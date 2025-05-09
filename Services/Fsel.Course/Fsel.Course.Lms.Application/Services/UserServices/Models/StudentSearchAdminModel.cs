@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public DateTime? Birthday { get; set; }
         public string? Email { get; set; }
         public EnumCourseType Type { get; set; }
+        public Guid? CourseId { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
     }
 }

@@ -80,6 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
+                    UserName = item.UserName,
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,
                     ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}",

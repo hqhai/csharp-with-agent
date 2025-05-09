@@ -106,5 +106,17 @@ namespace Fsel.System.Api.Controllers.Admins
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// add coin buy course
+        /// </summary>
+        [HttpPost("add-coin-fsel-event-reward")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddCoinFselEventReward([FromBody] AddCoinFselEventRewardCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
