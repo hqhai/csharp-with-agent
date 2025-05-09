@@ -38,11 +38,15 @@ namespace Fsel.System.Application.Queries.DailyQuiz
 
             var minCreatedDate = currentDate.Date.AddHours(-7);
 
-            var winners = await _dailyQuizWinnerRepository.Queryable.Where(p => p.CreatedDate >= minCreatedDate && p.IsWin).ToListAsync(cancellationToken);
+            var dailyQuizWinners = await _dailyQuizWinnerRepository.Queryable.Where(p => p.CreatedDate >= minCreatedDate).ToListAsync(cancellationToken);
+
+            var winners = dailyQuizWinners.Where(p => p.IsWin).ToList();
 
             var userIds = winners.Select(p => p.CreatedUserId).ToList();
 
             var result = new DailyQuizWinnerModels();
+
+            result.Code = dailyQuizWinners.FirstOrDefault(p => p.CreatedUserId == _authContext.CurrentUserId)?.Code;
 
             var studentModels = new List<DailyQuizWinnerModel>();
 
@@ -71,7 +75,6 @@ namespace Fsel.System.Application.Queries.DailyQuiz
                     }
                 });
 
-                result.Code = studentModels.FirstOrDefault(p => p.UserId == _authContext.CurrentUserId)?.Code;
                 result.Winner = studentModels;
             }
             methodResult.Result = result;

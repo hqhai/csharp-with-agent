@@ -85,6 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
+                    UserName = item.UserName,
                     Status = GetStatus(placementTestGroupResult),
                     ChooseLevel = placementTestGroupResult?.ChooseLevel,
                     CurrentLevel = placementTestGroupResult?.SuggetLevel,
