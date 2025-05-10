@@ -899,6 +899,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     MonthBirthday = birthday?.Month,
                     YearBirthday = birthday?.Year,
                     Provider = info.LoginProvider,
+                    ReturnUrl = returnUrl
                 };
 
                 TempData[nameof(ExternalLoginModel)] = externalLogin.Serialize();
