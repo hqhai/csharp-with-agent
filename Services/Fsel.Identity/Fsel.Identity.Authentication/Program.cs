@@ -22,11 +22,13 @@ using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using IdentityServer4;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -34,6 +36,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using static IdentityServer4.IdentityServerConstants;
 
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(UserDbContext).Assembly.GetName().Name;
@@ -76,9 +79,9 @@ builder.Services.AddAuthentication()
     .AddGoogle(options =>
     {
         options.UsePkce = true;
-        //options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
         options.ClientId = appSetting?.Authentication?.Google?.ClientId ?? string.Empty;
         options.ClientSecret = appSetting?.Authentication?.Google?.ClientSecret ?? string.Empty;
+        options.CallbackPath = appSetting?.Authentication?.Google?.Callback ?? string.Empty;
         options.Events = new OAuthEvents
         {
             OnRedirectToAuthorizationEndpoint = context =>
@@ -94,18 +97,10 @@ builder.Services.AddAuthentication()
                 return Task.CompletedTask;
             }
         };
-
-        //options.Scope.Add("https://www.googleapis.com/auth/user.phonenumbers.read");
-        //options.Scope.Add("https://www.googleapis.com/auth/plus.me");
-        //options.Scope.Add("https://www.googleapis.com/auth/userinfo.email");
-        //options.Scope.Add("https://www.googleapis.com/auth/userinfo.profile");
-        //options.Scope.Add("gender");
-        //options.Scope.Add("phone");
     })
     .AddFacebook(facebookOptions =>
     {
         facebookOptions.UsePkce = true;
-        //facebookOptions.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
         facebookOptions.AppId = appSetting?.Authentication?.Facebook?.ClientId ?? string.Empty;
         facebookOptions.AppSecret = appSetting?.Authentication?.Facebook?.ClientSecret ?? string.Empty;
         facebookOptions.CallbackPath = appSetting?.Authentication?.Facebook?.Callback ?? string.Empty;
@@ -115,93 +110,79 @@ builder.Services.AddAuthentication()
         facebookOptions.Fields.Add("name");
         facebookOptions.Fields.Add("birthday");
         facebookOptions.Fields.Add("gender");
-        //facebookOptions.Fields.Add("picture");
-        //facebookOptions.Fields.Add("public_profile");
-        //facebookOptions.Fields.Add("phone");
-        //facebookOptions.UserInformationEndpoint = "https://graph.facebook.com/v2.8/me?fields=id,name,email,birthday,gender,phone,avatar_2d_profile_picture";
+        facebookOptions.Events = new OAuthEvents
+        {
+            OnRedirectToAuthorizationEndpoint = context =>
+            {
+                if (appSetting?.Authentication?.Facebook?.RedirectUriParams != null)
+                {
+                    appSetting?.Authentication?.Facebook?.RedirectUriParams.ForEach(param =>
+                    {
+                        context.Response.Redirect(context.RedirectUri + param);
+                    });
+                }
+
+                return Task.CompletedTask;
+            }
+        };
     })
-    .AddOAuth<OAuthOptions, ZaloOAuthHandler>("Zalo", options =>
+    .AddOAuth<OAuthOptions, ZaloOAuthHandler>(LoginProvider.Zalo, options =>
     {
         options.UsePkce = true;
         options.SignInScheme = IdentityConstants.ExternalScheme;
-        options.ClientId = "3677545940964641090";
-        options.ClientSecret = "vqMb7BGNKESCNzTWU389";
-        options.CallbackPath = "/signin-zalo";
-        options.AuthorizationEndpoint = "https://oauth.zaloapp.com/v4/permission";
-        options.TokenEndpoint = "https://oauth.zaloapp.com/v4/access_token";
-        options.UserInformationEndpoint = "https://graph.zalo.me/v2.0/me?fields=id,name,picture,birthday,gender,phone,email";
+        options.ClientId = appSetting?.Authentication?.Zalo?.ClientId ?? string.Empty;
+        options.ClientSecret = appSetting?.Authentication?.Zalo?.ClientSecret ?? string.Empty;
+        options.CallbackPath = appSetting?.Authentication?.Zalo?.Callback ?? string.Empty;
+        options.AuthorizationEndpoint = appSetting?.Authentication?.Zalo?.AuthorizationEndpoint ?? string.Empty;
+        options.TokenEndpoint = appSetting?.Authentication?.Zalo?.TokenEndpoint ?? string.Empty;
+        options.UserInformationEndpoint = appSetting?.Authentication?.Zalo?.UserInformationEndpoint ?? string.Empty;
         options.SaveTokens = true;
 
-        options.Scope.Add("scope.userInfo");
-        options.Scope.Add("scope.userLocation");
-        options.Scope.Add("scope.userPhonenumber");
-
-        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-        options.ClaimActions.MapJsonKey(ClaimTypes.GivenName, "name");
-        options.ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
-        options.ClaimActions.MapJsonKey(ClaimTypes.MobilePhone, "phone");
-        options.ClaimActions.MapJsonKey(ClaimTypes.Gender, "gender");
-        options.ClaimActions.MapJsonKey(ClaimTypes.DateOfBirth, "birthday");
+        options.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, UserInfoFields.Id);
+        options.ClaimActions.MapJsonKey(ClaimTypes.GivenName, UserInfoFields.Name);
+        options.ClaimActions.MapJsonKey(ClaimTypes.Email, UserInfoFields.Email);
+        options.ClaimActions.MapJsonKey(ClaimTypes.MobilePhone, UserInfoFields.Phone);
+        options.ClaimActions.MapJsonKey(ClaimTypes.Gender, UserInfoFields.Gender);
+        options.ClaimActions.MapJsonKey(ClaimTypes.DateOfBirth, UserInfoFields.Birthday);
 
         options.Events = new OAuthEvents
         {
             OnAccessDenied = context =>
             {
-                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
-                logger.LogError("OnAccessDenied_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
                 return Task.CompletedTask;
             },
             OnTicketReceived = context =>
             {
-                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
-                logger.LogError("OnTicketReceived_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
                 return Task.CompletedTask;
             },
             OnRemoteFailure = context =>
             {
-                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
-                logger.LogError("OnRemoteFailure_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
                 return Task.CompletedTask;
             },
             OnCreatingTicket = async context =>
             {
-                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
-                logger.LogError("OnCreatingTicket_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
-
                 var request = new HttpRequestMessage(HttpMethod.Get, context.Options.UserInformationEndpoint);
-                request.Headers.Add("access_token", context.AccessToken);
+                request.Headers.Add(TokenTypes.AccessToken, context.AccessToken);
 
                 var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
                 response.EnsureSuccessStatusCode();
 
                 using var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
-                logger?.LogError("OnCreatingTicket_AccessToken: {json}", context.AccessToken);
-                logger?.LogError("OnCreatingTicket_Zalo_UserInfo: {json}", user.RootElement.ToString());
                 context.RunClaimActions(user.RootElement);
-                context.Properties.Items["LoginProvider"] = context.Scheme.ToString();
-
-                foreach (var claim in context.Principal.Claims)
-                {
-                    logger?.LogError("OnCreatingTicket_Claim: {type} = {value}", claim.Type, claim.Value);
-                }
+                context.Properties.Items[LoginProvider.Name] = context.Scheme.ToString();
             },
             OnRedirectToAuthorizationEndpoint = context =>
             {
-                var logger = context.HttpContext.RequestServices.GetService<ILoggerFactory>()?.CreateLogger("OAuthEvents");
-                logger.LogError("OnRedirectToAuthorizationEndpoint_Cookies: {cookies}", context.Request.Headers["Cookie"].ToString());
-
                 var uri = new UriBuilder(context.RedirectUri);
                 var query = QueryHelpers.ParseQuery(uri.Query);
 
-                // Đổi tên client_id => app_id
-                if (query.ContainsKey("client_id"))
+                if (query.ContainsKey(OAuthFields.ClientId))
                 {
-                    var appId = query["client_id"];
-                    query.Remove("client_id");
-                    query["app_id"] = appId;
+                    var appId = query[OAuthFields.ClientId];
+                    query.Remove(OAuthFields.ClientId);
+                    query[OAuthFields.AppId] = appId;
                 }
 
-                // Gán lại query string đã chỉnh sửa
                 uri.Query = new QueryBuilder(query.SelectMany(kvp => kvp.Value, (kvp, v) => new KeyValuePair<string, string>(kvp.Key, v))).ToQueryString().ToString();
 
                 context.Response.Redirect(uri.ToString());
@@ -209,17 +190,6 @@ builder.Services.AddAuthentication()
             }
         };
     })
-    //.AddOpenIdConnect("oidc", "Zalo", options =>
-    //{
-    //    options.Authority = "https://oauth.zaloapp.com/v4/permission";
-    //    options.ClientId = "implicit";
-
-    //    options.TokenValidationParameters = new TokenValidationParameters
-    //    {
-    //        NameClaimType = "name",
-    //        RoleClaimType = "role"
-    //    };
-    //})
     .AddCookie(options =>
     {
         options.CookieManager = new ChunkingCookieManager();

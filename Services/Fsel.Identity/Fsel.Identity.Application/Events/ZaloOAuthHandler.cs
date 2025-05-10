@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using static IdentityServer4.IdentityServerConstants;
 
 namespace Fsel.Identity.Application.Events
 {
@@ -26,14 +27,14 @@ namespace Fsel.Identity.Application.Events
 
             var parameters = new Dictionary<string, string>
             {
-                { "app_id", Options.ClientId },
-                { "grant_type", "authorization_code" },
-                { "code", context.Code }
+                { OAuthFields.AppId, Options.ClientId },
+                { OAuthFields.GrantType, PersistedGrantTypes.AuthorizationCode },
+                { OAuthFields.Code, context.Code }
             };
 
-            if (context.Properties.Items.TryGetValue("code_verifier", out var codeVerifier) && !string.IsNullOrEmpty(codeVerifier))
+            if (context.Properties.Items.TryGetValue(OAuthFields.CodeVerifier, out var codeVerifier) && !string.IsNullOrEmpty(codeVerifier))
             {
-                parameters.Add("code_verifier", codeVerifier);
+                parameters.Add(OAuthFields.CodeVerifier, codeVerifier);
             }
 
             var content = new FormUrlEncodedContent(parameters);
@@ -42,7 +43,7 @@ namespace Fsel.Identity.Application.Events
             var request = new HttpRequestMessage(HttpMethod.Post, Options.TokenEndpoint);
             request.Content = content;
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            request.Headers.Add("secret_key", Options.ClientSecret); // Gửi secret_key trong header
+            request.Headers.Add(OAuthFields.ClientSecret, Options.ClientSecret); // Gửi secret_key trong header
 
             var response = await Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, Context.RequestAborted);
             if (!response.IsSuccessStatusCode)

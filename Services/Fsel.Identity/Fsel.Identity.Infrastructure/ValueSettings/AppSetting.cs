@@ -11,6 +11,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public ResourceContent? ResourceContent { get; set; }
         public new Services? Services { get; set; }
+        public new Authentication? Authentication { get; set; }
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
         public UserReferralConfig? UserReferralConfig { get; set; }
         public UserDeletionConfig? UserDeletionConfig { get; set; }
@@ -71,5 +72,53 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public int DeletionDays { get; set; }
         public int DeletionMinutes { get; set; }
+    }
+
+    public class Authentication
+    {
+        public OpenId? OpenId { get; set; }
+
+        public Google? Google { get; set; }
+
+        public Facebook? Facebook { get; set; }
+
+        public Zalo? Zalo { get; set; }
+    }
+
+    public class Google
+    {
+        public string? ClientId { get; set; }
+
+        public string? ClientSecret { get; set; }
+
+        public string? Callback { get; set; }
+
+        public IList<string>? RedirectUriParams { get; set; }
+    }
+
+    public class Facebook
+    {
+        public string? ClientId { get; set; }
+
+        public string? ClientSecret { get; set; }
+
+        public string? Callback { get; set; }
+
+        public IList<string>? RedirectUriParams { get; set; }
+    }
+
+    public class Zalo
+    {
+        public string? ClientId { get; set; }
+
+        public string? ClientSecret { get; set; }
+
+        public string? Callback { get; set; }
+
+        public string? AuthorizationEndpoint { get; set; }
+
+        public string? TokenEndpoint { get; set; }
+
+        public string? UserInformationEndpoint { get; set; }
     }
 }

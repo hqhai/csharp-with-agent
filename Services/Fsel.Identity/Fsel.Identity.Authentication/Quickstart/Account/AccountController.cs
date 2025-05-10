@@ -34,6 +34,7 @@ using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Core.Caching;
 using Fsel.Identity.Application.Commands.UserReferrals;
+using static IdentityServer4.IdentityServerConstants;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -847,14 +848,14 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         //[ValidateAntiForgeryToken]
         public IActionResult ExternalLogin(string provider, string? returnUrl = null)
         {
-            var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), "Account", new { returnUrl });
+            var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), new { returnUrl });
 
-            if (provider == "Zalo")
+            if (provider == LoginProvider.Zalo)
             {
                 return Challenge(new AuthenticationProperties
                 {
                     RedirectUri = redirectUrl
-                }, "Zalo");
+                }, LoginProvider.Zalo);
             }
 
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
@@ -866,13 +867,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             returnUrl ??= string.Empty;
 
-            _logger.LogError("ExternalLoginConfirmation_Cookies: {cookies}", Request.Headers["Cookie"].ToString());
-
-            var auth = await HttpContext.AuthenticateAsync(Microsoft.AspNetCore.Identity.IdentityConstants.ExternalScheme);
-            _logger.LogCritical("Log_ExternalLoginConfirmation: auth = {auth}", auth.Serialize());
-
             var info = await _signInManager.GetExternalLoginInfoAsync();
-            _logger.LogCritical("Log_ExternalLoginConfirmation: info = {info}", info.Serialize());
             if (info == null)
             {
                 return RedirectToAction(nameof(Login), new { returnUrl });

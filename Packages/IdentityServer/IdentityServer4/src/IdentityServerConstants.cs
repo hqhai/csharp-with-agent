@@ -165,5 +165,33 @@ namespace IdentityServer4
             public const string JwtRequestUriHttpClient = "IdentityServer:JwtRequestUriClient";
             public const string BackChannelLogoutHttpClient = "IdentityServer:BackChannelLogoutClient";
         }
+
+        public static class OAuthFields
+        {
+            public const string ClientId = "client_id";
+            public const string ClientSecret = "secret_key";
+            public const string AppId = "app_id";
+            public const string GrantType = "grant_type";
+            public const string Code = "code";
+            public const string CodeVerifier = "code_verifier";
+        }
+
+        public static class UserInfoFields
+        {
+            public const string Id = "id";
+            public const string Name = "name";
+            public const string Email = "email";
+            public const string Phone = "phone";
+            public const string Gender = "gender";
+            public const string Birthday = "birthday";
+        }
+
+        public static class LoginProvider
+        {
+            public const string Name = "LoginProvider";
+            public const string Google = "Google";
+            public const string Facebook = "Facebook";
+            public const string Zalo = "Zalo";
+        }
     }
 }
