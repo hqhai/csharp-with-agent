@@ -23,7 +23,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     {
         public string? FileName { get; set; }
         public string? EventCode { get; set; }
-        public EnumEducationLevel EducationLevel { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
         public EnumCrmLocationLevel LocationLevel { get; set; }
     }
 
@@ -46,9 +46,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             }
 
             var exportDistrictEvents = await _courseDbContext.Set<ExportDistrictEventModel>()
-                                                             .FromSqlRaw("EXEC ExportDistrictDataToEventHaNoi @EventCode, @SchoolTypeLevel",
-                                                                  new SqlParameter("@EventCode", request.EventCode),
-                                                                  new SqlParameter("@SchoolTypeLevel", (int)request.EducationLevel))
+                                                             .FromSqlRaw("EXEC ExportDistrictDataToEventHaNoi @SchoolTypeLevel",
+                                                                  new SqlParameter("@SchoolTypeLevel", request.EducationLevel ?? (object)DBNull.Value))
                                                              .AsNoTracking()
                                                              .ToListAsync(cancellationToken);
 
@@ -63,11 +62,10 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 foreach (var item in exportDistrictEvents)
                 {
                     var exportSchoolEvents = await _courseDbContext.Set<ExportSchoolEventModel>()
-                                                              .FromSqlRaw("EXEC [ExportDataDistrictEventHaNoi] @EventCode ,@LocationId ,@SchoolId ,@SchoolTypeLevel",
+                                                              .FromSqlRaw("EXEC [ExportDataDistrictEventHaNoi] @EventCode ,@LocationId ,@SchoolId",
                                                                    new SqlParameter("@EventCode", request.EventCode),
                                                                    new SqlParameter("@LocationId", item.LocationId),
-                                                                   new SqlParameter("@SchoolId", (object)DBNull.Value),
-                                                                   new SqlParameter("@SchoolTypeLevel", (int)request.EducationLevel))
+                                                                   new SqlParameter("@SchoolId", (object)DBNull.Value))
                                                               .AsNoTracking()
                                                               .ToListAsync(cancellationToken);
                     listData.Add(new ExportDistrictModel
@@ -83,12 +81,11 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 foreach (var item in exportDistrictEvents)
                 {
                     var exportStudentEvents = await _courseDbContext.Set<ExportStudentEventModel>()
-                                                             .FromSqlRaw("EXEC [ExportDataSchoolEventHaNoi] @EventCode ,@LocationId ,@SchoolId ,@KeyWord ,@SchoolTypeLevel",
-                                                                  new SqlParameter("@EventCode", request.EventCode),
+                                                             .FromSqlRaw("EXEC [ExportDataSchoolEventHaNoi] @LocationId ,@SchoolId ,@KeyWord ,@SchoolTypeLevel ",
                                                                   new SqlParameter("@LocationId", item.LocationId),
                                                                   new SqlParameter("@SchoolId", (object)DBNull.Value),
                                                                   new SqlParameter("@KeyWord", (object)DBNull.Value),
-                                                                  new SqlParameter("@SchoolTypeLevel", (int)request.EducationLevel))
+                                                                  new SqlParameter("@SchoolTypeLevel", request.EducationLevel ?? (object)DBNull.Value))
                                                              .AsNoTracking()
                                                              .ToListAsync(cancellationToken);
                     listData.Add(new ExportDistrictModel
@@ -153,27 +150,24 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 }
                 if (exportDistrictModels != null && exportDistrictModels.Any())
                 {
-                    foreach (var item in exportDistrictModels)
+                    int startRow = 4;
+                    int index = 1;
+                    foreach (var item in exportDistrictModels.SelectMany(x => x.ExportSchoolEvents))
                     {
-                        var excelWorksheet = excelPackage.Workbook.Worksheets.Copy(originalWorksheet.Name, item.LocationName);
-                        int startRow = 4;
-
-                        foreach (var itemReport in item.ExportSchoolEvents)
-                        {
-                            excelWorksheet.Cells[startRow, 1].Value = item.ExportSchoolEvents.IndexOf(itemReport) + 1;
-                            excelWorksheet.Cells[startRow, 2].Value = itemReport.School;
-                            excelWorksheet.Cells[startRow, 3].Value = itemReport.NumberOfCompletedLessons;
-                            excelWorksheet.Cells[startRow, 4].Value = itemReport.TargetLessonCompletionRate + "%";
-                            excelWorksheet.Cells[startRow, 5].Value = itemReport.ScoreLevelLesson;
-                            excelWorksheet.Cells[startRow, 6].Value = itemReport.LevelCompletionRate;
-                            excelWorksheet.Cells[startRow, 7].Value = itemReport.AchievedScore + "%";
-                            excelWorksheet.Cells[startRow, 8].Value = itemReport.AssignmentClassForum + "%";
-                            excelWorksheet.Cells[startRow, 9].Value = itemReport.ScoreLevelClassForum;
-                            excelWorksheet.Cells[startRow, 10].Value = itemReport.NumberofCommentsonPosts;
-                            excelWorksheet.Cells[startRow, 11].Value = itemReport.ScoreLevelComment;
-                            excelWorksheet.Cells[startRow, 12].Value = itemReport.TotalScore;
-                            startRow++;
-                        }
+                        originalWorksheet.Cells[startRow, 1].Value = index;
+                        originalWorksheet.Cells[startRow, 2].Value = item.School;
+                        originalWorksheet.Cells[startRow, 3].Value = item.NumberOfCompletedLessons;
+                        originalWorksheet.Cells[startRow, 4].Value = item.TargetLessonCompletionRate + "%";
+                        originalWorksheet.Cells[startRow, 5].Value = item.ScoreLevelLesson;
+                        originalWorksheet.Cells[startRow, 6].Value = item.LevelCompletionRate;
+                        originalWorksheet.Cells[startRow, 7].Value = item.AchievedScore + "%";
+                        originalWorksheet.Cells[startRow, 8].Value = item.AssignmentClassForum + "%";
+                        originalWorksheet.Cells[startRow, 9].Value = item.ScoreLevelClassForum;
+                        originalWorksheet.Cells[startRow, 10].Value = item.NumberofCommentsonPosts;
+                        originalWorksheet.Cells[startRow, 11].Value = item.ScoreLevelComment;
+                        originalWorksheet.Cells[startRow, 12].Value = item.TotalScore;
+                        startRow++;
+                        index++;
                     }
                 }
 
@@ -205,21 +199,27 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
                         foreach (var itemReport in item.ExportStudentEvents)
                         {
-                            excelWorksheet.Cells[startRow, 1].Value = item.ExportStudentEvents.IndexOf(itemReport) + 1;
+                            excelWorksheet.Cells[startRow, 1].Value = item.ExportStudentEvents.IndexOf(itemReport);
                             excelWorksheet.Cells[startRow, 2].Value = itemReport.FullName;
-                            excelWorksheet.Cells[startRow, 3].Value = itemReport.Email;
-                            excelWorksheet.Cells[startRow, 4].Value = itemReport.PhoneNumber;
-                            excelWorksheet.Cells[startRow, 5].Value = itemReport.SchoolClass;
-                            excelWorksheet.Cells[startRow, 6].Value = itemReport.NumberOfCompletedLessons;
-                            excelWorksheet.Cells[startRow, 7].Value = itemReport.TargetLessonCompletionRate + "%";
-                            excelWorksheet.Cells[startRow, 8].Value = itemReport.ScoreLevelLesson;
-                            excelWorksheet.Cells[startRow, 9].Value = itemReport.LevelCompletionRate;
-                            excelWorksheet.Cells[startRow, 10].Value = itemReport.AchievedScore + "%";
-                            excelWorksheet.Cells[startRow, 11].Value = itemReport.AssignmentClassForum + "%";
-                            excelWorksheet.Cells[startRow, 12].Value = itemReport.ScoreLevelClassForum;
-                            excelWorksheet.Cells[startRow, 13].Value = itemReport.NumberofCommentsonPosts;
-                            excelWorksheet.Cells[startRow, 14].Value = itemReport.ScoreLevelComment;
-                            excelWorksheet.Cells[startRow, 15].Value = itemReport.TotalScore;
+                            excelWorksheet.Cells[startRow, 3].Value = itemReport.UserName;
+                            excelWorksheet.Cells[startRow, 4].Value = itemReport.Email;
+                            excelWorksheet.Cells[startRow, 5].Value = itemReport.PhoneNumber;
+                            excelWorksheet.Cells[startRow, 6].Value = itemReport.School;
+                            excelWorksheet.Cells[startRow, 7].Value = itemReport.SchoolGrade;
+                            excelWorksheet.Cells[startRow, 8].Value = itemReport.SchoolClass;
+                            excelWorksheet.Cells[startRow, 9].Value = itemReport.NumberOfCompletedLessons;
+                            excelWorksheet.Cells[startRow, 10].Value = itemReport.TargetLessonCompletionRate + "%";
+                            excelWorksheet.Cells[startRow, 11].Value = itemReport.ScoreLevelLesson;
+                            excelWorksheet.Cells[startRow, 12].Value = itemReport.LevelCompletionRate;
+                            excelWorksheet.Cells[startRow, 13].Value = itemReport.AchievedScore + "%";
+                            excelWorksheet.Cells[startRow, 14].Value = itemReport.AssignmentClassForum + "%";
+                            excelWorksheet.Cells[startRow, 15].Value = itemReport.ScoreLevelClassForum;
+                            excelWorksheet.Cells[startRow, 16].Value = itemReport.NumberofCommentsonPosts;
+                            excelWorksheet.Cells[startRow, 17].Value = itemReport.ScoreLevelComment;
+                            excelWorksheet.Cells[startRow, 18].Value = itemReport.TotalScore;
+                            excelWorksheet.Cells[startRow, 19].Value = itemReport.LocalId;
+                            excelWorksheet.Cells[startRow, 20].Value = itemReport.GlobalId;
+                            excelWorksheet.Cells[startRow, 21].Value = itemReport.EventCode;
                             startRow++;
                         }
                     }

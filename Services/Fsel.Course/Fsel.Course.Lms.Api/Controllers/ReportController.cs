@@ -247,9 +247,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Expot File Learning Process District
         /// </summary>
-        [HttpPost("export-fiel")]
+        [HttpPost("export-file")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportSelfStudyMonthlyQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);

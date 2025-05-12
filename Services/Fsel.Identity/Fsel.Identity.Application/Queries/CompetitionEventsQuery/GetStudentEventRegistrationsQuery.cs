@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
@@ -80,12 +81,18 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                 var district = locationDistricts?.FirstOrDefault(x => x.Name != null && x.Name.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim() == request.DistrictName);
                 competitionEvents = competitionEvents.Where(x => district != null && x.Id == district.Id).ToList();
             }
+            var schoolIds = competitionEvents.SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
+            var schoolResults = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel { Ids = schoolIds });
+            var schools = schoolResults.Content?.Result ?? new List<SchoolModel>();
+
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
             var eventRegistrations = await (from baseQ in _studentRepository.Queryable.Where(x => x.CourseId.HasValue)
                                             join sce in _studentCompetitionEventsRepository.Queryable.WhereBulkContains(competitionEventIds, x => x.CompetitionEventId) on baseQ.Id equals sce.StudentId
+                                            join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id
                                             join h in _humanRepository.Queryable on baseQ.HumanId equals h.Id
                                             join u in _userManager.Users on h.UserId equals u.Id
-                                            where (!request.StudentId.HasValue || baseQ.Id == request.StudentId.Value) && baseQ.CourseLevel.HasValue
+                                            where (!request.StudentId.HasValue || baseQ.Id == request.StudentId.Value)
+                                            && baseQ.CourseLevel.HasValue
                                             && courseLevels.Contains(baseQ.CourseLevel.Value)
                                             select new EventRegistrationModel
                                             {
@@ -102,7 +109,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                                 ParentPhoneNumber = baseQ.ParentPhoneNumber,
                                                 PhoneNumber = h.PhoneNumber,
                                                 Province = string.Empty,
-                                                ProvinceId = baseQ.ProvinceId,
+                                                ProvinceId = baseQ.ProvinceId ?? ce.LocationId,
                                                 School = baseQ.School,
                                                 SchoolClass = baseQ.SchoolClass,
                                                 SchoolGrade = baseQ.SchoolGrade,
@@ -117,8 +124,11 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             foreach (var item in eventRegistrations)
             {
                 var names = item.FullName?.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var school = schools.FirstOrDefault(x => x.Id == item.SchoolId);
+
                 item.FirstName = names != null && names.Length > 0 ? names.Last() : "";
                 item.LastName = names != null && names.Length > 1 ? string.Join(' ', names.Take(names.Length - 1)) : "";
+                item.District = school?.LocalId;
             }
             methodResult.Result = eventRegistrations;
             methodResult.StatusCode = StatusCodes.Status200OK;
