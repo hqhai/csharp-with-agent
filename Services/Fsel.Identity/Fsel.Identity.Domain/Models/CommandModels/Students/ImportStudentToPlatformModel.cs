@@ -16,13 +16,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
         public string? PhoneNumber { get; set; }
 
         [EpplusTableColumn(Header = "Date Of Birth")]
-        public string? DateOfBirth { get; set; }
-
-        [EpplusTableColumn(Header = "Parent Email")]
-        public string? ParentEmail { get; set; }
-
-        [EpplusTableColumn(Header = "Referral Code")]
-        public string? ReferralCode { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         [EpplusTableColumn(Header = "School")]
         public string? School { get; set; }

@@ -106,6 +106,14 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 request.SchoolClass = request.SchoolClass.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 query = query.Where(x => x.SchoolClass == request.SchoolClass);
             }
+            if (request.SchoolGrades != null && request.SchoolGrades.Any())
+            {
+                query = query.Where(x => x.SchoolGrade != null && request.SchoolGrades.Any(y => y == x.SchoolGrade));
+            }
+            if (request.SchoolClasses != null && request.SchoolClasses.Any())
+            {
+                query = query.Where(x => x.SchoolClass != null && request.SchoolClasses.Any(y => y == x.SchoolClass));
+            }
             if (request.LearningStatus.HasValue)
             {
                 if (request.LearningStatus.Value == EnumLearningStatus.InProgress)
@@ -139,6 +147,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 CourseId = i.CourseId,
                 UserId = i.Human.UserId,
                 CreatedDate = i.CreatedDate,
+                UserName = i.Human.User!.UserName
             });
             var list = await dataQuery.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             methodResult.Result = list.OrderBy(x => int.TryParse(x.SchoolGrade, out int graded) ? graded : 0).ThenBy(x => x.SchoolClass).ThenBy(x => x.FullName).ToList();

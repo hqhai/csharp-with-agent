@@ -99,6 +99,14 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 request.SchoolClass = request.SchoolClass.Trim().ToLower(CultureInfo.CurrentCulture);
                 query = query.Where(x => x.SchoolClass == request.SchoolClass);
             }
+            if (request.SchoolGrades != null && request.SchoolGrades.Any())
+            {
+                query = query.Where(x => x.SchoolGrade != null && request.SchoolGrades.Any(y => y == x.SchoolGrade));
+            }
+            if (request.SchoolClasses != null && request.SchoolClasses.Any())
+            {
+                query = query.Where(x => x.SchoolClass != null && request.SchoolClasses.Any(y => y == x.SchoolClass));
+            }
             if (request.LearningStatus.HasValue)
             {
                 if (request.LearningStatus.Value == EnumLearningStatus.InProgress)
@@ -142,6 +150,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 UserId = i.Human.UserId,
                 CreatedDate = i.CreatedDate,
                 BaseCourseLevel = i.BaseCourseLevel,
+                UserName = i.Human.User!.UserName
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = (await dataQuery.ToListAsync(cancellationToken))

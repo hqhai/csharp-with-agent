@@ -65,6 +65,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 EndDate = request.EndDate,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
@@ -220,6 +222,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     CourseLevel = item.CourseLevel,
                     ProcessDate = item.CreatedDate,
                     ExpiredDate = item.ExpiredDate,
+                    UserName = item.UserName,
                     OverallPercent = overallPercent,
                     OverallModuleReports = overallModuleReports.OrderBy(x => x.DisplayOrder).ToList(),
                 };

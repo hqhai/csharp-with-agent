@@ -66,5 +66,14 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Get("/v1/location/{localId}")]
         Task<IApiResponse<MethodResult<SchoolModel>>> GetLocationByLocalId([FromRoute] string localId);
+
+        [Post("/v1/admin/token-history/add-coin-buy-course")]
+        Task<IApiResponse<MethodResult<bool>>> AddCoinBuyCourse([Body] AddCoinBuyCourseModel query);
+
+        [Post("/v1/manager-report/admin/aggregate-data-students-in-event")]
+        Task<IApiResponse<MethodResult<IList<AggregateDataOtherStudentsInEventModel>>>> AggregateDataStudentsInEvent([FromBody] AggregateDataOtherStudentsInEventQueryModel students);
+
+        [Post("/v1/admin/token-history/add-coin-fsel-event-reward")]
+        Task<IApiResponse<MethodResult<bool>>> AddCoinFselEventReward([Body] AddCoinFselEventRewardModel query);
     }
 }

@@ -54,6 +54,8 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 LearningStatus = request.LearningStatus,
@@ -90,6 +92,8 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 CourseType = request.CourseType,
@@ -111,6 +115,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                     SchoolClass = student.SchoolClass,
                     SchoolGrade = student.SchoolGrade,
                     CourseLevel = student.CourseLevel,
+                    UserName = student.UserName,
                     ExpiredDate = student.ExpiredDate,
                     ProcessDate = student.CreatedDate
                 };

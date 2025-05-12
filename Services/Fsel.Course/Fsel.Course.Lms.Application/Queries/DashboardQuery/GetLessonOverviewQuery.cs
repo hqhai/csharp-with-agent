@@ -352,6 +352,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                     var percent = NumberHelper.ConvertDoublePercent(PercentHomeWork * NumberHelper.GetPercent(countDone, homeWorkResults.Count));
                     return (EnumResultStatus.Done, percent);
                 }
+                else if (homeWorkResults.All(x => x.Status != EnumResultStatus.Unfinished))
+                {
+                    return (EnumResultStatus.Process, default);
+                }
             }
             return (statusHomeWork, default);
         }

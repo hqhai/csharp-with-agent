@@ -195,7 +195,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
                 if (sectionGroup.CourseSkill == EnumCourseSkill.Speaking && sectionGroupResult != null)
                 {
-                    await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                    await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
                     {
                         bulk.ColumnInputExpression = entity => new { entity.CurrentSectionTimeCodeId };
                     });
@@ -397,7 +397,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 }
                 if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
                 {
-                    await _mockTestAnswerRepository.BulkMergeAsync(updateMockTestAnswers, bulk =>
+                    await _mockTestAnswerRepository.BulkUpdateList(updateMockTestAnswers, bulk =>
                     {
                         bulk.IgnoreOnUpdateExpression = entity => new { entity.MockTestResultId, entity.SectionGroupResultId, entity.SectionQuestionId, entity.SectionId, entity.SectionTimeCodeId };
                     });

@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Services\FFmpegServices\CommandModels\**" />
+    <EmbeddedResource Remove="Services\FFmpegServices\CommandModels\**" />
+    <None Remove="Services\FFmpegServices\CommandModels\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Fsel.Course.Infrastructure\Fsel.Course.Infrastructure.csproj" />
   </ItemGroup>
 
