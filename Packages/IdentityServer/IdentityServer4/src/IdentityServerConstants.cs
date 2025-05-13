@@ -166,6 +166,28 @@ namespace IdentityServer4
             public const string BackChannelLogoutHttpClient = "IdentityServer:BackChannelLogoutClient";
         }
 
+        public static class OAuthRoutePathParams
+        {
+            public const string Error = "errorId";
+            public const string Login = "returnUrl";
+            public const string Consent = "returnUrl";
+            public const string Logout = "logoutId";
+            public const string EndSessionCallback = "endSessionId";
+            public const string Custom = "returnUrl";
+            public const string UserCode = "userCode";
+        }
+
+        public static class OAuthRoutePaths
+        {
+            public const string Login = "/account/login";
+            public const string Register = "/account/register";
+            public const string Impersonation = "/account/impersonation";
+            public const string Logout = "/account/logout";
+            public const string Consent = "/consent";
+            public const string Error = "/home/error";
+            public const string DeviceVerification = "/device";
+        }
+
         public static class OAuthFields
         {
             public const string ClientId = "client_id";

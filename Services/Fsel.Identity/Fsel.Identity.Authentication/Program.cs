@@ -157,6 +157,10 @@ builder.Services.AddAuthentication()
             },
             OnRemoteFailure = context =>
             {
+                var returnUrl = context.Request.Query[OAuthRoutePathParams.Login].FirstOrDefault() ?? OAuthRoutePaths.Login;
+
+                context.Response.Redirect(returnUrl);
+                context.HandleResponse();
                 return Task.CompletedTask;
             },
             OnCreatingTicket = async context =>
