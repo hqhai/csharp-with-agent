@@ -157,7 +157,7 @@ builder.Services.AddAuthentication()
             },
             OnRemoteFailure = context =>
             {
-                var returnUrl = context.Request.Query[OAuthRoutePathParams.Login].FirstOrDefault() ?? OAuthRoutePaths.Login;
+                var returnUrl = $"{OAuthRoutePaths.Login}?{OAuthRoutePathParams.Login}={Uri.EscapeDataString(context.Properties?.Items[OAuthRoutePathParams.Login] ?? string.Empty)}";
 
                 context.Response.Redirect(returnUrl);
                 context.HandleResponse();
