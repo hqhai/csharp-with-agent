@@ -922,7 +922,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 return View(request);
             }
 
-            request.Email = externalLogin.Email;
+            if (!string.IsNullOrEmpty(externalLogin.Email))
+            {
+                request.Email = externalLogin.Email;
+            }
+
             if (!ModelState.IsValid)
             {
                 return View(request);

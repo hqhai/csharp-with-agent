@@ -9,8 +9,9 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
 
     public class ExternalLoginModel
     {
-        //[RegularExpression(RegexSettings.EmailValid, ErrorMessage = "i18n_Password_is_not_valid")]
         [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
+        [MaxLength(254, ErrorMessage = "i18n_limit_number_characters")]
+        [RegularExpression(RegexSettings.EmailValid, ErrorMessage = "i18n_Email_is_not_valid")]
         public string? Email { get; set; }
 
         public bool IsEmailReadonly { get; set; } = true;
