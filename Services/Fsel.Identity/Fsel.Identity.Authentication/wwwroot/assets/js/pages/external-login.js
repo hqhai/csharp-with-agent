@@ -175,7 +175,7 @@
     // Validate each field
     const isValidFirstName = validateFirstName();
     const isValidLastName = validateLastName();
-    //const isValidEmail = validateEmail();
+    const isValidEmail = validateEmail();
     const isValidPhoneNumber = validatePhoneNumber();
     const isValidGender = validateGender();
     const isValidDay = validateDay();
