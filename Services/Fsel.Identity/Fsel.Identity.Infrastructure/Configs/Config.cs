@@ -64,15 +64,15 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     {
                         "https://localhost:4400",
                         "http://localhost:4400",
-                        "http://test1_lms.fsel.edu.vn",
-                        "https://test1_lms.fsel.edu.vn"
+                        "http://lms-dev.fsel.edu.vn",
+                        "https://lms-dev.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
                         "https://localhost:4400",
                         "http://localhost:4400",
-                        "http://test1_lms.fsel.edu.vn",
-                        "https://test1_lms.fsel.edu.vn"
+                        "http://lms-dev.fsel.edu.vn",
+                        "https://lms-dev.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
@@ -114,15 +114,15 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     {
                         "https://localhost:4200",
                         "http://localhost:4200",
-                        "http://test1_lcms.fsel.edu.vn",
-                        "https://test1_lcms.fsel.edu.vn"
+                        "http://lcms-web-dev.fsel.edu.vn",
+                        "https://lcms-web-dev.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
                         "https://localhost:4200",
                         "http://localhost:4200",
-                        "http://test1_lcms.fsel.edu.vn",
-                        "https://test1_lcms.fsel.edu.vn"
+                        "http://lcms-web-dev.fsel.edu.vn",
+                        "https://lcms-web-dev.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
@@ -160,15 +160,15 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     {
                         "https://localhost:4300",
                         "http://localhost:4300",
-                        "http://test1_lmsadmin.fsel.edu.vn",
-                        "https://test1_lmsadmin.fsel.edu.vn"
+                        "http://lms-admin-dev.fsel.edu.vn",
+                        "https://lms-admin-dev.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
                         "https://localhost:4300",
                         "http://localhost:4300",
-                        "http://test1_lmsadmin.fsel.edu.vn",
-                        "https://test1_lmsadmin.fsel.edu.vn"
+                        "http://lms-admin-dev.fsel.edu.vn",
+                        "https://lms-admin-dev.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
