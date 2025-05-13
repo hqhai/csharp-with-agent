@@ -369,7 +369,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     : courseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS * CourseProgressValue.CountLessonIELTS + CourseProgressValue.CountUnitIELTS + CourseProgressValue.CountFullMockTest
                     : default;
 
-            int dem = courseType == EnumCourseType.Ielts ? 21 : 22;
+            int dem = courseType == EnumCourseType.Ielts ? 22 : 23;
             if (courseType == EnumCourseType.Ielts)
             {
                 var courseSkillMockTest = 0;

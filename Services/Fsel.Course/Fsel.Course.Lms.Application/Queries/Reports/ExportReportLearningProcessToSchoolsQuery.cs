@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                                                           .Select(x => x.StudentId)
                                                                           .ToListAsync(cancellationToken);
 
-            var placementTestResultGroups = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(courseStudentIds, x => x.StudentId)
+            var placementTestResultGroups = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIdsSet.ToList(), x => x.StudentId)
                                                      .Where(x => x.Status == EnumResultStatus.Done)
                                                      .Select(x => new PlacementTestResultReportGroupModel
                                                      {

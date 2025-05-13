@@ -27,7 +27,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         public string? EventCodeStr { get; set; }
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
-        public EnumEducationLevel EducationLevel { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
     }
 
     public class ExportReportLearningProcessToDistrictQueryHandler : IRequestHandler<ExportReportLearningProcessToDistrictQuery, MethodResult<Stream>>
@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                                                               .Select(x => x.StudentId)
                                                                               .ToListAsync(cancellationToken);
 
-            var placementTestResultGroups = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(courseStudentResults, x => x.StudentId)
+            var placementTestResultGroups = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                                      .Where(x => x.Status == EnumResultStatus.Done)
                                                      .Select(x => new PlacementTestResultReportGroupModel
                                                      {
