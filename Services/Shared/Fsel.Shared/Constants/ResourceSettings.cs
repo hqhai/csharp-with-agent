@@ -108,5 +108,8 @@ namespace Fsel.Shared.Constants
         public const string ReportStudentsByAdminSchool = "Resources//ExportExcelTemplates//Template_Export_Data_Student_By_Admin_School.xlsx";
 
         public const string SuccessCriteriaSchema = "Resources//AIPrompt//JsonSchemas//SuccessCriteriaSchema.json";
+
+        public const string AICheckForbiddenWordRole = "Resources//AIPrompt//Role//CheckForbiddenWord.txt";
+        public const string AICheckForbiddenWordInstruction = "Resources//AIPrompt//Instruction//CheckForbiddenWordInstruction.txt";
     }
 }

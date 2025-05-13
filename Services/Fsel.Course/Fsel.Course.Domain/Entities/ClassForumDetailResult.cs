@@ -95,5 +95,12 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
 
         public int RetryTime { get; set; }
+
+        public bool IsForbiddenWork { get; set; }
+
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? GradingAiForbidden { get; set; }
+
+        public bool IsForbiddenImage { get; set; }
     }
 }

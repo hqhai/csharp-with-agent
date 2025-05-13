@@ -57,6 +57,9 @@ namespace Fsel.Shared.Enums
         RecallCoinSurvey,
         SurveyReward,
         IllegalCoinRecall,
-        AddCoinBuyCourse
+        AddCoinBuyCourse,
+        NullForbiddenClassForum,
+        ForbiddenClassForum,
+        LanguageNotEnglish
     }
 }
