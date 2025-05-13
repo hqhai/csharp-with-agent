@@ -892,6 +892,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 var externalLogin = new ExternalLoginModel
                 {
                     Email = email,
+                    IsEmailReadonly = !string.IsNullOrEmpty(email),
                     PhoneNumber = phoneNumber,
                     FirstName = firstName,
                     LastName = lastName,

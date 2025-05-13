@@ -13,6 +13,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Quickstarts
         [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         public string? Email { get; set; }
 
+        public bool IsEmailReadonly { get; set; } = true;
+
         [RegularExpression(Common.Helpers.RegexHelper.PhoneNumberValid, ErrorMessage = "i18n_number_phone_invalid")]
         [Required(ErrorMessage = "i18n_Phone_number_cannot_empty")]
         public string? PhoneNumber { get; set; }
