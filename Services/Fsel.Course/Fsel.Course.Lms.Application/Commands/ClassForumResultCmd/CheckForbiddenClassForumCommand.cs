@@ -102,6 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                     {
                         ObjectId = classForumDetailResult.Id,
+                        UserIds = new List<Guid>() { classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty },
                         Content = EnumNotificationContent.LanguageNotEnglish,
                         Type = EnumNotificationType.LinkPage,
                         PlatformCode = EnumPlatformCode.LMS
@@ -117,6 +118,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                 {
                     ObjectId = classForumDetailResult.Id,
+                    UserIds = new List<Guid>() { classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty },
                     Content = EnumNotificationContent.ForbiddenClassForum,
                     Type = EnumNotificationType.LinkPage,
                     PlatformCode = EnumPlatformCode.LMS,
@@ -146,6 +148,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 NotificationSendingQueueModel model = new NotificationSendingQueueModel()
                 {
                     ObjectId = classForumDetailResult.Id,
+                    UserIds = new List<Guid>() { classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty },
                     Content = EnumNotificationContent.NullForbiddenClassForum,
                     Type = EnumNotificationType.LinkPage,
                     PlatformCode = EnumPlatformCode.LMS
