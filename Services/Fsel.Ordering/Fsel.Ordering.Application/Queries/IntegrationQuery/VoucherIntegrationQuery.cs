@@ -46,7 +46,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
                         select new
                         {
                             Voucher = voucher,
-                            HasOrder = voucher.Orders.Any(),
+                            UserId = voucher.Orders.Select(x => x.UserId == Guid.Empty ? default(Guid?) : x.UserId).FirstOrDefault(),
                             Packages = voucher.VoucherPackages.Select(x => x.Package),
                         };
 
@@ -72,7 +72,8 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             {
                 var voucher = _mapper.Map<VoucherIntegrationModel>(x.Voucher);
                 voucher.Packages = _mapper.Map<IList<PackageIntegrationModel>>(x.Packages);
-                if (x.HasOrder)
+                voucher.UserId = x.UserId;
+                if (x.UserId != null)
                 {
                     voucher.Status = EnumVoucherIntegrationStatus.Redeemed;
                 }

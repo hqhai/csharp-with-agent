@@ -16,6 +16,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels.IntegrationModel
         public string? SourceName { get; set; }
         public bool IsActive { get; set; }
         public int? NumberOfChanges { get; set; }
+        public Guid? UserId { get; set; }
         public EnumVoucherIntegrationStatus Status { get; set; }
         public IList<PackageIntegrationModel>? Packages { get; set; }
     }
