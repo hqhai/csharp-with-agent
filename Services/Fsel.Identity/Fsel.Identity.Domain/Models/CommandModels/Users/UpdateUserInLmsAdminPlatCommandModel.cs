@@ -20,7 +20,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Users
 
         public string? Address { get; set; }
 
-        public DateTime Birthday { get; set; }
+        public DateTime? Birthday { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? PhoneNumber { get; set; }
