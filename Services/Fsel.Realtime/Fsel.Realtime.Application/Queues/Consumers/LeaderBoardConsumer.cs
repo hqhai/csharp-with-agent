@@ -27,12 +27,6 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             {
                 var courseLevel = message.CourseLevel.ToString();
                 await _leaderBoardHubContext.GetGroup(courseLevel!).SendAsync(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, message);
-
-                try
-                {
-                    _queueProvider.Publish(RealtimeSettings.LeaderBoardHub.Methods.LeaderBoardMessage, courseLevel, message);
-                }
-                catch { }
             }
         }
     }
