@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     {
         public Guid ClassForumResulId { get; set; }
 
+        public Guid? ClassForumDetailResulId { get; set; }
     }
 
     public class AutoApprovalClassForumCommandHandler : IRequestHandler<AutoApprovalClassForumCommand, MethodResult<bool>>
@@ -59,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             #endregion
 
             var aiApprovalAndComment = await GetAIModeration(_mediator, classForumResult, cancellationToken);
-            bool isForbidden = classForumResult.ClassForumDetailResults.All(x => !x.IsForbiddenWork && !x.IsForbiddenImage);
+            bool isForbidden = request.ClassForumDetailResulId.HasValue && classForumResult.ClassForumDetailResults.Any(x => x.Id == request.ClassForumDetailResulId && (x.IsForbiddenWork || x.IsForbiddenImage));
             await UpdateStatusClassForumAfterApproval(classForumResult.Id, aiApprovalAndComment, _mediator, isForbidden, cancellationToken);
 
             return methodResult;
