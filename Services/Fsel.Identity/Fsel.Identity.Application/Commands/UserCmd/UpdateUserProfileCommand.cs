@@ -150,6 +150,11 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 return default;
             }
             var student = userView.Human?.Student;
+            if (student != null)
+            {
+                student.ParentEmail = string.IsNullOrEmpty(request.Parent?.Email) ? null : request.Parent?.Email;
+                student.ParentPhoneNumber = string.IsNullOrEmpty(request.Parent?.PhoneNumber) ? null : request.Parent?.PhoneNumber;
+            }
             if (request.Parent != null && student != null && student.CreatedByParent == false)
             {
                 if (student.ParentStudents == null || student.ParentStudents.Count == 0)
