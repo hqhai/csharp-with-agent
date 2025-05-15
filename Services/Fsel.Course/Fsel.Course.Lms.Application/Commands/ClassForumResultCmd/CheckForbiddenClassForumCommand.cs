@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.ValueSettings;
@@ -81,59 +80,42 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             var containsForbiddenWord = listForbiddenWordResultWordContent.Content?.Result ?? Enumerable.Empty<string>().ToList();
             if (containsForbiddenWord.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords), string.Join(", ", containsForbiddenWord));
+                classForumDetailResult.IsForbiddenWork = true;
+                await SaveClassForumDetailResult(classForumDetailResult, cancellationToken);
+                var paramsMessage = new List<object> { classForumDetailResult.ClassForumResult?.ClassForum?.Lesson?.Name ?? string.Empty };
+                await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
                 return methodResult;
             }
-
-            // checkImage
-            var filePaths = classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath ?? string.Empty).ToList();
-            if (filePaths != null && filePaths.Any() && classForumDetailResult.ClassForumResult?.ClassForum?.CourseSkill == EnumCourseSkill.Writing)
+            else
             {
-                await CheckImages(filePaths, classForumDetailResult);
-            }
-
-            // check word
-            if (!string.IsNullOrEmpty(classForumDetailResult.WordContent))
-            {
-                var checkWordContent = await CheckWordContent(classForumDetailResult.WordContent, classForumDetailResult, cancellationToken);
-                if (checkWordContent.Result)
+                // checkImage
+                var filePaths = classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath ?? string.Empty).ToList();
+                if (filePaths != null && filePaths.Any() && classForumDetailResult.ClassForumResult?.ClassForum?.CourseSkill == EnumCourseSkill.Writing)
                 {
-                    // thông báo lỗi language
-                    NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+                    await CheckImages(filePaths, classForumDetailResult);
+                }
+
+                // check word
+                if (!string.IsNullOrEmpty(classForumDetailResult.WordContent))
+                {
+                    var checkWordContent = await CheckWordContent(classForumDetailResult.WordContent, classForumDetailResult, cancellationToken);
+                    if (checkWordContent.Result)
                     {
-                        ObjectId = classForumDetailResult.Id,
-                        UserIds = new List<Guid>() { classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty },
-                        Content = EnumNotificationContent.LanguageNotEnglish,
-                        Type = EnumNotificationType.LinkPage,
-                        PlatformCode = EnumPlatformCode.LMS
-                    };
-                    await _notificationMessagePublisher.Publish(model, cancellationToken);
-                    methodResult.Result = true;
+                        // thông báo lỗi language
+                        await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.LanguageNotEnglish, EnumNotificationType.LinkPage, null, cancellationToken);
+                        methodResult.Result = true;
+                    }
+                }
+
+                // thông báo nếu có từ cấm ảnh hoặc text
+                if (classForumDetailResult.IsForbiddenImage || classForumDetailResult.IsForbiddenWork)
+                {
+                    var paramsMessage = new List<object> { classForumDetailResult.ClassForumResult?.ClassForum?.Lesson?.Name ?? string.Empty };
+                    await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
                 }
             }
 
-            // thông báo nếu có từ cấm ảnh hoặc text
-            if (classForumDetailResult.IsForbiddenImage || classForumDetailResult.IsForbiddenWork)
-            {
-                NotificationSendingQueueModel model = new NotificationSendingQueueModel()
-                {
-                    ObjectId = classForumDetailResult.Id,
-                    UserIds = new List<Guid>() { classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty },
-                    Content = EnumNotificationContent.ForbiddenClassForum,
-                    Type = EnumNotificationType.LinkPage,
-                    PlatformCode = EnumPlatformCode.LMS,
-                    ParamsMessage = new List<object> { classForumDetailResult.ClassForumResult?.ClassForum?.Lesson?.Name ?? string.Empty }
-                };
-                await _notificationMessagePublisher.Publish(model, cancellationToken);
-            }
-
-            await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
-            {
-                _classForumDetailResultRepository.Update(classForumDetailResult);
-                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-                return methodResult;
-            });
-
+            await SaveClassForumDetailResult(classForumDetailResult, cancellationToken);
             return methodResult;
         }
 
@@ -145,16 +127,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             if (retryResult == null)
             {
                 // gửi thông báo null
-                NotificationSendingQueueModel model = new NotificationSendingQueueModel()
-                {
-                    ObjectId = classForumDetailResult.Id,
-                    UserIds = new List<Guid>() { classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty },
-                    Content = EnumNotificationContent.NullForbiddenClassForum,
-                    Type = EnumNotificationType.LinkPage,
-                    PlatformCode = EnumPlatformCode.LMS
-                };
-                await _notificationMessagePublisher.Publish(model, cancellationToken);
-
+                await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.NullForbiddenClassForum, EnumNotificationType.LinkPage, null, cancellationToken);
                 return methodResult;
             }
 
@@ -183,6 +156,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                             methodResult.Result = true;
                             return methodResult;
                         }
+                    }
+                    else
+                    {
+                        methodResult.Result = true;
+                        return methodResult;
                     }
                 }
             }
@@ -258,6 +236,38 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     return methodResult;
                 }
             }
+
+            return methodResult;
+        }
+
+        private async Task<VoidMethodResult> SendNotification(Guid objectId, Guid userId, EnumNotificationContent content, EnumNotificationType type, IList<object>? paramsMessage, CancellationToken cancellationToken)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            NotificationSendingQueueModel model = new NotificationSendingQueueModel()
+            {
+                ObjectId = objectId,
+                UserIds = new List<Guid>() { userId },
+                Content = content,
+                Type = type,
+                PlatformCode = EnumPlatformCode.LMS,
+                ParamsMessage = paramsMessage
+            };
+            await _notificationMessagePublisher.Publish(model, cancellationToken);
+
+            return methodResult;
+        }
+
+        private async Task<VoidMethodResult> SaveClassForumDetailResult(ClassForumDetailResult classForumDetailResult, CancellationToken cancellationToken)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
+            {
+                _classForumDetailResultRepository.Update(classForumDetailResult);
+                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                return methodResult;
+            });
 
             return methodResult;
         }
