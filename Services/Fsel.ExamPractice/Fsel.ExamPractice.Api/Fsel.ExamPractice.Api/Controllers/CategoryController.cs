@@ -1,0 +1,54 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.ExamPractice.Api.Controllers
+{
+    using System.Net;
+    using Asp.Versioning;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
+    using Fsel.Common.Models;
+    using Fsel.ExamPractice.Application.Queries.CategoryQuery;
+    using Fsel.Shared.Constants;
+    using MediatR;
+    using Microsoft.AspNetCore.Mvc;
+
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [Route(Settings.APIDefaultRoute + "/category")]
+    [ApiController]
+    public class CategoryController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public CategoryController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Get Category
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<IList<EnumModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ApiVersion(ApiSettings.APIVersion1)]
+        public async Task<IActionResult> Get([FromQuery] GetEnumQuery query)
+        {
+            MethodResult<IList<EnumModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Category
+        /// </summary>
+        [HttpGet("exam-practice-subtypes")]
+        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ApiVersion(ApiSettings.APIVersion1)]
+        public async Task<IActionResult> GetExamPracticeSubType([FromQuery] GetExamPracticeSubTypesQuery query)
+        {
+            MethodResult<object> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+    }
+}
