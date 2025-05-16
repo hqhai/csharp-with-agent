@@ -143,6 +143,7 @@ namespace Fsel.Shared.Constants
                 public const string JobStudentAggregate = $"{KeyQueue}_JobStudentAggregate";
                 public const string NotifyWeeklyReportCourseTarget = $"{KeyQueue}_NotifyWeeklyReportCourseTarget";
                 public const string NotifyWeeklyCourseGoalTarget = $"{KeyQueue}_NotifyWeeklyCourseGoalTarget";
+                public const string ClassForumPronunciationAi = $"{KeyQueue}_ClassForumPronunciationAi";
             }
         }
 

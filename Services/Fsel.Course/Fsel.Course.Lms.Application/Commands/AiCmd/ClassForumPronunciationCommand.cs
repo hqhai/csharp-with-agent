@@ -80,15 +80,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                     await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
                     {
-                        classForumDetailResult.PronunciationAlFeedback = ConvertHelper.Serialize(response);
-                        _classForumDetailResultRepository.Update(classForumDetailResult, false
-                        , x => x.WordContent, x => x.Content
-                        , x => x.WordCount, x => x.SubmissionCount
-                        , x => x.ProcessDate, x => x.CompletionDate
-                        , x => x.Status
-                        , x => x.IsForbiddenImage
-                        , x => x.IsForbiddenWork, x => x.GradingAiForbidden
-                        , x => x.GradingAlFeedback);
+                        classForumDetailResult.PronunciationAlFeedback = Common.Helpers.ConvertHelper.Serialize(response);
+                        _classForumDetailResultRepository.Update(classForumDetailResult);
                         await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                         methodResult.Result = true;
                         return methodResult;

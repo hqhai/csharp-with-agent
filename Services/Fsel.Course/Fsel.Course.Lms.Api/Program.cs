@@ -192,13 +192,13 @@ builder.Services.AddScoped<SavePlacementTestAnswersPublisher>();
 builder.Services.AddScoped<ErrorExplainPublisher>();
 builder.Services.AddScoped<ExportFileExcelSchoolLearningProcessPublisher>();
 builder.Services.AddScoped<SpeechToTextPendingAiPublisher>();
+builder.Services.AddScoped<ClassForumPronunciationPublisher>();
 builder.Services.AddScoped<SubmitAiHomeWorkPublisher>();
 builder.Services.AddScoped<SubmitAiVideoPublisher>();
 builder.Services.AddScoped<AiFeedbackHomeWorkReponsePublisher>();
 builder.Services.AddScoped<AiFeedbackVideoResponsePublisher>();
 builder.Services.AddScoped<SubmitHomeWorkResultPublisher>();
 builder.Services.AddScoped<SubmitQuestionShortAnswerWordBasePublisher>();
-builder.Services.AddScoped<ClassForumPronunciationPublisher>();
 builder.Services.AddScoped<ExportFileUserInformationSupportSalePublisher>();
 
 // Refit
