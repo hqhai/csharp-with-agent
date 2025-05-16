@@ -62,6 +62,8 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery
             foreach (var section in sections)
             {
                 var subSections = await _examPracticeSectionRepository.Queryable.Include(x => x.Questions)
+                    .Include(x => x.ExamPracticeAISettings)
+                    .ThenInclude(x => x.ExamPracticeAICriteriaSettings)
                     .Where(x => x.ParentExamPracticeSectionId == section.Id)
                     .ToListAsync();
 
@@ -77,6 +79,8 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery
             if (!result.Any() && sections.Any() && sections.All(x => x.ExamPracticeId.HasValue))
             {
                 result = await _examPracticeSectionRepository.Queryable.Include(x => x.Questions)
+                    .Include(x => x.ExamPracticeAISettings)
+                    .ThenInclude(x => x.ExamPracticeAICriteriaSettings)
                     .WhereBulkContains(sections.Select(x => x.Id), x => x.Id)
                     .OrderBy(x => x.DisplayOrder)
                     .ToListAsync();

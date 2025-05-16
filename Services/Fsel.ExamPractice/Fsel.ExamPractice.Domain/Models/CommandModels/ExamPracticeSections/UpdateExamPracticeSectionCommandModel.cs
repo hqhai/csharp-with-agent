@@ -17,5 +17,6 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections
         public SectionMediaConfig? Config { get; set; }
         public IList<UpdateExamPracticeSectionCommandModel> ChildrenExamPracticeSections { get; set; } = new List<UpdateExamPracticeSectionCommandModel>();
         public IList<UpdateQuestionCommandModel> Questions { get; set; } = new List<UpdateQuestionCommandModel>();
+        public IList<ExamPracticeAISettingModel> ExamPracticeAISettings { get; set; } = new List<ExamPracticeAISettingModel>();
     }
 }
