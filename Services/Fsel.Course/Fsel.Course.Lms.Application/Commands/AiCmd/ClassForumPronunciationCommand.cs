@@ -7,8 +7,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
@@ -23,14 +27,17 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
         private readonly IPronuciationAssessmentService _pronuciationService;
         private readonly ILogger<ClassForumPronunciationCommand> _logger;
+        private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
 
         public ClassForumPronunciationCommandHandler(IClassForumDetailResultRepository classForumDetailResultRepository,
                                                      IPronuciationAssessmentService pronuciationService,
-                                                     ILogger<ClassForumPronunciationCommand> logger)
+                                                     ILogger<ClassForumPronunciationCommand> logger,
+                                                     SubmitAIResponsePublisher submitAIResponsePublisher)
         {
             _classForumDetailResultRepository = classForumDetailResultRepository;
             _pronuciationService = pronuciationService;
             _logger = logger;
+            _submitAIResponsePublisher = submitAIResponsePublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(ClassForumPronunciationCommand request, CancellationToken cancellationToken)
@@ -73,12 +80,20 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                     await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
                     {
-                        classForumDetailResult.PronunciationAlFeedback = Common.Helpers.ConvertHelper.Serialize(response);
+                        classForumDetailResult.PronunciationAlFeedback = ConvertHelper.Serialize(response);
                         _classForumDetailResultRepository.Update(classForumDetailResult);
                         await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                         methodResult.Result = true;
                         return methodResult;
                     });
+
+                    await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
+                    {
+                        PronunciationAlFeedback = ConvertHelper.Serialize(response),
+                        ClassForumResultId = classForumDetailResult.ClassForumResultId,
+                        EnumSubmissionCount = classForumDetailResult.SubmissionCount ?? EnumSubmissionCount.FirstSubmit,
+                        PronunciationScore = classForumDetailResult.PronunciationScore
+                    }, cancellationToken);
 
                     return methodResult;
                 }
