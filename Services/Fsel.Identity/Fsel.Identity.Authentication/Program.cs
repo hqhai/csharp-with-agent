@@ -2,6 +2,7 @@
 
 using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text;
 using System.Text.Json;
 using AutoMapper;
 using Fsel.Authentication.Infrastructure.Configs;
@@ -22,6 +23,7 @@ using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
@@ -161,8 +163,11 @@ builder.Services.AddAuthentication()
             },
             OnRemoteFailure = context =>
             {
-                var returnUrl = $"{OAuthRoutePaths.Login}?{OAuthRoutePathParams.Login}={Uri.EscapeDataString(context.Properties?.Items[OAuthRoutePathParams.Login] ?? string.Empty)}";
+                var encoded = Uri.EscapeDataString(context.Properties?.Items[OAuthRoutePathParams.Login] ?? string.Empty);
+                var bytes = Base64Url.Decode(encoded);
+                var returnUrl = Encoding.UTF8.GetString(bytes);
 
+                var redirectUrl = $"{OAuthRoutePaths.Login}?{OAuthRoutePathParams.Login}={returnUrl}";
                 context.Response.Redirect(returnUrl);
                 context.HandleResponse();
                 return Task.CompletedTask;

@@ -35,6 +35,7 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Core.Caching;
 using Fsel.Identity.Application.Commands.UserReferrals;
 using static IdentityServer4.IdentityServerConstants;
+using System.Text;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -849,13 +850,15 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public IActionResult ExternalLogin(string provider, string? returnUrl = null)
         {
             var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), new { returnUrl });
+            var bytes = Encoding.UTF8.GetBytes(returnUrl ?? string.Empty);
+            var encoded = Base64Url.Encode(bytes);
 
             if (provider == LoginProvider.Zalo)
             {
                 return Challenge(new AuthenticationProperties
                 {
                     RedirectUri = redirectUrl,
-                    //Items = { { nameof(returnUrl), returnUrl } }
+                    Items = { { nameof(returnUrl), encoded } }
                 }, LoginProvider.Zalo);
             }
 
