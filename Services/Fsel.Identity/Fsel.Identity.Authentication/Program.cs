@@ -145,6 +145,10 @@ builder.Services.AddAuthentication()
         options.ClaimActions.MapJsonKey(ClaimTypes.Gender, UserInfoFields.Gender);
         options.ClaimActions.MapJsonKey(ClaimTypes.DateOfBirth, UserInfoFields.Birthday);
 
+        options.Scope.Add("scope.userInfo");
+        options.Scope.Add("scope.userLocation");
+        options.Scope.Add("scope.userPhonenumber");
+
         options.Events = new OAuthEvents
         {
             OnAccessDenied = context =>
