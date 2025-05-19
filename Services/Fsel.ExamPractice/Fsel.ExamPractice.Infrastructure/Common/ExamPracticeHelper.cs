@@ -51,19 +51,21 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                 return true;
             }
 
-            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPractice.Id).ToListAsync();
+            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPractice.Id).OrderBy(x => x.DisplayOrder).ToListAsync();
             if (examPracticeSections.Count != request.ExamPracticeSections.Count)
             {
                 return true;
             }
             foreach (var item in request.ExamPracticeSections)
             {
+                var displayOrder = request.ExamPracticeSections.IndexOf(item);
+
                 var examPracticeSection = examPracticeSections.FirstOrDefault(x => x.Id == item.Id);
                 if (examPracticeSection == null)
                 {
                     return true;
                 }
-                if (item.DisplayOrder != examPracticeSection.DisplayOrder)
+                if (displayOrder != examPracticeSection.DisplayOrder)
                 {
                     return true;
                 }
@@ -290,6 +292,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             foreach (var examPracticeSectionRequest in examPracticeSections)
             {
                 var examPracticeSection = _mapper.Map<ExamPracticeSection>(examPracticeSectionRequest);
+                examPracticeSection.DisplayOrder = examPracticeSections.IndexOf(examPracticeSectionRequest);
                 if (!examPracticeSection.IsValid())
                 {
                     voidMethodResult.AddErrorBadRequest(examPracticeSection.ErrorMessages);
@@ -380,6 +383,8 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                         return voidMethodResult;
                     }
                 }
+
+                examPracticeSection.DisplayOrder = examPracticeSections.IndexOf(examPracticeSectionRequest);
 
                 targetList.Add(examPracticeSection);
                 // Đệ quy xử lý children nếu có

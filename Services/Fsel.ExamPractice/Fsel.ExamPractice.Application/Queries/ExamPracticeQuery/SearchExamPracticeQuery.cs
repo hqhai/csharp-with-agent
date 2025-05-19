@@ -33,21 +33,7 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery
                 return methodResult;
             }
 
-            var query = _examPracticeRepository.Queryable
-                              .Select(x => new ExamPracticeSearchModel
-                              {
-                                  Id = x.Id,
-                                  Code = x.Code,
-                                  Name = x.Name,
-                                  CreatedDate = x.CreatedDate,
-                                  Status = x.Status,
-                                  SubType = x.SubType,
-                                  EndDate = x.EndDate,
-                                  StartDate = x.StartDate,
-                                  UpdatedDate = x.UpdatedDate,
-                                  TotalAttempts = x.ExamPracticeResults.Count,
-                              });
-
+            var query = _examPracticeRepository.Queryable.Where(x => x.Type == request.Type);
             request.Keyword = request.Keyword?.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -74,8 +60,25 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery
             {
                 query = query.Where(x => request.SubTypes.Contains(x.SubType));
             }
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+            var queryData = query.Select(x => new ExamPracticeSearchModel
+            {
+                Id = x.Id,
+                Code = x.Code,
+                Name = x.Name,
+                CreatedFullName = x.CreatedFullName,
+                CreatedDate = x.CreatedDate,
+                Status = x.Status,
+                Type = x.Type,
+                SubType = x.SubType,
+                EndDate = x.EndDate,
+                StartDate = x.StartDate,
+                UpdatedDate = x.UpdatedDate,
+                CourseSkills = x.ExamPracticeSections.Where(x => x.CourseSkill.HasValue).Select(x => x.CourseSkill.GetValueOrDefault()).Distinct().ToList(),
+                CourseSubType = x.SubType,
+                TotalAttempts = x.ExamPracticeResults.Count,
+            });
+            int totalItem = await queryData.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await queryData.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                                    .ApplyPaging(request)
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken: cancellationToken)

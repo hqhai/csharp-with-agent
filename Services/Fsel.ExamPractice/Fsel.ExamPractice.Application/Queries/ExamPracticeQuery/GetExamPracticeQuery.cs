@@ -65,9 +65,10 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery
                     .Include(x => x.ExamPracticeAISettings)
                     .ThenInclude(x => x.ExamPracticeAICriteriaSettings)
                     .Where(x => x.ParentExamPracticeSectionId == section.Id)
+                    .OrderBy(x => x.DisplayOrder)
                     .ToListAsync();
 
-                if (subSections.Any())
+                if (subSections.Any() && section.ExamPracticeId.HasValue)
                 {
                     result.Add(section);
 

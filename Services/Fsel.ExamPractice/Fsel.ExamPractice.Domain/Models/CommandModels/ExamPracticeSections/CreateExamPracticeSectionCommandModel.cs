@@ -11,7 +11,6 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections
     public class CreateExamPracticeSectionCommandModel
     {
         public string? Name { get; set; }
-        public int DisplayOrder { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
         public EnumSectionExamPracticeType? Type { get; set; }
         public SectionMediaConfig? Config { get; set; }

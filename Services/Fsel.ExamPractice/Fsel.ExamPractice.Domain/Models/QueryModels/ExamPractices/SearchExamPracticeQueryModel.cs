@@ -8,6 +8,7 @@ namespace Fsel.ExamPractice.Domain.Models.QueryModels.ExamPractices
 
     public class SearchExamPracticeQueryModel : BaseQueryModel
     {
+        public EnumExamPracticeType Type { get; set; }
         public string? SubTypeStr { get; set; }
 
         public IList<EnumExamPracticeSubType>? SubTypes

@@ -10,12 +10,14 @@ namespace Fsel.ExamPractice.Api.Controllers
     using Fsel.ExamPractice.Application.Queries.CategoryQuery;
     using Fsel.Shared.Constants;
     using MediatR;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/category")]
     [ApiController]
+    [AllowAnonymous]
     public class CategoryController : ControllerBase
     {
         private readonly IMediator _mediator;

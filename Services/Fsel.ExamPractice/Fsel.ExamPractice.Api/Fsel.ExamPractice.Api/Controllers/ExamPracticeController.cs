@@ -5,7 +5,6 @@ namespace Fsel.ExamPractice.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.ExamPractice.Application.Commands.ExamPracticeCmd;
@@ -20,6 +19,7 @@ namespace Fsel.ExamPractice.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/exam-practice")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class ExamPracticeController : ControllerBase
     {
         private readonly IMediator _mediator;
