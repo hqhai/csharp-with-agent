@@ -855,7 +855,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 return Challenge(new AuthenticationProperties
                 {
                     RedirectUri = redirectUrl,
-                    Items = { { nameof(returnUrl), returnUrl } }
+                    //Items = { { nameof(returnUrl), returnUrl } }
                 }, LoginProvider.Zalo);
             }
 
