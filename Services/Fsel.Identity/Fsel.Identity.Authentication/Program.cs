@@ -163,11 +163,11 @@ builder.Services.AddAuthentication()
             },
             OnRemoteFailure = context =>
             {
-                var encoded = Uri.EscapeDataString(context.Properties?.Items[OAuthRoutePathParams.Login] ?? string.Empty);
-                var bytes = Base64Url.Decode(encoded);
-                var returnUrl = Encoding.UTF8.GetString(bytes);
-
+                //var encoded = Uri.EscapeDataString(context.Properties?.Items[OAuthRoutePathParams.Login] ?? string.Empty);
+                //var bytes = Base64Url.Decode(encoded);
+                var returnUrl = context.Request.Query[OAuthRoutePathParams.Login].ToString();
                 var redirectUrl = $"{OAuthRoutePaths.Login}?{OAuthRoutePathParams.Login}={returnUrl}";
+
                 context.Response.Redirect(returnUrl);
                 context.HandleResponse();
                 return Task.CompletedTask;
