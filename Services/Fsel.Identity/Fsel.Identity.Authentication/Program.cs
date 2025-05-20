@@ -163,7 +163,7 @@ builder.Services.AddAuthentication()
             },
             OnRemoteFailure = context =>
             {
-                var logger = context.HttpContext.RequestServices.GetService<ILogger>();
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger>();
                 var redirectUri = context.Properties?.RedirectUri ?? string.Empty;
                 logger.LogError("OnRemoteFailure - redirectUri: {redirectUri}", redirectUri);
 
