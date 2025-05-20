@@ -163,15 +163,7 @@ builder.Services.AddAuthentication()
             },
             OnRemoteFailure = context =>
             {
-                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<OAuthEvents>>();
                 var redirectUri = context.Properties?.RedirectUri ?? string.Empty;
-                logger.LogError("OnRemoteFailure - redirectUri: {redirectUri}", redirectUri);
-
-                //var encoded = context.Properties?.Items["state"] ?? string.Empty;
-                //var bytes = Base64Url.Decode(encoded);
-                //var returnUrl = context.Request.Query[OAuthRoutePathParams.Login].ToString();
-                //var redirectUrl = $"{OAuthRoutePaths.Login}?{OAuthRoutePathParams.Login}={returnUrl}";
-
                 context.Response.Redirect(redirectUri);
                 context.HandleResponse();
                 return Task.CompletedTask;

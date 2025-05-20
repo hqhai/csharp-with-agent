@@ -850,20 +850,18 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public IActionResult ExternalLogin(string provider, string? returnUrl = null)
         {
             var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), new { returnUrl });
-            //var bytes = Encoding.UTF8.GetBytes(returnUrl ?? string.Empty);
-            //var encoded = Base64Url.Encode(bytes);
 
+            AuthenticationProperties properties;
             if (provider == LoginProvider.Zalo)
             {
-                var authProperties = new AuthenticationProperties
+                properties = new AuthenticationProperties
                 {
                     RedirectUri = redirectUrl,
                 };
-                //authProperties.Items["state"] = encoded;
-                return Challenge(authProperties, LoginProvider.Zalo);
+                return Challenge(properties, LoginProvider.Zalo);
             }
 
-            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
         }
 
