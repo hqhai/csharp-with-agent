@@ -1,10 +1,8 @@
-// Copyright (c) Atlantic. All rights reserved.
+using OfficeOpenXml.Attributes;
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
-    using OfficeOpenXml.Attributes;
-
-    public class CreateStudentToEventFromFileModel
+    public class CreateTeacherToEventFromFileModel
     {
         [EpplusTableColumn(Header = "Full Name\n(Họ và tên)")]
         public string? FullName { get; set; }
@@ -18,10 +16,10 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
         [EpplusTableColumn(Header = "Date Of Birth\n(Ngày sinh)")]
         public DateTime? DateOfBirth { get; set; }
 
-        [EpplusTableColumn(Header = "Grade\n(Khối học)")]
-        public string? SchoolGrade { get; set; }
+        [EpplusTableColumn(Header = "Class\n(Bộ môn giảng dạy)")]
+        public string? Class { get; set; }
 
-        [EpplusTableColumn(Header = "Class\n(Lớp)")]
-        public string? SchoolClass { get; set; }
+        [EpplusTableColumn(Header = "Note\n(Ghi chú)")]
+        public string? Note { get; set; }
     }
 }

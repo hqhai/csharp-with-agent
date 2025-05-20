@@ -207,7 +207,21 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     }
                 };
 
-                Action<ExcelWorksheet, Dictionary<string, int?>?, int, int, CreateStudentToEventFromFileModel> defaultHandlerAction = (worksheet, columnIndexes, row, num, model) =>
+                Action<ExcelWorksheet, Dictionary<string, int?>?, int, int, CreateStudentToEventFromFileModel> defaultStudentHandlerAction = (worksheet, columnIndexes, row, num, model) =>
+                {
+                    worksheet.Cells[row, num].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    worksheet.Cells[row, num].Style.Fill.BackgroundColor.SetColor(Color.White);
+                    worksheet.Cells[row, num].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[row, num].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[row, num].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    worksheet.Cells[row, num].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    if (num == 6)
+                    {
+                        worksheet.Cells[row, num + 1].Value = null;
+                    }
+                };
+
+                Action<ExcelWorksheet, Dictionary<string, int?>?, int, int, CreateTeacherToEventFromFileModel> defaultTeacherHandlerAction = (worksheet, columnIndexes, row, num, model) =>
                 {
                     worksheet.Cells[row, num].Style.Fill.PatternType = ExcelFillStyle.Solid;
                     worksheet.Cells[row, num].Style.Fill.BackgroundColor.SetColor(Color.White);
@@ -226,68 +240,147 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 var cultureInfo = CultureInfo.InvariantCulture;
 
-                var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+                var students = new List<CreateStudentToEventFromFileModel>();
+
+                if (request.Category == EnumCompetitionEventCategory.Student)
                 {
-                    if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth.HasValue || !string.IsNullOrEmpty(x.SchoolGrade?.Trim()) || !string.IsNullOrEmpty(x.SchoolClass?.Trim()))
+                    var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                     {
-                        if (string.IsNullOrEmpty(x.FullName?.Trim()))
+                        if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth.HasValue || !string.IsNullOrEmpty(x.SchoolGrade?.Trim()) || !string.IsNullOrEmpty(x.SchoolClass?.Trim()))
                         {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
+                            if (string.IsNullOrEmpty(x.FullName?.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
+                            }
+                            else if (!Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
+                            }
+                            if (string.IsNullOrEmpty(x.PhoneNumber?.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyPhoneNumberVN });
+                            }
+                            else if (!Shared.Helpers.StringHelper.IsValidPhoneNumber(x.PhoneNumber?.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
+                            }
+                            if (!string.IsNullOrEmpty(x.Email?.Trim()) && !x.Email.Trim().IsValidEmail())
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
+                            }
+                            if (!x.DateOfBirth.HasValue)
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
+                            }
+                            else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < StartYear)
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                            }
+                            if (string.IsNullOrEmpty(x.SchoolGrade?.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolGrade), Message = ErrorMassageSetting.EmptyGradeVN });
+                            }
+                            if (string.IsNullOrEmpty(x.SchoolClass?.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolClass), Message = ErrorMassageSetting.EmptyClassVN });
+                            }
                         }
-                        else if (!Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
-                        }
-                        if (string.IsNullOrEmpty(x.PhoneNumber?.Trim()))
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyPhoneNumberVN });
-                        }
-                        else if (!Shared.Helpers.StringHelper.IsValidPhoneNumber(x.PhoneNumber?.Trim()))
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
-                        }
-                        if (!string.IsNullOrEmpty(x.Email?.Trim()) && !x.Email.Trim().IsValidEmail())
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
-                        }
-                        if (!x.DateOfBirth.HasValue)
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
-                        }
-                        else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < StartYear)
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
-                        }
-                        if (string.IsNullOrEmpty(x.SchoolGrade?.Trim()))
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolGrade), Message = ErrorMassageSetting.EmptyGradeVN });
-                        }
-                        if (string.IsNullOrEmpty(x.SchoolClass?.Trim()))
-                        {
-                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolClass), Message = ErrorMassageSetting.EmptyClassVN });
-                        }
+                        return await Task.FromResult(errors.Count == 0);
+                    },
+             null,
+             defaultStudentHandlerAction,
+             errorHandlerAction,
+             true);
+
+                    if (!result.IsValidHeader)
+                    {
+                        await SendNotify(request.Key ?? string.Empty, ErrorTemplate, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+
+                        return methodResult;
                     }
-                    return await Task.FromResult(errors.Count == 0);
-                },
-                null,
-                defaultHandlerAction,
-                errorHandlerAction,
-                true);
 
-                if (!result.IsValidHeader)
-                {
-                    await SendNotify(request.Key ?? string.Empty, ErrorTemplate, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
+                    if (result.Stream != null)
+                    {
+                        var file = ConvertHelper.StreamToByteArray(result.Stream);
 
-                    return methodResult;
+                        await SendNotify(request.Key ?? string.Empty, DataError, StatusCodes.Status400BadRequest, 0, file, cancellationToken);
+
+                        return methodResult;
+                    }
+
+                    students = result.Datas.ToList();
                 }
-
-                if (result.Stream != null)
+                else
                 {
-                    var file = ConvertHelper.StreamToByteArray(result.Stream);
+                    var result = formFile.ImportAndValidateExcel(async (CreateTeacherToEventFromFileModel x, IList<CreateTeacherToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+                    {
+                        if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth.HasValue || !string.IsNullOrEmpty(x.Class?.Trim()))
+                        {
+                            if (string.IsNullOrEmpty(x.FullName?.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
+                            }
+                            else if (!Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
+                            }
+                            if (string.IsNullOrEmpty(x.PhoneNumber?.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyPhoneNumberVN });
+                            }
+                            else if (!Shared.Helpers.StringHelper.IsValidPhoneNumber(x.PhoneNumber?.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
+                            }
+                            if (!string.IsNullOrEmpty(x.Email?.Trim()) && !x.Email.Trim().IsValidEmail())
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
+                            }
+                            if (!x.DateOfBirth.HasValue)
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
+                            }
+                            else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < StartYear)
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                            }
+                            if (string.IsNullOrEmpty(x.Class?.Trim()) && string.IsNullOrEmpty(x.Note?.Trim()))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Class), Message = ErrorMassageSetting.EmptyClassVN });
+                            }
+                        }
+                        return await Task.FromResult(errors.Count == 0);
+                    },
+             null,
+             defaultTeacherHandlerAction,
+             errorHandlerAction,
+             true);
 
-                    await SendNotify(request.Key ?? string.Empty, DataError, StatusCodes.Status400BadRequest, 0, file, cancellationToken);
+                    if (!result.IsValidHeader)
+                    {
+                        await SendNotify(request.Key ?? string.Empty, ErrorTemplate, StatusCodes.Status400BadRequest, 0, null, cancellationToken);
 
-                    return methodResult;
+                        return methodResult;
+                    }
+
+                    if (result.Stream != null)
+                    {
+                        var file = ConvertHelper.StreamToByteArray(result.Stream);
+
+                        await SendNotify(request.Key ?? string.Empty, DataError, StatusCodes.Status400BadRequest, 0, file, cancellationToken);
+
+                        return methodResult;
+                    }
+
+                    students = result.Datas.Select(p => new CreateStudentToEventFromFileModel()
+                    {
+                        FullName = p.FullName,
+                        PhoneNumber = p.PhoneNumber,
+                        Email = p.Email,
+                        DateOfBirth = p.DateOfBirth,
+                        SchoolGrade = "Giáo Viên",
+                        SchoolClass = p.Class == "Khác" ? p.Note : p.Class
+                    }).ToList();
                 }
 
                 var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
@@ -297,7 +390,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     return methodResult;
                 }
 
-                var students = result.Datas.ToList();
                 if (students == null || students.Count == 0)
                 {
                     methodResult.AddErrorBadRequest(FileNull);
