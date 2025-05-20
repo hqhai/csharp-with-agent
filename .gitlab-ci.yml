@@ -2019,7 +2019,7 @@ build-prod-cms-planetdefender:
   - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
     when: never
 
-build-dev-exampractice:
+build-dev-exam-practice:
   stage: build-image
   tags:
   - docker-runner
@@ -2031,7 +2031,7 @@ build-dev-exampractice:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exampractice
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
     DOCKERFILE: "./Environments/Development/ExamPractice.Development.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -2041,7 +2041,7 @@ build-dev-exampractice:
     refs:
     - ntdo/feature/auth-openid
 
-build-test-exampractice:
+build-test-exam-practice:
   stage: build-image
   tags:
   - docker-runner
@@ -2053,7 +2053,7 @@ build-test-exampractice:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exampractice
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
     DOCKERFILE: "./Environments/Testing/ExamPractice.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -2063,7 +2063,7 @@ build-test-exampractice:
     refs:
     - testing
 
-build-staging-exampractice:
+build-staging-exam-practice:
   stage: build-image
   tags:
   - docker-runner
@@ -2075,7 +2075,7 @@ build-staging-exampractice:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exampractice
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
     DOCKERFILE: "./Environments/Staging/ExamPractice.Staging.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -2085,7 +2085,7 @@ build-staging-exampractice:
     refs:
     - staging
 
-build-1m-exampractice:
+build-1m-exam-practice:
   stage: build-image
   tags:
   - docker-runner
@@ -2097,7 +2097,7 @@ build-1m-exampractice:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exampractice
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
     DOCKERFILE: "./Environments/Staging/ExamPractice.Staging.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -2107,7 +2107,7 @@ build-1m-exampractice:
     refs:
     - Fsel-1M
 
-build-demo-exampractice:
+build-demo-exam-practice:
   stage: build-image
   tags:
   - docker-runner
@@ -2119,7 +2119,7 @@ build-demo-exampractice:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exampractice
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
     DOCKERFILE: "./Environments/Production/ExamPractice.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
@@ -2129,7 +2129,7 @@ build-demo-exampractice:
     refs:
     - demo
 
-build-prod-exampractice:
+build-prod-exam-practice:
   stage: build-image
   tags:
   - docker-runner
@@ -2141,7 +2141,7 @@ build-prod-exampractice:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exampractice
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
     DOCKERFILE: "./Environments/Production/ExamPractice.Production.Dockerfile"
   extends: ".build-image-gitlab-registry"
   rules:
