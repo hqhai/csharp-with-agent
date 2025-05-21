@@ -7,8 +7,10 @@ namespace Fsel.ExamPractice.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.ExamPractice.Domain.Entities.Configs;
     using Fsel.ExamPractice.Domain.Entities.SkillScoreConfigs;
     using Fsel.ExamPractice.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
     public class ExamPracticeResult : Entity
@@ -60,9 +62,16 @@ namespace Fsel.ExamPractice.Domain.Entities
         public EnumPracticeMode? PracticeMode { get; set; }
         public string? ExerciseConfig { get; set; }
 
-        /// <summary>
-        /// Chuỗi liên tiếp
-        /// </summary>
+        [NotMapped]
+        public ExerciseConfig? Config
+        {
+            get
+            {
+                return ConvertHelper.Deserialize<ExerciseConfig>(Config);
+            }
+            set { ExerciseConfig = ConvertHelper.Serialize(value); }
+        }
+
         public int? HighestStreak { get; set; }
 
         /// <summary>
@@ -75,6 +84,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         /// </summary>
         public EnumResultStatus Status { get; set; }
 
+        public EnumWorkingStatus WorkingStatus { get; set; }
         public Guid StudentId { get; set; }
 
         public int ResultPosition { get; set; }
@@ -84,5 +94,6 @@ namespace Fsel.ExamPractice.Domain.Entities
         public Guid ExamPracticeId { get; set; }
         public ICollection<ExamPracticeSectionResult> ExamPracticeSectionResults { get; set; } = new List<ExamPracticeSectionResult>();
         public ICollection<ExamPracticeAnswer> ExamPracticeAnswers { get; set; } = new List<ExamPracticeAnswer>();
+        public ICollection<ExamPracticeScore> ExamPracticeScores { get; set; } = new List<ExamPracticeScore>();
     }
 }

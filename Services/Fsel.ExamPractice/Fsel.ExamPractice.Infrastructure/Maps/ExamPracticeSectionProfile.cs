@@ -7,12 +7,14 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
     using Fsel.ExamPractice.Domain.Models.EntityModels;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
 
     public class ExamPracticeSectionProfile : Profile
     {
         public ExamPracticeSectionProfile()
         {
             CreateMap<ExamPracticeSection, ExamPracticeSectionModel>().IgnoreAllNonExisting();
+            CreateMap<ExamPracticeSection, ExamPracticeSectionDetailModel>().ForMember(x => x.QuestionIds, x => x.MapFrom(y => y.Questions.Select(x => x.Id)));
             CreateMap<CreateExamPracticeSectionCommandModel, ExamPracticeSection>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<UpdateExamPracticeSectionCommandModel, ExamPracticeSection>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).IgnoreAllNonExisting();
         }

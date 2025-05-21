@@ -5,6 +5,7 @@ namespace Fsel.ExamPractice.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.ExamPractice.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class ExamPractice : Entity
     {
@@ -42,7 +43,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         public int? ExecutionTime { get; set; }
 
         public EnumExamPracticeStatus Status { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
+        public Shared.Enums.EnumCourseLevel? CourseLevel { get; set; }
 
         public DateTime? ActivatedAt { get; set; }
         public Guid? ParentExamPracticeId { get; set; }

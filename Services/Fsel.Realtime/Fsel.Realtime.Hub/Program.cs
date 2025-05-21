@@ -39,6 +39,7 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, typeof(ChatBotConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DisconnectSocketCalculateTime, typeof(DisconnectSocketCalculateTimeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ExamPracticeSpeaking, typeof(MockTestAISpeakingConsumer) },
     { QueueSettings.LmsQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.SystemQueue.NameQueue.Techie, typeof(StudentTechieConsumer) },
     { QueueSettings.OrderingQueue.NameQueue.ChangeStatusOrder, typeof(ChangeStatusOrderConsumer) },
@@ -67,5 +68,6 @@ app.UseHubs<BannerHub>(RealtimeSettings.BannerHub.Pattern);
 app.UseHubs<TranscriptHub>(RealtimeSettings.TranscriptHub.Pattern);
 app.UseHubs<BuyBlindBoxHub>(RealtimeSettings.SendNotifyBuyBlindBoxHub.Pattern);
 app.UseHubs<DictionaryHub>(RealtimeSettings.SendDictionaryHub.Pattern);
+app.UseHubs<ExamPracticeSpeakingHub>(RealtimeSettings.ExamPracticeSpeakingAIFeedBackHub.Pattern);
 
 app.Run();

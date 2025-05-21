@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class MockTestAISpeakingConsumer : BaseConsumer<SubmitAiSpeakingResponseModel>
+    public class ExamPracticeAISpeakingConsumer : BaseConsumer<SubmitAiSpeakingResponseModel>
     {
         private readonly IHubContext<MockTestSpeakingHub> _aISpeakingHub;
 
-        public MockTestAISpeakingConsumer(IHubContext<MockTestSpeakingHub> aISpeakingHub, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        public ExamPracticeAISpeakingConsumer(IHubContext<MockTestSpeakingHub> aISpeakingHub, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _aISpeakingHub = aISpeakingHub;
         }

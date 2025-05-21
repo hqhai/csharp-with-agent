@@ -8,41 +8,11 @@ namespace Fsel.ExamPractice.Domain.Entities
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Entities;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Newtonsoft.Json;
 
-    public class ExamPracticeAnswer : Entity
+    public class ExamPracticeAnswer : BaseAnswer
     {
-        [NotMapped]
-        public override Guid? UpdatedUserId { get; set; }
-
-        [NotMapped]
-        public override Guid? DeletedUserId { get; set; }
-
-        [NotMapped]
-        public override string? UpdatedFullName { get; set; }
-
-        [NotMapped]
-        public override string? DeletedFullName { get; set; }
-
-        [NotMapped]
-        public override DateTime? UpdatedDate { get; set; }
-
-        [NotMapped]
-        public override DateTime? DeletedDate { get; set; }
-
-        public EnumAnswerStatus Status { get; set; }
-
-        public bool? IsCorrect { get; set; }
-
-        /// <summary>
-        /// Số lượng câu trả lời đúng
-        /// </summary>
-        [Column(TypeName = "smallint")]
-        public virtual short CorrectCount { get; set; }
-
         private const string answerStr = "{\"answers\":";
 
         /// <summary>
@@ -51,7 +21,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         private string? _answerStr;
 
         [MaxLength(11000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? AnswerStr
+        public override string? AnswerStr
         {
             get { return _answerStr; }
             set
@@ -69,7 +39,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         }
 
         [NotMapped]
-        public object? Answer
+        public override object? Answer
         {
             get { return ConvertHelper.Deserialize<object>(AnswerStr); }
             set { AnswerStr = value != null ? ConvertHelper.Serialize(value) : null; }
@@ -103,6 +73,12 @@ namespace Fsel.ExamPractice.Domain.Entities
 
         public ExamPracticeSectionResult? ExamPracticeSectionResult { get; set; }
         public Guid? ExamPracticeSectionResultId { get; set; }
+
+        public ExamPracticeSection? ExamPracticeSection { get; set; }
+        public Guid? ExamPracticeSectionId { get; set; }
+
+        public Question? Question { get; set; }
+        public Guid? QuestionId { get; set; }
 
         public override bool IsValid()
         {

@@ -36,7 +36,7 @@ namespace Fsel.ExamPractice.Infrastructure.Configs
                  .HasMaxLength(20)
                  .HasConversion(
                      v => v.ToString(),
-                     v => v.EnumParse<EnumCourseLevel>());
+                     v => (Shared.Enums.EnumCourseLevel?)v.EnumParse<EnumCourseLevel>());
         }
     }
 }

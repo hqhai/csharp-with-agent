@@ -8,9 +8,12 @@ namespace Fsel.ExamPractice.Infrastructure.Common
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.ExamPractice.Domain.Entities;
+    using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPractices;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
+    using Fsel.ExamPractice.Infrastructure.Repositories;
+    using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
     public class ExamPracticeHelper
@@ -73,7 +76,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                 {
                     return true;
                 }
-                if (item.Config?.Instruction != examPracticeSection.Config?.Instruction)
+                if (item.Config?.Instruction != examPracticeSection.SectionMediaConfig?.Instruction)
                 {
                     return true;
                 }
@@ -184,7 +187,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                 {
                     return false;
                 }
-                if (section.Config == null || string.IsNullOrEmpty(section.Config.Instruction))
+                if (section.SectionMediaConfig == null || string.IsNullOrEmpty(section.SectionMediaConfig.Instruction))
                 {
                     return false;
                 }
@@ -297,6 +300,10 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                 {
                     voidMethodResult.AddErrorBadRequest(examPracticeSection.ErrorMessages);
                     return voidMethodResult;
+                }
+                if (examPracticeSection.CourseSkill.HasValue && examPracticeSection.SectionMediaConfig != null)
+                {
+                    examPracticeSection.SectionMediaConfig.ExecutionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.SectionMediaConfig.AudioPath);
                 }
                 targetList.Add(examPracticeSection);
 
@@ -546,6 +553,90 @@ namespace Fsel.ExamPractice.Infrastructure.Common
 
             var childLeafSections = await GetLeafExamPracticeSectionsAsync(childSections);
             return leafSections.Concat(childLeafSections).ToList();
+        }
+
+        public async Task UpdateExamPracticeSectionScoreAsync(ExamPractice examPractice)
+        {
+            if (examPractice == null || examPractice.Status == EnumExamPracticeStatus.Draft)
+            {
+                return;
+            }
+            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.ExamPracticeSections).Where(x => x.ExamPracticeId == examPractice.Id).ToListAsync();
+
+            foreach (var item in examPracticeSections)
+            {
+                if (examPractice.Type == EnumExamPracticeType.IELTS && item.CourseSkill.HasValue)
+                {
+                    if (item.CourseSkill.Value == Shared.Enums.EnumCourseSkill.Reading || item.CourseSkill.Value == Shared.Enums.EnumCourseSkill.Listening)
+                    {
+                        var examPracticeIds = item.ExamPracticeSections.Select(x => x.Id).ToList();
+                        var countQuestion = await _questionRepository.Queryable.WhereBulkContains(examPracticeIds, x => x.ExamPracticeSectionId).CountAsync();
+                        if (item.SectionMediaConfig == null)
+                        {
+                            item.SectionMediaConfig = new Domain.Entities.Configs.SectionMediaConfig
+                            {
+                                TotalQuestion = countQuestion
+                            };
+                        }
+                        else
+                        {
+                            item.SectionMediaConfig.TotalQuestion = countQuestion;
+                        }
+                    }
+                    else if (item.CourseSkill.Value == Shared.Enums.EnumCourseSkill.Writing)
+                    {
+                        if (item.SectionMediaConfig == null)
+                        {
+                            item.SectionMediaConfig = new Domain.Entities.Configs.SectionMediaConfig
+                            {
+                                TotalQuestion = item.ExamPracticeSections.Count
+                            };
+                        }
+                        else
+                        {
+                            var config = item.SectionMediaConfig;
+                            config.TotalQuestion = item.ExamPracticeSections.Count;
+                            item.SectionMediaConfig = config;
+                        }
+                    }
+                    else if (item.CourseSkill.Value == Shared.Enums.EnumCourseSkill.Speaking)
+                    {
+                        var examPracticeIds = item.ExamPracticeSections.Select(x => x.Id).ToList();
+                        var countQuestion = await _examPracticeSectionRepository.Queryable.WhereBulkContains(examPracticeIds, x => x.ParentExamPracticeSectionId).CountAsync();
+                        if (item.SectionMediaConfig == null)
+                        {
+                            item.SectionMediaConfig = new Domain.Entities.Configs.SectionMediaConfig
+                            {
+                                TotalQuestion = countQuestion
+                            };
+                        }
+                        else
+                        {
+                            item.SectionMediaConfig.TotalQuestion = countQuestion;
+                        }
+                    }
+                }
+                else
+                {
+                    var countQuestion = await _questionRepository.Queryable.Where(x => x.ExamPracticeSectionId == item.Id).CountAsync();
+                    if (item.SectionMediaConfig == null)
+                    {
+                        item.SectionMediaConfig = new Domain.Entities.Configs.SectionMediaConfig
+                        {
+                            TotalQuestion = countQuestion
+                        };
+                    }
+                    else
+                    {
+                        var config = item.SectionMediaConfig;
+                        config.TotalQuestion = countQuestion;
+                        item.SectionMediaConfig = config;
+                    }
+                }
+            }
+
+            _examPracticeSectionRepository.UpdateList(examPracticeSections);
+            await _examPracticeSectionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
     }
 }

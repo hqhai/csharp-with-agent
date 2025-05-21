@@ -30,6 +30,16 @@ namespace Fsel.ExamPractice.Infrastructure.Configs
                .WithMany(b => b.ExamPracticeAnswers)
                .HasForeignKey(b => b.ExamPracticeSectionResultId)
                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.ExamPracticeSection)
+               .WithMany(b => b.ExamPracticeAnswers)
+               .HasForeignKey(b => b.ExamPracticeSectionId)
+               .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Question)
+              .WithMany(b => b.ExamPracticeAnswers)
+              .HasForeignKey(b => b.QuestionId)
+              .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

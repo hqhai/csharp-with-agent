@@ -81,5 +81,6 @@ namespace Fsel.ExamPractice.Domain.Entities
 
         public ExamPracticeSection? ExamPracticeSection { get; set; }
         public Guid ExamPracticeSectionId { get; set; }
+        public ICollection<ExamPracticeAnswer> ExamPracticeAnswers { get; set; } = new List<ExamPracticeAnswer>();
     }
 }

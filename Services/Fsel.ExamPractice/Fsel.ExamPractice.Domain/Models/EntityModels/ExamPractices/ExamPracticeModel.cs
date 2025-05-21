@@ -21,5 +21,6 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public EnumExamPracticeStatus Status { get; set; }
         public int TotalAttempts { get; set; }
         public IList<ExamPracticeSectionModel> ExamPracticeSections { get; set; } = new List<ExamPracticeSectionModel>();
+        public ExamPracticeResultModel? ExamPracticeResult { get; set; }
     }
 }

@@ -142,6 +142,7 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
                 methodResult.Result = _mapper.Map<ExamPracticeModel>(examPractice);
                 return methodResult;
             });
+            await _examPracticeHelper.UpdateExamPracticeSectionScoreAsync(examPractice).ConfigureAwait(false);
 
             return methodResult;
         }

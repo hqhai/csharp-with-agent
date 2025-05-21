@@ -306,6 +306,7 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("AnswerStr")
+                        .IsRequired()
                         .HasMaxLength(11000)
                         .HasColumnType("nvarchar(max)");
 
@@ -329,6 +330,9 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                     b.Property<Guid>("ExamPracticeResultId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ExamPracticeSectionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("ExamPracticeSectionResultId")
                         .HasColumnType("uniqueidentifier");
 
@@ -344,6 +348,9 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
 
                     b.Property<double?>("PronunciationScore")
                         .HasColumnType("float");
+
+                    b.Property<Guid?>("QuestionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("RetryTime")
                         .HasColumnType("int");
@@ -366,7 +373,11 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
 
                     b.HasIndex("ExamPracticeResultId");
 
+                    b.HasIndex("ExamPracticeSectionId");
+
                     b.HasIndex("ExamPracticeSectionResultId");
+
+                    b.HasIndex("QuestionId");
 
                     b.ToTable("ExamPracticeAnswers");
                 });
@@ -461,6 +472,11 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
+                    b.Property<string>("WorkingStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<double>("WorkingTime")
                         .HasColumnType("float");
 
@@ -538,6 +554,82 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                     b.HasIndex("ExamPracticeId");
 
                     b.ToTable("ExamPracticeRetrys");
+                });
+
+            modelBuilder.Entity("Fsel.ExamPractice.Domain.Entities.ExamPracticeScore", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<int>("Criteria")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<Guid>("ExamPracticeResultId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ExamPracticeSectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FeedBack")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<long>("Score")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExamPracticeResultId");
+
+                    b.HasIndex("ExamPracticeSectionId");
+
+                    b.ToTable("ExamPracticeScores");
                 });
 
             modelBuilder.Entity("Fsel.ExamPractice.Domain.Entities.ExamPracticeSection", b =>
@@ -667,6 +759,9 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                     b.Property<Guid>("ExamPracticeResultId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("ExamPracticeSectionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int?>("HighestStreak")
                         .HasColumnType("int");
 
@@ -674,7 +769,7 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid>("ParentExamPracticeSectionResultId")
+                    b.Property<Guid?>("ParentExamPracticeSectionResultId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("Percent")
@@ -711,9 +806,79 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
 
                     b.HasIndex("ExamPracticeResultId");
 
+                    b.HasIndex("ExamPracticeSectionId");
+
                     b.HasIndex("ParentExamPracticeSectionResultId");
 
                     b.ToTable("ExamPracticeSectionResults");
+                });
+
+            modelBuilder.Entity("Fsel.ExamPractice.Domain.Entities.ProsodyScore", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("BandComment")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("BandScore")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<double>("MaxScore")
+                        .HasColumnType("float");
+
+                    b.Property<double>("MinScore")
+                        .HasColumnType("float");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProsodyScores");
                 });
 
             modelBuilder.Entity("Fsel.ExamPractice.Domain.Entities.Question", b =>
@@ -839,14 +1004,28 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("Fsel.ExamPractice.Domain.Entities.ExamPracticeSection", "ExamPracticeSection")
+                        .WithMany("ExamPracticeAnswers")
+                        .HasForeignKey("ExamPracticeSectionId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Fsel.ExamPractice.Domain.Entities.ExamPracticeSectionResult", "ExamPracticeSectionResult")
                         .WithMany("ExamPracticeAnswers")
                         .HasForeignKey("ExamPracticeSectionResultId")
                         .OnDelete(DeleteBehavior.NoAction);
 
+                    b.HasOne("Fsel.ExamPractice.Domain.Entities.Question", "Question")
+                        .WithMany("ExamPracticeAnswers")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("ExamPracticeResult");
 
+                    b.Navigation("ExamPracticeSection");
+
                     b.Navigation("ExamPracticeSectionResult");
+
+                    b.Navigation("Question");
                 });
 
             modelBuilder.Entity("Fsel.ExamPractice.Domain.Entities.ExamPracticeResult", b =>
@@ -879,6 +1058,25 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                     b.Navigation("ExamPractice");
                 });
 
+            modelBuilder.Entity("Fsel.ExamPractice.Domain.Entities.ExamPracticeScore", b =>
+                {
+                    b.HasOne("Fsel.ExamPractice.Domain.Entities.ExamPracticeResult", "ExamPracticeResult")
+                        .WithMany("ExamPracticeScores")
+                        .HasForeignKey("ExamPracticeResultId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fsel.ExamPractice.Domain.Entities.ExamPracticeSection", "ExamPracticeSection")
+                        .WithMany("ExamPracticeScores")
+                        .HasForeignKey("ExamPracticeSectionId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("ExamPracticeResult");
+
+                    b.Navigation("ExamPracticeSection");
+                });
+
             modelBuilder.Entity("Fsel.ExamPractice.Domain.Entities.ExamPracticeSection", b =>
                 {
                     b.HasOne("Fsel.ExamPractice.Domain.Entities.ExamPractice", "ExamPractice")
@@ -904,13 +1102,20 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fsel.ExamPractice.Domain.Entities.ExamPracticeSectionResult", "ParentExamPracticeSectionResult")
+                    b.HasOne("Fsel.ExamPractice.Domain.Entities.ExamPracticeSection", "ExamPracticeSection")
                         .WithMany("ExamPracticeSectionResults")
-                        .HasForeignKey("ParentExamPracticeSectionResultId")
+                        .HasForeignKey("ExamPracticeSectionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.HasOne("Fsel.ExamPractice.Domain.Entities.ExamPracticeSectionResult", "ParentExamPracticeSectionResult")
+                        .WithMany("ExamPracticeSectionResults")
+                        .HasForeignKey("ParentExamPracticeSectionResultId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("ExamPracticeResult");
+
+                    b.Navigation("ExamPracticeSection");
 
                     b.Navigation("ParentExamPracticeSectionResult");
                 });
@@ -944,6 +1149,8 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                 {
                     b.Navigation("ExamPracticeAnswers");
 
+                    b.Navigation("ExamPracticeScores");
+
                     b.Navigation("ExamPracticeSectionResults");
                 });
 
@@ -956,6 +1163,12 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                 {
                     b.Navigation("ExamPracticeAISettings");
 
+                    b.Navigation("ExamPracticeAnswers");
+
+                    b.Navigation("ExamPracticeScores");
+
+                    b.Navigation("ExamPracticeSectionResults");
+
                     b.Navigation("ExamPracticeSections");
 
                     b.Navigation("Questions");
@@ -966,6 +1179,11 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                     b.Navigation("ExamPracticeAnswers");
 
                     b.Navigation("ExamPracticeSectionResults");
+                });
+
+            modelBuilder.Entity("Fsel.ExamPractice.Domain.Entities.Question", b =>
+                {
+                    b.Navigation("ExamPracticeAnswers");
                 });
 #pragma warning restore 612, 618
         }

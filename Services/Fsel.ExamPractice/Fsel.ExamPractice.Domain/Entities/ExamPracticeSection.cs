@@ -24,7 +24,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         public string? ConfigStr { get; set; }
 
         [NotMapped]
-        public SectionMediaConfig? Config
+        public SectionMediaConfig? SectionMediaConfig
         {
             get { return ConvertHelper.Deserialize<SectionMediaConfig>(ConfigStr); }
             set { ConfigStr = ConvertHelper.Serialize(value); }
@@ -37,7 +37,10 @@ namespace Fsel.ExamPractice.Domain.Entities
         public Guid? ParentExamPracticeSectionId { get; set; }
         public ExamPracticeSection? ParentExamPracticeSection { get; set; }
         public ICollection<ExamPracticeSection> ExamPracticeSections { get; set; } = new List<ExamPracticeSection>();
+        public ICollection<ExamPracticeSectionResult> ExamPracticeSectionResults { get; set; } = new List<ExamPracticeSectionResult>();
         public ICollection<Question> Questions { get; set; } = new List<Question>();
         public ICollection<ExamPracticeAISetting> ExamPracticeAISettings { get; set; } = new List<ExamPracticeAISetting>();
+        public ICollection<ExamPracticeAnswer> ExamPracticeAnswers { get; set; } = new List<ExamPracticeAnswer>();
+        public ICollection<ExamPracticeScore> ExamPracticeScores { get; set; } = new List<ExamPracticeScore>();
     }
 }

@@ -22,6 +22,10 @@ namespace Fsel.ExamPractice.Domain.Entities.Configs
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? VideoFilePath { get; set; }
 
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? AudioPath { get; set; }
+
+        public int TotalQuestion { get; set; }
         public int TargetWord { get; set; }
     }
 }

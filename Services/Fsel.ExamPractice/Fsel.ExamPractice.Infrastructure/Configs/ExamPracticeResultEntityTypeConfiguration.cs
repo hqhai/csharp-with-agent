@@ -6,6 +6,7 @@ namespace Fsel.ExamPractice.Infrastructure.Configs
     using Fsel.Common.Helpers;
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -26,6 +27,12 @@ namespace Fsel.ExamPractice.Infrastructure.Configs
                    .HasConversion(
                        v => v.ToString(),
                        v => v.EnumParse<EnumResultStatus>());
+
+            builder.Property(e => e.WorkingStatus)
+                 .HasMaxLength(20)
+                 .HasConversion(
+                     v => v.ToString(),
+                     v => v.EnumParse<EnumWorkingStatus>());
 
             builder.HasOne(a => a.ExamPracticeRetry)
                 .WithMany(b => b.ExamPracticeResults)

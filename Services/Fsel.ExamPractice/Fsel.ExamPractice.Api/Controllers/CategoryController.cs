@@ -8,6 +8,7 @@ namespace Fsel.ExamPractice.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Common.Models;
     using Fsel.ExamPractice.Application.Queries.CategoryQuery;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
@@ -50,6 +51,19 @@ namespace Fsel.ExamPractice.Api.Controllers
         public async Task<IActionResult> GetExamPracticeSubType([FromQuery] GetExamPracticeSubTypesQuery query)
         {
             MethodResult<object> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Tags
+        /// </summary>
+        [HttpGet("exam-practice-tags")]
+        [ProducesResponseType(typeof(MethodResult<IList<ExamPracticeTagModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ApiVersion(ApiSettings.APIVersion1)]
+        public async Task<IActionResult> GetExamPracticeTags([FromQuery] GetTagExamPracticeQuery query)
+        {
+            MethodResult<IList<ExamPracticeTagModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

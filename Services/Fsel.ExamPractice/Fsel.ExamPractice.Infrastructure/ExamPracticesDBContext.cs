@@ -21,6 +21,8 @@ namespace Fsel.ExamPractice.Infrastructure
         public DbSet<ExamPracticeAISetting> ExamPracticeAISettings { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<ExamPracticeSectionResult> ExamPracticeSectionResults { get; set; }
+        public DbSet<ExamPracticeScore> ExamPracticeScores { get; set; }
+        public DbSet<ProsodyScore> ProsodyScores { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -34,6 +36,8 @@ namespace Fsel.ExamPractice.Infrastructure
             modelBuilder.ApplyConfiguration(new ExamPracticeAISettingEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExamPracticeAiCriteriaSettingEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ExamPracticeScoreEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ProsodyScoreEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
     }

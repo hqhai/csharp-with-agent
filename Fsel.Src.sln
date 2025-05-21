@@ -162,6 +162,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.ExamPractice.Infrastru
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.ExamPractice.Api", "Services\Fsel.ExamPractice\Fsel.ExamPractice.Api\Fsel.ExamPractice.Api.csproj", "{A8F7ED8A-0070-EABF-9376-996AE611B123}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.ExamPractice.Lms.Api", "Services\Fsel.ExamPractice\Fsel.ExamPractice.Lms.Api\Fsel.ExamPractice.Lms.Api.csproj", "{041C5074-3166-49F3-8E15-BAB88912DEE6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fsel.ExamPractice.Lms.Application", "Services\Fsel.ExamPractice\Fsel.ExamPractice.Lms.Application\Fsel.ExamPractice.Lms.Application.csproj", "{A37D719E-F2D5-4A4D-A8BF-7B4EB899510D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -396,6 +400,14 @@ Global
 		{A8F7ED8A-0070-EABF-9376-996AE611B123}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8F7ED8A-0070-EABF-9376-996AE611B123}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8F7ED8A-0070-EABF-9376-996AE611B123}.Release|Any CPU.Build.0 = Release|Any CPU
+		{041C5074-3166-49F3-8E15-BAB88912DEE6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{041C5074-3166-49F3-8E15-BAB88912DEE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{041C5074-3166-49F3-8E15-BAB88912DEE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{041C5074-3166-49F3-8E15-BAB88912DEE6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A37D719E-F2D5-4A4D-A8BF-7B4EB899510D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A37D719E-F2D5-4A4D-A8BF-7B4EB899510D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A37D719E-F2D5-4A4D-A8BF-7B4EB899510D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A37D719E-F2D5-4A4D-A8BF-7B4EB899510D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -474,6 +486,8 @@ Global
 		{07FC7CDD-EF0D-454F-B427-522E616C9456} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{345A2871-9FBB-E8D5-4F3A-5D0A87DBFD81} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{A8F7ED8A-0070-EABF-9376-996AE611B123} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{041C5074-3166-49F3-8E15-BAB88912DEE6} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{A37D719E-F2D5-4A4D-A8BF-7B4EB899510D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C3F5014D-C4B6-471E-9F07-3E7AE3B37304}

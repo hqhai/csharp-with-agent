@@ -6,6 +6,7 @@ namespace Fsel.ExamPractice.Domain.Enums.ErrorCodes
     {
         LockedClonedStatus,
         MissingRequiredData,
-        DataChanged
+        DataChanged,
+        RetryLimitExceeded
     }
 }

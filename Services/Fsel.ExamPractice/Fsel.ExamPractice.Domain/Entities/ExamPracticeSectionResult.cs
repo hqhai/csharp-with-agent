@@ -75,10 +75,14 @@ namespace Fsel.ExamPractice.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
 
-        public Guid ExamPracticeResultId { get; set; }
         public ExamPracticeResult? ExamPracticeResult { get; set; }
-        public Guid ParentExamPracticeSectionResultId { get; set; }
+        public Guid ExamPracticeResultId { get; set; }
+
         public ExamPracticeSectionResult? ParentExamPracticeSectionResult { get; set; }
+        public Guid? ParentExamPracticeSectionResultId { get; set; }
+
+        public ExamPracticeSection? ExamPracticeSection { get; set; }
+        public Guid ExamPracticeSectionId { get; set; }
         public ICollection<ExamPracticeSectionResult> ExamPracticeSectionResults { get; set; } = new List<ExamPracticeSectionResult>();
         public ICollection<ExamPracticeAnswer> ExamPracticeAnswers { get; set; } = new List<ExamPracticeAnswer>();
     }

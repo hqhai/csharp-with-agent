@@ -60,6 +60,8 @@ namespace Fsel.Shared.Constants
                 public const string BannerRealTime = $"{KeyQueue}_BannerRealTime";
                 public const string SpeechToTextRealTime = $"{KeyQueue}_SpeechToTextRealTime";
                 public const string DictionaryRealTime = $"{KeyQueue}_DictionaryRealTime";
+
+                public const string ExamPracticeSpeaking = $"{KeyQueue}_ExamPracticeSpeaking";
             }
         }
 

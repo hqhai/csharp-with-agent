@@ -26,6 +26,11 @@ namespace Fsel.ExamPractice.Infrastructure.Configs
                 .HasForeignKey(b => b.ExamPracticeResultId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasOne(a => a.ExamPracticeSection)
+              .WithMany(b => b.ExamPracticeSectionResults)
+              .HasForeignKey(b => b.ExamPracticeSectionId)
+              .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasOne(a => a.ParentExamPracticeSectionResult)
                 .WithMany(b => b.ExamPracticeSectionResults)
                 .HasForeignKey(b => b.ParentExamPracticeSectionResultId)

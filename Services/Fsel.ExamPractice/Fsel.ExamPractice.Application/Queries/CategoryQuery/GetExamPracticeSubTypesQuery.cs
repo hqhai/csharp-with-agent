@@ -15,9 +15,9 @@ namespace Fsel.ExamPractice.Application.Queries.CategoryQuery
         public EnumExamPracticeType Type { get; set; }
     }
 
-    public class GetExamPracticeSubTypesHandler : IRequestHandler<GetExamPracticeSubTypesQuery, MethodResult<object>>
+    public class GetExamPracticeSubTypesQueryHandler : IRequestHandler<GetExamPracticeSubTypesQuery, MethodResult<object>>
     {
-        public GetExamPracticeSubTypesHandler()
+        public GetExamPracticeSubTypesQueryHandler()
         {
         }
 
