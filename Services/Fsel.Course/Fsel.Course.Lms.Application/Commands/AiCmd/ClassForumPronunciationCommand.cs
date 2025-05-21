@@ -86,9 +86,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         , x => x.WordCount, x => x.SubmissionCount
                         , x => x.ProcessDate, x => x.CompletionDate
                         , x => x.Status
-                        // task 5307 chưa lên prod
-                        //, x => x.IsForbiddenImage
-                        //, x => x.IsForbiddenWork, x => x.GradingAiForbidden
+                        , x => x.IsForbiddenImage
+                        , x => x.IsForbiddenWork, x => x.GradingAiForbidden
                         , x => x.GradingAlFeedback);
                         await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                         methodResult.Result = true;
