@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPractices
+namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 {
     using System.Threading;
     using System.Threading.Tasks;

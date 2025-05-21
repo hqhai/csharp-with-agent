@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.ExamPractice.Lms.Application.Queries.Questions
+namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
 {
     using System.Text.Json.Serialization;
     using AutoMapper;

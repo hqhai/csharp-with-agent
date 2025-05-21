@@ -5,7 +5,6 @@ namespace Fsel.ExamPractice.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.ExamPractice.Domain.Enums;
-    using Fsel.Shared.Enums;
 
     public class ExamPractice : Entity
     {

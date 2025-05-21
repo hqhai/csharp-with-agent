@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPractices
+namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 {
     using System.Linq.Dynamic.Core;
     using AutoMapper;
@@ -15,7 +15,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPractices
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Domain.Models.EntityModels.Questions;
     using Fsel.ExamPractice.Infrastructure.Common;
-    using Fsel.ExamPractice.Infrastructure.Repositories;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;

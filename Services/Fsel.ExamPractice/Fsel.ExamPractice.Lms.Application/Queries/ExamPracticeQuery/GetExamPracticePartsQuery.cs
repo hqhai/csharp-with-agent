@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPractices
+namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 {
     using System.Linq.Dynamic.Core;
     using Fsel.Common.ActionResults;

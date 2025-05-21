@@ -7,8 +7,10 @@ using Fsel.ExamPractice.Infrastructure;
 using Fsel.ExamPractice.Infrastructure.Common;
 using Fsel.ExamPractice.Infrastructure.Repositories;
 using Fsel.ExamPractice.Infrastructure.ValueSettings;
+using Fsel.ExamPractice.Lms.Application.Queues.Consumers;
 using Fsel.ExamPractice.Lms.Application.Services.AiService;
 using Fsel.ExamPractice.Lms.Application.Services.UserServices;
+using Fsel.Shared.Constants;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +43,12 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
         var randomApiKey = appSetting.OpenAiConfig.ApiKeys[Random.Shared.Next(appSetting.OpenAiConfig.ApiKeys.Count)];
         httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {randomApiKey}");
     }
+});
+
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+       { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeExamPracticeConsumer) },
 });
 var app = builder.Build();
 app.UseServices();

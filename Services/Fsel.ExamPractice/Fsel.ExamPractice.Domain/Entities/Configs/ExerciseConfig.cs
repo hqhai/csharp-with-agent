@@ -9,6 +9,6 @@ namespace Fsel.ExamPractice.Domain.Entities.Configs
         public IList<Guid>? ExamPracticeSectionIds { get; set; }
         public bool IsAllPart { get; set; }
         public EnumPracticeTimeLimitOption? PracticeTimeLimitOption { get; set; }
-        public double? ExecutionTime { get; set; }
+        public int? ExecutionTime { get; set; }
     }
 }

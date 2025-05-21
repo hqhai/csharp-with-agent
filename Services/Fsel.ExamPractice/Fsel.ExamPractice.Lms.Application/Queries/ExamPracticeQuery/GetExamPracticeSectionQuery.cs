@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPractices
+namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -11,7 +11,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPractices
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Domain.Models.EntityModels.Questions;
     using Fsel.ExamPractice.Infrastructure.Common;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 

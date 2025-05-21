@@ -7,7 +7,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd;
-    using Fsel.ExamPractice.Lms.Application.Queries.ExamPractices;
+    using Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using MediatR;

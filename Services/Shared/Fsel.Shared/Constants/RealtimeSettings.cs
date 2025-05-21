@@ -173,5 +173,15 @@ namespace Fsel.Shared.Constants
                 public const string ExamPracticeSpeakingAIFeedBack = $"ExamPracticeSpeakingAIFeedBack";
             }
         }
+
+        public static class SetTimeExamPracticeHub
+        {
+            public const string Pattern = $"/set-time-exam-practice";
+
+            public static class Methods
+            {
+                public const string SetTimeExamPracticeHub = $"SetTimeExamPracticeHub";
+            }
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 
-namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPractices
+namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
