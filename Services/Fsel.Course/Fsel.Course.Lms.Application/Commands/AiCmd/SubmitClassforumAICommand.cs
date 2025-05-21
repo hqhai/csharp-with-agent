@@ -193,7 +193,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                 await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
                 {
-                    bulk.IgnoreOnUpdateExpression = c => new { c.WordContent, c.Content, c.WordCount, c.SubmissionCount, c.ProcessDate, c.CompletionDate, c.Status, c.ClassForumResultId };
+                    bulk.IgnoreOnUpdateExpression = c => new { c.WordContent, c.Content, c.WordCount, c.SubmissionCount, c.ProcessDate, c.CompletionDate, c.Status, c.ClassForumResultId,c => c.IsForbiddenImage,c => c.IsForbiddenWork, c => c.GradingAiForbidden,
+                    c => c.PronunciationAlFeedback
+                    };
                 });
 
                 _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 3: {classForumDetailResult.Serialize(options)}");
