@@ -186,35 +186,38 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                         var verify = await VerifyOtpAsync(user, request.Otp);
                         if (verify.Result)
                         {
-                            using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                            return await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
                             {
-                                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                                var result = await _userManager.ConfirmEmailAsync(user, token);
-
-                                _mapper.Map(userRegisterModel, user);
-                                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, userRegisterModel.Password);
-                                user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                                result = await _userManager.UpdateAsync(user);
-                                if (!result.Succeeded)
+                                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                                 {
-                                    scope.Dispose();
-                                    result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error.Description));
-                                    return View(request);
+                                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                                    var result = await _userManager.ConfirmEmailAsync(user, token);
+
+                                    _mapper.Map(userRegisterModel, user);
+                                    user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, userRegisterModel.Password);
+                                    user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
+                                    result = await _userManager.UpdateAsync(user);
+                                    if (!result.Succeeded)
+                                    {
+                                        scope.Dispose();
+                                        result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error.Description));
+                                        return View(request);
+                                    }
+
+                                    scope.Complete();
+
+                                    #region Create User Referral
+                                    var vm = await BuildLoginViewModelAsync(request.ReturnUrl ?? string.Empty);
+                                    if (!string.IsNullOrEmpty(vm.ReferralCode))
+                                    {
+                                        await _mediator.Send(new CreateUserReferralCommand { ReferralCode = vm.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }).ConfigureAwait(false);
+                                    }
+                                    #endregion
+
+                                    ViewBag.Success = _localizer["i18n_User_successfuly_added"];
+                                    return await LoginWithoutPassword(user, request.ReturnUrl);
                                 }
-
-                                scope.Complete();
-                            }
-
-                            #region Create User Referral
-                            var vm = await BuildLoginViewModelAsync(request.ReturnUrl ?? string.Empty);
-                            if (!string.IsNullOrEmpty(vm.ReferralCode))
-                            {
-                                await _mediator.Send(new CreateUserReferralCommand { ReferralCode = vm.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }).ConfigureAwait(false);
-                            }
-                            #endregion
-
-                            ViewBag.Success = _localizer["i18n_User_successfuly_added"];
-                            return await LoginWithoutPassword(user, request.ReturnUrl);
+                            });
                         }
                         else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpInvalid)))
                         {
@@ -454,41 +457,44 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                     return View(request);
                 }
 
-                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                return await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
                 {
-                    if (user == null)
+                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
                     {
-                        user = _mapper.Map<User>(request);
-                        user.UserName = request.Email;
-                        var result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
-                        result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                        if (user == null)
+                        {
+                            user = _mapper.Map<User>(request);
+                            user.UserName = request.Email;
+                            var result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
+                            result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
 
-                        if (!result.Succeeded)
+                            if (!result.Succeeded)
+                            {
+                                scope.Dispose();
+                                result.Errors.ForEach(x =>
+                                {
+                                    ModelState.AddModelError(string.Empty, x.Description);
+                                });
+                                return View(request);
+                            }
+                        }
+
+                        await _userOtpCache.RemoveAsync($"{nameof(SendOtpAsync)}.{user.Id}");
+                        var sendResult = await SendOtpAsync(user);
+                        if (!sendResult.IsOK)
                         {
                             scope.Dispose();
-                            result.Errors.ForEach(x =>
-                            {
-                                ModelState.AddModelError(string.Empty, x.Description);
-                            });
+                            ModelState.AddModelError(string.Empty, _localizer[sendResult.ErrorMessages.Select(x => x.ErrorCode).FirstOrDefault() ?? string.Empty]);
                             return View(request);
                         }
+
+                        scope.Complete();
+
+                        return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Register) });
                     }
 
-                    await _userOtpCache.RemoveAsync($"{nameof(SendOtpAsync)}.{user.Id}");
-                    var sendResult = await SendOtpAsync(user);
-                    if (!sendResult.IsOK)
-                    {
-                        scope.Dispose();
-                        ModelState.AddModelError(string.Empty, _localizer[sendResult.ErrorMessages.Select(x => x.ErrorCode).FirstOrDefault() ?? string.Empty]);
-                        return View(request);
-                    }
-
-                    scope.Complete();
-
-                    return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Register) });
-                }
-
-                //var context = await _interaction.GetAuthorizationContextAsync(request.ReturnUrl);
+                    //var context = await _interaction.GetAuthorizationContextAsync(request.ReturnUrl);
+                });
             }
 
             return View(request);
@@ -948,8 +954,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             }
             else
             {
-                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                return await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
                 {
+                    using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                     user = new User
                     {
                         Email = request.Email,
@@ -977,14 +984,14 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             return Redirect(request.ReturnUrl ?? returnUrl ?? string.Empty);
                         }
                     }
-
                     scope.Dispose();
-                }
-            }
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.TryAddModelError(error.Code, error.Description);
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.TryAddModelError(error.Code, error.Description);
+                    }
+                    return View(request);
+                });
             }
 
             return View(request);

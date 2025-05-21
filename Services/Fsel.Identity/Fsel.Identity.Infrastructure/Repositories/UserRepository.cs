@@ -13,12 +13,15 @@ namespace Fsel.Identity.Infrastructure.Repositories
         private readonly UserManager<User> _userManager;
         private readonly IStudentRepository _studentRepository;
         private readonly IParentRepository _parentRepository;
+        private readonly UserDbContext _userDbContext;
+        public DbContext DbContext => _userDbContext;
 
-        public UserRepository(UserManager<User> userManager, IStudentRepository studentRepository, IParentRepository parentRepository)
+        public UserRepository(UserManager<User> userManager, IStudentRepository studentRepository, IParentRepository parentRepository, UserDbContext userDbContext)
         {
             _userManager = userManager;
             _studentRepository = studentRepository;
             _parentRepository = parentRepository;
+            _userDbContext = userDbContext;
         }
 
         public async Task<User> GenerateUserDataAsync(User user, EnumRoleRegister role)
