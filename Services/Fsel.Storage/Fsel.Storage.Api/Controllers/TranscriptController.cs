@@ -133,5 +133,17 @@ namespace Fsel.Storage.Api.Controllers
             var methodResult = await _mediator.Send(new ConvertFileToWAVCommand { FormFile = file });
             return methodResult.GetActionResult();
         }
+
+        /// <summary>
+        /// speech to text
+        /// </summary>
+        [HttpPost("convert-speech-to-text")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ToolConvertSpeechToText([FromBody] SpeechToTextCommand command)
+        {
+            var methodResult = await _mediator.Send(command);
+            return methodResult.GetActionResult();
+        }
     }
 }

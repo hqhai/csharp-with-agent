@@ -88,5 +88,15 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// class forum detail result not Status PendingSpeechToText
         /// </summary>
         RecordNotStatusPendingSpeechToText,
+
+        /// <summary>
+        /// đã quá 2 lần chỉnh sửa
+        /// </summary>
+        MaximumEditTwoClassForumDetail,
+
+        /// <summary>
+        /// word content null
+        /// </summary>
+        WordContentNull,
     }
 }
