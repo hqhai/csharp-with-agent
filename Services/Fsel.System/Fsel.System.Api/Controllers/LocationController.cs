@@ -10,7 +10,6 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Queries.LocationQuery;
-    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
@@ -38,7 +37,7 @@ namespace Fsel.System.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LocationModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetLocationsQuery query)
+        public async Task<IActionResult> Get([FromQuery] SearchLocationsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -69,15 +68,15 @@ namespace Fsel.System.Api.Controllers
         }
 
         /// <summary>
-        /// Get locations
+        /// Get locations by localId
         /// </summary>
-        [HttpPost("execute-list-query")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<LocationModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("{localId}")]
+        [ProducesResponseType(typeof(MethodResult<LocationModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ExecuteListQuery([FromQuery] GetLocationsQuery query)
+        public async Task<IActionResult> GetLocationByLocalId([FromRoute] string localId)
         {
-            var result = await _locationRepository.GetListResultAsync<LocationModel>(query);
-            return result.GetActionResult();
+            var queryResult = await _mediator.Send(new GetLocationByLocalIdQuery { LocalId = localId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

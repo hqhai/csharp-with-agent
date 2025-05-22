@@ -69,7 +69,11 @@ namespace Fsel.Ordering.Application.Commands.Products
                     methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.CodeAlreadyExists));
                     return methodResult;
                 }
-
+                if (_productRepository.Queryable.Any(p => p.Name.ToLower() == request.Name.ToLower() && p.Id != request.Id))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NameAlreadyExists));
+                    return methodResult;
+                }
                 var quantityChanged = product.OrderTransactions.Where(p => p.Status == EnumOrderTransactionStatus.Requested || p.Status == EnumOrderTransactionStatus.Received).Count();
                 if (request.Quantity < quantityChanged)
                 {
@@ -96,6 +100,11 @@ namespace Fsel.Ordering.Application.Commands.Products
                 if (_productRepository.Queryable.Any(p => p.Code == request.Code))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                    return methodResult;
+                }
+                if (_productRepository.Queryable.Any(p => p.Name.ToLower() == request.Name.ToLower()))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NameAlreadyExists));
                     return methodResult;
                 }
 

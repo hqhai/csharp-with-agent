@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Queries.Reports
 {
-    using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -14,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -58,7 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
 
-            var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!).Distinct().ToList();
+            var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => (x.Email ?? string.Empty).ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim()).Distinct().ToList();
             var studentResultToEmail = await _userService.GetStudentByEmailsAsync(emails);
             if (!studentResultToEmail.IsSuccessStatusCode)
             {
@@ -73,6 +73,34 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
 
+            var featureAccessTimeQuery = students.SelectMany(x =>
+            {
+                var userId = x.UserId;
+                return new List<GetFeatureAccessTimeExportQueryModel> {
+                     new GetFeatureAccessTimeExportQueryModel
+                     {
+                         UserId = userId,
+                         EnumFeature = EnumFeature.ClassForum,
+                     },
+                     new GetFeatureAccessTimeExportQueryModel
+                     {
+                         UserId = userId,
+                         EnumFeature = EnumFeature.HomeWork,
+                     },
+                     new GetFeatureAccessTimeExportQueryModel
+                     {
+                         UserId = userId,
+                         EnumFeature = EnumFeature.VideoLesson,
+                     }
+                };
+            }).ToList();
+
+            var featureAccessTimeResult = await _systemService.GetFeatureAccessTimesAsync(new GetFeatureAccessTimeToExportQueryModel
+            {
+                FeatureAccessTimes = featureAccessTimeQuery
+            }).ConfigureAwait(false);
+            var featureAccessTimeResults = featureAccessTimeResult.Content?.Result;
+
             foreach (var student in students)
             {
                 var reportProgress = new ReportTimeStudentModel
@@ -80,40 +108,17 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     FullName = student.User?.FullName,
                     Email = student.User?.Email,
                 };
-                var userId = student?.UserId ?? default;
-
-                //if (userId == new Guid("0aff08b8-0521-4ee7-aaf3-08dcbe0507e9"))
-                //{
-                //}
-
-                var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeToModulesAsync(new FeatureAccessTimesQueryModel
+                var userId = student.UserId;
+                var featureAccessTimes = featureAccessTimeResults?.Where(x => x.CreatedUserId == userId).ToList();
+                if (featureAccessTimes != null && featureAccessTimes.Any())
                 {
-                    UserId = userId,
-                    FeatureAccessTimes = new List<FeatureAccessTimeQueryModel> {
-                        new FeatureAccessTimeQueryModel
-                        {
-                            EnumFeature = EnumFeature.ClassForum,
-                        },
-                        new FeatureAccessTimeQueryModel
-                        {
-                            EnumFeature = EnumFeature.HomeWork,
-                        },
-                        new FeatureAccessTimeQueryModel
-                        {
-                            EnumFeature = EnumFeature.VideoLesson,
-                        }
-                    }
-                }).ConfigureAwait(false);
-                if (featureAccessTimeResult.IsSuccessStatusCode)
-                {
-                    var featureAccessTimes = featureAccessTimeResult.Content?.Result;
                     reportProgress.CurrentTimeVideoLesson = GetLastVisiteDate(featureAccessTimes, EnumFeature.VideoLesson);
                     reportProgress.CurrentTimeClassForum = GetLastVisiteDate(featureAccessTimes, EnumFeature.ClassForum);
                     reportProgress.CurrentTimeHomework = GetLastVisiteDate(featureAccessTimes, EnumFeature.HomeWork);
                 }
                 reportStudents.Add(reportProgress);
             }
-            methodResult.Result = reportStudents.OrderBy(x => x.FullName).ToList().ExportExcel();
+            methodResult.Result = reportStudents.OrderBy(x => emails.IndexOf((x.Email ?? string.Empty).ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim())).ToList().ExportExcel();
             return methodResult;
         }
 

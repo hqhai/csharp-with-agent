@@ -8,7 +8,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Commands.UserOtpCmd;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -66,15 +66,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await _userManager.ConfirmEmailAsync(user, token);
-            var roles = await _userManager.GetRolesAsync(user);
-
-            user = await UpdateUserAsync(roles, user);
-            if (!user.IsValid())
+            if (user.Student == null && user.Parent == null)
             {
-                methodResult.AddError(user.ErrorMessages);
-                return methodResult;
+                var roles = await _userManager.GetRolesAsync(user);
+
+                user = await UpdateUserAsync(roles, user);
+                if (!user.IsValid())
+                {
+                    methodResult.AddError(user.ErrorMessages);
+                    return methodResult;
+                }
+                await _userManager.UpdateAsync(user);
             }
-            await _userManager.UpdateAsync(user);
 
             var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
             var confirmOtp = new ConfirmOtpModel

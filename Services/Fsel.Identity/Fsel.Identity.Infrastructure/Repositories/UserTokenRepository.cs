@@ -51,7 +51,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
         }
 
-        public virtual async Task<UserToken?> Remove(UserToken? userToken)
+        public virtual async Task<UserToken?> RemoveAsync(UserToken? userToken)
         {
             try
             {

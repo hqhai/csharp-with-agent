@@ -31,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     public class ChangeCourseLevelCommand : IRequest<MethodResult<CourseResultModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
+        public Guid? UserId { get; set; }
     }
 
     public class ChangeCourseLevelCommandHandler : IRequestHandler<ChangeCourseLevelCommand, MethodResult<CourseResultModel>>
@@ -74,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseResultModel> methodResult = new MethodResult<CourseResultModel>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -97,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumChangeLevelErrorCode.StudiedUpToUnit3), nameof(isChangeLevelStudent));
                 return methodResult;
             }
-            var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync();
+            var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!userCourseSettingsResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingsResult));
@@ -144,7 +145,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     {
                         item.WorkingStatus = EnumWorkingStatus.InActive;
                     }
-                    _courseResultRepository.UpdateList(courseResultActives);
+                    _courseResultRepository.UpdateList(courseResultActives, false, x => x.CourseId, x => x.StudentId);
                     await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
 
@@ -162,7 +163,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 else
                 {
                     courseResult.WorkingStatus = EnumWorkingStatus.Active;
-                    _courseResultRepository.Update(courseResult);
+                    _courseResultRepository.Update(courseResult, false, x => x.CourseId, x => x.StudentId);
                 }
                 if (!courseResult.IsValid())
                 {
@@ -189,7 +190,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             var classResult = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel
             {
                 CourseId = course.Id,
-                UserId = _authContext.CurrentUserId,
+                UserId = request.UserId ?? _authContext.CurrentUserId,
             });
 
             if (!classResult.IsSuccessStatusCode)
@@ -202,14 +203,14 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             {
                 IsDeduction = true,
                 Type = EnumUserCourseType.ChangeLevel,
-                UserId = _authContext.CurrentUserId
+                UserId = request.UserId ?? _authContext.CurrentUserId
             }, cancellationToken).ConfigureAwait(false);
 
             var updateResult = await _userService.UpdateCourseToStudentAsync(course.Id);
 
             if (updateResult.IsSuccessStatusCode)
             {
-                await SendNotification(course, courseResult, cancellationToken);
+                await SendNotification(course, courseResult, request.UserId ?? _authContext.CurrentUserId, cancellationToken);
             }
 
             methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
@@ -217,7 +218,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             return methodResult;
         }
 
-        private async Task SendNotification(Course course, CourseResult? courseResult, CancellationToken cancellationToken)
+        private async Task SendNotification(Course course, CourseResult? courseResult, Guid userId, CancellationToken cancellationToken)
         {
             if (courseResult == null)
             {
@@ -226,7 +227,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 
             NotificationSendingQueueModel notificationModel = new NotificationSendingQueueModel()
             {
-                UserIds = new List<Guid>() { courseResult.CreatedUserId },
+                UserIds = new List<Guid>() { userId },
                 ParamsMessage = new List<object> { course.Name ?? string.Empty, },
                 Type = EnumNotificationType.LinkPage,
                 Content = EnumNotificationContent.CourseChange,

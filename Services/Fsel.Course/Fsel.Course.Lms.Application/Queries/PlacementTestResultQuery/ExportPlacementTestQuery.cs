@@ -13,14 +13,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
-    using Fsel.Shared.Enums.ErrorCodes;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class ExportPlacementTestQuery : IRequest<MethodResult<Stream>>
     {
@@ -55,13 +55,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var students = new List<StudentModel>();
             var studentIds = new List<Guid>();
 
-            var placementTestResultExports = new List<PlacementTestResultExportModel>();
+            var placementTestResultExports = new List<PlacementTestReportExportModel>();
             var placementTestResults = await _placementTestResultRepository.Queryable
+                                            .Where(x => x != null && x.UpdatedDate.HasValue && x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date)
                                             .GroupBy(x => x.StudentId)
                                             .Select(x => x.OrderByDescending(x => x.UpdatedDate).ThenByDescending(x => x.CreatedDate).FirstOrDefault())
                                             .ToListAsync(cancellationToken);
-
-            placementTestResults = placementTestResults.Where(x => x != null && x.UpdatedDate.HasValue && x.UpdatedDate.Value.Date >= request.StartDate.Date && x.UpdatedDate.Value.Date <= request.EndDate.Date).ToList();
             if (placementTestResults.Any())
             {
                 studentIds = placementTestResults.Select(x => x.StudentId).ToList();
@@ -74,35 +73,69 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 students = studentResults.Content?.Result?.ToList();
             }
 
-            var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).ToListAsync(cancellationToken);
-            foreach (var item in placementTestResults)
+            var placementTestResultGroupResults = await _placementTestResultRepository.Queryable
+                                                                                      .WhereBulkContains(studentIds, x => x.StudentId)
+                                                                                      .Where(x => x.Status == EnumResultStatus.Done)
+                                                                                      .ToListAsync(cancellationToken);
+
+            var placementTestResultGroups = placementTestResultGroupResults.GroupBy(x => x.StudentId)
+                                                                           .Select(x => new
+                                                                           {
+                                                                               StudentId = x.Key,
+                                                                               PlacementTestStart = x.Select(x => x).OrderBy(x => x.CreatedDate).FirstOrDefault(),
+                                                                               PlacementTestEnd = x.Select(x => x).OrderByDescending(x => x.CreatedDate).FirstOrDefault(),
+                                                                           })
+                                                                           .ToList();
+
+            var courseResults = await _courseResultRepository.Queryable
+                                                             .Include(x => x.Course)
+                                                             .WhereBulkContains(studentIds, x => x.StudentId)
+                                                             .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                                                             .ToListAsync(cancellationToken);
+
+            foreach (var item in placementTestResultGroups)
             {
-                if (item != null)
+                var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                var placementTestResultEnd = item.PlacementTestEnd;
+                var placementTestResultStart = item.PlacementTestStart;
+                if (student == null)
                 {
-                    var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                    if (student != null)
-                    {
-                        var placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == item.StudentId).OrderBy(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                        int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
-                        var (levelCompleted, isLock) = item.Level.GetLevelInScore(item.Percent, IeltsScoreHelper.GetInitialAge(placementTestResult?.Level, age));
-                        var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
-                        placementTestResultExports.Add(new PlacementTestResultExportModel
-                        {
-                            Name = student.User?.FullName,
-                            Birthday = student.User?.Birthday,
-                            Email = student.User?.Email,
-                            CourseLevel = item.Level.GetCourseLevelByPlacementTestLevel(),
-                            CurrentLevel = isLock ? student.CourseLevel : null,
-                            LevelCompleted = item.Status == EnumResultStatus.Done ? levelCompleted : item.Level.GetCourseLevelByPlacementTestLevel(),
-                            Percent = item.Percent,
-                            IsPTdone = isLock,
-                            CourseName = courseResult?.Course?.Name,
-                            UpdatedDate = item.UpdatedDate.HasValue ? item.UpdatedDate.Value : null,
-                        });
-                    }
+                    continue;
                 }
+
+                if (item == null || placementTestResultEnd == null)
+                {
+                    placementTestResultExports.Add(new PlacementTestReportExportModel
+                    {
+                        Name = student.User?.FullName,
+                        Birthday = student.User?.Birthday,
+                        Email = student.User?.Email,
+                    });
+                    continue;
+                }
+
+                int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
+
+                var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, age));
+                var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
+                var currentLevel = SendMailHelper.GetPreviousEnumValue(levelCompleted ?? default);
+
+                placementTestResultExports.Add(new PlacementTestReportExportModel
+                {
+                    Name = student.User?.FullName,
+                    Birthday = student.User?.Birthday,
+                    Email = student.User?.Email,
+                    CompletionLevel = isLock ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestResultEnd.Level.GetCourseLevelByPlacementTestLevel()) : null,
+                    ChooseLevel = isLock ? student.CourseLevel.GetCodeByEnumCourseLevel() : null,
+                    SuggetLevel = isLock ? placementTestResultEnd.Status == EnumResultStatus.Done ? levelCompleted.GetCodeByEnumCourseLevel() : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestResultEnd.Level.GetCourseLevelByPlacementTestLevel()) : null,
+                    CurrentLevel = isLock ? currentLevel == EnumCourseLevel.A1 && placementTestResultEnd.Percent < MinCompletePercent ? ValueCourseLevel.PreA1 : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(currentLevel) : null,
+                    Percent = isLock ? placementTestResultEnd.Percent : null,
+                    IsPTdone = isLock,
+                    CourseName = EnumCourseLevelHelper.GetCodeByEnumCourseLevel(courseResult?.Course?.CourseLevel),
+                    FinishDate = isLock && placementTestResultEnd.UpdatedDate.HasValue ? placementTestResultEnd.UpdatedDate.Value : null,
+                });
             }
-            methodResult.Result = placementTestResultExports.OrderBy(x => x.UpdatedDate).ToList().ExportExcel();
+            methodResult.Result = placementTestResultExports.OrderBy(x => x.FinishDate).ToList().ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

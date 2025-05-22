@@ -3,9 +3,7 @@
 namespace Fsel.System.Application.Queries.BannerQuery
 {
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Extensions;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.QueryModels.Banners;
@@ -30,43 +28,42 @@ namespace Fsel.System.Application.Queries.BannerQuery
         {
             MethodResult<PagingItemsModel<BannerModel>> methodResult = new MethodResult<PagingItemsModel<BannerModel>>();
             ArgumentNullException.ThrowIfNull(request);
+
             if (request.PageSize > 100)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var query = _bannerRepository.Queryable.Select(x => new BannerModel
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Code = x.Code,
-                CreatedDate = x.CreatedDate,
-                CreatedFullName = x.CreatedFullName,
-                CreatedUserId = x.CreatedUserId,
-                Description = x.Description,
-                FilePath = x.FilePath,
-                StartDate = x.StartDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam),
-                EndDate = x.EndDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam),
-                Type = x.Type,
-                UpdatedDate = x.UpdatedDate,
-                UpdatedFullName = x.UpdatedFullName,
-                UpdatedUserId = x.UpdatedUserId,
-                Url = x.Url
-            });
+
+            var query = _bannerRepository.Queryable
+                                         .AsQueryable();
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(x => x.Name == request.Keyword);
+                query = query.Where(x => (x.Name != null && x.Name.ToLower().Trim().Contains(request.Keyword.ToLower().Trim())) || (x.Code != null && x.Code.ToLower().Trim().Contains(request.Keyword.ToLower().Trim())));
             }
 
-            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await query.ApplySortAndPaging(request)
-                                   .AsNoTracking()
-                                   .ToListAsync(cancellationToken: cancellationToken)
-                                   .ConfigureAwait(false);
+            if (request.ListCourseLevels != null && request.ListCourseLevels.Any())
+            {
+                query = query.Where(x => x.BannerScopes != null && x.BannerScopes.Any(c => c.CourseLevel.HasValue && request.ListCourseLevels.Contains(c.CourseLevel.Value)));
+            }
 
-            methodResult.Result = new PagingItemsModel<BannerModel>(lists, request, totalItem);
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            return methodResult;
+            if (request.StartDate.HasValue && request.EndDate.HasValue)
+            {
+                query = query.Where(x => request.StartDate.Value.Date <= x.EndDate.Date && request.EndDate.Value.Date >= x.StartDate.Date);
+            }
+
+            if (request.Type.HasValue)
+            {
+                query = query.Where(x => x.Type == request.Type);
+            }
+
+            if (request.Status.HasValue)
+            {
+                query = query.Where(x => x.Status == request.Status);
+            }
+
+            return await _bannerRepository.GetListByPageResultAsync<BannerModel>(query, request, cancellationToken);
         }
     }
 }

@@ -20,7 +20,21 @@ namespace Fsel.Identity.Infrastructure.Configs
                     v => v.HasValue ? v.ToString() : null,
                     v => v.EnumParse<EnumGender>());
 
+            builder.Property(e => e.Status)
+                 .HasMaxLength(100)
+                 .HasConversion(
+                    v => v.HasValue ? v.ToString() : null,
+                    v => v.EnumParse<EnumUserStatus>());
+
             //builder.Metadata.RemoveIndex(builder.HasIndex(u => u.NormalizedUserName).Metadata.Properties);
+            builder.HasIndex(x => x.NormalizedUserName)
+                .HasFilter("[NormalizedUserName] IS NOT NULL AND [IsDeleted] = 0");
+
+            builder.HasIndex(x => new { x.IsDeleted, x.UserName });
+            builder.HasIndex(x => new { x.IsDeleted, x.Email });
+            builder.HasIndex(x => new { x.IsDeleted, x.PhoneNumber });
+            builder.HasIndex(x => new { x.IsDeleted, x.Id, x.UserName, x.Email });
+            builder.HasIndex(x => new { x.Id, x.ConcurrencyStamp });
         }
     }
 }

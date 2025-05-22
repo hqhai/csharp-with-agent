@@ -39,6 +39,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly AnswerTypeConverter _answerTypeConverter;
         private readonly IUserService _userService;
+        private readonly IQuestionShuffleRepository _questionShuffleRepository;
+        private readonly IQuestionExplanationErrorRepository _questionExplanationErrorRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
 
         public GetHomeWorkQueryHandler(IMapper mapper
@@ -47,7 +49,9 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             , QuestionTypeConverter questionTypeConverter
             , AnswerTypeConverter answerTypeConverter
             , IHomeWorkResultRepository homeWorkResult
-            , IUserService userService)
+            , IUserService userService
+            , IQuestionShuffleRepository questionShuffleRepository
+            , IQuestionExplanationErrorRepository questionExplanationErrorRepository)
         {
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
@@ -55,6 +59,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             _questionTypeConverter = questionTypeConverter;
             _answerTypeConverter = answerTypeConverter;
             _userService = userService;
+            _questionShuffleRepository = questionShuffleRepository;
+            _questionExplanationErrorRepository = questionExplanationErrorRepository;
             _homeWorkResultRepository = homeWorkResult;
         }
 
@@ -62,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
@@ -88,38 +94,70 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
                 return methodResult;
             }
-            methodResult.Result = GetHomeWork(homeWork, homeWorkResult, request.IsShowSubStatus);
+            methodResult.Result = await GetHomeWorkAsync(homeWork, homeWorkResult, request.IsShowSubStatus);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private HomeWorkModel GetHomeWork(HomeWork homeWork, HomeWorkResult homeWorkResult, bool isShowSubStatus)
+        private async Task<HomeWorkModel> GetHomeWorkAsync(HomeWork homeWork, HomeWorkResult homeWorkResult, bool isShowSubStatus)
         {
             var homeWorkModel = _mapper.Map<HomeWorkModel>(homeWork);
-            homeWorkModel.Questions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).Select(n =>
+            var listQuestionShuffle = new List<QuestionShuffle>();
+            var homeWorkQuestions = homeWork.HomeWorkQuestions.OrderBy(x => x!.CreatedDate).ToList();
+            var questionIds = homeWorkQuestions.Select(x => x!.QuestionId).ToList();
+
+            var questionShuffles = await _questionShuffleRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId)
+                                                                             .Where(x => x.StudentId == homeWorkResult.StudentId).ToListAsync();
+            var questionExplanationErrors = await _questionExplanationErrorRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId)
+                                                                                               .Where(x => x.Status == EnumProcessedStatus.NotProcessed && x.ObjectResultId == homeWorkResult.Id).ToListAsync();
+
+            foreach (var homeWorkQuestion in homeWorkQuestions)
             {
-                var answer = n.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id);
-                return GetQuestion(n.Question, answer, homeWorkResult, isShowSubStatus);
-            }).ToList();
+                var question = homeWorkQuestion.Question;
+                if (question == null)
+                {
+                    continue;
+                }
+                var homeWorkAnswer = homeWorkQuestion.HomeWorkAnswers.FirstOrDefault(n => n.HomeWorkResultId == homeWorkResult.Id);
+                bool isCheck = homeWorkAnswer?.Status == EnumAnswerStatus.Done;
+                var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
+
+                var questionModel = _mapper.Map<QuestionModel>(question);
+                questionModel.CorrectStatus = GetCorrectStatus(homeWorkAnswer);
+                questionModel.IsReportExplanation = questionExplanationErrors.Any(x => x.QuestionId == question.Id);
+                questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
+                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
+                {
+                    if (questionShuffle == null)
+                    {
+                        questionShuffle = new QuestionShuffle
+                        {
+                            QuestionId = question.Id,
+                            StudentId = homeWorkResult.StudentId,
+                            ShuffleConfigStr = questionShuffleStr
+                        };
+                    }
+                    else
+                    {
+                        questionShuffle.ShuffleConfigStr = questionShuffleStr;
+                    }
+                    listQuestionShuffle.Add(questionShuffle);
+                }
+                if (homeWorkAnswer != null)
+                {
+                    homeWorkAnswer.CorrectCount = isCheck ? homeWorkAnswer.CorrectCount : default;
+                    homeWorkAnswer.IsCorrect = isCheck ? homeWorkAnswer.IsCorrect : default;
+                    homeWorkAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(homeWorkAnswer.Answer, question.QuestionType, isShowSubStatus, homeWorkResult.Status, homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit);
+                    questionModel.ResultAnswer = _mapper.Map<AnswerModel>(homeWorkAnswer);
+                }
+
+                homeWorkModel.Questions.Add(questionModel);
+            }
+
+            await _questionShuffleRepository.SaveQuestionShufflesAsync(listQuestionShuffle);
             homeWorkModel.HomeWorkResult = _mapper.Map<HomeWorkResultModel>(homeWorkResult);
             return homeWorkModel;
-        }
-
-        private QuestionModel GetQuestion(Question? question, HomeWorkAnswer? homeWorkAnswer, HomeWorkResult homeWorkResult, bool isShowSubStatus)
-        {
-            ArgumentNullException.ThrowIfNull(question);
-            var isCheck = homeWorkAnswer?.Status == EnumAnswerStatus.Done;
-            var questionModel = _mapper.Map<QuestionModel>(question);
-            questionModel.CorrectStatus = GetCorrectStatus(homeWorkAnswer);
-            questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
-            if (homeWorkAnswer != null)
-            {
-                homeWorkAnswer.CorrectCount = isCheck ? homeWorkAnswer.CorrectCount : default;
-                homeWorkAnswer.IsCorrect = isCheck ? homeWorkAnswer.IsCorrect : default;
-                homeWorkAnswer.Answer = _answerTypeConverter.AnswerTypeConverterObject(homeWorkAnswer.Answer, question.QuestionType, isShowSubStatus, homeWorkResult.Status, homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit);
-                questionModel.ResultAnswer = _mapper.Map<AnswerModel>(homeWorkAnswer);
-            }
-            return questionModel;
         }
 
         private static EnumCorrectStatus? GetCorrectStatus(HomeWorkAnswer? homeWorkAnswer)

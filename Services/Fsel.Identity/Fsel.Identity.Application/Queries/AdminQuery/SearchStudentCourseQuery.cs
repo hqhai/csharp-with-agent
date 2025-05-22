@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -23,11 +24,13 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     {
         private readonly UserManager<User> _userManager;
         private readonly ITrainingService _trainingService;
+        private readonly IUserSchoolRepository _userSchoolRepository;
 
-        public SearchStudentCourseQueryHandler(UserManager<User> userManager, ITrainingService trainingService)
+        public SearchStudentCourseQueryHandler(UserManager<User> userManager, ITrainingService trainingService, IUserSchoolRepository userSchoolRepository)
         {
             _userManager = userManager;
             _trainingService = trainingService;
+            _userSchoolRepository = userSchoolRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentCourseModel>>> Handle(SearchStudentCourseQuery request, CancellationToken cancellationToken)

@@ -85,12 +85,16 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                                         x.Type == request.Type)
                             .FirstOrDefaultAsync(cancellationToken);
 
+            var userResult = await _userService.GetUserByIdAsync(_authContext.CurrentUserId.ToString());
+            var user = userResult.Content?.Result;
+
             await _interactionActionRepository.ExecuteTransactionAsync(async () =>
             {
                 if (action == null)
                 {
                     action = _mapper.Map<InteractionAction>(request);
                     action.UserId = _authContext.CurrentUserId;
+                    action.CourseId = user?.CourseId;
 
                     if (!action.IsValid())
                     {
@@ -132,11 +136,11 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
 
                         var objectOwnerId = CustomDataForParamMessage(classForumResultTemp!);
 
-
                         FeatureModuleQuery query = new FeatureModuleQuery
                         {
                             FeatureModule = EnumFeatureModule.ClassForumResult,
-                            ObjectId = classForumResultTemp?.Id ?? default
+                            ObjectId = classForumResultTemp?.Id ?? default,
+                            UserId = _authContext.CurrentUserId,
                         };
                         var moduleResultReply = await _courseService.GetModuleModel(query);
                         var featureModuleReplyModel = moduleResultReply?.Content?.Result;
@@ -148,7 +152,6 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
                                         featureModuleReplyModel?.LessonId ?? default,
                                         featureModuleReplyModel?.ClassForumDetailResultId ?? default,
                                      };
-
 
                         bool conditionCheckIsClassForum = await CheckObjecIsClassForum(request.ObjectId);
                         if (!conditionCheckIsClassForum)

@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
 {
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq.Dynamic.Core;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -136,7 +137,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                studentRanking = studentRanking.Where(x => (x.FullName != null && x.FullName.ToLower().Contains(request.Keyword.ToLower().Trim())) || (x.Email != null && x.Email.ToLower() == request.Keyword.ToLower().Trim())).ToList();
+                studentRanking = studentRanking.Where(x => (x.FullName != null && x.FullName.ToLower(CultureInfo.InvariantCulture).Contains(request.Keyword.ToLower(CultureInfo.InvariantCulture).Trim(), StringComparison.InvariantCulture)) || (x.Email != null && x.Email.ToLower(CultureInfo.InvariantCulture) == request.Keyword.ToLower(CultureInfo.InvariantCulture).Trim())).ToList();
             }
 
             var lists = studentRanking.ApplyPaging(request).ToList();

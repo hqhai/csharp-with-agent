@@ -190,6 +190,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                  }).ToListAsync();
             var completeLesson = query.Sum(x => x.CountVideo + x.CountClassForum + x.CountHomeWork);
 
+            lessonProgress.Id = lessonResult.Id;
             lessonProgress.Status = lessonResult.Status;
             lessonProgress.Percent = NumberHelper.GetPercent(completeLesson, MaxModuleLesson);
             lessonProgress.ContentCompleted = string.Format("{0} / {1}", completeLesson, MaxModuleLesson);
@@ -206,6 +207,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var isDone = mockTestResult.Status == EnumResultStatus.Done;
             LessonStudentProgressModel mockTestProgress = new LessonStudentProgressModel
             {
+                Id = mockTestResult.Id,
                 Type = nameof(mockTestResult.MockTest),
                 ObjectId = mockTest.Id,
                 Name = mockTest.Name,

@@ -5,6 +5,8 @@ namespace Fsel.Training.Application.Services.CourseServices
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
+    using Fsel.Training.Application.Services.CourseServices.CommandModels;
     using Fsel.Training.Application.Services.CourseServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -31,5 +33,11 @@ namespace Fsel.Training.Application.Services.CourseServices
 
         [Get("/v1/course/execute-query")]
         Task<IApiResponse<MethodResult<CourseModel>>> GetCourseByLevel([FromQuery] BaseQueryModel baseQuery);
+
+        [Post("/v1/placement-test-result/choose-level-pt")]
+        Task<IApiResponse<MethodResult<bool>>> ChooseLevelPTAsync([FromBody] SavePlacementTestGroupResultCommandModel command);
+
+        [Get("/v1/course/get-course-for-choose-level")]
+        Task<IApiResponse<MethodResult<CourseForChooseLevelModel>>> GetCourseForChooseLevel([Query] GetCourseForChooseLevelQueryModel command);
     }
 }

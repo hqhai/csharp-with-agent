@@ -28,6 +28,11 @@ namespace Fsel.Shared.Enums
         CreateUserForEventULIS,
         MailPaymentWithVoucher,
         CreateUser,
+        MailRegisterForEventHaNoi,
+        MailRegisterForEventPhuTho,
+        MailRegisterForEventUlis,
+        MailRegisterForEventPhenikaa,
+        MailRegisterForEventThaiNguyen,
         CreateAccountFromCRM,
 
         #region event

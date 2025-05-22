@@ -10,7 +10,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Commands.UserOtpCmd;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Infrastructure.ValueSettings;
@@ -87,7 +87,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var userOtpCode = await _mediator.Send(new SaveUserOtpCommand { Id = user.Id }, cancellationToken);
+            var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
             var param = new SendOtpTemplateModel
             {
                 OtpCode = userOtpCode.Result,

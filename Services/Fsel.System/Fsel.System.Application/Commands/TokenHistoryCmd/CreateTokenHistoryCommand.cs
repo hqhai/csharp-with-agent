@@ -19,6 +19,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class CreateTokenHistoryCommand : CreateTokenHistoryCommandModel, IRequest<MethodResult<IList<TokenHistoryModel>>>
     {
@@ -132,7 +133,6 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 methodResult.Result = _mapper.Map<IList<TokenHistoryModel>>(tokenHistorys);
                 return methodResult;
             });
-
             return methodResult;
         }
     }

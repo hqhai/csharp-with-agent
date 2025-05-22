@@ -9,8 +9,10 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
     public class StudentRepository : BaseRepository<Student>, IStudentRepository
     {
+        private readonly UserDbContext _userDbContext;
         public StudentRepository(UserDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
+            _userDbContext = dbContext;
         }
 
         public override async Task<Student?> GetIncludeByIdAsync(Guid id)

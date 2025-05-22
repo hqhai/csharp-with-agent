@@ -1,6 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Attributes;
+using Fsel.Common.Enums.ErrorCodes;
 using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Core.Entities;
 using Fsel.Shared.Enums;
@@ -14,9 +16,13 @@ namespace Fsel.Identity.Domain.Entities
         [Column(Order = 0)]
         public override Guid Id { get; set; }
 
+        [EmailValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(70, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         [ProtectedPersonalData]
         public override string? Email { get; set; }
 
+        [PhoneValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(20, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         [ProtectedPersonalData]
         public override string? PhoneNumber { get; set; }
 
@@ -46,7 +52,12 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(1000)]
         public string? AvatarPath { get; set; }
 
-        public virtual ICollection<UserOtp> UserOtpCodes { get; set; } = new List<UserOtp>();
+        [MaxLength(20, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? DefaultPassword { get; set; }
+
+        public EnumUserStatus? Status { get; set; } = EnumUserStatus.Active;
+
+        public virtual ICollection<UserOtpCode> UserOtpCodes { get; set; } = new List<UserOtpCode>();
 
         public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
 
@@ -55,6 +66,8 @@ namespace Fsel.Identity.Domain.Entities
         public virtual ICollection<UserPlatform> UserPlatforms { get; set; } = new List<UserPlatform>();
 
         public virtual ICollection<UserReferral> Senders { get; set; } = new List<UserReferral>();
+
+        public virtual ICollection<UserSchool> UserSchools { get; set; } = new List<UserSchool>();
 
         public virtual UserReferral? Receiver { get; set; }
 

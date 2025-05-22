@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
@@ -41,7 +42,23 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
             var userReferrals = await _userReferralRepository.Queryable.ToListAsync(cancellationToken);
             var senderIds = userReferrals.Select(x => x.SenderId).Distinct().ToList();
 
-            var users = _userManager.Users.Include(p => p.Senders).Where(p => senderIds != null && senderIds.Contains(p.Id)).Select(x => new SearchReferralCodeModel
+            var users = _userManager.Users.Include(p => p.Senders).Where(p => senderIds != null && senderIds.Contains(p.Id));
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                if (request.Keyword.IsValidEmail())
+                {
+                    users = users.Where(m => m.Email!.Contains(request.Keyword));
+                }
+                else
+                {
+                    var codeQuery = users.Where(m => m.Code!.Contains(request.Keyword));
+                    var fullNameQuery = users.Where(m => m.FullName!.Contains(request.Keyword));
+                    users = codeQuery.Union(fullNameQuery);
+                }
+            }
+
+            var queryData = users.Select(x => new SearchReferralCodeModel
             {
                 SenderId = x.Id,
                 FullName = x.FullName,
@@ -50,16 +67,10 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                 Code = x.Code,
                 NumberUser = x.Senders.Count(),
             });
+            queryData = queryData?.OrderByDescending(p => p.NumberUser);
 
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                users = users?.Where(m => (!string.IsNullOrEmpty(m.Email) && m.Email.Contains(request.Keyword)) || (!string.IsNullOrEmpty(m.Code) && m.Code.Contains(request.Keyword)) || (!string.IsNullOrEmpty(m.FullName) && m.FullName.Contains(request.Keyword)));
-            }
-
-            users = users?.OrderByDescending(p => p.NumberUser);
-
-            int totalItem = users != null ? await users.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false) : default;
-            var lists = users != null ? await users
+            int totalItem = queryData != null ? await queryData.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false) : default;
+            var lists = queryData != null ? await queryData
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)

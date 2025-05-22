@@ -112,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                                     .ToList();
 
             // Gửi thông báo khi đạt top
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             var studentId = student?.Content?.Result?.Id;
 
             if (studentId != null)

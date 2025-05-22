@@ -2,6 +2,7 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System;
     using System.ComponentModel;
     using System.Globalization;
     using System.Text;
@@ -59,6 +60,7 @@ namespace Fsel.Shared.Helpers
         public static IList<T> ToList<T>(this IEnumerable<string>? values, char separator = ',')
         {
             var results = new List<T>();
+            values = values?.Where(x => x != null).ToList();
             if (values == null)
             {
                 return results;
@@ -245,6 +247,206 @@ namespace Fsel.Shared.Helpers
             return Regex.IsMatch(input, "^[a-zA-Z0-9]+$");
         }
 
+        public static string GeneratePassword(int length)
+        {
+            if (length < 3)
+            {
+                throw new ArgumentException("Độ dài mật khẩu phải lớn hơn hoặc bằng 3 để đảm bảo các yêu cầu.");
+            }
+
+            // Danh sách các ký tự
+            const string upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const string lowerCase = "abcdefghijklmnopqrstuvwxyz";
+            const string digits = "0123456789";
+            const string specialChars = "!@#$%^&*()_-+=<>?";
+            const string allChars = upperCase + lowerCase + digits;
+
+            Random random = new Random();
+
+            // Đảm bảo có ít nhất 1 ký tự viết hoa, 1 ký tự đặc biệt
+            string upper = upperCase[random.Next(upperCase.Length)].ToString();
+            string special = specialChars[random.Next(specialChars.Length)].ToString();
+            string number = digits[random.Next(digits.Length)].ToString();
+
+            // Các ký tự còn lại được chọn ngẫu nhiên
+            string remainingChars = new string(Enumerable.Repeat(allChars, length - 3)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+
+            // Ghép lại tất cả và xáo trộn vị trí
+            string password = upper + special + number + remainingChars;
+            return new string(password.OrderBy(_ => random.Next()).ToArray());
+        }
+
+        public static string GenerateLaterPartPassword(int length)
+        {
+            if (length < 3)
+            {
+                throw new ArgumentException("Độ dài mật khẩu phải lớn hơn hoặc bằng 3 để đảm bảo các yêu cầu.");
+            }
+
+            Random random = new Random();
+
+            const string Letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+            const string Digits = "123456789";
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Digits[random.Next(Digits.Length)]);
+
+            for (int i = 1; i < length; i++)
+            {
+                string chars = Letters + Digits;
+                sb.Append(chars[random.Next(chars.Length)]);
+            }
+
+            return new string(sb.ToString().OrderBy(_ => random.Next()).ToArray());
+        }
+
+        public static string JoinWithComma(ICollection<string> items)
+        {
+            // Kiểm tra nếu danh sách rỗng hoặc null
+            if (items == null || items.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            // Sử dụng string.Join để nối các phần tử với dấu phẩy
+            return string.Join(", ", items);
+        }
+
+        public static bool IsValidPhoneNumber(string? phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                return false;
+            }
+
+            phoneNumber = phoneNumber.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase);
+
+            string pattern = @"^(0\d{9})$|^(84\d{9})$|^\+84\d{9}$|^[1-9]\d{8}$";
+
+            Regex regex = new Regex(pattern);
+
+            return regex.IsMatch(phoneNumber);
+        }
+
+        public static string NormalizeToDomesticFormat(string? phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                return string.Empty;
+            }
+
+            var stringComparison = StringComparison.InvariantCultureIgnoreCase;
+            phoneNumber = phoneNumber.Replace(" ", "", stringComparison);
+
+            if (phoneNumber.StartsWith("+84", stringComparison) && phoneNumber.Length == 12)
+            {
+                return string.Concat("0", phoneNumber.AsSpan(3));
+            }
+            else if (phoneNumber.StartsWith("84", stringComparison) && phoneNumber.Length == 11)
+            {
+                return string.Concat("0", phoneNumber.AsSpan(2));
+            }
+            else if (phoneNumber.StartsWith("0", stringComparison) && phoneNumber.Length == 10)
+            {
+                return phoneNumber;
+            }
+            else if (!phoneNumber.StartsWith("0", stringComparison) && phoneNumber.Length == 9)
+            {
+                return "0" + phoneNumber;
+            }
+
+            return phoneNumber;
+        }
+
+        public static string FormatStringWithParam(object data, params object[]? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param ?? Array.Empty<object>());
+        }
+
+        public static bool ContainsSpecialChars(string input)
+        {
+            return Regex.IsMatch(input, @"^[\p{L}\s]+$");
+        }
+
+        public static class TextCleaner
+        {
+            // Hàm chuẩn hóa chuỗi: trim, lowercase, chuẩn hóa khoảng trắng
+            private static string NormalizeWhitespaceAndCase(string input)
+            {
+                return Regex.Replace(input.Trim().ToLowerInvariant(), @"\s+", " ");
+            }
+
+            // Hàm loại bỏ toàn bộ dấu câu
+            public static string RemovePunctuation(string input)
+            {
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return string.Empty;
+                }
+                input = DecodeEscapesSmart(input);
+                return Regex.Replace(input, @"[^\w\s]", "");
+            }
+
+            public static string DecodeEscapesSmart(string input)
+            {
+                if (string.IsNullOrEmpty(input))
+                {
+                    return input;
+                }
+                string result = input;
+                string pattern = @"\\[nrtbfv0\\'""]";
+                bool changed = true;
+
+                while (changed)
+                {
+                    string replaced = Regex.Replace(result, pattern, match =>
+                    {
+                        return match.Value switch
+                        {
+                            "\\n" => "\n",
+                            "\\t" => "\t",
+                            "\\r" => "\r",
+                            "\\b" => "\b",
+                            "\\f" => "\f",
+                            "\\v" => "\v",
+                            "\\0" => "\0",
+                            "\\\\" => "\\",
+                            "\\\"" => "\"",
+                            "\\\'" => "'",
+                            _ => match.Value
+                        };
+                    });
+
+                    changed = replaced != result;
+                    result = replaced;
+                }
+                return result;
+            }
+
+            // Hàm chuẩn hóa + loại bỏ dấu câu cho một chuỗi
+            public static string CleanText(string input)
+            {
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return string.Empty;
+                }
+                string noPunctuation = RemovePunctuation(input);
+                return NormalizeWhitespaceAndCase(noPunctuation);
+            }
+
+            // Hàm xử lý danh sách đáp án
+            public static IList<string> CleanAnswers(IList<string>? answers)
+            {
+                if (answers == null || answers.Count == 0)
+                {
+                    return answers ?? new List<string>();
+                }
+                return answers.Select(ans => CleanText(ans)).ToList();
+            }
+        }
+
         public static (string? FirstName, string? LastName) ParseFullName(this string? fullName)
         {
             if (string.IsNullOrWhiteSpace(fullName))
@@ -252,7 +454,7 @@ namespace Fsel.Shared.Helpers
                 return (string.Empty, string.Empty);
             }
 
-            int firstSpaceIndex = fullName.IndexOf(' ');
+            int firstSpaceIndex = fullName.IndexOf(' ', StringComparison.InvariantCulture);
 
             if (firstSpaceIndex == -1)
             {

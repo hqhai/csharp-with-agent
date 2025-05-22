@@ -35,6 +35,12 @@ namespace Fsel.System.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumTokenMission>());
+
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId, c.CreatedDate });
+            builder.HasIndex(c => new { c.IsDeleted, c.UserId, c.Type });
+            builder.HasIndex(x => new { x.IsDeleted, x.UserId }).IncludeValueProperties(x => new { x.VolatileToken, x.Type });
+            builder.HasIndexIncludeAllProperties(c => new { c.IsDeleted, c.UserId, c.CreatedDate });
+            builder.HasIndexIncludeAllProperties(c => new { c.IsDeleted, c.UserId, c.Type });
         }
     }
 }

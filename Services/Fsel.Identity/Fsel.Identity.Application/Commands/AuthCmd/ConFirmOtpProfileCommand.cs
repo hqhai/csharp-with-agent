@@ -9,7 +9,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Commands.UserOtpCmd;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Infrastructure.ValueSettings;
@@ -87,25 +87,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.OTP, Email = user.Email }, cancellationToken);
             if (!method.IsOK)
             {
-                methodResult.AddError(method.ErrorMessages);
-                return methodResult;
-            }
-            if (!string.IsNullOrEmpty(request.Email))
-            {
-                user.Email = request.Email;
-            }
-            else if (!string.IsNullOrEmpty(request.PhoneNumber))
-            {
-                user.PhoneNumber = request.PhoneNumber;
-                user.PhoneNumberConfirmed = true;
-            }
-            if (!user.IsValid())
-            {
-                methodResult.AddError(user.ErrorMessages);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
 
-            await _userManager.UpdateAsync(user);
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

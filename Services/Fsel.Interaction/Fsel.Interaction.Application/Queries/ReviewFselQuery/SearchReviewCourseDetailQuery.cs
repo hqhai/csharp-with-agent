@@ -63,6 +63,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
             var studentReviews = await _studentReviewRepository.Queryable.Include(x => x.StudentReviewDetails)
                                                                             .Where(x => x.ReviewType == EnumReviewType.Course && x.CourseId == request.CourseId)
                                                                             .ToListAsync(cancellationToken);
+
             var studentIds = studentReviews.Select(x => x.StudentId).ToList();
             var classStudentResults = await _trainingService.GetClassByStudentIdsAsync(new GetClassListByStudentIdsModel { CourseId = request.CourseId, StudentIds = studentIds });
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
@@ -103,7 +104,7 @@ namespace Fsel.Interaction.Application.Queries.ReviewFselQuery
                 StudentId = x.StudentId,
                 CodeStudent = student?.Code,
                 ClassCode = classStudent?.Code,
-                Stars = x.StudentReviewDetails.Average(x => x.VoteStars),
+                Stars = x.StudentReviewDetails.Any() ? x.StudentReviewDetails.Average(x => x.VoteStars) : default,
                 StudentReviewQuestionTypes = x.StudentReviewDetails.Select(x => new StudentReviewQuestionTypeModel
                 {
                     Id = x.Id,

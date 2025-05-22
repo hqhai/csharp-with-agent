@@ -12,7 +12,11 @@ namespace Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes
 
         public string? Email { get; set; }
 
+        public string? PhoneNumber { get; set; }
+
         [JsonIgnore]
         public bool IsCheckExpiredTime { get; set; } = true;
+
+        public Guid? UserId { get; set; }
     }
 }

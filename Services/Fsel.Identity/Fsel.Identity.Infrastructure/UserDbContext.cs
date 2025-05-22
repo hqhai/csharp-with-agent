@@ -5,6 +5,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Core.Entities;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Identity.Infrastructure.Configs;
 using Fsel.Shared.Constants;
 using MediatR;
@@ -25,10 +26,10 @@ namespace Fsel.Identity.Infrastructure
             ArgumentNullException.ThrowIfNull(builder);
             base.OnModelCreating(builder);
 
-            SeedPlatforms(builder);
-            SeedRoles(builder);
-            //SeedUsers(builder);
-            //SeedUserRoles(builder);
+            //Dùng khi tạo migration, comment lại sau khi tạo xong
+            //builder.Ignore<OverallStudentModel>();
+            //builder.Ignore<NumberStudentLearnOnSystemModel>();
+            //builder.Ignore<SummaryDataOnCityModel>();
 
             builder.Entity<User>().ToTable(nameof(Users))
                 .HasQueryFilter(e => !e.IsDeleted)
@@ -43,6 +44,12 @@ namespace Fsel.Identity.Infrastructure
             builder.Entity<RoleClaimEntity>().ToTable(nameof(RoleClaims));
             builder.Entity<UserToken>().ToTable(nameof(UserTokens))
                 .HasQueryFilter(e => !e.IsDeleted);
+            builder.HasSequence<int>(SqlSettings.Sequence.UserSequence).StartsAt(100000).IncrementsBy(1);
+
+            SeedPlatforms(builder);
+            SeedRoles(builder);
+            //SeedUsers(builder);
+            //SeedUserRoles(builder);
 
             builder.ApplyConfiguration(new TeacherEntityTypeConfiguration());
             builder.ApplyConfiguration(new TeacherBankAccountEntityTypeConfiguration());
@@ -51,7 +58,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new ParentStudentEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserEntityTypeConfiguration());
-            builder.ApplyConfiguration(new UserOtpEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserOtpCodeEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSettingEntityTypeConfiguration());
             builder.ApplyConfiguration(new PlatformEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserPlatformEntityTypeConfiguration());
@@ -63,10 +70,13 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentCompetitionEventsEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentRankingEventEntityTypeConfiguration());
             builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new EventManagerEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
             builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -78,7 +88,7 @@ namespace Fsel.Identity.Infrastructure
         public override DbSet<UserLoginEntity> UserLogins { get; set; }
         public override DbSet<RoleClaimEntity> RoleClaims { get; set; }
         public override DbSet<Role> Roles { get; set; }
-        public DbSet<UserOtp> UserOtps { get; set; }
+        public DbSet<UserOtpCode> UserOtps { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Parent> Parents { get; set; }
@@ -96,13 +106,25 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<StudentCompetitionEvent> StudentCompetitionEvents { get; set; }
         public DbSet<StudentRankingEvent> StudentRankingEvents { get; set; }
         public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
+        public DbSet<EventManager> EventManagers { get; set; }
         public DbSet<UserReferral> UserReferrals { get; set; }
         public DbSet<EventRegistration> EventRegistrations { get; set; }
         public DbSet<UserDeletion> UserDeletions { get; set; }
+        public DbSet<UserSchool> UserSchools { get; set; }
+        public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
+        public DbSet<StudentEventLearningRecord> StudentEventLearningRecords { get; set; }
 
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
         #endregion Db Set
+
+        #region report
+        public DbSet<OverallStudentModel> OverallStudentResults { get; set; }
+
+        public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
+
+        public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
+        #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

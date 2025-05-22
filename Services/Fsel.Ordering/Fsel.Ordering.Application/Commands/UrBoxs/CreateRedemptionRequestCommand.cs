@@ -17,6 +17,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
+    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.UrBox;
     using Fsel.Ordering.Infrastructure.ValueSettings;
@@ -110,10 +111,9 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
             }
 
             var totalPrice = quantity * price;
-
             if (token < totalPrice)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Min));
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(token), token);
                 return methodResult;
             }
 

@@ -77,17 +77,22 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
             {
                 foreach (var item in comments)
                 {
+                    if (item.Comment.Status != EnumCommentStatus.Approver && item.Comment.UserId != _authContext.CurrentUserId)
+                    {
+                        continue;
+                    }
+
                     var commentModel = _mapper.Map<CommentModel>(item.Comment);
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Comment.Id && x.Type == EnumInteractionActionType.Like).ToList();
                     commentModel.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.Id == item.Comment.UserId)?.AvatarPath;
                     commentModel.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.Id == item.Comment.UserId)?.FullName;
                     commentModel.Comments = await GetCommentsByObjectIdAsync(item.Comment.Id, filter);
-                    commentModel.CommentNumber = commentModel.Comments?.Count ?? default;
+                    commentModel.CommentNumber = commentModel.Comments?.Count(x => x.Status == EnumCommentStatus.Approver) ?? default;
                     commentModel.LikeNumber = actionLikes.Count;
                     commentModel.IsLiked = actionLikes.Any(x => x.UserId == _authContext.CurrentUserId);
                     commentModel.ObjectId = item.Comment.ObjectId;
                     commentModel.IsFlagged = item.IsFlagged;
-
+                    commentModel.Status = item.Comment.Status;
                     results.Add(commentModel);
                 }
             }

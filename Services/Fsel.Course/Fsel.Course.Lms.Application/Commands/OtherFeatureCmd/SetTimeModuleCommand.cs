@@ -3,11 +3,9 @@
 namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 {
     using AutoMapper;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -67,12 +65,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            var requestInfo = new
-            {
-                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
-                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync : {requestInfo}");
 
             if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
@@ -89,60 +81,25 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
             }
-            var requestInfoUpdate = new
-            {
-                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
-                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_1 : {requestInfoUpdate}");
 
-            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false
-                , x => x.SkillScoresStr, x => x.SkillScoreUngradedStr
-                , x => x.CorrectCount, x => x.CorrectTotal
-                , x => x.CorrectCountUngraded, x => x.CorrectTotalUngraded
-                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
-                , x => x.Percent, x => x.IsWorking);
-            await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-
-            var requestInfoUpdate2 = new
+            await _videoTimeCodeResultRepository.BulkUpdateList(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
             {
-                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
-                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_2 : {requestInfoUpdate2}");
+                bulk.ColumnInputExpression = entity => new { entity.WorkingTime, entity.RetryWorkingTime };
+            });
         }
 
         private async Task UpdateSectionGroupResultAsync(SetTimeModuleCommand request)
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
 
-            var requestInfo = new
-            {
-                sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync: {requestInfo}");
-
             if (sectionGroupResult != null && sectionGroupResult.SectionGroup != null)
             {
                 sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
 
-                var requestInfoUpdate = new
+                await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
                 {
-                    sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
-                }.Serialize();
-                _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_1 : {requestInfoUpdate}");
-
-                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.CurrentSectionTimeCodeId
-                , x => x.CorrectCount, x => x.CorrectTotal, x => x.SkillScoresStr
-                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
-                , x => x.Percent);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-
-                var requestInfoUpdate2 = new
-                {
-                    sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
-                }.Serialize();
-                _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_2 : {requestInfoUpdate2}");
+                    bulk.ColumnInputExpression = entity => new { entity.WorkingTime };
+                });
             }
         }
     }

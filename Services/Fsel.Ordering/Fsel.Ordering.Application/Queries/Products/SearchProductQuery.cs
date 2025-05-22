@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Queries.Products
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -26,12 +27,14 @@ namespace Fsel.Ordering.Application.Queries.Products
         private readonly IProductRepository _productRepository;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
+        private readonly IOrderTransactionRepository _orderTransactionRepository;
 
-        public SearchProductQueryHandler(IProductRepository productRepository, AuthContext authContext, IMapper mapper)
+        public SearchProductQueryHandler(IProductRepository productRepository, AuthContext authContext, IMapper mapper, IOrderTransactionRepository orderTransactionRepository)
         {
             _productRepository = productRepository;
             _authContext = authContext;
             _mapper = mapper;
+            _orderTransactionRepository = orderTransactionRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ProductModel>>> Handle(SearchProductQuery request, CancellationToken cancellationToken)
@@ -39,17 +42,31 @@ namespace Fsel.Ordering.Application.Queries.Products
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<ProductModel>>();
 
-            var products = await _productRepository.Queryable.Include(p => p.OrderTransactions.Where(x => x.Status == EnumOrderTransactionStatus.Requested || x.Status == EnumOrderTransactionStatus.Received)).ToListAsync(cancellationToken);
+            var validStatuses = new[] { EnumOrderTransactionStatus.Requested, EnumOrderTransactionStatus.Received };
 
-            var query = _mapper.Map<IList<ProductModel>>(products);
+            var result = await (from a in _productRepository.Queryable
+                                join b in _orderTransactionRepository.Queryable
+                                on a.Id equals b.ProductId into transactions
+                                select new
+                                {
+                                    Product = a,
+                                    QuantityChanged = transactions.Count(x => validStatuses.Contains(x.Status)),
+                                    RemainingQuantity = a.Quantity - transactions.Count(x => validStatuses.Contains(x.Status)),
+                                    ProductStatus = a.Quantity > transactions.Count(x => validStatuses.Contains(x.Status)),
+                                    Status = a.Quantity > transactions.Count(x => validStatuses.Contains(x.Status))
+                                                ? EnumProductStatus.Active
+                                                : EnumProductStatus.InActive
+                                }).ToListAsync(cancellationToken);
 
-            query.ForEach(p =>
+            var query = result.Select(x =>
             {
-                var product = products.FirstOrDefault(x => x.Id == p.Id);
-                p.ProductStatus = p.Status == EnumProductStatus.Active;
-                p.QuantityChanged = product?.OrderTransactions.Count ?? 0;
-                p.RemainingQuantity = p.Quantity - p.QuantityChanged;
-            });
+                var product = _mapper.Map<ProductModel>(x.Product);
+                product.QuantityChanged = x.QuantityChanged;
+                product.RemainingQuantity = x.RemainingQuantity;
+                product.ProductStatus = x.ProductStatus;
+                product.Status = x.Status;
+                return product;
+            }).ToList();
 
             if (!string.IsNullOrEmpty(request.Code))
             {
@@ -71,26 +88,31 @@ namespace Fsel.Ordering.Application.Queries.Products
                 query = query.Where(p => p.Status == request.Status).ToList();
             }
 
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
             if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
             {
-                if (request.PopularOrLatest.HasValue && request.PopularOrLatest == true)
-                {
-                    query = query.OrderByDescending(x => x.QuantityChanged).ToList();
-                }
-                else if (request.PopularOrLatest.HasValue && request.PopularOrLatest == false)
-                {
-                    query = query.OrderByDescending(x => x.CreatedDate).ToList();
-                }
-                else
-                {
-                    query = query.OrderByDescending(x => x.ShowPriority).ToList();
-                }
+                var queryShowPriority = query.Where(p => p.ShowPriority).ToList();
+                var queryNotShowPriority = query.Where(p => !p.ShowPriority).ToList();
+
+                Func<ProductModel, object> orderByCriteria = request.PopularOrLatest == true
+                    ? x => x.QuantityChanged
+                    : x => x.CreatedDate!;
+
+                queryShowPriority = queryShowPriority.OrderByDescending(orderByCriteria).ToList();
+                queryNotShowPriority = queryNotShowPriority.OrderByDescending(orderByCriteria).ToList();
+
                 if (request.Min.HasValue && request.Max.HasValue)
                 {
-                    query = query.Where(x => x.Price >= request.Min && x.Price <= request.Max).ToList();
+                    queryShowPriority = queryShowPriority.Where(x => x.Price >= request.Min && x.Price <= request.Max).ToList();
+                    queryNotShowPriority = queryNotShowPriority.Where(x => x.Price >= request.Min && x.Price <= request.Max).ToList();
                 }
+
+                query = queryShowPriority.Concat(queryNotShowPriority).ToList();
+
                 query = query.Where(p => p.EventIds != null && request.EventIds != null && request.EventIds.Any(x => p.EventIds.Contains(x))).ToList();
-                query = query.Where(p => p.ExpireDate.Date >= DateTime.UtcNow.Date && p.RemainingQuantity > 0).ToList();
+
+                query = query.Where(p => p.ExpireDate >= currentDate && p.RemainingQuantity > 0).ToList();
             }
 
             IQueryable<ProductModel> queryable = query.AsQueryable();

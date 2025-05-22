@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
+    using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Models;
@@ -66,7 +67,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             }
 
             var (questionArray, answerArray, averagePronScore, count) = ExtractQuestionAnswerAndPronunciationScores(mockTestResult);
-
             var scoreRanges = _prosodyScoreRepository.Queryable.ToList();
             (long bandScore, string feedBack) = GetBandScore(averagePronScore, scoreRanges);
 
@@ -119,12 +119,34 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     skillScore.CorrectCount = score;
                     skillScore.TotalCount = 36;
                     skillScore.Skill = EnumCourseSkill.Speaking;
-                    skillScore.Scores = NumberHelper.RoundNumberDouble((double)score / 4); // sửa sau
+                    skillScore.Scores = NumberHelper.RoundReduceNumber((double)score / 4); // sửa sau
                 }
                 skillScores.Add(skillScore);
             }
             sectionGroupResult.SkillScores = skillScores;
             sectionGroupResult.CorrectCount += (int)score;
+
+            if (mockTestResult.SkillScores != null && mockTestResult.SkillScores.Count > 1)
+            {
+                if (skillScores.Any())
+                {
+                    // Bước 1: Clone danh sách mà không chứa phần tử có Skill là Speaking
+                    var clonedSkillScores = mockTestResult.SkillScores
+                        .Where(x => x.Skill != EnumCourseSkill.Speaking)
+                        .ToList(); // Chuyển đổi thành danh sách
+
+                    // Bước 2: Thêm phần tử từ skillScores.Single() vào danh sách đã clone
+                    var skillScoreToAdd = skillScores.Single();
+                    clonedSkillScores.Add(skillScoreToAdd);
+
+                    // Bước 3: Gán ngược giá trị đã chỉnh sửa vào mockTestResult.SkillScores
+                    mockTestResult.SkillScores = clonedSkillScores;
+                }
+            }
+            else
+            {
+                mockTestResult.SkillScores = skillScores;
+            }
 
             await SendToWebSocket(mockTestScores, cancellationToken);
 
@@ -132,6 +154,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             //save skillscores
             await SaveSectionGroupResultToDatabase(sectionGroupResult, cancellationToken);
+
+            //save MocKTestResult
+            await SaveMockTestResultAsync(mockTestResult, cancellationToken);
 
             return methodResult.Result;
         }
@@ -225,7 +250,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
             {
                 await _mockTestScoreRepository.AddList(mockTestScores);
-
                 await _mockTestScoreRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 return new MethodResult<bool>();
             });
@@ -234,13 +258,24 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         private async Task SaveSectionGroupResultToDatabase(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
             _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
+            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-            await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             //await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
             //{
             //return new MethodResult<bool>();
 
             //});
+        }
+
+        private async Task SaveMockTestResultAsync(MockTestResult mockTestResult, CancellationToken cancellationToken)
+        {
+            try
+            {
+                _mockTestResultRepository.Update(mockTestResult);
+                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
+            }
+            catch { }
         }
 
         #endregion Handle

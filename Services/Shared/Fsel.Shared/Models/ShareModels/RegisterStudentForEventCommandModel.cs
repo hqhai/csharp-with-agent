@@ -7,6 +7,7 @@ namespace Fsel.Shared.Models.ShareModels
     public class RegisterStudentForEventCommandModel
     {
         public string? EventCode { get; set; }
+        public string? Password { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? Email { get; set; }
@@ -19,11 +20,13 @@ namespace Fsel.Shared.Models.ShareModels
         public string? School { get; set; }
         public Guid? SchoolId { get; set; }
         public string? SchoolGrade { get; set; }
+        public string? SchoolFaculty { get; set; }
         public string? SchoolClass { get; set; }
         public string? SchoolStudentCode { get; set; }
         public string? TeacherPhoneNumber { get; set; }
         public string? ParentEmail { get; set; }
         public string? ParentPhoneNumber { get; set; }
-        public bool IsSchoolarshipAdvising { get; set; }
+        public bool IsBussinessCheckBox { get; set; }
+        public string? StudentMainMajor { get; set; }
     }
 }

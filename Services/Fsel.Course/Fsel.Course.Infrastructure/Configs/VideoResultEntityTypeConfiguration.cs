@@ -5,6 +5,7 @@ namespace Fsel.Course.Infrastructure.Configs
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -30,7 +31,15 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
 
+            builder.Property(e => e.PlaybackSpeed)
+                .HasMaxLength(20)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumPlaybackSpeed>());
+
             builder.HasIndex(c => new { c.LessonResultId, c.VideoId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.Status, c.StudentId });
+            builder.HasIndex(c => new { c.StudentId });
         }
     }
 }

@@ -34,7 +34,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                 methodResult.Result = null;
                 return methodResult;
             }
-            var sender = await _userManager.Users.FirstOrDefaultAsync(p => !string.IsNullOrEmpty(p.Code) && p.Code.Trim().ToLower() == request.ReferralCode.Trim().ToLower(), cancellationToken);
+            var sender = await _userManager.Users.FirstOrDefaultAsync(p => p.Code == request.ReferralCode.Trim(), cancellationToken);
 
             if (sender == null)
             {

@@ -3,7 +3,7 @@
 
 using AutoMapper;
 using Fsel.Identity.Application.Commands.SenderCmd;
-using Fsel.Identity.Application.Commands.UserOtpCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Identity.Authentication.Quickstart.Base;
@@ -63,11 +63,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly ILogger<AccountController> _logger;
         private readonly IParentRepository _parentRepository;
         private readonly IStudentRepository _studentRepository;
-        private readonly IUserOtpRepository _userOtpRepository;
+        private readonly IUserOtpCodeRepository _userOtpRepository;
         private readonly IUserRepository _userRepository;
         private readonly Core.Base.AuthContext _languageContext;
         private readonly IStringLocalizer _localizer;
-        private readonly ICacheService<UserOtpModel> _userOtpCache;
+        private readonly ICacheService<UserOtpCodeModel> _userOtpCache;
 
         public AccountController(
             IUserSession userSession,
@@ -83,11 +83,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             ILogger<AccountController> logger,
             IParentRepository parentRepository,
             IStudentRepository studentRepository,
-            IUserOtpRepository userOtpRepository,
+            IUserOtpCodeRepository userOtpRepository,
             IUserRepository userRepository,
             Core.Base.AuthContext languageContext,
             IStringLocalizer localizer,
-            ICacheService<UserOtpModel> userOtpCache)
+            ICacheService<UserOtpCodeModel> userOtpCache)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -219,11 +219,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                                 }
                             });
                         }
-                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpInvalid)))
+                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpCodeErrorCode.OtpInvalid)))
                         {
                             ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_is_not_valid"]);
                         }
-                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpExpired)))
+                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpCodeErrorCode.OtpExpired)))
                         {
                             ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_has_expired"]);
                         }
@@ -256,11 +256,11 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                             }.Serialize();
                             return RedirectToAction(nameof(ForgotPassword), new { request.ReturnUrl });
                         }
-                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpInvalid)))
+                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpCodeErrorCode.OtpInvalid)))
                         {
                             ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_is_not_valid"]);
                         }
-                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpErrorCode.OtpExpired)))
+                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpCodeErrorCode.OtpExpired)))
                         {
                             ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_has_expired"]);
                         }
@@ -527,9 +527,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             return methodResult;
         }
 
-        private async Task<MethodResult<UserOtpModel>> CreateAndSendMailOtpAsync(User user)
+        private async Task<MethodResult<UserOtpCodeModel>> CreateAndSendMailOtpAsync(User user)
         {
-            var methodResult = new MethodResult<UserOtpModel>();
+            var methodResult = new MethodResult<UserOtpCodeModel>();
 
             //var otp = await _userManager.GenerateUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName);
             var otpResult = await _mediator.Send(new CreateUserOtpCommand { UserId = user.Id }).ConfigureAwait(false);
@@ -540,7 +540,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             }
 
             // Send OTP via email
-            var sendResult = await SendMailOtpAsync(user, otpResult?.Result?.Otp);
+            var sendResult = await SendMailOtpAsync(user, otpResult?.Result?.OtpCode);
             if (!sendResult.IsOK)
             {
                 methodResult.AddErrorBadRequest("i18n_Failed_to_send_OTP");

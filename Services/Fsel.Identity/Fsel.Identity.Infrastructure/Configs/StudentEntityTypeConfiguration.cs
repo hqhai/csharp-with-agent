@@ -32,6 +32,10 @@ namespace Fsel.Identity.Infrastructure.Configs
                     .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasIndex(x => x.UserId).IsUnique(false);
+
+            builder.HasIndex(x => new { x.IsDeleted, x.SchoolId });
+            builder.HasIndex(x => new { x.IsDeleted }).IncludeValueProperties(x => new { x.CreatedDate, x.School, x.CourseLevel, x.SchoolId });
+            builder.HasIndexIncludeAllProperties(c => new { c.IsDeleted, c.SchoolId, c.SchoolClass });
         }
     }
 }

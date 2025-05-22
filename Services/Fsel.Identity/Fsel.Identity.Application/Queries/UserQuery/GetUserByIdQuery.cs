@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -21,11 +22,13 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     {
         private readonly IMapper _mapper;
         private readonly UserManager<User> _userManager;
+        private readonly IStudentRepository _studentRepository;
 
-        public GetUserByIdQueryHandler(IMapper mapper, UserManager<User> userManager)
+        public GetUserByIdQueryHandler(IMapper mapper, UserManager<User> userManager, IStudentRepository studentRepository)
         {
             _mapper = mapper;
             _userManager = userManager;
+            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
@@ -38,7 +41,15 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 return methodResult;
             }
-            methodResult.Result = _mapper.Map<UserModel>(user);
+
+            var result = _mapper.Map<UserModel>(user);
+
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == user.Id, cancellationToken);
+            if (student != null)
+            {
+                result.CourseId = student.CourseId;
+            }
+            methodResult.Result = result;
             return methodResult;
         }
     }

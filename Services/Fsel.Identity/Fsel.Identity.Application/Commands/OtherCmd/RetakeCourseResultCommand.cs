@@ -11,7 +11,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.AuthCmd;
-    using Fsel.Identity.Application.Commands.UserOtpCmd;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.CommandModels;
     using Fsel.Identity.Application.Services.OrderService;

@@ -1,12 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 using System.Globalization;
+using System.Threading;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.AuthCmd;
-using Fsel.Identity.Application.Commands.UserOtpCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Services.OrderService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
@@ -128,13 +129,16 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region Add Platform to User
 
-            var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
-            if (platform != null)
+            switch (request.Role)
             {
-                user.UserPlatforms.Add(new UserPlatform
-                {
-                    PlatformId = platform.Id
-                });
+                case EnumRoleRegisterWithAdmin.CSO:
+                case EnumRoleRegisterWithAdmin.Teacher:
+                case EnumRoleRegisterWithAdmin.Moderator:
+                    await AddUserToPlatForm(user, EnumPlatformCode.LMSAdmin, cancellationToken);
+                    break;
+                default:
+                    await AddUserToPlatForm(user, EnumPlatformCode.LMS, cancellationToken);
+                    break;
             }
 
             #endregion Add Platform to User
@@ -150,11 +154,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region Send Code OTP
 
-            var userOtpCode = await _mediator.Send(new SaveUserOtpCommand { Id = user.Id }, cancellationToken);
+            var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
             var param = new SendOtpTemplateModel
             {
                 OtpCode = userOtpCode.Result,
-                AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, userOtpCode.Result),
+                AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, userOtpCode.Result, user.Id),
                 OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
             };
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
@@ -215,6 +219,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 user.Code = "Moderator";
             }
             return user;
+        }
+
+        private async Task AddUserToPlatForm(User user, EnumPlatformCode platformCode, CancellationToken cancellationToken)
+        {
+            var platform = await _platformRepository.GetPlatformAsync(platformCode, cancellationToken);
+            if (platform != null)
+            {
+                user.UserPlatforms.Add(new UserPlatform
+                {
+                    PlatformId = platform.Id
+                });
+            }
         }
     }
 }

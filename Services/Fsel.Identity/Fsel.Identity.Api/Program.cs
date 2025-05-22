@@ -12,6 +12,7 @@ using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
+using Fsel.Identity.Infrastructure.Common;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
@@ -34,7 +35,7 @@ builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IUserOtpRepository, UserOtpRepository>();
+builder.Services.AddScoped<IUserOtpCodeRepository, UserOtpCodeRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
 builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepository>();
 builder.Services.AddScoped<ICSORepository, CSORepository>();
@@ -54,12 +55,21 @@ builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRe
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
 builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
+builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
+builder.Services.AddScoped<ISchoolImportHistoryRepository, SchoolImportHistoryRepository>();
+builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
+builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
+builder.Services.AddScoped<SendStudentsFromFilePublisher>();
+
+//Common
+builder.Services.AddScoped<SaveOtpCodeConverter>();
 
 //Refit
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
@@ -79,15 +89,17 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.WeeklySnapShotLeaderBoard, typeof(LeaderBoardForSchoolConsumer) },
     { QueueSettings.PlantDefenderQueue.NameQueue.DeleteGuestStudent, typeof(DeleteGuestStudentConsumer) },
     { QueueSettings.UserQueue.NameQueue.UpdateStatusTrialStudent, typeof(UpdateTrialStudentStatusConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
-    { QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
+    //{ QueueSettings.LmsQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
+    //{ QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) },
     { QueueSettings.LmsQueue.NameQueue.StudentRankingEvent, typeof(StudentRankingEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddFeatureMission, typeof(AddFeatureMissionConsumer) },
     { QueueSettings.UserQueue.NameQueue.NoticeExtend, typeof(NoticeExtendPackageConsumer) },
     { QueueSettings.UserQueue.NameQueue.WeeklyNotice, typeof(WeeklyNoticeConsumer) },
     { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
-    { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) }
+    { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) },
+    { QueueSettings.UserQueue.NameQueue.CreateStudentsFromFile, typeof(CreateStudentsFromFileConsumer) },
+    { QueueSettings.UserQueue.NameQueue.AggregateDataStudentsInEvent, typeof(AggregateDataStudentsInEventConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

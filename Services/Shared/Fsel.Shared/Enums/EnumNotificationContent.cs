@@ -54,5 +54,9 @@ namespace Fsel.Shared.Enums
         FriendCompletedExam,
         FriendCompleteUnitOne,
         FriendPaymentSuccessfully,
+        RecallCoinSurvey,
+        SurveyReward,
+        IllegalCoinRecall,
+        AddCoinBuyCourse
     }
 }

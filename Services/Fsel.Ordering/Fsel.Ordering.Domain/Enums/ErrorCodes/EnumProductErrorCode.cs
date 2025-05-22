@@ -4,12 +4,18 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
 {
     public enum EnumProductErrorCode
     {
+        ProductNotExist,
         NotPartOfTheEvent,
         ExchangeExpirationDate,
         OutOfQuantity,
         NotEnoughTokens,
         CodeAlreadyExists,
+        NameAlreadyExists,
         WrongQuantity,
-        WrongExpirationDate
+        WrongExpirationDate,
+        EmptyPhoneNumber,
+        PhoneNumberIsInvalid,
+        GiftExchangeOff,
+        TransactionInProgress
     }
 }

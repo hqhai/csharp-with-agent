@@ -9,63 +9,61 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetVideoTimeCodeRankingQuery : IRequest<MethodResult<IList<TestResultRankingModel>>>
+    public class GetVideoTimeCodeRankingQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<TestResultRankingModel>>>
     {
         public Guid? VideoTimeCodeResultId { get; set; }
         public Guid? LessonResultId { get; set; }
         public EnumTimeCodeType? Type { get; set; }
     }
 
-    public class GetVideoTimeCodeRankingQueryHandler : IRequestHandler<GetVideoTimeCodeRankingQuery, MethodResult<IList<TestResultRankingModel>>>
+    public class GetVideoTimeCodeRankingQueryHandler : IRequestHandler<GetVideoTimeCodeRankingQuery, MethodResult<PagingItemsModel<TestResultRankingModel>>>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly ITrainingService _trainingService;
 
-        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, ILessonResultRepository lessonResultRepository, IVideoResultRepository videoResultRepository, IMapper mapper, IUserService userService, ITrainingService trainingService)
+        public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
+            ILessonResultRepository lessonResultRepository,
+            IVideoResultRepository videoResultRepository,
+            IUserService userService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
-            _mapper = mapper;
             _userService = userService;
-            _trainingService = trainingService;
         }
 
-        public async Task<MethodResult<IList<TestResultRankingModel>>> Handle(GetVideoTimeCodeRankingQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> Handle(GetVideoTimeCodeRankingQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<TestResultRankingModel>> methodResult = new MethodResult<IList<TestResultRankingModel>>();
+            MethodResult<PagingItemsModel<TestResultRankingModel>> methodResult = new MethodResult<PagingItemsModel<TestResultRankingModel>>();
 
             if (request.VideoTimeCodeResultId.HasValue)
             {
-                methodResult = await GetRankingToTimeCode(methodResult, request.VideoTimeCodeResultId.Value, cancellationToken);
+                methodResult = await GetRankingToTimeCode(methodResult, request, cancellationToken);
             }
             else if (request.LessonResultId.HasValue && request.Type.HasValue)
             {
-                methodResult = await GetRankingToTimeCode(methodResult, request.LessonResultId.Value, request.Type.Value, cancellationToken);
+                methodResult = await GetRankingToTimeCode(methodResult, request, request.Type.Value, cancellationToken);
             }
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<TestResultRankingModel>>> GetRankingToTimeCode(MethodResult<IList<TestResultRankingModel>> methodResult, Guid videoTimeCodeResultId, CancellationToken cancellationToken)
+        private async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> GetRankingToTimeCode(MethodResult<PagingItemsModel<TestResultRankingModel>> methodResult, GetVideoTimeCodeRankingQuery request, CancellationToken cancellationToken)
         {
-            List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.VideoTimeCode).FirstOrDefaultAsync(x => x.Id == videoTimeCodeResultId, cancellationToken);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.VideoTimeCode).FirstOrDefaultAsync(x => x.Id == request.VideoTimeCodeResultId, cancellationToken);
             if (videoTimeCodeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult));
@@ -87,109 +85,110 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 return methodResult;
             }
 
-            var students = await GetStudents(videoTimeCodeResult.StudentId);
-            if (students == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
-                return methodResult;
-            }
-            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable
-                            .Include(x => x.VideoResult)
-                            .ThenInclude(x => x.LessonResult)
-                            .Where(x => x.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && x.Status == EnumResultStatus.Done && students.Select(x => x.Id).Contains(x.StudentId))
-                            .Where(x => x.VideoResult != null && x.VideoResult.LessonResult != null && x.VideoResult.LessonResult.UnitId == lessonResult.UnitId && x.VideoResult.LessonResult.CourseId == lessonResult.CourseId)
-                            .ToListAsync(cancellationToken);
+            var query = from bastQ in _videoTimeCodeResultRepository.Queryable
+                        where bastQ.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId &&
+                              bastQ.Status == EnumResultStatus.Done &&
+                              bastQ.VideoResult!.LessonResult!.CourseId == lessonResult.CourseId &&
+                              bastQ.VideoResult.LessonResult.UnitId == lessonResult.UnitId &&
+                              bastQ.VideoResult.LessonResult.LessonId == lessonResult.LessonId
+                        select new TestResultRankingModel
+                        {
+                            WorkingTime = bastQ.WorkingTime,
+                            CorrectCount = bastQ.CorrectCount,
+                            CorrectTotal = bastQ.CorrectTotal,
+                            Id = bastQ.Id,
+                            Percent = bastQ.CorrectTotal != 0 ? Math.Round((double)bastQ.CorrectCount * 100 / bastQ.CorrectTotal, 0) : default,
+                            CreatedDate = bastQ.CreatedDate,
+                            Status = bastQ.Status,
+                            StudentId = bastQ.StudentId,
+                            Score = bastQ.CorrectCount,
+                            UpdatedDate = bastQ.UpdatedDate,
+                        };
 
-            foreach (var item in students)
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query.OrderByDescending(x => x.Percent).ThenBy(x => x.WorkingTime)
+                                   .ApplyPaging(request)
+                                   .AsNoTracking()
+                                   .ToListAsync(cancellationToken: cancellationToken)
+                                   .ConfigureAwait(false);
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
+            var students = studentResults?.Content?.Result;
+
+            foreach (var item in lists)
             {
-                var videoTimeCodeResultStudent = videoTimeCodeResults.FirstOrDefault(x => x.StudentId == item.Id);
-                var videoTimeCodeResultDto = _mapper.Map<TestResultRankingModel>(videoTimeCodeResultStudent);
-                if (videoTimeCodeResultStudent == null)
-                {
-                    videoTimeCodeResultDto = new TestResultRankingModel();
-                }
-                videoTimeCodeResultDto.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
-                videoTimeCodeResultDto.FullName = item?.User?.FullName;
-                videoTimeCodeResultDto.AvatarPath = item?.User?.AvatarPath;
-                testResultRankings.Add(videoTimeCodeResultDto);
+                var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                item.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
+                item.FullName = student?.User?.FullName;
+                item.AvatarPath = student?.User?.AvatarPath;
             }
-            methodResult.Result = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
+            methodResult.Result = new PagingItemsModel<TestResultRankingModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<IList<StudentModel>?> GetStudents(Guid studentId)
+        private async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> GetRankingToTimeCode(MethodResult<PagingItemsModel<TestResultRankingModel>> methodResult, GetVideoTimeCodeRankingQuery request, EnumTimeCodeType type, CancellationToken cancellationToken)
         {
-            var currentClass = await _trainingService.GetClassByStudentId(studentId);
-            var classStudentIds = currentClass.Content?.Result?.ClassStudents?.Select(x => x.StudentId).ToList();
-            if (classStudentIds == null)
-            {
-                return default;
-            }
-
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(classStudentIds);
-            var students = studentResults?.Content?.Result;
-            return students;
-        }
-
-        private async Task<MethodResult<IList<TestResultRankingModel>>> GetRankingToTimeCode(MethodResult<IList<TestResultRankingModel>> methodResult, Guid lessonResultId, EnumTimeCodeType type, CancellationToken cancellationToken)
-        {
-            List<TestResultRankingModel> testResultRankings = new List<TestResultRankingModel>();
+            ArgumentNullException.ThrowIfNull(request.LessonResultId);
             if (type == EnumTimeCodeType.Standalone)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(EnumTimeCodeType.Standalone));
                 return methodResult;
             }
-            var lessonResult = await _lessonResultRepository.GetByIdAsync(lessonResultId);
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId.Value);
             if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId, cancellationToken);
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            var students = await GetStudents(lessonResult.StudentId);
-            if (students == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(students));
-                return methodResult;
-            }
-            foreach (var item in students)
-            {
-                var videoTimeCodeResultStudent = await _videoTimeCodeResultRepository.Queryable
-                                        .Include(x => x.VideoResult)
-                                        .ThenInclude(x => x!.LessonResult)
-                                        .Where(x => x.VideoTimeCode != null && x.VideoTimeCode.VideoId == videoResult.VideoId && x.VideoTimeCode.TimeCodeType == type)
-                                        .Where(x => x.StudentId == item.Id && x.Status == EnumResultStatus.Done)
-                                        .Where(x => x.VideoResult != null && x.VideoResult.LessonResult != null && x.VideoResult.LessonResult.UnitId == lessonResult.UnitId && x.VideoResult.LessonResult.CourseId == lessonResult.CourseId)
-                                        .GroupBy(x => x.StudentId)
-                                        .Select(x => new TestResultRankingModel
-                                        {
-                                            CorrectCount = x.Sum(x => x.CorrectCount),
-                                            CorrectTotal = x.Sum(x => x.CorrectTotal),
-                                            Score = x.Sum(x => x.CorrectCount),
-                                            StudentId = x.Key,
-                                            WorkingTime = x.Sum(x => x.WorkingTime),
-                                            Percent = NumberHelper.GetPercent(x.Sum(x => x.CorrectCount), x.Sum(x => x.CorrectTotal)),
-                                            Status = x.Select(x => x.VideoResult).Select(x => x!.Status).FirstOrDefault(),
-                                        })
-                                        .FirstOrDefaultAsync(cancellationToken);
 
-                if (videoTimeCodeResultStudent == null)
-                {
-                    videoTimeCodeResultStudent = new TestResultRankingModel();
-                }
-                videoTimeCodeResultStudent.IsCurrentStudent = item.Id == videoResult.StudentId;
-                videoTimeCodeResultStudent.FullName = item?.User?.FullName;
-                videoTimeCodeResultStudent.AvatarPath = item?.User?.AvatarPath;
-                testResultRankings.Add(videoTimeCodeResultStudent);
-            }
+            var query = from bastQ in _videoTimeCodeResultRepository.Queryable
+                        where bastQ.VideoTimeCode!.VideoId == videoResult.VideoId &&
+                              bastQ.VideoTimeCode.TimeCodeType == type &&
+                              bastQ.VideoResult!.Status == EnumResultStatus.Done &&
+                              bastQ.VideoResult.LessonResult!.CourseId == lessonResult.CourseId &&
+                              bastQ.VideoResult.LessonResult.UnitId == lessonResult.UnitId &&
+                              bastQ.VideoResult.LessonResult.LessonId == lessonResult.LessonId
+                        group bastQ by new { bastQ.StudentId, bastQ.VideoResultId } into g
+                        select new TestResultRankingModel
+                        {
+                            CorrectCount = g.Sum(x => x.CorrectCount),
+                            CorrectTotal = g.Sum(x => x.CorrectTotal),
+                            Score = g.Sum(x => x.CorrectCount),
+                            StudentId = g.Key.StudentId,
+                            Id = g.Key.VideoResultId,
+                            WorkingTime = g.Sum(x => x.WorkingTime),
+                            Percent = g.Sum(x => x.CorrectTotal) != 0 ? Math.Round((double)g.Sum(x => x.CorrectCount) * 100 / g.Sum(x => x.CorrectTotal), 0) : default,
+                        };
 
-            methodResult.Result = testResultRankings.OrderByDescending(x => x.Status).ThenByDescending(x => x.Percent).ThenBy(x => x.FullName).ToList();
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query.OrderByDescending(x => x.Percent).ThenBy(x => x.WorkingTime)
+                                   .ApplyPaging(request)
+                                   .AsNoTracking()
+                                   .ToListAsync(cancellationToken: cancellationToken)
+                                   .ConfigureAwait(false);
+
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
+            var students = studentResults?.Content?.Result;
+
+            var videoResults = await _videoResultRepository.Queryable.WhereBulkContains(lists.Select(y => y.Id), x => x.Id).ToListAsync(cancellationToken: cancellationToken);
+
+            foreach (var item in lists)
+            {
+                var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                var videoResultStudent = videoResults.FirstOrDefault(x => x.Id == item.Id);
+                item.Status = videoResultStudent?.Status ?? default;
+                item.IsCurrentStudent = student?.Id == videoResult.StudentId;
+                item.FullName = student?.User?.FullName;
+                item.Percent = NumberHelper.ConvertRound(item.Percent);
+                item.AvatarPath = student?.User?.AvatarPath;
+            }
+            methodResult.Result = new PagingItemsModel<TestResultRankingModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

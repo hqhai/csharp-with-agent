@@ -7,7 +7,7 @@ namespace Fsel.Shared.Enums
     public enum EnumCourseLevel
     {
         [Description("Think A1")]
-        A1,
+        A1 = 0,
 
         [Description("Think A2")]
         A2,
@@ -33,13 +33,13 @@ namespace Fsel.Shared.Enums
         [Description("Mindset 3")]
         MS3,
 
-        [Description("Adult Foundation 1")]
-        AF1,
+        [Description("English Foundation - Level A1")]
+        EFA1,
 
-        [Description("Adult Foundation 2")]
-        AF2,
+        [Description("English Foundation - Level A2")]
+        EFA2,
 
-        [Description("Adult Foundation 3")]
-        AF3
+        [Description("English Foundation - Level B1")]
+        EFB1
     }
 }

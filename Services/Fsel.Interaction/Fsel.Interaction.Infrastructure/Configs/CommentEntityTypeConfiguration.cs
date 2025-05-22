@@ -18,6 +18,11 @@ namespace Fsel.Interaction.Infrastructure.Configs
               .HasConversion(
                   v => v.ToString(),
                   v => v.EnumParse<EnumInteractionType>());
+
+            builder.Property(e => e.Status)
+                   .HasMaxLength(100)
+                   .HasConversion(v => v.ToString(),
+                                  v => v.EnumParse<EnumCommentStatus>());
         }
     }
 }

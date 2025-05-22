@@ -22,13 +22,11 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
     public class SearchHistoryVoucherQueryHandler : IRequestHandler<SearchHistoryVoucherQuery, MethodResult<PagingItemsModel<HistoryVoucherModel>>>
     {
-        private readonly IVoucherRepository _voucherRepository;
         private readonly IOrderRepository _orderRepository;
         private readonly IUserService _userService;
 
-        public SearchHistoryVoucherQueryHandler(IVoucherRepository voucherRepository, IOrderRepository orderRepository, IUserService userService)
+        public SearchHistoryVoucherQueryHandler(IOrderRepository orderRepository, IUserService userService)
         {
-            _voucherRepository = voucherRepository;
             _orderRepository = orderRepository;
             _userService = userService;
         }
@@ -42,21 +40,40 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             {
                 OrderCode = p.Code,
                 DayUsed = p.CreatedDate,
-                Status = p.Status,
+                Status = p.Status == EnumOrderStatus.Payment,
                 VoucherId = p.VoucherId ?? default,
                 UserId = p.UserId,
                 VoucherCode = p.Voucher == null ? null : p.Voucher.Code
             });
 
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                var studentResult = await _userService.GetStudentByEmail(request.Keyword);
+                var student = studentResult.Content?.Result;
+                var userId = student?.UserId;
+
+                if (userId.HasValue)
+                {
+                    orders = orders.Where(p => p.UserId == userId);
+                }
+                else
+                {
+                    orders = orders.Where(m => (m.OrderCode ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.VoucherCode ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                }
+            }
+
             if (request.Day.HasValue)
             {
-                orders = orders.Where(p => p.DayUsed.Date == request.Day.Value.Date);
+                orders = orders.Where(p => p.DayUsed.HasValue && p.DayUsed.Value.Date == request.Day.Value.Date);
             }
 
             if (request.Status.HasValue)
             {
-                orders = orders.Where(p => request.Status == true ? p.Status == EnumOrderStatus.Payment : p.Status == EnumOrderStatus.New);
+                orders = orders.Where(p => p.Status == request.Status);
             }
+
+            orders = orders.OrderByDescending(m => m.DayUsed);
+
             int totalItem = await orders.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await orders
                     .ApplySortAndPaging(request)
@@ -64,7 +81,12 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var userIds = lists.Select(p => p.UserId).Distinct().ToList();
+            var nullableGuids = lists.Where(p => p.UserId.HasValue).Select(p => p.UserId).Distinct().ToList();
+            var userIds = new List<Guid>();
+            nullableGuids.ForEach(p =>
+            {
+                userIds.Add(p!.Value);
+            });
             var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
             var students = studentResults.Content?.Result;
             lists.ForEach(p =>

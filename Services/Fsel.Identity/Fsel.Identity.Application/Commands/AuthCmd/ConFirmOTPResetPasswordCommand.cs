@@ -3,7 +3,7 @@
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base.Managers;
-using Fsel.Identity.Application.Commands.UserOtpCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
@@ -48,10 +48,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.Otp, Email = request.Email, IsCheckExpiredTime = false }, cancellationToken);
+            var method = await _mediator.Send(new ConfirmOtpCommand { Otp = request.Otp, Email = request.Email, PhoneNumber = request.PhoneNumber, UserId = request.UserId, IsCheckExpiredTime = false }, cancellationToken);
             if (!method.IsOK || method.Result == null)
             {
-                methodResult.AddError(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
             var user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
@@ -76,7 +76,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.NewPassword);
             user.PasswordHash = hashPassword;
-            user.EmailConfirmed = true;
             await _userManager.UpdateAsync(user);
 
             methodResult.StatusCode = StatusCodes.Status200OK;

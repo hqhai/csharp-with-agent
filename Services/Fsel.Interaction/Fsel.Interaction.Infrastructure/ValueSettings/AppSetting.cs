@@ -10,11 +10,20 @@ namespace Fsel.Interaction.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public HarmfulContentConfigs? HarmfulContentConfigs { get; set; }
         public new Services? Services { get; set; }
+        public CoinConfig? CoinConfig { get; set; }
+        public OpenAiConfig? OpenAiConfig { get; set; }
     }
 
     public class ConstantUrl
     {
         public string? ConfirmOtpUrl { get; set; }
+    }
+
+    public class OpenAiConfig
+    {
+        public string? Uri { get; set; }
+        public string? ApiKey { get; set; }
+        public string? ModelCommentAI { get; set; }
     }
 
     public class HarmfulContentConfigs
@@ -47,5 +56,10 @@ namespace Fsel.Interaction.Infrastructure.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class CoinConfig
+    {
+        public double SurveyEvent { get; set; }
     }
 }

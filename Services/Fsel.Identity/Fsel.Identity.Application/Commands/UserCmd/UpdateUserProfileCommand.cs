@@ -44,7 +44,16 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
+            if (request.PhoneNumber != null && user.UserName == user.PhoneNumber)
+            {
+                var checkUserName = await _userManager.Users.AnyAsync(x => x.Id != user.Id && x.UserName == request.PhoneNumber, cancellationToken);
 
+                if (checkUserName)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.PhoneNumber));
+                    return methodResult;
+                }
+            }
             var userRoles = await _userManager.GetRolesAsync(user);
             var role = userRoles.FirstOrDefault();
             User? userView = null;

@@ -3,11 +3,14 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Shared.Constants;
 using Fsel.System.Domain.Entities;
+using Fsel.System.Domain.Entities.BlindBoxs;
 using Fsel.System.Domain.Entities.ChatBot;
 using Fsel.System.Domain.Entities.Chatbots;
 using Fsel.System.Domain.Entities.Configs;
+using Fsel.System.Domain.Entities.DailyQuiz;
 using Fsel.System.Domain.Entities.QuestBoards;
 using Fsel.System.Infrastructure.Configs;
+using Fsel.System.Infrastructure.Configs.BlindBoxs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -30,6 +33,8 @@ namespace Fsel.System.Infrastructure
             SeedTokenConfig(modelBuilder);
             SeedTechieConfig(modelBuilder);
             SeedTechieActionsConfig(modelBuilder);
+            SeedDisplayOrderConfig(modelBuilder);
+            SeedBlindBox(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
@@ -56,11 +61,24 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new TechieActionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentTechieEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LuckyTicketEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new FselRatingEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseTargetConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new CourseSuggestConfigEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new BannerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerScopeEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerImageEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BannerSettingEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new BannerStudentEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TokenHistoryTranslationEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DisplayOrderConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new BlindBoxChestConfigEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new BlindBoxChestEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new BlindBoxHistoryEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new BlindBoxUserEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new DailyQuizHistoryEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new DailyQuizAnswerEntityTypeConfigConfiguration());
+            modelBuilder.ApplyConfiguration(new DictionaryEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -97,9 +115,24 @@ namespace Fsel.System.Infrastructure
         public DbSet<CourseTargetConfig> CourseTargetConfigs { get; set; }
         public DbSet<CourseSuggestConfig> CourseSuggestConfigs { get; set; }
         public DbSet<Banner> Banners { get; set; }
+        public DbSet<BannerSetting> BannerSettings { get; set; }
+        public DbSet<BannerScope> BannerScopes { get; set; }
+        public DbSet<BannerImage> BannerImages { get; set; }
         public DbSet<BannerStudent> BannerStudents { get; set; }
         public DbSet<TokenHistory> TokenHistories { get; set; }
         public DbSet<TokenHistoryTranslation> TokenHistoryTranslations { get; set; }
+        public DbSet<FselRating> FselRatings { get; set; }
+        public DbSet<BlindBox> BlindBoxes { get; set; }
+        public DbSet<BlindBoxChest> BlindBoxChests { get; set; }
+        public DbSet<BlindBoxChestConfig> BlindBoxChestConfigs { get; set; }
+        public DbSet<BlindBoxHistory> BlindBoxHistories { get; set; }
+        public DbSet<BlindBoxUser> BlindBoxUsers { get; set; }
+        public DbSet<DailyQuizQuestion> DailyQuizQuestions { get; set; }
+        public DbSet<DailyQuizAnswer> DailyQuizAnswers { get; set; }
+        public DbSet<DailyQuizHistory> DailyQuizHistories { get; set; }
+        public DbSet<DailyQuizWinner> DailyQuizWinners { get; set; }
+        public DbSet<Dictionary> Dictionaries { get; set; }
+        public DbSet<UnknownWord> UnknownWords { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -177,6 +210,31 @@ namespace Fsel.System.Infrastructure
 
             builder.Entity<TechieAction>().HasData(techieActions);
             builder.Entity<TechieActionTranslation>().HasData(packageTranslations);
+        }
+
+        private static void SeedDisplayOrderConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.DisplayOrderConfig);
+            var displayOrderConfigs = ConvertHelper.DeserializeFromFilePath<IList<DisplayOrderConfig>>(path);
+            ArgumentNullException.ThrowIfNull(displayOrderConfigs);
+            builder.Entity<DisplayOrderConfig>().HasData(displayOrderConfigs);
+        }
+
+        private static void SeedBlindBox(ModelBuilder builder)
+        {
+            var blindBoxPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBox);
+            var blindBoxChestPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBoxChest);
+            var blindBoxChestConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBoxChestConfig);
+            var blindBoxes = ConvertHelper.DeserializeFromFilePath<IList<BlindBox>>(blindBoxPath);
+            var blindBoxChests = ConvertHelper.DeserializeFromFilePath<IList<BlindBoxChest>>(blindBoxChestPath);
+            var blindBoxChestConfigs = ConvertHelper.DeserializeFromFilePath<IList<BlindBoxChestConfig>>(blindBoxChestConfigPath);
+            ArgumentNullException.ThrowIfNull(blindBoxes);
+            ArgumentNullException.ThrowIfNull(blindBoxChests);
+            ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
+
+            builder.Entity<BlindBox>().HasData(blindBoxes);
+            builder.Entity<BlindBoxChest>().HasData(blindBoxChests);
+            builder.Entity<BlindBoxChestConfig>().HasData(blindBoxChestConfigs);
         }
 
         //private static void SeedTechieActionsConfig(ModelBuilder builder)

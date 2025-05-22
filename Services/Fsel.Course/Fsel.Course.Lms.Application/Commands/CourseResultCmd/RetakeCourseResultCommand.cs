@@ -32,6 +32,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     public class RetakeCourseResultCommand : IRequest<MethodResult<CourseResultModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 
     public class RetakeCourseResultCommandHandler : IRequestHandler<RetakeCourseResultCommand, MethodResult<CourseResultModel>>
@@ -75,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseResultModel> methodResult = new MethodResult<CourseResultModel>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -99,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 return methodResult;
             }
 
-            var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync();
+            var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!userCourseSettingsResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingsResult));
@@ -145,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             var classResult = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel
             {
                 CourseId = method.Result?.CourseId ?? default,
-                UserId = _authContext.CurrentUserId,
+                UserId = request.UserId ?? _authContext.CurrentUserId,
             });
 
             if (!classResult.IsSuccessStatusCode)
@@ -159,7 +161,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 IsDeduction = true,
                 CourseLevel = request.CourseLevel,
                 Type = EnumUserCourseType.ResetAndLearnAgain,
-                UserId = _authContext.CurrentUserId
+                UserId = request.UserId ?? _authContext.CurrentUserId
             }, cancellationToken).ConfigureAwait(false);
 
             await _userService.UpdateCourseToStudentAsync(method.Result?.CourseId ?? default);
@@ -243,7 +245,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             if (courseResultActive != null)
             {
                 courseResultActive.WorkingStatus = EnumWorkingStatus.InActive;
-                _courseResultRepository.Update(courseResultActive);
+                _courseResultRepository.Update(courseResultActive, false, x => x.CourseId, x => x.StudentId);
                 await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
@@ -264,7 +266,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             {
                 x.WorkingStatus = EnumWorkingStatus.NotWorking;
                 return x;
-            }).ToList());
+            }).ToList(), false, x => x.CourseId, x => x.StudentId);
             await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             return courseResults.Select(x => x.CourseId).ToList();
         }

@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
     using Fsel.Identity.Application.Services.LmsCourseService.QueryModels;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -66,5 +67,17 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1.1/admin/course")]
         Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByIdsAsync([FromBody] IList<Guid> courseIds);
+
+        [Post("/v1.1/admin/course")]
+        Task<IApiResponse<MethodResult<IList<CourseModel>>>> Get([FromBody] IList<Guid> courseIds);
+
+        [Post("/v1.1/admin/other/param-beginner-guide")]
+        Task<IApiResponse<MethodResult<IList<ParamBeginnerGuideModel>>>> GetParamBeginnerGuide([FromBody] IList<Guid> studentIds);
+
+        [Post("/v1/admin/student/aggregate-data-students")]
+        Task<IApiResponse<MethodResult<AggregateDataStudentsByAdminModels>>> AggregateDataStudents([FromBody] AggregateDataStudentsByAdminQueryModels students);
+
+        [Post("/v1/report/aggregate-data-students-in-event")]
+        Task<IApiResponse<MethodResult<IList<AggregateDataLearnStudentsInEventModel>>>> AggregateDataStudentsInEvent([Body] AggregateDataLearnStudentsInEventQueryModel students);
     }
 }

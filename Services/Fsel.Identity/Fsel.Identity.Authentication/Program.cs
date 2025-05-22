@@ -20,6 +20,7 @@ using Fsel.Identity.Application.Services.UserProfileService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
+using Fsel.Identity.Infrastructure.Common;
 using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
@@ -255,7 +256,7 @@ builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
 builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
 builder.Services.AddScoped<IParentRepository, ParentRepository>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IUserOtpRepository, UserOtpRepository>();
+builder.Services.AddScoped<IUserOtpCodeRepository, UserOtpCodeRepository>();
 builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
 builder.Services.AddScoped<ICSORepository, CSORepository>();
 builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepository>();
@@ -276,6 +277,10 @@ builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRe
 builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
 builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
 builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
+builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
+builder.Services.AddScoped<ISchoolImportHistoryRepository, SchoolImportHistoryRepository>();
+builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
+builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
 
 // Event
 builder.Services.AddTransient<IEventSink, TokenIssuedEventHandler>();
@@ -285,6 +290,11 @@ builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
+builder.Services.AddScoped<SendStudentsFromFilePublisher>();
+
+//Common
+builder.Services.AddScoped<SaveOtpCodeConverter>();
 
 //Refit
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);

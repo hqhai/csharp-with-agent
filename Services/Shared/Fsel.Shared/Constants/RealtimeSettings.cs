@@ -4,6 +4,36 @@ namespace Fsel.Shared.Constants
 {
     public static class RealtimeSettings
     {
+        public static class SendDictionaryHub
+        {
+            public const string Pattern = $"/get-dictionary";
+
+            public static class Methods
+            {
+                public const string GetDictionary = $"GetDictionary";
+            }
+        }
+
+        public static class SendNotifyBuyBlindBoxHub
+        {
+            public const string Pattern = $"/buy-blind-box";
+
+            public static class Methods
+            {
+                public const string BuyBlindBox = $"BuyBlindBox";
+            }
+        }
+
+        public static class SendStudentsFromFileHub
+        {
+            public const string Pattern = $"/send-students-from-file";
+
+            public static class Methods
+            {
+                public const string SendStudentsFromFile = $"SendStudentsFromFile";
+            }
+        }
+
         public static class DiscussionBoardHub
         {
             public const string Pattern = $"/discussion-board";
@@ -111,6 +141,26 @@ namespace Fsel.Shared.Constants
             public static class Methods
             {
                 public const string Payment = $"Payment";
+            }
+        }
+
+        public static class BannerHub
+        {
+            public const string Pattern = $"/banner";
+
+            public static class Methods
+            {
+                public const string Banner = $"Banner";
+            }
+        }
+
+        public static class TranscriptHub
+        {
+            public const string Pattern = $"/transcript";
+
+            public static class Methods
+            {
+                public const string Transcript = $"Transcript";
             }
         }
     }

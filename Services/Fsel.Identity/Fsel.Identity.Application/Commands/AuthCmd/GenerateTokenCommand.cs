@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
-            var user = await _userManager.Users.Include(x => x!.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
@@ -128,7 +128,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var student = user.Student;
                 tokenLogin.IsOrder = false;
                 tokenLogin.ClassId = student?.ClassId;
-                var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
+                var classStudent = await _trainingService.GetClassToStudentId(student?.Id ?? default);
                 var @class = classStudent?.Content?.Result;
                 var isPlacementTest = await _lmsCourseService.IsPlacementTestAsync(student?.Id ?? default);
                 var isSurvey = await _interactionService.IsSurveyCompleted(request.Id ?? default);
@@ -144,6 +144,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 {
                     tokenLogin.IsSurvey = isSurvey?.Content?.Result;
                 }
+            }
+            if (userRoles.Contains(EnumRole.AdminSchool.ToString()))
+            {
+                tokenLogin.SchoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
             }
 
             methodResult.Result = tokenLogin;

@@ -236,7 +236,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             GC.SuppressFinalize(this);
         }
 
-        public async Task<MethodResult<IList<string>>> UploadFilesAsync(EnumBucketType? bucketType, IList<IFormFile> files, EnumFolderType folderType, bool isResize = false, bool isValidEmpty = false)
+        public async Task<MethodResult<IList<string>>> UploadFilesAsync(EnumBucketType? bucketType, IList<IFormFile> files, EnumFolderType folderType, bool isResize = false, bool isValidEmpty = false, bool isAddSuffix = true)
         {
             MethodResult<IList<string>> results = new MethodResult<IList<string>>();
             results.Result = new List<string>();
@@ -245,7 +245,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             {
                 foreach (var file in files)
                 {
-                    var uploadFile = UploadFileAsync(bucketType, file, folderType, isResize);
+                    var uploadFile = UploadFileAsync(bucketType, file, folderType, isResize, isValidEmpty, isAddSuffix);
                     var result = await uploadFile.WaitAsync(cancellationToken: CancellationToken.None).ConfigureAwait(true);
                     if (!string.IsNullOrEmpty(result.Result))
                     {
@@ -270,15 +270,20 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return await UploadFileAsync(bucketType, stream, key);
         }
 
-        public async Task<string?> UploadFileAsync(EnumBucketType? bucketType, IFormFile? file, string? folder, bool isResize = false)
+        public async Task<string?> UploadFileAsync(EnumBucketType? bucketType, IFormFile? file, string? folder, bool isResize = false, bool isAddSuffix = true)
         {
             if (file == null)
             {
                 return default;
             }
 
-            var randomValue = _randomSecure.Next(9999).ToString(CultureInfo.InvariantCulture);
-            var key = PathHelper.Combine(folder, file.FileName.ReplaceSpecialChars().AddSuffix(randomValue, DateTime.UtcNow));
+            var fileName = file.FileName;
+            if (isAddSuffix)
+            {
+                var randomValue = _randomSecure.Next(9999).ToString(CultureInfo.InvariantCulture);
+                fileName = file.FileName.ReplaceSpecialChars().AddSuffix(randomValue, DateTime.UtcNow);
+            }
+            var key = PathHelper.Combine(folder, fileName);
             Stream stream;
             if (isResize)
             {
@@ -292,7 +297,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             return await UploadFileAsync(bucketType, stream, key);
         }
 
-        public async Task<MethodResult<string?>> UploadFileAsync(EnumBucketType? bucketType, IFormFile? file, EnumFolderType folderType, bool isResize = false, bool isValidEmpty = false)
+        public async Task<MethodResult<string?>> UploadFileAsync(EnumBucketType? bucketType, IFormFile? file, EnumFolderType folderType, bool isResize = false, bool isValidEmpty = false, bool isAddSuffix = true)
         {
             MethodResult<string?> result = await IsValidFileAsync(file, folderType, isValidEmpty);
             if (file == null || !result.IsOK)
@@ -300,7 +305,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 return result;
             }
 
-            var filePath = await UploadFileAsync(bucketType, file, folderType.ToString(), isResize);
+            var filePath = await UploadFileAsync(bucketType, file, folderType.ToString(), isResize, isAddSuffix);
             if (string.IsNullOrEmpty(filePath))
             {
                 result.AddErrorServer();

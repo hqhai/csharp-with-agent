@@ -10,6 +10,8 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public Otp? Otp { get; set; }
         public ConstantUrl? ConstantUrl { get; set; }
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
+        public SharePointConfig? SharePointConfig { get; set; }
+        public DailyQuizConfig? DailyQuizConfig { get; set; }
         public new Services? Services { get; set; }
 
         public OpenAiConfig? OpenAiConfig { get; set; }
@@ -25,6 +27,16 @@ namespace Fsel.System.Infrastructure.ValueSettings
     {
         public string? Uri { get; set; }
         public string? ApiKey { get; set; }
+    }
+
+    public class SharePointConfig
+    {
+        public string? ClientId { get; set; }
+        public string? ClientSecret { get; set; }
+        public string? TenantId { get; set; }
+        public string? FSELContentTeamSiteId { get; set; }
+        public string? FSELContentTeamFileId { get; set; }
+        public string? FSELContentTeamSheetName { get; set; }
     }
 
     public class ConstantUrl
@@ -77,5 +89,15 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class DailyQuizConfig
+    {
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public int NumberQuestion { get; set; }
+        public int NumberCorrect { get; set; }
+        public int NumberWinner { get; set; }
+        public int EndHour { get; set; }
     }
 }

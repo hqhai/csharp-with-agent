@@ -5,8 +5,10 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Globalization;
     using System.Linq;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.TrainingService;
@@ -53,7 +55,22 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 return methodResult;
             }
             var usersByRole = await _userManager.GetUsersInRoleAsync(request.Role.ToString() ?? string.Empty);
+            var query = _userManager.Users;
             IQueryable<UserSearchModel>? userQuery = default;
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
+                if (request.Keyword.IsValidPhoneNumber())
+                {
+                    query = query.Where(m => m.PhoneNumber == request.Keyword);
+                }
+                else
+                {
+                    query = query.Where(m => m.FullName!.Contains(request.Keyword));
+                }
+            }
+
             if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
                 userQuery = from u in _userManager.Users
@@ -70,7 +87,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 Email = u.Email,
                                 TeacherId = t.Id,
                                 CreatedDate = u.CreatedDate,
-                                Status = u.LockoutEnabled,
+                                Status = !u.Status.HasValue || u.Status == EnumUserStatus.Active,
                             };
 
                 if (request.RoleTeachers != null && request.RoleTeachers.Any(x => x == EnumRoleTeacher.Teacher))
@@ -96,7 +113,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 Email = u.Email,
                                 CSOId = cso.Id,
                                 CreatedDate = u.CreatedDate,
-                                Status = u.LockoutEnabled,
+                                Status = !u.Status.HasValue || u.Status == EnumUserStatus.Active,
                             };
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
@@ -112,13 +129,8 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                 Email = u.Email,
                                 NumberClass = 0,
                                 CreatedDate = u.CreatedDate,
-                                Status = u.LockoutEnabled,
+                                Status = !u.Status.HasValue || u.Status == EnumUserStatus.Active,
                             };
-            }
-
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                userQuery = userQuery?.Where(m => m.PhoneNumber == request.Keyword || (m.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
             }
 
             int totalItem = userQuery != null ? await userQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false) : default;

@@ -42,42 +42,52 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
 
             var teacherQuery = _teacherRepository.Queryable
                               .Include(x => x.User)
-                              .Select(x => new TeacherModel
-                              {
-                                  Id = x.Id,
-                                  CourseLevels = x.CourseLevels,
-                                  CourseTypes = x.CourseTypes,
-                                  PassportPath = x.PassportPath,
-                                  UniversityDegreePath = x.UniversityDegreePath,
-                                  CertificationPath = x.CertificationPath,
-                                  PoliceClearancePath = x.PoliceClearancePath,
-                                  UserId = x.UserId,
-                                  CreatedDate = x.CreatedDate,
-                                  CreatedUserId = x.CreatedUserId,
-                                  CreatedFullName = x.CreatedFullName,
-                                  UpdatedDate = x.UpdatedDate,
-                                  UpdatedUserId = x.UpdatedUserId,
-                                  UpdatedFullName = x.UpdatedFullName,
-                                  User = new UserModel
-                                  {
-                                      Id = x.User!.Id,
-                                      FullName = x.User.FullName,
-                                      AvatarPath = x.User.AvatarPath,
-                                      Birthday = x.User.Birthday,
-                                      PhoneNumber = x.User.PhoneNumber,
-                                      Gender = x.User.Gender,
-                                      Email = x.User.Email,
-                                      Address = x.User.Address
-                                  }
-                              });
+                              .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                teacherQuery = teacherQuery.Where(m => m.Id.ToString() == request.Keyword || ((m.User.FullName ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())));
+                request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    teacherQuery = teacherQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    teacherQuery = teacherQuery.Where(m => m.User != null && m.User.FullName!.Contains(request.Keyword));
+                }
             }
 
-            int totalItem = await teacherQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await teacherQuery
+            var dataQuery = teacherQuery.Select(x => new TeacherModel
+            {
+                Id = x.Id,
+                CourseLevels = x.CourseLevels,
+                CourseTypes = x.CourseTypes,
+                PassportPath = x.PassportPath,
+                UniversityDegreePath = x.UniversityDegreePath,
+                CertificationPath = x.CertificationPath,
+                PoliceClearancePath = x.PoliceClearancePath,
+                UserId = x.UserId,
+                CreatedDate = x.CreatedDate,
+                CreatedUserId = x.CreatedUserId,
+                CreatedFullName = x.CreatedFullName,
+                UpdatedDate = x.UpdatedDate,
+                UpdatedUserId = x.UpdatedUserId,
+                UpdatedFullName = x.UpdatedFullName,
+                User = new UserModel
+                {
+                    Id = x!.User!.Id,
+                    FullName = x.User.FullName,
+                    AvatarPath = x.User.AvatarPath,
+                    Birthday = x.User.Birthday,
+                    PhoneNumber = x.User.PhoneNumber,
+                    Gender = x.User.Gender,
+                    Email = x.User.Email,
+                    Address = x.User.Address
+                }
+            });
+
+            int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await dataQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)

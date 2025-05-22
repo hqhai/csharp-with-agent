@@ -184,8 +184,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 if (videoResult != null && videoTimeCode != null)
                 {
                     videoResult.CurrentVideoTimeCodeId = videoTimeCode.Id;
-                    _videoResultRepository.Update(videoResult);
-                    await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _videoResultRepository.BulkMergeAsync(new List<VideoResult>() { videoResult });
                 }
             }
         }
@@ -196,8 +195,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (videoResult != null)
             {
                 videoResult.Status = EnumResultStatus.Done;
-                _videoResultRepository.Update(videoResult);
-                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _videoResultRepository.BulkMergeAsync(new List<VideoResult>() { videoResult });
             }
         }
 
@@ -229,8 +227,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
             {
                 lessonResult.Status = EnumResultStatus.New;
-                _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.BulkMergeAsync(new List<LessonResult>() { lessonResult });
             }
             return lessonResult;
         }
@@ -241,8 +238,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (unitResult != null && unitResult.Status == EnumResultStatus.Unfinished)
             {
                 unitResult.Status = EnumResultStatus.New;
-                _unitResultRepository.Update(unitResult);
-                await _unitResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitResultRepository.BulkMergeAsync(new List<UnitResult>() { unitResult });
             }
         }
 
@@ -252,8 +248,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (finalTestResult != null && finalTestResult.Status == EnumResultStatus.Unfinished)
             {
                 finalTestResult.Status = EnumResultStatus.New;
-                _finalTestResultRepository.Update(finalTestResult);
-                await _finalTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _finalTestResultRepository.BulkMergeAsync(new List<FinalTestResult>() { finalTestResult });
             }
         }
 
@@ -268,8 +263,8 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (mockTestResult != null && mockTestResult.Status == EnumResultStatus.Unfinished)
             {
                 mockTestResult.Status = EnumResultStatus.New;
-                _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _mockTestResultRepository.BulkMergeAsync(new List<MockTestResult>() { mockTestResult });
             }
         }
     }

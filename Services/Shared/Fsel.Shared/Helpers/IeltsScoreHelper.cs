@@ -123,7 +123,7 @@ namespace Fsel.Shared.Helpers
             return default;
         }
 
-        public static int GetInitialAge(EnumPlacementTestLevel? level, int age)
+        public static int GetInitialAge(EnumPlacementTestLevel? level, int age = default)
         {
             if (level.HasValue)
             {
@@ -264,25 +264,89 @@ namespace Fsel.Shared.Helpers
 
             private static readonly List<AssessmentPlacementTestModel> listAssessment = new List<AssessmentPlacementTestModel>
             {
-                 new AssessmentPlacementTestModel{
-                    DesiredLevel = EnumCourseLevel.A1,
-                    StartingLevel = EnumCourseLevel.B1,
-                    Levels = new List<LevelScoreModel>
-                    {
-                        new LevelScoreModel{Level = EnumPlacementTestLevel.B1,CorrectCount=0, CorrectTotal=numberOfPoints},
-                        new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=0, CorrectTotal=numberOfPoints},
-                        new LevelScoreModel{Level = EnumPlacementTestLevel.A1,CorrectCount=0, CorrectTotal=numberOfPoints}
-                    }
-                 },
-                  new AssessmentPlacementTestModel{
-                    DesiredLevel = EnumCourseLevel.A2,
-                    StartingLevel = EnumCourseLevel.B1,
-                    Levels = new List<LevelScoreModel>
-                    {
-                        new LevelScoreModel{Level = EnumPlacementTestLevel.B1,CorrectCount=0, CorrectTotal=numberOfPoints},
-                        new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=0, CorrectTotal=numberOfPoints},
-                        new LevelScoreModel{Level = EnumPlacementTestLevel.A1,CorrectCount=numberOfPoints, CorrectTotal=numberOfPoints}
-                    }
+                new AssessmentPlacementTestModel
+                {
+                   DesiredLevel = EnumCourseLevel.EFB1,
+                   StartingLevel = EnumCourseLevel.A2,
+                   Levels = new List<LevelScoreModel>
+                   {
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=numberOfPoints, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.B1,CorrectCount=0, CorrectTotal=numberOfPoints}
+                   }
+                },
+                new AssessmentPlacementTestModel
+                {
+                   DesiredLevel = EnumCourseLevel.EFB1,
+                   StartingLevel = EnumCourseLevel.B1,
+                   Levels = new List<LevelScoreModel>
+                   {
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.B1,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=numberOfPoints, CorrectTotal=numberOfPoints}
+                   }
+                },
+                new AssessmentPlacementTestModel
+                {
+                   DesiredLevel = EnumCourseLevel.EFA2,
+                   StartingLevel = EnumCourseLevel.A2,
+                   Levels = new List<LevelScoreModel>
+                   {
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A1,CorrectCount=numberOfPoints, CorrectTotal=numberOfPoints}
+                   }
+                },
+                new AssessmentPlacementTestModel
+                {
+                   DesiredLevel = EnumCourseLevel.EFA2,
+                   StartingLevel = EnumCourseLevel.B1,
+                   Levels = new List<LevelScoreModel>
+                   {
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.B1,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A1,CorrectCount=numberOfPoints, CorrectTotal=numberOfPoints}
+                   }
+                },
+                new AssessmentPlacementTestModel
+                {
+                   DesiredLevel = EnumCourseLevel.EFA1,
+                   StartingLevel = EnumCourseLevel.A2,
+                   Levels = new List<LevelScoreModel>
+                   {
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A1,CorrectCount=0, CorrectTotal=numberOfPoints}
+                   }
+                },
+                new AssessmentPlacementTestModel
+                {
+                   DesiredLevel = EnumCourseLevel.EFA1,
+                   StartingLevel = EnumCourseLevel.B1,
+                   Levels = new List<LevelScoreModel>
+                   {
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.B1,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A1,CorrectCount=0, CorrectTotal=numberOfPoints}
+                   }
+                },
+                new AssessmentPlacementTestModel
+                {
+                   DesiredLevel = EnumCourseLevel.A1,
+                   StartingLevel = EnumCourseLevel.B1,
+                   Levels = new List<LevelScoreModel>
+                   {
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.B1,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A1,CorrectCount=0, CorrectTotal=numberOfPoints}
+                   }
+                },
+                new AssessmentPlacementTestModel
+                {
+                   DesiredLevel = EnumCourseLevel.A2,
+                   StartingLevel = EnumCourseLevel.B1,
+                   Levels = new List<LevelScoreModel>
+                   {
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.B1,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A2,CorrectCount=0, CorrectTotal=numberOfPoints},
+                       new LevelScoreModel{Level = EnumPlacementTestLevel.A1,CorrectCount=numberOfPoints, CorrectTotal=numberOfPoints}
+                   }
                 },
                 new AssessmentPlacementTestModel{
                     DesiredLevel = EnumCourseLevel.B1,

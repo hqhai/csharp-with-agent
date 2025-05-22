@@ -5,13 +5,13 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Models;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -29,22 +29,34 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
         private readonly ITrainingService _trainingService;
         private readonly IOrderService _orderService;
         private readonly ISystemService _systemService;
+        private readonly IUserSchoolRepository _userSchoolRepository;
 
-        public GetStudentProfileQueryHandler(IMapper mapper, UserManager<User> userManager, ITrainingService trainingService, IOrderService orderService, ISystemService systemService)
+        public GetStudentProfileQueryHandler(IMapper mapper,
+            UserManager<User> userManager,
+            ITrainingService trainingService,
+            IOrderService orderService,
+            ISystemService systemService,
+            IUserSchoolRepository userSchoolRepository)
         {
             _mapper = mapper;
             _userManager = userManager;
             _trainingService = trainingService;
             _orderService = orderService;
             _systemService = systemService;
+            _userSchoolRepository = userSchoolRepository;
         }
 
         public async Task<MethodResult<StudentModel>> Handle(GetStudentProfileQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
-
-            var userView = await _userManager.Users.Include(x => x!.Student)
+            var isStudentToSchool = await _userSchoolRepository.CheckStudentToAdminSchoolAsync(request.StudentId);
+            if (!isStudentToSchool)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUserSchoolErrorCode.StudentNotInSchool), nameof(isStudentToSchool));
+                return methodResult;
+            }
+            var userView = await _userManager.Users.Include(x => x.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
                                                    .FirstOrDefaultAsync(x => x.Student != null && x.Student.Id == request.StudentId, cancellationToken);
             if (userView == null)
@@ -53,6 +65,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 return methodResult;
             }
             var student = userView.Student;
+
             var parentStudent = student?.ParentStudents.FirstOrDefault();
             if (student != null && parentStudent != null)
             {
@@ -86,7 +99,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent.User);
                 userModel.Parent.Occupation = parentStudent.Parent.Occupation;
             }
-            var classStudent = await _trainingService.GetClassByStudentId(student?.Id ?? default);
+            var classStudent = await _trainingService.GetClassToStudentId(student?.Id ?? default);
             var @class = classStudent?.Content?.Result;
             if (@class != null)
             {

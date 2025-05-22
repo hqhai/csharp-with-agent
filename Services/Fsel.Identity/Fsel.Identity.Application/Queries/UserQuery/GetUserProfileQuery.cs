@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.OrderService;
+    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -30,8 +31,9 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly ITrainingService _trainingService;
         private readonly IOrderService _orderService;
         private readonly ILmsCourseService _lmsCourseService;
+        private readonly ISystemService _systemService;
 
-        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager, ITrainingService trainingService, IOrderService orderService, ILmsCourseService lmsCourseService)
+        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager, ITrainingService trainingService, IOrderService orderService, ILmsCourseService lmsCourseService, ISystemService systemService)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -39,6 +41,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             _trainingService = trainingService;
             _orderService = orderService;
             _lmsCourseService = lmsCourseService;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<UserProfileModel>> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
@@ -99,6 +102,11 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                         .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
+            else if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            {
+                userView = await _userManager.Users.Include(x => x.UserSchools)
+                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId && x.EmailConfirmed, cancellationToken);
+            }
             else if (userRoles.FirstOrDefault() == EnumRole.Moderator.ToString() || userRoles.FirstOrDefault() == EnumRole.MasterAdmin.ToString() || userRoles.FirstOrDefault() == EnumRole.Admin.ToString())
             {
                 userView = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
@@ -121,7 +129,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     userModel.CountPTResult = countResult?.Content?.Result ?? default;
                     if (student.CreatedByParent == false)
                     {
-                        var classStudent = await _trainingService.GetClassByStudentId(student.Id);
+                        var classStudent = await _trainingService.GetClassToStudentId(student.Id);
                         if (!classStudent.IsSuccessStatusCode)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classStudent));
@@ -176,7 +184,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     }
                 }
             }
-
             if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString())
             {
                 var parent = userView?.Parent;
@@ -187,7 +194,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
                     foreach (var student in userModel.Students)
                     {
-                        var classStudent = await _trainingService.GetClassByStudentId(student.Id);
+                        var classStudent = await _trainingService.GetClassToStudentId(student.Id);
                         if (!classStudent.IsSuccessStatusCode)
                         {
                             methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classStudent));
@@ -202,7 +209,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     }
                 }
             }
-
             if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString())
             {
                 var teacher = userView?.Teacher;
@@ -212,12 +218,20 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                     _mapper.Map(teacher, userModel);
                 }
             }
-
             if (userRoles.FirstOrDefault() == EnumRole.CSO.ToString())
             {
                 _mapper.Map(userView?.CSO, userModel);
             }
-
+            if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            {
+                var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                if (schoolId.HasValue)
+                {
+                    var schoolResult = await _systemService.GetSchoolByIds(new List<Guid> { schoolId.Value });
+                    userModel.School = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
+                    userModel.SchoolName = schoolResult.Content?.Result?.FirstOrDefault()?.Name;
+                }
+            }
             userModel.Roles = userRoles;
             methodResult.Result = userModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

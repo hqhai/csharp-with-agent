@@ -46,6 +46,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly ITrainingService _trainingService;
         private readonly AuthContext _authContext;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
 
         public GetLessonOverviewQueryHandler(IUserService userService,
             ILessonResultRepository lessonResultRepository,
@@ -60,7 +61,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             IUnitResultRepository unitResultRepository,
             IFinalTestResultRepository finalTestResultRepository,
             ITrainingService trainingService,
-            AuthContext authContext)
+            AuthContext authContext,
+            IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
         {
             _userService = userService;
             _lessonResultRepository = lessonResultRepository;
@@ -76,6 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             _finalTestResultRepository = finalTestResultRepository;
             _trainingService = trainingService;
             _authContext = authContext;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
         }
 
         public async Task<MethodResult<LessonOverviewModel>> Handle(GetLessonOverviewQuery request, CancellationToken cancellationToken)
@@ -116,14 +119,14 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
         public async Task<MethodResult<(Guid?, Guid)>> Validate()
         {
             MethodResult<(Guid?, Guid)> methodResult = new MethodResult<(Guid?, Guid)>();
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentsResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentsResult));
                 return methodResult;
             }
             var studentId = studentsResult.Content?.Result?.Id;
-            var classResult = await _trainingService.GetClassByStudentId(studentId ?? default);
+            var classResult = await _trainingService.GetClassToStudentIdAsync(studentId ?? default);
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError));
@@ -207,8 +210,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id);
                 if (videoResult != null && videoResult.Status != EnumResultStatus.Done && videoResult.CurrentVideoTimeCodeId.HasValue)
                 {
-                    var videoTimeCode = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId.Value);
-                    var videoTimeCodeResult = videoTimeCode?.VideoTimeCodeResults.FirstOrDefault();
+                    var videoTimeCode = await _videoTimeCodeRepository.Queryable.FirstOrDefaultAsync(x => x.Id == videoResult.CurrentVideoTimeCodeId.Value);
+                    var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoResult.CurrentVideoTimeCodeId.Value);
+
                     if (videoTimeCode != null && videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone && (videoTimeCodeResult == null || videoTimeCodeResult.Status != EnumResultStatus.Done))
                     {
                         (lessonOverview.ObjectId, lessonOverview.Status) = (videoTimeCode.Id, GetStatusOverview(videoTimeCodeResult?.Status ?? EnumResultStatus.New));
@@ -347,6 +351,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 {
                     var percent = NumberHelper.ConvertDoublePercent(PercentHomeWork * NumberHelper.GetPercent(countDone, homeWorkResults.Count));
                     return (EnumResultStatus.Done, percent);
+                }
+                else if (homeWorkResults.All(x => x.Status != EnumResultStatus.Unfinished))
+                {
+                    return (EnumResultStatus.Process, default);
                 }
             }
             return (statusHomeWork, default);

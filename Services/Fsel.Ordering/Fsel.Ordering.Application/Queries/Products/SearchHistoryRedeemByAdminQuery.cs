@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Queries.Products
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.UserService;
@@ -81,6 +82,8 @@ namespace Fsel.Ordering.Application.Queries.Products
                 p.StudentName = item?.User?.FullName;
                 p.Email = item?.User?.Email;
                 p.School = item?.School;
+                p.CreatedDate = p.CreatedDate.HasValue ? p.CreatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : null;
+                p.UpdatedDate = p.UpdatedDate.HasValue ? p.UpdatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : null;
             });
 
             methodResult.Result = new PagingItemsModel<SearchHistoryRedeemByAdminModel>(lists, request, totalItem);

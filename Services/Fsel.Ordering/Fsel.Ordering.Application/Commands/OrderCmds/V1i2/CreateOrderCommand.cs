@@ -60,14 +60,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<OrderModel>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentResult.Error);
-                return methodResult;
-            }
-            var student = studentResult.Content?.Result;
-
             if (string.IsNullOrEmpty(request.FullName) || string.IsNullOrEmpty(request.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
@@ -92,13 +84,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.Id == request.PackageId && p.Status == EnumPackageStatus.Active, cancellationToken);
-            if (package == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
-                return methodResult;
-            }
-
             var @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Id == request.EventId, cancellationToken);
             if (@event == null)
             {
@@ -116,11 +101,20 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 }
             }
 
-            var packageEvent = @event.PackageEvents.FirstOrDefault(p => p.PackageId == package.Id);
-            if (packageEvent != null)
+            var packageEvent = @event.PackageEvents.FirstOrDefault(p => p.PackageId == request.PackageId);
+            if (packageEvent == null)
             {
-                package.Price = packageEvent.Price;
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@event));
+                return methodResult;
             }
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+            var student = studentResult.Content?.Result;
 
             var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student?.User?.Code }, cancellationToken).ConfigureAwait(false);
             string code = codeSend.Result ?? string.Empty;
@@ -131,6 +125,52 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
+            decimal discountPrice = 0;
+            decimal totalPrice = packageEvent.Price;
+            int discountPercent = 0;
+            Guid? voucherId = null;
+
+            if (!string.IsNullOrEmpty(request.VoucherCode))
+            {
+                var checkVoucher = await _mediator.Send(new CheckVoucherCommand()
+                {
+                    Code = request.VoucherCode,
+                    PackageId = request.PackageId,
+                    EventId = request.EventId,
+                }, cancellationToken);
+                if (!checkVoucher.IsOK)
+                {
+                    methodResult.AddError(checkVoucher.ErrorMessages);
+                    return methodResult;
+                }
+
+                var voucher = await _voucherRepository.GetByIdAsync(checkVoucher.Result?.VoucherId ?? default);
+                if (voucher == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
+                    return methodResult;
+                }
+
+                if (voucher.Category == EnumVoucherCategory.Percent)
+                {
+                    discountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(packageEvent.Price * voucher.Value));
+                    totalPrice = packageEvent.Price - discountPrice;
+                    discountPercent = voucher.Value;
+                }
+                else if (voucher.Category == EnumVoucherCategory.Money)
+                {
+                    discountPrice = voucher.Value;
+                    totalPrice = discountPrice < packageEvent.Price ? packageEvent.Price - discountPrice : 0;
+                }
+                else if (voucher.Category == EnumVoucherCategory.Month)
+                {
+                    discountPrice = 0;
+                    totalPrice = packageEvent.Price;
+                }
+
+                voucherId = voucher.Id;
+            }
+
             var order = await _orderRepository.Queryable.FirstOrDefaultAsync(p => p.UserId == _authContext.CurrentUserId && p.Status == EnumOrderStatus.New && !p.IsTrial, cancellationToken);
 
             if (order != null)
@@ -138,23 +178,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 var updateOrderResult = await _mediator.Send(new UpdateOrderCommand()
                 {
                     Order = order,
-                    Package = package,
-                    Code = code,
-                    FullName = request.FullName,
-                    PhoneNumber = request.PhoneNumber,
-                    Email = request.Email,
-                    Address = request.Address,
-                    PaymentMethod = request.PaymentMethod,
-                    ProvinceId = request.ProvinceId,
-                    DistrictId = request.DistrictId,
-                    IsInvoice = request.IsInvoice,
-                    CompanyAddress = request.CompanyAddress,
-                    CompanyName = request.CompanyName,
-                    CompanyTaxCode = request.CompanyTaxCode,
-                    CompanyEmail = request.CompanyEmail,
-                    ReferralCode = request.ReferralCode,
-                    EventId = request.EventId,
-                    VoucherCode = request.VoucherCode,
+                    Request = request,
+                    DiscountPercent = discountPercent,
+                    DiscountPrice = discountPrice,
+                    TotalPrice = totalPrice,
+                    Price = packageEvent.Price,
+                    StudentCode = student?.User?.Code,
+                    VoucherId = voucherId,
                 }, cancellationToken).ConfigureAwait(false);
 
                 if (!updateOrderResult.IsOK)
@@ -169,35 +199,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
             var newOrder = _mapper.Map<Order>(request);
 
-            var discountPercent = 0;
-
-            if (!string.IsNullOrEmpty(request.VoucherCode))
-            {
-                var checkVoucher = await _mediator.Send(new CheckVoucherCommand()
-                {
-                    Code = request.VoucherCode,
-                    PackageId = request.PackageId,
-                }, cancellationToken);
-                if (!checkVoucher.IsOK)
-                {
-                    methodResult.AddError(checkVoucher.ErrorMessages);
-                    return methodResult;
-                }
-                var voucher = await _voucherRepository.GetByIdAsync(checkVoucher.Result?.VoucherId ?? default);
-                if (voucher == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherNotExist));
-                    return methodResult;
-                }
-                discountPercent = voucher.Percent;
-                newOrder.VoucherId = voucher.Id;
-            }
-
-            newOrder.Price = package.Price;
+            newOrder.VoucherId = voucherId;
+            newOrder.Price = packageEvent.Price;
             newOrder.Code = code;
             newOrder.DiscountPercent = discountPercent;
-            newOrder.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(newOrder.Price * newOrder.DiscountPercent));
-            newOrder.TotalPrice = newOrder.Price - newOrder.DiscountPrice;
+            newOrder.DiscountPrice = discountPrice;
+            newOrder.TotalPrice = totalPrice;
             newOrder.UserId = _authContext.CurrentUserId;
 
             if (!newOrder.IsValid())

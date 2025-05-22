@@ -25,7 +25,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
     public class DeleteListDataStudentCommandHandler : IRequestHandler<DeleteListDataStudentCommand, MethodResult<bool>>
     {
-        private readonly IUserOtpRepository _userOtpRepository;
+        private readonly IUserOtpCodeRepository _userOtpRepository;
         private readonly IUserSettingRepository _userSettingRepository;
         private readonly IUserPlatformRepository _userPlatformRepository;
         private readonly IStudentRankingRepository _studentRankingRepository;
@@ -38,7 +38,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly ITrainingService _trainingService;
         private readonly UserManager<User> _userManager;
 
-        public DeleteListDataStudentCommandHandler(IUserOtpRepository userOtpRepository
+        public DeleteListDataStudentCommandHandler(IUserOtpCodeRepository userOtpRepository
                                                  , IUserSettingRepository userSettingRepository
                                                  , IUserPlatformRepository userPlatformRepository
                                                  , IStudentRankingRepository studentRankingRepository

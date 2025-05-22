@@ -5,6 +5,8 @@ namespace Fsel.Shared.Enums
     public enum EnumBannerType
     {
         Popup,
-        Warning
+        Warning,
+        Home,
+        Left
     }
 }

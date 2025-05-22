@@ -15,5 +15,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public DateTime? Birthday { get; set; }
         public EnumGender? Gender { get; set; }
         public string? Address { get; set; }
+        public string? School { get; set; }
+        public string? SchoolName { get; set; }
+        public Guid? CourseId { get; set; }
     }
 }
