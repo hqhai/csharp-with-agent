@@ -211,28 +211,36 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
 
                     if (item.TotalSchoolDefault > 0)
                     {
-                        excelWorksheet.Cells[$"H{startRow}"].Value = $"{Math.Round(((exportSummaryReports.Sum(x => ((((double)(x.TotalSchool ?? 0)) / x.TotalSchoolDefault) * 100))) / exportSummaryReports.Count) ?? 0, 2)}%";
+                        var totalSchoolTotal = exportSummaryReports.Sum(x => (double)(x.TotalSchool ?? 0));
+                        var totalSchoolDefaultTotal = exportSummaryReports.Sum(x => (double)(x.TotalSchoolDefault ?? 0));
+                        excelWorksheet.Cells[$"H{startRow}"].Value = $"{Math.Round(((totalSchoolTotal / totalSchoolDefaultTotal) * 100), 2)}%";
                     }
 
                     excelWorksheet.Cells[$"I{startRow}"].Value = exportSummaryReports.Sum(x => x.RegisterStudent);
 
                     if (item.ElevationOfTerrain > 0)
                     {
-                        excelWorksheet.Cells[$"J{startRow}"].Value = $"{Math.Round((exportSummaryReports.Sum(x => ((((double)(x.RegisterStudent ?? 0)) / x.ElevationOfTerrain) * 100)) / exportSummaryReports.Count) ?? 0, 2)}%";
+                        var registerStudentTotal = exportSummaryReports.Sum(x => (double)(x.RegisterStudent ?? 0));
+                        var elevationOfTerrainTotal = exportSummaryReports.Sum(x => (double)(x.ElevationOfTerrain ?? 0));
+                        excelWorksheet.Cells[$"J{startRow}"].Value = $"{Math.Round(((registerStudentTotal / elevationOfTerrainTotal) * 100), 2)}%";
                     }
 
                     excelWorksheet.Cells[$"K{startRow}"].Value = exportSummaryReports.Sum(x => x.RegisterTeacher);
 
                     if (item.ElevationOfRefHeight > 0)
                     {
-                        excelWorksheet.Cells[$"L{startRow}"].Value = $"{Math.Round((exportSummaryReports.Sum(x => ((((double)(x.RegisterTeacher ?? 0)) / x.ElevationOfRefHeight) * 100)) / exportSummaryReports.Count) ?? 0, 2)}%";
+                        var registerTeacherTotal = exportSummaryReports.Sum(x => (double)(x.RegisterTeacher ?? 0));
+                        var elevationOfRefHeight = exportSummaryReports.Sum(x => (double)(x.ElevationOfRefHeight ?? 0));
+                        excelWorksheet.Cells[$"L{startRow}"].Value = $"{Math.Round(((registerTeacherTotal / elevationOfRefHeight) * 100), 2)}%";
                     }
 
                     excelWorksheet.Cells[$"M{startRow}"].Value = exportSummaryReports.Sum(x => x.TotalStudent);
 
                     if (item.TotalStudentDefault > 0)
                     {
-                        excelWorksheet.Cells[$"N{startRow}"].Value = $"{Math.Round((exportSummaryReports.Sum(x => ((((double)(x.TotalStudent ?? 0)) / x.TotalStudentDefault) * 100)) / exportSummaryReports.Count) ?? 0, 2)}%";
+                        var totalStudentTotal = exportSummaryReports.Sum(x => (double)(x.TotalStudent ?? 0));
+                        var totalStudentDefaultTotal = exportSummaryReports.Sum(x => (double)(x.TotalStudentDefault ?? 0));
+                        excelWorksheet.Cells[$"N{startRow}"].Value = $"{Math.Round(((totalStudentTotal / totalStudentDefaultTotal) * 100), 2)}%";
                     }
 
                     BorderRow(excelWorksheet, startRow, "A", "N");
@@ -294,21 +302,27 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
 
                     if (item.ElevationOfTerrain > 0)
                     {
-                        excelWorksheet.Cells[$"G{startRow}"].Value = $"{Math.Round(((exportSummaryReports.Sum(x => ((((double)(x.RegisterStudent ?? 0)) / x.ElevationOfTerrain) * 100))) / exportSummaryReports.Count) ?? 0, 2)}%";
+                        var registerStudentTotal = exportSummaryReports.Sum(x => (double)(x.RegisterStudent ?? 0));
+                        var elevationOfTerrainTotal = exportSummaryReports.Sum(x => (double)(x.ElevationOfTerrain ?? 0));
+                        excelWorksheet.Cells[$"G{startRow}"].Value = $"{Math.Round(((registerStudentTotal / elevationOfTerrainTotal) * 100), 2)}%";
                     }
 
                     excelWorksheet.Cells[$"H{startRow}"].Value = exportSummaryReports.Sum(x => x.RegisterTeacher);
 
                     if (item.ElevationOfRefHeight > 0)
                     {
-                        excelWorksheet.Cells[$"I{startRow}"].Value = $"{Math.Round((exportSummaryReports.Sum(x => ((((double)(x.RegisterTeacher ?? 0)) / x.ElevationOfRefHeight) * 100)) / exportSummaryReports.Count) ?? 0, 2)}%";
+                        var registerTeacherTotal = exportSummaryReports.Sum(x => (double)(x.RegisterTeacher ?? 0));
+                        var elevationOfRefHeight = exportSummaryReports.Sum(x => (double)(x.ElevationOfRefHeight ?? 0));
+                        excelWorksheet.Cells[$"I{startRow}"].Value = $"{Math.Round(((registerTeacherTotal / elevationOfRefHeight) * 100), 2)}%";
                     }
 
                     excelWorksheet.Cells[$"J{startRow}"].Value = exportSummaryReports.Sum(x => x.TotalStudent);
 
                     if (item.TotalStudentDefault > 0)
                     {
-                        excelWorksheet.Cells[$"K{startRow}"].Value = $"{Math.Round((exportSummaryReports.Sum(x => ((((double)(x.TotalStudent ?? 0)) / x.TotalStudentDefault) * 100)) / exportSummaryReports.Count) ?? 0, 2)}%";
+                        var totalStudentTotal = exportSummaryReports.Sum(x => (double)(x.TotalStudent ?? 0));
+                        var totalStudentDefaultTotal = exportSummaryReports.Sum(x => (double)(x.TotalStudentDefault ?? 0));
+                        excelWorksheet.Cells[$"K{startRow}"].Value = $"{Math.Round(((totalStudentTotal / totalStudentDefaultTotal) * 100), 2)}%";
                     }
 
                     BorderRow(excelWorksheet, startRow, "A", "K");
