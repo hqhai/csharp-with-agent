@@ -16,13 +16,13 @@ namespace Fsel.Realtime.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(SetTimeModuleModel? request, CancellationToken cancellationToken)
+        public async Task Publish(SetTimeExamPracticeModel? request, CancellationToken cancellationToken)
         {
             if (request == null)
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.ExamPracticeQueue.NameQueue.GetTimeExamPractice, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.GetTimeExamPractice, request, cancellationToken);
         }
     }
 }

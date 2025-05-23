@@ -116,7 +116,7 @@ namespace Fsel.Realtime.Application.Hubs
         {
             string type = Context.GetHttpContext()?.Request.Query["Type"].ToString() ?? string.Empty;
             string objectId = Context.GetHttpContext()?.Request.Query["ObjectId"].ToString() ?? string.Empty;
-            await _getTimeModulePublisher.Publish(new SetTimeModuleModel
+            await _getTimeModulePublisher.Publish(new SetTimeExamPracticeModel
             {
                 AccessTime = ConnectionTracker.Instance.GetTimeValue(Context.ConnectionId) ?? default,
                 ObjectId = new Guid(objectId),

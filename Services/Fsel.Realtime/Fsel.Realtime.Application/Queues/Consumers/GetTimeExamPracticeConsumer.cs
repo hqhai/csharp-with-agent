@@ -12,9 +12,9 @@ namespace Fsel.Realtime.Application.Queues.Consumers
 
     public class GetTimeExamPracticeConsumer : BaseConsumer<GetTimeModuleModel>
     {
-        private readonly IHubContext<SetTimeModuleHub> _setTimeModuleHub;
+        private readonly IHubContext<SetTimeExamPracticeHub> _setTimeModuleHub;
 
-        public GetTimeExamPracticeConsumer(IHubContext<SetTimeModuleHub> setTimeModuleHub, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        public GetTimeExamPracticeConsumer(IHubContext<SetTimeExamPracticeHub> setTimeModuleHub, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _setTimeModuleHub = setTimeModuleHub;
         }
