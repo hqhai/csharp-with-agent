@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250523052855_EditTable_AddColumn_Discriminator")]
+    partial class EditTable_AddColumn_Discriminator
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -385,20 +388,20 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(103);
 
                     b.Property<string>("District")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("DistrictId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(70)
-                        .HasColumnType("nvarchar(70)");
+                        .HasMaxLength(254)
+                        .HasColumnType("nvarchar(254)");
 
                     b.Property<string>("FirstName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsBussinessCheckBox")
                         .HasColumnType("bit");
@@ -408,48 +411,47 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("LastName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ParentEmail")
-                        .HasMaxLength(70)
-                        .HasColumnType("nvarchar(70)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ParentPhoneNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Province")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("ProvinceId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("School")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("SchoolClass")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("SchoolGrade")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("SchoolId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("SchoolStudentCode")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -464,8 +466,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("TeacherPhoneNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -508,8 +510,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Code")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -544,8 +546,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("Gender")
                         .HasMaxLength(100)
@@ -593,462 +595,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("IsDeleted", "PhoneNumber");
 
                     b.ToTable("Humans");
-                });
-
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Menu", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("ConfigStr")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<int>("Index")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Menus");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("77eee0bb-70b0-4672-964c-35adb0a4df6f"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":1,\"code_title\":\"HOME_PAGE.HOME\",\"link\":\"/home\",\"icon\":\"Home.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 1,
-                            IsDeleted = false,
-                            Name = "Home Page"
-                        },
-                        new
-                        {
-                            Id = new Guid("de64d9a6-6011-4a25-b73f-af31a0c530a1"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":2,\"code_title\":\"HOME_PAGE.USER_MANAGEMENT\",\"link\":\"/user\",\"icon\":\"People.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 2,
-                            IsDeleted = false,
-                            Name = "User Management By Admin"
-                        },
-                        new
-                        {
-                            Id = new Guid("efb2d814-6b8b-4c12-92a4-21fde9feeb54"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":27,\"code_title\":\"i18n_user_permissions\",\"link\":\"/user-permissions\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[{\"id\":270,\"code_title\":\"i18n_user_group\",\"link\":\"/user-permissions/user-group\",\"icon\":\"\",\"parentId\":27,\"code\":\"\",\"permission\":\"Admin\",\"children\":null},{\"id\":271,\"code_title\":\"i18n_permission_group\",\"link\":\"/user-permissions/permission-group\",\"icon\":\"\",\"parentId\":27,\"code\":\"\",\"permission\":\"Admin\",\"children\":null},{\"id\":272,\"code_title\":\"i18n_permission\",\"link\":\"/user-permissions/permission-list\",\"icon\":\"\",\"parentId\":27,\"code\":\"\",\"permission\":\"Admin\",\"children\":null},{\"id\":273,\"code_title\":\"i18n_permission_access\",\"link\":\"/user-permissions/permission-access\",\"icon\":\"\",\"parentId\":27,\"code\":\"\",\"permission\":\"Admin\",\"children\":null}]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 3,
-                            IsDeleted = false,
-                            Name = "Permission Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("3e1dfc7e-a768-4316-ae01-00a20cd4a281"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":2,\"code_title\":\"HOME_PAGE.PERSONAL_INFORMATION\",\"link\":\"/user/detail\",\"icon\":\"People.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"Teacher,CSO\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 4,
-                            IsDeleted = false,
-                            Name = "User Management By Teacher, CSO"
-                        },
-                        new
-                        {
-                            Id = new Guid("d5b153cc-1481-40d3-b39f-b35a67dd54e6"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":3,\"code_title\":\"HOME_PAGE.CLASS_MANAGER\",\"link\":\"/class\",\"icon\":\"Presentation.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin,CSO\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 5,
-                            IsDeleted = false,
-                            Name = "Class Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("06641b23-3857-4b6d-b1d7-096fc98fa8b9"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":4,\"code_title\":\"HOME_PAGE.STUDENT_MANAGEMENT\",\"link\":\"/student\",\"icon\":\"Students.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"AdminSchool,CSO\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 6,
-                            IsDeleted = false,
-                            Name = "Student Management By AdminSchool, CSO"
-                        },
-                        new
-                        {
-                            Id = new Guid("56f3a987-a5cf-4eee-88b7-baac8a82caee"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":4,\"code_title\":\"HOME_PAGE.STUDENT_MANAGEMENT\",\"link\":\"/student-admin\",\"icon\":\"Students.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 7,
-                            IsDeleted = false,
-                            Name = "Student Management By Admin"
-                        },
-                        new
-                        {
-                            Id = new Guid("f768e305-26aa-4bca-9197-c3673825373e"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":5,\"code_title\":\"HOME_PAGE.MANAGE_LIVE_TIME_FRAMES\",\"link\":\"/live-time\",\"icon\":\"Livestream.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 8,
-                            IsDeleted = false,
-                            Name = "Live Time Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("b50e1cd9-5b46-467a-ba7f-b86011747b32"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":6,\"code_title\":\"HOME_PAGE.LIVE_CLASS\",\"link\":\"/live-class\",\"icon\":\"Livestream.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"CSO,Teacher\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 9,
-                            IsDeleted = false,
-                            Name = "Time Setting"
-                        },
-                        new
-                        {
-                            Id = new Guid("17234df3-b92f-4103-9bc0-7b5feaad7b00"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":7,\"code_title\":\"HOME_PAGE.EMPTY_CALENDAR\",\"link\":\"/empty-calendar\",\"icon\":\"Livestream.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"CSO,Teacher\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 10,
-                            IsDeleted = false,
-                            Name = "Empty Calendar Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("06e2c9b5-378b-4a32-a36f-45a65b68d791"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":8,\"code_title\":\"HOME_PAGE.EXERCISE_MANAGEMENT\",\"link\":\"/exercise-management\",\"icon\":\"Edit.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"Teacher\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 11,
-                            IsDeleted = false,
-                            Name = "Exercise Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("121436b1-ac91-46c2-b4b8-76da74e13d33"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":9,\"code_title\":\"HOME_PAGE.MANAGE_REVIEWS\",\"link\":\"/review\",\"icon\":\"Review.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 12,
-                            IsDeleted = false,
-                            Name = "Review Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("f8759866-2981-4751-a447-d6c0230fa44a"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":10,\"code_title\":\"HOME_PAGE.SET_TIME\",\"link\":\"/setup-time\",\"icon\":\"Clock.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 13,
-                            IsDeleted = false,
-                            Name = "Set Time"
-                        },
-                        new
-                        {
-                            Id = new Guid("2d1222ff-8e49-4689-8c47-c6ebca08fb61"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":11,\"code_title\":\"HOME_PAGE.STORE_OF_FORBIDDEN_WORDS\",\"link\":\"/forbidden-word\",\"icon\":\"Forbiden.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 14,
-                            IsDeleted = false,
-                            Name = "Store Of Forbiden Words"
-                        },
-                        new
-                        {
-                            Id = new Guid("c13b856d-a3ee-40fa-a018-2d33ce028f6a"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":12,\"code_title\":\"HOME_PAGE.PAYMENT_TITLE\",\"link\":\"/payment\",\"icon\":\"payment-icon.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 15,
-                            IsDeleted = false,
-                            Name = "Payment Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("cd067ac8-af65-47bd-bbd4-0bf3b9ad90fb"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":13,\"code_title\":\"HOME_PAGE.VOUCHER-MANAGEMENT\",\"link\":\"/voucher-management\",\"icon\":\"payment-icon.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 16,
-                            IsDeleted = false,
-                            Name = "Voucher Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("c3851e05-cda0-4418-b852-8304949104a0"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":14,\"code_title\":\"HOME_PAGE.CLASS_FORUM_MANAGEMENT\",\"link\":\"/class-forum-management\",\"icon\":\"Chat.svg\",\"parentId\":0,\"code\":\"\",\"permission\":\"CSO\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 17,
-                            IsDeleted = false,
-                            Name = "Class Forum Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("4aff9531-9c38-4ef9-a965-923585d9d47a"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":15,\"code_title\":\"HOME_PAGE.QUEST_BOARD_MANAGEMENT\",\"link\":\"/quest-board\",\"icon\":\"payment-icon.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 18,
-                            IsDeleted = false,
-                            Name = "Quest Board Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("049a2515-641d-447b-b27b-e46f41e64ef3"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":16,\"code_title\":\"HOME_PAGE.STUDENT_PROGRESS_MANAGEMENT\",\"link\":\"/student-progress\",\"icon\":\"payment-icon.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin,CSO\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 19,
-                            IsDeleted = false,
-                            Name = "Student Progress Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("655bbf11-95ad-4941-8739-878437acb3c2"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":18,\"code_title\":\"HOME_PAGE.HELP_AND_SUPPORT_MANAGEMENT\",\"link\":\"/help-and-support-management\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 20,
-                            IsDeleted = false,
-                            Name = "Help And Support Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("6bd509c9-3986-4780-8ea0-e02059c9d9e9"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":19,\"code_title\":\"HOME_PAGE.ERROR_REPORT_MANAGEMENT\",\"link\":\"/error-reporting-management\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 21,
-                            IsDeleted = false,
-                            Name = "Error Report Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("6ee1bea6-02ea-4502-b8cc-92671e6430fc"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":20,\"code_title\":\"HOME_PAGE.PRICE_LIST_MANAGEMENT\",\"link\":\"/price-management\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 22,
-                            IsDeleted = false,
-                            Name = "Price List Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("464add9c-629a-4a83-99e0-70d020d72a04"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":21,\"code_title\":\"Quản lý mã giới thiệu\",\"link\":\"/invite-friends\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 23,
-                            IsDeleted = false,
-                            Name = "Manage Referral Code"
-                        },
-                        new
-                        {
-                            Id = new Guid("1c9b88c3-c865-4d91-89df-3b84fec63843"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":22,\"code_title\":\"Quản lý voucher\",\"link\":\"/voucher\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 24,
-                            IsDeleted = false,
-                            Name = "Voucher Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("600f483b-dd9e-4aa3-9364-bbdca16a391a"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":23,\"code_title\":\"Cấu hình thứ tự popup\",\"link\":\"/popup-order-config\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 25,
-                            IsDeleted = false,
-                            Name = "Popup Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("be37f400-f10b-40b6-bc01-ad0e3d114fce"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":229,\"code_title\":\"Quản lý mục tiêu khóa học\",\"link\":\"/course-target\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 26,
-                            IsDeleted = false,
-                            Name = "Course Objective Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("e7b3e33f-c1cb-48e7-bbe0-39be74dd5e36"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":30,\"code_title\":\"Quản lý quà tặng FSEL\",\"link\":\"/gift\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 27,
-                            IsDeleted = false,
-                            Name = "FSEL Gift Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("19f86ebc-e6e9-4baf-84d8-f0e90489b2a1"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":29,\"code_title\":\"Quản lý Banner\",\"link\":\"/banner\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 28,
-                            IsDeleted = false,
-                            Name = "Banner Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("18e09c83-8f23-4509-a39c-7d3d32c4d81b"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":24,\"code_title\":\"Quản lý báo cáo\",\"link\":\"/report-management\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":[{\"id\":220,\"code_title\":\"Kết quả đánh giá đầu vào\",\"link\":\"/report-management/pt-result\",\"icon\":\"\",\"parentId\":22,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":null},{\"id\":221,\"code_title\":\"Tiến độ học tập\",\"link\":\"/report-management/learning-progress\",\"icon\":\"\",\"parentId\":22,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":null},{\"id\":222,\"code_title\":\"Kết quả học tập\",\"link\":\"/report-management/learning-result\",\"icon\":\"\",\"parentId\":22,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":null},{\"id\":223,\"code_title\":\"Chuyên cần\",\"link\":\"/report-management/assiduity\",\"icon\":\"\",\"parentId\":22,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":null}]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 29,
-                            IsDeleted = false,
-                            Name = "Report Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("68365a87-73fa-4926-acb6-24f1403f77ad"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":25,\"code_title\":\"Dashboard\",\"link\":\"/dashboard\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":[{\"id\":250,\"code_title\":\"Báo cáo tiến độ học tập\",\"link\":\"/dashboard/progress-learn\",\"icon\":\"\",\"parentId\":25,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":null},{\"id\":251,\"code_title\":\"Báo cáo kết quả đánh giá đầu vào\",\"link\":\"/dashboard/result-pt\",\"icon\":\"\",\"parentId\":25,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":null},{\"id\":252,\"code_title\":\"Báo cáo kết quả học tập\",\"link\":\"/dashboard/result-learn\",\"icon\":\"\",\"parentId\":25,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":null},{\"id\":253,\"code_title\":\"Chuyên cần\",\"link\":\"/dashboard/diligence\",\"icon\":\"\",\"parentId\":25,\"code\":\"\",\"permission\":\"AdminSchool\",\"children\":null}]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 30,
-                            IsDeleted = false,
-                            Name = "Dashboard"
-                        },
-                        new
-                        {
-                            Id = new Guid("53416e56-89d7-4fec-bb3f-c9225878470d"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":26,\"code_title\":\"Thêm học sinh vào túi mù\",\"link\":\"/blind-box\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 31,
-                            IsDeleted = false,
-                            Name = "BlindBox Management"
-                        },
-                        new
-                        {
-                            Id = new Guid("66b606c5-ef09-4f76-89e4-e11d0d914cb5"),
-                            Category = "LMSAdmin",
-                            ConfigStr = "{\"id\":27,\"code_title\":\"Hướng dẫn sử dụng\",\"link\":\"/guide\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin,CSO,AdminSchool\",\"children\":[]}",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Index = 32,
-                            IsDeleted = false,
-                            Name = "Instructions For Use"
-                        });
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Parent", b =>
@@ -2063,150 +1609,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             Name = "Thêm học sinh vào túi mù",
                             PermissionGroupId = new Guid("6f12e0d0-774c-4868-a062-e94b0b6ecf2d"),
                             Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("79e900b5-cb1a-49bb-a8ad-33925b97e095"),
-                            ClaimValue = "SchoolStudentManagement.View",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xem và tìm kiếm danh sách, thông tin học sinh",
-                            PermissionGroupId = new Guid("618be731-43b3-45ed-bfad-262945ef0d51"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("ce8b975b-6f31-454e-b21f-18a35061e266"),
-                            ClaimValue = "SchoolStudentManagement.Add",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Thêm mới học sinh",
-                            PermissionGroupId = new Guid("618be731-43b3-45ed-bfad-262945ef0d51"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("1e938573-3317-449a-b322-76225eb87039"),
-                            ClaimValue = "SchoolStudentManagement.Update",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Chỉnh sửa thông tin học sinh",
-                            PermissionGroupId = new Guid("618be731-43b3-45ed-bfad-262945ef0d51"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("90897566-3edf-4aae-969a-9acb31c80c0b"),
-                            ClaimValue = "SchoolStudentManagement.Delete",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xóa học sinh",
-                            PermissionGroupId = new Guid("618be731-43b3-45ed-bfad-262945ef0d51"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("6df0f361-0d99-4a38-b5be-706225b7f22b"),
-                            ClaimValue = "ReportManagementByAdminSchool.ViewPTResultsReport",
-                            CreatedDate = new DateTime(2025, 6, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xem báo cáo kết quả đánh giá đầu vào",
-                            PermissionGroupId = new Guid("a1a7a7be-8865-49b1-a0be-bb573b888fd3"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("a092a54c-1306-4600-af02-8cae97875977"),
-                            ClaimValue = "ReportManagementByAdminSchool.ViewLearningProgressReport",
-                            CreatedDate = new DateTime(2025, 6, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xem báo cáo tiến độ học tập",
-                            PermissionGroupId = new Guid("a1a7a7be-8865-49b1-a0be-bb573b888fd3"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("27b1c0ae-d63a-4553-a130-e008183940c7"),
-                            ClaimValue = "ReportManagementByAdminSchool.ViewLearningResultsReport",
-                            CreatedDate = new DateTime(2025, 6, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xem báo cáo kết quả học tập",
-                            PermissionGroupId = new Guid("a1a7a7be-8865-49b1-a0be-bb573b888fd3"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("09748430-9ce7-4f22-a777-2516fc98d16c"),
-                            ClaimValue = "ReportManagementByAdminSchool.ViewAttendanceReport",
-                            CreatedDate = new DateTime(2025, 6, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xem báo cáo chuyên cần",
-                            PermissionGroupId = new Guid("a1a7a7be-8865-49b1-a0be-bb573b888fd3"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("e5e6f8f3-aaa3-480f-bd6e-f005aec41167"),
-                            ClaimValue = "DashboardManagementByAdminSchool.ViewPTResultsReport",
-                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xem báo cáo kết quả đánh giá đầu vào",
-                            PermissionGroupId = new Guid("933dca96-a6a7-4b37-870b-b423f3c2165c"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("18f69e03-68d9-4be2-8d86-126f3fd87022"),
-                            ClaimValue = "DashboardManagementByAdminSchool.ViewLearningProgressReport",
-                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xem báo cáo tiến độ học tập",
-                            PermissionGroupId = new Guid("933dca96-a6a7-4b37-870b-b423f3c2165c"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("1aacc9b4-8abb-4e18-9583-acaab2a302aa"),
-                            ClaimValue = "DashboardManagementByAdminSchool.ViewLearningResultsReport",
-                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xem báo cáo kết quả học tập",
-                            PermissionGroupId = new Guid("933dca96-a6a7-4b37-870b-b423f3c2165c"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("29799ab5-71de-444e-b68e-9c00f9160346"),
-                            ClaimValue = "DashboardManagementByAdminSchool.ViewAttendanceReport",
-                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            Name = "Xem báo cáo chuyên cần",
-                            PermissionGroupId = new Guid("933dca96-a6a7-4b37-870b-b423f3c2165c"),
-                            Status = true
                         });
                 });
 
@@ -2257,9 +1659,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid?>("MenuId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
@@ -2294,7 +1693,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("77eee0bb-70b0-4672-964c-35adb0a4df6f"),
                             Name = "Home/Dashboard",
                             Status = true
                         },
@@ -2306,7 +1704,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("2d1222ff-8e49-4689-8c47-c6ebca08fb61"),
                             Name = "Kho từ cấm",
                             Status = true
                         },
@@ -2318,7 +1715,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("efb2d814-6b8b-4c12-92a4-21fde9feeb54"),
                             Name = "Quản lý phân quyền",
                             Status = true
                         },
@@ -2330,7 +1726,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("6ee1bea6-02ea-4502-b8cc-92671e6430fc"),
                             Name = "Quản lý bảng giá",
                             Status = true
                         },
@@ -2342,20 +1737,18 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("19f86ebc-e6e9-4baf-84d8-f0e90489b2a1"),
                             Name = "Quản lý banner",
                             Status = true
                         },
                         new
                         {
                             Id = new Guid("a1a7a7be-8865-49b1-a0be-bb573b888fd3"),
-                            ClaimType = "ReportManagementByAdminSchool",
+                            ClaimType = "ReportManagement",
                             CreatedDate = new DateTime(2025, 4, 9, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("18e09c83-8f23-4509-a39c-7d3d32c4d81b"),
-                            Name = "Quản lý báo cáo của Admin School",
+                            Name = "Quản lý báo cáo",
                             Status = true
                         },
                         new
@@ -2366,7 +1759,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("6bd509c9-3986-4780-8ea0-e02059c9d9e9"),
                             Name = "Quản lý báo cáo lỗi",
                             Status = true
                         },
@@ -2378,7 +1770,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("56f3a987-a5cf-4eee-88b7-baac8a82caee"),
                             Name = "Quản lý học sinh",
                             Status = true
                         },
@@ -2390,7 +1781,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("d5b153cc-1481-40d3-b39f-b35a67dd54e6"),
                             Name = "Quản lý lớp",
                             Status = true
                         },
@@ -2402,7 +1792,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("464add9c-629a-4a83-99e0-70d020d72a04"),
                             Name = "Quản lý mã giới thiệu",
                             Status = true
                         },
@@ -2414,7 +1803,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("be37f400-f10b-40b6-bc01-ad0e3d114fce"),
                             Name = "Quản lý mục tiêu khóa học",
                             Status = true
                         },
@@ -2426,7 +1814,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("de64d9a6-6011-4a25-b73f-af31a0c530a1"),
                             Name = "Quản lý người dùng",
                             Status = true
                         },
@@ -2438,7 +1825,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("4aff9531-9c38-4ef9-a965-923585d9d47a"),
                             Name = "Quản lý nhiệm vụ",
                             Status = true
                         },
@@ -2472,7 +1858,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("e7b3e33f-c1cb-48e7-bbe0-39be74dd5e36"),
                             Name = "Quản lý quà tặng",
                             Status = true
                         },
@@ -2484,7 +1869,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("c13b856d-a3ee-40fa-a018-2d33ce028f6a"),
                             Name = "Quản lý thanh toán",
                             Status = true
                         },
@@ -2496,7 +1880,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("600f483b-dd9e-4aa3-9364-bbdca16a391a"),
                             Name = "Quản lý thứ tự popup",
                             Status = true
                         },
@@ -2508,7 +1891,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("049a2515-641d-447b-b27b-e46f41e64ef3"),
                             Name = "Quản lý tiến độ học sinh",
                             Status = true
                         },
@@ -2520,7 +1902,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("cd067ac8-af65-47bd-bbd4-0bf3b9ad90fb"),
                             Name = "Quản lý ưu đãi",
                             Status = true
                         },
@@ -2532,7 +1913,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("1c9b88c3-c865-4d91-89df-3b84fec63843"),
                             Name = "Quản lý voucher",
                             Status = true
                         },
@@ -2555,32 +1935,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            MenuId = new Guid("53416e56-89d7-4fec-bb3f-c9225878470d"),
                             Name = "Thêm học sinh vào túi mù",
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("618be731-43b3-45ed-bfad-262945ef0d51"),
-                            ClaimType = "SchoolStudentManagement",
-                            CreatedDate = new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            MenuId = new Guid("06641b23-3857-4b6d-b1d7-096fc98fa8b9"),
-                            Name = "Quản lý học sinh của AdminSchool, CSO",
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = new Guid("933dca96-a6a7-4b37-870b-b423f3c2165c"),
-                            ClaimType = "DashboardManagementByAdminSchool",
-                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            CreatedFullName = "",
-                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
-                            IsDeleted = false,
-                            MenuId = new Guid("68365a87-73fa-4926-acb6-24f1403f77ad"),
-                            Name = "Quản lý Dashboard của AdminSchool",
                             Status = true
                         });
                 });
@@ -2757,9 +2112,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsDefault")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -2806,7 +2158,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "Student",
                             NormalizedName = "Student"
@@ -2819,7 +2170,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "Teacher",
                             NormalizedName = "Teacher"
@@ -2832,7 +2182,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "Parent",
                             NormalizedName = "Parent"
@@ -2845,7 +2194,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "TeacherLive",
                             NormalizedName = "TeacherLive"
@@ -2858,7 +2206,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "Moderator",
                             NormalizedName = "Moderator"
@@ -2871,7 +2218,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "Admin",
                             NormalizedName = "Admin"
@@ -2884,7 +2230,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "CSO",
                             NormalizedName = "CSO"
@@ -2897,7 +2242,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "MasterAdmin",
                             NormalizedName = "MasterAdmin"
@@ -2910,7 +2254,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = false,
                             IsDeleted = false,
                             Name = "Guest",
                             NormalizedName = "Guest"
@@ -2923,7 +2266,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "EducationDepartment",
                             NormalizedName = "EducationDepartment"
@@ -2936,7 +2278,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "EducationDivision",
                             NormalizedName = "EducationDivision"
@@ -2949,7 +2290,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             DisplayOrder = 0,
                             IsActive = false,
-                            IsDefault = true,
                             IsDeleted = false,
                             Name = "DepartmentAdmin",
                             NormalizedName = "DepartmentAdmin"
@@ -3105,12 +2445,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ParentEmail")
-                        .HasMaxLength(70)
-                        .HasColumnType("nvarchar(70)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("ParentPhoneNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("ProvinceId")
                         .HasColumnType("uniqueidentifier");
@@ -3120,16 +2460,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("SchoolClass")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("SchoolFaculty")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("SchoolGrade")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<Guid?>("SchoolId")
                         .HasColumnType("uniqueidentifier");
@@ -3161,10 +2501,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "SchoolId", "SchoolClass"), new[] { "BaseCourseLevel", "BeginnerGuideStr", "ClassId", "CourseId", "CourseLevel", "CreatedByParent", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DistrictId", "ExpiredDate", "HumanId", "NumberOfShield", "Occupation", "PackageId", "ParentEmail", "ParentPhoneNumber", "ProvinceId", "School", "SchoolFaculty", "SchoolGrade", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
-                    b.ToTable("Students", t =>
-                        {
-                            t.HasCheckConstraint("CK_Student_NumberOfToken_NonNegative", "[NumberOfToken] >= 0");
-                        });
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentCompetitionEvent", b =>
@@ -3386,79 +2723,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("IsDeleted", "StudentId");
 
                     b.ToTable("StudentDailyStreak");
-                });
-
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentEditHistory", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("EditDetailStr")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<Guid>("StudentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("StudentEditHistories");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentEventLearningRecord", b =>
@@ -4072,8 +3336,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -4264,8 +3528,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(70)
-                        .HasColumnType("nvarchar(70)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -4277,8 +3540,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("PhoneNumber")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Reason")
                         .IsRequired()
@@ -4505,8 +3767,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("OTPCode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<int>("RetryCount")
                         .HasColumnType("int");
@@ -4727,9 +3989,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -4757,21 +4016,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("EventCode")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<string>("LocalId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("SchoolId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("SchoolName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -5086,17 +4336,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Menu", b =>
-                {
-                    b.HasOne("Fsel.Identity.Domain.Entities.PermissionGroup", "PermissionGroup")
-                        .WithOne("Menu")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.Menu", "Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("PermissionGroup");
-                });
-
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Parent", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.Human", "Human")
@@ -5370,8 +4609,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.PermissionGroup", b =>
                 {
-                    b.Navigation("Menu");
-
                     b.Navigation("Permissions");
 
                     b.Navigation("RoleClaims");

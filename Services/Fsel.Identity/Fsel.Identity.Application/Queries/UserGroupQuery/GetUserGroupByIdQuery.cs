@@ -16,7 +16,7 @@ namespace Fsel.Identity.Application.Queries.UserGroupQuery
     public class GetUserGroupByIdQuery : IRequest<MethodResult<UserGroupModel>>
     {
         public Guid Id { get; set; }
-        
+
         public class Handler : IRequestHandler<GetUserGroupByIdQuery, MethodResult<UserGroupModel>>
         {
             private readonly IUserGroupRepository _userGroupRepository;
@@ -24,7 +24,7 @@ namespace Fsel.Identity.Application.Queries.UserGroupQuery
             private readonly IUserRoleRepository _userRoleRepository;
             private readonly IMapper _mapper;
             private readonly RoleManager<Role> _roleManager;
-            
+
             public Handler(
                 IUserGroupRepository userGroupRepository,
                 IUserGroupMemberShipRepository userGroupMemberShipRepository,
@@ -38,11 +38,11 @@ namespace Fsel.Identity.Application.Queries.UserGroupQuery
                 _roleManager = roleManager;
                 _userRoleRepository = userRoleRepository;
             }
-            
+
             public async Task<MethodResult<UserGroupModel>> Handle(GetUserGroupByIdQuery request, CancellationToken cancellationToken)
             {
                 var methodResult = new MethodResult<UserGroupModel>();
-                
+
                 // Get the user group
                 var userGroup = await _roleManager.FindByIdAsync(request.Id.ToString());
                 if (userGroup == null)
@@ -50,25 +50,24 @@ namespace Fsel.Identity.Application.Queries.UserGroupQuery
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(UserGroup));
                     return methodResult;
                 }
-                
+
                 // Map to model
                 var userGroupModel = _mapper.Map<UserGroupModel>(userGroup);
-                
 
-                var memberQuery =  _userRoleRepository.GetQuery();
+
+                var memberQuery = _userRoleRepository.GetQuery();
                 // Get members of the group
                 var members = await memberQuery
                     .Where(x => x.RoleId == request.Id && x.IsActive)
-                    .Include(x => x.User)
                     .ToListAsync(cancellationToken);
-                
+
                 userGroupModel.Members = _mapper.Map<List<UserGroupMemberShipModel>>(members);
-                
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = userGroupModel;
-                
+
                 return methodResult;
             }
         }
     }
-} 
+}
