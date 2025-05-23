@@ -3,16 +3,49 @@
 namespace Fsel.ExamPractice.Infrastructure.Common
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.ExamPractice.Domain.Entities;
+    using Fsel.ExamPractice.Domain.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
 
-    public class QuestionHelper
+    public static class QuestionHelper
     {
-        public QuestionHelper()
+        public static MethodResult<(Question, object?, short, bool)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit, object? oldAnswer = default, bool isTryAgain = false, bool isMandatoryAnswer = false)
         {
+            var methodResult = new MethodResult<(Question, object?, short, bool)>();
+            if (question == null || question.Config == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+                return methodResult;
+            }
+            var methodValidate = AnswerTypeHelper.ValidateAnswerLength(answer, question);
+            if (!methodValidate.IsOK)
+            {
+                methodResult.AddErrorBadRequest(methodValidate.ErrorMessages);
+                return methodResult;
+            }
+
+            var (answerConfig, correctCount, isAnswerMissing, isAnswered) = AnswerTypeHelper.GetTotalCorrectByAnswerType(answer, oldAnswer, question, isTryAgain, isSubmit, isMandatoryAnswer);
+            if (answerConfig == null && !string.IsNullOrEmpty(answer?.ToString()))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.AnswerIsInTheWrongFormat), nameof(answerConfig), answerConfig);
+                return methodResult;
+            }
+            if (isMandatoryAnswer && isAnswerMissing)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionNotCompleted), nameof(question), new object[] { question.Id, answer ?? string.Empty });
+                return methodResult;
+            }
+            methodResult.Result = (question, answerConfig, correctCount, isAnswered);
+            return methodResult;
         }
 
-        public MethodResult<Question> HandleQuestion(Question question, bool isUseTypeExercisePreparation = false, bool isCreated = true)
+        public static MethodResult<(Question, object?, short, bool)> HandleAnswerTest(Question? question, object? answer, bool isSubmit, bool isMandatoryAnswer = false)
+        {
+            return HandleQuestionAnswer(question, answer, isSubmit, default, false, isMandatoryAnswer);
+        }
+
+        public static MethodResult<Question> HandleQuestion(Question question, bool isUseTypeExercisePreparation = false, bool isCreated = true)
         {
             ArgumentNullException.ThrowIfNull(question);
             var methodResult = new MethodResult<Question>();

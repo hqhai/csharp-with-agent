@@ -26,7 +26,6 @@ builder.Services.AddScoped<IExamPracticeSectionResultRepository, ExamPracticeSec
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
 builder.Services.AddScoped<ExamPracticeHelper>();
-builder.Services.AddScoped<QuestionHelper>();
 
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 var app = builder.Build();

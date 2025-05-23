@@ -72,6 +72,8 @@ namespace Fsel.ExamPractice.Domain.Entities
         /// </summary>
         public EnumResultStatus Status { get; set; }
 
+        public Guid? CurrentExamPracticeSectionId { get; set; }
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
 

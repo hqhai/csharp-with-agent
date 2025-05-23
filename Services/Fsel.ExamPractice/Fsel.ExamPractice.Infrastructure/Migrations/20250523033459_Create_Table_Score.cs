@@ -20,6 +20,12 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                 oldType: "uniqueidentifier");
 
             migrationBuilder.AddColumn<Guid>(
+                name: "CurrentExamPracticeSectionId",
+                table: "ExamPracticeSectionResults",
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.AddColumn<Guid>(
                 name: "ExamPracticeSectionId",
                 table: "ExamPracticeSectionResults",
                 type: "uniqueidentifier",
@@ -199,6 +205,10 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_ExamPracticeAnswers_QuestionId",
                 table: "ExamPracticeAnswers");
+
+            migrationBuilder.DropColumn(
+                name: "CurrentExamPracticeSectionId",
+                table: "ExamPracticeSectionResults");
 
             migrationBuilder.DropColumn(
                 name: "ExamPracticeSectionId",

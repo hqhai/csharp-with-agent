@@ -2,9 +2,8 @@
 
 namespace Fsel.ExamPractice.Domain.Enums.ErrorCodes
 {
-    public enum EnumQuestionErrorCode
+    public enum EnumAnswerErrorCode
     {
-        ConfigIsInTheWrongFormat,
-        QuestionNotCompleted
+        AnswerIsInTheWrongFormat
     }
 }

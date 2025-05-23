@@ -87,7 +87,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.OtherQuery
             {
                 return default;
             }
-            var executionTime = examPracticeSection.SectionMediaConfig?.ExecutionTime ?? default;
+            var executionTime = examPracticeSection.Config?.ExecutionTime ?? default;
             if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice && examPracticeResult.Config != null && examPracticeResult.Config.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
             {
                 executionTime = examPracticeResult.Config?.ExecutionTime ?? default;

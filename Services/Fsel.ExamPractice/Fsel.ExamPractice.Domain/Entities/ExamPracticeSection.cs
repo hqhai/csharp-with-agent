@@ -24,7 +24,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         public string? ConfigStr { get; set; }
 
         [NotMapped]
-        public SectionMediaConfig? SectionMediaConfig
+        public SectionMediaConfig? Config
         {
             get { return ConvertHelper.Deserialize<SectionMediaConfig>(ConfigStr); }
             set { ConfigStr = ConvertHelper.Serialize(value); }

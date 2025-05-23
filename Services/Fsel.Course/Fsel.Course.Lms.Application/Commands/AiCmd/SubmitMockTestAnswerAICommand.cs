@@ -251,7 +251,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
                 if (checkSkillMockTest)
                 {
-                    var sections = await _sectionRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
                     _mockTestResultRepository.Update(mockTestResult, false, x => x.MockTestId, x => x.CourseId, x => x.UnitId, x => x.StudentId);
                     if (skillScore != null)
                     {

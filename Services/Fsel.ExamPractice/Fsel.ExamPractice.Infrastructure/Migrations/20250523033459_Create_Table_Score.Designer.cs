@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.ExamPractice.Infrastructure.Migrations
 {
     [DbContext(typeof(ExamPracticesDBContext))]
-    [Migration("20250521064500_Create_Table_Score")]
+    [Migration("20250523033459_Create_Table_Score")]
     partial class Create_Table_Score
     {
         /// <inheritdoc />
@@ -745,6 +745,9 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                     b.Property<Guid>("CreatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
+
+                    b.Property<Guid?>("CurrentExamPracticeSectionId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")

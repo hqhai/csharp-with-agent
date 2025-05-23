@@ -8,14 +8,17 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd;
     using Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery;
+    using Fsel.ExamPractice.Lms.Application.Queries.ReportQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
     [Route(Settings.APIDefaultRoute + "/exam-practice")]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class ExamPracticeController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -94,6 +97,42 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
         public async Task<IActionResult> Get([FromQuery] GetExamPracticeSectionQuery query)
         {
             MethodResult<ExamPracticeSectionDetailModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create Answers
+        /// </summary>
+        [HttpPost("create-answers")]
+        [ProducesResponseType(typeof(MethodResult<ExamPracticeSectionResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateAnswers([FromBody] CreateExamPracticeAnswerCommand command)
+        {
+            MethodResult<ExamPracticeSectionResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Report ExamPracticeSection
+        /// </summary>
+        [HttpGet("report-exam-practice")]
+        [ProducesResponseType(typeof(MethodResult<ExamPracticeResultReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetReport([FromQuery] GetReportExamPracticeResultQuery query)
+        {
+            MethodResult<ExamPracticeResultReportModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Report ExamPracticeSection
+        /// </summary>
+        [HttpGet("report-exam-practice-section")]
+        [ProducesResponseType(typeof(MethodResult<ExamPracticeSectionResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetReport([FromQuery] GetExamPracticeSectionResultReportQuery query)
+        {
+            MethodResult<ExamPracticeSectionResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -12,8 +12,9 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAnswers
 
     public class ExamPracticeAnswerQuestionModel
     {
-        public Guid QuestionId { get; set; }
-        public Guid ExamPracticeSectionId { get; set; }
+        public Guid? QuestionId { get; set; }
+        public Guid? ExamPracticeSectionId { get; set; }
         public object? Answer { get; set; }
+        public string? SpeechTextAnswer { get; set; }
     }
 }

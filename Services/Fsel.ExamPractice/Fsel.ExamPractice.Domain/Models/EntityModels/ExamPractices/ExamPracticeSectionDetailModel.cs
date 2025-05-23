@@ -12,7 +12,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public Guid Id { get; set; }
         public string? Name { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
-        public SectionMediaConfig? SectionMediaConfig { get; set; }
+        public SectionMediaConfig? Config { get; set; }
         public Guid? ParentExamPracticeSectionId { get; set; }
         public EnumSectionExamPracticeType? Type { get; set; }
         public IList<ExamPracticeSectionDetailModel> ExamPracticeSections { get; set; } = new List<ExamPracticeSectionDetailModel>();

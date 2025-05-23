@@ -64,6 +64,7 @@ namespace Fsel.Shared.Constants
                 public const string SetTimeExamPractice = $"{KeyQueue}_SetTimeExamPractice";
                 public const string GetTimeExamPractice = $"{KeyQueue}_GetTimeExamPractice";
                 public const string ExamPracticeSpeaking = $"{KeyQueue}_ExamPracticeSpeaking";
+                public const string ExamPracticeWriting = $"{KeyQueue}_ExamPracticeWriting";
             }
         }
 
@@ -147,6 +148,8 @@ namespace Fsel.Shared.Constants
             {
                 public const string GetTimeExamPractice = $"{KeyQueue}_GetTimeExamPractice";
                 public const string SetTimeExamPractice = $"{KeyQueue}_SetTimeExamPractice";
+                public const string ExamPracticeAnwserResponse = $"{KeyQueue}_ExamPracticeAnwserResponse";
+                public const string SpeakingAI = $"{KeyQueue}_SpeakingAI";
             }
         }
 

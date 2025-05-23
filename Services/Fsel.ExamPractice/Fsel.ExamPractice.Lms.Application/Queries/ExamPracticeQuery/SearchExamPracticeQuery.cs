@@ -110,10 +110,10 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                     IsNew = x.ExamPractice.ActivatedAt.HasValue && DateTime.UtcNow <= x.ExamPractice.ActivatedAt.Value.AddDays(7),
                     ParticipantCount = x.ParticipantCount,
                     TotalSections = x.ExamPracticeSections.Count,
-                    TotalQuestions = x.ExamPracticeSections.Select(s => s.SectionMediaConfig?.TotalQuestion).Sum() ?? 0,
+                    TotalQuestions = x.ExamPracticeSections.Select(s => s.Config?.TotalQuestion).Sum() ?? 0,
                     Status = x.ExamPracticeResult?.Status,
                     ExamPracticeResultId = x.ExamPracticeResult?.Id,
-                    TotalRetry = TotalRetry - (x.ExamPracticeRetry?.RetryCount ?? 0),
+                    TotalRetry = (x.ExamPracticeRetry?.RetryCount ?? TotalRetry),
                 }).ToList()
             }).ToList();
 

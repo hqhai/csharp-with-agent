@@ -18,6 +18,7 @@ namespace Fsel.ExamPractice.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/exam-practice")]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     [ApiController]
     public class ExamPracticeController : ControllerBase
     {

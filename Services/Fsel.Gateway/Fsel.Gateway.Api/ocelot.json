@@ -211,6 +211,19 @@
           "Port": 5503
         }
       ]
+    },
+    {
+      "SwaggerKey": "lms-exam-practice",
+      "UpstreamPathTemplate": "/lms-exam-practice-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5504
+        }
+      ]
     }
   ],
   "SwaggerEndPoints": [
@@ -491,6 +504,26 @@
           "Name": "ExamPractice API",
           "Version": "v1.2",
           "Url": "http://localhost:5503/swagger/v1.2/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "lms-exam-practice",
+      "Config": [
+        {
+          "Name": "Lms ExamPractice API",
+          "Version": "v1",
+          "Url": "http://localhost:5504/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "Lms ExamPractice API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5504/swagger/v1.1/swagger.json"
+        },
+        {
+          "Name": "Lms ExamPractice API",
+          "Version": "v1.2",
+          "Url": "http://localhost:5504/swagger/v1.2/swagger.json"
         }
       ]
     }
