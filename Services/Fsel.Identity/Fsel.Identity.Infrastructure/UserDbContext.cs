@@ -31,19 +31,13 @@ namespace Fsel.Identity.Infrastructure
             //builder.Ignore<NumberStudentLearnOnSystemModel>();
             //builder.Ignore<SummaryDataOnCityModel>();
 
-            builder.Entity<User>()
-                .HasQueryFilter(e => !e.IsDeleted)
-                .HasIndex(x => x.NormalizedUserName)
-                .HasFilter($"{nameof(User.NormalizedUserName)} IS NOT NULL")
-                .IsUnique(false);
-            builder.Entity<Role>()
-                .HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
+            builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<UserClaimEntity>();
             builder.Entity<UserRoleEntity>();
             builder.Entity<UserLoginEntity>();
             builder.Entity<RoleClaimEntity>();
-            builder.Entity<UserToken>()
-                .HasQueryFilter(e => !e.IsDeleted);
             builder.HasSequence<int>(SqlSettings.Sequence.UserSequence).StartsAt(100000).IncrementsBy(1);
 
             SeedPlatforms(builder);
