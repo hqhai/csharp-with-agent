@@ -16,13 +16,13 @@ namespace Fsel.Realtime.Application.Hubs
 
     public class SetTimeExamPracticeHub : BaseHub
     {
-        private readonly SetTimeModulePublisher _setTimeModulePublisher;
-        private readonly ILogger<SetTimeModuleHub> _logger;
-        private readonly GetTimeModulePublisher _getTimeModulePublisher;
-        private readonly IHubContext<SetTimeModuleHub> _setTimeModuleHubContext;
+        private readonly SetTimeExamPracticePublisher _setTimeModulePublisher;
+        private readonly ILogger<SetTimeExamPracticeHub> _logger;
+        private readonly GetTimeExamPracticePublisher _getTimeModulePublisher;
+        private readonly IHubContext<SetTimeExamPracticeHub> _setTimeModuleHubContext;
         private readonly AuthContext _authContext;
 
-        public SetTimeExamPracticeHub(SetTimeModulePublisher setTimeModulePublisher, ILogger<SetTimeModuleHub> logger, GetTimeModulePublisher getTimeModulePublisher, IHubContext<SetTimeModuleHub> setTimeModuleHubContext, AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
+        public SetTimeExamPracticeHub(SetTimeExamPracticePublisher setTimeModulePublisher, ILogger<SetTimeExamPracticeHub> logger, GetTimeExamPracticePublisher getTimeModulePublisher, IHubContext<SetTimeExamPracticeHub> setTimeModuleHubContext, AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor) : base(authContext, ipApiService, httpContextAccessor)
         {
             _setTimeModulePublisher = setTimeModulePublisher;
             _logger = logger;
@@ -53,7 +53,7 @@ namespace Fsel.Realtime.Application.Hubs
             await DisConnectAsync(type, objectId);
             if (!string.IsNullOrEmpty(userId.ToString()))
             {
-                await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "Disconnect" });
+                await _setTimeModuleHubContext.GetGroup(_authContext.CurrentUserId.ToString()).SendAsync(RealtimeSettings.SetTimeExamPracticeHub.Methods.SetTimeExamPracticeHub, new { Event = "Disconnect" });
                 await Groups.RemoveGroupAsync(Context.ConnectionId, userId.ToString());
             }
 
@@ -93,7 +93,7 @@ namespace Fsel.Realtime.Application.Hubs
             ConnectionTracker.Instance.RecordConnectionStart(Context.ConnectionId);
             ConnectionTracker.Instance.RecordConnectionStartUser(Context.ConnectionId, userId);
 
-            await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "StartTime" });
+            await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeExamPracticeHub.Methods.SetTimeExamPracticeHub, new { Event = "StartTime" });
 
             _logger.LogInformation($"Connect SetTimeModule : {Context.ConnectionId}");
             await Task.CompletedTask;
@@ -108,7 +108,7 @@ namespace Fsel.Realtime.Application.Hubs
             ConnectionTracker.Instance.RecordConnectionEndUser(userId);
 
             await DisConnectAsync(type, objectId);
-            await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeModuleHub.Methods.SetTimeModule, new { Event = "StopTime" });
+            await _setTimeModuleHubContext.GetGroup(userId).SendAsync(RealtimeSettings.SetTimeExamPracticeHub.Methods.SetTimeExamPracticeHub, new { Event = "StopTime" });
             _logger.LogInformation($"Disconnect SetTimeModule 4: {Context.ConnectionId}");
         }
 

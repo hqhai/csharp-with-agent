@@ -48,7 +48,8 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
-       { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeExamPracticeConsumer) },
+       { QueueSettings.ExamPracticeQueue.NameQueue.GetTimeExamPractice, typeof(GetTimeExamPracticeConsumer) },
+       { QueueSettings.ExamPracticeQueue.NameQueue.SetTimeExamPractice, typeof(SetTimeExamPracticeConsumer) },
 });
 var app = builder.Build();
 app.UseServices();
