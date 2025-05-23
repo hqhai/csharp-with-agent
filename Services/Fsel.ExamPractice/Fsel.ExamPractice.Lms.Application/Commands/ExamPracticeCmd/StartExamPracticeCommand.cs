@@ -37,6 +37,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         private readonly IExamPracticeRetryRepository _examPracticeRetryRepository;
         private readonly IExamPracticeResultRepository _examPracticeResultRepository;
         private readonly IMapper _mapper;
+        private readonly IExamPracticeSectionRepository _examPracticeSectionRepository;
         private const int MaxRetryAttempts = 20;
 
         public StartExamPracticeCommandHandler(
@@ -45,7 +46,8 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             IUserService userService,
             IExamPracticeRetryRepository examPracticeRetryRepository,
             IExamPracticeResultRepository examPracticeResultRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IExamPracticeSectionRepository examPracticeSectionRepository)
         {
             _examPracticeRepository = examPracticeRepository;
             _authContext = authContext;
@@ -53,6 +55,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             _examPracticeRetryRepository = examPracticeRetryRepository;
             _examPracticeResultRepository = examPracticeResultRepository;
             _mapper = mapper;
+            _examPracticeSectionRepository = examPracticeSectionRepository;
         }
 
         public async Task<MethodResult<ExamPracticeResultModel>> Handle(StartExamPracticeCommand request, CancellationToken cancellationToken)
@@ -95,6 +98,21 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     return methodResult;
                 }
             }
+            if (request.ExamPracticeSectionIds != null && request.ExamPracticeSectionIds.Any())
+            {
+                var examPracticeSections = await _examPracticeSectionRepository.GetByIdsAsync(request.ExamPracticeSectionIds);
+                if (!examPracticeSections.Any())
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSections), request.ExamPracticeSectionIds);
+                    return methodResult;
+                }
+                if (examPracticeSections.Count() != request.ExamPracticeSectionIds.Count)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSections), request.ExamPracticeSectionIds.Where(x => examPracticeSections.Any(y => y.Id == x)));
+                    return methodResult;
+                }
+            }
+
             var examPracticeSection = examPractice.ExamPracticeSections.FirstOrDefault();
             if (examPracticeSection != null && examPracticeSection.CourseSkill.HasValue && examPractice.SubType == EnumExamPracticeSubType.SkillMockTest && request.PracticeMode == EnumPracticeMode.Practice)
             {
@@ -167,14 +185,34 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 WorkingStatus = EnumWorkingStatus.Active,
                 PracticeMode = request.PracticeMode,
                 ResultPosition = await _examPracticeResultRepository.Queryable.Where(x => x.ExamPracticeId == examPracticeRetry.Id).CountAsync(cancellationToken),
-                Config = request.PracticeMode == EnumPracticeMode.Practice ? new ExerciseConfig
+            };
+            ExerciseConfig? exerciseConfig = null;
+            if (request.PracticeMode == EnumPracticeMode.Practice)
+            {
+                exerciseConfig = new ExerciseConfig
                 {
                     ExamPracticeSectionIds = request.ExamPracticeSectionIds,
                     IsAllPart = request.IsAllPart,
                     PracticeTimeLimitOption = request.PracticeTimeLimitOption,
-                    ExecutionTime = request.PracticeTimeLimitOption.HasValue && request.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased ? (int)request.PracticeTimeLimitOption.Value : null,
-                } : null
-            };
+                };
+                if (request.PracticeTimeLimitOption.HasValue)
+                {
+                    if (request.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
+                    {
+                        exerciseConfig.ExecutionTime = (int)request.PracticeTimeLimitOption.Value;
+                    }
+                    else if (examPractice.Type == EnumExamPracticeType.IELTS)
+                    {
+                        var examPracticeSetions = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPractice.Id).ToListAsync(cancellationToken);
+                        exerciseConfig.ExecutionTime = (int?)examPracticeSetions.Sum(x => x.Config?.ExecutionTime ?? default);
+                    }
+                    else
+                    {
+                        exerciseConfig.ExecutionTime = examPractice.ExecutionTime;
+                    }
+                }
+            }
+            examPracticeResult.Config = exerciseConfig;
             await _examPracticeResultRepository.ExecuteTransactionAsync(async () =>
             {
                 await _examPracticeResultRepository.BulkMergeAsync(new List<ExamPracticeResult> { examPracticeResult }, bulk =>

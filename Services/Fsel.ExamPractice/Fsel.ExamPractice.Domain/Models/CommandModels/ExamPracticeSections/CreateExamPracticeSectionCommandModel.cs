@@ -13,7 +13,7 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections
         public string? Name { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
         public EnumSectionExamPracticeType? Type { get; set; }
-        public SectionMediaConfig? SectionMediaConfig { get; set; }
+        public SectionMediaConfig? Config { get; set; }
         public IList<CreateExamPracticeSectionCommandModel> ChildrenExamPracticeSections { get; set; } = new List<CreateExamPracticeSectionCommandModel>();
         public IList<CreateQuestionCommandModel> Questions { get; set; } = new List<CreateQuestionCommandModel>();
         public IList<ExamPracticeAISettingModel> ExamPracticeAISettings { get; set; } = new List<ExamPracticeAISettingModel>();

@@ -743,6 +743,9 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
+                    b.Property<Guid?>("CurrentExamPracticeSectionId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(109);

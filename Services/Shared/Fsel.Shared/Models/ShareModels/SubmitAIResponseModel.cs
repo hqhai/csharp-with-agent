@@ -21,6 +21,16 @@ namespace Fsel.Shared.Models.ShareModels
         public string? GradingAlFeedBack { get; set; }
     }
 
+    public class SubmitExamPracticeResponseModel
+    {
+        public string? CriteriaName { get; set; }
+        public int? DisplayOrder { get; set; }
+
+        public Guid? ExamPracticeResultId { get; set; }
+
+        public string? GradingAlFeedBack { get; set; }
+    }
+
     public class SubmitAiSpeakingResponseModel
     {
         public string? CriteriaName { get; set; }
@@ -48,5 +58,12 @@ namespace Fsel.Shared.Models.ShareModels
         public Guid MockTestResultId { get; set; }
 
         public Guid SectionGroupId { get; set; }
+    }
+
+    public class SpeakingExamPracticeAIEvaluationModel
+    {
+        public Guid ExamPracticeResultId { get; set; }
+
+        public Guid ExamPracticeSectionId { get; set; }
     }
 }
