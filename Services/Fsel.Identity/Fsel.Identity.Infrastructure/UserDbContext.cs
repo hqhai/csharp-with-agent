@@ -31,18 +31,18 @@ namespace Fsel.Identity.Infrastructure
             //builder.Ignore<NumberStudentLearnOnSystemModel>();
             //builder.Ignore<SummaryDataOnCityModel>();
 
-            builder.Entity<User>().ToTable(nameof(Users))
+            builder.Entity<User>()
                 .HasQueryFilter(e => !e.IsDeleted)
                 .HasIndex(x => x.NormalizedUserName)
                 .HasFilter($"{nameof(User.NormalizedUserName)} IS NOT NULL")
                 .IsUnique(false);
-            builder.Entity<Role>().ToTable(nameof(Roles))
+            builder.Entity<Role>()
                 .HasQueryFilter(e => !e.IsDeleted);
-            builder.Entity<UserClaimEntity>().ToTable(nameof(UserClaims));
-            builder.Entity<UserRoleEntity>().ToTable(nameof(UserRoles));
-            builder.Entity<UserLoginEntity>().ToTable(nameof(UserLogins));
-            builder.Entity<RoleClaimEntity>().ToTable(nameof(RoleClaims));
-            builder.Entity<UserToken>().ToTable(nameof(UserTokens))
+            builder.Entity<UserClaimEntity>();
+            builder.Entity<UserRoleEntity>();
+            builder.Entity<UserLoginEntity>();
+            builder.Entity<RoleClaimEntity>();
+            builder.Entity<UserToken>()
                 .HasQueryFilter(e => !e.IsDeleted);
             builder.HasSequence<int>(SqlSettings.Sequence.UserSequence).StartsAt(100000).IncrementsBy(1);
 
