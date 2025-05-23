@@ -3,8 +3,11 @@
 namespace Fsel.Identity.Infrastructure.Repositories
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Identity;
 
     public class UserRoleRepository : IUserRoleRepository
@@ -21,6 +24,36 @@ namespace Fsel.Identity.Infrastructure.Repositories
             try
             {
                 return _userDbContext.UserRoles.AsQueryable();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public virtual IQueryable<GetAccountDashboardQueryModel> GetUsersByRoles(IList<EnumRole> roles)
+        {
+            try
+            {
+                var roleNames = roles.Select(r => r.ToString()).ToList();
+
+                return (from a in _userDbContext.Users
+                        join b in _userDbContext.UserRoles on a.Id equals b.UserId
+                        join c in _userDbContext.Roles on b.RoleId equals c.Id
+                        join d in _userDbContext.EventManagers on a.Id equals d.UserId
+                        join n in _userDbContext.CompetitionEvents on d.CompetitionEventId equals n.Id
+                        where !string.IsNullOrEmpty(c.Name) && roleNames.Contains(c.Name!)
+                        select new GetAccountDashboardQueryModel
+                        {
+                            Id = a.Id,
+                            CreatedDate = a.CreatedDate,
+                            FullName = a.FullName,
+                            UserName = a.UserName,
+                            Status = a.Status,
+                            Role = c.Name,
+                            EventCode = n.EventCode,
+                            DefaultPassword = a.DefaultPassword
+                        }).AsQueryable();
             }
             catch (Exception)
             {

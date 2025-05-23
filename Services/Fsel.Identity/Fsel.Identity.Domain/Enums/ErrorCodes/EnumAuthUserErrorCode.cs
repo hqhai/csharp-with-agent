@@ -148,5 +148,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Password is incorrect
         /// </summary>
         PasswordIncorrect,
+
+        /// <summary>
+        /// Role ko thuộc trang báo cáo
+        /// </summary>
+        RoleNotInDashboard
     }
 }
