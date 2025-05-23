@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
@@ -20,21 +21,21 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
     {
         public class Handler : IRequestHandler<AddUserToGroupCommand, MethodResult<List<UserGroupMemberShipModel>>>
         {
-            private readonly IUserGroupRepository _userGroupRepository;
-            private readonly IUserGroupMemberShipRepository _userGroupMemberShipRepository;
+            private readonly RoleManager<Role> _roleManager;
+            private readonly IUserRoleRepository _userRoleRepository;
             private readonly IMapper _mapper;
             private readonly UserManager _userManager;
 
             public Handler(
-                IUserGroupRepository userGroupRepository,
-                IUserGroupMemberShipRepository userGroupMemberShipRepository,
                 IMapper mapper,
-                UserManager userManager)
+                UserManager userManager,
+                RoleManager<Role> roleManager,
+                IUserRoleRepository userRoleRepository)
             {
-                _userGroupRepository = userGroupRepository;
-                _userGroupMemberShipRepository = userGroupMemberShipRepository;
                 _mapper = mapper;
                 _userManager = userManager;
+                _roleManager = roleManager;
+                _userRoleRepository = userRoleRepository;
             }
 
             public async Task<MethodResult<List<UserGroupMemberShipModel>>> Handle(AddUserToGroupCommand request, CancellationToken cancellationToken)
@@ -49,7 +50,7 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 }
 
                 // Kiểm tra nhóm tồn tại
-                var userGroup = await _userGroupRepository.GetByIdAsync(request.GroupId);
+                var userGroup = await _roleManager.FindByIdAsync(request.GroupId.ToString());
                 if (userGroup == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(UserGroup));
@@ -59,61 +60,51 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 // Danh sách kết quả
                 var resultList = new List<UserGroupMemberShipModel>();
 
-                // Xử lý trong transaction để đảm bảo tính nhất quán
-                await _userGroupMemberShipRepository.ExecuteTransactionAsync(async () =>
+
+                foreach (var userId in request.UserIds)
                 {
-                    foreach (var userId in request.UserIds)
+                    // Kiểm tra user tồn tại
+                    var user = await _userManager.FindByIdAsync(userId.ToString());
+                    if (user == null)
                     {
-                        // Kiểm tra user tồn tại
-                        var user = await _userManager.FindByIdAsync(userId.ToString());
-                        if (user == null)
-                        {
-                            // Skip nếu user không tồn tại
-                            continue;
-                        }
-
-                        // Kiểm tra xem user đã thuộc nhóm chưa
-                        var existingMembership = await _userGroupMemberShipRepository.Queryable
-                            .FirstOrDefaultAsync(x => x.UserId == userId && x.GroupId == request.GroupId, cancellationToken);
-
-                        if (existingMembership != null)
-                        {
-                            // Nếu tài khoản đã bị vô hiệu hóa trước đó, kích hoạt lại
-                            if (!existingMembership.IsActive)
-                            {
-                                existingMembership.IsActive = true;
-                                _userGroupMemberShipRepository.Update(existingMembership);
-
-                                // Thêm vào danh sách kết quả
-                                resultList.Add(_mapper.Map<UserGroupMemberShipModel>(existingMembership));
-                            }
-                            // Không thêm vào kết quả nếu đã là thành viên active
-                            continue;
-                        }
-
-                        // Tạo membership mới cho mỗi user
-                        var membership = new UserGroupMemberShip
-                        {
-                            GroupId = request.GroupId,
-                            UserId = userId,
-                        };
-
-                        _userGroupMemberShipRepository.Add(membership);
-
-                        // Thêm vào danh sách kết quả
-                        resultList.Add(_mapper.Map<UserGroupMemberShipModel>(membership));
+                        // Skip nếu user không tồn tại
+                        continue;
                     }
 
-                    // Lưu tất cả thay đổi
-                    await _userGroupMemberShipRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                    // Kiểm tra xem user đã thuộc nhóm chưa
+                    var existingMembership = await _userRoleRepository.GetQuery()
+                        .FirstOrDefaultAsync(x => x.UserId == userId && x.RoleId == request.GroupId, cancellationToken);
 
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                    methodResult.Result = resultList;
-                    return methodResult;
+                    if (existingMembership != null)
+                    {
+                        // Nếu tài khoản đã bị vô hiệu hóa trước đó, kích hoạt lại
+                        if (!existingMembership.IsActive)
+                        {
+                            existingMembership.IsActive = true;
+                            await _userRoleRepository.UpdateAsync(existingMembership);
 
-                });
+                            // Thêm vào danh sách kết quả
+                            resultList.Add(_mapper.Map<UserGroupMemberShipModel>(existingMembership));
+                        }
+                        // Không thêm vào kết quả nếu đã là thành viên active
+                        continue;
+                    }
+
+                    // Tạo membership mới cho mỗi user
+                    var membership = new UserRole
+                    {
+                        RoleId = request.GroupId,
+                        UserId = userId,
+                    };
+
+                    await _userRoleRepository.AddAsync(membership);
+
+                    // Thêm vào danh sách kết quả
+                    resultList.Add(_mapper.Map<UserGroupMemberShipModel>(membership));
+                }
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = resultList;
                 return methodResult;
             }
         }

@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.UserGroup;
@@ -19,13 +20,13 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
 
         public class Handler : IRequestHandler<UpdateUserGroupCommand, MethodResult<UserGroupModel>>
         {
-            private readonly IUserGroupRepository _userGroupRepository;
             private readonly IMapper _mapper;
+            private readonly RoleManager<Role> _roleManager;
 
-            public Handler(IUserGroupRepository userGroupRepository, IMapper mapper)
+            public Handler(IMapper mapper, RoleManager<Role> roleManager)
             {
-                _userGroupRepository = userGroupRepository;
                 _mapper = mapper;
+                _roleManager = roleManager;
             }
 
             public async Task<MethodResult<UserGroupModel>> Handle(UpdateUserGroupCommand request, CancellationToken cancellationToken)
@@ -33,7 +34,7 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 var methodResult = new MethodResult<UserGroupModel>();
 
                 // Lấy nhóm cần cập nhật
-                var userGroup = await _userGroupRepository.GetByIdAsync(request.Id);
+                var userGroup = await _roleManager.FindByIdAsync(request.Id.ToString());
                 if (userGroup == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(UserGroup));
@@ -41,10 +42,10 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 }
 
                 // Kiểm tra xem tên nhóm đã tồn tại chưa (nếu thay đổi tên)
-                if (userGroup.GroupName != request.GroupName)
+                if (userGroup.Name != request.GroupName)
                 {
-                    var existingGroup = await _userGroupRepository.Queryable
-                        .FirstOrDefaultAsync(x => x.GroupName == request.GroupName && x.Id != request.Id, cancellationToken);
+                    var existingGroup = await _roleManager.Roles
+                        .FirstOrDefaultAsync(x => x.Name == request.GroupName && x.Id != request.Id, cancellationToken);
 
                     if (existingGroup != null)
                     {
@@ -54,7 +55,7 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 }
 
                 // Lấy tất cả các nhóm để xử lý DisplayOrder
-                var allGroups = await _userGroupRepository.Queryable
+                var allGroups = await _roleManager.Roles
                     .Where(x => x.Id != request.Id) // Loại trừ nhóm hiện tại
                     .OrderBy(x => x.DisplayOrder)
                     .ToListAsync(cancellationToken);
@@ -111,41 +112,41 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 // Cập nhật thông tin nhóm với AutoMapper
                 _mapper.Map(request, userGroup);
 
-                await _userGroupRepository.ExecuteTransactionAsync(async () =>
+                // Nếu có sự thay đổi DisplayOrder, cập nhật các nhóm bị ảnh hưởng
+                if (newDisplayOrder != oldDisplayOrder)
                 {
-                    // Nếu có sự thay đổi DisplayOrder, cập nhật các nhóm bị ảnh hưởng
-                    if (newDisplayOrder != oldDisplayOrder)
+                    if (newDisplayOrder < oldDisplayOrder)
                     {
-                        if (newDisplayOrder < oldDisplayOrder)
+                        var groupsToUpdate = allGroups.Where(x => x.DisplayOrder >= newDisplayOrder && x.DisplayOrder < oldDisplayOrder).ToList();
+                        if (groupsToUpdate.Any())
                         {
-                            var groupsToUpdate = allGroups.Where(x => x.DisplayOrder >= newDisplayOrder && x.DisplayOrder < oldDisplayOrder).ToList();
-                            if (groupsToUpdate.Any())
+                            foreach (var group in groupsToUpdate)
                             {
-                                _userGroupRepository.UpdateList(groupsToUpdate);
-                            }
-                        }
-                        else if (newDisplayOrder > oldDisplayOrder)
-                        {
-                            var groupsToUpdate = allGroups.Where(x => x.DisplayOrder > oldDisplayOrder && x.DisplayOrder <= newDisplayOrder).ToList();
-                            if (groupsToUpdate.Any())
-                            {
-                                _userGroupRepository.UpdateList(groupsToUpdate);
+                                await _roleManager.UpdateAsync(group);
+
                             }
                         }
                     }
+                    else if (newDisplayOrder > oldDisplayOrder)
+                    {
+                        var groupsToUpdate = allGroups.Where(x => x.DisplayOrder > oldDisplayOrder && x.DisplayOrder <= newDisplayOrder).ToList();
 
-                    // Cập nhật nhóm hiện tại
-                    _userGroupRepository.Update(userGroup);
-                    await _userGroupRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                        foreach (var group in groupsToUpdate)
+                        {
+                            await _roleManager.UpdateAsync(group);
 
-                    // Map trở lại model
-                    var resultModel = _mapper.Map<UserGroupModel>(userGroup);
+                        }
+                    }
+                }
 
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                    methodResult.Result = resultModel;
-                    return methodResult;
-                });
+                // Cập nhật nhóm hiện tại
+                await _roleManager.UpdateAsync(userGroup);
 
+                // Map trở lại model
+                var resultModel = _mapper.Map<UserGroupModel>(userGroup);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = resultModel;
                 return methodResult;
             }
         }

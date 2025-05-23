@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserToken>
+    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRole, UserLoginEntity, UserToken>
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -72,8 +72,9 @@ namespace Fsel.Identity.Infrastructure
         #region Db Set
 
         public override DbSet<User> Users { get; set; }
-        public DbSet<UserToken> UserTokens { get; set; }
-        public DbSet<Role> Roles { get; set; }
+        public override DbSet<UserToken> UserTokens { get; set; }
+        public override DbSet<Role> Roles { get; set; }
+        public override DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Human> Humans { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
