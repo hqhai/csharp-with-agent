@@ -147,6 +147,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string GetTimeExamPractice = $"{KeyQueue}_GetTimeExamPractice";
+                public const string SetTimeExamPractice = $"{KeyQueue}_SetTimeExamPractice";
                 public const string ExamPracticeAnwserResponse = $"{KeyQueue}_ExamPracticeAnwserResponse";
                 public const string SpeakingAI = $"{KeyQueue}_SpeakingAI";
             }

@@ -22,7 +22,7 @@ namespace Fsel.Realtime.Application.Queues.Publishers
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.GetTimeExamPractice, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.ExamPracticeQueue.NameQueue.GetTimeExamPractice, request, cancellationToken);
         }
     }
 }
