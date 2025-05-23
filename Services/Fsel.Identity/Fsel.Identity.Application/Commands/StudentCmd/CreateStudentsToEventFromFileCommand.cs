@@ -54,6 +54,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly ILogger<CreateStudentsToEventFromFileCommand> _logger;
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
+        private readonly IHumanRepository _humanRepository;
+        private readonly IStudentRepository _studentRepository;
 
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
         private const string Success = "Thành công";
@@ -67,11 +69,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string ExpiredDate = "Đã hết thời gian tạo tài khoản";
 
         private const string DefaultPassword = "Fsel@";
-        private const int StartYear = 1900;
+        private const int MinYear = 1900;
 
         private static readonly Random s_random = new Random();
 
-        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ILogger<CreateStudentsToEventFromFileCommand> logger, AuthContext authContext, ISystemService systemService)
+        public CreateStudentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ILogger<CreateStudentsToEventFromFileCommand> logger, AuthContext authContext, ISystemService systemService, IHumanRepository humanRepository, IStudentRepository studentRepository)
         {
             _userManager = userManager;
             _orderService = orderService;
@@ -83,6 +85,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _logger = logger;
             _authContext = authContext;
             _systemService = systemService;
+            _humanRepository = humanRepository;
+            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<CreateStudentsToEventFromFileModel>> Handle(CreateStudentsToEventFromFileCommand request, CancellationToken cancellationToken)
@@ -244,6 +248,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                 if (request.Category == EnumCompetitionEventCategory.Student)
                 {
+                    var datas = new List<CreateStudentToEventFromFileModel>();
+
                     var result = formFile.ImportAndValidateExcel(async (CreateStudentToEventFromFileModel x, IList<CreateStudentToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                     {
                         if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth.HasValue || !string.IsNullOrEmpty(x.SchoolGrade?.Trim()) || !string.IsNullOrEmpty(x.SchoolClass?.Trim()))
@@ -272,7 +278,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
                             }
-                            else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < StartYear)
+                            else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < MinYear)
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                            }
+                            else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year > DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Year)
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
                             }
@@ -284,10 +294,54 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolClass), Message = ErrorMassageSetting.EmptyClassVN });
                             }
+
+                            if (datas.Any(p => p.FullName == x.FullName && p.DateOfBirth == x.DateOfBirth && p.PhoneNumber == x.PhoneNumber))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.DataAlreadyExistInListVN });
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = null });
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = null });
+                            }
+                            else
+                            {
+                                datas.Add(new CreateStudentToEventFromFileModel()
+                                {
+                                    FullName = x.FullName,
+                                    DateOfBirth = x.DateOfBirth,
+                                    PhoneNumber = x.PhoneNumber
+                                });
+                            }
                         }
                         return await Task.FromResult(errors.Count == 0);
                     },
-             null,
+             async (Dictionary<int, CreateStudentToEventFromFileModel> datas, IList<ValidateExcelModel> errors) =>
+             {
+                 var query = await (from u in _userManager.Users
+                                    join h in _humanRepository.Queryable on u.Id equals h.UserId
+                                    join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                                    where s.SchoolId == schoolId
+                                    select new
+                                    {
+                                        User = u,
+                                        Human = h,
+                                        Student = s
+                                    }).ToListAsync(cancellationToken);
+
+                 datas.ForEach(p =>
+                 {
+                     var phoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(p.Value.PhoneNumber?.Trim());
+
+                     var data = query.FirstOrDefault(x => x.User.PhoneNumber == phoneNumber && x.Human.Birthday.HasValue && p.Value.DateOfBirth.HasValue && x.Human.Birthday.Value.Date == p.Value.DateOfBirth.Value.Date && !string.IsNullOrEmpty(x.User.FullName) && !string.IsNullOrEmpty(p.Value.FullName) && x.User.FullName.ToLower() == p.Value.FullName.ToLower());
+
+                     if (data != null)
+                     {
+                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateStudentToEventFromFileModel.PhoneNumber), Message = ErrorMassageSetting.DataAlreadyExistVN });
+                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateStudentToEventFromFileModel.FullName), Message = null });
+                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateStudentToEventFromFileModel.DateOfBirth), Message = null });
+                     }
+                 });
+
+                 return await Task.FromResult(errors.Count == 0);
+             },
              defaultStudentHandlerAction,
              errorHandlerAction,
              true);
@@ -312,6 +366,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
                 else
                 {
+                    var datas = new List<CreateTeacherToEventFromFileModel>();
+
                     var result = formFile.ImportAndValidateExcel(async (CreateTeacherToEventFromFileModel x, IList<CreateTeacherToEventFromFileModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                     {
                         if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || x.DateOfBirth.HasValue || !string.IsNullOrEmpty(x.Class?.Trim()))
@@ -340,7 +396,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.EmptyBirthDayVN });
                             }
-                            else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < StartYear)
+                            else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year < MinYear)
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                            }
+                            else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year > DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Year)
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
                             }
@@ -348,10 +408,54 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Class), Message = ErrorMassageSetting.EmptyClassVN });
                             }
+
+                            if (datas.Any(p => p.FullName == x.FullName && p.DateOfBirth == x.DateOfBirth && p.PhoneNumber == x.PhoneNumber))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.DataAlreadyExistInListVN });
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = null });
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = null });
+                            }
+                            else
+                            {
+                                datas.Add(new CreateTeacherToEventFromFileModel()
+                                {
+                                    FullName = x.FullName,
+                                    DateOfBirth = x.DateOfBirth,
+                                    PhoneNumber = x.PhoneNumber
+                                });
+                            }
                         }
                         return await Task.FromResult(errors.Count == 0);
                     },
-             null,
+             async (Dictionary<int, CreateTeacherToEventFromFileModel> datas, IList<ValidateExcelModel> errors) =>
+             {
+                 var query = await (from u in _userManager.Users
+                                    join h in _humanRepository.Queryable on u.Id equals h.UserId
+                                    join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                                    where s.SchoolId == schoolId
+                                    select new
+                                    {
+                                        User = u,
+                                        Human = h,
+                                        Student = s
+                                    }).ToListAsync(cancellationToken);
+
+                 datas.ForEach(p =>
+                 {
+                     var phoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(p.Value.PhoneNumber?.Trim());
+
+                     var data = query.FirstOrDefault(x => x.User.PhoneNumber == phoneNumber && x.Human.Birthday.HasValue && p.Value.DateOfBirth.HasValue && x.Human.Birthday.Value.Date == p.Value.DateOfBirth.Value.Date && !string.IsNullOrEmpty(x.User.FullName) && !string.IsNullOrEmpty(p.Value.FullName) && x.User.FullName.ToLower() == p.Value.FullName.ToLower());
+
+                     if (data != null)
+                     {
+                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateStudentToEventFromFileModel.PhoneNumber), Message = ErrorMassageSetting.DataAlreadyExistVN });
+                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateStudentToEventFromFileModel.FullName), Message = null });
+                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateStudentToEventFromFileModel.DateOfBirth), Message = null });
+                     }
+                 });
+
+                 return await Task.FromResult(errors.Count == 0);
+             },
              defaultTeacherHandlerAction,
              errorHandlerAction,
              true);
