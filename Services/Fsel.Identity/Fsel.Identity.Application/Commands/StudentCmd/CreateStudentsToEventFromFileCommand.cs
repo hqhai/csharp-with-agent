@@ -400,6 +400,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
                             }
+                            else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year > (DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Year - 1))
+                            {
+                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                            }
                             else if (x.DateOfBirth.HasValue && x.DateOfBirth.Value.Year > DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Year)
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
