@@ -88,7 +88,7 @@ namespace Fsel.Identity.Infrastructure
         public override DbSet<UserLoginEntity> UserLogins { get; set; }
         public override DbSet<RoleClaimEntity> RoleClaims { get; set; }
         public override DbSet<Role> Roles { get; set; }
-        public DbSet<UserOtpCode> UserOtps { get; set; }
+        public DbSet<UserOtpCode> UserOtpCodes { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<Parent> Parents { get; set; }
