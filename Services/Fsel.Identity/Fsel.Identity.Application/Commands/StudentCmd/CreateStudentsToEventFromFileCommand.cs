@@ -448,9 +448,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
                      if (data != null)
                      {
-                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateStudentToEventFromFileModel.PhoneNumber), Message = ErrorMassageSetting.DataAlreadyExistVN });
-                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateStudentToEventFromFileModel.FullName), Message = null });
-                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateStudentToEventFromFileModel.DateOfBirth), Message = null });
+                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateTeacherToEventFromFileModel.PhoneNumber), Message = ErrorMassageSetting.DataAlreadyExistVN });
+                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateTeacherToEventFromFileModel.FullName), Message = null });
+                         errors.Add(new ValidateExcelModel { RowIndex = p.Key, ColumnName = nameof(CreateTeacherToEventFromFileModel.DateOfBirth), Message = null });
                      }
                  });
 
