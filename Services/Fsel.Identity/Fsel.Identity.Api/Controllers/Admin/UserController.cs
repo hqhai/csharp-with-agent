@@ -311,17 +311,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// Import Account Dashboard
         /// </summary>
         [HttpPost("import-account-dashboard")]
-        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ImportAccountDashboardModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ImportAccountDashboard([FromForm] ImportAccountDashboardCommand command)
         {
-            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            if (!commandResult.IsOK || commandResult.Result == null)
+            MethodResult<ImportAccountDashboardModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null || commandResult.Result.Stream == null)
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Template_ErrorTaikhoan_Dashboard.xlsx");
+            return File(commandResult.Result.Stream, Settings.Excels.ContentType, "Template_ErrorTaikhoan_Dashboard.xlsx");
         }
 
         /// <summary>

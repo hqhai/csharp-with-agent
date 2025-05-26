@@ -14,17 +14,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Admins;
+    using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ImportAccountDashboardCommand : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class ImportAccountDashboardCommand : BaseImportCommandModel, IRequest<MethodResult<ImportAccountDashboardModel>>
     {
         public EnumRole Role { get; set; }
     }
 
-    public class ImportAccountDashboardCommandHandler : IRequestHandler<ImportAccountDashboardCommand, MethodResult<Stream>>
+    public class ImportAccountDashboardCommandHandler : IRequestHandler<ImportAccountDashboardCommand, MethodResult<ImportAccountDashboardModel>>
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
@@ -46,10 +47,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _eventManagerRepository = eventManagerRepository;
         }
 
-        public async Task<MethodResult<Stream>> Handle(ImportAccountDashboardCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<ImportAccountDashboardModel>> Handle(ImportAccountDashboardCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<Stream> methodResult = new MethodResult<Stream>();
+            MethodResult<ImportAccountDashboardModel> methodResult = new MethodResult<ImportAccountDashboardModel>();
 
             if (request.FormFile == null)
             {
@@ -80,9 +81,20 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email không đúng định dạng" });
                 }
 
-                if (string.IsNullOrEmpty(x.EventCode) || !await _competitionEventsRepository.Queryable.AnyAsync(c => !string.IsNullOrEmpty(c.EventCode) && c.EventCode.Trim() == x.EventCode.Trim()))
+                if (string.IsNullOrEmpty(x.EventCode))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode sai hoặc không tồn tại" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode không được để trống" });
+                }
+
+                List<string> eventCodes = x.EventCode?.Split(',').ToList() ?? new List<string>();
+                eventCodes = eventCodes.Select(x => x.Trim()).ToList();
+                foreach (var eventCode in eventCodes)
+                {
+                    if (!string.IsNullOrEmpty(eventCode) && !await _competitionEventsRepository.Queryable.AnyAsync(c => !string.IsNullOrEmpty(c.EventCode) && eventCode == c.EventCode.Trim()))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode sai hoặc không tồn tại" });
+                        break;
+                    }
                 }
 
                 return await Task.FromResult(errors.Count == 0);
@@ -90,33 +102,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             if (result.Stream != null)
             {
-                methodResult.Result = result.Stream;
+                methodResult.Result = new ImportAccountDashboardModel { Stream = result.Stream };
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
 
             var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!.Trim()).ToList();
-            var emailsDuplicates = emails.GroupBy(x => x).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
-
-            if (emailsDuplicates.Any())
-            {
-                methodResult.AddErrorBadRequest(new List<ErrorResult>
-                {
-                    new ErrorResult
-                    {
-                        ErrorCode = nameof(emailsDuplicates),
-                        Errors = new List<Error>
-                        {
-                            new Error
-                            {
-                                FieldName  = nameof(emailsDuplicates),
-                                ErrorValues = emailsDuplicates.Cast<object>().ToList()
-                            }
-                        }
-                    }
-                });
-                return methodResult;
-            }
 
             var role = await _roleManager.FindByNameAsync(nameof(request.Role));
             if (role == null)
@@ -130,6 +121,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
 
             var users = await _userManager.Users.Where(x => !string.IsNullOrEmpty(x.Email) && emails.Contains(x.Email)).ToListAsync(cancellationToken);
+
+            int countAccount = 0;
+
             foreach (var item in result.Datas)
             {
                 if (string.IsNullOrEmpty(item.Email))
@@ -167,7 +161,14 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     await _userManager.AddToRoleAsync(user, request.Role.ToString());
 
                     // thêm vào eventManager
-                    await AddEventManager(item.EventCode, user.Id, request.Role, cancellationToken);
+                    List<string> eventCodes = item.EventCode?.Split(',').ToList() ?? new List<string>();
+                    eventCodes = eventCodes.Select(x => x.Trim()).ToList();
+                    foreach (var eventCode in eventCodes)
+                    {
+                        await AddEventManager(eventCode, user.Id, request.Role, cancellationToken);
+                    }
+
+                    countAccount += 1;
                 }
                 catch (Exception e)
                 {
@@ -177,6 +178,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             }
 
+            methodResult.Result = new ImportAccountDashboardModel { CountAccount = countAccount };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
