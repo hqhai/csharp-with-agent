@@ -13,7 +13,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 RUN apt update && apt install ffmpeg -y 
 WORKDIR /src
 COPY ["Services/Fsel.ExamPractice/Fsel.ExamPractice.Lms.Api/Fsel.ExamPractice.Lms.Api.csproj", "Services/Fsel.ExamPractice/Fsel.ExamPractice.Lms.Api/"]
-COPY ["Services/Fsel.ExamPractice/Fsel.ExamPractice.Application/Fsel.ExamPractice.Application.csproj", "Services/Fsel.ExamPractice/Fsel.ExamPractice.Application/"]
+COPY ["Services/Fsel.ExamPractice/Fsel.ExamPractice.Lms.Application/Fsel.ExamPractice.Lms.Application.csproj", "Services/Fsel.ExamPractice/Fsel.ExamPractice.Lms.Application/"]
 COPY ["Services/Fsel.ExamPractice/Fsel.ExamPractice.Infrastructure/Fsel.ExamPractice.Infrastructure.csproj", "Services/Fsel.ExamPractice/Fsel.ExamPractice.Infrastructure/"]
 COPY ["Services/Fsel.ExamPractice/Fsel.ExamPractice.Domain/Fsel.ExamPractice.Domain.csproj", "Services/Fsel.ExamPractice/Fsel.ExamPractice.Domain/"]
 COPY ["Services/Shared/Fsel.Shared/Fsel.Shared.csproj", "Services/Shared/Fsel.Shared/"]

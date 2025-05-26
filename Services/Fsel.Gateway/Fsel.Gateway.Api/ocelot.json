@@ -212,9 +212,10 @@
         }
       ]
     },
+    // ExamPracticeLms Service
     {
-      "SwaggerKey": "lms-exam-practice",
-      "UpstreamPathTemplate": "/lms-exam-practice-gateway/{everything}",
+      "SwaggerKey": "exam-practice-lms",
+      "UpstreamPathTemplate": "/exam-practice-lms-gateway/{everything}",
       "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
       "DownstreamPathTemplate": "/api/{everything}",
       "DownstreamScheme": "http",
@@ -508,20 +509,20 @@
       ]
     },
     {
-      "Key": "lms-exam-practice",
+      "Key": "exam-practice-lms",
       "Config": [
         {
-          "Name": "Lms ExamPractice API",
+          "Name": "ExamPracticeLms API",
           "Version": "v1",
           "Url": "http://localhost:5504/swagger/v1/swagger.json"
         },
         {
-          "Name": "Lms ExamPractice API",
+          "Name": "ExamPracticeLms API",
           "Version": "v1.1",
           "Url": "http://localhost:5504/swagger/v1.1/swagger.json"
         },
         {
-          "Name": "Lms ExamPractice API",
+          "Name": "ExamPracticeLms API",
           "Version": "v1.2",
           "Url": "http://localhost:5504/swagger/v1.2/swagger.json"
         }
