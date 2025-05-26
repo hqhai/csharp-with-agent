@@ -285,7 +285,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     {
                         int mergeRangeCount = courseLevel == EnumCourseLevel.EFA1 ? CourseProgressValue.CountUnitRFIA1 * CourseProgressValue.CountLessonRFI + CourseProgressValue.CountFinalTest
                                                                                                                 : CourseProgressValue.CountUnitRFIA2 * CourseProgressValue.CountLessonRFI + CourseProgressValue.CountFinalTest;
-                        int dem = 22;
+                        int dem = 23;
                         var excelNewWorksheet = excelPackage.Workbook.Worksheets.Copy(excelWorksheet.Name, courseLevel.GetDescription());
                         for (int i = 6; i < mergeRangeCount; i++)
                         {

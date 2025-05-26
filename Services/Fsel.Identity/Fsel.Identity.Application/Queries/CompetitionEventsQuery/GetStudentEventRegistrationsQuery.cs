@@ -126,8 +126,8 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                 var names = item.FullName?.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 var school = schools.FirstOrDefault(x => x.Id == item.SchoolId);
 
-                item.FirstName = names != null && names.Length > 0 ? names.Last() : "";
-                item.LastName = names != null && names.Length > 1 ? string.Join(' ', names.Take(names.Length - 1)) : "";
+                item.FirstName = names != null && names.Length > 1 ? string.Join(' ', names.Take(names.Length - 1)) : string.Empty;
+                item.LastName = names != null && names.Length > 0 ? names.Last() : string.Empty;
                 item.District = school?.LocalId;
             }
             methodResult.Result = eventRegistrations;

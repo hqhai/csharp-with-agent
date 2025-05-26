@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -186,7 +187,8 @@ namespace Fsel.Course.Lms.Api.Controllers
             {
                 return queryResult.GetActionResult();
             }
-            return File(queryResult.Result, Settings.Excels.ContentType, "export-file-learning-process-district.xlsx");
+            string url = $"export-file-learning-process-district-{query.EventCodeStr}-{query.CourseType}-{query.CourseLevel}-{query.EducationLevel}-{NumberHelper.GenerateCodeNumber(5)}.xlsx";
+            return File(queryResult.Result, Settings.Excels.ContentType, url);
         }
 
         ///// <summary>
