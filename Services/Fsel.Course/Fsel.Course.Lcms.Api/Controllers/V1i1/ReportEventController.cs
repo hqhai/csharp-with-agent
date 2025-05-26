@@ -7,6 +7,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Application.Commands.ReportEventCmd;
     using Fsel.Course.Application.Queries.V1i1.ReportEvent;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Shared.Attributes;
@@ -234,6 +235,23 @@ namespace Fsel.Course.Lcms.Api.Controllers
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get 
+        /// </summary>
+        [HttpPost("export-summary-report")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportSummaryReport([FromQuery] ExportSummaryReportCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, command.CheckByGroup == 1 ? "BaoCao_Capso.xlsx" : "BaoCao_CapPhong.xlsx");
         }
     }
 }

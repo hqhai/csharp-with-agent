@@ -82,5 +82,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/chat-bot-config/unit-chatbot-configs")]
         Task<IApiResponse<MethodResult<IList<ChatbotConfigModel>>>> GetUnitChatbotConfigsByUnitIds([Body] GetUnitChatbotConfigsQueryModel query);
+
+        [Post("/v1/feature-access-time/get-feature-access-time-by-user-ids")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTimeByUserIds([Body] GetFeatureAccessTimesByUserIdsQueryModel model);
     }
 }
