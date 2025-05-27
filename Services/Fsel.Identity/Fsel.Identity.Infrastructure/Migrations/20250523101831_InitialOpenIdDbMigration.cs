@@ -171,6 +171,76 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             // Update dữ liệu từ Humans -> AspNetUsers, và xóa HumanId ở các bảng liên quan
             migrationBuilder.Sql(@"
+                -- Bước 1: Tìm Parent Humans chưa có User
+                WITH HumansWithoutUser AS (
+                    SELECT H.*
+                    FROM Humans H
+                    JOIN Parents P ON P.HumanId = H.Id
+                    WHERE H.UserId IS NULL
+                )
+
+                -- Bước 2: Tạo Users mới từ Humans
+                DECLARE @NewUsers TABLE (NewUserId UNIQUEIDENTIFIER, HumanId UNIQUEIDENTIFIER);
+
+                INSERT INTO AspNetUsers (
+                    Id,
+                    Address,
+                    AvatarPath,
+                    Birthday,
+                    Code,
+                    PhoneNumber,
+                    Gender,
+                    FirstName,
+                    LastName,
+                    CreatedDate,
+                    CreatedUserId,
+                    CreatedFullName,
+                    IsDeleted,
+                    EmailConfirmed,
+                    LockoutEnabled,
+                    PhoneNumberConfirmed,
+                    TwoFactorEnabled
+                )
+                OUTPUT INSERTED.Id, H.Id INTO @NewUsers (NewUserId, HumanId)
+                SELECT 
+                    NEWID(),
+                    H.Address,
+                    H.AvatarPath,
+                    H.Birthday,
+                    H.Code,
+                    H.PhoneNumber,
+                    H.Gender,
+                    -- FirstName: nếu FullName chỉ có 1 từ thì FirstName = FullName
+                    TRIM(
+                        CASE 
+                            WHEN CHARINDEX(' ', H.FullName) = 0 THEN H.FullName
+                            ELSE LEFT(H.FullName, CHARINDEX(' ', H.FullName) - 1)
+                        END
+                    ),
+                    -- LastName: nếu FullName chỉ có 1 từ thì LastName = FullName
+                    TRIM(
+                        CASE 
+                            WHEN CHARINDEX(' ', H.FullName) = 0 THEN H.FullName
+                            ELSE STUFF(H.FullName, 1, CHARINDEX(' ', H.FullName), '')
+                        END
+                    ),
+                    GETDATE(),
+                    ISNULL(H.CreatedUserId, '00000000-0000-0000-0000-000000000000'),
+                    ISNULL(H.CreatedFullName, 'System'),
+                    H.IsDeleted,
+                    0,
+                    0,
+                    0,
+                    0
+                FROM HumansWithoutUser H;
+
+                -- Bước 3: Cập nhật Humans với UserId mới
+                UPDATE H
+                SET H.UserId = N.NewUserId
+                FROM Humans H
+                JOIN @NewUsers N ON H.Id = N.HumanId;
+
+                -- Bước 4: Đồng bộ lại dữ liệu User từ Humans (cho toàn bộ Users)
                 UPDATE U
                 SET 
                     Address     = ISNULL(H.Address, U.Address),
@@ -179,39 +249,51 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Code        = ISNULL(H.Code, U.Code),
                     PhoneNumber = ISNULL(H.PhoneNumber, U.PhoneNumber),
                     Gender      = ISNULL(H.Gender, U.Gender),
-                    LastName    = TRIM(LEFT(ISNULL(H.FullName, U.LastName), CHARINDEX(' ', ISNULL(H.FullName, U.LastName)))),
-                    FirstName   = TRIM(STUFF(ISNULL(H.FullName, U.LastName), 1, CHARINDEX(' ', ISNULL(H.FullName, U.LastName)), ''))
+                    -- FirstName
+                    FirstName   = TRIM(
+                        CASE 
+                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 THEN ISNULL(H.FullName, U.FullName)
+                            ELSE LEFT(ISNULL(H.FullName, U.FullName), CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) - 1)
+                        END
+                    ),
+                    -- LastName
+                    LastName    = TRIM(
+                        CASE 
+                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 THEN ISNULL(H.FullName, U.FullName)
+                            ELSE STUFF(ISNULL(H.FullName, U.FullName), 1, CHARINDEX(' ', ISNULL(H.FullName, U.FullName)), '')
+                        END
+                    )
                 FROM AspNetUsers U
                 LEFT JOIN Humans H ON U.Id = H.UserId;
 
-                UPDATE CSOs
+                -- Bước 5: Cập nhật các bảng liên quan
+
+                -- CSOs
+                UPDATE CSOs 
                 SET UserId = U.Id
                 FROM CSOs C
                 JOIN Humans H ON C.HumanId = H.Id
                 JOIN AspNetUsers U ON H.UserId = U.Id;
 
-                UPDATE Parents
+                -- Parents
+                UPDATE Parents 
                 SET UserId = U.Id
-                FROM Parents P
-                JOIN Humans H ON P.HumanId = H.Id
+                FROM Parents C
+                JOIN Humans H ON C.HumanId = H.Id
                 JOIN AspNetUsers U ON H.UserId = U.Id;
 
-                DELETE FROM ParentStudents WHERE ParentId IN (SELECT Id FROM Parents WHERE UserId IS NULL);
-                DELETE FROM Parents WHERE UserId IS NULL;
-
-                UPDATE Students
+                -- Students
+                UPDATE Students 
                 SET UserId = U.Id
-                FROM Students S
-                JOIN Humans H ON S.HumanId = H.Id
+                FROM Students C
+                JOIN Humans H ON C.HumanId = H.Id
                 JOIN AspNetUsers U ON H.UserId = U.Id;
 
-                DELETE FROM ParentStudents WHERE StudentId IN (SELECT Id FROM Students WHERE UserId IS NULL);
-                DELETE FROM Students WHERE UserId IS NULL;
-
-                UPDATE Teachers
+                -- Teachers
+                UPDATE Teachers 
                 SET UserId = U.Id
-                FROM Teachers T
-                JOIN Humans H ON T.HumanId = H.Id
+                FROM Teachers C
+                JOIN Humans H ON C.HumanId = H.Id
                 JOIN AspNetUsers U ON H.UserId = U.Id;
             ");
 
@@ -429,29 +511,66 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             // Rollback dữ liệu từ AspNetUsers -> Humans, và khôi phục HumanId ở các bảng liên quan
             migrationBuilder.Sql(@"
-                INSERT INTO Humans (Id, CreatedUserId, CreatedFullName, CreatedDate, IsDeleted, UserId, Address, AvatarPath, Birthday, Code, FullName, Gender, PhoneNumber)
-                SELECT NEWID(), '00000000-0000-0000-0000-000000000000', 'MigrationRollback', GETDATE(), 0, U.Id, U.Address, U.AvatarPath, U.Birthday, U.Code, 
-                   CONCAT(U.FirstName, ' ', U.FullName), U.Gender, U.PhoneNumber
+                -- 1️ Insert lại Humans từ AspNetUsers (rollback)
+                INSERT INTO Humans (
+                    Id,
+                    CreatedUserId,
+                    CreatedFullName,
+                    CreatedDate,
+                    IsDeleted,
+                    UserId,
+                    Address,
+                    AvatarPath,
+                    Birthday,
+                    Code,
+                    FullName,
+                    Gender,
+                    PhoneNumber
+                )
+                SELECT 
+                    NEWID(),
+                    ISNULL(U.CreatedUserId, '00000000-0000-0000-0000-000000000000'),
+                    ISNULL(U.CreatedFullName, 'MigrationRollback'),
+                    GETDATE(),
+                    0,
+                    U.Id,
+                    U.Address,
+                    U.AvatarPath,
+                    U.Birthday,
+                    U.Code,
+                    -- Rollback FullName = concat FirstName + LastName, có xử lý nếu FirstName hoặc LastName bị null
+                    TRIM(
+                        CASE
+                            WHEN ISNULL(U.FirstName, '') = ISNULL(U.LastName, '') THEN ISNULL(U.FirstName, '')
+                            ELSE CONCAT(ISNULL(U.FirstName, ''), ' ', ISNULL(U.LastName, ''))
+                        END
+                    ),
+                    U.Gender,
+                    U.PhoneNumber
                 FROM AspNetUsers U;
-                
+
+                -- 2️ Update lại HumanId cho CSOs
                 UPDATE C
                 SET HumanId = H.Id
                 FROM CSOs C
                 JOIN AspNetUsers U ON C.UserId = U.Id
                 JOIN Humans H ON H.UserId = U.Id;
-                
+
+                -- 3️ Update lại HumanId cho Parents
                 UPDATE P
                 SET HumanId = H.Id
                 FROM Parents P
                 JOIN AspNetUsers U ON P.UserId = U.Id
                 JOIN Humans H ON H.UserId = U.Id;
-                
+
+                -- 4️ Update lại HumanId cho Students
                 UPDATE S
                 SET HumanId = H.Id
                 FROM Students S
                 JOIN AspNetUsers U ON S.UserId = U.Id
                 JOIN Humans H ON H.UserId = U.Id;
-                
+
+                -- 5️ Update lại HumanId cho Teachers
                 UPDATE T
                 SET HumanId = H.Id
                 FROM Teachers T
