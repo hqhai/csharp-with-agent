@@ -31,7 +31,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly RoleManager<Role> _roleManager;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IEventManagerRepository _eventManagerRepository;
-        private static readonly char[] s_lowercaseLetters = "abcdefghijkmnopqrstuvwxyz".ToCharArray();
+        private static readonly char[] s_lowercaseLetters = "abcdefghijkmnpqrstuvwxyz".ToCharArray();
         private static readonly char[] s_uppercaseLetters = "ABCDEFGHJKLMNPQRSTUVWXYZ".ToCharArray();
         private static readonly char[] s_digits = "123456789".ToCharArray();
         private static readonly char[] s_allowedChars = s_lowercaseLetters.Concat(s_uppercaseLetters).ToArray();

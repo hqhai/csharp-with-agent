@@ -30,10 +30,13 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     public class GetAccountDashboardQueryHandler : IRequestHandler<GetAccountDashboardQuery, MethodResult<PagingItemsModel<GetAccountDashboardQueryModel>>>
     {
         private readonly IUserRoleRepository _userRoleRepository;
+        private readonly IEventManagerRepository _eventManagerRepository;
 
-        public GetAccountDashboardQueryHandler(IUserRoleRepository userRoleRepository)
+        public GetAccountDashboardQueryHandler(IUserRoleRepository userRoleRepository,
+                                               IEventManagerRepository eventManagerRepository)
         {
             _userRoleRepository = userRoleRepository;
+            _eventManagerRepository = eventManagerRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<GetAccountDashboardQueryModel>>> Handle(GetAccountDashboardQuery request, CancellationToken cancellationToken)
@@ -72,6 +75,18 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken: cancellationToken)
                                    .ConfigureAwait(false);
+
+            var userIds = lists.Select(x => x.Id).ToList();
+            var eventManagers = await _eventManagerRepository.Queryable
+                                                             .Include(x => x.CompetitionEvent)
+                                                             .WhereBulkContains(userIds, x => x.UserId)
+                                                             .ToListAsync(cancellationToken).ConfigureAwait(false);
+
+            foreach (var user in lists)
+            {
+                var eventManager = eventManagers.FirstOrDefault(x => x.UserId == user.Id && x.CompetitionEvent != null && (user.Role != EnumRole.EducationDivision.ToString() ? !x.CompetitionEvent.ParentEventId.HasValue : x.CompetitionEvent.Category == EnumCompetitionEventCategory.Student));
+                user.EventCode = eventManager?.CompetitionEvent?.EventCode ?? default;
+            }
 
             methodResult.Result = new PagingItemsModel<GetAccountDashboardQueryModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
