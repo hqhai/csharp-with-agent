@@ -27,9 +27,9 @@ namespace Fsel.Identity.Infrastructure
             base.OnModelCreating(builder);
 
             //Dùng khi tạo migration, comment lại sau khi tạo xong
-            builder.Ignore<OverallStudentModel>();
-            builder.Ignore<NumberStudentLearnOnSystemModel>();
-            builder.Ignore<SummaryDataOnCityModel>();
+            //builder.Ignore<OverallStudentModel>();
+            //builder.Ignore<NumberStudentLearnOnSystemModel>();
+            //builder.Ignore<SummaryDataOnCityModel>();
 
             builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
