@@ -207,7 +207,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "exam-practice-testing.fsel-testing-n.svc",
+          "Host": "exam-practice-lcms-testing.fsel-testing-n.svc",
           "Port": 80
         }
       ]
@@ -494,17 +494,17 @@
         {
           "Name": "ExamPractice API",
           "Version": "v1",
-          "Url": "http://exam-practice-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://exam-practice-lcms-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "ExamPractice API",
           "Version": "v1.1",
-          "Url": "http://exam-practice-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://exam-practice-lcms-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "ExamPractice API",
           "Version": "v1.2",
-          "Url": "http://exam-practice-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://exam-practice-lcms-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
