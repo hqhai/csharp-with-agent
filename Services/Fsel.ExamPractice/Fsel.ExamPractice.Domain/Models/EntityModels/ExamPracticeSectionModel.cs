@@ -4,6 +4,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.ExamPractice.Domain.Entities.Configs;
+    using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
     using Fsel.ExamPractice.Domain.Models.EntityModels.Questions;
     using Fsel.Shared.Enums;
@@ -14,6 +15,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels
         public EnumCourseSkill? CourseSkill { get; set; }
         public string? ConfigStr { get; set; }
         public SectionMediaConfig? Config { get; set; }
+        public EnumSectionExamPracticeType? Type { get; set; }
         public int DisplayOrder { get; set; }
         public Guid? ParentExamPracticeSectionId { get; set; }
         public IList<ExamPracticeSectionModel> ExamPracticeSections { get; set; } = new List<ExamPracticeSectionModel>();

@@ -67,7 +67,11 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery
                     .Where(x => x.ParentExamPracticeSectionId == section.Id)
                     .OrderBy(x => x.DisplayOrder)
                     .ToListAsync();
-
+                foreach (var sub in subSections)
+                {
+                    sub.Questions = sub.Questions.OrderBy(q => q.CreatedDate).ToList();
+                    sub.ExamPracticeAISettings = sub.ExamPracticeAISettings.OrderBy(ai => ai.CreatedDate).ToList();
+                }
                 if (subSections.Any() && section.ExamPracticeId.HasValue)
                 {
                     result.Add(section);
@@ -85,6 +89,11 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery
                     .WhereBulkContains(sections.Select(x => x.Id), x => x.Id)
                     .OrderBy(x => x.DisplayOrder)
                     .ToListAsync();
+                foreach (var sub in result)
+                {
+                    sub.Questions = sub.Questions.OrderBy(q => q.CreatedDate).ToList();
+                    sub.ExamPracticeAISettings = sub.ExamPracticeAISettings.OrderBy(ai => ai.CreatedDate).ToList();
+                }
             }
             return result;
         }

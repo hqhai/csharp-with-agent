@@ -45,6 +45,18 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExamPracticeModel>();
+            if (string.IsNullOrEmpty(request.Code))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+
+            if (string.IsNullOrEmpty(request.Name))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Name), request.Name);
+                return methodResult;
+            }
+
             var existCode = await _examPracticeRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken);
             if (existCode)
             {
@@ -63,6 +75,12 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
             }
 
             var examPractice = _mapper.Map<Domain.Entities.ExamPractice>(request);
+            if (!examPractice.IsValid())
+            {
+                methodResult.AddErrorBadRequest(examPractice.ErrorMessages);
+                return methodResult;
+            }
+
             if (request.Type == EnumExamPracticeType.ExamPractice)
             {
                 if (!request.StartDate.HasValue)

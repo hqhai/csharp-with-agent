@@ -31,7 +31,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             _examPracticeSectionResultRepository = examPracticeSectionResultRepository;
         }
 
-        public async Task<ExamPracticeSectionResult> UpdateExamPracticeToIsSubmit(ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult, bool isSubmit)
+        public async Task UpdateExamPracticeToIsSubmit(ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult, bool isSubmit)
         {
             if (isSubmit)
             {
@@ -42,9 +42,8 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                 {
                     await UpdateExamPracticeSectionResultChildrenAsync(examPracticeSection, examPracticeSectionResult);
                 }
-                return await UpdateExamPracticeSectionResultAsync(examPracticeSection, examPracticeSectionResult);
+                await UpdateExamPracticeSectionResultAsync(examPracticeSection, examPracticeSectionResult);
             }
-            return examPracticeSectionResult;
         }
 
         public async Task UpdateExamPracticeToIsSubmit(ExamPracticeResult examPracticeResult)
@@ -273,7 +272,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             return LinQHelper.GetHighestStreak(isHighestStreaks);
         }
 
-        public async Task<ExamPracticeSectionResult> UpdateExamPracticeSectionResultAsync(ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult)
+        public async Task UpdateExamPracticeSectionResultAsync(ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult)
         {
             ArgumentNullException.ThrowIfNull(examPracticeSection);
             ArgumentNullException.ThrowIfNull(examPracticeSectionResult);
@@ -303,7 +302,6 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                     entity.ExamPracticeSectionId
                 };
             });
-            return examPracticeSectionResult;
         }
 
         public async Task<IList<ExamPracticeSection>> GetExamPracticeSectionsAsync(ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult)

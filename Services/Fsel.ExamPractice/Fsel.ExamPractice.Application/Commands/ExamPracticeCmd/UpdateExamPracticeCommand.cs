@@ -56,6 +56,18 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.LockedClonedStatus), nameof(examPractice.Status), examPractice.Status);
                 return methodResult;
             }
+            if (string.IsNullOrEmpty(request.Code))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+
+            if (string.IsNullOrEmpty(request.Name))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Name), request.Name);
+                return methodResult;
+            }
+
             if (request.ProvinceId.HasValue)
             {
                 var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { IdsStr = request.ProvinceId.Value.ToString() });
@@ -127,7 +139,11 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
             else
             {
                 _mapper.Map(request, examPractice);
-
+                if (!examPractice.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(examPractice.ErrorMessages);
+                    return methodResult;
+                }
                 if (!request.IsDraft && request.Type == EnumExamPracticeType.ExamPractice)
                 {
                     var examPracticeSectionCurrents = _examPracticeHelper.GetLeafSections(request.ExamPracticeSections);

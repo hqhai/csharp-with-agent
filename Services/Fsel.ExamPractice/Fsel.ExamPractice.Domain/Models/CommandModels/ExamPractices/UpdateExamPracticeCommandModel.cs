@@ -11,7 +11,6 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPractices
     public class UpdateExamPracticeCommandModel : BaseCommandModel
     {
         public bool IsDraft { get; set; }
-
         public string? Name { get; set; }
         public string? Code { get; set; }
         public string? SchoolGrade { get; set; }

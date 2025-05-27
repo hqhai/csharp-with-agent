@@ -153,7 +153,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                         bulk.ColumnInputExpression = entity => new { entity.CurrentExamPracticeSectionId };
                     });
                 }
-                examPracticeSectionResult = await _examPracticeSectionHelper.UpdateExamPracticeToIsSubmit(examPracticeSection, examPracticeSectionResult, request.IsSubmit);
+                await _examPracticeSectionHelper.UpdateExamPracticeToIsSubmit(examPracticeSection, examPracticeSectionResult, request.IsSubmit);
                 if (examPracticeSection.CourseSkill == EnumCourseSkill.Writing && request.IsSubmit)
                 {
                     if (request.Answers != null && request.Answers.Count > 0)
@@ -214,7 +214,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     await UpdateExamPracticeResultAsync(examPracticeResult, cancellationToken);
                 }
             }
-            var examPracticeSectionResultDto = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
+            var examPracticeSectionResultDto = _mapper.Map<ExamPracticeSectionResultModel>(await _examPracticeSectionResultRepository.GetByIdAsync(examPracticeSectionResult.Id));
             examPracticeSectionResultDto.IsTestDone = examPracticeResult.Status == EnumResultStatus.Done;
             methodResult.Result = examPracticeSectionResultDto;
             return methodResult;
