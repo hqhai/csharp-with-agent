@@ -83,12 +83,6 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeResult));
                 return methodResult;
             }
-            if (examPracticeResult.Status != EnumResultStatus.Done)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusNotDone), nameof(examPracticeResult));
-                return methodResult;
-            }
-
             await _examPracticeRetryRepository.ExecuteTransactionAsync(async () =>
             {
                 examPracticeRetry.RetryCount--;
