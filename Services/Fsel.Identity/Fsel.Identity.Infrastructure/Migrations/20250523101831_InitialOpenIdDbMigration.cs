@@ -51,46 +51,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 newName: "IX_UserOtpCodes_IsDeleted_OtpCode_Status");
 
             migrationBuilder.RenameColumn(
-                name: "HumanId",
-                table: "Teachers",
-                newName: "UserId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Teachers_HumanId",
-                table: "Teachers",
-                newName: "IX_Teachers_UserId");
-
-            migrationBuilder.RenameColumn(
-                name: "HumanId",
-                table: "Students",
-                newName: "UserId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Students_HumanId",
-                table: "Students",
-                newName: "IX_Students_UserId");
-
-            migrationBuilder.RenameColumn(
-                name: "HumanId",
-                table: "Parents",
-                newName: "UserId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Parents_HumanId",
-                table: "Parents",
-                newName: "IX_Parents_UserId");
-
-            migrationBuilder.RenameColumn(
-                name: "HumanId",
-                table: "CSOs",
-                newName: "UserId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_CSOs_HumanId",
-                table: "CSOs",
-                newName: "IX_CSOs_UserId");
-
-            migrationBuilder.RenameColumn(
                 name: "FullName",
                 table: "AspNetUsers",
                 newName: "LastName");
@@ -252,15 +212,15 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     -- FirstName
                     FirstName   = TRIM(
                         CASE 
-                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 THEN ISNULL(H.FullName, U.FullName)
-                            ELSE LEFT(ISNULL(H.FullName, U.FullName), CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) - 1)
+                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) = 0 THEN ISNULL(H.FullName, U.LastName)
+                            ELSE LEFT(ISNULL(H.FullName, U.LastName), CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) - 1)
                         END
                     ),
                     -- LastName
                     LastName    = TRIM(
                         CASE 
-                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 THEN ISNULL(H.FullName, U.FullName)
-                            ELSE STUFF(ISNULL(H.FullName, U.FullName), 1, CHARINDEX(' ', ISNULL(H.FullName, U.FullName)), '')
+                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) = 0 THEN ISNULL(H.FullName, U.LastName)
+                            ELSE STUFF(ISNULL(H.FullName, U.LastName), 1, CHARINDEX(' ', ISNULL(H.FullName, U.LastName)), '')
                         END
                     )
                 FROM AspNetUsers U
@@ -296,6 +256,46 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 JOIN Humans H ON C.HumanId = H.Id
                 JOIN AspNetUsers U ON H.UserId = U.Id;
             ");
+
+            migrationBuilder.RenameColumn(
+                name: "HumanId",
+                table: "Teachers",
+                newName: "UserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Teachers_HumanId",
+                table: "Teachers",
+                newName: "IX_Teachers_UserId");
+
+            migrationBuilder.RenameColumn(
+                name: "HumanId",
+                table: "Students",
+                newName: "UserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Students_HumanId",
+                table: "Students",
+                newName: "IX_Students_UserId");
+
+            migrationBuilder.RenameColumn(
+                name: "HumanId",
+                table: "Parents",
+                newName: "UserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Parents_HumanId",
+                table: "Parents",
+                newName: "IX_Parents_UserId");
+
+            migrationBuilder.RenameColumn(
+                name: "HumanId",
+                table: "CSOs",
+                newName: "UserId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_CSOs_HumanId",
+                table: "CSOs",
+                newName: "IX_CSOs_UserId");
 
             migrationBuilder.DropTable(
                 name: "Humans");
@@ -375,34 +375,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 name: "IX_Students_IsDeleted_SchoolId_SchoolClass",
                 table: "Students");
 
-            migrationBuilder.DropColumn(
-                name: "VerifyId",
-                table: "UserOtpCodes");
-
-            migrationBuilder.DropColumn(
-                name: "Address",
-                table: "AspNetUsers");
-
-            migrationBuilder.DropColumn(
-                name: "AvatarPath",
-                table: "AspNetUsers");
-
-            migrationBuilder.DropColumn(
-                name: "Birthday",
-                table: "AspNetUsers");
-
-            migrationBuilder.DropColumn(
-                name: "Code",
-                table: "AspNetUsers");
-
-            migrationBuilder.DropColumn(
-                name: "FirstName",
-                table: "AspNetUsers");
-
-            migrationBuilder.DropColumn(
-                name: "Gender",
-                table: "AspNetUsers");
-
             migrationBuilder.RenameColumn(
                 name: "OtpCode",
                 table: "UserOtpCodes",
@@ -417,51 +389,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 name: "IX_UserOtpCodes_IsDeleted_OtpCode_Status",
                 table: "UserOtpCodes",
                 newName: "IX_UserOtpCodes_IsDeleted_OTPCode_Status");
-
-            migrationBuilder.RenameColumn(
-                name: "UserId",
-                table: "Teachers",
-                newName: "HumanId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Teachers_UserId",
-                table: "Teachers",
-                newName: "IX_Teachers_HumanId");
-
-            migrationBuilder.RenameColumn(
-                name: "UserId",
-                table: "Students",
-                newName: "HumanId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Students_UserId",
-                table: "Students",
-                newName: "IX_Students_HumanId");
-
-            migrationBuilder.RenameColumn(
-                name: "UserId",
-                table: "Parents",
-                newName: "HumanId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_Parents_UserId",
-                table: "Parents",
-                newName: "IX_Parents_HumanId");
-
-            migrationBuilder.RenameColumn(
-                name: "UserId",
-                table: "CSOs",
-                newName: "HumanId");
-
-            migrationBuilder.RenameIndex(
-                name: "IX_CSOs_UserId",
-                table: "CSOs",
-                newName: "IX_CSOs_HumanId");
-
-            migrationBuilder.RenameColumn(
-                name: "LastName",
-                table: "AspNetUsers",
-                newName: "FullName");
 
             migrationBuilder.AlterColumn<string>(
                 name: "OTPCode",
@@ -577,6 +504,79 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 JOIN AspNetUsers U ON T.UserId = U.Id
                 JOIN Humans H ON H.UserId = U.Id;
             ");
+
+            migrationBuilder.DropColumn(
+                name: "VerifyId",
+                table: "UserOtpCodes");
+
+            migrationBuilder.DropColumn(
+                name: "Address",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "AvatarPath",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "Birthday",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "Code",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "FirstName",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "Gender",
+                table: "AspNetUsers");
+
+            migrationBuilder.RenameColumn(
+                name: "UserId",
+                table: "Teachers",
+                newName: "HumanId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Teachers_UserId",
+                table: "Teachers",
+                newName: "IX_Teachers_HumanId");
+
+            migrationBuilder.RenameColumn(
+                name: "UserId",
+                table: "Students",
+                newName: "HumanId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Students_UserId",
+                table: "Students",
+                newName: "IX_Students_HumanId");
+
+            migrationBuilder.RenameColumn(
+                name: "UserId",
+                table: "Parents",
+                newName: "HumanId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Parents_UserId",
+                table: "Parents",
+                newName: "IX_Parents_HumanId");
+
+            migrationBuilder.RenameColumn(
+                name: "UserId",
+                table: "CSOs",
+                newName: "HumanId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_CSOs_UserId",
+                table: "CSOs",
+                newName: "IX_CSOs_HumanId");
+
+            migrationBuilder.RenameColumn(
+                name: "LastName",
+                table: "AspNetUsers",
+                newName: "FullName");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Students_IsDeleted",
