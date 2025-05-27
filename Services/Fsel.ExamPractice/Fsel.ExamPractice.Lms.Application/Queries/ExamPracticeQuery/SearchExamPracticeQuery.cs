@@ -14,6 +14,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -113,6 +114,12 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                     TotalQuestions = x.ExamPracticeSections.Select(s => s.Config?.TotalQuestion).Sum() ?? 0,
                     Status = x.ExamPracticeResult?.Status,
                     ExamPracticeResultId = x.ExamPracticeResult?.Id,
+                    Config = x.ExamPracticeResult?.Config,
+                    ExamPracticeScore = x.ExamPracticeResult?.ExamPracticeScore,
+                    CorrectCount = x.ExamPracticeResult?.CorrectCount ?? default,
+                    CorrectTotal = x.ExamPracticeResult?.CorrectTotal ?? default,
+                    PracticeMode = x.ExamPracticeResult?.PracticeMode,
+                    Score = x.ExamPracticeResult?.SkillScores != null && x.ExamPracticeResult.SkillScores.Any() ? NumberHelper.RoundNumberDouble(x.ExamPracticeResult.SkillScores.Average(x => x.Scores)) : default,
                     TotalRetry = (x.ExamPracticeRetry?.RetryCount ?? TotalRetry),
                 }).ToList()
             }).ToList();

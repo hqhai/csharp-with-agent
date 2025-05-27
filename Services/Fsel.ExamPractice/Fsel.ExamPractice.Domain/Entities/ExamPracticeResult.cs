@@ -72,6 +72,15 @@ namespace Fsel.ExamPractice.Domain.Entities
             set { ExerciseConfig = ConvertHelper.Serialize(value); }
         }
 
+        [NotMapped]
+        public double? ExamPracticeScore
+        {
+            get
+            {
+                return NumberHelper.RoundToQuarter(NumberHelper.GetScore(CorrectCount, CorrectTotal));
+            }
+        }
+
         public int? HighestStreak { get; set; }
 
         /// <summary>

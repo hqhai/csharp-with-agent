@@ -2,6 +2,7 @@
 
 namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
 {
+    using Fsel.ExamPractice.Domain.Entities.Configs;
     using Fsel.ExamPractice.Domain.Entities.SkillScoreConfigs;
     using Fsel.ExamPractice.Domain.Enums;
 
@@ -13,6 +14,9 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public double Percent { get; set; }
         public int CorrectCount { get; set; }
         public int CorrectTotal { get; set; }
+        public EnumPracticeMode? PracticeMode { get; set; }
+        public ExerciseConfig? Config { get; set; }
+        public double? ExamPracticeScore { get; set; }
         public EnumResultStatus Status { get; set; }
         public Guid StudentId { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }

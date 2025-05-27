@@ -2,6 +2,7 @@
 
 namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
 {
+    using Fsel.ExamPractice.Domain.Entities.Configs;
     using Fsel.ExamPractice.Domain.Enums;
 
     public class ExamPracticeGroupModel
@@ -18,6 +19,12 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public int ParticipantCount { get; set; }
         public int TotalRetry { get; set; }
         public Guid? ExamPracticeResultId { get; set; }
+        public EnumPracticeMode? PracticeMode { get; set; }
+        public ExerciseConfig? Config { get; set; }
+        public double? Score { get; set; }
+        public int CorrectCount { get; set; }
+        public int CorrectTotal { get; set; }
+        public double? ExamPracticeScore { get; set; }
         public EnumResultStatus? Status { get; set; }
     }
 }
