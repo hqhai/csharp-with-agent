@@ -99,6 +99,15 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             foreach (var item in examPracticeSections)
             {
                 var examPracticeSectionDto = _mapper.Map<ExamPracticeSectionDetailModel>(item);
+                var examPracticeSectionResult = _mapper.Map<ExamPracticeSectionResultModel>(item.ExamPracticeSectionResults.FirstOrDefault());
+
+                double executionTime = default;
+                if (examPracticeSectionResult != null && examPracticeResult.PracticeMode == EnumPracticeMode.Practice)
+                {
+                    executionTime = examPracticeResult.Config?.ExecutionTime ?? default;
+                    examPracticeSectionResult.RemainingTime = executionTime - examPracticeSectionResult.WorkingTime > 0 ? executionTime - examPracticeSectionResult.WorkingTime : default;
+                }
+                examPracticeSectionDto.ExamPracticeSectionResult = examPracticeSectionResult;
                 examPracticeSectionDto.QuestionTests = item.Questions.OrderBy(x => x.CreatedDate)
                                             .Select(x =>
                                             {

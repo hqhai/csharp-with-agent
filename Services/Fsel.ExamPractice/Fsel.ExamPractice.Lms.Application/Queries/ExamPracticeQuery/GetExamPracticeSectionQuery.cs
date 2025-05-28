@@ -53,6 +53,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeResult));
                 return methodResult;
             }
+
             var examPracticeSection = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId)
                                             .Where(x => x.Id == request.ExamPracticeSectionId).FirstOrDefaultAsync(cancellationToken);
             if (examPracticeSection == null)
@@ -60,6 +61,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSection), request.ExamPracticeSectionId);
                 return methodResult;
             }
+
             var examPracticeSectionResult = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ExamPracticeSectionId == request.ExamPracticeSectionId)
                                                                     .FirstOrDefaultAsync(x => x.ExamPracticeResultId == request.ExamPracticeResultId, cancellationToken);
             if (examPracticeSectionResult == null)
@@ -98,7 +100,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             }
 
             var examPracticeSectionDetail = _mapper.Map<ExamPracticeSectionDetailModel>(examPracticeSection);
-            examPracticeSectionDetail.ExamPracticeSectionResult = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
             var examPracticeSectionDetails = new List<ExamPracticeSectionDetailModel>();
             var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeResult.Id && x.QuestionId.HasValue).ToListAsync(cancellationToken);
 
@@ -117,8 +118,20 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                                             }).ToList();
                 examPracticeSectionDetails.Add(examPracticeSectionDto);
             }
-
+            var examPracticeSectionResultModel = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
+            double executionTime = default;
+            if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice)
+            {
+                executionTime = examPracticeResult.Config?.ExecutionTime ?? default;
+                examPracticeSectionResultModel.RemainingTime = executionTime - examPracticeSectionResult.WorkingTime > 0 ? executionTime - examPracticeSectionResult.WorkingTime : default;
+            }
+            else
+            {
+                executionTime = examPracticeSection.Config?.ExecutionTime ?? default;
+            }
+            examPracticeSectionDetail.ExamPracticeSectionResult = examPracticeSectionResultModel;
             examPracticeSectionDetail.ExamPracticeSections = examPracticeSectionDetails;
+            examPracticeSectionDetail.ExecutionTime = executionTime;
             methodResult.Result = examPracticeSectionDetail;
             return methodResult;
         }

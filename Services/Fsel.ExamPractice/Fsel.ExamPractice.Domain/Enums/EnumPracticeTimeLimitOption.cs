@@ -13,18 +13,18 @@ namespace Fsel.ExamPractice.Domain.Enums
         ExamBased = 1,
 
         [Description("30 phút")]
-        Minute30 = 30,
+        Minute30 = 1800,
 
         [Description("45 phút")]
-        Minute45 = 45,
+        Minute45 = 2700,
 
         [Description("60 phút")]
-        Minute60 = 60,
+        Minute60 = 3600,
 
         [Description("75 phút")]
-        Minute75 = 75,
+        Minute75 = 4500,
 
         [Description("90 phút")]
-        Minute90 = 90,
+        Minute90 = 5400,
     }
 }

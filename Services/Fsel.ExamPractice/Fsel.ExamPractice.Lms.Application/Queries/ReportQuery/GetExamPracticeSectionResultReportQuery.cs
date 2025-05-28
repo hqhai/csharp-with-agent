@@ -70,6 +70,13 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
             if ((courseSkill == EnumCourseSkill.Reading || courseSkill == EnumCourseSkill.Listening) && examPracticeSectionResult.SkillScores != null)
             {
                 var examPracticeSectionResultReport = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
+                double executionTime = default;
+                if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice)
+                {
+                    executionTime = examPracticeResult.Config?.ExecutionTime ?? default;
+                    examPracticeSectionResultReport.RemainingTime = executionTime - examPracticeSectionResult.WorkingTime > 0 ? executionTime - examPracticeSectionResult.WorkingTime : default;
+                }
+
                 var scores = examPracticeSectionResult.SkillScores.Select(x => x.Scores).FirstOrDefault();
                 examPracticeSectionResultReport.BandScoresReport = GetBandScoresReport(examPracticeSectionResult, scores);
                 if (examPracticeResult.ExamPractice != null && examPracticeResult.ExamPractice.CourseLevel.HasValue)

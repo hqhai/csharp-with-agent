@@ -17,6 +17,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public IList<SkillScores>? SkillScores { get; set; }
         public int? HighestStreak { get; set; }
         public double WorkingTime { get; set; }
+        public double RemainingTime { get; set; }
         public EnumResultStatus Status { get; set; }
         public Guid StudentId { get; set; }
         public Guid ExamPracticeResultId { get; set; }
@@ -25,6 +26,6 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public double TargetBandScore { get; set; }
         public bool IsCheckScoreColor { get; set; }
         public bool IsFeedBack { get; set; }
-        public Guid ParentExamPracticeSectionResultId { get; set; }
+        public Guid? ParentExamPracticeSectionResultId { get; set; }
     }
 }

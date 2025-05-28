@@ -15,6 +15,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public SectionMediaConfig? Config { get; set; }
         public Guid? ParentExamPracticeSectionId { get; set; }
         public EnumSectionExamPracticeType? Type { get; set; }
+        public double ExecutionTime { get; set; }
         public IList<ExamPracticeSectionDetailModel> ExamPracticeSections { get; set; } = new List<ExamPracticeSectionDetailModel>();
         public ExamPracticeSectionResultModel? ExamPracticeSectionResult { get; set; }
         public IList<Guid> QuestionIds { get; set; } = new List<Guid>();

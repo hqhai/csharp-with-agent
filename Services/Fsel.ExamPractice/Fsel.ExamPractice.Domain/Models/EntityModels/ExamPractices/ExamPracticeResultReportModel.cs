@@ -19,6 +19,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public double? ExamPracticeScore { get; set; }
         public EnumResultStatus Status { get; set; }
         public Guid StudentId { get; set; }
+        public double RemainingTime { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public int? HighestStreak { get; set; }
         public double WorkingTime { get; set; }

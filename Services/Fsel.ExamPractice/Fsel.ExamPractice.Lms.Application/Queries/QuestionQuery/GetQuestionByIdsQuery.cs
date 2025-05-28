@@ -83,7 +83,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
             {
                 return new List<QuestionModel>();
             }
-            foreach (var question in questions)
+            return questions.Select(question =>
             {
                 bool isShowAnswer = examPracticeResult.Status == EnumResultStatus.Done;
                 var answer = question.ExamPracticeAnswers.FirstOrDefault();
@@ -103,10 +103,8 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
                     }
                     questionModel.ResultAnswer = answerDto;
                 }
-                listQuestion.Add(questionModel);
-            }
-
-            return listQuestion;
+                return questionModel;
+            }).ToList();
         }
 
         private static EnumCorrectStatus? GetCorrectStatus(BaseAnswer? answer)
