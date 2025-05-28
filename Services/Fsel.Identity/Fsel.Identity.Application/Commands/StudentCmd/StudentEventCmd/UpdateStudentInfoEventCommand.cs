@@ -144,6 +144,33 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             student.ParentPhoneNumber = request.ParentPhoneNumber;
             _studentRepository.Update(student);
             await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            await AddParentAsync(request, student.Id, cancellationToken);
+        }
+
+        private async Task AddParentAsync(UpdateStudentInfoEventCommand request, Guid studentId, CancellationToken cancellationToken)
+        {
+            var human = new Human()
+            {
+                FullName = "N/A",
+                PhoneNumber = request.ParentPhoneNumber,
+                Email = request.ParentEmail,
+                Parent = new Parent()
+                {
+                    ParentStudents = new List<ParentStudent>()
+                    {
+                        new ParentStudent()
+                        {
+                            StudentId = studentId
+                        }
+                    }
+                }
+            };
+            if (human.IsValid())
+            {
+                _humanRepository.Add(human);
+                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
     }
 }

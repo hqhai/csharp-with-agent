@@ -88,6 +88,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _mapper.Map(request, user);
             _mapper.Map(request, user.Human);
             student = _mapper.Map(request, user.Human?.Student);
+
             if (!user.IsValid())
             {
                 methodResult.AddErrorBadRequest(user.ErrorMessages);
@@ -98,6 +99,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
+            }
+
+            if (student != null)
+            {
+                student.ParentEmail = string.IsNullOrEmpty(request.Parent?.Email) ? null : request.Parent?.Email;
+                student.ParentPhoneNumber = string.IsNullOrEmpty(request.Parent?.PhoneNumber) ? null : request.Parent?.PhoneNumber;
             }
 
             #endregion Validate User
