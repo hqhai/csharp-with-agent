@@ -51,8 +51,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<ClientsIntegrationModel>>();
 
-            return methodResult;
-
             List<Guid> distinctUserIds = new List<Guid>();
 
             if (string.IsNullOrEmpty(request.Email))
