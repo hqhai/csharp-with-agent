@@ -70,15 +70,15 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     return methodResult;
                 }
             }
-            if (!string.IsNullOrEmpty(request.Email))
-            {
-                var checkEmail = await _userManager.Users.AnyAsync(x => x.Id != user.Id && x.Email == request.Email, cancellationToken);
-                if (checkEmail)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
-                    return methodResult;
-                }
-            }
+            //if (!string.IsNullOrEmpty(request.Email))
+            //{
+            //    var checkEmail = await _userManager.Users.AnyAsync(x => x.Id != user.Id && x.Email == request.Email, cancellationToken);
+            //    if (checkEmail)
+            //    {
+            //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
+            //        return methodResult;
+            //    }
+            //}
 
             #endregion Validate PhoneNumber
 
