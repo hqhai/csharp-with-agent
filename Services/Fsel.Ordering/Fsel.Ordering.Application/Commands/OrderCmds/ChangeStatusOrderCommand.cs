@@ -212,6 +212,12 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
                 });
 
                 order.Status = request.OrderStatus;
+                if (!order.IsValid())
+                {
+                    methodResult.AddError(order.ErrorMessages);
+                    return methodResult;
+                }
+
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

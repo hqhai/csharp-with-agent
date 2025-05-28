@@ -4,6 +4,7 @@ using Fsel.Ordering.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Ordering.Infrastructure.Migrations
 {
     [DbContext(typeof(OrderingDbContext))]
-    partial class OrderingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505035604_Update_Optimize_Field_Length")]
+    partial class Update_Optimize_Field_Length
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -498,9 +501,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<int>("BonusCoins")
-                        .HasColumnType("int");
-
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -589,7 +589,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
-                            BonusCoins = 0,
                             Code = "BASIC",
                             CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -606,7 +605,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
-                            BonusCoins = 0,
                             Code = "STANDARD",
                             CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -623,7 +621,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
-                            BonusCoins = 0,
                             Code = "PREMIUM",
                             CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -640,7 +637,6 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c"),
-                            BonusCoins = 0,
                             Code = "PREMIUM",
                             CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -1455,8 +1451,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<int?>("NumberOfChanges")
                         .HasColumnType("int");
