@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models
+namespace Fsel.Course.Domain.Models.EntityModels
 {
     using System.Text.Json.Serialization;
     using Fsel.Core.Base.BaseModels;

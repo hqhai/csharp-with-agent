@@ -5,8 +5,7 @@ namespace Fsel.Course.Infrastructure.Maps
     using AutoMapper;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Models;
-    using Fsel.Course.Domain.Models.EntityModels.ArchiveModels;
+    using Fsel.Course.Domain.Models.EntityModels;
 
     public class ClassForumDetailResultHistoryProfile : Profile
     {
