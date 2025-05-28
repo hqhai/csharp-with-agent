@@ -17,6 +17,9 @@ namespace Fsel.Identity.Application.Services
 
         [Post("/v1/send-sms")]
         Task<IApiResponse<MethodResult<bool>>> SendSMSAsync([Body] SendSMSCommandModel command);
+
+        [Post("/v1/zalo/send-sms")]
+        Task<IApiResponse<MethodResult<bool>>> SendSMSWithZaloAsync([Body] SendSMSByZaloCommandModel command);
     }
 
     public class SendEmailCommandModel
