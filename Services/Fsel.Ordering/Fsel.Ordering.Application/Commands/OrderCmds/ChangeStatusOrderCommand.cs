@@ -55,6 +55,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IMediator _mediator;
         private readonly IPackageEventRepository _packageEventRepository;
         private readonly IUserVoucherLockRepository _userVoucherLockRepository;
+        private readonly AddCoinWhenCoursePurchasedPublisher _addCoinWhenCoursePurchasedPublisher;
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -71,7 +72,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , IMediator mediator
             , IPackageEventRepository packageEventRepository
             , ChangeStatusOrderPublisher changeStatusOrderPublisher
-            , IUserVoucherLockRepository userVoucherLockRepository)
+            , IUserVoucherLockRepository userVoucherLockRepository,
+AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -89,6 +91,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _mediator = mediator;
             _packageEventRepository = packageEventRepository;
             _userVoucherLockRepository = userVoucherLockRepository;
+            _addCoinWhenCoursePurchasedPublisher = addCoinWhenCoursePurchasedPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -193,7 +196,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
                     var course = courseResults.Content?.Result?.FirstOrDefault();
-                    if (course != null && order != null && order.Package != null && (order.Package.MonthNumber == ExtendMonth.TwentyFourMonth ||
+                    if (course != null && order.Package != null && (order.Package.MonthNumber == ExtendMonth.TwentyFourMonth ||
                                                                    order.Package.MonthNumber == ExtendMonth.TwelveMonth ||
                                                                    order.Package.MonthNumber == ExtendMonth.SixMonth ||
                                                                    order.Package.MonthNumber == ExtendMonth.ThreeMonth))
@@ -246,7 +249,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     }
                     await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
 
-                    var blindBoxPackages = _appSetting.BlindBoxConfigs;
+                    //var blindBoxPackages = _appSetting.BlindBoxConfigs;
 
                     //if (order.RevenueType == EnumPaymentRevenueType.Revenue && blindBoxPackages != null && blindBoxPackages.Packages != null && blindBoxPackages.Packages.Contains(package.MonthNumber))
                     //{
@@ -257,6 +260,17 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                     //        NumberOpen = 0
                     //    });
                     //}
+
+                    if (order.RevenueType == EnumPaymentRevenueType.Revenue && package.BonusCoins > 0)
+                    {
+                        await _addCoinWhenCoursePurchasedPublisher.Publish(new AddCoinWhenCoursePurchasedCommandModel()
+                        {
+                            Coins = package.BonusCoins,
+                            Month = package.MonthNumber,
+                            ObjectId = order.Id,
+                            UserIds = new List<Guid>() { order.UserId }
+                        }, cancellationToken);
+                    }
                 }
 
                 #endregion Gửi mail thanh toán
