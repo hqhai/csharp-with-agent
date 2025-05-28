@@ -148,5 +148,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Password is incorrect
         /// </summary>
         PasswordIncorrect,
+
+        /// <summary>
+        /// Account has been cut off
+        /// </summary>
+        AccountHasBeenCutOff,
     }
 }

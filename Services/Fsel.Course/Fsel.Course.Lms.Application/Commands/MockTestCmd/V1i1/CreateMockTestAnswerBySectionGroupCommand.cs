@@ -31,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class CreateMockTestAnswerBySectionGroupCommand : CreateAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
     {
@@ -207,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             if (!methodResult.IsOK)
             {
                 return methodResult;
-            };
+            }
 
             try
             {
@@ -477,11 +478,23 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
                         return methodResult;
                     }
+                    int answerLength = item.Answer?.ToString()?.Length ?? default;
+                    if (section.DisplayOrder == AnswerLength.Section0 && answerLength > AnswerLength.MaxLengthDisplayOrder0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(item.Answer), item.Answer ?? new(), answerLength);
+                        return methodResult;
+                    }
+                    if (section.DisplayOrder == AnswerLength.Section1 && answerLength > AnswerLength.MaxLengthDisplayOrder1)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(item.Answer), item.Answer ?? new(), answerLength);
+                        return methodResult;
+                    }
                     var mockTestAnswer = await _mockTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.MockTestResultId == request.MockTestResultId && x.SectionId == section.Id);
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, section.Id);
                         mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0);
+
                         if (!mockTestAnswer.IsValid())
                         {
                             methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);
