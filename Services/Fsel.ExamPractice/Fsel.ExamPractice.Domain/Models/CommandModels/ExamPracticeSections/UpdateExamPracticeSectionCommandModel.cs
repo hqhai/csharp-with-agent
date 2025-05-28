@@ -5,6 +5,7 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections
     using Fsel.ExamPractice.Domain.Entities.Configs;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.Models.CommandModels.Questions;
+    using Fsel.ExamPractice.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
 
     public class UpdateExamPracticeSectionCommandModel

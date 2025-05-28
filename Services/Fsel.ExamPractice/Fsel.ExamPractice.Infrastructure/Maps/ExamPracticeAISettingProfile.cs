@@ -6,6 +6,7 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
     using Fsel.Core.Extensions;
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
+    using Fsel.ExamPractice.Domain.Models.EntityModels;
 
     public class ExamPracticeAISettingProfile : Profile
     {

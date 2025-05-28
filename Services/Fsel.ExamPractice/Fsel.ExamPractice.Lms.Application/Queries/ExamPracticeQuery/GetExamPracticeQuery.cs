@@ -82,7 +82,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 return methodResult;
             }
             var examPracticeSections = new List<ExamPracticeSection>();
-            if (examPractice.Type == Domain.Enums.EnumExamPracticeType.IELTS)
+            if (examPractice.Type == EnumExamPracticeType.IELTS)
             {
                 examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.ExamPracticeSectionResults.Where(x => x.ExamPracticeResultId == examPracticeResult.Id)).Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId).ToListAsync(cancellationToken);
             }
