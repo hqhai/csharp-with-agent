@@ -104,8 +104,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region Save Parent
 
-            if (request.Parent != null && !string.IsNullOrEmpty(request.Parent.FullName))
+            if (request.Parent != null)
             {
+                request.Parent.FullName = !string.IsNullOrEmpty(request.Parent.FullName) ? request.Parent.FullName : "N/A";
                 var humanParent = student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
                 var userResult = await SaveParent(request, student, humanParent, cancellationToken);
                 if (!userResult.IsOK)
