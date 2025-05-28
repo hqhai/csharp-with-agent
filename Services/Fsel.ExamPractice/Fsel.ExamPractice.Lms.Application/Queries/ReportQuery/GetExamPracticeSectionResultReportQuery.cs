@@ -71,7 +71,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
             {
                 var examPracticeSectionResultReport = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
                 double executionTime = default;
-                if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice)
+                if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice && examPracticeResult.Config?.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
                 {
                     executionTime = examPracticeResult.Config?.ExecutionTime ?? default;
                     examPracticeSectionResultReport.RemainingTime = executionTime - examPracticeSectionResult.WorkingTime > 0 ? executionTime - examPracticeSectionResult.WorkingTime : default;
