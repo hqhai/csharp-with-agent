@@ -689,8 +689,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 throw new ArgumentException("Full name and phone number cannot be empty.");
             }
 
-            string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            string digits = "0123456789";
+            string letters = "ABCDEFGHJKMNPQRSTUVWXYZ";
+            string digits = "123456789";
 
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
 
