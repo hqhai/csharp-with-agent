@@ -225,9 +225,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-tree-events")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEvent>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetTreeCompetitionEvent()
+        public async Task<IActionResult> GetTreeCompetitionEvent([FromQuery] GetTreeCompetitionEventQuery query)
         {
-            var queryResult = await _mediator.Send(new GetTreeCompetitionEventQuery()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

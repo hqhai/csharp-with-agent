@@ -15,6 +15,9 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
     public class GetTreeCompetitionEventQuery : IRequest<MethodResult<IList<CompetitionEventTreeModel>>>
     {
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
     }
 
     public class GetTreeCompetitionEventQueryHandler : IRequestHandler<GetTreeCompetitionEventQuery, MethodResult<IList<CompetitionEventTreeModel>>>
@@ -35,6 +38,11 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             MethodResult<IList<CompetitionEventTreeModel>> methodResult = new MethodResult<IList<CompetitionEventTreeModel>>();
 
             var eventParents = await _competitionEventsRepository.Queryable.Where(x => !x.ParentEventId.HasValue).ToListAsync(cancellationToken);
+
+            if (request.StartDate.HasValue && request.EndDate.HasValue)
+            {
+                eventParents = eventParents.Where(x => request.StartDate <= x.EventContent?.EndDate && request.EndDate >= x.EventContent?.StartDate).ToList();
+            }
 
             var eventParentResults = _mapper.Map<IList<CompetitionEventTreeModel>>(eventParents);
 
