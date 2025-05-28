@@ -58,6 +58,8 @@ builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationReposi
 builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
 builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
 builder.Services.AddScoped<ISchoolImportHistoryRepository, SchoolImportHistoryRepository>();
+builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
+builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
@@ -88,8 +90,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.WeeklySnapShotLeaderBoard, typeof(LeaderBoardForSchoolConsumer) },
     { QueueSettings.PlantDefenderQueue.NameQueue.DeleteGuestStudent, typeof(DeleteGuestStudentConsumer) },
     { QueueSettings.UserQueue.NameQueue.UpdateStatusTrialStudent, typeof(UpdateTrialStudentStatusConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
-    { QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
+    //{ QueueSettings.LmsQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
+    //{ QueueSettings.TrainingQueue.NameQueue.SaveUserCourseSetting, typeof(SaveUserCourseSettingConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddExpiredDateForStudent, typeof(AddExpiredDateForStudentConsumer) },
     { QueueSettings.LmsQueue.NameQueue.StudentRankingEvent, typeof(StudentRankingEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.AddFeatureMission, typeof(AddFeatureMissionConsumer) },
@@ -97,7 +99,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.UserQueue.NameQueue.WeeklyNotice, typeof(WeeklyNoticeConsumer) },
     { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) },
-    { QueueSettings.UserQueue.NameQueue.CreateStudentsFromFile, typeof(CreateStudentsFromFileConsumer) }
+    { QueueSettings.UserQueue.NameQueue.CreateStudentsFromFile, typeof(CreateStudentsFromFileConsumer) },
+    { QueueSettings.UserQueue.NameQueue.AggregateDataStudentsInEvent, typeof(AggregateDataStudentsInEventConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

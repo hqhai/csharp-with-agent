@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Text.Json.Serialization;
 using Fsel.Common.ValueSettings;
 
 namespace Fsel.Ordering.Infrastructure.ValueSettings
@@ -16,6 +17,19 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public VoucherConfigs? VoucherConfigs { get; set; }
         public PurchaseSettings? PurchaseSettings { get; set; }
         public ResourceContent? ResourceContent { get; set; }
+        public BlindBoxConfigs? BlindBoxConfigs { get; set; }
+    }
+
+    public class BlindBoxConfigs
+    {
+        [JsonInclude]
+        private int[]? _packages;
+
+        public IReadOnlyList<int>? Packages
+        {
+            get => _packages;
+            set => _packages = value?.ToArray();
+        }
     }
 
     public class VoucherConfigs

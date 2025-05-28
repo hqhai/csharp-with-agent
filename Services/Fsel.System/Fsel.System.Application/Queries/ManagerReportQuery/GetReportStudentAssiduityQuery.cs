@@ -39,6 +39,8 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 Keyword = request.Keyword,
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
@@ -81,6 +83,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                     SchoolClass = student.SchoolClass,
                     SchoolGrade = student.SchoolGrade,
                     CourseLevel = student.CourseLevel,
+                    UserName = student.UserName,
                     ExpiredDate = student.ExpiredDate,
                     ProcessDate = student.CreatedDate
                 };

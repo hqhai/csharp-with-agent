@@ -8,7 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
     public class SchoolSummaryModel
     {
         public string? DistrictName { get; set; }
-        public string? GroupName { get; set; }
         public string? SchoolName { get; set; }
         public int? ImportStudent { get; set; }
         public int? RegisterStudent { get; set; }
@@ -32,5 +31,12 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
         public int? AmountArchiveC1 { get; set; }
         public decimal? PercentageAmountArchiveC1 { get; set; }
         public int? TotalItem { get; set; }
+        public double? TotalStudentDefault { get; set; }
+        public int? StudentNewPT { get; set; }
+        public decimal? PercentActiveDefault { get; set; }
+        public decimal? PercentDonePtDefault { get; set; }
+        public int? TotalStudentJoin { get; set; }
+        public decimal? PercentTotalStudentJoin { get; set; }
+        public decimal? PercentStudentJoinDefault { get; set; }
     }
 }

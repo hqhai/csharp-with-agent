@@ -44,6 +44,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 Status = request.Status,
@@ -82,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic);
             var placementTestGroupResults = (await query.Where(x => x.Status == EnumResultStatus.Done && x.CurrentLevel.HasValue).ToListAsync(cancellationToken))
-                                                        .GroupBy(x => x.CurrentLevel)
+                                                        .GroupBy(x => x.SuggetLevel)
                                                         .Select(x => new
                                                         {
                                                             CurrentLevel = x.Key,

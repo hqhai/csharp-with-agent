@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
@@ -20,10 +19,13 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class GetLevelSelectionQuery : IRequest<MethodResult<IList<LevelDtoModel>>>
     {
         public EnumCourseType CourseType { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 
     public class GetLevelSelectionQueryHandler : IRequestHandler<GetLevelSelectionQuery, MethodResult<IList<LevelDtoModel>>>
@@ -33,6 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private const int MaxAgeIELST = 14;
+        private const int MaxAgeEnglishFoundation = 16;
 
         public GetLevelSelectionQueryHandler(ICourseResultRepository courseResultRepository, ChangeCourseHelper changeCourseHelper, AuthContext authContext, IUserService userService)
         {
@@ -46,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LevelDtoModel>>();
-            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync();
+            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync(_authContext.CurrentUserId);
             if (!userCourseSettingResults.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingResults));
@@ -54,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             }
             var userCourseSettings = userCourseSettingResults?.Content?.Result;
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -72,8 +75,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 return methodResult;
             }
 
+            if (!student.ExpiredDate.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.ExpiredDate));
+                return methodResult;
+            }
+
             int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
-            if (request.CourseType == EnumCourseType.Ielts && age < MaxAgeIELST)
+            if ((request.CourseType == EnumCourseType.Ielts && age < AgeMilestone.StudentAge) || (request.CourseType == EnumCourseType.EnglishFoundation && age < AgeMilestone.TeenagersAge))
             {
                 methodResult.Result = new List<LevelDtoModel>();
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -87,6 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 return methodResult;
             }
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => x.StudentId == student.Id && x.WorkingStatus != EnumWorkingStatus.NotWorking).ToListAsync(cancellationToken);
+
             var isStudentsAchieveScore = await _changeCourseHelper.IsStudentsAchieveScoresAsync(student.Id, student.BaseCourseLevel);
             var levelDtos = ConvertHelper.Deserialize<List<LevelDtoModel>>(request.CourseType.GetListCourseLevels(student.BaseCourseLevel.Value, isStudentsAchieveScore));
 

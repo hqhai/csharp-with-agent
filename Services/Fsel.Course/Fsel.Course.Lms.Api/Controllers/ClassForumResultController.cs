@@ -17,11 +17,12 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Attributes;
+    using Microsoft.AspNetCore.Authorization;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
-    [Permission]
+    //[Permission]
     public class ClassForumResultController : BaseController
     {
         private readonly IMediator _mediator;
@@ -130,6 +131,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> SearchRelevantClassForums([FromQuery] SearchRelevantClassForumsQuery query)
         {
             MethodResult<PagingItemsModel<ClassForumResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get Class forum
+        /// </summary>
+        [HttpPost("check-ffmpeg")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CheckFFmpeg([FromQuery] CheckFFmpegCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -66,6 +66,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var dataOverallResult = await _mediator.Send(new GetOverallReportLearningProgressQuery
             {
                 Keyword = request.Keyword,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
@@ -85,6 +87,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 EndDate = request.EndDate,
                 PageSize = request.PageSize,
                 Filters = request.Filters,
@@ -130,6 +134,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolName = item.School,
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,
+                    UserName = item.UserName,
                     ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}",
                     UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}",
                     LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}",

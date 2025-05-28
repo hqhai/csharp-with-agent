@@ -33,6 +33,7 @@ namespace Fsel.Shared.Constants
                 public const string JobRunEvents = $"{KeyQueue}_JobRunEvents";
                 public const string CheckUserDeletion = $"{KeyQueue}_CheckUserDeletion";
                 public const string CreateStudentsFromFile = $"{KeyQueue}_CreateStudentsFromFile";
+                public const string AggregateDataStudentsInEvent = $"{KeyQueue}_AggregateDataStudentsInEvent";
             }
         }
 
@@ -58,6 +59,7 @@ namespace Fsel.Shared.Constants
                 public const string Banner = $"{KeyQueue}_Banner";
                 public const string BannerRealTime = $"{KeyQueue}_BannerRealTime";
                 public const string SpeechToTextRealTime = $"{KeyQueue}_SpeechToTextRealTime";
+                public const string DictionaryRealTime = $"{KeyQueue}_DictionaryRealTime";
             }
         }
 
@@ -77,6 +79,7 @@ namespace Fsel.Shared.Constants
             public static class NameQueue
             {
                 public const string SpeechToTextAi = $"{KeyQueue}_SpeechToTextAi";
+                public const string ResponseSpeechToTextPendingAi = $"{KeyQueue}_ResponseSpeechToTextPendingAi";
             }
         }
 
@@ -111,7 +114,8 @@ namespace Fsel.Shared.Constants
                 public const string DeleteClassForumByFlag = $"{KeyQueue}_DeleteClassForumByFlag";
                 public const string ClassForumAIResponse = $"{KeyQueue}_ClassForumAIResponse";
                 public const string MockTestAnwserResponse = $"{KeyQueue}_MockTestAnwserResponse";
-                public const string WeeklyReport = $"{KeyQueue}_WeeklyReport";
+                public const string SendWeeklyReport = $"{KeyQueue}_SendWeeklyReport";
+                public const string AggregateDataWeeklyReport = $"{KeyQueue}_AggregateDataWeeklyReport";
                 public const string WeeklySnapShotLeaderBoard = $"{KeyQueue}_WeeklySnapShotLeaderBoard";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
                 public const string UpdateClassForumResultToExpiredTime = $"{KeyQueue}_UpdateClassForumResultToExpiredTime";
@@ -126,6 +130,8 @@ namespace Fsel.Shared.Constants
                 public const string ExportExcelStudentLearningProcess = $"{KeyQueue}_ExportExcelStudentLearningProcess";
                 public const string SavePlacementTestAnswers = $"{KeyQueue}_SavePlacementTestAnswers";
                 public const string ErrorExplainGgSheet = $"{KeyQueue}_ErrorEplainGgSheet";
+                public const string ExportExcelSchoolLearningProcess = $"{KeyQueue}_ExportExcelSchoolLearningProcess";
+                public const string SpeechToTextPendingAi = $"{KeyQueue}_SpeechToTextPendingAi";
             }
         }
 
@@ -143,6 +149,11 @@ namespace Fsel.Shared.Constants
                 public const string NoticeAccessTime = $"{KeyQueue}_NoticeAccessTime";
                 public const string Techie = $"{KeyQueue}_Techie";
                 public const string CreateLuckyTicket = $"{KeyQueue}_CreateLuckyTicket";
+                public const string BuyBlindBox = $"{KeyQueue}_BuyBlindBox";
+                public const string SendNotifyBuyBlindBox = $"{KeyQueue}_SendNotifyBuyBlindBox";
+                public const string ChooseDailyQuizWinners = $"{KeyQueue}_ChooseDailyQuizWinners";
+                public const string SendDictionary = $"{KeyQueue}_SendDictionary";
+                public const string CrawDictionaryData = $"{KeyQueue}_CrawDictionaryData";
             }
         }
 

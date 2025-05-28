@@ -54,6 +54,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 Keyword = request.Keyword,
                 Status = request.Status,
                 StartDate = request.StartDate,
@@ -70,6 +72,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
@@ -104,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     Status = x.Status,
                     ChooseLevel = x.ChooseLevel,
                     CompletionLevel = x.CompletionLevel,
-                    CurrentLevel = x.CurrentLevel,
+                    CurrentLevel = x.SuggetLevel,
                 })
                 .ToListAsync(cancellationToken);
 
@@ -127,6 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
+                    UserName = item.UserName,
                     ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
                     Status = groupResult != null && groupResult.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.InProgress
                 };

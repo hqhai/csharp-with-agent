@@ -94,7 +94,6 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
                 foreach (var (time, seconds) in accessTimes)
                 {
-
                     if (featureAccessTimeCheck == null || !IsSameRangeHour(featureAccessTimeCheck))
                     {
                         AddNewFeatureAccessTime(request, seconds, time);
@@ -120,7 +119,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 //methodResult.Result = _mapper.Map<FeatureAccessTimeModel>(featureAccessTime);
 
-                if ((request.Type == EnumFeature.VideoLesson.ToString() || request.Type == EnumFeature.HomeWork.ToString() || request.Type == EnumFeature.MockTest.ToString() || request.Type == EnumFeature.FinalTest.ToString()) && request.AccessTime.HasValue)
+                if ((request.Type == EnumFeature.VideoLesson.ToString() || request.Type == EnumFeature.HomeWork.ToString() || request.Type == EnumFeature.MockTest.ToString() || request.Type == EnumFeature.FinalTest.ToString() || request.Type == EnumFeature.ClassForum.ToString() || request.Type == EnumFeature.ChatBot.ToString()) && request.AccessTime.HasValue)
                 {
                     int minute = DateTimeHelper.ConvertSecondsToMinutes(request.AccessTime.Value);
                     await DoQuestBoard(student!.Id, EnumQuestBoardCategory.ExploreTheLearningGalaxy, minute, cancellationToken);

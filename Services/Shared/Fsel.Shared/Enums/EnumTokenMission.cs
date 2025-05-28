@@ -74,6 +74,7 @@ namespace Fsel.Shared.Enums
         RecallCoinsSurveyEvent,
         ReclaimGiftCoins,
         SurveyReward,
+        FselEventReward,
 
         #region QuestBoard
 
@@ -164,7 +165,32 @@ namespace Fsel.Shared.Enums
 
         #region
         FselStore,
-        UrBox
+        UrBox,
+        #endregion
+
+        #region Blind Box
+
+        [Description("Mở rương mảnh ghép số 1")]
+        PurchaseChestFirst,
+
+        [Description("Mở rương mảnh ghép số 2")]
+        PurchaseChestSecond,
+
+        [Description("Mở rương mảnh ghép số 3")]
+        PurchaseChestThird,
+
+        [Description("Mở rương mảnh ghép số 4")]
+        PurchaseChestFourth,
+
+        [Description("Mở rương mảnh ghép số 5")]
+        PurchaseChestFifth,
+
+        [Description("Mở rương mảnh ghép số 6")]
+        PurchaseChestSixth,
+
+        [Description("Mở rương nhận Fsel coins")]
+        OpenChestCoins
+
         #endregion
     }
 }

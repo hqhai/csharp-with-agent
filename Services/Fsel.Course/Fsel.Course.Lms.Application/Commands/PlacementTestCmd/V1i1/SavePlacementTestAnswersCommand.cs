@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 }
                 if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
                 {
-                    await _placementTestAnswerRepository.BulkMergeAsync(updatePlacementTestAnswers, bulk =>
+                    await _placementTestAnswerRepository.BulkUpdateList(updatePlacementTestAnswers, bulk =>
                     {
                         bulk.IgnoreOnUpdateExpression = entity => new { entity.PlacementTestResultId, entity.SectionQuestionId, entity.SectionGroupResultId };
                     });
@@ -184,7 +184,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             return methodResult;
         }
 
-        private static PlacementTestAnswer GetPlacementTestAnswer(PlacementTestAnswer placementTestAnswer, object? answer, int correctCount, bool isAnswered, Question questionItem)
+        private static PlacementTestAnswer GetPlacementTestAnswer(PlacementTestAnswer placementTestAnswer, object? answer, short correctCount, bool isAnswered, Question questionItem)
         {
             placementTestAnswer.Answer = answer;
             placementTestAnswer.CorrectCount = correctCount;
