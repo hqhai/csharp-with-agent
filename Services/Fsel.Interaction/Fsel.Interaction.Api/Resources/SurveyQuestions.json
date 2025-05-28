@@ -2821,5 +2821,573 @@
         ]
       }
     ]
+  },
+  {
+    "id": "EB9DDECF-15FC-4393-AF86-EB2B14F64EB7",
+    "createdDate": "2025-01-16",
+    "question": "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+    "description": null,
+    "icon": null,
+    "displayOrder": 1,
+    "displayLevel": 1,
+    "type": "MultipleChoiceVertical",
+    "surveyFormType": "Event",
+    "competitionEventId": "A0AA2D10-65B3-4DF1-B773-3D63D8A03230",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Cải thiện điểm số ở trường",
+        "image": null
+      },
+      {
+        "id": 2,
+        "content": "Thi chứng chỉ",
+        "image": null
+      },
+      {
+        "id": 3,
+        "content": "Sở thích",
+        "image": null
+      },
+      {
+        "id": 4,
+        "content": "Lý do khác",
+        "image": null
+      }
+    ],
+    "translations": [
+      {
+        "id": "52248D53-305E-49B6-8260-BF78F1C91889",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "EB9DDECF-15FC-4393-AF86-EB2B14F64EB7",
+        "question": "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+        "language": "vi-VN",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Cải thiện điểm số ở trường",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Thi chứng chỉ",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Sở thích",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Lý do khác",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "1092914C-2706-4226-8F97-579C7AE9C500",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "EB9DDECF-15FC-4393-AF86-EB2B14F64EB7",
+        "question": "What is your goal in learning English?",
+        "language": "en-US",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Improving school grades",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Taking certification exams",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Personal interest",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Other reasons",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "36C3BEF7-7FEF-4999-A553-49FA53EED5C1",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "EB9DDECF-15FC-4393-AF86-EB2B14F64EB7",
+        "question": "Quels sont vos objectifs pour apprendre l'anglais ?",
+        "language": "fr-FR",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Améliorer vos notes à l'école",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Passer une certification",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Intérêt personnel",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Autres raisons",
+            "image": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "92D64860-C647-4359-A326-78A39DE366E1",
+    "createdDate": "2025-01-16",
+    "question": "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+    "description": null,
+    "icon": null,
+    "displayOrder": 2,
+    "displayLevel": 1,
+    "type": "MultipleChoiceVertical",
+    "surveyFormType": "Event",
+    "competitionEventId": "A0AA2D10-65B3-4DF1-B773-3D63D8A03230",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "1",
+        "image": null
+      },
+      {
+        "id": 2,
+        "content": "2",
+        "image": null
+      },
+      {
+        "id": 3,
+        "content": "3",
+        "image": null
+      },
+      {
+        "id": 4,
+        "content": "4",
+        "image": null
+      },
+      {
+        "id": 5,
+        "content": "5",
+        "image": null
+      }
+    ],
+    "translations": [
+      {
+        "id": "3EAE31F3-4E19-4E76-8C89-A571558F5ECE",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "92D64860-C647-4359-A326-78A39DE366E1",
+        "question": "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+        "language": "vi-VN",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "1",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "2",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "3",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "4",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "5",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "9EDF0F4F-E12C-4E3F-AA24-31A97B3E2D80",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "92D64860-C647-4359-A326-78A39DE366E1",
+        "question": "How would you rate the importance of learning English (on a scale of 1 to 5, from least to most important)?",
+        "language": "en-US",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "1",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "2",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "3",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "4",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "5",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "8B3CEAA3-64D0-4070-B26E-56633396CA0D",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "92D64860-C647-4359-A326-78A39DE366E1",
+        "question": "Comment évaluez-vous l'importance de l'apprentissage de l'anglais ? (échelle de 1 à 5, de faible à élevé)?",
+        "language": "fr-FR",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "1",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "2",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "3",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "4",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "5",
+            "image": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "69B1A8AB-2811-450D-B9BF-12CD91E44193",
+    "createdDate": "2025-01-16",
+    "question": "Bạn học thêm Tiếng Anh ở đâu?",
+    "description": null,
+    "icon": null,
+    "displayOrder": 1,
+    "displayLevel": 2,
+    "type": "MultipleChoiceVertical",
+    "surveyFormType": "Event",
+    "competitionEventId": "A0AA2D10-65B3-4DF1-B773-3D63D8A03230",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Trung tâm tiếng Anh",
+        "image": null
+      },
+      {
+        "id": 2,
+        "content": "Học online",
+        "image": null
+      },
+      {
+        "id": 3,
+        "content": "Học gia sư",
+        "image": null
+      },
+      {
+        "id": 4,
+        "content": "Học thêm với giáo viên",
+        "image": null
+      },
+      {
+        "id": 5,
+        "content": "Không học thêm tiếng Anh",
+        "image": null
+      }
+    ],
+    "translations": [
+      {
+        "id": "93F2689E-D1FB-4EF8-AB4A-C4CC52795EE8",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "69B1A8AB-2811-450D-B9BF-12CD91E44193",
+        "question": "Bạn học thêm Tiếng Anh ở đâu?",
+        "language": "vi-VN",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Trung tâm tiếng Anh",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Học online",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Học gia sư",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Học thêm với giáo viên",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Không học thêm tiếng Anh",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "337A1505-8221-4967-93A9-285A31AD5DA2",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "69B1A8AB-2811-450D-B9BF-12CD91E44193",
+        "question": "Where do you take additional English lessons?",
+        "language": "en-US",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "English language centers",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Online learning",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Private tutoring",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Extra classes with teachers",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Do not take additional English lessons",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "1AD583B8-EE62-4BDB-BA56-E228062929B4",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "69B1A8AB-2811-450D-B9BF-12CD91E44193",
+        "question": "Où prenez-vous des cours supplémentaires d'anglais ?",
+        "language": "fr-FR",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Centres de langue anglaise",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Apprentissage en ligne",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Cours particuliers",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Cours supplémentaires avec des enseignants",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Je ne prends pas de cours supplémentaires d'anglais",
+            "image": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "6FE5A134-6379-4244-96F1-69CC71962368",
+    "createdDate": "2025-01-16",
+    "question": "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+    "description": null,
+    "icon": null,
+    "displayOrder": 2,
+    "displayLevel": 2,
+    "type": "MultipleChoiceVertical",
+    "surveyFormType": "Event",
+    "competitionEventId": "A0AA2D10-65B3-4DF1-B773-3D63D8A03230",
+    "isPilot": false,
+    "answers": [
+      {
+        "id": 1,
+        "content": "Giao tiếp tiếng Anh rất pro trong mắt bạn bè",
+        "image": null
+      },
+      {
+        "id": 2,
+        "content": "Điểm cao được cô giáo khen ngợi trước lớp",
+        "image": null
+      },
+      {
+        "id": 3,
+        "content": "Thích vì tiếng Anh hay ho",
+        "image": null
+      },
+      {
+        "id": 4,
+        "content": "Không thích gì cả",
+        "image": null
+      },
+      {
+        "id": 5,
+        "content": "Ghét tiếng Anh",
+        "image": null
+      }
+    ],
+    "translations": [
+      {
+        "id": "5C29C250-58CD-4675-AC3C-41A13D6C6055",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "6FE5A134-6379-4244-96F1-69CC71962368",
+        "question": "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+        "language": "vi-VN",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Giao tiếp tiếng Anh rất pro trong mắt bạn bè",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Điểm cao được cô giáo khen ngợi trước lớp",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Thích vì tiếng Anh hay ho",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Không thích gì cả",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Ghét tiếng Anh",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "836F815F-955B-4E08-A1EE-C7685CCEC230",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "6FE5A134-6379-4244-96F1-69CC71962368",
+        "question": "What do you like most about learning English?",
+        "language": "en-US",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Being seen as a pro at English by friends",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "High grades and being praised by the teacher in class",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Enjoying English because it is interesting",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Do not like anything about it",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Dislike English entirely",
+            "image": null
+          }
+        ]
+      },
+      {
+        "id": "2CA57663-8C08-43EF-B9F3-1F044E724FCA",
+        "createdDate": "2025-01-16",
+        "surveyQuestionId": "6FE5A134-6379-4244-96F1-69CC71962368",
+        "question": "Qu'aimez-vous le plus dans l'apprentissage de l'anglais ?",
+        "language": "fr-FR",
+        "description": null,
+        "answers": [
+          {
+            "id": 1,
+            "content": "Être considéré comme un expert en anglais par vos amis",
+            "image": null
+          },
+          {
+            "id": 2,
+            "content": "Obtenir de bonnes notes et être félicité par le professeur en classe",
+            "image": null
+          },
+          {
+            "id": 3,
+            "content": "Aimer l'anglais parce que c'est intéressant",
+            "image": null
+          },
+          {
+            "id": 4,
+            "content": "Ne rien aimer du tout",
+            "image": null
+          },
+          {
+            "id": 5,
+            "content": "Détester l'anglais complètement",
+            "image": null
+          }
+        ]
+      }
+    ]
   }
 ]
