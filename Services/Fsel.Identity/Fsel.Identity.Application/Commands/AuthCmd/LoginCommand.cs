@@ -82,6 +82,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenLocked), new Error(nameof(request.Username), request.Username));
                 return methodResult;
             }
+            else if (user.Status.HasValue && user.Status == EnumUserStatus.Disable)
+            {
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Username), request.Username));
+                return methodResult;
+            }
 
             var isCheckPassword = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!isCheckPassword)
