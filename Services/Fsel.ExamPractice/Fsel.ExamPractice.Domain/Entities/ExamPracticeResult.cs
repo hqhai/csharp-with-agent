@@ -67,7 +67,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         {
             get
             {
-                return ConvertHelper.Deserialize<ExerciseConfig>(Config);
+                return ConvertHelper.Deserialize<ExerciseConfig>(ExerciseConfig);
             }
             set { ExerciseConfig = ConvertHelper.Serialize(value); }
         }
