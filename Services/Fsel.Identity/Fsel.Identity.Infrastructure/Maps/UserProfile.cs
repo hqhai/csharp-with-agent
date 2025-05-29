@@ -10,6 +10,7 @@ using Fsel.Identity.Domain.Models.CommandModels.Quickstarts;
 using Fsel.Identity.Domain.Models.CommandModels.Students;
 using Fsel.Identity.Domain.Models.CommandModels.Users;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Shared.Helpers;
 
 namespace Fsel.Identity.Infrastructure.Maps
 {
@@ -19,9 +20,15 @@ namespace Fsel.Identity.Infrastructure.Maps
         {
             CreateMap<User, UserModel>().IgnoreAllNonExisting();
             CreateMap<User, UserProfileModel>().IgnoreAllNonExisting();
-            CreateMap<CreateStudentByParentCommandModel, User>().IgnoreAllNonExisting();
-            CreateMap<CreateUserCommandModel, User>().IgnoreAllNonExisting();
-            CreateMap<UpdateUserCommandModel, User>().IgnoreAllNonExisting();
+            CreateMap<CreateStudentByParentCommandModel, User>()
+                .AfterMap<ParseFullNameMappingAction<CreateStudentByParentCommandModel>>()
+                .IgnoreAllNonExisting();
+            CreateMap<CreateUserCommandModel, User>()
+                .AfterMap<ParseFullNameMappingAction<CreateUserCommandModel>>()
+                .IgnoreAllNonExisting();
+            CreateMap<UpdateUserCommandModel, User>()
+                .AfterMap<ParseFullNameMappingAction<UpdateUserCommandModel>>()
+                .IgnoreAllNonExisting();
             CreateMap<UpdateStudentByAdminCommandModel, User>()
                 .BeforeMap((m, c) =>
                 {
@@ -33,10 +40,13 @@ namespace Fsel.Identity.Infrastructure.Maps
                                            : c.NormalizedUserName;
                 })
                 .ForMember(p => p.NormalizedEmail, n => n.MapFrom(m => (m.Email ?? string.Empty).ToUpper(CultureInfo.CurrentCulture)))
-                .ForMember(m => m.Id, opt => opt.Ignore());
+                .ForMember(m => m.Id, opt => opt.Ignore())
+                .AfterMap<ParseFullNameMappingAction<UpdateStudentByAdminCommandModel>>();
 
             CreateMap<User, StudentModel>().ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
-            CreateMap<SignUpCommandModel, User>().IgnoreAllNonExisting();
+            CreateMap<SignUpCommandModel, User>()
+                .AfterMap<ParseFullNameMappingAction<SignUpCommandModel>>()
+                .IgnoreAllNonExisting();
             CreateMap<UpdateUserProfileCommandModel, User>()
                 .BeforeMap((m, c) =>
                 {
@@ -47,11 +57,38 @@ namespace Fsel.Identity.Infrastructure.Maps
                     : (c.PhoneNumber?.Trim() == c.UserName?.Trim()) ? m.PhoneNumber
                     : c.NormalizedUserName;
                 })
-                .ForMember(m => m.Id, opt => opt.Ignore());
+                .ForMember(m => m.Id, opt => opt.Ignore())
+                .AfterMap<ParseFullNameMappingAction<UpdateUserProfileCommandModel>>();
 
-            CreateMap<UpdateStudentProfileCommandModel, User>().IgnoreAllNonExisting();
-            CreateMap<UpdateProfileStudentCommandModel, User>().IgnoreAllNonExisting();
-            CreateMap<UserRegisterModel, User>().IgnoreAllNonExisting();
+            CreateMap<UpdateStudentProfileCommandModel, User>()
+                .AfterMap<ParseFullNameMappingAction<UpdateStudentProfileCommandModel>>()
+                .IgnoreAllNonExisting();
+            CreateMap<UpdateProfileStudentCommandModel, User>()
+                .AfterMap<ParseFullNameMappingAction<UpdateProfileStudentCommandModel>>()
+                .IgnoreAllNonExisting();
+            CreateMap<UserRegisterModel, User>()
+                .AfterMap<ParseFullNameMappingAction<UserRegisterModel>>()
+                .IgnoreAllNonExisting();
+        }
+    }
+
+    public class ParseFullNameMappingAction<TSource> : IMappingAction<TSource, User>
+    where TSource : class
+    {
+        public void Process(TSource source, User? destination, ResolutionContext context)
+        {
+            // Kiểm tra nếu source có FullName
+            var fullNameProp = typeof(TSource).GetProperty(nameof(User.FullName));
+            if (destination != null && fullNameProp != null)
+            {
+                var fullNameValue = fullNameProp.GetValue(source) as string;
+                if (!string.IsNullOrEmpty(fullNameValue))
+                {
+                    var parsed = fullNameValue.ParseFullName();
+                    destination.FirstName = parsed.FirstName;
+                    destination.LastName = parsed.LastName;
+                }
+            }
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Fsel.Identity.Domain.Entities
 
         public string? FullName
         {
-            get { return $"{LastName} {FirstName}".Trim(); }
+            get { return string.Concat(LastName, " ", FirstName).Trim(); }
         }
 
         public DateTime? Birthday { get; set; }
