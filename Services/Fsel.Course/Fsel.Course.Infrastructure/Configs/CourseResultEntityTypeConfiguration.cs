@@ -15,13 +15,13 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Status)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
 
             builder.Property(e => e.WorkingStatus)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumWorkingStatus>());

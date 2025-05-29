@@ -52,7 +52,17 @@ namespace Fsel.Ordering.Domain.Entities
 
         public string? Description { get; set; }
 
+        /// <summary>
+        /// Coin tặng chức năng mời bạn bè
+        /// </summary>
+        [Range(0, 240000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int ReferToken { get; set; }
+
+        /// <summary>
+        /// Coin tặng khi mua khóa học
+        /// </summary>
+        [Range(0, 240000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int BonusCoins { get; set; }
 
         public EnumPackageStatus Status { get; set; }
 

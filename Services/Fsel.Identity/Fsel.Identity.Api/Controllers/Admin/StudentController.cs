@@ -249,7 +249,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPut("update-event-content")]
         [ProducesResponseType(typeof(MethodResult<StudentSearchAdminModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        //[Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin) })]
         public async Task<IActionResult> UpdateEventContentTime([FromBody] UpdateEventExportTimeCommand cmd)
         {
             var queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
@@ -326,6 +325,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Tool Synchronous Parent Info
+        /// </summary>
+        [HttpPost("tool-synchronous-parent-info")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ToolSynchronousParentInfo()
+        {
+            var queryResult = await _mediator.Send(new ToolSynchronousParentInfoCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

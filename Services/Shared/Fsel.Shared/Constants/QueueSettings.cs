@@ -182,6 +182,7 @@ namespace Fsel.Shared.Constants
                 public const string ChangeStatusOrder = $"{KeyQueue}_ChangeStatusOrder";
                 public const string JobUpdateVouchersStatus = $"{KeyQueue}_JobUpdateVouchersStatus";
                 public const string NoticeExtendPackage = $"{KeyQueue}_NoticeExtendPackage";
+                public const string AddCoinWhenCoursePurchased = $"{KeyQueue}_AddCoinWhenCoursePurchased";
             }
         }
 
