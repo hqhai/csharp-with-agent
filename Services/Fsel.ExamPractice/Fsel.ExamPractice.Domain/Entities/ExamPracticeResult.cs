@@ -18,14 +18,31 @@ namespace Fsel.ExamPractice.Domain.Entities
         /// <summary>
         /// Số câu trả lời đúng của Student
         /// </summary>
-        [Range(0, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
+        private int _correctCount;
 
-        /// <summary>
-        /// Tổng số câu trả lời đúng
-        /// </summary>
         [Range(0, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectTotal { get; set; }
+        public int CorrectCount
+        {
+            get => _correctCount;
+            set
+            {
+                _correctCount = value;
+                UpdatePercent();
+            }
+        }
+
+        private int _correctTotal;
+
+        [Range(0, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        public int CorrectTotal
+        {
+            get => _correctTotal;
+            set
+            {
+                _correctTotal = value;
+                UpdatePercent();
+            }
+        }
 
         /// <summary>
         /// Phần trăm câu trả lời đúng
@@ -34,17 +51,11 @@ namespace Fsel.ExamPractice.Domain.Entities
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public virtual double Percent { get; set; }
 
-        [NotMapped]
-        private double PercentValue
+        private void UpdatePercent()
         {
-            get
-            {
-                return CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : PercentValue;
-            }
-            set
-            {
-                Percent = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : value;
-            }
+            Percent = CorrectTotal > 0
+                ? NumberHelper.GetPercent(CorrectCount, CorrectTotal)
+                : Percent;
         }
 
         public string? SkillScoresStr { get; set; }

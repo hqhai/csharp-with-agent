@@ -91,7 +91,16 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.Questions).Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId).ToListAsync(cancellationToken);
             }
             var examPracticeDetail = _mapper.Map<ExamPracticeDetailModel>(examPractice);
-            examPracticeDetail.ExamPracticeResult = _mapper.Map<ExamPracticeResultModel>(examPracticeResult);
+            var examPracticeResultModel = _mapper.Map<ExamPracticeResultModel>(examPracticeResult);
+
+            double executionExamPracticeTime = default;
+            if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice && examPracticeResult.Config?.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
+            {
+                executionExamPracticeTime = examPracticeResult.Config?.ExecutionTime ?? default;
+                examPracticeResultModel.RemainingTime = executionExamPracticeTime - examPracticeResult.WorkingTime > 0 ? executionExamPracticeTime - examPracticeResult.WorkingTime : default;
+            }
+
+            examPracticeDetail.ExamPracticeResult = examPracticeResultModel;
 
             var examPracticeSectionDetails = new List<ExamPracticeSectionDetailModel>();
             var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeResult.Id && x.QuestionId.HasValue).ToListAsync(cancellationToken);
