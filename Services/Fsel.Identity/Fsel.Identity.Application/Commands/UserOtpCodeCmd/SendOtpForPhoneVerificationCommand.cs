@@ -32,7 +32,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         private readonly UserManager<User> _userManager;
         private readonly ISenderService _senderService;
         private readonly AuthContext _authContext;
-        private const string TemplateId = "433947";
+        private const string TemplateId = "436230";
 
         public SendOtpForPhoneVerificationCommandHandler(IUserOtpCodeRepository userOtpCodeRepository,
             UserManager<User> userManager,
@@ -113,7 +113,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                         TemplateId = TemplateId,
                         Params = new
                         {
-                            thoi_gian = "3",
                             otp = userOtpCode.OTPCode
                         },
                         UseUnicode = 0
