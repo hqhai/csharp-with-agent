@@ -109,6 +109,9 @@ namespace Fsel.Shared.Constants
 
         public const string SuccessCriteriaSchema = "Resources//AIPrompt//JsonSchemas//SuccessCriteriaSchema.json";
 
+        public const string AICheckForbiddenWordRole = "Resources//AIPrompt//Role//CheckForbiddenWord.txt";
+        public const string AICheckForbiddenWordInstruction = "Resources//AIPrompt//Instruction//CheckForbiddenWordInstruction.txt";
+
         public const string DepartmentLevelReport = "Resources//ExportExcelTemplates//BaoCao_Capso.xlsx";
         public const string DivisionLevelReport = "Resources//ExportExcelTemplates//BaoCao_CapPhong.xlsx";
     }

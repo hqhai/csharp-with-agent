@@ -88,18 +88,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.Base64InText));
                 return methodResult;
             }
-            // Check từ khoá cấm
-            var listForbiddenWordResultContent = await _systemService.CheckContainForbiddenWord(request.Content ?? string.Empty);
-            var listForbiddenWordResultWordContent = await _systemService.CheckContainForbiddenWord(request.WordContent ?? string.Empty);
-            var containsForbiddenWord = (listForbiddenWordResultContent.Content?.Result ?? Enumerable.Empty<string>())
-             .Concat(listForbiddenWordResultWordContent.Content?.Result ?? Enumerable.Empty<string>()).Distinct()
-             .ToList();
+            //// Check từ khoá cấm
+            //var listForbiddenWordResultContent = await _systemService.CheckContainForbiddenWord(request.Content ?? string.Empty);
+            //var listForbiddenWordResultWordContent = await _systemService.CheckContainForbiddenWord(request.WordContent ?? string.Empty);
+            //var containsForbiddenWord = (listForbiddenWordResultContent.Content?.Result ?? Enumerable.Empty<string>())
+            // .Concat(listForbiddenWordResultWordContent.Content?.Result ?? Enumerable.Empty<string>()).Distinct()
+            // .ToList();
 
-            if (containsForbiddenWord.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords), string.Join(", ", containsForbiddenWord));
-                return methodResult;
-            }
+            //if (containsForbiddenWord.Any())
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ContainsForbiddenKeywords), string.Join(", ", containsForbiddenWord));
+            //    return methodResult;
+            //}
 
             var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
