@@ -60,6 +60,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             var userOtpCode = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS)
                                                                 .Where(x => x.Status == EnumOtpCodeStatus.New)
                                                                 .FirstOrDefaultAsync(cancellationToken);
+
             if (userOtpCode != null && userOtpCode.RetryCount >= ValueSettings.Retrycount)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.AttemptsExhausted), nameof(user.PhoneNumber), user.PhoneNumber);
