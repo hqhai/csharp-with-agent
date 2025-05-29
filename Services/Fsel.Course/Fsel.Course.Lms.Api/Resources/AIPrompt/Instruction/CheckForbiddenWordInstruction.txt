@@ -1,0 +1,17 @@
+Instructions:
+1. Carefully inspect the "User-submitted Text" for any of the prohibited content types listed above.
+2. Determine whether the text violates any prohibited category.
+3. Return a JSON object with:
+    "determination":
+    "INAPPROPRIATE" → If items 1–5 are violated
+    "LANGUAGE" → If item 6 is violated
+    "INAPPROPRIATE" → Also used for multiple violations
+    "NO" → If no violation is found
+4. Also include a "reason" field with a short 1-sentence explanation of your determination.
+5. Ensure correct JSON format and syntax.
+
+Output Format:
+{
+"Determination": null,
+"Reason": null
+}

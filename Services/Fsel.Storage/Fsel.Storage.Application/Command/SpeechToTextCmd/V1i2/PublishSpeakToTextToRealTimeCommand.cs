@@ -171,7 +171,8 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
         public async Task<MethodResult<string?>> UpLoadFileAsync(IFormFile formFile)
         {
-            return await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+            var a = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+            return a;
         }
 
         private async Task PublishTextToSocket(SpeechToTextAiConsumerModel message, string? convertContent, string? filePath)

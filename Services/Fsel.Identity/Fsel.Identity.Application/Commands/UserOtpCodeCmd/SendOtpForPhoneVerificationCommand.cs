@@ -32,7 +32,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         private readonly UserManager<User> _userManager;
         private readonly ISenderService _senderService;
         private readonly AuthContext _authContext;
-        private const string TemplateId = "433947";
+        private const string TemplateId = "436230";
 
         public SendOtpForPhoneVerificationCommandHandler(IUserOtpCodeRepository userOtpCodeRepository,
             UserManager<User> userManager,
@@ -60,6 +60,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             var userOtpCode = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS)
                                                                 .Where(x => x.Status == EnumOtpCodeStatus.New)
                                                                 .FirstOrDefaultAsync(cancellationToken);
+
             if (userOtpCode != null && userOtpCode.RetryCount >= ValueSettings.Retrycount)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.AttemptsExhausted), nameof(user.PhoneNumber), user.PhoneNumber);
@@ -113,7 +114,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                         TemplateId = TemplateId,
                         Params = new
                         {
-                            thoi_gian = "3",
                             otp = userOtpCode.OTPCode
                         },
                         UseUnicode = 0
