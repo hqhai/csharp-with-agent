@@ -153,7 +153,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("update-class-forum-detail")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.CSO))]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> UpdateClassForumDetailResult([FromBody] UpdateClassForumDetailResultCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
