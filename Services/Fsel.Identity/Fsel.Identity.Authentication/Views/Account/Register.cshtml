@@ -44,6 +44,20 @@
                         <div class="float-input float-input-validate">
                             <input class="text-input"
                                    type="text"
+                                   name="LastName"
+                                   id="lastName"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   required
+                                   asp-for="LastName" />
+                            <label for="LastName" class="input-label">@Localizer["i18nSignUpLabelLastName"]</label>
+                        </div>
+                        @Html.CustomValidationMessageFor(model => model.LastName, Localizer, "", new { @class = "content-text-danger" })
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
                                    name="FirstName"
                                    id="firstName"
                                    placeholder=""
@@ -54,20 +68,6 @@
                         </div>
                         @* @Html.Raw(HttpUtility.HtmlDecode(Html.ValidationMessageFor(m => m.FirstName, Localizer, "", new { @class = "content-text-danger" }))) *@
                         @Html.CustomValidationMessageFor(model => model.FirstName, Localizer, "", new { @class = "content-text-danger" })
-                    </div>
-                    <div class="col-sm-6">
-                        <div class="float-input float-input-validate">
-                            <input class="text-input"
-                                   type="text"
-                                   name="LastName"
-                                   id="lastName"
-                                   placeholder=""
-                                   autocomplete="off"
-                                   required
-                                   asp-for="LastName" />
-                            <label for="LastName" class="input-label">@Localizer["i18nSignUpLabelLastName"]</label>
-                        </div>
-                        @Html.CustomValidationMessageFor(model => model.LastName, Localizer, "", new { @class = "content-text-danger" })
                     </div>
                 </div>
                 <div class="row">

@@ -182,14 +182,14 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     TRIM(
                         CASE 
                             WHEN CHARINDEX(' ', H.FullName) = 0 THEN H.FullName
-                            ELSE LEFT(H.FullName, CHARINDEX(' ', H.FullName) - 1)
+                            ELSE STUFF(H.FullName, 1, CHARINDEX(' ', H.FullName), '')
                         END
                     ),
                     -- LastName
                     TRIM(
                         CASE 
                             WHEN CHARINDEX(' ', H.FullName) = 0 THEN H.FullName
-                            ELSE STUFF(H.FullName, 1, CHARINDEX(' ', H.FullName), '')
+                            ELSE LEFT(H.FullName, CHARINDEX(' ', H.FullName) - 1)
                         END
                     ),
                     GETDATE(),
@@ -216,17 +216,17 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     PhoneNumber = ISNULL(H.PhoneNumber, U.PhoneNumber),
                     Gender      = ISNULL(H.Gender, U.Gender),
                     -- FirstName
-                    FirstName   = TRIM(
-                        CASE 
-                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) = 0 THEN ISNULL(H.FullName, U.LastName)
-                            ELSE LEFT(ISNULL(H.FullName, U.LastName), CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) - 1)
-                        END
-                    ),
-                    -- LastName
-                    LastName    = TRIM(
+                    FirstName    = TRIM(
                         CASE 
                             WHEN CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) = 0 THEN ISNULL(H.FullName, U.LastName)
                             ELSE STUFF(ISNULL(H.FullName, U.LastName), 1, CHARINDEX(' ', ISNULL(H.FullName, U.LastName)), '')
+                        END
+                    ),
+                    -- LastName
+                    LastName   = TRIM(
+                        CASE 
+                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) = 0 THEN ISNULL(H.FullName, U.LastName)
+                            ELSE LEFT(ISNULL(H.FullName, U.LastName), CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) - 1)
                         END
                     )
                 FROM AspNetUsers U
@@ -475,12 +475,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     U.Birthday,
                     U.Code,
                     -- Rollback FullName = concat FirstName + LastName, có xử lý nếu FirstName hoặc LastName bị null
-                    TRIM(
-                        CASE
-                            WHEN ISNULL(U.FirstName, '') = ISNULL(U.LastName, '') THEN ISNULL(U.FirstName, '')
-                            ELSE CONCAT(ISNULL(U.FirstName, ''), ' ', ISNULL(U.LastName, ''))
-                        END
-                    ),
+                    TRIM(CONCAT(
+                        NULLIF(U.LastName, ''), 
+                        IIF(U.LastName IS NOT NULL AND U.FirstName IS NOT NULL AND U.LastName <> '' AND U.FirstName <> '', ' ', ''), 
+                        NULLIF(U.FirstName, '')
+                    )),
                     U.Gender,
                     U.PhoneNumber
                 FROM AspNetUsers U;
