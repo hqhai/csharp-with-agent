@@ -58,7 +58,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                     School = x.School,
                     SchoolId = x.SchoolId,
                     ExpiredDate = x.ExpiredDate,
-                    User = _mapper.Map<UserModel>(x)
+                    User = _mapper.Map<UserModel>(x.User)
                 })
                 .ToListAsync(cancellationToken);
 
