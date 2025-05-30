@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.OtherCmd;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -36,6 +37,18 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetFeatureModule([FromQuery] GetFeatureModuleQuery query)
         {
             MethodResult<FeatureModuleModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>s
+        /// send notify after pt
+        /// </summary>
+        [HttpGet("send-notify-after-pt")]
+        [ProducesResponseType(typeof(MethodResult<FeatureModuleModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendNotifyAfterPT([FromQuery] SendNotifyAfterChooseLevelCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

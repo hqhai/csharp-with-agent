@@ -36,6 +36,7 @@ namespace Fsel.Shared.Enums
 
         //Version 1.1
         CompletedStreakLogin,
+
         CompleteCourse,
         UpgradeOrder,
         SubcriptionNotice,
@@ -57,6 +58,27 @@ namespace Fsel.Shared.Enums
         RecallCoinSurvey,
         SurveyReward,
         IllegalCoinRecall,
-        AddCoinBuyCourse
+        AddCoinBuyCourse,
+
+        #region Notify after PT
+
+        OneHourAfterPT,
+        Day1At7h30,
+        Day1At19h30,
+        Day2At12h00,
+        Day2At19h30,
+        Day3At7h30,
+        Day3At12h00,
+        Day4At17h30,
+        Day5At12h00,
+        Day6At12h00,
+        Day6At17h30,
+        Day6At19h30,
+        Day7At7h30,
+        Day7At12h00,
+        Day7At17h30,
+        Day7At19h30
+
+        #endregion Notify after PT
     }
 }

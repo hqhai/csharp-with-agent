@@ -219,6 +219,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
     { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SendNotifyAfterChooseLevel, typeof(SendNotifyAfterChooseLevelConsumer) },
 });
 
 var app = builder.Build();

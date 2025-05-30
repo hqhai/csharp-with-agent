@@ -4,8 +4,10 @@ namespace Fsel.Hangfire.Host.Jobs
 {
     using Fsel.Common.Helpers;
     using Fsel.Core.Extensions;
+    using Fsel.Hangfire.Application.Classes;
     using Fsel.Hangfire.Application.Workers;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using global::Hangfire;
 
     public static class RecurringJobBase
@@ -33,6 +35,12 @@ namespace Fsel.Hangfire.Host.Jobs
             //JobExtensions.SetRecurringJob<TestWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.Daily);
             JobExtensions.SetRecurringJob<ChooseDailyQuizWinnersWorker>(WorkerSettings.JobName.ChooseDailyQuizWinners, Cron.Daily(13, 59));
             JobExtensions.SetRecurringJob<AggregateDataStudentsInEventWorker>(WorkerSettings.JobName.AggregateDataStudentsInEvent, Cron.Daily(17, 1));
+
+            JobExtensions.SetRecurringJob<SenNotifyAfterChooseLevelWorker, NotifyAfterChooseLevel>(WorkerSettings.JobName.SendNotifyAfterChooseLevel, Cron.Hourly(), new NotifyAfterChooseLevel(EnumNotifyAfterChooseLevelType.EveryHour));
+            JobExtensions.SetRecurringJob<SenNotifyAfterChooseLevelWorker, NotifyAfterChooseLevel>(WorkerSettings.JobName.SendNotifyAfterChooseLevel, Cron.Daily(0, 30), new NotifyAfterChooseLevel(EnumNotifyAfterChooseLevelType.At07h30));
+            JobExtensions.SetRecurringJob<SenNotifyAfterChooseLevelWorker, NotifyAfterChooseLevel>(WorkerSettings.JobName.SendNotifyAfterChooseLevel, Cron.Daily(5, 0), new NotifyAfterChooseLevel(EnumNotifyAfterChooseLevelType.At12h00));
+            JobExtensions.SetRecurringJob<SenNotifyAfterChooseLevelWorker, NotifyAfterChooseLevel>(WorkerSettings.JobName.SendNotifyAfterChooseLevel, Cron.Daily(10, 30), new NotifyAfterChooseLevel(EnumNotifyAfterChooseLevelType.At17h30));
+            JobExtensions.SetRecurringJob<SenNotifyAfterChooseLevelWorker, NotifyAfterChooseLevel>(WorkerSettings.JobName.SendNotifyAfterChooseLevel, Cron.Daily(12, 30), new NotifyAfterChooseLevel(EnumNotifyAfterChooseLevelType.At19h30));
         }
     }
 }

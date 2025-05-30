@@ -32,6 +32,7 @@ namespace Fsel.Training.Application.Queries.ClassStudentQuery
             classStudents = classStudents.DistinctBy(p => p.StudentId).ToList();
             var students = classStudents.Select(p => new StudentsIn7DayChooseLevelModel()
             {
+                UserId = p.CreatedUserId,
                 StudentId = p.StudentId,
                 CreatedDate = p.CreatedDate
             }).ToList();
