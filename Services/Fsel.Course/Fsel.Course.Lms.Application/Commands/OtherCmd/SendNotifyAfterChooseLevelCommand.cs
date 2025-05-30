@@ -69,7 +69,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 }
                 students = students.Where(p => studentEvents.Contains(p.StudentId)).ToList();
                 students = students.Where(p => p.CreatedDate >= dateTimeUTC.AddHours(-2) && p.CreatedDate <= dateTimeUTC.AddMinutes(-1)).ToList();
-                await SendNotification(students, EnumNotificationContent.OneHourAfterPT, cancellationToken);
+                var userIds = students.Select(p => p.UserId).ToList();
+                await SendNotification(userIds, EnumNotificationContent.OneHourAfterPT, cancellationToken);
             }
             else if (request.NotifyAfterChooseLevelType == EnumNotifyAfterChooseLevelType.At07h30)
             {
