@@ -112,8 +112,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FeatureModuleModel> methodResult = new MethodResult<FeatureModuleModel>();
-            var userId = request.UserId == null ? _authContext.CurrentUserId : request.UserId;
-            var studentResult = await _userService.GetStudentByUserIdAsync(userId ?? default);
+            var userId = !request.UserId.HasValue ? _authContext.CurrentUserId : request.UserId.Value;
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(userId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
