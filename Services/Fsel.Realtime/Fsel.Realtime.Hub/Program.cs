@@ -20,6 +20,9 @@ builder.Services.AddScoped<GetTimeModulePublisher>();
 builder.Services.AddScoped<ChatBotPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<DictionaryPublisher>();
+builder.Services.AddScoped<SetTimeExamPracticePublisher>();
+builder.Services.AddScoped<GetTimeExamPracticePublisher>();
+
 builder.Services.AddScoped<SetTimeModuleHub>();
 builder.Services.AddScoped<TechieHub>();
 builder.Services.AddScoped<BannerHub>();
@@ -27,8 +30,7 @@ builder.Services.AddScoped<BannerPublisher>();
 builder.Services.AddScoped<TranscriptHub>();
 builder.Services.AddScoped<BuyBlindBoxHub>();
 builder.Services.AddScoped<DictionaryHub>();
-builder.Services.AddScoped<SetTimeExamPracticePublisher>();
-builder.Services.AddScoped<GetTimeExamPracticePublisher>();
+builder.Services.AddScoped<SetTimeExamPracticeHub>();
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>
