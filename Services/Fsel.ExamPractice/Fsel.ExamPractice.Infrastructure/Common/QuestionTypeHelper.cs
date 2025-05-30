@@ -184,6 +184,51 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             return (result, totalCorrect);
         }
 
+        public static bool ValidateQuestionExamPractice(object? config, object? configOld, EnumQuestionType questionType)
+        {
+            switch (questionType)
+            {
+                case EnumQuestionType.Multichoice:
+                case EnumQuestionType.Checklist:
+                    var multichoice = config.Deserialize<MultipleChoiceQuestion>();
+                    var multichoiceOld = configOld.Deserialize<MultipleChoiceQuestion>();
+
+                    return IsMultipleChoiceQuestionChanged(multichoice, multichoiceOld);
+            }
+
+            return false;
+        }
+
+        private static bool IsMultipleChoiceQuestionChanged(MultipleChoiceQuestion? current, MultipleChoiceQuestion? old)
+        {
+            if (current == null || old == null)
+            {
+                return true;
+            }
+            if (!string.Equals(current.Name, old.Name, StringComparison.Ordinal))
+            {
+                return true;
+            }
+            if (current.Contents.Count != old.Contents.Count)
+            {
+                return true;
+            }
+            for (int i = 0; i < current.Contents.Count; i++)
+            {
+                var newItem = current.Contents[i];
+                var oldItem = old.Contents[i];
+
+                if (newItem.Id != oldItem.Id ||
+                    !string.Equals(newItem.FilePath, oldItem.FilePath, StringComparison.Ordinal) ||
+                    !string.Equals(newItem.Content, oldItem.Content, StringComparison.Ordinal) ||
+                    newItem.IsCorrect != oldItem.IsCorrect)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         public static bool ValidateQuestionExamPractice(object? config, EnumQuestionType questionType)
         {
             var isError = false;

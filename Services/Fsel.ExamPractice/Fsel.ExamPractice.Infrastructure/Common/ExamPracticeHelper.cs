@@ -51,7 +51,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                 return true;
             }
 
-            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPractice.Id).OrderBy(x => x.DisplayOrder).ToListAsync();
+            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.Questions).Where(x => x.ExamPracticeId == examPractice.Id).OrderBy(x => x.DisplayOrder).ToListAsync();
             if (examPracticeSections.Count != request.ExamPracticeSections.Count)
             {
                 return true;
@@ -88,11 +88,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                     {
                         return true;
                     }
-                    if (question.CorrectTotal != questionRequest.CorrectTotal)
-                    {
-                        return true;
-                    }
-                    if (question.Config.Serialize() != questionRequest.Config.Serialize())
+                    if (QuestionTypeHelper.ValidateQuestionExamPractice(question.Config, questionRequest.Config, question.QuestionType))
                     {
                         return true;
                     }
