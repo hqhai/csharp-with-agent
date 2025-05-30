@@ -5,6 +5,7 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
+using Fsel.Course.Lms.Application.Services.UserServices.Models;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Models.ShareModels;
 using MediatR;
@@ -60,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
 
             if (request.NotifyAfterChooseLevelType == EnumNotifyAfterChooseLevelType.EveryHour)
             {
-                var studentEventResults = await _userService.GetStudentsInEventByStudentIds(studentIds);
+                var studentEventResults = await _userService.GetStudentsInEventByStudentIds(new GetStudentIdsInEventByStudentIdsQueryModel() { StudentIds = studentIds });
                 var studentEvents = studentEventResults.Content?.Result;
                 if (studentEvents == null || !studentEvents.Any())
                 {
@@ -68,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 }
                 students = students.Where(p => studentEvents.Contains(p.StudentId)).ToList();
                 students = students.Where(p => p.CreatedDate >= dateTimeUTC.AddHours(-2) && p.CreatedDate <= dateTimeUTC.AddMinutes(-1)).ToList();
+                await SendNotification(students, EnumNotificationContent.OneHourAfterPT, cancellationToken);
             }
             else if (request.NotifyAfterChooseLevelType == EnumNotifyAfterChooseLevelType.At07h30)
             {
