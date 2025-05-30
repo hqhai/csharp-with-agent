@@ -71,7 +71,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var platformCodes = await _platformRepository.Queryable.Include(x => x.UserPlatforms).Where(x => x.UserPlatforms.Select(n => n.UserId).Contains(user.Id)).Select(x => x.Code).ToListAsync(cancellationToken);
-            if (platformCodes != null && platformCodes.Count > 0 && request.PlatformCode.HasValue && !platformCodes.Contains(request.PlatformCode.Value))
+            if (platformCodes != null && platformCodes.Count > 0 && !platformCodes.Contains(request.PlatformCode))
             {
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.UserIsNotOnAnyPlatform), new Error(nameof(request.Username), request.Username), new Error(nameof(request.Password), request.Password));
                 return methodResult;
@@ -80,6 +80,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             if (user.Status.HasValue && user.Status == EnumUserStatus.Inactive)
             {
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenLocked), new Error(nameof(request.Username), request.Username));
+                return methodResult;
+            }
+            else if (user.Status.HasValue && user.Status == EnumUserStatus.Disable)
+            {
+                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Username), request.Username));
                 return methodResult;
             }
 

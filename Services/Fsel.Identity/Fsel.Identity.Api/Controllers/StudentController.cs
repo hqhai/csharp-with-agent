@@ -298,9 +298,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("send-otp-sms")]
         [ProducesResponseType(typeof(MethodResult<SaveOTPForUserEventHaNoiCommandModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendOtpSMS()
+        public async Task<IActionResult> SendOtpSMS([FromBody] SendOtpForPhoneVerificationCommand command)
         {
-            MethodResult<SaveOTPForUserEventHaNoiCommandModel> commandResult = await _mediator.Send(new SendOtpForPhoneVerificationCommand()).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
