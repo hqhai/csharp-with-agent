@@ -449,7 +449,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                         Question? question;
                         if (questionRequest.Id.HasValue)
                         {
-                            question = await _questionRepository.GetByIdAsync(questionRequest.Id.Value);
+                            question = listQuestion.FirstOrDefault(x => x.Id == questionRequest.Id.Value);
                             if (question == null)
                             {
                                 voidMethodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), questionRequest.Id);
