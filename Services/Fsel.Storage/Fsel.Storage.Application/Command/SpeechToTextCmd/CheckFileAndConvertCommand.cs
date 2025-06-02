@@ -20,14 +20,14 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     {
         private readonly IFFmpegServices _fFmpegServices;
         private readonly ILogger<CheckFileAndConvertCommand> _logger;
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClient;
         private List<string> _codecs = new List<string> { "WebM", "ADTS" };
         private List<string> _nameFiles = new List<string> { "AAC", "mp4", "WMA" };
         //private List<(string, string)> _fileCodecs = new List<(string, string)> { ("WMA", "Windows media") };
 
         public CheckFileAndConvertCommandHandler(IFFmpegServices fFmpegServices,
                                                  ILogger<CheckFileAndConvertCommand> logger,
-                                                 HttpClient httpClient)
+                                                 IHttpClientFactory httpClient)
         {
             _fFmpegServices = fFmpegServices;
             _logger = logger;
@@ -89,7 +89,8 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
             _logger.LogInformation($"LogConvertAudio:{ffmpegConvert.Content}");
 
             // đọc dữ liệu từ link s3
-            var response = await _httpClient.GetAsync(ffmpegConvert.Content.Paths3);
+            var httpClient = _httpClient.CreateClient();
+            var response = await httpClient.GetAsync(ffmpegConvert.Content.Paths3);
             if (!response.IsSuccessStatusCode)
             {
                 return methodResult;
