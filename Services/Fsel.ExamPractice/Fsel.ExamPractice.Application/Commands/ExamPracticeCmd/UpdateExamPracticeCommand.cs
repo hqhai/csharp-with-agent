@@ -112,7 +112,11 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.EndDate), request.EndDate);
                     return methodResult;
                 }
-
+                if (request.StartDate >= request.EndDate)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.StartDate), nameof(request.EndDate));
+                    return methodResult;
+                }
                 if (new[] { EnumExamPracticeSubType.Practice, EnumExamPracticeSubType.HighschoolEntrance }.Any(x => x == request.SubType) && !request.ProvinceId.HasValue)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ProvinceId), request.SubType);
