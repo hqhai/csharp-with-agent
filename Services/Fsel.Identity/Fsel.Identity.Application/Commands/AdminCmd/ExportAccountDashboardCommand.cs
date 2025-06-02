@@ -36,18 +36,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     {
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IMapper _mapper;
-        private readonly ICompetitionEventsRepository _competitionEventsRepository;
-        private readonly IEventManagerRepository _eventManagerRepository;
 
         public ExportAccountDashboardCommandHandler(IUserRoleRepository userRoleRepository,
-                                                    IMapper mapper,
-                                                    ICompetitionEventsRepository competitionEventsRepository,
-                                                    IEventManagerRepository eventManagerRepository)
+                                                    IMapper mapper)
         {
             _userRoleRepository = userRoleRepository;
             _mapper = mapper;
-            _competitionEventsRepository = competitionEventsRepository;
-            _eventManagerRepository = eventManagerRepository;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportAccountDashboardCommand request, CancellationToken cancellationToken)
@@ -91,18 +85,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
-            }
-
-            var userIds = userResults.Select(x => x.Id).ToList();
-            var eventManagers = await _eventManagerRepository.Queryable
-                                                             .Include(x => x.CompetitionEvent)
-                                                             .WhereBulkContains(userIds, x => x.UserId)
-                                                             .ToListAsync(cancellationToken).ConfigureAwait(false);
-
-            foreach (var user in userResults)
-            {
-                var eventManager = eventManagers.FirstOrDefault(x => x.UserId == user.Id && x.CompetitionEvent != null && (user.Role != EnumRole.EducationDivision.ToString() ? !x.CompetitionEvent.ParentEventId.HasValue : x.CompetitionEvent.Category == EnumCompetitionEventCategory.Student));
-                user.EventCode = eventManager?.CompetitionEvent?.EventCode ?? default;
             }
 
             var template = _mapper.Map<IList<ExportAccountDashboardCommandModel>>(userResults);

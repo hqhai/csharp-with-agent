@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
+    using System.Drawing;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -19,6 +20,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using OfficeOpenXml;
+    using OfficeOpenXml.Style;
 
     public class ImportAccountDashboardCommand : BaseImportCommandModel, IRequest<MethodResult<ImportAccountDashboardModel>>
     {
@@ -35,6 +38,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private static readonly char[] s_uppercaseLetters = "ABCDEFGHJKLMNPQRSTUVWXYZ".ToCharArray();
         private static readonly char[] s_digits = "123456789".ToCharArray();
         private static readonly char[] s_allowedChars = s_lowercaseLetters.Concat(s_uppercaseLetters).ToArray();
+        private const string ErrorMessage = "Error Message\n(Thông báo lỗi)";
 
         public ImportAccountDashboardCommandHandler(UserManager<User> userManager,
                                                     RoleManager<Role> roleManager,
@@ -64,6 +68,42 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
+            Action<ExcelWorksheet, Dictionary<string, int?>?, IList<ValidateExcelModel>> errorHandlerAction = (worksheet, columnIndexes, errors) =>
+            {
+                worksheet.Cells[1, 5].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 5].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 5].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 5].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 5].Value = ErrorMessage;
+                worksheet.Cells[1, 5].Style.Font.Bold = true;
+                foreach (var error in errors.GroupBy(x => x.RowIndex).Select(x => x).OrderBy(x => x.Key))
+                {
+                    var errorMessages = new List<string>();
+                    int targetRow = error.Key;
+
+                    foreach (var errorMessage in error.OrderBy(p => p.RowIndex))
+                    {
+                        var message = errorMessage.Message;
+                        if (!string.IsNullOrEmpty(message))
+                        {
+                            errorMessages.Add(message);
+                            int? num = columnIndexes?[errorMessage.ColumnName ?? string.Empty];
+                            if (num.HasValue)
+                            {
+                                worksheet.Cells[targetRow, num.Value].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                                worksheet.Cells[targetRow, num.Value].Style.Fill.BackgroundColor.SetColor(Color.Red);
+                                worksheet.Cells[targetRow, num.Value].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                                worksheet.Cells[targetRow, num.Value].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                                worksheet.Cells[targetRow, num.Value].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                                worksheet.Cells[targetRow, num.Value].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                            }
+                        }
+                    }
+                    var messages = Shared.Helpers.StringHelper.JoinWithComma(errorMessages.Distinct().ToList());
+                    worksheet.Cells[targetRow, 5].Value = messages;
+                }
+            };
+
             var result = request.FormFile.ImportAndValidateExcel(async (ImportAccountDashboardCommandModel x, IList<ImportAccountDashboardCommandModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.FullName))
@@ -76,9 +116,24 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = $"Username chưa điền hoặc sai định dạng" });
                 }
 
+                if (!string.IsNullOrEmpty(x.UserName) && await _userManager.Users.AnyAsync(c => c.UserName == x.UserName.Trim()))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = "Username trùng" });
+                }
+
+                if (!string.IsNullOrEmpty(x.UserName) && x.UserName.Length < 6)
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = $"Username tối thiểu 6 ký tự" });
+                }
+
                 if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email không đúng định dạng" });
+                }
+
+                if (!string.IsNullOrEmpty(x.Email) && await _userManager.Users.AnyAsync(c => c.Email == x.Email.Trim()))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email trùng" });
                 }
 
                 if (string.IsNullOrEmpty(x.EventCode))
@@ -98,12 +153,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
 
                 return await Task.FromResult(errors.Count == 0);
-            });
+            }, null, null, errorHandlerAction, true);
 
             if (result.Stream != null)
             {
                 methodResult.Result = new ImportAccountDashboardModel { Stream = result.Stream };
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+
+            if (!result.Datas.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 

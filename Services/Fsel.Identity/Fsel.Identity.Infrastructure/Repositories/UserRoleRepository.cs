@@ -40,6 +40,16 @@ namespace Fsel.Identity.Infrastructure.Repositories
                 return (from a in _userDbContext.Users
                         join b in _userDbContext.UserRoles on a.Id equals b.UserId
                         join c in _userDbContext.Roles on b.RoleId equals c.Id
+                        let em = _userDbContext.EventManagers
+                           .Where(x => x.UserId == a.Id && x.CompetitionEvent != null &&
+                                       (c.Name != EnumRole.EducationDivision.ToString()
+                                           ? !x.CompetitionEvent.ParentEventId.HasValue
+                                           : x.CompetitionEvent.Category == EnumCompetitionEventCategory.Student))
+                           .Select(x => new
+                           {
+                               x.CompetitionEvent!.EventCode
+                           })
+                           .FirstOrDefault()
                         where !string.IsNullOrEmpty(c.Name) && roleNames.Contains(c.Name!)
                         select new GetAccountDashboardQueryModel
                         {
@@ -49,8 +59,9 @@ namespace Fsel.Identity.Infrastructure.Repositories
                             UserName = a.UserName,
                             Status = a.Status,
                             Role = c.Name,
-                            DefaultPassword = a.DefaultPassword
-                        }).AsQueryable();
+                            DefaultPassword = a.DefaultPassword,
+                            EventCode = em != null ? em.EventCode : null
+                        }).OrderByDescending(x => x.CreatedDate).AsQueryable();
             }
             catch (Exception)
             {
