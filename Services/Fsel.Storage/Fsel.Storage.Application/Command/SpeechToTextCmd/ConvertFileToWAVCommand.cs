@@ -5,13 +5,10 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using Fsel.Storage.Application.Services.AmazonS3Services;
-    using Fsel.Storage.Application.Services.FFmpegServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Refit;
 
     public class ConvertFileToWAVCommand : IRequest<MethodResult<string>>
     {
@@ -20,13 +17,13 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
 
     public class ConvertFileToWAVCommandHandler : IRequestHandler<ConvertFileToWAVCommand, MethodResult<string>>
     {
-        private readonly IFFmpegServices _fFmpegServices;
+        private readonly IMediator _mediator;
         private readonly IAmazonS3Service _amazonS3Service;
 
-        public ConvertFileToWAVCommandHandler(IFFmpegServices fFmpegServices,
+        public ConvertFileToWAVCommandHandler(IMediator mediator,
                                               IAmazonS3Service amazonS3Service)
         {
-            _fFmpegServices = fFmpegServices;
+            _mediator = mediator;
             _amazonS3Service = amazonS3Service;
         }
 
@@ -36,51 +33,17 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
             ArgumentNullException.ThrowIfNull(request.FormFile);
             MethodResult<string> methodResult = new MethodResult<string>();
 
-            await using var stream = request.FormFile.OpenReadStream();
-            var filePart = new StreamPart(stream, request.FormFile.FileName, request.FormFile.ContentType);
-
-            var ffmpegConvert = await _fFmpegServices.Convert(filePart);
-            if (!ffmpegConvert.IsSuccessStatusCode)
+            var convertFile = await _mediator.Send(new CheckFileAndConvertCommand { FormFile = request.FormFile }, cancellationToken);
+            if (!convertFile.IsOK || convertFile.Result == null)
             {
-                methodResult.AddError(ffmpegConvert.Error);
+                methodResult.AddErrorBadRequest(convertFile.ErrorMessages.ToList());
                 return methodResult;
             }
 
-            var jobConvertResult = await _fFmpegServices.Status(ffmpegConvert.Content?.JobId ?? Guid.Empty);
-            if (!jobConvertResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(jobConvertResult.Error);
-                return methodResult;
-            }
-            var jobConvert = jobConvertResult.Content;
-            if (jobConvert == null || jobConvert.FileData == null || jobConvert.FileName == null || jobConvert.ContentType == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(jobConvert));
-                return methodResult;
-            }
-
-            byte[] byteArray = Convert.FromBase64String(jobConvert.FileData);
-            IFormFile formFile = ConvertToIFormFile(byteArray, jobConvert.FileName, jobConvert.ContentType);
-            if (formFile == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(formFile));
-                return methodResult;
-            }
-
-            var file = await UpLoadFileAsync(formFile);
+            var file = await UpLoadFileAsync(convertFile.Result);
             methodResult.Result = file.Result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private static IFormFile ConvertToIFormFile(byte[] fileData, string fileName, string contentType)
-        {
-            var stream = new MemoryStream(fileData);
-            return new FormFile(stream, 0, fileData.Length, "file", fileName)
-            {
-                Headers = new HeaderDictionary(),
-                ContentType = contentType
-            };
         }
 
         private async Task<MethodResult<string?>> UpLoadFileAsync(IFormFile formFile)

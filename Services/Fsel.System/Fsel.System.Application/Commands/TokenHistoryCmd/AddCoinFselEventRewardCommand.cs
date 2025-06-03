@@ -5,45 +5,40 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
-    using Fsel.System.Application.Queues.Publisher;
+    using Fsel.System.Domain.Models.CommandModels.TokenHistorys;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class AddCoinBuyCourseCommand : IRequest<MethodResult<bool>>
+    public class AddCoinFselEventRewardCommand : IRequest<MethodResult<bool>>
     {
-        public IList<Guid>? UserIds { get; set; }
-
-        public double Coin { get; set; }
-
-        public int Month { get; set; }
+        public IList<AddCoinFselEventRewardCommandModel>? Values { get; set; }
     }
 
-    public class AddCoinBuyCourseCommandHandler : IRequestHandler<AddCoinBuyCourseCommand, MethodResult<bool>>
+    public class AddCoinFselEventRewardCommandHandler : IRequestHandler<AddCoinFselEventRewardCommand, MethodResult<bool>>
     {
         private readonly IMediator _mediator;
-        private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public AddCoinBuyCourseCommandHandler(IMediator mediator, NotificationMessagePublisher notificationMessagePublisher)
+        public AddCoinFselEventRewardCommandHandler(IMediator mediator)
         {
             _mediator = mediator;
-            _notificationMessagePublisher = notificationMessagePublisher;
         }
 
-        public async Task<MethodResult<bool>> Handle(AddCoinBuyCourseCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(AddCoinFselEventRewardCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(request.UserIds);
+            ArgumentNullException.ThrowIfNull(request.Values);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            foreach (var userId in request.UserIds.Distinct())
+            foreach (var value in request.Values)
             {
                 var newTokenHistory = new List<TokenHistoryQueueModel>
                 {
                     new TokenHistoryQueueModel
                     {
-                        VolatileToken = request.Coin,
-                        UserId = userId,
-                        Feature = EnumTokenFeature.Payment,
+                        VolatileToken = value.Coin,
+                        UserId = value.UserId,
+                        Feature = EnumTokenFeature.FselEvent,
+                        Mission = EnumTokenMission.FselEventReward,
                         Type = EnumTokenHistoryType.Recevived,
                         TokenHistoryTranslations = new List<TokenHistoryTranslationModel>
                         {
@@ -54,7 +49,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                                 {
                                     new
                                     {
-                                         Title = $"Mua gói học {request.Month} tháng"
+                                         Title = $"Thưởng sự kiện của FSEL"
                                     }
                                 }
                             },
@@ -65,7 +60,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                                 {
                                     new
                                     {
-                                         Title = $"Purchase {request.Month}-month course"
+                                         Title = $"FSEL Event Reward"
                                     }
                                 }
                             },
@@ -76,7 +71,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                                 {
                                     new
                                     {
-                                         Title = $"Acheter un cours de {request.Month} mois"
+                                         Title = $"Récompense d'événement FSEL"
                                     }
                                 }
                             }
@@ -86,19 +81,6 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
 
                 await _mediator.Send(new CreateTokenHistoryCommand { TokenHistorys = newTokenHistory }, cancellationToken);
             }
-
-            // gửi thông báo
-            await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel
-            {
-                UserIds = request.UserIds.Distinct().ToList(),
-                ObjectId = Guid.Empty,
-                Type = EnumNotificationType.Text,
-                Content = EnumNotificationContent.AddCoinBuyCourse,
-                ParamsMessage = new List<object> { request.Coin, request.Month },
-                SenderId = Guid.Empty,
-                PlatformCode = EnumPlatformCode.LMS
-            }, cancellationToken);
-
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

@@ -134,6 +134,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolName = item.School,
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,
+                    UserName = item.UserName,
                     ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}",
                     UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}",
                     LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}",

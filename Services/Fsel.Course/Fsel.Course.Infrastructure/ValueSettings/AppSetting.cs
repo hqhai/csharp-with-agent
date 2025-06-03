@@ -52,6 +52,7 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public IList<string>? ApiKeys { get; set; }
 
         public string? ApprovalAIModel { get; set; }
+        public string? CheckForbiddenAIModel { get; set; }
     }
 
     public class AzureAiConfig

@@ -246,24 +246,24 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("CompanyAddress")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("CompanyEmail")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(70)
+                        .HasColumnType("nvarchar(70)");
 
                     b.Property<string>("CompanyName")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("CompanyTaxCode")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<Guid?>("CourseId")
                         .HasColumnType("uniqueidentifier");
@@ -306,8 +306,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(70)
+                        .HasColumnType("nvarchar(70)");
 
                     b.Property<Guid?>("EventId")
                         .HasColumnType("uniqueidentifier");
@@ -317,8 +317,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -338,8 +338,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PhoneNumber")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -348,8 +348,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ReferralCode")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("RevenueType")
                         .HasMaxLength(100)
@@ -411,7 +411,8 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -496,6 +497,9 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<int>("BonusCoins")
+                        .HasColumnType("int");
 
                     b.Property<string>("Code")
                         .IsRequired()
@@ -585,6 +589,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("42d7ddb2-9f36-4f86-badc-67dc16bb722b"),
+                            BonusCoins = 0,
                             Code = "BASIC",
                             CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -601,6 +606,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("daa6fc87-6461-49d4-b3a5-c9e4cc30bc59"),
+                            BonusCoins = 0,
                             Code = "STANDARD",
                             CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -617,6 +623,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("d13ee4ab-785a-425c-bd70-b74b61df42eb"),
+                            BonusCoins = 0,
                             Code = "PREMIUM",
                             CreatedDate = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -633,6 +640,7 @@ namespace Fsel.Ordering.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("cbd0a22a-356d-47da-8b42-849a0121361c"),
+                            BonusCoins = 0,
                             Code = "PREMIUM",
                             CreatedDate = new DateTime(2024, 9, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
