@@ -18,6 +18,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
         [MinLength(8, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public string? Password { get; set; }
 
-        public EnumPlatformCode? PlatformCode { get; set; }
+        public EnumPlatformCode PlatformCode { get; set; } = EnumPlatformCode.LMS;
     }
 }

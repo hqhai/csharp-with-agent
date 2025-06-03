@@ -37,6 +37,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Microsoft.IdentityModel.Tokens;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
+    using PhoneNumbers;
 
     public class CreateStudentsToEventFromFileCommand : CreateStudentsToEventFromByteModel, IRequest<MethodResult<CreateStudentsToEventFromFileModel>>
     {
@@ -258,10 +259,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
                             }
-                            else if (!Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
+                            else
                             {
-                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
+                                var fullName = GenerateFullName(x.FullName);
+                                if (!Shared.Helpers.StringHelper.ContainsSpecialChars(fullName))
+                                {
+                                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
+                                }
                             }
+
                             if (string.IsNullOrEmpty(x.PhoneNumber?.Trim()))
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyPhoneNumberVN });
@@ -270,6 +276,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
                             }
+
                             if (!string.IsNullOrEmpty(x.Email?.Trim()) && !x.Email.Trim().IsValidEmail())
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
@@ -376,10 +383,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
                             }
-                            else if (!Shared.Helpers.StringHelper.ContainsSpecialChars(x.FullName.Trim()))
+                            else
                             {
-                                errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
+                                var fullName = GenerateFullName(x.FullName);
+                                if (!Shared.Helpers.StringHelper.ContainsSpecialChars(fullName))
+                                {
+                                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.InvalidFullNameVN });
+                                }
                             }
+
                             if (string.IsNullOrEmpty(x.PhoneNumber?.Trim()))
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyPhoneNumberVN });
@@ -388,6 +400,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
                             }
+
                             if (!string.IsNullOrEmpty(x.Email?.Trim()) && !x.Email.Trim().IsValidEmail())
                             {
                                 errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
@@ -676,8 +689,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 throw new ArgumentException("Full name and phone number cannot be empty.");
             }
 
-            string letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            string digits = "0123456789";
+            string letters = "ABCDEFGHJKMNPQRSTUVWXYZ";
+            string digits = "123456789";
 
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
 
@@ -690,6 +703,22 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             char randomDigit = digits[s_random.Next(digits.Length)];
 
             return $"{initials}_{phoneNumber}_{randomLetter1}{randomLetter2}{randomDigit}";
+        }
+
+        public static string GenerateFullName(string fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(fullName))
+            {
+                throw new ArgumentException("Full name and phone number cannot be empty.");
+            }
+
+            CultureInfo cultureInfo = CultureInfo.InvariantCulture;
+
+            var newFullName = RemoveDiacritics(fullName);
+
+            string initials = string.Join("", newFullName.Split(' ').Where(s => s.Length > 0).Select(s => s[0])).ToUpper(cultureInfo);
+
+            return initials;
         }
 
         public static string RemoveDiacritics(string text)

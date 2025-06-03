@@ -22,7 +22,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Feedback
         /// </summary>
-        [MaxLength(10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(4000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Feedback { get; set; }
 
         public string? VideoSkillScoresStr { get; set; }

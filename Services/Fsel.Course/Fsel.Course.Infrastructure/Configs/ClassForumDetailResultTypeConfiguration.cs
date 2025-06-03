@@ -21,13 +21,13 @@ namespace Fsel.Course.Infrastructure.Configs
                  .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(e => e.SubmissionCount)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumSubmissionCount>());
 
             builder.Property(e => e.Status)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumClassForumResultStatus>());

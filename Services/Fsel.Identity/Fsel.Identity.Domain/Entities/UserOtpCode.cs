@@ -10,7 +10,7 @@ namespace Fsel.Identity.Domain.Entities
 
     public class UserOtpCode : Entity
     {
-        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(20, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? OTPCode { get; set; }
 
         public DateTime ExpiredTime { get; set; }

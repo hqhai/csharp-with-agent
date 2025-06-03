@@ -138,7 +138,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
     { QueueSettings.SystemQueue.NameQueue.ChooseDailyQuizWinners, typeof(ChooseDailyQuizWinnersConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.DictionaryRealTime, typeof(DictionaryConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.AddCoinWhenCoursePurchased, typeof(AddCoinWhenCoursePurchasedConsumer) }
 });
 
 var app = builder.Build();

@@ -6,5 +6,6 @@ namespace Fsel.Shared.Enums
     {
         Active,
         Inactive,
+        Disable
     }
 }
