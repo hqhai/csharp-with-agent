@@ -61,6 +61,7 @@ namespace Fsel.Sender.Domain.ValueSettings
     {
         public string? BrandName { get; set; }
         public string? Token { get; set; }
+        public string? OTPTemplateId { get; set; }
     }
 
     public class SmtpGoogle

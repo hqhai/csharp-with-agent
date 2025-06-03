@@ -44,7 +44,9 @@ namespace Fsel.Sender.Application.Commands.SendZaloCmd
 
             var token = _appSetting.ZaloConfig?.Token;
 
-            if (string.IsNullOrEmpty(brandName) || string.IsNullOrEmpty(request.TemplateId) || string.IsNullOrEmpty(token) || request.PhoneNumbers == null || !request.PhoneNumbers.Any())
+            var templateId = GetTemplateId(request.Template, _appSetting);
+
+            if (string.IsNullOrEmpty(brandName) || string.IsNullOrEmpty(templateId) || string.IsNullOrEmpty(token) || request.PhoneNumbers == null || !request.PhoneNumbers.Any())
             {
                 var phonenumber = request.PhoneNumbers?.FirstOrDefault();
                 _logger.LogError($"SendSMSByZaloCommand: config null(brandName: {brandName}, token: {token})or request PhoneNumbers null(phoneNumnber: {phonenumber})");
@@ -62,7 +64,7 @@ namespace Fsel.Sender.Application.Commands.SendZaloCmd
                     To = x,
                     RequestID = smsId,
                     Scheduled = string.Empty,
-                    TemplateId = request.TemplateId,
+                    TemplateId = templateId,
                     TemplateData = request.Params,
                     UseUnicode = request.UseUnicode
                 };
@@ -103,6 +105,16 @@ namespace Fsel.Sender.Application.Commands.SendZaloCmd
                 return methodResult;
             });
             return methodResult;
+        }
+
+        private static string? GetTemplateId(EnumZaloTemplate template, AppSetting appSetting)
+        {
+            if (template == EnumZaloTemplate.OTP)
+            {
+                return appSetting.ZaloConfig?.OTPTemplateId;
+            }
+
+            return string.Empty;
         }
     }
 }
