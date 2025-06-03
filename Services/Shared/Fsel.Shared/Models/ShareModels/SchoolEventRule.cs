@@ -145,6 +145,7 @@ namespace Fsel.Shared.Models.ShareModels
     public class StopAtLevelSelectionConfig
     {
         public string? Image { get; set; }
+        public string? ImageMobile { get; set; }
         public string? Title { get; set; }
         public IList<string>? Content { get; set; }
         public IList<string>? Footer { get; set; }
