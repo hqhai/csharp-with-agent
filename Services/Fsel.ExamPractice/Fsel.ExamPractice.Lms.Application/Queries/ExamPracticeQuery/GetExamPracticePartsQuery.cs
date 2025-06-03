@@ -56,12 +56,14 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             if (examPractice.Type == EnumExamPracticeType.IELTS && examPracticeSection.CourseSkill.HasValue && listSkill.Any(x => x == examPracticeSection.CourseSkill.Value))
             {
                 var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ParentExamPracticeSectionId == examPracticeSection.Id)
+                                                .OrderBy(x => x.DisplayOrder)
                                                 .Select(x => new ExamPracticePartModel
                                                 {
                                                     ExamPracticeSectionId = x.Id,
                                                     TotalQuestion = examPracticeSection.CourseSkill == EnumCourseSkill.Reading ? x.Questions.Count : DefaultQuestion
                                                 })
                                                 .ToListAsync(cancellationToken);
+
                 examPracticeConfig.ExamPracticeParts = examPracticeSections;
             }
             examPracticeConfig.PracticeTimeLimitRules = examPractice.Type.GetEnumPracticeTimeLimits(examPractice.SubType, examPracticeSection.CourseSkill);

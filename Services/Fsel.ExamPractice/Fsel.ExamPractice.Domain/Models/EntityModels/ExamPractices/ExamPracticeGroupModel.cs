@@ -8,6 +8,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
     public class ExamPracticeGroupModel
     {
         public Guid Id { get; set; }
+        public DateTime? CreatedDate { get; set; }
         public EnumExamPracticeType Type { get; set; }
         public EnumExamPracticeStatus ExamPracticeStatus { get; set; }
         public string? Name { get; set; }

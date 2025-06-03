@@ -84,11 +84,11 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             var examPracticeSections = new List<ExamPracticeSection>();
             if (examPractice.Type == EnumExamPracticeType.IELTS)
             {
-                examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.ExamPracticeSectionResults.Where(x => x.ExamPracticeResultId == examPracticeResult.Id)).Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId).ToListAsync(cancellationToken);
+                examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.ExamPracticeSectionResults.Where(x => x.ExamPracticeResultId == examPracticeResult.Id)).Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             }
             else
             {
-                examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.Questions).Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId).ToListAsync(cancellationToken);
+                examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.Questions).Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
             }
             var examPracticeDetail = _mapper.Map<ExamPracticeDetailModel>(examPractice);
             var examPracticeResultModel = _mapper.Map<ExamPracticeResultModel>(examPracticeResult);

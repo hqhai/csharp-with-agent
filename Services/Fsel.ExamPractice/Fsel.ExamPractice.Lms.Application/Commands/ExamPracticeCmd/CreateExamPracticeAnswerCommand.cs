@@ -211,7 +211,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 if (request.IsSubmit)
                 {
                     await _examPracticeSectionHelper.UpdateExamPracticeToIsSubmit(examPracticeResult);
-                    await UpdateExamPracticeResultAsync(examPracticeResult, cancellationToken);
+                    await UpdateExamPracticeResultAsync(examPracticeResult, examPractice, cancellationToken);
                 }
             }
             var examPracticeSectionResultDto = _mapper.Map<ExamPracticeSectionResultModel>(await _examPracticeSectionResultRepository.GetByIdAsync(examPracticeSectionResult.Id));
@@ -244,12 +244,12 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             }
         }
 
-        private async Task UpdateExamPracticeResultAsync(ExamPracticeResult examPracticeResult, CancellationToken cancellationToken)
+        private async Task UpdateExamPracticeResultAsync(ExamPracticeResult examPracticeResult, ExamPractice examPractice, CancellationToken cancellationToken)
         {
             var examPracticeSectionResults = await _examPracticeSectionResultRepository.Queryable.Where(s => s.ExamPracticeResultId == examPracticeResult.Id && s.CreatedDate >= examPracticeResult.CreatedDate).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             if (examPracticeSectionResults != null && examPracticeSectionResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                examPracticeResult.HighestStreak = await _examPracticeSectionHelper.GetHighestStreak(examPracticeResult);
+                examPracticeResult.HighestStreak = await _examPracticeSectionHelper.GetHighestStreak(examPracticeResult, examPractice);
                 examPracticeResult.CorrectCount = examPracticeSectionResults.Sum(x => x.CorrectCount);
                 examPracticeResult.CorrectTotal = examPracticeSectionResults.Sum(x => x.CorrectTotal);
                 examPracticeResult.Status = EnumResultStatus.Done;

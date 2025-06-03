@@ -254,20 +254,27 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             return LinQHelper.GetHighestStreak(isHighestStreaks);
         }
 
-        public async Task<int> GetHighestStreak(ExamPracticeResult examPracticeResult)
+        public async Task<int> GetHighestStreak(ExamPracticeResult examPracticeResult, ExamPractice examPractice)
         {
             ArgumentNullException.ThrowIfNull(examPracticeResult);
             var isHighestStreaks = new List<bool>();
-            var mockTestAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.CreatedDate >= examPracticeResult.CreatedDate)
+            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.CreatedDate >= examPracticeResult.CreatedDate)
                                                                      .Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
                                                                      .OrderBy(x => x.CreatedDate)
                                                                      .ToListAsync();
-
-            isHighestStreaks = mockTestAnswers.Where(x => x.Answer != null).Select(x => x.Answer.Deserialize<MultipleChoiceAnswerV1>())
-                                                 .Where(x => x != null && x.Answers != null)
-                                                 .SelectMany(x => x!.Answers)
-                                                 .Select(x => x.IsExact.HasValue && x.IsExact == true)
-                                                 .ToList();
+            if (examPractice.Type == EnumExamPracticeType.IELTS)
+            {
+                isHighestStreaks = examPracticeAnswers.Where(x => x.Answer != null).Select(x => x.Answer.Deserialize<MultipleChoiceAnswerV1>())
+                                              .Where(x => x != null && x.Answers != null)
+                                              .SelectMany(x => x!.Answers)
+                                              .Select(x => x.IsExact.HasValue && x.IsExact == true)
+                                              .ToList();
+            }
+            else
+            {
+                isHighestStreaks = examPracticeAnswers.Select(x => x.IsCorrect.HasValue && x.IsCorrect == true)
+                                              .ToList();
+            }
 
             return LinQHelper.GetHighestStreak(isHighestStreaks);
         }

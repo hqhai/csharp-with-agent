@@ -63,7 +63,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 .Where(x => x.Status == EnumExamPracticeStatus.Active || x.ExamPracticeResults.Any(y => y.StudentId == student.Id));
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(x => x.Name != null && request.Keyword.Contains(x.Name));
+                query = query.Where(x => x.Name != null && x.Name.Contains(request.Keyword));
             }
             if (request.SubType.HasValue)
             {
@@ -103,6 +103,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 ExamPracticeGroupModels = g.Select(x => new ExamPracticeGroupModel
                 {
                     Id = x.ExamPractice.Id,
+                    CreatedDate = x.ExamPractice.CreatedDate,
                     Code = x.ExamPractice.Code,
                     Type = x.ExamPractice.Type,
                     ExamPracticeStatus = x.ExamPractice.Status,
@@ -121,7 +122,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                     PracticeMode = x.ExamPracticeResult?.PracticeMode,
                     Score = x.ExamPracticeResult?.SkillScores != null && x.ExamPracticeResult.SkillScores.Any() ? NumberHelper.RoundNumberDouble(x.ExamPracticeResult.SkillScores.Average(x => x.Scores)) : default,
                     TotalRetry = (x.ExamPracticeRetry?.RetryCount ?? TotalRetry),
-                }).ToList()
+                }).OrderByDescending(x => x.CreatedDate).ToList()
             }).ToList();
 
             methodResult.Result = list;
