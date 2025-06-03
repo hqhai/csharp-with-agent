@@ -131,11 +131,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email không đúng định dạng" });
                 }
 
-                if (!string.IsNullOrEmpty(x.Email) && await _userManager.Users.AnyAsync(c => c.Email == x.Email.Trim()))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email trùng" });
-                }
-
                 if (string.IsNullOrEmpty(x.EventCode))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode không được để trống" });
@@ -165,6 +160,29 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             if (!result.Datas.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            var userNames = result.Datas.Where(x => !string.IsNullOrEmpty(x.UserName)).Select(x => x.UserName!.Trim()).ToList();
+            var userNamesDuplicates = userNames.GroupBy(x => x).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
+
+            if (userNamesDuplicates.Any())
+            {
+                methodResult.AddErrorBadRequest(new List<ErrorResult>
+                {
+                    new ErrorResult
+                    {
+                        ErrorCode = nameof(userNamesDuplicates),
+                        Errors = new List<Error>
+                        {
+                            new Error
+                            {
+                                FieldName  = nameof(userNamesDuplicates),
+                                ErrorValues = userNamesDuplicates.Cast<object>().ToList()
+                            }
+                        }
+                    }
+                });
                 return methodResult;
             }
 
