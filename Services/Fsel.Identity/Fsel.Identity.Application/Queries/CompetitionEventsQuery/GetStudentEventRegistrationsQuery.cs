@@ -98,9 +98,9 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                             {
                                                 StudentId = baseQ.Id,
                                                 BirthDay = h.Birthday,
-                                                District = string.Empty,
+                                                District = ce.Name,
                                                 UserName = u.UserName,
-                                                DistrictId = baseQ.DistrictId,
+                                                DistrictId = ce.LocationId,
                                                 Email = h.Email,
                                                 ExpiredDate = baseQ.ExpiredDate,
                                                 FullName = h.FullName,
@@ -128,7 +128,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
                 item.FirstName = names != null && names.Length > 1 ? string.Join(' ', names.Take(names.Length - 1)) : string.Empty;
                 item.LastName = names != null && names.Length > 0 ? names.Last() : string.Empty;
-                item.District = school?.LocalId;
+                item.District = item.District ?? locationDistricts?.FirstOrDefault(x => x.Id == item.DistrictId)?.Name;
             }
             methodResult.Result = eventRegistrations;
             methodResult.StatusCode = StatusCodes.Status200OK;
