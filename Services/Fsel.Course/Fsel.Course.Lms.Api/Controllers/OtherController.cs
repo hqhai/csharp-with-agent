@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("send-notify-after-pt")]
         [ProducesResponseType(typeof(MethodResult<FeatureModuleModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendNotifyAfterPT([FromQuery] SendNotifyForStudentsCommand command)
+        public async Task<IActionResult> SendNotifyAfterPT([FromQuery] PushNoticeCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

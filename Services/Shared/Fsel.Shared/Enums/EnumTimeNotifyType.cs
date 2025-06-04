@@ -1,6 +1,6 @@
 namespace Fsel.Shared.Enums
 {
-    public enum EnumNotifyAfterChooseLevelType
+    public enum EnumTimeNotifyType
     {
         EveryHour = 0,
         At07h30 = 1,

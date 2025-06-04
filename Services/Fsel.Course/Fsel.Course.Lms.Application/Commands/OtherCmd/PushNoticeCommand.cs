@@ -13,12 +13,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Lms.Application.Commands.OtherCmd
 {
-    public class SendNotifyForStudentsCommand : IRequest<MethodResult<bool>>
+    public class PushNoticeCommand : IRequest<MethodResult<bool>>
     {
-        public EnumNotifyAfterChooseLevelType NotifyAfterChooseLevelType { get; set; }
+        public EnumTimeNotifyType TimeNotifyType { get; set; }
     }
 
-    public class SendNotifyForStudentsCommandHandler : IRequestHandler<SendNotifyForStudentsCommand, MethodResult<bool>>
+    public class PushNoticeCommandHandler : IRequestHandler<PushNoticeCommand, MethodResult<bool>>
     {
         private readonly ITrainingService _trainingService;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
@@ -26,7 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
 
-        public SendNotifyForStudentsCommandHandler(ITrainingService trainingService, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IUserService userService, NotificationMessagePublisher notificationMessagePublisher, IPlacementTestGroupResultRepository placementTestGroupResultRepository)
+        public PushNoticeCommandHandler(ITrainingService trainingService, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IUserService userService, NotificationMessagePublisher notificationMessagePublisher, IPlacementTestGroupResultRepository placementTestGroupResultRepository)
         {
             _trainingService = trainingService;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(SendNotifyForStudentsCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(PushNoticeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
 
             studentChooseLevelIds = studentChooseLevels?.Select(p => p.StudentId).ToList();
 
-            if (request.NotifyAfterChooseLevelType == EnumNotifyAfterChooseLevelType.EveryHour)
+            if (request.TimeNotifyType == EnumTimeNotifyType.EveryHour)
             {
                 var studentEvents = await GetStudentIdsInEvent(studentChooseLevelIds);
                 if (studentEvents == null || !studentEvents.Any())
@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 userIds = studentDonePTs?.Select(p => p.CreatedUserId).ToList();
                 await SendNotification(userIds, EnumNotificationContent.OneHourAfterDonePT, cancellationToken);
             }
-            else if (request.NotifyAfterChooseLevelType == EnumNotifyAfterChooseLevelType.At07h30)
+            else if (request.TimeNotifyType == EnumTimeNotifyType.At07h30)
             {
                 var day1 = GetStudentsChooseLevel(studentChooseLevels, 1, dateTimeVietNam);
                 await SendNotification(day1, EnumNotificationContent.Day1At7h30AfterChooseLevel, cancellationToken);
@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 day7 = GetStudentsDonePT(studentDonePTs, 7, dateTimeVietNam);
                 await SendNotification(day7, EnumNotificationContent.Day7At7h30AfterDonePT, cancellationToken);
             }
-            else if (request.NotifyAfterChooseLevelType == EnumNotifyAfterChooseLevelType.At12h00)
+            else if (request.TimeNotifyType == EnumTimeNotifyType.At12h00)
             {
                 var day2 = GetStudentsChooseLevel(studentChooseLevels, 2, dateTimeVietNam);
                 await SendNotification(day2, EnumNotificationContent.Day2At12h00AfterChooseLevel, cancellationToken);
@@ -127,7 +127,13 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 await SendNotification(day5, EnumNotificationContent.Day5At12h00AfterChooseLevel, cancellationToken);
 
                 day5 = GetStudentsDonePT(studentDonePTs, 5, dateTimeVietNam);
-                await SendNotification(day5, EnumNotificationContent.Day5At12h00AfterDonePT, cancellationToken);
+                studentEventResults = await GetStudentIdsInEvent(day5);
+                if (studentEventResults != null && studentEventResults.Any())
+                {
+                    var studentEvents = studentDonePTs?.Where(p => studentEventResults.Contains(p.StudentId)).ToList();
+                    day5 = studentEvents?.Select(p => p.CreatedUserId).ToList();
+                    await SendNotification(day5, EnumNotificationContent.Day5At12h00AfterDonePT, cancellationToken);
+                }
 
                 var day6 = GetStudentsChooseLevel(studentChooseLevels, 6, dateTimeVietNam);
                 await SendNotification(day6, EnumNotificationContent.Day6At12h00AfterChooseLevel, cancellationToken);
@@ -139,9 +145,15 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 await SendNotification(day7, EnumNotificationContent.Day7At12h00AfterChooseLevel, cancellationToken);
 
                 day7 = GetStudentsDonePT(studentDonePTs, 7, dateTimeVietNam);
-                await SendNotification(day7, EnumNotificationContent.Day7At12h00AfterDonePT, cancellationToken);
+                studentEventResults = await GetStudentIdsInEvent(day7);
+                if (studentEventResults != null && studentEventResults.Any())
+                {
+                    var studentEvents = studentDonePTs?.Where(p => studentEventResults.Contains(p.StudentId)).ToList();
+                    day7 = studentEvents?.Select(p => p.CreatedUserId).ToList();
+                    await SendNotification(day7, EnumNotificationContent.Day7At12h00AfterDonePT, cancellationToken);
+                }
             }
-            else if (request.NotifyAfterChooseLevelType == EnumNotifyAfterChooseLevelType.At17h30)
+            else if (request.TimeNotifyType == EnumTimeNotifyType.At17h30)
             {
                 var day3 = GetStudentsDonePT(studentDonePTs, 3, dateTimeVietNam);
                 await SendNotification(day3, EnumNotificationContent.Day3At17h30AfterDonePT, cancellationToken);
@@ -164,16 +176,28 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 day7 = GetStudentsDonePT(studentDonePTs, 7, dateTimeVietNam);
                 await SendNotification(day7, EnumNotificationContent.Day7At17h30AfterDonePT, cancellationToken);
             }
-            else if (request.NotifyAfterChooseLevelType == EnumNotifyAfterChooseLevelType.At19h30)
+            else if (request.TimeNotifyType == EnumTimeNotifyType.At19h30)
             {
                 var day1 = GetStudentsDonePT(studentDonePTs, 1, dateTimeVietNam);
-                await SendNotification(day1, EnumNotificationContent.Day1At19h30AfterDonePT, cancellationToken);
+                var studentEventResults = await GetStudentIdsInEvent(day1);
+                if (studentEventResults != null && studentEventResults.Any())
+                {
+                    var studentEvents = studentDonePTs?.Where(p => studentEventResults.Contains(p.StudentId)).ToList();
+                    day1 = studentEvents?.Select(p => p.CreatedUserId).ToList();
+                    await SendNotification(day1, EnumNotificationContent.Day1At19h30AfterDonePT, cancellationToken);
+                }
 
                 var day2 = GetStudentsChooseLevel(studentChooseLevels, 2, dateTimeVietNam);
                 await SendNotification(day2, EnumNotificationContent.Day2At19h30AfterChooseLevel, cancellationToken);
 
                 day2 = GetStudentsDonePT(studentDonePTs, 2, dateTimeVietNam);
-                await SendNotification(day2, EnumNotificationContent.Day2At19h30AfterDonePT, cancellationToken);
+                studentEventResults = await GetStudentIdsInEvent(day2);
+                if (studentEventResults != null && studentEventResults.Any())
+                {
+                    var studentEvents = studentDonePTs?.Where(p => studentEventResults.Contains(p.StudentId)).ToList();
+                    day2 = studentEvents?.Select(p => p.CreatedUserId).ToList();
+                    await SendNotification(day2, EnumNotificationContent.Day2At19h30AfterDonePT, cancellationToken);
+                }
 
                 var day5 = GetStudentsDonePT(studentDonePTs, 5, dateTimeVietNam);
                 await SendNotification(day5, EnumNotificationContent.Day5At19h30AfterDonePT, cancellationToken);
