@@ -1,6 +1,6 @@
 namespace Fsel.Shared.Enums
 {
-    public enum EnumTimeNotifyType
+    public enum EnumPushNoticeTimeType
     {
         EveryHour = 0,
         At07h30 = 1,

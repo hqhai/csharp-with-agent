@@ -5,7 +5,7 @@ using Fsel.Shared.Models.ShareModels;
 
 namespace Fsel.Hangfire.Application.Workers
 {
-    public class PushNoticeWorker : IWorker<NotifyTime>
+    public class PushNoticeWorker : IWorker<PushNoticeTime>
     {
         private readonly PushNoticePublisher _sendNotifyAfterChooseLevelPublisher;
 
@@ -14,7 +14,7 @@ namespace Fsel.Hangfire.Application.Workers
             _sendNotifyAfterChooseLevelPublisher = sendNotifyAfterChooseLevelPublisher;
         }
 
-        public async Task RunAsync(NotifyTime? data = null)
+        public async Task RunAsync(PushNoticeTime? data = null)
         {
             if (data != null)
             {

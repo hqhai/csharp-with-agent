@@ -4,6 +4,6 @@ namespace Fsel.Shared.Models.ShareModels
 {
     public class PushNoticeQueueModel
     {
-        public EnumTimeNotifyType TimeNotifyType { get; set; }
+        public EnumPushNoticeTimeType TimeNotifyType { get; set; }
     }
 }
