@@ -8,12 +8,12 @@ namespace Fsel.Identity.Application.Queries.EventQuery
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentIdsInEventByStudentIdsQuery : IRequest<MethodResult<List<Guid>>>
+    public class GetStudentIdsInEventByStudentIdsQuery : IRequest<MethodResult<List<Guid>?>>
     {
         public IList<Guid>? StudentIds { get; set; }
     }
 
-    public class GetStudentIdsInEventByStudentIdsQueryHandler : IRequestHandler<GetStudentIdsInEventByStudentIdsQuery, MethodResult<List<Guid>>>
+    public class GetStudentIdsInEventByStudentIdsQueryHandler : IRequestHandler<GetStudentIdsInEventByStudentIdsQuery, MethodResult<List<Guid>?>>
     {
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
@@ -24,13 +24,14 @@ namespace Fsel.Identity.Application.Queries.EventQuery
             _competitionEventsRepository = competitionEventsRepository;
         }
 
-        public async Task<MethodResult<List<Guid>>> Handle(GetStudentIdsInEventByStudentIdsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<List<Guid>?>> Handle(GetStudentIdsInEventByStudentIdsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<List<Guid>>();
+            var methodResult = new MethodResult<List<Guid>?>();
 
             if (request.StudentIds == null || !request.StudentIds.Any())
             {
+                methodResult.Result = null;
                 return methodResult;
             }
 

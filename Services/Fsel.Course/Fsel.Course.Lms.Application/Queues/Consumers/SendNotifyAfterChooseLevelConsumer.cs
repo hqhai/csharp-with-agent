@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 return;
             }
 
-            await _mediator.Send(new SendNotifyAfterChooseLevelCommand { NotifyAfterChooseLevelType = message.NotifyAfterChooseLevelType }).ConfigureAwait(false);
+            await _mediator.Send(new SendNotifyForStudentsCommand { NotifyAfterChooseLevelType = message.NotifyAfterChooseLevelType }).ConfigureAwait(false);
         }
     }
 }

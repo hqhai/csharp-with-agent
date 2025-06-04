@@ -173,6 +173,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         Task<IApiResponse<MethodResult<Guid>>> GetSchoolIdAsync();
 
         [Post("/v1/event/get-student-ids-in-event-by-student-ids")]
-        Task<IApiResponse<MethodResult<IList<Guid>>>> GetStudentsInEventByStudentIds([Body] GetStudentIdsInEventByStudentIdsQueryModel model);
+        Task<IApiResponse<MethodResult<IList<Guid>?>>> GetStudentsInEventByStudentIds([Body] GetStudentIdsInEventByStudentIdsQueryModel model);
     }
 }
