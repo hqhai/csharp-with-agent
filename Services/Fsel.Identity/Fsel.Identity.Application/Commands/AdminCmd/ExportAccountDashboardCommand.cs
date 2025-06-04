@@ -36,6 +36,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     {
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IMapper _mapper;
+        private const string DistrictCity = "District&City";
+        private const string City = "City";
+        private const string District = "District";
 
         public ExportAccountDashboardCommandHandler(IUserRoleRepository userRoleRepository,
                                                     IMapper mapper)
@@ -92,15 +95,15 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 if (item.Role == EnumRole.DepartmentAdmin.ToString())
                 {
-                    item.Role = "District&City";
+                    item.Role = DistrictCity;
                 }
                 else if (item.Role == EnumRole.EducationDepartment.ToString())
                 {
-                    item.Role = "City";
+                    item.Role = City;
                 }
                 else if (item.Role == EnumRole.EducationDivision.ToString())
                 {
-                    item.Role = "District";
+                    item.Role = District;
                 }
             }
             methodResult.Result = template.ExportExcel();

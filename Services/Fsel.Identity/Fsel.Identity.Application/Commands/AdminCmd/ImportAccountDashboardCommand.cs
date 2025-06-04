@@ -39,6 +39,16 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private static readonly char[] s_digits = "123456789".ToCharArray();
         private static readonly char[] s_allowedChars = s_lowercaseLetters.Concat(s_uppercaseLetters).ToArray();
         private const string ErrorMessage = "Error Message\n(Thông báo lỗi)";
+        private const string FullNameNull = "Họ và tên không được để trống";
+        private const string UserNameInValid = "Username chưa điền hoặc sai định dạng";
+        private const string UserNameDuplicate = "Username trùng";
+        private const string UserNameMinSixChar = "Username tối thiểu 6 ký tự";
+        private const string UserNameAlreadyExistInFile = "Username đã tồn tại trong file";
+        private const string EmailInValid = "Email không đúng định dạng";
+        private const string EmailDuplicate = "Email trùng";
+        private const string EmailAlreadyExistInFile = "Email đã tồn tại trong file";
+        private const string EventCodeNull = "EventCode không được để trống";
+        private const string EventCodeNotExist = "EventCode sai hoặc không tồn tại";
 
         public ImportAccountDashboardCommandHandler(UserManager<User> userManager,
                                                     RoleManager<Role> roleManager,
@@ -104,41 +114,53 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
             };
 
+            var datas = new List<ImportAccountDashboardCommandModel>();
+
             var result = request.FormFile.ImportAndValidateExcel(async (ImportAccountDashboardCommandModel x, IList<ImportAccountDashboardCommandModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.FullName))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = "Họ và tên không được để trống" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = FullNameNull });
                 }
 
                 if (string.IsNullOrEmpty(x.UserName))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = $"Username chưa điền hoặc sai định dạng" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = UserNameInValid });
                 }
 
                 if (!string.IsNullOrEmpty(x.UserName) && await _userManager.Users.AnyAsync(c => c.UserName == x.UserName.Trim()))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = "Username trùng" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = UserNameDuplicate });
                 }
 
                 if (!string.IsNullOrEmpty(x.UserName) && x.UserName.Length < 6)
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = $"Username tối thiểu 6 ký tự" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = UserNameMinSixChar });
+                }
+
+                if (!string.IsNullOrEmpty(x.UserName) && datas.Any(m => m.UserName == x.UserName))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = UserNameAlreadyExistInFile });
                 }
 
                 if (string.IsNullOrEmpty(x.Email) || !x.Email.IsValidEmail())
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email không đúng định dạng" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = EmailInValid });
                 }
 
                 if (!string.IsNullOrEmpty(x.Email) && await _userManager.Users.AnyAsync(c => c.Email == x.Email.Trim()))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email trùng" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = EmailDuplicate });
+                }
+
+                if (!string.IsNullOrEmpty(x.Email) && datas.Any(m => m.Email == x.Email))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = EmailAlreadyExistInFile });
                 }
 
                 if (string.IsNullOrEmpty(x.EventCode))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode không được để trống" });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = EventCodeNull });
                 }
 
                 List<string> eventCodes = x.EventCode?.Split(',').ToList() ?? new List<string>();
@@ -147,10 +169,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 {
                     if (!string.IsNullOrEmpty(eventCode) && !await _competitionEventsRepository.Queryable.AnyAsync(c => !string.IsNullOrEmpty(c.EventCode) && eventCode == c.EventCode.Trim()))
                     {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode sai hoặc không tồn tại" });
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = EventCodeNotExist });
                         break;
                     }
                 }
+
+                datas.Add(x);
 
                 return await Task.FromResult(errors.Count == 0);
             }, null, null, errorHandlerAction, true);
@@ -168,51 +192,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
-            var userNames = result.Datas.Where(x => !string.IsNullOrEmpty(x.UserName)).Select(x => x.UserName!.Trim()).ToList();
-            var userNamesDuplicates = userNames.GroupBy(x => x).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
-
-            if (userNamesDuplicates.Any())
-            {
-                methodResult.AddErrorBadRequest(new List<ErrorResult>
-                {
-                    new ErrorResult
-                    {
-                        ErrorCode = nameof(userNamesDuplicates),
-                        Errors = new List<Error>
-                        {
-                            new Error
-                            {
-                                FieldName  = nameof(userNamesDuplicates),
-                                ErrorValues = userNamesDuplicates.Cast<object>().ToList()
-                            }
-                        }
-                    }
-                });
-                return methodResult;
-            }
-
             var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!.Trim()).ToList();
-            var emailsDuplicates = emails.GroupBy(x => x).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
-
-            if (emailsDuplicates.Any())
-            {
-                methodResult.AddErrorBadRequest(new List<ErrorResult>
-                {
-                    new ErrorResult
-                    {
-                        ErrorCode = nameof(emailsDuplicates),
-                        Errors = new List<Error>
-                        {
-                            new Error
-                            {
-                                FieldName  = nameof(emailsDuplicates),
-                                ErrorValues = emailsDuplicates.Cast<object>().ToList()
-                            }
-                        }
-                    }
-                });
-                return methodResult;
-            }
 
             var role = await _roleManager.FindByNameAsync(nameof(request.Role));
             if (role == null)
