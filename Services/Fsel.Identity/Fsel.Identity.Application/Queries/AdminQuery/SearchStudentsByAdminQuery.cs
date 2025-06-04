@@ -129,14 +129,14 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             {
                 query = query.Where(m => m.Student.SchoolId.HasValue && m.Student.SchoolId == request.SchoolId);
             }
-            if (request.Grades != null && request.Grades.Count > 0)
-            {
-                query = query.WhereBulkContains(request.Grades, x => x.Student.SchoolGrade);
-            }
-            if (request.Classes != null && request.Classes.Count > 0)
-            {
-                query = query.WhereBulkContains(request.Classes, x => x.Student.SchoolGrade);
-            }
+            //if (request.Grades != null && request.Grades.Count > 0)
+            //{
+            //    query = query.WhereBulkContains(request.Grades, x => x.Student.SchoolGrade);
+            //}
+            //if (request.Classes != null && request.Classes.Count > 0)
+            //{
+            //    query = query.WhereBulkContains(request.Classes, x => x.Student.SchoolGrade);
+            //}
 
             var users = query.Select(p => new StudentSearchAdminModel
             {
@@ -166,10 +166,6 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             });
 
             int totalItem = await users.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            var a = users
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking();
 
             var lists = await users
                     .ApplySortAndPaging(request)
