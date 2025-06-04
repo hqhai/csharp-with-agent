@@ -88,6 +88,21 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
 
             var template = _mapper.Map<IList<ExportAccountDashboardCommandModel>>(userResults);
+            foreach (var item in template)
+            {
+                if (item.Role == EnumRole.DepartmentAdmin.ToString())
+                {
+                    item.Role = "District&City";
+                }
+                else if (item.Role == EnumRole.EducationDepartment.ToString())
+                {
+                    item.Role = "City";
+                }
+                else if (item.Role == EnumRole.EducationDivision.ToString())
+                {
+                    item.Role = "District";
+                }
+            }
             methodResult.Result = template.ExportExcel();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

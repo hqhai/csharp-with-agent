@@ -131,6 +131,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email không đúng định dạng" });
                 }
 
+                if (!string.IsNullOrEmpty(x.Email) && await _userManager.Users.AnyAsync(c => c.Email == x.Email.Trim()))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email trùng" });
+                }
+
                 if (string.IsNullOrEmpty(x.EventCode))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.EventCode), Message = "EventCode không được để trống" });
@@ -187,6 +192,27 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
 
             var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(x => x.Email!.Trim()).ToList();
+            var emailsDuplicates = emails.GroupBy(x => x).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
+
+            if (emailsDuplicates.Any())
+            {
+                methodResult.AddErrorBadRequest(new List<ErrorResult>
+                {
+                    new ErrorResult
+                    {
+                        ErrorCode = nameof(emailsDuplicates),
+                        Errors = new List<Error>
+                        {
+                            new Error
+                            {
+                                FieldName  = nameof(emailsDuplicates),
+                                ErrorValues = emailsDuplicates.Cast<object>().ToList()
+                            }
+                        }
+                    }
+                });
+                return methodResult;
+            }
 
             var role = await _roleManager.FindByNameAsync(nameof(request.Role));
             if (role == null)
