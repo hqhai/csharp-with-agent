@@ -76,36 +76,47 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                     claims.Add(new Claim(JwtClaimNames.Surname, user.LastName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.GivenName, user.FirstName ?? string.Empty, ClaimValueTypes.String));
 
-                    #region Custom Profile 
+                    #region Custom Profile
 
-                    var student = user.Student;
-                    var classStudentResult = await _trainingService.GetClassByStudentId(student?.Id ?? default);
-                    var @class = classStudentResult?.Content?.Result;
-                    var isPlacementTestResult = await _lmsCourseService.IsPlacementTestAsync(student?.Id ?? default);
-                    var isSurveyResult = await _interactionService.IsSurveyCompleted(user.Id);
-
-                    var classId = student?.ClassId;
-                    var classCode = @class?.Code;
-                    var isPlacementTest = isPlacementTestResult?.Content?.Result;
-                    bool? isSurvey = null;
-                    bool isOrder = false;
-
-                    if (@class != null)
+                    if (roles.Contains(EnumRole.Student.ToString()))
                     {
-                        var order = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = user.Id });
-                        isOrder = order?.Content?.Result == EnumOrderStatus.Payment;
-                    }
-                    if (isSurveyResult.IsSuccessStatusCode)
-                    {
-                        isSurvey = isSurveyResult?.Content?.Result;
-                    }
+                        var student = user.Student;
+                        var classStudentResult = await _trainingService.GetClassByStudentId(student?.Id ?? default);
+                        var @class = classStudentResult?.Content?.Result;
+                        var isPlacementTestResult = await _lmsCourseService.IsPlacementTestAsync(student?.Id ?? default);
+                        var isSurveyResult = await _interactionService.IsSurveyCompleted(user.Id);
 
-                    claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.Code, user.Code ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.ClassId, classId.ToString() ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.ClassCode, classCode ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsPlacementTest, isPlacementTest?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
-                    claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsSurvey, isSurvey?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
-                    claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsOrder, isOrder.ToString(), ClaimValueTypes.Boolean));
+                        var classId = student?.ClassId;
+                        var classCode = @class?.Code;
+                        var isPlacementTest = isPlacementTestResult?.Content?.Result;
+                        bool? isSurvey = null;
+                        bool isOrder = false;
+
+                        if (@class != null)
+                        {
+                            var order = await _orderService.GetStatusAsync(new GetStatusByUserCommandModel { CourseId = @class.CourseId, UserId = user.Id });
+                            isOrder = order?.Content?.Result == EnumOrderStatus.Payment;
+                        }
+                        if (isSurveyResult.IsSuccessStatusCode)
+                        {
+                            isSurvey = isSurveyResult?.Content?.Result;
+                        }
+
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.Code, user.Code ?? string.Empty, ClaimValueTypes.String));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.ClassId, classId.ToString() ?? string.Empty, ClaimValueTypes.String));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.ClassCode, classCode ?? string.Empty, ClaimValueTypes.String));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsPlacementTest, isPlacementTest?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsSurvey, isSurvey?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsOrder, isOrder.ToString(), ClaimValueTypes.Boolean));
+                    }
+                    else if (roles.Contains(EnumRole.AdminSchool.ToString()))
+                    {
+                        var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                        if (schoolId.HasValue)
+                        {
+                            claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.SchoolId, schoolId.Value.ToString()));
+                        }
+                    }
 
                     #endregion
                 }
