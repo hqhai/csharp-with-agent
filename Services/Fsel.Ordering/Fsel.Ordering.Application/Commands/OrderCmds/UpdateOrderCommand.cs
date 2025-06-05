@@ -66,6 +66,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
+            _mapper.Map(request, order);
 
             if (!order.IsValid())
             {
@@ -73,15 +74,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
 
-
-            _mapper.Map(request, order);
-
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
                 order = _orderRepository.Add(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 await SendNotification(order, cancellationToken);
-
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<OrderModel>(order);
@@ -89,7 +86,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             });
             return methodResult;
         }
-
 
         private async Task SendNotification(Order order, CancellationToken cancellationToken)
         {

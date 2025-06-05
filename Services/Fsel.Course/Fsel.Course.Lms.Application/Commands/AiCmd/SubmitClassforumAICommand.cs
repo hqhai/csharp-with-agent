@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SenderService;
@@ -74,6 +75,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         public async Task<bool> Handle(SubmitClassForumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+
+            var checkForbidden = await _mediator.Send(new CheckForbiddenClassForumCommand { ClassForumDetailResultId = request.ClassForumDetailResultId }, cancellationToken);
+            if (checkForbidden != null && checkForbidden.Result)
+            {
+                return false;
+            }
 
             try
             {

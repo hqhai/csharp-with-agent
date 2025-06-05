@@ -1,6 +1,7 @@
 using Fsel.Common.Enums.ErrorCodes;
 using System.ComponentModel.DataAnnotations;
 using Fsel.Core.Entities;
+using Fsel.Common.Helpers;
 
 namespace Fsel.System.Domain.Entities.DailyQuiz
 {
@@ -13,5 +14,6 @@ namespace Fsel.System.Domain.Entities.DailyQuiz
         public Guid SchoolId { get; set; }
         public Guid CompetitionEventId { get; set; }
         public bool IsWin { get; set; }
+        public DateTime? CreatedDateLocal { get; set; } = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
     }
 }

@@ -1872,6 +1872,9 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
 
+                    b.Property<DateTime?>("CreatedDateLocal")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("CreatedFullName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -2026,6 +2029,9 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
+
+                    b.Property<DateTime?>("CreatedDateLocal")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedFullName")
                         .IsRequired()

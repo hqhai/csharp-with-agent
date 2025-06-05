@@ -150,6 +150,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         PasswordIncorrect,
 
         /// <summary>
+        /// Account has been cut off
+        /// </summary>
+        AccountHasBeenCutOff,
+
+        /// <summary>
         /// Role ko thuộc trang báo cáo
         /// </summary>
         RoleNotInDashboard
