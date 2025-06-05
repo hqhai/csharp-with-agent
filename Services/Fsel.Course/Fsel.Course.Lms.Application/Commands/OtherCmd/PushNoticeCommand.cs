@@ -247,7 +247,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                     UserIds = userIds,
                     ObjectId = Guid.NewGuid(),
                     ParamsMessage = null,
-                    Type = EnumNotificationType.Text,
+                    Type = EnumNotificationType.LinkPage,
                     Content = content,
                     PlatformCode = EnumPlatformCode.LMS
                 }, cancellationToken);
