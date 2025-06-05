@@ -4,6 +4,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 {
     using System;
     using System.Linq;
+    using Fsel.Core.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Microsoft.AspNetCore.Identity;
 
@@ -14,6 +15,15 @@ namespace Fsel.Identity.Infrastructure.Repositories
         public UserRoleRepository(UserDbContext userDbContext)
         {
             _userDbContext = userDbContext;
+        }
+
+        public IQueryable<UserRoleEntity> Queryable
+        {
+            get
+            {
+                IQueryable<UserRoleEntity> queryable = _userDbContext.UserRoles.AsQueryable();
+                return queryable;
+            }
         }
 
         public virtual IQueryable<IdentityUserRole<Guid>> GetQuery()

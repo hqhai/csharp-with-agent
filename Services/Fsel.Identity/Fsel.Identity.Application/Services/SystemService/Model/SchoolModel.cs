@@ -38,6 +38,10 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
 
         public bool IsActive { get; set; }
 
+        public string? LocalId { get; set; }
+
+        public Guid? ParentId { get; set; }
+
         public LocationModel? Location { get; set; }
     }
 
