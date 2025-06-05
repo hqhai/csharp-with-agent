@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -70,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 LearningStatus = request.LearningStatus,
                 CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
+                ListCourseType = request.ListCourseType,
                 Status = request.Status,
                 IsLearning = request.ManagerReportType != EnumManagerReportType.ReportManagerPT ? true : null,
             };

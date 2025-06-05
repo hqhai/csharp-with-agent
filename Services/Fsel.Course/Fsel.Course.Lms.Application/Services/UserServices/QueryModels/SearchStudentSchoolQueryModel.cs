@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.QueryModels
         public string? SchoolClass { get; set; }
         public string? ListSchoolGrade { get; set; }
         public string? ListSchoolClass { get; set; }
+        public string? ListCourseType { get; set; }
         public string? ListSchool { get; set; }
         public string? ListDistrict { get; set; }
         public string? ListProvince { get; set; }

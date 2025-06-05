@@ -88,8 +88,13 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
             var overallModules = new List<OverallModuleReportModel>();
             var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
-            var unitGroups = await _courseUnitMockTestRepository.Queryable
-                                     .Where(x => courseIds != null && courseIds.Contains(x.CourseId) && x.UnitId.HasValue)
+            if (!courseIds.Any())
+            {
+                return new OverallReportLearningResultModel();
+            }
+
+            var unitGroups = (await _courseUnitMockTestRepository.Queryable.WhereBulkContains(courseIds, x => x.CourseId)
+                                     .Where(x => x.UnitId.HasValue).ToListAsync())
                                      .GroupBy(x => x.Number)
                                      .Select(x => new
                                      {
@@ -100,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                              UnitId = u.UnitId.GetValueOrDefault()
                                          }).Distinct().ToList()
                                      })
-                                     .ToListAsync();
+                                     .ToList();
 
             var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
@@ -184,8 +189,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                                  MockTestResult = mtr
                                              }).ToListAsync();
 
-                var mockTestGroups = await _courseUnitMockTestRepository.Queryable
-                                           .Where(x => courseIds != null && courseIds.Contains(x.CourseId) && x.MockTestId.HasValue)
+                var mockTestGroups = (await _courseUnitMockTestRepository.Queryable.WhereBulkContains(courseIds, x => x.CourseId)
+                                           .Where(x => x.MockTestId.HasValue).ToListAsync())
                                            .GroupBy(x => new { x.Number, x.Course!.CourseLevel })
                                            .Select(x => new
                                            {
@@ -193,7 +198,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                                Number = x.Key.Number,
                                                MockTestIds = x.Where(u => u.MockTestId.HasValue).Select(u => u.MockTestId.GetValueOrDefault()).ToList()
                                            })
-                                           .ToListAsync();
+                                           .ToList();
 
                 foreach (var item in courseLevels)
                 {

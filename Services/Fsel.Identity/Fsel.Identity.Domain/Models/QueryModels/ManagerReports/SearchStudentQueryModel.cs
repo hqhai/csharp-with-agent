@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
 {
+    using System.Text.Json.Serialization;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -66,6 +67,17 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             get
             {
                 return ListStudentId.ToList<Guid>();
+            }
+        }
+
+        public string? ListCourseType { get; set; }
+
+        [JsonIgnore]
+        public IList<EnumCourseType>? CourseTypes
+        {
+            get
+            {
+                return ListCourseType.ToList<EnumCourseType>();
             }
         }
 

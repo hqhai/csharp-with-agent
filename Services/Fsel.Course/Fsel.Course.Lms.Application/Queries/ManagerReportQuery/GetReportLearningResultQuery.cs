@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -23,9 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     public class GetReportLearningResultQueryHandler : IRequestHandler<GetReportLearningResultQuery, MethodResult<IList<LearningResultReportModel>>>
     {
         private readonly IMediator _mediator;
-        private readonly IMapper _mapper;
         private readonly ICourseResultRepository _courseResultRepository;
-        private readonly ICourseRepository _courseRepository;
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
@@ -33,9 +30,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
         public GetReportLearningResultQueryHandler(
             IMediator mediator,
-            IMapper mapper,
             ICourseResultRepository courseResultRepository,
-            ICourseRepository courseRepository,
             IUnitResultRepository unitResultRepository,
             IMockTestResultRepository mockTestResultRepository,
             IFinalTestResultRepository finalTestResultRepository,
@@ -43,9 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             )
         {
             _mediator = mediator;
-            _mapper = mapper;
             _courseResultRepository = courseResultRepository;
-            _courseRepository = courseRepository;
             _unitResultRepository = unitResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
@@ -109,9 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               UnitResults = g.Select(x => x.ur).ToList(),
                                           }).ToListAsync(cancellationToken);
 
-            var mockTestResults = await _mockTestResultRepository.Queryable
-                                                                 .WhereBulkContains(studentIds, x => x.StudentId)
-                                                                 .WhereBulkContains(courseIds, x => x.CourseId)
+            var mockTestResults = await _mockTestResultRepository.Queryable.WhereBulkContains(dataStudent, new[] { "StudentId", "CourseId" })
                                                                  .Where(x => x.Status == EnumResultStatus.Done)
                                                                  .ToListAsync(cancellationToken);
 
@@ -131,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               SkillMockTestResults = x.Where(x => x.UnitId.HasValue).OrderBy(x => x.CreatedDate).ToList(),
                                           }).ToList();
 
-            var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+            var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(dataStudent, new[] { "StudentId", "CourseId" })
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
                                           join ftr in _finalTestResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into finalTestGroup
                                           from ftr in finalTestGroup.DefaultIfEmpty()
@@ -217,6 +208,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     FullName = item.FullName,
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
+                    PhoneNumber = item.PhoneNumber,
                     SchoolName = item.School,
                     Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                     CourseLevel = item.CourseLevel,

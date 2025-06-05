@@ -228,6 +228,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     StudentId = item.Id,
                     Email = item.Email,
                     FullName = item.FullName,
+                    PhoneNumber = item.PhoneNumber,
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,

@@ -79,6 +79,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 {
                     FullName = student.FullName,
                     Email = student.Email,
+                    PhoneNumber = student.PhoneNumber,
                     SchoolName = student.School,
                     SchoolClass = student.SchoolClass,
                     SchoolGrade = student.SchoolGrade,

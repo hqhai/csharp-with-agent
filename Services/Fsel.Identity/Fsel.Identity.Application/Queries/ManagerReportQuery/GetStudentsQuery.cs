@@ -104,6 +104,11 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && x.CourseLevel == request.CourseLevel.Value);
             }
+            if (request.CourseTypes != null && request.CourseTypes.Any())
+            {
+                var courseLevels = EnumCourseLevelHelper.GetCourseLevels(request.CourseTypes);
+                queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
+            }
 
             var query = from u in _userManager.Users
                         join h in _humanRepository.Queryable on u.Id equals h.UserId

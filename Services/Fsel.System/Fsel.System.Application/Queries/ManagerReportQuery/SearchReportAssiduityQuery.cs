@@ -110,6 +110,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 {
                     StudentId = student.Id,
                     FullName = student.FullName,
+                    PhoneNumber = student.PhoneNumber,
                     Email = student.Email,
                     SchoolName = student.School,
                     SchoolClass = student.SchoolClass,
