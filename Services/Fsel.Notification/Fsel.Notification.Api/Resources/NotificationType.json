@@ -1618,7 +1618,7 @@
     "icon": "",
     "priority": 1,
     "templateMessage": "👀 Techie đang check VAR: bạn hôm nay chưa học bài nào luôn á! VAR xác nhận: coin đang bị bỏ lỡ, cơ hội bóc Túi Mù đang chờ bạn đó!",
-    "templateLink": "/learn",
+    "templateLink": "/marketplace",
     "createdDate": "2025-05-30",
     "translations": [
       {
@@ -1881,7 +1881,7 @@
     "content": "Day7At19h30AfterChooseLevel",
     "icon": "",
     "priority": 1,
-    "templateMessage": "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞",
+    "templateMessage": "😳 Hôm nay bạn đang… vượt mức pickleball về độ lười học! Techie cảnh báo: Không học bài hôm nay là trượt bảng vàng thật đó nhaaa!",
     "templateLink": "/learn",
     "createdDate": "2025-05-30",
     "translations": [
@@ -1889,21 +1889,21 @@
         "id": "c0b6de90-4362-4178-98b8-c5225c2d3e9c",
         "createdDate": "2025-05-30",
         "notificationTypeId": "23990ecc-834f-44b7-a7a5-a03baa703b32",
-        "templateMessage": "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞",
+        "templateMessage": "😳 Hôm nay bạn đang… vượt mức pickleball về độ lười học! Techie cảnh báo: Không học bài hôm nay là trượt bảng vàng thật đó nhaaa!",
         "language": "vi-VN"
       },
       {
         "id": "808ed0b9-d93d-4350-8cd0-85c6e5e633e9",
         "createdDate": "2025-05-30",
         "notificationTypeId": "23990ecc-834f-44b7-a7a5-a03baa703b32",
-        "templateMessage": "📊 AI predicts you'll study today… If correct, Techie will reward you with 160 coins. If wrong… Techie will be sad again 😞",
+        "templateMessage": "😳 Today, you're... surpassing pickleball in laziness! Techie warns: If you don’t study today, you’ll truly fall off the leaderboard!",
         "language": "en-US"
       },
       {
         "id": "07f77fa5-27f7-4b55-9d1a-505e3876daa4",
         "createdDate": "2025-05-30",
         "notificationTypeId": "23990ecc-834f-44b7-a7a5-a03baa703b32",
-        "templateMessage": "📊 L'IA prévoit que tu vas étudier aujourd'hui… Si c'est vrai, Techie te récompensera avec 160 pièces. Si c'est faux... Techie sera encore triste 😞",
+        "templateMessage": "😳 Aujourd'hui, tu surpasses même le pickleball en paresse ! Techie avertit : Si tu n'étudies pas aujourd'hui, tu vas vraiment tomber du classement !",
         "language": "fr-FR"
       }
     ]

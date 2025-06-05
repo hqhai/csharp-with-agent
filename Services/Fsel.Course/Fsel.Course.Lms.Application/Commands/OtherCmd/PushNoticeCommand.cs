@@ -178,7 +178,10 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
             }
             else if (request.TimeNotifyType == EnumPushNoticeTimeType.At19h30)
             {
-                var day1 = GetStudentsDonePT(studentDonePTs, 1, dateTimeVietNam);
+                var day1 = GetStudentsChooseLevel(studentChooseLevels, 1, dateTimeVietNam);
+                await SendNotification(day1, EnumNotificationContent.Day1At19h30AfterChooseLevel, cancellationToken);
+
+                day1 = GetStudentsDonePT(studentDonePTs, 1, dateTimeVietNam);
                 var studentEventResults = await GetStudentIdsInEvent(day1);
                 if (studentEventResults != null && studentEventResults.Any())
                 {
@@ -202,7 +205,10 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 var day5 = GetStudentsDonePT(studentDonePTs, 5, dateTimeVietNam);
                 await SendNotification(day5, EnumNotificationContent.Day5At19h30AfterDonePT, cancellationToken);
 
-                var day6 = GetStudentsDonePT(studentDonePTs, 6, dateTimeVietNam);
+                var day6 = GetStudentsChooseLevel(studentChooseLevels, 6, dateTimeVietNam);
+                await SendNotification(day6, EnumNotificationContent.Day6At19h30AfterChooseLevel, cancellationToken);
+
+                day6 = GetStudentsDonePT(studentDonePTs, 6, dateTimeVietNam);
                 await SendNotification(day6, EnumNotificationContent.Day6At19h30AfterDonePT, cancellationToken);
 
                 var day7 = GetStudentsChooseLevel(studentChooseLevels, 7, dateTimeVietNam);
