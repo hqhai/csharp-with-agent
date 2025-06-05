@@ -239,6 +239,12 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                         x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.CreatedDateLocal };
                     });
                 }
+                else
+                {
+                    var deleteWinners = await _dailyQuizWinnerRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
+                    deleteWinners = deleteWinners.Where(p => p.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date == currentDate.Date).ToList();
+                    await _dailyQuizWinnerRepository.DeleteListAsync(deleteWinners);
+                }
 
                 await _dailyQuizHistoryRepository.BulkMergeAsync(dailyQuizHistories, x =>
                 {
