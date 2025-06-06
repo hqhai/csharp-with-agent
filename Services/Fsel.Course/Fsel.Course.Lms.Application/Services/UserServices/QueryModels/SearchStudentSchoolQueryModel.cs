@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.QueryModels
         public string? ListSchool { get; set; }
         public string? ListDistrict { get; set; }
         public string? ListProvince { get; set; }
+        public string? ListCourseLevel { get; set; }
         public bool IsCheckDate { get; set; }
         public bool? IsLearning { get; set; }
         public EnumCompletionStatus? Status { get; set; }

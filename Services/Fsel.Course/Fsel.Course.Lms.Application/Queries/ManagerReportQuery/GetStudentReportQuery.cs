@@ -65,11 +65,13 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListCourseType = request.ListCourseType,
+                ListCourseLevel = request.ListCourseLevel,
+
                 Keyword = request.Keyword,
                 LearningStatus = request.LearningStatus,
                 CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
-                ListCourseType = request.ListCourseType,
                 Status = request.Status,
                 IsLearning = request.ManagerReportType != EnumManagerReportType.ReportManagerPT ? true : null,
             };
