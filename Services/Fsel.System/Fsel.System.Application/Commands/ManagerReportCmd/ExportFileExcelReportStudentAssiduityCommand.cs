@@ -40,29 +40,31 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 ListSchool = request.ListSchool,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
 
+                SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 StartDate = request.StartDate,
                 CourseType = request.CourseType,
                 LearningStatus = request.LearningStatus,
-                SchoolClass = request.SchoolClass,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportStudentAssiduityQuery
             {
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
 
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
                 Keyword = request.Keyword,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 LearningStatus = request.LearningStatus,
-                SchoolClass = request.SchoolClass,
                 CourseType = request.CourseType,
             }, cancellationToken);
             var userResult = await _userService.GetUserProfileAsync();

@@ -45,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseType = request.ListCourseType,
+                ListCourseLevel = request.ListCourseLevel,
 
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
@@ -62,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 ListSchoolClass = request.ListSchoolClass,
                 ListCourseType = request.ListCourseType,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
 
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,

@@ -42,6 +42,8 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListSchool = request.ListSchool,
+                ListCourseLevel = request.ListCourseLevel,
+
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
                 StartDate = request.StartDate,

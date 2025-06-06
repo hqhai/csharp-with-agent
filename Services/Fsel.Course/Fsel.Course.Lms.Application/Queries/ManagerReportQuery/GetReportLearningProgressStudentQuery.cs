@@ -42,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
                 ListCourseType = request.ListCourseType,
+                ListCourseLevel = request.ListCourseLevel,
 
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
