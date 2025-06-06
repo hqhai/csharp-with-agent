@@ -18,6 +18,8 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         public DateTime? StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
+
+        public IList<Guid>? LocationIds { get; set; }
     }
 
     public class GetTreeCompetitionEventQueryHandler : IRequestHandler<GetTreeCompetitionEventQuery, MethodResult<IList<CompetitionEventTreeModel>>>
@@ -42,6 +44,11 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             if (request.StartDate.HasValue && request.EndDate.HasValue)
             {
                 eventParents = eventParents.Where(x => request.StartDate <= x.EventContent?.EndDate && request.EndDate >= x.EventContent?.StartDate).ToList();
+            }
+
+            if (request.LocationIds != null)
+            {
+                eventParents = eventParents.Where(x => x.LocationId.HasValue && request.LocationIds.Contains(x.LocationId.Value)).ToList();
             }
 
             var eventParentResults = _mapper.Map<IList<CompetitionEventTreeModel>>(eventParents);
