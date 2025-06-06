@@ -234,19 +234,6 @@ namespace Fsel.Ordering.Application.Commands.Products
                     // Thực hiện transaction
                     await _productRepository.ExecuteTransactionAsync(async () =>
                     {
-                        // Tạo transaction
-                        var orderTransaction = _orderTransactionRepository.Add(new OrderTransaction
-                        {
-                            Type = EnumOrderTransactionType.Product,
-                            Status = EnumOrderTransactionStatus.Requested,
-                            Code = code,
-                            ProductId = product.Id,
-                            RequestBody = request
-                        });
-
-                        await _orderTransactionRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
-
-                        // Tạo token history
                         var tokenHistoryTranslations = product.Translations.Select(item => new TokenHistoryTranslationModel
                         {
                             Language = item.Language,
@@ -259,22 +246,63 @@ namespace Fsel.Ordering.Application.Commands.Products
                         var language = RegionHelper.GetCountry(EnumCountryKey.Vietnam)?.CultureCode;
                         var configDefault = tokenHistoryTranslations.FirstOrDefault(x => x.Language == language);
 
-                        var tokenHistories = new List<TokenHistoryQueueModel>
+                        var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
                         {
-                            new TokenHistoryQueueModel
-                            {
-                                ObjectId = product.Id,
-                                VolatileToken = product.Price,
-                                Feature = EnumTokenFeature.MarketPlace,
-                                Type = EnumTokenHistoryType.Exchanged,
-                                UserId = _authContext.CurrentUserId,
-                                Config = configDefault?.Config ?? tokenHistoryTranslations.FirstOrDefault()?.Config,
-                                TokenHistoryTranslations = tokenHistoryTranslations,
-                                Mission = EnumTokenMission.FselStore
-                            }
-                        };
+                            UserId = student?.Human?.UserId ?? default,
+                            NumberOfCoinsDeducted = product.Price,
+                            Feature = EnumTokenFeature.MarketPlace,
+                            Mission = EnumTokenMission.FselStore,
+                            ObjectId = product.Id,
+                            Config = configDefault?.Config ?? tokenHistoryTranslations.FirstOrDefault()?.Config
+                        });
 
-                        await _createTokenHistoryPublisher.Publish(tokenHistories, cancellationToken);
+                        if (!result.IsSuccessStatusCode)
+                        {
+                            methodResult.AddError(result.Error);
+                            return methodResult;
+                        }
+
+                        // Tạo transaction
+                        var orderTransaction = _orderTransactionRepository.Add(new OrderTransaction
+                        {
+                            Type = EnumOrderTransactionType.Product,
+                            Status = EnumOrderTransactionStatus.Requested,
+                            Code = code,
+                            ProductId = product.Id,
+                            RequestBody = request
+                        });
+
+                        await _orderTransactionRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+                        //// Tạo token history
+                        //var tokenHistoryTranslations = product.Translations.Select(item => new TokenHistoryTranslationModel
+                        //{
+                        //    Language = item.Language,
+                        //    Config = new List<object>
+                        //    {
+                        //        new { Title = item.Name }
+                        //    }
+                        //}).ToList();
+
+                        //var language = RegionHelper.GetCountry(EnumCountryKey.Vietnam)?.CultureCode;
+                        //var configDefault = tokenHistoryTranslations.FirstOrDefault(x => x.Language == language);
+
+                        //var tokenHistories = new List<TokenHistoryQueueModel>
+                        //{
+                        //    new TokenHistoryQueueModel
+                        //    {
+                        //        ObjectId = product.Id,
+                        //        VolatileToken = product.Price,
+                        //        Feature = EnumTokenFeature.MarketPlace,
+                        //        Type = EnumTokenHistoryType.Exchanged,
+                        //        UserId = _authContext.CurrentUserId,
+                        //        Config = configDefault?.Config ?? tokenHistoryTranslations.FirstOrDefault()?.Config,
+                        //        TokenHistoryTranslations = tokenHistoryTranslations,
+                        //        Mission = EnumTokenMission.FselStore
+                        //    }
+                        //};
+
+                        //await _createTokenHistoryPublisher.Publish(tokenHistories, cancellationToken);
 
                         methodResult.StatusCode = StatusCodes.Status200OK;
                         methodResult.Result = code;
