@@ -90,10 +90,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
             var overallModules = new List<OverallModuleReportModel>();
             var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
-            if (!courseIds.Any())
-            {
-                return new OverallReportLearningResultModel();
-            }
 
             var unitGroups = (await _courseUnitMockTestRepository.Queryable.WhereBulkContains(courseIds, x => x.CourseId)
                                      .Where(x => x.UnitId.HasValue).ToListAsync())
