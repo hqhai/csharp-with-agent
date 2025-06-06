@@ -176,7 +176,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.LearningStatus.HasValue ? request.LearningStatus.Value.GetDescription() : null);
                 excelWorksheet.Cells["J2"].Value = GetData(excelWorksheet.Cells["J2"].Value, request.ListSchoolGrade ?? request.SchoolGrade);
                 excelWorksheet.Cells["K2"].Value = GetData(excelWorksheet.Cells["K2"].Value, request.ListSchoolClass ?? request.SchoolClass);
-                excelWorksheet.Cells["L2"].Value = GetData(excelWorksheet.Cells["L2"].Value, request.CourseLevel);
+                excelWorksheet.Cells["L2"].Value = GetData(excelWorksheet.Cells["L2"].Value, request.CourseLevel?.GetDescription() ?? request.ListCourseLevel);
 
                 //FillCourseLevelData(excelWorksheet, request.CourseType.GetValueOrDefault(), overallReportLearningProgress);
                 if (learningProgressReports != null && learningProgressReports.Any())

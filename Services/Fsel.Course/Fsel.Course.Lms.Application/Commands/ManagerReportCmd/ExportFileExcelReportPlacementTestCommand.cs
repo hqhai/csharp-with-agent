@@ -116,7 +116,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.ListSchoolGrade ?? request.SchoolGrade);
             excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.ListSchoolClass ?? request.SchoolClass);
             excelWorksheet.Cells["H3"].Value = GetData(excelWorksheet.Cells["H3"].Value, request.CurrentLevel);
-            excelWorksheet.Cells["I3"].Value = GetData(excelWorksheet.Cells["I3"].Value, request.CourseLevel);
+            excelWorksheet.Cells["I3"].Value = GetData(excelWorksheet.Cells["I3"].Value, request.CourseLevel?.GetDescription() ?? request.ListCourseLevel);
             excelWorksheet.Cells["J3"].Value = GetData(excelWorksheet.Cells["J3"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
             excelWorksheet.Cells["K3"].Value = GetData(excelWorksheet.Cells["K3"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
         }
