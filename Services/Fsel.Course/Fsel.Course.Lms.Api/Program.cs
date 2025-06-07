@@ -117,6 +117,10 @@ builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGro
 builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository>();
 builder.Services.AddScoped<IWeeklyReportRepository, WeeklyReportRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ILevelRepository, LevelRepository>();
+builder.Services.AddScoped<ISkillRepository, SkillRepository>();
+builder.Services.AddScoped<ISkillLevelRepository, SkillLevelRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
