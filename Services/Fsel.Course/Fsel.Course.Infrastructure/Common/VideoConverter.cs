@@ -19,7 +19,6 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
     public class VideoConverter
@@ -41,6 +40,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IMapper _mapper;
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
         private readonly IQuestionExplanationErrorRepository _questionExplanationErrorRepository;
+        private readonly ISkillRepository _skillRepository;
         private const int NumberOfQuestion = 1;
 
         public VideoConverter(IVideoRepository videoRepository
@@ -59,7 +59,8 @@ namespace Fsel.Course.Infrastructure.Common
             , DateTimeConverter dateTimeConverter
             , IMapper mapper
             , IQuestionShuffleRepository questionShuffleRepository
-            , IQuestionExplanationErrorRepository questionExplanationErrorRepository)
+            , IQuestionExplanationErrorRepository questionExplanationErrorRepository
+            , ISkillRepository skillRepository)
         {
             _videoRepository = videoRepository;
             _questionRepository = questionRepository;
@@ -78,6 +79,7 @@ namespace Fsel.Course.Infrastructure.Common
             _mapper = mapper;
             _questionShuffleRepository = questionShuffleRepository;
             _questionExplanationErrorRepository = questionExplanationErrorRepository;
+            _skillRepository = skillRepository;
         }
 
         public VoidMethodResult AddQuestionToExercise(dynamic newExercise, CreateExerciseCommandModel? exercise)
@@ -119,7 +121,7 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public VoidMethodResult AddTimeCodeToVideo(dynamic video, IList<CreateVideoTimeCodeCommandModel>? videoTimeCodes)
+        public async Task<VoidMethodResult> AddTimeCodeToVideo(dynamic video, IList<CreateVideoTimeCodeCommandModel>? videoTimeCodes)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCodes);
             VoidMethodResult methodResult = new VoidMethodResult();
@@ -151,6 +153,16 @@ namespace Fsel.Course.Infrastructure.Common
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(exercise));
                         return methodResult;
                     }
+                    if (exercise.SkillId.HasValue)
+                    {
+                        var skillExists = await _skillRepository.AnyGuidAsync(exercise.SkillId.Value);
+                        if (!skillExists)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(exercise.SkillId), exercise.SkillId);
+                            return methodResult;
+                        }
+                    }
+
                     var newExercise = _mapper.Map<Exercise>(exercise);
                     var method = AddQuestionToExercise(newExercise, exercise);
                     if (!method.IsOK)

@@ -24,17 +24,20 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
+        private readonly ISkillRepository _skillRepository;
 
         public CreateLessonCommandHandler(ILessonRepository lessonRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
             , IVideoRepository videoRepository
-            , IExtraPracticeRepository extraPracticeRepository)
+            , IExtraPracticeRepository extraPracticeRepository
+            , ISkillRepository skillRepository)
         {
             _lessonRepository = lessonRepository;
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _videoRepository = videoRepository;
             _extraPracticeRepository = extraPracticeRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(CreateLessonCommand request, CancellationToken cancellationToken)
@@ -55,6 +58,18 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonInstructions));
                 return methodResult;
             }
+            foreach (var lessonInstruction in request.LessonInstructions)
+            {
+                if (lessonInstruction.SkillId.HasValue)
+                {
+                    var skillExists = await _skillRepository.AnyGuidAsync(lessonInstruction.SkillId.Value);
+                    if (!skillExists)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonInstruction.SkillId), lessonInstruction.SkillId);
+                        return methodResult;
+                    }
+                }
+            }
 
             if (request.VideoIds == null || request.VideoIds.Count == 0)
             {
@@ -68,6 +83,16 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 return methodResult;
             }
 
+            var skillId = request.ClassForum.SkillId;
+            if (skillId.HasValue)
+            {
+                var skillExists = await _skillRepository.AnyGuidAsync(skillId.Value);
+                if (!skillExists)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(skillId), skillId);
+                    return methodResult;
+                }
+            }
             ClassForum classForum = new ClassForum();
             _mapper.Map(request.ClassForum, classForum);
 

@@ -1,0 +1,116 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Application.Commands.SkillCmd
+{
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.CommandModels.Skills;
+    using Fsel.Course.Domain.Models.EntityModels.SkillModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class UpdateSkillCommand : UpdateSkillCommandModel, IRequest<MethodResult<SkillModel>>
+    {
+    }
+
+    public class UpdateSkillCommandHandler : IRequestHandler<UpdateSkillCommand, MethodResult<SkillModel>>
+    {
+        private readonly ISkillRepository _skillRepository;
+        private readonly IMapper _mapper;
+
+        public UpdateSkillCommandHandler(ISkillRepository skillRepository,
+            IMapper mapper)
+        {
+            _skillRepository = skillRepository;
+            _mapper = mapper;
+        }
+
+        public async Task<MethodResult<SkillModel>> Handle(UpdateSkillCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<SkillModel> methodResult = new MethodResult<SkillModel>();
+
+            var skill = await _skillRepository.GetByIdAsync(request.Id);
+            if (skill == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
+                return methodResult;
+            }
+            if (string.IsNullOrEmpty(request.Code))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+            if (string.IsNullOrEmpty(request.Name))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Name), request.Name);
+                return methodResult;
+            }
+
+            var isDuplicateCode = await _skillRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Code == request.Code, cancellationToken);
+            var isDuplicateName = await _skillRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken);
+            if (isDuplicateName && isDuplicateCode)
+            {
+                methodResult.AddErrorBadRequest(new List<ErrorResult>
+                {
+                    new ErrorResult
+                    {
+                        ErrorCode = nameof(EnumSystemErrorCode.DataAlreadyExist),
+                        Errors =new List<Error>
+                        {
+                            new Error
+                            {
+                                FieldName = nameof(request.Code),
+                                ErrorValues =  new List<object>{ request.Code }
+                            }
+                        },
+                    },
+                    new ErrorResult
+                    {
+                        ErrorCode = nameof(EnumSystemErrorCode.DataAlreadyExist),
+                        Errors =new List<Error>
+                        {
+                            new Error
+                            {
+                                FieldName = nameof(request.Name),
+                                ErrorValues =  new List<object>{ request.Name  }
+                            }
+                        },
+                    }
+                });
+                return methodResult;
+            }
+            if (isDuplicateCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+            if (isDuplicateName)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name), request.Name);
+                return methodResult;
+            }
+
+            _mapper.Map(request, skill);
+            if (!skill.IsValid())
+            {
+                methodResult.AddErrorBadRequest(skill.ErrorMessages);
+                return methodResult;
+            }
+
+            await _skillRepository.ExecuteTransactionAsync(async () =>
+            {
+                skill = _skillRepository.Update(skill);
+                await _skillRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = _mapper.Map<SkillModel>(skill);
+                return methodResult;
+            });
+            return methodResult;
+        }
+    }
+}

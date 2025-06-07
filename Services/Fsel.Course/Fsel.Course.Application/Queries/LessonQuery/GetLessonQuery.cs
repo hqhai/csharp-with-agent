@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
@@ -21,12 +22,17 @@ namespace Fsel.Course.Application.Queries.LessonQuery
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
+        private readonly ISkillRepository _skillRepository;
 
-        public GetLessonQueryHandler(IMapper mapper, ILessonRepository lessonRepository, IHomeWorkRepository homeWorkRepository)
+        public GetLessonQueryHandler(IMapper mapper,
+            ILessonRepository lessonRepository,
+            IHomeWorkRepository homeWorkRepository,
+            ISkillRepository skillRepository)
         {
             _mapper = mapper;
             _lessonRepository = lessonRepository;
             _homeWorkRepository = homeWorkRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(GetLessonQuery request, CancellationToken cancellationToken)
@@ -48,6 +54,13 @@ namespace Fsel.Course.Application.Queries.LessonQuery
             lessonModel.VideoId = video?.Id;
             lessonModel.ExtraPracticeIds = lesson.LessonExtraPractices.OrderBy(x => x!.CreatedDate).Select(x => x.ExtracPraticeId).ToList();
             lessonModel.ClassForum = _mapper.Map<ClassForumModel>(lesson.ClassForum);
+            var skillId = lesson.ClassForum?.SkillId;
+            if (skillId.HasValue)
+            {
+                var skill = await _skillRepository.GetByIdAsync(skillId.Value);
+                lessonModel.ClassForum.SkillName = skill?.Name;
+            }
+
             lessonModel.IsActive = lesson.UnitLessons.Any();
             lessonModel.HomeWorks = _mapper.Map<IList<HomeWorkModel>>(homeWorks.OrderBy(x => x.LessonHomeWorks.Select(x => x.CreatedDate).FirstOrDefault()));
             methodResult.Result = lessonModel;

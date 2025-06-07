@@ -29,6 +29,11 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasForeignKey<ClassForum>(p => p.LessonId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasOne(a => a.Skill)
+                .WithOne(b => b.ClassForum)
+                .HasForeignKey<ClassForum>(p => p.SkillId)
+                .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasIndex(x => x.LessonId).IsUnique(false);
         }
     }

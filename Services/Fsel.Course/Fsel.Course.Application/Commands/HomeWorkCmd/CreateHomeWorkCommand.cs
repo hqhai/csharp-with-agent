@@ -24,14 +24,17 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
         private readonly IMapper _mapper;
         private readonly QuestionConverter _questionConverter;
         private readonly IHomeWorkRepository _homeWorkRepository;
+        private readonly ISkillRepository _skillRepository;
 
         public CreateHomeWorkCommandHandler(IMapper mapper
             , QuestionConverter questionConverter
-            , IHomeWorkRepository homeWorkRepository)
+            , IHomeWorkRepository homeWorkRepository
+            , ISkillRepository skillRepository)
         {
             _mapper = mapper;
             _questionConverter = questionConverter;
             _homeWorkRepository = homeWorkRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkCommand request, CancellationToken cancellationToken)
@@ -46,6 +49,17 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
                 return methodResult;
             }
+
+            if (request.SkillId.HasValue)
+            {
+                var skillExists = await _skillRepository.AnyGuidAsync(request.SkillId.Value);
+                if (!skillExists)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SkillId), request.SkillId);
+                    return methodResult;
+                }
+            }
+
             foreach (var question in request.Questions)
             {
                 if (question == null)

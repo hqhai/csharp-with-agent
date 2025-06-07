@@ -15,5 +15,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumMockTestType MockTestType { get; set; }
         public double Version { get; set; }
         public IList<EnumCourseSkill>? Skills { get; set; }
+        public IList<string?>? SkillNames { get; set; }
+        public IList<Guid>? SkillIds { get; set; }
     }
 }

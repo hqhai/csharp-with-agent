@@ -79,8 +79,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         SectionGroups = x.PlacementTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
                                         {
                                             Id = x!.Id,
-                                            ExecutionTime = x!.ExecutionTime,
+                                            ExecutionTime = x.ExecutionTime,
                                             CourseSkill = x.CourseSkill,
+                                            SkillId = x.SkillId,
+                                            SkillName = x.Skill != null ? x.Skill.Name : null,
                                             Sections = x.Sections.OrderBy(x => x.DisplayOrder).Select(x => new SectionModel
                                             {
                                                 Id = x.Id,
