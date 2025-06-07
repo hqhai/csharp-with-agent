@@ -175,51 +175,33 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                     return methodResult;
                 }
 
-                if (orderTransaction.Status == EnumOrderTransactionStatus.Success)
+                var configs = new List<object>();
+
+                for (int i = 0; i < quantity; i++)
                 {
-                    var configs = new List<object>();
-
-                    for (int i = 0; i < quantity; i++)
+                    var data = new
                     {
-                        var data = new
-                        {
-                            Id = gift.Result.Id,
-                            Title = gift.Result.Title,
-                            Price = price
-                        };
-                        configs.Add(data);
-                    }
+                        Id = gift.Result.Id,
+                        Title = gift.Result.Title,
+                        Price = price
+                    };
+                    configs.Add(data);
+                }
 
-                    var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
-                    {
-                        UserId = student?.Human?.UserId ?? default,
-                        NumberOfCoinsDeducted = totalPrice,
-                        Feature = EnumTokenFeature.MarketPlace,
-                        Mission = EnumTokenMission.UrBox,
-                        ObjectId = orderTransaction.Id,
-                        Config = configs
-                    });
+                var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
+                {
+                    UserId = student?.Human?.UserId ?? default,
+                    NumberOfCoinsDeducted = totalPrice,
+                    Feature = EnumTokenFeature.MarketPlace,
+                    Mission = EnumTokenMission.UrBox,
+                    ObjectId = orderTransaction.Id,
+                    Config = configs
+                });
 
-                    if (!result.IsSuccessStatusCode)
-                    {
-                        methodResult.AddError(result.Error);
-                        return methodResult;
-                    }
-
-                    //var tokenHistorys = new List<TokenHistoryQueueModel>
-                    //{
-                    //    new TokenHistoryQueueModel
-                    //    {
-                    //        ObjectId = orderTransaction.Id,
-                    //        VolatileToken = totalPrice,
-                    //        Feature = EnumTokenFeature.MarketPlace,
-                    //        Type = EnumTokenHistoryType.Exchanged,
-                    //        UserId = student?.Human?.UserId ?? default,
-                    //        Mission = EnumTokenMission.UrBox,
-                    //        Config = configs
-                    //    }
-                    //};
-                    //await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
+                if (!result.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(result.Error);
+                    return methodResult;
                 }
 
                 var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
