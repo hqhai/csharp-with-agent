@@ -43,6 +43,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var student = await (from u in _userManager.Users
                                  join h in _humanRepository.Queryable on u.Id equals h.UserId
                                  join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                                 where u.Id == userId
                                  select s).FirstOrDefaultAsync(cancellationToken);
 
             if (student == null)
