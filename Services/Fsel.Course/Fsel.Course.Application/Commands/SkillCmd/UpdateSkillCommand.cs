@@ -10,7 +10,6 @@ namespace Fsel.Course.Application.Commands.SkillCmd
     using Fsel.Course.Domain.Models.EntityModels.SkillModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdateSkillCommand : UpdateSkillCommandModel, IRequest<MethodResult<SkillModel>>
     {
@@ -50,47 +49,19 @@ namespace Fsel.Course.Application.Commands.SkillCmd
                 return methodResult;
             }
 
-            var isDuplicateCode = await _skillRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Code == request.Code, cancellationToken);
-            var isDuplicateName = await _skillRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == request.Name, cancellationToken);
-            if (isDuplicateName && isDuplicateCode)
-            {
-                methodResult.AddErrorBadRequest(new List<ErrorResult>
-                {
-                    new ErrorResult
-                    {
-                        ErrorCode = nameof(EnumSystemErrorCode.DataAlreadyExist),
-                        Errors =new List<Error>
-                        {
-                            new Error
-                            {
-                                FieldName = nameof(request.Code),
-                                ErrorValues =  new List<object>{ request.Code }
-                            }
-                        },
-                    },
-                    new ErrorResult
-                    {
-                        ErrorCode = nameof(EnumSystemErrorCode.DataAlreadyExist),
-                        Errors =new List<Error>
-                        {
-                            new Error
-                            {
-                                FieldName = nameof(request.Name),
-                                ErrorValues =  new List<object>{ request.Name  }
-                            }
-                        },
-                    }
-                });
-                return methodResult;
-            }
+            var isDuplicateCode = await _skillRepository.IsDuplicateFieldValueAsync(skill.Id, nameof(request.Code), request.Code);
+            var isDuplicateName = await _skillRepository.IsDuplicateFieldValueAsync(skill.Id, nameof(request.Name), request.Name);
+
             if (isDuplicateCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
-                return methodResult;
             }
             if (isDuplicateName)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name), request.Name);
+            }
+            if (!methodResult.IsOK)
+            {
                 return methodResult;
             }
 

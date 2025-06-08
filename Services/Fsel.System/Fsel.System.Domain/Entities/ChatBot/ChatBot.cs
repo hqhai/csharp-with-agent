@@ -12,7 +12,7 @@ namespace Fsel.System.Domain.Entities.ChatBot
         public Guid? UnitId { get; set; }
 
         public EnumCourseSkill Skill { get; set; }
-
+        public Guid? SkillId { get; set; }
         public long RemainToken { get; set; }
 
         public Guid StudentId { get; set; }
@@ -24,7 +24,6 @@ namespace Fsel.System.Domain.Entities.ChatBot
         public string? LastestQuestionStr { get; set; }
 
         public EnumChatBotStatus Status { get; set; }
-
 
         [NotMapped]
         public IList<ChatBotMessage>? Conversations

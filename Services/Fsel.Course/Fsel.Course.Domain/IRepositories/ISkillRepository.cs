@@ -7,5 +7,8 @@ namespace Fsel.Course.Domain.IRepositories
 
     public interface ISkillRepository : IRepository<Skill>
     {
+        Task<bool> IsDuplicateFieldValueAsync(string? fieldName, string? value);
+
+        Task<bool> IsDuplicateFieldValueAsync(Guid id, string? fieldName, string? value);
     }
 }

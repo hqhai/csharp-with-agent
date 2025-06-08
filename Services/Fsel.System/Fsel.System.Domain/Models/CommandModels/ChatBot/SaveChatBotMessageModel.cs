@@ -7,9 +7,8 @@ namespace Fsel.System.Domain.Models.CommandModels.ChatBot
     public class SaveChatBotMessageModel
     {
         public Guid? UnitId { get; set; }
-
         public EnumCourseSkill Skill { get; set; }
-
+        public Guid? SkillId { get; set; }
         public Guid? StudentId { get; set; }
     }
 }
