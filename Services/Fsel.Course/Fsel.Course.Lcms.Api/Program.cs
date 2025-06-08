@@ -94,6 +94,7 @@ builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<SectionGroupManagerConverter>();
+builder.Services.AddScoped<ProgramConverter>();
 
 // Helper
 builder.Services.AddScoped<LinQHelper>();

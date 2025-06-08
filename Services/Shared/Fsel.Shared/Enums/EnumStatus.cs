@@ -5,6 +5,7 @@ namespace Fsel.Shared.Enums
     public enum EnumStatus
     {
         Active,
-        InActive
+        InActive,
+        Archive
     }
 }

@@ -14,6 +14,11 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Course.Application.Commands.CategoryCmd;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Application.Commands.ProgramCmd;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Application.Queries.ProgramQuery;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -100,6 +105,126 @@ namespace Fsel.Course.Lcms.Api.Controllers
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create category
+        /// </summary>
+        [HttpPost("create-category")]
+        [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryCommand command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// update category
+        /// </summary>
+        [HttpPut("update-category")]
+        [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryCommand command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// delete category
+        /// </summary>
+        [HttpDelete("delete-category/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
+        {
+            var methodResult = await _mediator.Send(new DeleteCategoryCommand { Id = id }).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Archive category
+        /// </summary>
+        [HttpPut("archive-category/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ArchiveCategory([FromRoute] Guid id)
+        {
+            var methodResult = await _mediator.Send(new ArchiveCategoryCommand { Id = id }).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get category by id
+        /// </summary>
+        [HttpGet("category/{id}")]
+        [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCategoryById([FromRoute] Guid id)
+        {
+            var methodResult = await _mediator.Send(new GetCategoryByIdQuery { Id = id }).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get category tree
+        /// </summary>
+        [HttpGet("category-tree")]
+        [ProducesResponseType(typeof(MethodResult<IList<CategoryTreeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCategoryTree([FromQuery] GetCategoryTreeQuery command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// search category tree
+        /// </summary>
+        [HttpGet("search-category")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CategoryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchCategory([FromQuery] SearchCategoryQuery command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// create program
+        /// </summary>
+        [HttpPost("create-program")]
+        [ProducesResponseType(typeof(MethodResult<ProgramModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> CreateProgram([FromBody] CreateProgramCommand command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// update program
+        /// </summary>
+        [HttpPut("update-program")]
+        [ProducesResponseType(typeof(MethodResult<ProgramModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateProgram([FromBody] UpdateProgramCommand command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get program by id
+        /// </summary>
+        [HttpGet("program/{programId}")]
+        [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetProgramById([FromRoute] Guid programId)
+        {
+            var methodResult = await _mediator.Send(new GetProgramByIdQuery { ProgramId = programId }).ConfigureAwait(false);
+            return methodResult.GetActionResult();
         }
     }
 }
