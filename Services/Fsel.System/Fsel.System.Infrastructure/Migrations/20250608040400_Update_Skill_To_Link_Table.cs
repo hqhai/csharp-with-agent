@@ -17,10 +17,22 @@ namespace Fsel.System.Infrastructure.Migrations
                 type: "uniqueidentifier",
                 nullable: true);
 
+            migrationBuilder.AddColumn<string>(
+                name: "SkillName",
+                table: "GameTopics",
+                type: "nvarchar(max)",
+                nullable: true);
+
             migrationBuilder.AddColumn<Guid>(
                 name: "SkillId",
                 table: "ChatBots",
                 type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "SkillName",
+                table: "ChatBots",
+                type: "nvarchar(max)",
                 nullable: true);
         }
 
@@ -32,7 +44,15 @@ namespace Fsel.System.Infrastructure.Migrations
                 table: "GameTopics");
 
             migrationBuilder.DropColumn(
+                name: "SkillName",
+                table: "GameTopics");
+
+            migrationBuilder.DropColumn(
                 name: "SkillId",
+                table: "ChatBots");
+
+            migrationBuilder.DropColumn(
+                name: "SkillName",
                 table: "ChatBots");
         }
     }

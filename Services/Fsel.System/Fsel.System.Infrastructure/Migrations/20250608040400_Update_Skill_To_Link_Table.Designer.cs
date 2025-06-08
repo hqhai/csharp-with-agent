@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.System.Infrastructure.Migrations
 {
     [DbContext(typeof(SystemDbContext))]
-    [Migration("20250608034144_Update_Skill_To_Link_Table")]
+    [Migration("20250608040400_Update_Skill_To_Link_Table")]
     partial class Update_Skill_To_Link_Table
     {
         /// <inheritdoc />
@@ -1302,6 +1302,9 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.Property<Guid?>("SkillId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SkillName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -2811,6 +2814,9 @@ namespace Fsel.System.Infrastructure.Migrations
 
                     b.Property<Guid?>("SkillId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SkillName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UnitOrder")
                         .IsRequired()

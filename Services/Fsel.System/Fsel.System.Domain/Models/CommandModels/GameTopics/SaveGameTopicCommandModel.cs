@@ -10,6 +10,7 @@ namespace Fsel.System.Domain.Models.CommandModels.GameTopics
         public EnumUnitNumber UnitOrder { get; set; }
         public string? Value { get; set; }
         public EnumCourseSkill Skill { get; set; }
+        public string? SkillName { get; set; }
         public Guid? SkillId { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
