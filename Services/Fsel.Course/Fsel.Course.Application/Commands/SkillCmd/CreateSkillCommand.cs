@@ -7,9 +7,11 @@ namespace Fsel.Course.Application.Commands.SkillCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Skills;
     using Fsel.Course.Domain.Models.EntityModels.SkillModels;
+    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -43,6 +45,12 @@ namespace Fsel.Course.Application.Commands.SkillCmd
             if (string.IsNullOrEmpty(request.Name))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Name), request.Name);
+                return methodResult;
+            }
+
+            if (!LinQHelper.IsValidSkillCode(request.Code))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSkillErrorCode.SkillCodeInvalid), nameof(request.Code), request.Code);
                 return methodResult;
             }
 

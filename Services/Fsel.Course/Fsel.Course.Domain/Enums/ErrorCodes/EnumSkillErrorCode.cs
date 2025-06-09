@@ -7,6 +7,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Skill Is Active
         /// </summary>
-        SkillIsActive
+        SkillIsActive,
+
+        /// <summary>
+        /// SkillCode Invalid
+        /// </summary>
+        SkillCodeInvalid
     }
 }
