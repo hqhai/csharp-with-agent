@@ -19,6 +19,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
             get { return _audioPath.AddS3BaseUrl(); }
         }
 
+        public string? SkillName { get; set; }
+        public Guid? SkillId { get; set; }
         public long TotalQuestion { get; set; }
         public EnumResultStatus Status { get; set; }
         public IList<SectionModel>? Sections { get; set; }

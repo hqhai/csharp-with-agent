@@ -104,6 +104,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                             Name = n.Name,
                                             MediaPost = n.MediaPost,
                                             CourseSkill = n.CourseSkill,
+                                            SkillId = n.SkillId,
+                                            SkillName = n.Skill != null ? n.Skill.Name : null,
                                             Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                                             {
                                                 Id = m!.Id,

@@ -58,6 +58,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                               Id = x!.Id,
                                               ExecutionTime = x!.ExecutionTime,
                                               CourseSkill = x.CourseSkill,
+                                              SkillName = x.Skill != null ? x.Skill.Name : null,
+                                              SkillId = x.SkillId,
                                               Sections = x.Sections.OrderBy(x => x!.DisplayOrder).Select(x => new SectionModel
                                               {
                                                   Id = x.Id,

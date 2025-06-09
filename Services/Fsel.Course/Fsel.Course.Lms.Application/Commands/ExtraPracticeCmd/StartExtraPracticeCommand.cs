@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     StudentId = studentId ?? default,
                     CorrectTotal = a.Item1,
                     Status = EnumResultStatus.New,
-                    ExtraPracticeExerciseResults = a.Item2 != null ? a.Item2 : new List<ExtraPracticeExerciseResult>()
+                    ExtraPracticeExerciseResults = a.Item2 != null ? a.Item2 : new List<ExtraPracticeExerciseResult>(),
                 };
                 extraPractice.ExtraPracticeResults.Add(extraPracticeResult);
                 _extraPracticeRepository.Update(extraPractice);

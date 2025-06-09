@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public HomeWorkProfile()
         {
-            CreateMap<HomeWork, HomeWorkModel>().IgnoreAllNonExisting();
+            CreateMap<HomeWork, HomeWorkModel>().ForMember(p => p.SkillName, x => x.MapFrom(n => n.Skill != null ? n.Skill.Name : null));
             CreateMap<HomeWork, LessonHomeWorkResultModel>().IgnoreAllNonExisting();
             CreateMap<CreateHomeWorkCommandModel, HomeWork>().IgnoreAllNonExisting();
             CreateMap<UpdateHomeWorkCommandModel, HomeWork>().IgnoreAllNonExisting();

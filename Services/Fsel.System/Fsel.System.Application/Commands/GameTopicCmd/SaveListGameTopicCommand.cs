@@ -13,7 +13,6 @@ namespace Fsel.System.Application.Commands.GameTopicCmd
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class SaveListGameTopicCommand : SaveListGameTopicCommandModel, IRequest<MethodResult<bool>>
     {

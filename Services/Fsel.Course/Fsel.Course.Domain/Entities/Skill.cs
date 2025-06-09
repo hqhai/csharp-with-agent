@@ -8,6 +8,9 @@ namespace Fsel.Course.Domain.Entities
 
     public class Skill : Entity
     {
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? FilePath { get; set; }
+
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
@@ -17,6 +20,12 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
+        public Exercise? Exercise { get; set; }
+        public SectionGroup? SectionGroup { get; set; }
+        public ClassForum? ClassForum { get; set; }
+        public HomeWork? HomeWork { get; set; }
+        public LessonInstruction? LessonInstruction { get; set; }
+        public ExtraPracticeExerciseResult? ExtraPracticeExerciseResult { get; set; }
         public ICollection<SkillLevel> SkillLevels { get; set; } = new List<SkillLevel>();
     }
 }

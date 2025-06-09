@@ -77,6 +77,8 @@ namespace Fsel.Course.Domain.Entities
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingPresence { get; set; }
 
+        public Skill? Skill { get; set; }
+        public Guid? SkillId { get; set; }
         public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
 
         public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();

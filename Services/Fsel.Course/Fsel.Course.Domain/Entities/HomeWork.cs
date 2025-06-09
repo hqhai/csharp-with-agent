@@ -44,6 +44,8 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public bool IsArchive { get; set; }
 
+        public Skill? Skill { get; set; }
+        public Guid? SkillId { get; set; }
         public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();
         public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
 

@@ -29,6 +29,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                  .ThenInclude(e => e!.ClassForumFiles.OrderBy(x => x.CreatedDate))
                                  .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .ThenInclude(x => x.Skill)
                                  .Include(e => e.LessonVideos.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(e => e.Video)
                                  .ThenInclude(e => e!.VideoTimeCodes.OrderBy(x => x.CreatedDate))

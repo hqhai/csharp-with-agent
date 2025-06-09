@@ -21,6 +21,8 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
+        public Skill? Skill { get; set; }
+        public Guid? SkillId { get; set; }
         public Lesson? Lesson { get; set; }
         public Guid LessonId { get; set; }
     }

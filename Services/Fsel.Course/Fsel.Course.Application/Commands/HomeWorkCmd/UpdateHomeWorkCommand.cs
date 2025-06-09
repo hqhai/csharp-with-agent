@@ -27,16 +27,19 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly QuestionConverter _questionConverter;
         private readonly IQuestionRepository _questionRepository;
+        private readonly ISkillRepository _skillRepository;
 
         public UpdateHomeWorkCommandHandler(IMapper mapper
             , IHomeWorkRepository homeWorkRepository
             , QuestionConverter questionConverter
-            , IQuestionRepository questionRepository)
+            , IQuestionRepository questionRepository
+            , ISkillRepository skillRepository)
         {
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
             _questionConverter = questionConverter;
             _questionRepository = questionRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(UpdateHomeWorkCommand request, CancellationToken cancellationToken)
@@ -48,6 +51,16 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
                 return methodResult;
             }
+            if (request.SkillId.HasValue)
+            {
+                var skillExists = await _skillRepository.AnyGuidAsync(request.SkillId.Value);
+                if (!skillExists)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.SkillId), request.SkillId);
+                    return methodResult;
+                }
+            }
+
             var homeWork = await _homeWorkRepository.Queryable
                             .Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
                             .ThenInclude(x => x.Question)
