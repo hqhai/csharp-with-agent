@@ -19,6 +19,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public ResourceContent? ResourceContent { get; set; }
         public BlindBoxConfigs? BlindBoxConfigs { get; set; }
         public OrderConfigs? OrderConfigs { get; set; }
+        public MarketplacePremiumConfig? MarketplacePremiumConfig { get; set; }
     }
 
     public class BlindBoxConfigs
@@ -132,5 +133,12 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     public class OrderConfigs
     {
         public int TrialPeriod { get; set; }
+    }
+
+    public class MarketplacePremiumConfig
+    {
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public IList<int>? Packages { get; set; }
     }
 }
