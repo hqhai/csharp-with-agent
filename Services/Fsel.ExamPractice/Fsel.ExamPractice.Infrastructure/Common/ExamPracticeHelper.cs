@@ -77,6 +77,10 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                 {
                     return true;
                 }
+                if (item.Config?.MediaPost != examPracticeSection.Config?.MediaPost)
+                {
+                    return true;
+                }
                 foreach (var questionRequest in item.Questions)
                 {
                     var question = examPracticeSection.Questions.FirstOrDefault(x => x.Id == questionRequest.Id);
