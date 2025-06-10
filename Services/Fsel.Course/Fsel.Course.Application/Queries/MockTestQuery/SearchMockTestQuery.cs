@@ -46,8 +46,8 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                                           UpdatedFullName = x.UpdatedFullName,
                                           Version = x.Version,
                                           Skills = x.MockTestSections.Select(x => x.SectionGroup).Select(n => n!.CourseSkill).ToList(),
-                                          SkillNames = x.MockTestSections.Select(x => x.SectionGroup).Select(x => x.Skill).Select(n => n.Name).ToList(),
-                                          SkillIds = x.MockTestSections.Select(x => x.SectionGroup).Select(x => x.Skill).Select(n => n.Id).ToList(),
+                                          SkillNames = x.MockTestSections.Select(x => x.SectionGroup).Where(x => x != null && x.Skill != null).Select(x => x!.Skill!.Name).ToList(),
+                                          SkillIds = x.MockTestSections.Select(x => x.SectionGroup).Where(x => x != null && x.Skill != null).Select(x => x!.Skill!.Id).ToList(),
                                       });
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
