@@ -26,7 +26,24 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
         public int? TotalSchoolTHCS { get; set; }
         public int? TotalSchoolDefault { get; set; }
         public int? TotalSchoolTHCSDefault { get; set; }
+
+        // new
+        public int? TotalStudentVerified { get; set; }
+
+        public int? TotalStudentVerifiedTHCS { get; set; }
+        public int? TotalTeacherVerified { get; set; }
+        public int? TotalTeacherVerifiedTHCS { get; set; }
+        public int? TotalStudentPTComplete { get; set; }
+        public int? TotalStudentPTProgress { get; set; }
+        public int? TotalStudentPTCompleteTHCS { get; set; }
+        public int? TotalStudentPTProgressTHCS { get; set; }
+        public int? TotalTeacherPTComplete { get; set; }
+        public int? TotalTeacherPTProgress { get; set; }
+        public int? TotalTeacherPTCompleteTHCS { get; set; }
+        public int? TotalTeacherPTProgressTHCS { get; set; }
+        public int? TotalStudentLearnProgressTHCS { get; set; }
+        public int? TotalStudentLearnProgress { get; set; }
+        public int? TotalTeacherLearnProgress { get; set; }
+        public int? TotalTeacherLearnProgressTHCS { get; set; }
     }
 }
-
-

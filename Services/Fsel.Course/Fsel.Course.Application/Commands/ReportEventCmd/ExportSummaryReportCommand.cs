@@ -15,6 +15,7 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
     using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
@@ -61,7 +62,7 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
             }
 
             var result = await _courseDbContext.Set<ExportSummaryReportCommandModel>()
-                                               .FromSqlRaw("EXEC ExportSchoolSummary  @UserId, @CheckByGroup",
+                                               .FromSqlRaw("EXEC ExportSchoolSummary1  @UserId, @CheckByGroup",
                                                    new SqlParameter("@UserId", _authContext.CurrentUserId),
                                                    new SqlParameter("@CheckByGroup", request.CheckByGroup))
                                                .AsNoTracking()
@@ -110,11 +111,10 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
 
         private static void FillDataDepartment(ExcelWorksheet excelWorksheet, IList<ExportSummaryReportCommandModel> exportSummaryReports)
         {
-            int startRow = 7;
+            int startRow = 8;
             foreach (var item in exportSummaryReports)
             {
-                BorderRow(excelWorksheet, startRow, "A", "N");
-
+                BorderRow(excelWorksheet, startRow, "A", "AR");
                 excelWorksheet.Cells[startRow, 2].Value = item.DistrictName;
                 excelWorksheet.Cells[startRow, 3].Value = item.TotalSchoolTHCSDefault;
                 excelWorksheet.Cells[startRow, 4].Value = item.ElevationOfTerrainTHCS;
@@ -142,13 +142,18 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
                 }
 
                 excelWorksheet.Cells[startRow, 13].Value = item.TotalStudentTHCS;
-
                 if (item.TotalStudentDefaultTHCS > 0)
                 {
                     excelWorksheet.Cells[startRow, 14].Value = $"{Math.Round(((((double)(item.TotalStudentTHCS ?? 0)) / item.TotalStudentDefaultTHCS) * 100) ?? 0, 2)}%";
                 }
 
-                startRow++; // Di chuyển xuống dòng tiếp theo               
+                excelWorksheet.Cells[startRow, 15].Value = item.TotalStudentVerifiedTHCS;
+                if (item.TotalStudentVerifiedTHCS > 0)
+                {
+                    excelWorksheet.Cells[startRow, 16].Value = $"{Math.Round(((((double)(item.TotalStudentTHCS ?? 0)) / item.ElevationOfTerrainTHCS) * 100) ?? 0, 2)}%";
+                }
+
+                startRow++; // Di chuyển xuống dòng tiếp theo
             }
 
             foreach (var item in exportSummaryReports)
@@ -250,7 +255,7 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
 
         private static void FillDataDivision(ExcelWorksheet excelWorksheet, IList<ExportSummaryReportCommandModel> exportSummaryReports)
         {
-            int startRow = 7;
+            int startRow = 8;
             int countData = 0;
             int countLevelTHCS = 0;
             int levelTHCS = exportSummaryReports.Count(x => x.Level == 3);
@@ -280,6 +285,90 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
                 {
                     excelWorksheet.Cells[startRow, 11].Value = $"{Math.Round(((((double)(item.TotalStudent ?? 0)) / item.TotalStudentDefault) * 100) ?? 0, 2)}%";
                 }
+
+                // New
+                excelWorksheet.Cells[startRow, 12].Value = item.TotalStudentVerified;
+                if (item.TotalStudentVerified > 0)
+                {
+                    excelWorksheet.Cells[startRow, 13].Value = $"{Math.Round(((((double)(item.TotalStudentVerified ?? 0)) / item.ElevationOfTerrain) * 100) ?? 0, 2)}%";
+                }
+
+                excelWorksheet.Cells[startRow, 14].Value = item.TotalTeacherVerified;
+                if (item.TotalTeacherVerified > 0)
+                {
+                    excelWorksheet.Cells[startRow, 15].Value = $"{Math.Round(((((double)(item.TotalTeacherVerified ?? 0)) / item.ElevationOfRefHeight) * 100) ?? 0, 2)}%";
+                }
+
+                var totalVerified = (item.TotalTeacherVerified ?? default) + (item.TotalStudentVerified ?? default);
+                excelWorksheet.Cells[startRow, 16].Value = totalVerified;
+                if (totalVerified > 0)
+                {
+                    excelWorksheet.Cells[startRow, 17].Value = $"{Math.Round(((((double)totalVerified) / item.TotalStudentDefault) * 100) ?? 0, 2)}%";
+                }
+
+                excelWorksheet.Cells[startRow, 18].Value = item.TotalStudentPTComplete;
+                if (item.TotalStudentPTComplete > 0)
+                {
+                    excelWorksheet.Cells[startRow, 19].Value = $"{Math.Round(((((double)(item.TotalStudentPTComplete ?? 0)) / item.RegisterStudent) * 100) ?? 0, 2)}%";
+                    excelWorksheet.Cells[startRow, 20].Value = $"{Math.Round(((((double)(item.TotalStudentPTComplete ?? 0)) / item.ElevationOfTerrain) * 100) ?? 0, 2)}%";
+                }
+
+                excelWorksheet.Cells[startRow, 21].Value = item.TotalStudentPTProgress;
+                if (item.TotalStudentPTProgress > 0)
+                {
+                    excelWorksheet.Cells[startRow, 22].Value = $"{Math.Round(((((double)(item.TotalStudentPTProgress ?? 0)) / item.RegisterStudent) * 100) ?? 0, 2)}%";
+                    excelWorksheet.Cells[startRow, 23].Value = $"{Math.Round(((((double)(item.TotalStudentPTProgress ?? 0)) / item.ElevationOfTerrain) * 100) ?? 0, 2)}%";
+                }
+
+                excelWorksheet.Cells[startRow, 24].Value = item.TotalTeacherPTComplete;
+                if (item.TotalTeacherPTComplete > 0)
+                {
+                    excelWorksheet.Cells[startRow, 25].Value = $"{Math.Round(((((double)(item.TotalTeacherPTComplete ?? 0)) / item.RegisterTeacher) * 100) ?? 0, 2)}%";
+                    excelWorksheet.Cells[startRow, 26].Value = $"{Math.Round(((((double)(item.TotalTeacherPTComplete ?? 0)) / item.ElevationOfRefHeight) * 100) ?? 0, 2)}%";
+                }
+
+                excelWorksheet.Cells[startRow, 27].Value = item.TotalTeacherPTProgress;
+                if (item.TotalTeacherPTProgress > 0)
+                {
+                    excelWorksheet.Cells[startRow, 28].Value = $"{Math.Round(((((double)(item.TotalTeacherPTProgress ?? 0)) / item.RegisterTeacher) * 100) ?? 0, 2)}%";
+                    excelWorksheet.Cells[startRow, 29].Value = $"{Math.Round(((((double)(item.TotalTeacherPTProgress ?? 0)) / item.ElevationOfRefHeight) * 100) ?? 0, 2)}%";
+                }
+
+                var totalPTComplete = (item.TotalTeacherPTComplete ?? default) + (item.TotalStudentPTComplete ?? default);
+                var totalPTProgress = (item.TotalTeacherPTProgress ?? default) + (item.TotalStudentPTProgress ?? default);
+                var totalRegister = (item.RegisterTeacher ?? default) + (item.RegisterStudent ?? default);
+                excelWorksheet.Cells[startRow, 30].Value = totalPTComplete;
+                if (totalPTComplete > 0)
+                {
+                    excelWorksheet.Cells[startRow, 31].Value = $"{Math.Round(((((double)totalPTComplete) / item.TotalStudentDefault) * 100) ?? 0, 2)}%";
+                    excelWorksheet.Cells[startRow, 32].Value = $"{Math.Round(((((double)totalPTComplete) / totalRegister) * 100), 2)}%";
+                }
+
+                excelWorksheet.Cells[startRow, 33].Value = totalPTProgress;
+                if (totalPTComplete > 0)
+                {
+                    excelWorksheet.Cells[startRow, 34].Value = $"{Math.Round(((((double)totalPTProgress) / item.TotalStudentDefault) * 100) ?? 0, 2)}%";
+                    excelWorksheet.Cells[startRow, 35].Value = $"{Math.Round(((((double)totalPTProgress) / totalRegister) * 100), 2)}%";
+                }
+
+                excelWorksheet.Cells[startRow, 36].Value = item.TotalStudentLearnProgress;
+                if (item.TotalStudentLearnProgress > 0)
+                {
+                    excelWorksheet.Cells[startRow, 37].Value = $"{Math.Round(((((double)(item.TotalStudentLearnProgress ?? 0)) / item.RegisterStudent) * 100) ?? 0, 2)}%";
+                }
+
+                excelWorksheet.Cells[startRow, 38].Value = item.TotalTeacherLearnProgress;
+                if (item.TotalTeacherLearnProgress > 0)
+                {
+                    excelWorksheet.Cells[startRow, 39].Value = $"{Math.Round(((((double)(item.TotalTeacherLearnProgress ?? 0)) / item.RegisterTeacher) * 100) ?? 0, 2)}%";
+                }
+                var totalLearn = (item.TotalStudentLearnProgress ?? default) + (item.TotalTeacherLearnProgress ?? default);
+                excelWorksheet.Cells[startRow, 40].Value = totalLearn;
+                if (totalLearn > 0)
+                {
+                    excelWorksheet.Cells[startRow, 41].Value = $"{Math.Round(((((double)totalLearn) / totalRegister) * 100), 2)}%";
+                }
+
                 startRow++; // Di chuyển xuống dòng tiếp theo
 
                 if (countLevelTHCS == levelTHCS)
@@ -291,45 +380,92 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
 
                 if (countData == exportSummaryReports.Count)
                 {
+                    var registerStudentTotal = exportSummaryReports.Sum(x => (double)(x.RegisterStudent ?? 0));
+                    var registerTeacherTotal = exportSummaryReports.Sum(x => (double)(x.RegisterTeacher ?? 0));
+                    var registerAccountTotal = registerStudentTotal + registerTeacherTotal;
+
+                    var elevationOfTerrainTotal = exportSummaryReports.Sum(x => (double)(x.ElevationOfTerrain ?? 0));
+                    var elevationOfRefHeight = exportSummaryReports.Sum(x => (double)(x.ElevationOfRefHeight ?? 0));
+                    var totalStudentDefault = exportSummaryReports.Sum(x => (double)(x.TotalStudentDefault ?? 0));
+
+                    var totalStudentTotal = exportSummaryReports.Sum(x => (double)(x.TotalStudent ?? 0));
+                    // Verified
+                    var totalStudentVerified = exportSummaryReports.Sum(x => (double)(x.TotalStudentVerified ?? 0));
+                    var totalTeachertVerified = exportSummaryReports.Sum(x => (double)(x.TotalTeacherVerified ?? 0));
+                    var totalAccountVerified = totalStudentVerified + totalTeachertVerified;
+                    // PT Complete
+                    var totalStudentPTComplete = exportSummaryReports.Sum(x => (double)(x.TotalStudentPTComplete ?? 0));
+                    var totalTeacherPTComplete = exportSummaryReports.Sum(x => (double)(x.TotalTeacherPTComplete ?? 0));
+                    var totalAccountPTComplete = totalTeacherPTComplete + totalStudentPTComplete;
+                    // PT Progress
+                    var totalStudentPTProgress = exportSummaryReports.Sum(x => (double)(x.TotalStudentPTProgress ?? 0));
+                    var totalTeacherPTProgress = exportSummaryReports.Sum(x => (double)(x.TotalTeacherPTProgress ?? 0));
+                    var totalAccountPTProgress = totalTeacherPTProgress + totalStudentPTProgress;
+
+                    // Learn
+                    var totalStudentLearn = exportSummaryReports.Sum(x => (double)(x.TotalStudentLearnProgress ?? 0));
+                    var totalTeacherLearn = exportSummaryReports.Sum(x => (double)(x.TotalTeacherLearnProgress ?? 0));
+                    var totalAccountLearn = totalStudentLearn + totalTeacherLearn;
+
+                    excelWorksheet.Cells[$"A{startRow}:AO{startRow}"].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    excelWorksheet.Cells[$"A{startRow}:AO{startRow}"].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
                     excelWorksheet.Cells[$"B{startRow}"].Value = "Tổng";
                     excelWorksheet.Cells[$"B{startRow}"].Style.Font.Bold = true;
-                    excelWorksheet.Cells[$"A{startRow}:K{startRow}"].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    excelWorksheet.Cells[$"A{startRow}:K{startRow}"].Style.Fill.BackgroundColor.SetColor(Color.Yellow);
-                    excelWorksheet.Cells[$"C{startRow}"].Value = exportSummaryReports.Sum(x => x.ElevationOfTerrain);
-                    excelWorksheet.Cells[$"D{startRow}"].Value = exportSummaryReports.Sum(x => x.ElevationOfRefHeight);
-                    excelWorksheet.Cells[$"E{startRow}"].Value = exportSummaryReports.Sum(x => x.TotalStudentDefault);
-                    excelWorksheet.Cells[$"F{startRow}"].Value = exportSummaryReports.Sum(x => x.RegisterStudent);
+                    excelWorksheet.Cells[$"C{startRow}"].Value = elevationOfTerrainTotal;
+                    excelWorksheet.Cells[$"D{startRow}"].Value = elevationOfRefHeight;
+                    excelWorksheet.Cells[$"E{startRow}"].Value = totalStudentDefault;
+                    excelWorksheet.Cells[$"F{startRow}"].Value = registerStudentTotal;
+                    excelWorksheet.Cells[$"G{startRow}"].Value = $"{registerStudentTotal.GetPercent(elevationOfTerrainTotal, 2)}%";
 
-                    if (item.ElevationOfTerrain > 0)
-                    {
-                        var registerStudentTotal = exportSummaryReports.Sum(x => (double)(x.RegisterStudent ?? 0));
-                        var elevationOfTerrainTotal = exportSummaryReports.Sum(x => (double)(x.ElevationOfTerrain ?? 0));
-                        excelWorksheet.Cells[$"G{startRow}"].Value = $"{Math.Round(((registerStudentTotal / elevationOfTerrainTotal) * 100), 2)}%";
-                    }
+                    excelWorksheet.Cells[$"H{startRow}"].Value = registerTeacherTotal;
+                    excelWorksheet.Cells[$"I{startRow}"].Value = $"{registerTeacherTotal.GetPercent(elevationOfRefHeight, 2)}%";
 
-                    excelWorksheet.Cells[$"H{startRow}"].Value = exportSummaryReports.Sum(x => x.RegisterTeacher);
+                    excelWorksheet.Cells[$"J{startRow}"].Value = totalStudentTotal;
+                    excelWorksheet.Cells[$"K{startRow}"].Value = $"{totalStudentTotal.GetPercent(totalStudentDefault, 2)}%";
 
-                    if (item.ElevationOfRefHeight > 0)
-                    {
-                        var registerTeacherTotal = exportSummaryReports.Sum(x => (double)(x.RegisterTeacher ?? 0));
-                        var elevationOfRefHeight = exportSummaryReports.Sum(x => (double)(x.ElevationOfRefHeight ?? 0));
-                        excelWorksheet.Cells[$"I{startRow}"].Value = $"{Math.Round(((registerTeacherTotal / elevationOfRefHeight) * 100), 2)}%";
-                    }
+                    excelWorksheet.Cells[$"L{startRow}"].Value = totalStudentVerified;
+                    excelWorksheet.Cells[$"M{startRow}"].Value = $"{totalStudentVerified.GetPercent(elevationOfTerrainTotal, 2)}%";
 
-                    excelWorksheet.Cells[$"J{startRow}"].Value = exportSummaryReports.Sum(x => x.TotalStudent);
+                    excelWorksheet.Cells[$"N{startRow}"].Value = totalTeachertVerified;
+                    excelWorksheet.Cells[$"O{startRow}"].Value = $"{totalTeachertVerified.GetPercent(elevationOfRefHeight, 2)}%";
 
-                    if (item.TotalStudentDefault > 0)
-                    {
-                        var totalStudentTotal = exportSummaryReports.Sum(x => (double)(x.TotalStudent ?? 0));
-                        var totalStudentDefaultTotal = exportSummaryReports.Sum(x => (double)(x.TotalStudentDefault ?? 0));
-                        excelWorksheet.Cells[$"K{startRow}"].Value = $"{Math.Round(((totalStudentTotal / totalStudentDefaultTotal) * 100), 2)}%";
-                    }
+                    excelWorksheet.Cells[$"P{startRow}"].Value = totalAccountVerified;
+                    excelWorksheet.Cells[$"Q{startRow}"].Value = $"{totalAccountVerified.GetPercent(totalStudentDefault, 2)}%";
 
-                    BorderRow(excelWorksheet, startRow, "A", "K");
+                    excelWorksheet.Cells[$"R{startRow}"].Value = totalStudentPTComplete;
+                    excelWorksheet.Cells[$"S{startRow}"].Value = $"{totalStudentPTComplete.GetPercent(registerStudentTotal, 2)}%";
+                    excelWorksheet.Cells[$"T{startRow}"].Value = $"{totalStudentPTComplete.GetPercent(elevationOfTerrainTotal, 2)}%";
+
+                    excelWorksheet.Cells[$"U{startRow}"].Value = totalStudentPTProgress;
+                    excelWorksheet.Cells[$"V{startRow}"].Value = $"{totalStudentPTProgress.GetPercent(registerStudentTotal, 2)}%";
+                    excelWorksheet.Cells[$"W{startRow}"].Value = $"{totalStudentPTProgress.GetPercent(elevationOfTerrainTotal, 2)}%";
+
+                    excelWorksheet.Cells[$"X{startRow}"].Value = totalTeacherPTComplete;
+                    excelWorksheet.Cells[$"Y{startRow}"].Value = $"{totalTeacherPTComplete.GetPercent(registerTeacherTotal, 2)}%";
+                    excelWorksheet.Cells[$"Z{startRow}"].Value = $"{totalTeacherPTComplete.GetPercent(elevationOfRefHeight, 2)}%";
+
+                    excelWorksheet.Cells[$"AA{startRow}"].Value = totalTeacherPTProgress;
+                    excelWorksheet.Cells[$"AB{startRow}"].Value = $"{totalTeacherPTProgress.GetPercent(registerTeacherTotal, 2)}%";
+                    excelWorksheet.Cells[$"AC{startRow}"].Value = $"{totalTeacherPTProgress.GetPercent(elevationOfRefHeight, 2)}%";
+
+                    excelWorksheet.Cells[$"AD{startRow}"].Value = totalAccountPTComplete;
+                    excelWorksheet.Cells[$"AE{startRow}"].Value = $"{totalAccountPTComplete.GetPercent(registerAccountTotal, 2)}%";
+                    excelWorksheet.Cells[$"AF{startRow}"].Value = $"{totalAccountPTComplete.GetPercent(totalStudentDefault, 2)}%";
+
+                    excelWorksheet.Cells[$"AG{startRow}"].Value = totalAccountPTProgress;
+                    excelWorksheet.Cells[$"AH{startRow}"].Value = $"{totalAccountPTProgress.GetPercent(registerAccountTotal, 2)}%";
+                    excelWorksheet.Cells[$"AI{startRow}"].Value = $"{totalAccountPTProgress.GetPercent(totalStudentDefault, 2)}%";
+
+                    excelWorksheet.Cells[$"AJ{startRow}"].Value = totalStudentLearn;
+                    excelWorksheet.Cells[$"AK{startRow}"].Value = $"{totalStudentLearn.GetPercent(elevationOfTerrainTotal, 2)}%";
+                    excelWorksheet.Cells[$"AL{startRow}"].Value = totalTeacherLearn;
+                    excelWorksheet.Cells[$"AM{startRow}"].Value = $"{totalTeacherLearn.GetPercent(elevationOfRefHeight, 2)}%";
+                    excelWorksheet.Cells[$"AN{startRow}"].Value = totalAccountLearn;
+                    excelWorksheet.Cells[$"AO{startRow}"].Value = $"{totalAccountLearn.GetPercent(totalStudentDefault, 2)}%";
+                    BorderRow(excelWorksheet, startRow, "A", "AO");
                 }
             }
         }
-
 
         public static string GetData(object data, object? param)
         {
