@@ -205,18 +205,18 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                                     }
 
                                     scope.Complete();
-
-                                    #region Create User Referral
-                                    var vm = await BuildLoginViewModelAsync(request.ReturnUrl ?? string.Empty);
-                                    if (!string.IsNullOrEmpty(vm.ReferralCode))
-                                    {
-                                        await _mediator.Send(new CreateUserReferralCommand { ReferralCode = vm.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }).ConfigureAwait(false);
-                                    }
-                                    #endregion
-
-                                    ViewBag.Success = _localizer["i18n_User_successfuly_added"];
-                                    return await LoginWithoutPassword(user, request.ReturnUrl);
                                 }
+
+                                #region Create User Referral
+                                var vm = await BuildLoginViewModelAsync(request.ReturnUrl ?? string.Empty);
+                                if (!string.IsNullOrEmpty(vm.ReferralCode))
+                                {
+                                    await _mediator.Send(new CreateUserReferralCommand { ReferralCode = vm.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }).ConfigureAwait(false);
+                                }
+                                #endregion
+
+                                ViewBag.Success = _localizer["i18n_User_successfuly_added"];
+                                return await LoginWithoutPassword(user, request.ReturnUrl);
                             });
                         }
                         else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpCodeErrorCode.OtpInvalid)))
