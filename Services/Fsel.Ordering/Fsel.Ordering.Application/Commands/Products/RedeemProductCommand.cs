@@ -4,13 +4,18 @@ namespace Fsel.Ordering.Application.Commands.Products
 {
     using System;
     using System.Collections.Concurrent;
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Caching;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Ordering.Application.Commands.MarketplacePremiumCmd;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
@@ -20,7 +25,7 @@ namespace Fsel.Ordering.Application.Commands.Products
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using System.Text.Json;
+    using Microsoft.Extensions.Logging;
 
     public class RedeemProductCommand : RedeemProductCommandModel, IRequest<MethodResult<string>>
     {
@@ -88,19 +93,25 @@ namespace Fsel.Ordering.Application.Commands.Products
         private readonly AuthContext _authContext;
         private readonly IOrderTransactionRepository _orderTransactionRepository;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
+        private readonly ICacheService<StudentModel> _cacheService;
+        private readonly ILogger<RedeemProductPremiumCommandHandler> _logger;
 
         public RedeemProductCommandHandler(
             IUserService userService,
             IProductRepository productRepository,
             AuthContext authContext,
             IOrderTransactionRepository orderTransactionRepository,
-            CreateTokenHistoryPublisher createTokenHistoryPublisher)
+            CreateTokenHistoryPublisher createTokenHistoryPublisher,
+            ICacheService<StudentModel> cacheService,
+            ILogger<RedeemProductPremiumCommandHandler> logger)
         {
             _userService = userService;
             _productRepository = productRepository;
             _authContext = authContext;
             _orderTransactionRepository = orderTransactionRepository;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
+            _cacheService = cacheService;
+            _logger = logger;
         }
 
         public async Task<MethodResult<string>> Handle(RedeemProductCommand request, CancellationToken cancellationToken)
@@ -210,9 +221,33 @@ namespace Fsel.Ordering.Application.Commands.Products
                         return methodResult;
                     }
 
-                    var student = studentResult.Content?.Result;
-                    var token = student?.NumberOfToken ?? 0;
+                    if (studentResult.Content?.Result == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                        return methodResult;
+                    }
 
+                    var key = $"NumberOfToken_{_authContext.CurrentUserId}";
+                    var student = _cacheService.Get(key,
+                        TimeSpan.FromMinutes(1),
+                        () => studentResult.Content.Result,
+                        _logger);
+
+                    if (student == null)
+                    {
+                        student = studentResult.Content.Result;
+                    }
+
+                    if (student == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                        return methodResult;
+                    }
+
+                    student.NumberOfToken -= product.Price;
+                    await _cacheService.SetAsync(key, student, TimeSpan.FromSeconds(5));
+
+                    var token = student.NumberOfToken;
                     if (token < product.Price)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(token), token);
@@ -234,18 +269,6 @@ namespace Fsel.Ordering.Application.Commands.Products
                     // Thực hiện transaction
                     await _productRepository.ExecuteTransactionAsync(async () =>
                     {
-                        var tokenHistoryTranslations = product.Translations.Select(item => new TokenHistoryTranslationModel
-                        {
-                            Language = item.Language,
-                            Config = new List<object>
-                            {
-                                new { Title = item.Name }
-                            }
-                        }).ToList();
-
-                        var language = RegionHelper.GetCountry(EnumCountryKey.Vietnam)?.CultureCode;
-                        var configDefault = tokenHistoryTranslations.FirstOrDefault(x => x.Language == language);
-
                         var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
                         {
                             UserId = student?.Human?.UserId ?? default,
@@ -253,7 +276,14 @@ namespace Fsel.Ordering.Application.Commands.Products
                             Feature = EnumTokenFeature.MarketPlace,
                             Mission = EnumTokenMission.FselStore,
                             ObjectId = product.Id,
-                            Config = configDefault?.Config ?? tokenHistoryTranslations.FirstOrDefault()?.Config
+                            Translations = product.Translations.Select(p => new TokenHistoryTranslationModel()
+                            {
+                                Language = p.Language,
+                                Config = new List<object>
+                                {
+                                        new { Title = p.Name }
+                                }
+                            }).ToList()
                         });
 
                         if (!result.IsSuccessStatusCode)

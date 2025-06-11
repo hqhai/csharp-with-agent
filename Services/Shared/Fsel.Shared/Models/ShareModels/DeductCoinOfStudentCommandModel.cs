@@ -10,5 +10,7 @@ namespace Fsel.Shared.Models.ShareModels
         public EnumTokenMission? Mission { get; set; }
         public Guid? ObjectId { get; set; }
         public object? Config { get; set; }
+
+        public IList<TokenHistoryTranslationModel>? Translations { get; set; }
     }
 }

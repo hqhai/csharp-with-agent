@@ -114,5 +114,7 @@ namespace Fsel.Shared.Constants
 
         public const string DepartmentLevelReport = "Resources//ExportExcelTemplates//BaoCao_Capso.xlsx";
         public const string DivisionLevelReport = "Resources//ExportExcelTemplates//BaoCao_CapPhong.xlsx";
+
+        public const string ProductFileName = "Resources//Products.json";
     }
 }

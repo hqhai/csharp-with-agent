@@ -1,26 +1,19 @@
-// Copyright (c) Atlantic. All rights reserved.
-
-namespace Fsel.Ordering.Application.Commands.UrBoxs
+namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
 {
-    using System;
     using System.Security.Cryptography;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Caching;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
-    using Fsel.Ordering.Application.Commands.MarketplacePremiumCmd;
     using Fsel.Ordering.Application.Queries.UrBoxQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UrBoxService;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Fsel.Ordering.Application.Services.UserService;
-    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Entities;
-    using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.UrBox;
     using Fsel.Ordering.Infrastructure.ValueSettings;
@@ -30,13 +23,15 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
 
-    public class CreateRedemptionRequestCommand : CreateRedemptionRequestCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
+    public class RedeemUrboxPremiumCommand : CreateRedemptionRequestCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
     {
+        public Guid ProductId { get; set; }
+        public Guid UserId { get; set; }
+        public long Price { get; set; }
     }
 
-    public class CreateRedemptionRequestCommandHandler : IRequestHandler<CreateRedemptionRequestCommand, MethodResult<RedemptionResponseModel>>
+    public class RedeemUrboxPremiumCommandHandler : IRequestHandler<RedeemUrboxPremiumCommand, MethodResult<RedemptionResponseModel>>
     {
         private readonly IUrBoxService _urBoxService;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
@@ -47,15 +42,12 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
         private readonly IOrderTransactionRepository _orderTransactionRepository;
         private readonly IHostEnvironment _hostEnvironment;
 
-        private readonly ICacheService<StudentModel> _cacheService;
-        private readonly ILogger<RedeemProductPremiumCommandHandler> _logger;
-
         private const string LanguageVN = "vi";
         private const string LanguageEN = "en";
         private const string CultureCodeVN = "vi-VN";
         private const string CultureCodeEN = "en-US";
 
-        public CreateRedemptionRequestCommandHandler(IUrBoxService urBoxService, CreateTokenHistoryPublisher createTokenHistoryPublisher, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository, IHostEnvironment hostEnvironment, ICacheService<StudentModel> cacheService, ILogger<RedeemProductPremiumCommandHandler> logger)
+        public RedeemUrboxPremiumCommandHandler(IUrBoxService urBoxService, CreateTokenHistoryPublisher createTokenHistoryPublisher, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository, IHostEnvironment hostEnvironment)
         {
             _urBoxService = urBoxService;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -65,20 +57,12 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
             _userService = userService;
             _orderTransactionRepository = orderTransactionRepository;
             _hostEnvironment = hostEnvironment;
-            _cacheService = cacheService;
-            _logger = logger;
         }
 
-        public async Task<MethodResult<RedemptionResponseModel>> Handle(CreateRedemptionRequestCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<RedemptionResponseModel>> Handle(RedeemUrboxPremiumCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<RedemptionResponseModel>();
-
-            if (string.IsNullOrEmpty(request.PhoneNumber) || !request.PhoneNumber.IsValidPhoneNumber())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.PhoneNumber), request.PhoneNumber);
-                return methodResult;
-            }
 
             if (request.DataBuy == null || request.DataBuy.Count == 0)
             {
@@ -96,36 +80,6 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
             }
 
             if (string.IsNullOrEmpty(request.PhoneNumber))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentResult.Error);
-                return methodResult;
-            }
-
-            if (studentResult.Content?.Result == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            var key = $"NumberOfToken_{_authContext.CurrentUserId}";
-            var student = _cacheService.Get(key,
-                TimeSpan.FromMinutes(1),
-                () => studentResult.Content.Result,
-                _logger);
-
-            if (student == null)
-            {
-                student = studentResult.Content.Result;
-            }
-
-            if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
@@ -167,33 +121,9 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 nameOther = giftOther.Result?.Title;
             }
 
-            if (!long.TryParse(gift.Result?.Price, out long price))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            if (!long.TryParse(request.DataBuy.FirstOrDefault()?.Quantity, out long quantity))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            var totalPrice = quantity * price;
-
-            student.NumberOfToken -= totalPrice;
-            await _cacheService.SetAsync(key, student, TimeSpan.FromSeconds(5));
-
-            var token = student.NumberOfToken;
-            if (token < totalPrice)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(token), token);
-                return methodResult;
-            }
-
             await _orderTransactionRepository.ExecuteTransactionAsync(async () =>
             {
-                var orderTransaction = _orderTransactionRepository.Add(new OrderTransaction() { Type = EnumOrderTransactionType.UrBox });
+                var orderTransaction = _orderTransactionRepository.Add(new OrderTransaction() { Type = EnumOrderTransactionType.UrBoxPremium, ProductId = request.ProductId });
                 await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 var redemptionRequest = new CreateRedemptionRequestModel(_appSetting);
@@ -251,11 +181,11 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
 
                 var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
                 {
-                    UserId = student?.Human?.UserId ?? default,
-                    NumberOfCoinsDeducted = totalPrice,
+                    UserId = request.UserId,
+                    NumberOfCoinsDeducted = request.Price,
                     Feature = EnumTokenFeature.MarketPlace,
-                    Mission = EnumTokenMission.UrBox,
-                    ObjectId = orderTransaction.Id,
+                    Mission = EnumTokenMission.MarketPlacePremium,
+                    ObjectId = request.ProductId,
                     Translations = new List<TokenHistoryTranslationModel>()
                     {
                         new TokenHistoryTranslationModel()

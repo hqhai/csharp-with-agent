@@ -76,7 +76,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     Feature = request.Feature,
                     Mission = request.Mission,
                     ObjectId = request.ObjectId,
-                    Config = request.Config
+                    Config = request.Config,
+                    Translations = request.Translations
                 });
 
                 if (!result.IsSuccessStatusCode)

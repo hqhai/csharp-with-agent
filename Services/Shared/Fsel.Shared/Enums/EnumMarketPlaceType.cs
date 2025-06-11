@@ -4,6 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumMarketPlaceType
     {
-        FSEL, UrBox, MarketplacePremium
+        FSEL, UrBox
     }
 }
