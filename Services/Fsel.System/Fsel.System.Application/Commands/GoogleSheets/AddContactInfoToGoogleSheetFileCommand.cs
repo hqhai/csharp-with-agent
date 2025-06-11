@@ -20,6 +20,8 @@ namespace Fsel.System.Application.Commands.GoogleSheets
     public class AddContactInfoToGoogleSheetFileCommand : IRequest<MethodResult<bool>>
     {
         public IList<AddContactInfoToGoogleSheetFileCommandModel>? Model { get; set; }
+        public string? OverrideSpreadSheetId { get; set; }
+        public string? OverrideSheet { get; set; }
     }
 
     public class AddContactInfoToGoogleSheetFileCommandHandler : IRequestHandler<AddContactInfoToGoogleSheetFileCommand, MethodResult<bool>>
@@ -36,8 +38,12 @@ namespace Fsel.System.Application.Commands.GoogleSheets
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var spreadSheetId = _appSetting.GoogleSheetConfig?.LandingPageSpreadSheetId;
-            var sheet = _appSetting.GoogleSheetConfig?.LandingPageSheet;
+            var spreadSheetId = !string.IsNullOrEmpty(request.OverrideSpreadSheetId)
+                ? request.OverrideSpreadSheetId
+                : _appSetting.GoogleSheetConfig?.LandingPageSpreadSheetId;
+            var sheet = !string.IsNullOrEmpty(request.OverrideSheet)
+                ? request.OverrideSheet
+                : _appSetting.GoogleSheetConfig?.LandingPageSheet;
 
             if (string.IsNullOrEmpty(spreadSheetId))
             {
@@ -47,7 +53,13 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 
             var credentialsPath = ResourceSettings.I18NCredentialsFilePath;
 
-            var data = request.Model?.Select(item => new List<object> { item?.Email ?? string.Empty, item?.PhoneNumber ?? string.Empty, item?.FullName ?? string.Empty, DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam).ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture) }).ToList();
+            var data = request.Model?.Select(item => new List<object>
+            {
+                item?.Email ?? string.Empty,
+                item?.PhoneNumber ?? string.Empty,
+                item?.FullName ?? string.Empty,
+                DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam).ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture)
+            }).ToList();
 
             GoogleCredential credential;
 
