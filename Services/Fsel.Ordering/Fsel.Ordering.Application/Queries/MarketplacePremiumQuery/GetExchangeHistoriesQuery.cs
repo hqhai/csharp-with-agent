@@ -5,13 +5,11 @@ using Fsel.Core.Base;
 using Fsel.Ordering.Application.Services.UrBoxService;
 using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
 using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
-using Fsel.Ordering.Domain.Entities;
 using Fsel.Ordering.Domain.IRepositories;
 using Fsel.Ordering.Infrastructure.ValueSettings;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Index.HPRtree;
 
 namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
 {
@@ -45,9 +43,17 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExchangeHistoryModel>();
 
-            var urboxTransactions = await _orderTransactionRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId && p.Status == EnumOrderTransactionStatus.Success && p.Type == EnumOrderTransactionType.UrBoxPremium).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
+            var urboxTransactions = await (from pt in _orderTransactionRepository.Queryable
+                                           join p in _productRepository.Queryable on pt.ProductId equals p.Id
+                                           where p.IsPremium && pt.CreatedUserId == _authContext.CurrentUserId && pt.Type == EnumOrderTransactionType.UrBoxPremium
+                                           && pt.Status == EnumOrderTransactionStatus.Success
+                                           select new
+                                           {
+                                               UrboxTransaction = pt,
+                                               Product = p
+                                           }).ToListAsync(cancellationToken);
 
-            var responses = urboxTransactions.Select(p => p?.ResponseBody).Deserialize<List<RedemptionResponseModel>>();
+            var responses = urboxTransactions.Select(p => p.UrboxTransaction).Select(p => p?.ResponseBody).Deserialize<List<RedemptionResponseModel>>();
 
             var gifts = responses?.Select(d => d.Data).Select(c => c.Cart).SelectMany(clg => clg.CodeLinkGift).ToList();
 
@@ -59,7 +65,7 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
 
             foreach (var item in urboxTransactions)
             {
-                tasks.Add(GetDetailExchangeHistoryAsync(item.Id));
+                tasks.Add(GetDetailExchangeHistoryAsync(item.UrboxTransaction.Id));
             }
 
             foreach (var item in giftIds)
@@ -95,33 +101,37 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
             {
                 var giftDetail = giftDetails.FirstOrDefault(p => p.Data?.Id == gift.PriceId);
                 var item = detailExchangeHistories.FirstOrDefault(p => p.Id == gift.CartDetailId);
-                var a = new GiftHistoryModel
+                var urboxTransaction = urboxTransactions.FirstOrDefault(p => p.Product.GlobalId == gift.PriceId);
+                if (urboxTransaction != null)
                 {
-                    Id = gift.CartDetailId,
-                    GiftId = gift.PriceId,
-                    GiftName = giftDetail?.Data?.Title,
-                    Price = "" + gift.Price,
-                    Content = giftDetail?.Data?.Content,
-                    Note = giftDetail?.Data?.Note,
-                    Expired = gift.Expired,
-                    CodeImage = gift.CodeImage,
-                    Code = gift.Code,
-                    Image = giftDetail?.Data?.Image,
-                    BrandImage = giftDetail?.Data?.BrandImage,
-                    BrandTitle = giftDetail?.Data?.BrandImage,
-                    Delivery = item?.Delivery,
-                    Offices = giftDetail?.Data?.Offices?.Select(p => p.Address).ToList(),
-                    Pin = gift.Pin,
-                    Serial = gift.Serial,
-                    MarketPlaceType = EnumMarketPlaceType.UrBox
-                };
-                if (item != null && GetStatusGift(item.DeliveryCode))
-                {
-                    history.Used.Add(a);
-                }
-                else
-                {
-                    history.UnUsed.Add(a);
+                    var a = new GiftHistoryModel
+                    {
+                        Id = urboxTransaction.Product.Id.ToString(),
+                        GiftId = gift.PriceId,
+                        GiftName = giftDetail?.Data?.Title,
+                        Price = "" + gift.Price,
+                        Content = giftDetail?.Data?.Content,
+                        Note = giftDetail?.Data?.Note,
+                        Expired = gift.Expired,
+                        CodeImage = gift.CodeImage,
+                        Code = gift.Code,
+                        Image = giftDetail?.Data?.Image,
+                        BrandImage = giftDetail?.Data?.BrandImage,
+                        BrandTitle = giftDetail?.Data?.BrandImage,
+                        Delivery = item?.Delivery,
+                        Offices = giftDetail?.Data?.Offices?.Select(p => p.Address).ToList(),
+                        Pin = gift.Pin,
+                        Serial = gift.Serial,
+                        MarketPlaceType = EnumMarketPlaceType.UrBox
+                    };
+                    if (item != null && GetStatusGift(item.DeliveryCode))
+                    {
+                        history.Used.Add(a);
+                    }
+                    else
+                    {
+                        history.UnUsed.Add(a);
+                    }
                 }
             }
 
@@ -134,6 +144,36 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
                                                  ProductTransaction = pt,
                                                  Product = p
                                              }).ToListAsync(cancellationToken);
+
+            foreach (var productTransaction in productTransactions)
+            {
+                if (productTransaction.ProductTransaction.Status == EnumOrderTransactionStatus.Requested)
+                {
+                    history.UnUsed.Add(new GiftHistoryModel()
+                    {
+                        Id = productTransaction.Product.Id.ToString(),
+                        Price = "" + productTransaction.Product.Price,
+                        BrandImage = _appSetting.MarketplacePremiumConfig?.BrandImage,
+                        BrandTitle = _appSetting.MarketplacePremiumConfig?.BrandName,
+                        Pin = productTransaction.ProductTransaction.Code,
+                        Code = productTransaction.ProductTransaction.Code,
+                        Image = productTransaction.Product.Images?.FirstOrDefault()
+                    });
+                }
+                else
+                {
+                    history.Used.Add(new GiftHistoryModel()
+                    {
+                        Id = productTransaction.Product.Id.ToString(),
+                        Price = "" + productTransaction.Product.Price,
+                        BrandImage = _appSetting.MarketplacePremiumConfig?.BrandImage,
+                        BrandTitle = _appSetting.MarketplacePremiumConfig?.BrandName,
+                        Pin = productTransaction.ProductTransaction.Code,
+                        Code = productTransaction.ProductTransaction.Code,
+                        Image = productTransaction.Product.Images?.FirstOrDefault()
+                    });
+                }
+            }
 
             methodResult.Result = history;
             return methodResult;
