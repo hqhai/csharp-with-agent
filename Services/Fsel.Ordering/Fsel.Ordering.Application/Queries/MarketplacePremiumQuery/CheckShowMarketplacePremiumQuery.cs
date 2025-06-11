@@ -55,10 +55,24 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
                                     Package = p
                                 }).ToListAsync(cancellationToken);
 
-            if (orders != null && orders.Any(p => packages.Contains(p.Package.MonthNumber) && (p.Order.UpdatedDate.HasValue ? (p.Order.UpdatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) >= startDate && p.Order.UpdatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) <= endDate) : (p.Order.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam) >= startDate && p.Order.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam) <= endDate))))
+            if (orders != null)
             {
-                methodResult.Result = true;
-                return methodResult;
+                foreach (var orderItem in orders)
+                {
+                    bool isInPackage = packages.Contains(orderItem.Package.MonthNumber);
+
+                    DateTime orderDate = orderItem.Order.UpdatedDate.HasValue
+                        ? orderItem.Order.UpdatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam)
+                        : orderItem.Order.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+                    bool isInDateRange = orderDate >= startDate && orderDate <= endDate;
+
+                    if (isInPackage && isInDateRange)
+                    {
+                        methodResult.Result = true;
+                        return methodResult;
+                    }
+                }
             }
 
             return methodResult;

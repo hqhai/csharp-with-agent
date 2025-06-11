@@ -27,6 +27,11 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
         private readonly AuthContext _languageContext;
         private readonly IProductRepository _productRepository;
 
+        public const int deliveryCode2 = 2;
+        public const int deliveryCode4 = 4;
+        public const int deliveryCode8 = 8;
+        public const int deliveryCode11 = 11;
+
         public GetExchangeHistoriesQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext authContext, IOrderTransactionRepository orderTransactionRepository, IMapper mapper, AuthContext languageContext, IProductRepository productRepository)
         {
             _urBoxService = urBoxService;
@@ -181,7 +186,7 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
 
         private static bool GetStatusGift(long deliveryCode)
         {
-            if (deliveryCode == 2 || deliveryCode == 4 || deliveryCode == 8 || deliveryCode == 11)
+            if (deliveryCode == deliveryCode2 || deliveryCode == deliveryCode4 || deliveryCode == deliveryCode8 || deliveryCode == deliveryCode11)
             {
                 return true;
             }
