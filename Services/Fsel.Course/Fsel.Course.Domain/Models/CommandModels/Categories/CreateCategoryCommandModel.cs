@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.Categories
 {
+    using Fsel.Shared.Enums;
+
     public class CreateCategoryCommandModel
     {
         public Guid? ParentId { get; set; }
@@ -11,5 +13,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Categories
         public string? Code { get; set; }
 
         public string? Description { get; set; }
+
+        public EnumStatus Status { get; set; }
     }
 }

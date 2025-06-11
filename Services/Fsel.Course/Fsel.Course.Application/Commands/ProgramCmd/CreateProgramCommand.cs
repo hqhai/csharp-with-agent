@@ -12,7 +12,6 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
     using Fsel.Course.Domain.Models.CommandModels.Programs;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

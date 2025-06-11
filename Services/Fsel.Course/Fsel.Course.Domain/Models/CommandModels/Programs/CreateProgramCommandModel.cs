@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.Programs
 {
+    using Fsel.Shared.Enums;
+
     public class CreateProgramCommandModel
     {
         public Guid ParentId { get; set; }
@@ -11,6 +13,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.Programs
         public string? Code { get; set; }
 
         public string? Description { get; set; }
+
+        public EnumStatus Status { get; set; }
 
         public IList<UpdateLevelCommandModel>? Levels { get; set; }
     }

@@ -77,7 +77,6 @@ namespace Fsel.Course.Application.Commands.CategoryCmd
 
             await _categoryRepository.ExecuteTransactionAsync(async () =>
             {
-                category.Status = EnumStatus.Active;
                 category.Type = EnumTypeCategory.Subject;
 
                 _categoryRepository.Add(category);
