@@ -52,6 +52,7 @@ namespace Fsel.Course.Application.Queries.SkillQuery
                 Description = x.Description,
                 FilePath = x.FilePath,
                 CreatedDate = x.CreatedDate,
+                UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,
                 IsActive = x.SkillLevels.Any(),
             });
