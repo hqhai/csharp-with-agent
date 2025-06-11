@@ -16,12 +16,37 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
         public int? RegisterTeacher { get; set; }
         public int? TotalStudent { get; set; }
         public int? Level { get; set; }
+
+        /// <summary>
+        /// Số học sinh thực tế
+        /// </summary>
         public int? ElevationOfTerrainTHCS { get; set; }
+
+        /// <summary>
+        /// Số GV Thực tế
+        /// </summary>
         public int? ElevationOfRefHeightTHCS { get; set; }
+
+        /// <summary>
+        /// Tổng số học viên thực tế (HS + GV)
+        /// </summary>
         public int? TotalStudentDefaultTHCS { get; set; }
+
+        /// <summary>
+        /// Số lượng học sinh đăng ký
+        /// </summary>
         public int? RegisterStudentTHCS { get; set; }
+
+        /// <summary>
+        /// Số lượng GV đăng ký
+        /// </summary>
         public int? RegisterTeacherTHCS { get; set; }
+
+        /// <summary>
+        /// Tổng số học viên đăng ký (HS+GV)
+        /// </summary>
         public int? TotalStudentTHCS { get; set; }
+
         public int? TotalSchool { get; set; }
         public int? TotalSchoolTHCS { get; set; }
         public int? TotalSchoolDefault { get; set; }
