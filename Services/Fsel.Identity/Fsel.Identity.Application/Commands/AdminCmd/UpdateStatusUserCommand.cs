@@ -2,52 +2,49 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
-
-    public class UpdateStatusUsersCommand : IRequest<MethodResult<bool>>
+    public class UpdateStatusUserCommand : IRequest<MethodResult<UserModel>>
     {
-        public IList<Guid> Ids { get; set; }
+        public Guid Id { get; set; }
+        public bool Status { get; set; }
     }
 
-    public class UpdateStatusUsersCommandHandler : IRequestHandler<UpdateStatusUsersCommand, MethodResult<bool>>
+    public class UpdateStatusUserCommandHandler : IRequestHandler<UpdateStatusUserCommand, MethodResult<UserModel>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IMapper _mapper;
 
-        public UpdateStatusUsersCommandHandler(UserManager<User> userManager)
+        public UpdateStatusUserCommandHandler(UserManager<User> userManager,
+            IMapper mapper)
         {
             _userManager = userManager;
+            _mapper = mapper;
         }
 
-        public async Task<MethodResult<bool>> Handle(UpdateStatusUsersCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<UserModel>> Handle(UpdateStatusUserCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            ArgumentNullException.ThrowIfNull(request.Ids);
-
-            var methodResult = new MethodResult<bool>();
-
-            var users = await _userManager.Users.WhereBulkContains(request.Ids, x => x.Id).ToListAsync(cancellationToken);
-            if (users == null)
+            var methodResult = new MethodResult<UserModel>();
+            var user = await _userManager.FindByIdAsync(request.Id.ToString());
+            if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(users));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
 
-            foreach (var user in users)
-            {
-                user.Status = (!user.Status.HasValue || user.Status == EnumUserStatus.Inactive) ? EnumUserStatus.Active : EnumUserStatus.Inactive;
-                await _userManager.UpdateAsync(user);
-            }
-
+            user.Status = request.Status ? EnumUserStatus.Active : EnumUserStatus.Inactive;
+            await _userManager.UpdateAsync(user);
 
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = true;
+            methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
         }
     }
