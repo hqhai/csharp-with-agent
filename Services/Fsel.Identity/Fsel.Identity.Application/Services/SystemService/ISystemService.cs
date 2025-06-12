@@ -77,7 +77,7 @@ namespace Fsel.Identity.Application.Services.SystemService
         [Post("/v1/admin/token-history/add-coin-fsel-event-reward")]
         Task<IApiResponse<MethodResult<bool>>> AddCoinFselEventReward([Body] AddCoinFselEventRewardModel query);
 
-        [Post("/v1/google-sheet/add-contact-info-to-google-sheet-file")]
-        Task<IApiResponse<MethodResult<bool>>> AddContactInfoToGoogleSheetFile([Body] CreateContactInfosToGoogleSheetFileCommandModel model);
+        [Post("/v1/google-sheet/add-dynamic-info-to-google-sheet-file")]
+        Task<IApiResponse<MethodResult<bool>>> AddDynamicInfoToGoogleSheetFile([Body] CreateDynamicInfosToGoogleSheetFileCommandModel model);
     }
 }

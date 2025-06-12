@@ -17,36 +17,49 @@ namespace Fsel.System.Application.Commands.GoogleSheets
     using Google.Apis.Sheets.v4.Data;
     using MediatR;
 
-    public class AddContactInfoToGoogleSheetFileCommand : IRequest<MethodResult<bool>>
+    public class AddDynamicInfoToGoogleSheetFileCommand : IRequest<MethodResult<bool>>
     {
-        public IList<AddContactInfoToGoogleSheetFileCommandModel>? Model { get; set; }
+        public IList<Dictionary<string, object>>? Model { get; set; }
         public string? OverrideSpreadSheetId { get; set; }
         public string? OverrideSheet { get; set; }
-        public IList<string>? ColumnOrder { get; set; }
+        public IList<string> ColumnOrder { get; set; }
     }
 
-    public class AddContactInfoToGoogleSheetFileCommandHandler : IRequestHandler<AddContactInfoToGoogleSheetFileCommand, MethodResult<bool>>
+    public class AddDynamicInfoToGoogleSheetFileCommandHandler : IRequestHandler<AddDynamicInfoToGoogleSheetFileCommand, MethodResult<bool>>
     {
         private readonly AppSetting _appSetting;
 
-        public AddContactInfoToGoogleSheetFileCommandHandler(AppSetting appSetting)
+        public AddDynamicInfoToGoogleSheetFileCommandHandler(AppSetting appSetting)
         {
             _appSetting = appSetting;
         }
 
-        public async Task<MethodResult<bool>> Handle(AddContactInfoToGoogleSheetFileCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(AddDynamicInfoToGoogleSheetFileCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
+            if (request.ColumnOrder == null || !request.ColumnOrder.Any())
+            {
+                methodResult.AddErrorBadRequest("ColumnOrder is required.");
+                return methodResult;
+            }
+
+            if (request.Model == null || !request.Model.Any())
+            {
+                methodResult.AddErrorBadRequest("Model data is required.");
+                return methodResult;
+            }
+
             var spreadSheetId = !string.IsNullOrEmpty(request.OverrideSpreadSheetId)
                 ? request.OverrideSpreadSheetId
                 : _appSetting.GoogleSheetConfig?.LandingPageSpreadSheetId;
+
             var sheet = !string.IsNullOrEmpty(request.OverrideSheet)
                 ? request.OverrideSheet
                 : _appSetting.GoogleSheetConfig?.LandingPageSheet;
 
-            if (string.IsNullOrEmpty(spreadSheetId))
+            if (string.IsNullOrEmpty(spreadSheetId) || string.IsNullOrEmpty(sheet))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
@@ -54,31 +67,32 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 
             var credentialsPath = ResourceSettings.I18NCredentialsFilePath;
 
-            var defaultOrder = new List<string> { "Email", "PhoneNumber", "FullName", "Time" };
-            var columnOrder = request.ColumnOrder?.Any() == true ? request.ColumnOrder : defaultOrder;
-
-            var data = request.Model?.Select(item =>
+            var data = request.Model.Select(item =>
             {
                 var row = new List<object>();
-                foreach (var col in columnOrder)
+                foreach (var col in request.ColumnOrder!)
                 {
-                    if (string.Equals(col, "Time", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(col, "CreatedTime", StringComparison.OrdinalIgnoreCase))
                     {
                         row.Add(DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam)
                             .ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture));
                         continue;
                     }
 
-                    var prop = item?.GetType().GetProperty(col);
-                    var value = prop?.GetValue(item) ?? string.Empty;
-                    row.Add(value);
+                    // Get value by key if exists
+                    if (item.TryGetValue(col, out var value))
+                    {
+                        row.Add(value ?? string.Empty);
+                    }
+                    else
+                    {
+                        row.Add(string.Empty);
+                    }
                 }
                 return row;
             }).ToList();
 
-
             GoogleCredential credential;
-
             using (var stream = new FileStream(credentialsPath, FileMode.Open, FileAccess.Read))
             {
                 credential = GoogleCredential.FromStream(stream)
@@ -94,8 +108,10 @@ namespace Fsel.System.Application.Commands.GoogleSheets
                 var requestBody = service.Spreadsheets.Values.Get(spreadSheetId, $"{sheet}!A:A");
                 var response = await requestBody.ExecuteAsync(cancellationToken);
 
-                var valueRange = new ValueRange();
-                valueRange.Values = data?.ToArray();
+                var valueRange = new ValueRange
+                {
+                    Values = data.Select(d => (IList<object>)d).ToList()
+                };
 
                 var appendRequest = service.Spreadsheets.Values.Append(valueRange, spreadSheetId, $"{sheet}!A:A");
                 appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;

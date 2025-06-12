@@ -377,24 +377,42 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
         private async Task AddContactInfoToGGSheet(RegisterStudentForEventCommandModel request)
         {
-            var modelList = new List<CreateContactInfoToGoogleSheetFileCommandModel>
+            var columnOrder = new List<string> { "FullName", "Email", "PhoneNumber", "Time" };
+
+            var dict = new Dictionary<string, object>();
+
+            foreach (var column in columnOrder)
+            {
+                if (string.Equals(column, "Time", StringComparison.OrdinalIgnoreCase))
                 {
-                    new CreateContactInfoToGoogleSheetFileCommandModel
-                    {
-                        FullName = $"{request.LastName} {request.FirstName}",
-                        Email = request.Email,
-                        PhoneNumber = $"'{request.PhoneNumber}",
-                    }
-                };
+                    dict["Time"] = DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam)
+                        .ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture);
+                    continue;
+                }
+
+                // Special handling if column is derived (e.g., "FullName")
+                if (string.Equals(column, "FullName", StringComparison.OrdinalIgnoreCase))
+                {
+                    dict["FullName"] = $"{request.LastName} {request.FirstName}".Trim();
+                    continue;
+                }
+
+                var prop = request.GetType().GetProperty(column);
+                var value = prop?.GetValue(request) ?? string.Empty;
+                dict[column] = value;
+            }
+
+            var modelDictList = new List<Dictionary<string, object>> { dict };
+
             var sheetName = _appSetting?.GoogleSheetConfig?.SummerSelfLearningSheet;
             var spreadSheetId = _appSetting?.GoogleSheetConfig?.SummerSelfLearningSpreadSheetId;
 
-            await _systemService.AddContactInfoToGoogleSheetFile(new CreateContactInfosToGoogleSheetFileCommandModel
+            await _systemService.AddDynamicInfoToGoogleSheetFile(new CreateDynamicInfosToGoogleSheetFileCommandModel
             {
-                Model = modelList,
+                Model = modelDictList,
                 OverrideSheet = sheetName,
                 OverrideSpreadSheetId = spreadSheetId,
-                ColumnOrder = new List<string> { "FullName", "Email", "PhoneNumber", "Time" }
+                ColumnOrder = columnOrder
             });
         }
     }
