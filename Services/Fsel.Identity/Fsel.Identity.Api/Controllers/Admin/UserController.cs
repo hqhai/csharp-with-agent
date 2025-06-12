@@ -82,6 +82,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
+        [EncryptResponse]
         public async Task<IActionResult> SearchUser([FromQuery] SearchUserQuery query)
         {
             MethodResult<PagingItemsModel<UserSearchModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
