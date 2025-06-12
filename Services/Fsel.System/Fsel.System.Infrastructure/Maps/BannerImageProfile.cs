@@ -13,6 +13,7 @@ namespace Fsel.System.Infrastructure.Maps
             CreateMap<BannerImage, BannerImageModel>().IgnoreAllNonExisting();
             CreateMap<CreateBannerImageCommandModel, BannerImage>().IgnoreAllNonExisting();
             CreateMap<BannerImage, CreateBannerImageCommandModel>().IgnoreAllNonExisting();
+            CreateMap<BannerImage, BannerStudentQueueModel>().IgnoreAllNonExisting();
         }
     }
 }
