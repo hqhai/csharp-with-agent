@@ -249,25 +249,25 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
                 excelWorksheet.Cells[startRow, 14].Value = $"{totalAccountRegisterOther.GetPercent(totalAccountDefaultOther, 2)}%";
 
                 excelWorksheet.Cells[startRow, 15].Value = totalStudentVerifiedOther;
-                excelWorksheet.Cells[startRow, 16].Value = $"{totalStudentVerifiedOther.GetPercent(totalAccountDefaultOther, 2)}%";
+                excelWorksheet.Cells[startRow, 16].Value = $"{totalStudentVerifiedOther.GetPercent(elevationOfTerrainOther, 2)}%";
                 excelWorksheet.Cells[startRow, 17].Value = totalTeacherVerifiedOther;
-                excelWorksheet.Cells[startRow, 18].Value = $"{totalTeacherVerifiedOther.GetPercent(totalAccountDefaultOther, 2)}%";
+                excelWorksheet.Cells[startRow, 18].Value = $"{totalTeacherVerifiedOther.GetPercent(elevationOfRefHeightOther, 2)}%";
                 excelWorksheet.Cells[startRow, 19].Value = totalAccountVerifiedOther;
                 excelWorksheet.Cells[startRow, 20].Value = $"{totalAccountVerifiedOther.GetPercent(totalAccountDefaultOther, 2)}%";
 
                 excelWorksheet.Cells[startRow, 21].Value = totalStudentPTCompleteOther;
-                excelWorksheet.Cells[startRow, 22].Value = $"{totalStudentPTCompleteOther.GetPercent(totalAccountRegisterOther, 2)}%";
-                excelWorksheet.Cells[startRow, 23].Value = $"{totalStudentPTCompleteOther.GetPercent(totalAccountDefaultOther, 2)}%";
+                excelWorksheet.Cells[startRow, 22].Value = $"{totalStudentPTCompleteOther.GetPercent(registerStudentOther, 2)}%";
+                excelWorksheet.Cells[startRow, 23].Value = $"{totalStudentPTCompleteOther.GetPercent(elevationOfTerrainOther, 2)}%";
                 excelWorksheet.Cells[startRow, 24].Value = totalStudentPTProgressOther;
-                excelWorksheet.Cells[startRow, 25].Value = $"{totalStudentPTProgressOther.GetPercent(totalAccountRegisterOther, 2)}%";
-                excelWorksheet.Cells[startRow, 26].Value = $"{totalStudentPTProgressOther.GetPercent(totalAccountDefaultOther, 2)}%";
+                excelWorksheet.Cells[startRow, 25].Value = $"{totalStudentPTProgressOther.GetPercent(registerStudentOther, 2)}%";
+                excelWorksheet.Cells[startRow, 26].Value = $"{totalStudentPTProgressOther.GetPercent(elevationOfTerrainOther, 2)}%";
 
                 excelWorksheet.Cells[startRow, 27].Value = totalTeacherPTCompleteOther;
-                excelWorksheet.Cells[startRow, 28].Value = $"{totalTeacherPTCompleteOther.GetPercent(totalAccountRegisterOther, 2)}%";
-                excelWorksheet.Cells[startRow, 29].Value = $"{totalTeacherPTCompleteOther.GetPercent(totalAccountDefaultOther, 2)}%";
+                excelWorksheet.Cells[startRow, 28].Value = $"{totalTeacherPTCompleteOther.GetPercent(registerTeacherOther, 2)}%";
+                excelWorksheet.Cells[startRow, 29].Value = $"{totalTeacherPTCompleteOther.GetPercent(elevationOfRefHeightOther, 2)}%";
                 excelWorksheet.Cells[startRow, 30].Value = totalTeacherPTProgressOther;
-                excelWorksheet.Cells[startRow, 31].Value = $"{totalTeacherPTProgressOther.GetPercent(totalAccountRegisterOther, 2)}%";
-                excelWorksheet.Cells[startRow, 32].Value = $"{totalTeacherPTProgressOther.GetPercent(totalAccountDefaultOther, 2)}%";
+                excelWorksheet.Cells[startRow, 31].Value = $"{totalTeacherPTProgressOther.GetPercent(registerTeacherOther, 2)}%";
+                excelWorksheet.Cells[startRow, 32].Value = $"{totalTeacherPTProgressOther.GetPercent(elevationOfRefHeightOther, 2)}%";
 
                 excelWorksheet.Cells[startRow, 33].Value = totalAccountPTCompleteOther;
                 excelWorksheet.Cells[startRow, 34].Value = $"{totalAccountPTCompleteOther.GetPercent(totalAccountRegisterOther, 2)}%";
@@ -277,9 +277,9 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
                 excelWorksheet.Cells[startRow, 38].Value = $"{totalAccountPTProgressOther.GetPercent(totalAccountDefaultOther, 2)}%";
 
                 excelWorksheet.Cells[startRow, 39].Value = totalStudentLearnProgressOther;
-                excelWorksheet.Cells[startRow, 40].Value = $"{totalStudentLearnProgressOther.GetPercent(totalAccountDefaultOther, 2)}%";
+                excelWorksheet.Cells[startRow, 40].Value = $"{totalStudentLearnProgressOther.GetPercent(elevationOfTerrainOther, 2)}%";
                 excelWorksheet.Cells[startRow, 41].Value = totalTeacherLearnProgressOther;
-                excelWorksheet.Cells[startRow, 42].Value = $"{totalTeacherLearnProgressOther.GetPercent(totalAccountDefaultOther, 2)}%";
+                excelWorksheet.Cells[startRow, 42].Value = $"{totalTeacherLearnProgressOther.GetPercent(elevationOfRefHeightOther, 2)}%";
                 excelWorksheet.Cells[startRow, 43].Value = totalAccountLearnProgressOther;
                 excelWorksheet.Cells[startRow, 44].Value = $"{totalAccountLearnProgressOther.GetPercent(totalAccountDefaultOther, 2)}%";
 
