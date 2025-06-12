@@ -52,7 +52,7 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
                 return methodResult;
             }
 
-            var quantityChanged = product.OrderTransactions.Where(p => p.Status == EnumOrderTransactionStatus.Requested || p.Status == EnumOrderTransactionStatus.Received).Count();
+            var quantityChanged = product.OrderTransactions.Where(p => p.Status == EnumOrderTransactionStatus.Requested || p.Status == EnumOrderTransactionStatus.Received || p.Status == EnumOrderTransactionStatus.Success).Count();
 
             var productModel = _mapper.Map<ProductModel>(product);
 

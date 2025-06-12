@@ -62,7 +62,7 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
             {
                 p.BrandName = p.MarketPlaceType == EnumMarketPlaceType.FSEL ? _appSetting.MarketplacePremiumConfig?.BrandName : p.ProductGlobalConfig?.BrandName;
                 p.BrandImage = p.MarketPlaceType == EnumMarketPlaceType.FSEL ? _appSetting.MarketplacePremiumConfig?.BrandImage : p.ProductGlobalConfig?.BrandImage;
-                p.RemainingQuantity = p.MarketPlaceType == EnumMarketPlaceType.FSEL ? transactions.Where(x => x.ProductId == p.Id && (x.Status == EnumOrderTransactionStatus.Requested || x.Status == EnumOrderTransactionStatus.Received)).Count() : transactions.Where(x => x.ProductId == p.Id && x.Status == EnumOrderTransactionStatus.Success).Count();
+                p.RemainingQuantity = p.Quantity - (p.MarketPlaceType == EnumMarketPlaceType.FSEL ? transactions.Where(x => x.ProductId == p.Id && (x.Status == EnumOrderTransactionStatus.Requested || x.Status == EnumOrderTransactionStatus.Received)).Count() : transactions.Where(x => x.ProductId == p.Id && x.Status == EnumOrderTransactionStatus.Success).Count());
             });
 
             methodResult.Result = new PagingItemsModel<ProductModel>(lists, request, totalItem);
