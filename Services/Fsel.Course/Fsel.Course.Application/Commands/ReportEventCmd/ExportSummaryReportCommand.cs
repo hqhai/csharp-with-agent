@@ -172,7 +172,7 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
                 excelWorksheet.Cells[startRow, 29].Value = $"{(double)(item.TotalTeacherPTCompleteTHCS ?? default).GetPercent((item.ElevationOfRefHeightTHCS ?? default), 2)}%";
 
                 excelWorksheet.Cells[startRow, 30].Value = item.TotalTeacherPTProgressTHCS;
-                excelWorksheet.Cells[startRow, 31].Value = $"{(double)(item.TotalTeacherPTProgressTHCS ?? default).GetPercent((item.RegisterStudentTHCS ?? default), 2)}%";
+                excelWorksheet.Cells[startRow, 31].Value = $"{(double)(item.TotalTeacherPTProgressTHCS ?? default).GetPercent((item.RegisterTeacherTHCS ?? default), 2)}%";
                 excelWorksheet.Cells[startRow, 32].Value = $"{(double)(item.TotalTeacherPTProgressTHCS ?? default).GetPercent((item.ElevationOfRefHeightTHCS ?? default), 2)}%";
 
                 var totalAccountPTCompleteTHCS = (double)(item.TotalStudentPTCompleteTHCS ?? default) + (item.TotalTeacherPTCompleteTHCS ?? default);
