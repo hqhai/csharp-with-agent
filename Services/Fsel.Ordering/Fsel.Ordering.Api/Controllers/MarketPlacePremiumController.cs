@@ -69,9 +69,21 @@ namespace Fsel.Ordering.Api.Controllers
         [HttpGet("get-histories")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetHistories([FromQuery] GetExchangeHistoriesQuery query)
+        public async Task<IActionResult> GetHistories()
         {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new GetExchangeHistoriesQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// check user
+        /// </summary>
+        [HttpGet("check")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<bool>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Check()
+        {
+            var commandResult = await _mediator.Send(new CheckShowMarketplacePremiumQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
