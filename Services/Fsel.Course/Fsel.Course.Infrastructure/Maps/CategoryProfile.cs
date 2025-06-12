@@ -17,9 +17,9 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<CreateCategoryCommandModel, Category>().IgnoreAllNonExisting();
             CreateMap<UpdateCategoryCommandModel, Category>().IgnoreAllNonExisting();
             CreateMap<Category, CategoryTreeModel>()
-                     .ForMember(x => x.Label, x => x.MapFrom(c => c.Id))
+                     .ForMember(x => x.Label, x => x.MapFrom(c => c.Name))
                      .ForMember(x => x.ExpandedIcon, x => x.MapFrom(c => c.Type))
-                     .ForMember(x => x.Data, x => x.MapFrom(c => c.Name));
+                     .ForMember(x => x.Data, x => x.MapFrom(c => c.Id));
             CreateMap<Category, ProgramModel>().IgnoreAllNonExisting();
             CreateMap<CreateProgramCommandModel, Category>().ForMember(x => x.Levels, x => x.Ignore()).IgnoreAllNonExisting();
             CreateMap<UpdateProgramCommandModel, Category>().ForMember(x => x.Levels, x => x.Ignore()).IgnoreAllNonExisting();
