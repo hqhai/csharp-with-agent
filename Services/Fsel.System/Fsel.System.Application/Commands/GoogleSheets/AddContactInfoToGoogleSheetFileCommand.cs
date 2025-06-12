@@ -22,6 +22,7 @@ namespace Fsel.System.Application.Commands.GoogleSheets
         public IList<AddContactInfoToGoogleSheetFileCommandModel>? Model { get; set; }
         public string? OverrideSpreadSheetId { get; set; }
         public string? OverrideSheet { get; set; }
+        public IList<string>? ColumnOrder { get; set; }
     }
 
     public class AddContactInfoToGoogleSheetFileCommandHandler : IRequestHandler<AddContactInfoToGoogleSheetFileCommand, MethodResult<bool>>
@@ -53,12 +54,39 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 
             var credentialsPath = ResourceSettings.I18NCredentialsFilePath;
 
-            var data = request.Model?.Select(item => new List<object>
+            var defaultOrder = new List<string> { "Email", "PhoneNumber", "FullName", "Time" };
+            var columnOrder = request.ColumnOrder?.Any() == true ? request.ColumnOrder : defaultOrder;
+
+            var data = request.Model?.Select(item =>
             {
-                item?.Email ?? string.Empty,
-                item?.PhoneNumber ?? string.Empty,
-                item?.FullName ?? string.Empty,
-                DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam).ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture)
+                var row = new List<object>();
+                foreach (var col in columnOrder)
+                {
+                    switch (col)
+                    {
+                        case "Email":
+                            row.Add(item?.Email ?? string.Empty);
+                            break;
+
+                        case "PhoneNumber":
+                            row.Add(item?.PhoneNumber ?? string.Empty);
+                            break;
+
+                        case "FullName":
+                            row.Add(item?.FullName ?? string.Empty);
+                            break;
+
+                        case "Time":
+                            row.Add(DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam)
+                                .ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture));
+                            break;
+
+                        default:
+                            row.Add(string.Empty);
+                            break;
+                    }
+                }
+                return row;
             }).ToList();
 
             GoogleCredential credential;

@@ -13,5 +13,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.GoogleSheets
         public IList<CreateContactInfoToGoogleSheetFileCommandModel>? Model { get; set; }
         public string? OverrideSpreadSheetId { get; set; }
         public string? OverrideSheet { get; set; }
+        public IList<string>? ColumnOrder { get; set; }
     }
 }

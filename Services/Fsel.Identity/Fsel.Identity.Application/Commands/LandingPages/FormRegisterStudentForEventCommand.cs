@@ -251,7 +251,6 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             {
                 await SendMailInfoUser(request, password, template.MailRegister.Value, template.SubjectMailRegister);
             }
-            await AddContactInfoToGGSheet(request);
             return methodResult;
         }
 
@@ -382,9 +381,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 {
                     new CreateContactInfoToGoogleSheetFileCommandModel
                     {
-                        FullName = $"{request.FirstName} {request.LastName}",
+                        FullName = $"{request.LastName} {request.FirstName}",
                         Email = request.Email,
-                        PhoneNumber = request.PhoneNumber,
+                        PhoneNumber = $"'{request.PhoneNumber}",
                     }
                 };
             var sheetName = _appSetting?.GoogleSheetConfig?.SummerSelfLearningSheet;
@@ -394,7 +393,8 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             {
                 Model = modelList,
                 OverrideSheet = sheetName,
-                OverrideSpreadSheetId = spreadSheetId
+                OverrideSpreadSheetId = spreadSheetId,
+                ColumnOrder = new List<string> { "FullName", "Email", "PhoneNumber", "Time" }
             });
         }
     }
