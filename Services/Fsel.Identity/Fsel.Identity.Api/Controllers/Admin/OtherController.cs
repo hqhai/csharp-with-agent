@@ -115,5 +115,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Add Coin By Sheet
+        /// </summary>
+        [HttpPost("add-coin-fsel-event-reward")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddCoinFselEventRewardBySheet()
+        {
+            var commandResult = await _mediator.Send(new AddCoinFselEventRewardBySheetCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

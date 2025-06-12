@@ -5,21 +5,20 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.Storage.Application.Queues.Publisher;
+    using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Application.Services.OpenAIServices;
+    using Fsel.Storage.Domain.Models.EntityModels;
+    using Fsel.Storage.Infrastructure.ValueSettings;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Fsel.Storage.Infrastructure.ValueSettings;
     using Microsoft.Extensions.Logging;
-    using Fsel.Core.Base.Interfaces;
-    using Fsel.Storage.Application.Services.AmazonS3Services;
+    using Newtonsoft.Json;
     using Polly;
     using Refit;
-    using Newtonsoft.Json;
-    using Fsel.Storage.Domain.Models.EntityModels;
-    using Fsel.Storage.Application.Services.FFmpegServices;
 
     public class PublishSpeakToTextToRealTimeCommand : SpeechToTextAiConsumerModel, INotification
     {
@@ -36,7 +35,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         private const int Retry_GPT_Time = 2;
         private readonly IDeepgramProvider _deepgramProvider;
         private readonly ICognitiveProvider _cognitiveProvider;
-        private readonly IFFmpegServices _fFmpegServices;
+        private readonly IMediator _mediator;
         private int _countRetry;
         private int _intervalRetryTime = 5;
         private DateTime _startDate, _endDate;
@@ -48,7 +47,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                                                           ILogger<PublishSpeakToTextToRealTimeCommand> logger,
                                                           IDeepgramProvider deepgramProvider,
                                                           ICognitiveProvider cognitiveProvider,
-                                                          IFFmpegServices fFmpegServices)
+                                                          IMediator mediator)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
@@ -57,7 +56,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
             _logger = logger;
             _deepgramProvider = deepgramProvider;
             _cognitiveProvider = cognitiveProvider;
-            _fFmpegServices = fFmpegServices;
+            _mediator = mediator;
         }
 
         public async Task Handle(PublishSpeakToTextToRealTimeCommand request, CancellationToken cancellationToken)
@@ -71,28 +70,13 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                 return;
             }
 
-            await using var stream = formFileDefault.OpenReadStream();
-            var filePart = new StreamPart(stream, formFileDefault.FileName, formFileDefault.ContentType);
-
-            var ffmpegConvert = await _fFmpegServices.Convert(filePart);
-            if (!ffmpegConvert.IsSuccessStatusCode)
+            var convertFile = await _mediator.Send(new CheckFileAndConvertCommand { FormFile = formFileDefault }, cancellationToken);
+            if (!convertFile.IsOK || convertFile.Result == null)
             {
                 return;
             }
 
-            var jobConvertResult = await _fFmpegServices.Status(ffmpegConvert.Content?.JobId ?? Guid.Empty);
-            if (!jobConvertResult.IsSuccessStatusCode)
-            {
-                return;
-            }
-            var jobConvert = jobConvertResult.Content;
-            if (jobConvert == null || jobConvert.FileData == null || jobConvert.FileName == null || jobConvert.ContentType == null)
-            {
-                return;
-            }
-
-            byte[] byteArray = Convert.FromBase64String(jobConvert.FileData);
-            IFormFile formFile = ConvertToIFormFile(byteArray, jobConvert.FileName, jobConvert.ContentType);
+            IFormFile formFile = convertFile.Result;
             if (formFile == null)
             {
                 return;
@@ -187,7 +171,8 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
         public async Task<MethodResult<string?>> UpLoadFileAsync(IFormFile formFile)
         {
-            return await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+            var a = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+            return a;
         }
 
         private async Task PublishTextToSocket(SpeechToTextAiConsumerModel message, string? convertContent, string? filePath)

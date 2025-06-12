@@ -110,6 +110,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
         public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
         public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
+        public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
 
         #endregion Report
 

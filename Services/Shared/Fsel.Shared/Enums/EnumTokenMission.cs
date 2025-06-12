@@ -74,6 +74,7 @@ namespace Fsel.Shared.Enums
         RecallCoinsSurveyEvent,
         ReclaimGiftCoins,
         SurveyReward,
+        FselEventReward,
 
         #region QuestBoard
 
