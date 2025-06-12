@@ -6,6 +6,7 @@ using Fsel.Ordering.Application.Services.UrBoxService;
 using Fsel.Ordering.Application.Services.UrBoxService.Models.Request;
 using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
 using Fsel.Ordering.Domain.IRepositories;
+using Fsel.Ordering.Domain.Models.EntityModels;
 using Fsel.Ordering.Infrastructure.ValueSettings;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -152,17 +153,22 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
 
             foreach (var productTransaction in productTransactions)
             {
+                var product = _mapper.Map<ProductModel>(productTransaction.Product);
+
                 if (productTransaction.ProductTransaction.Status == EnumOrderTransactionStatus.Requested)
                 {
                     history.UnUsed.Add(new GiftHistoryModel()
                     {
-                        Id = productTransaction.Product.Id.ToString(),
+                        Id = product.Id.ToString(),
+                        GiftId = product.GlobalId,
+                        GiftName = product.Name,
                         Price = "" + productTransaction.Product.Price,
                         BrandImage = _appSetting.MarketplacePremiumConfig?.BrandImage,
                         BrandTitle = _appSetting.MarketplacePremiumConfig?.BrandName,
                         Pin = productTransaction.ProductTransaction.Code,
                         Code = productTransaction.ProductTransaction.Code,
-                        Image = productTransaction.Product.Images?.FirstOrDefault()
+                        Image = productTransaction.Product.Images?.FirstOrDefault(),
+                        MarketPlaceType = EnumMarketPlaceType.FSEL
                     });
                 }
                 else
@@ -170,12 +176,15 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
                     history.Used.Add(new GiftHistoryModel()
                     {
                         Id = productTransaction.Product.Id.ToString(),
+                        GiftId = product.Id.ToString(),
+                        GiftName = product.Name,
                         Price = "" + productTransaction.Product.Price,
                         BrandImage = _appSetting.MarketplacePremiumConfig?.BrandImage,
                         BrandTitle = _appSetting.MarketplacePremiumConfig?.BrandName,
                         Pin = productTransaction.ProductTransaction.Code,
                         Code = productTransaction.ProductTransaction.Code,
-                        Image = productTransaction.Product.Images?.FirstOrDefault()
+                        Image = productTransaction.Product.Images?.FirstOrDefault(),
+                        MarketPlaceType = EnumMarketPlaceType.FSEL
                     });
                 }
             }
