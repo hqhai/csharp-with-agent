@@ -140,7 +140,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         public async Task AddChildentCategory(IList<CategoryTreeModel> parentCategories, CancellationToken cancellationToken)
         {
-            var parentCategoryIds = parentCategories.Select(x => x.Label).ToList();
+            var parentCategoryIds = parentCategories.Select(x => x.Data).ToList();
             var childentCategories = await _categoryRepository.Queryable
                                                               .WhereBulkContains(parentCategoryIds, x => x.ParentId)
                                                               .Where(x => x.Status != EnumStatus.Archive)
@@ -155,7 +155,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             Parallel.ForEach(parentCategories, parentCategory =>
             {
-                var childentWithEventParents = childentCategories.Where(x => x.ParentId == parentCategory.Label).ToList();
+                var childentWithEventParents = childentCategories.Where(x => x.ParentId == parentCategory.Data).ToList();
                 var parentCategoryChildents = _mapper.Map<IList<CategoryTreeModel>>(childentWithEventParents);
                 parentCategory.Children = parentCategoryChildents;
 
