@@ -27,14 +27,16 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
         private readonly AuthContext _languageContext;
         private readonly IProductRepository _productRepository;
         private readonly IMapper _mapper;
+        private readonly IOrderTransactionRepository _orderTransactionRepository;
 
-        public SearchProductPremiumQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext languageContext, IProductRepository productRepository, IMapper mapper)
+        public SearchProductPremiumQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext languageContext, IProductRepository productRepository, IMapper mapper, IOrderTransactionRepository orderTransactionRepository)
         {
             _urBoxService = urBoxService;
             _appSetting = appSetting;
             _languageContext = languageContext;
             _productRepository = productRepository;
             _mapper = mapper;
+            _orderTransactionRepository = orderTransactionRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ProductModel>>> Handle(SearchProductPremiumQuery request, CancellationToken cancellationToken)
@@ -42,7 +44,7 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<ProductModel>>();
 
-            var productEntities = await _productRepository.Queryable.Where(p => p.IsPremium).OrderBy(p => p.Price).ToListAsync(cancellationToken);
+            var productEntities = await _productRepository.Queryable.Include(p => p.OrderTransactions).Where(p => p.IsPremium).OrderBy(p => p.Price).ToListAsync(cancellationToken);
 
             var products = _mapper.Map<IList<ProductModel>>(productEntities);
 
@@ -52,10 +54,15 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
                     .ApplySortAndPaging(request)
                     .ToList();
 
+            var productIds = lists.Select(p => p.Id).ToList();
+
+            var transactions = await _orderTransactionRepository.Queryable.WhereBulkContains(productIds, p => p.ProductId).ToListAsync(cancellationToken);
+
             lists.ForEach(p =>
             {
                 p.BrandName = p.MarketPlaceType == EnumMarketPlaceType.FSEL ? _appSetting.MarketplacePremiumConfig?.BrandName : p.ProductGlobalConfig?.BrandName;
                 p.BrandImage = p.MarketPlaceType == EnumMarketPlaceType.FSEL ? _appSetting.MarketplacePremiumConfig?.BrandImage : p.ProductGlobalConfig?.BrandImage;
+                p.RemainingQuantity = p.MarketPlaceType == EnumMarketPlaceType.FSEL ? transactions.Where(x => x.ProductId == p.Id && (x.Status == EnumOrderTransactionStatus.Requested || x.Status == EnumOrderTransactionStatus.Received)).Count() : transactions.Where(x => x.ProductId == p.Id && x.Status == EnumOrderTransactionStatus.Success).Count();
             });
 
             methodResult.Result = new PagingItemsModel<ProductModel>(lists, request, totalItem);
