@@ -134,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     TotalStudent = students.Count(y => y.CourseLevel == x)
                 }).ToList()
             };
-            var countUnit = request.CourseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca : request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS : ValueDefault;
+            var countUnit = request.CourseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca : request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS : CourseProgressValue.CountUnitRFIA2;
             var unitModules = Enumerable.Range(1, countUnit).Select(i =>
             {
                 var courseUnits = unitGroups.Where(x => x.Number == i).SelectMany(x => x.UnitIds).ToList();
@@ -148,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 };
             });
 
-            if (request.CourseType == EnumCourseType.Academic)
+            if (request.CourseType == EnumCourseType.Academic || request.CourseType == EnumCourseType.EnglishFoundation)
             {
                 var finalTestResults = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                               join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
