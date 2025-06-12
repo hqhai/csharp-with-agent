@@ -75,16 +75,16 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
             }
 
             var checkResult = await _mediator.Send(new CheckShowMarketplacePremiumQuery(), cancellationToken);
-            //if (!checkResult.IsOK)
-            //{
-            //    methodResult.AddError(checkResult.ErrorMessages);
-            //    return methodResult;
-            //}
-            //if (!checkResult.Result)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotPartOfTheEvent), nameof(checkResult));
-            //    return methodResult;
-            //}
+            if (!checkResult.IsOK)
+            {
+                methodResult.AddError(checkResult.ErrorMessages);
+                return methodResult;
+            }
+            if (!checkResult.Result)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotPartOfTheEvent), nameof(checkResult));
+                return methodResult;
+            }
 
             var product = await _productRepository.Queryable.Include(p => p.OrderTransactions).FirstOrDefaultAsync(p => p.Id == request.ProductId, cancellationToken);
             if (product == null)
