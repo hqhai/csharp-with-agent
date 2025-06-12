@@ -45,7 +45,10 @@ namespace Fsel.Identity.Application.Commands.LandingPages
         private const string DefaultPassword = "Fsel@2024";
         private readonly ISystemService _systemService;
 
-        public FormRegisterStudentForEventCommandHandler(IEventRegistrationRepository eventRegistrationRepository, ICompetitionEventsRepository competitionEventsRepository, IMapper mapper, ISenderService senderService, AppSetting appSetting, UserManager<User> userManager, IPlatformRepository platformRepository, MediatR.IMediator mediator, IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
+        public FormRegisterStudentForEventCommandHandler(IEventRegistrationRepository eventRegistrationRepository, ICompetitionEventsRepository competitionEventsRepository, IMapper mapper, ISenderService senderService, AppSetting appSetting, UserManager<User> userManager,
+            IPlatformRepository platformRepository, MediatR.IMediator mediator,
+            IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
+            ISystemService systemService)
         {
             _eventRegistrationRepository = eventRegistrationRepository;
             _competitionEventsRepository = competitionEventsRepository;
@@ -56,6 +59,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             _platformRepository = platformRepository;
             _mediator = mediator;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<bool>> Handle(FormRegisterStudentForEventCommand request, CancellationToken cancellationToken)
@@ -247,7 +251,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             {
                 await SendMailInfoUser(request, password, template.MailRegister.Value, template.SubjectMailRegister);
             }
-
+            await AddContactInfoToGGSheet(request);
             return methodResult;
         }
 
@@ -286,23 +290,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     await SendMailRegisterEvent(request, competitionEvent, EnumSenderTemplate.MailRegisterEvent, Subject, CultureInfo.InvariantCulture).ConfigureAwait(false);
                 }
 
-
-                // Add new account info to gg sheet
-                var modelList = new List<CreateContactInfoToGoogleSheetFileCommandModel>
-                {
-                    new CreateContactInfoToGoogleSheetFileCommandModel
-                    {
-                        FullName = $"{request.FirstName} {request.LastName}",
-                        Email = request.Email,
-                        PhoneNumber = request.PhoneNumber,
-                    }
-                };
-                await _systemService.AddContactInfoToGoogleSheetFile(new CreateContactInfosToGoogleSheetFileCommandModel
-                {
-                    Model = modelList,
-                    OverrideSheet = _appSetting.GoogleSheetConfig?.SummerSelfLearningSheet,
-                    OverrideSpreadSheetId = _appSetting.GoogleSheetConfig?.SummerSelfLearningSpreadSheetId
-                }); 
+                await AddContactInfoToGGSheet(request);
                 return methodResult;
             });
             return methodResult;
@@ -385,6 +373,28 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 Template = senderTemplate,
                 Subject = subject,
                 Params = param,
+            });
+        }
+
+        private async Task AddContactInfoToGGSheet(RegisterStudentForEventCommandModel request)
+        {
+            var modelList = new List<CreateContactInfoToGoogleSheetFileCommandModel>
+                {
+                    new CreateContactInfoToGoogleSheetFileCommandModel
+                    {
+                        FullName = $"{request.FirstName} {request.LastName}",
+                        Email = request.Email,
+                        PhoneNumber = request.PhoneNumber,
+                    }
+                };
+            var sheetName = _appSetting?.GoogleSheetConfig?.SummerSelfLearningSheet;
+            var spreadSheetId = _appSetting?.GoogleSheetConfig?.SummerSelfLearningSpreadSheetId;
+
+            await _systemService.AddContactInfoToGoogleSheetFile(new CreateContactInfosToGoogleSheetFileCommandModel
+            {
+                Model = modelList,
+                OverrideSheet = sheetName,
+                OverrideSpreadSheetId = spreadSheetId
             });
         }
     }
