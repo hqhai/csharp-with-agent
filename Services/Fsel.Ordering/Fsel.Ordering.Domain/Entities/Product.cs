@@ -158,5 +158,6 @@ namespace Fsel.Ordering.Domain.Entities
         public string? BrandImage { get; set; }
         public string? Content { get; set; }
         public string? Note { get; set; }
+        public IList<string>? Addresses { get; set; }
     }
 }

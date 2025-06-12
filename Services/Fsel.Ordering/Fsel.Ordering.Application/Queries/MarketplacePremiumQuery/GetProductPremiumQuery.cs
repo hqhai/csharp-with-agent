@@ -84,7 +84,8 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
                     BrandName = gift?.Brand,
                     BrandImage = gift?.BrandImage,
                     Content = gift?.Content,
-                    Note = gift?.Note
+                    Note = gift?.Note,
+                    Addresses = gift?.Offices?.Where(x => !string.IsNullOrEmpty(x.Address)).Select(p => p.Address ?? string.Empty).ToList()
                 };
             }
 
