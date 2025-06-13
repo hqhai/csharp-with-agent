@@ -132,7 +132,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Update or delete test data for a student
         /// </summary>
-        [HttpPut("{studentId}/test")]
+        [HttpPut("{studentId}/delete-test")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateOrDeleteTest(Guid studentId)
