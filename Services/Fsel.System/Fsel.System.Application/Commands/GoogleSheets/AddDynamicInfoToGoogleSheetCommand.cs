@@ -70,26 +70,29 @@ namespace Fsel.System.Application.Commands.GoogleSheets
             var data = request.Model.Select(item =>
             {
                 var row = new List<object>();
+
                 foreach (var col in request.ColumnOrder!)
                 {
-                    if (string.Equals(col, "CreatedTime", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(col, "Time", StringComparison.OrdinalIgnoreCase))
                     {
                         row.Add(DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam)
                             .ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture));
-                        continue;
                     }
-
-                    // Get value by key if exists
-                    if (item.TryGetValue(col, out var value))
+                    else if (item.TryGetValue(col, out var value))
                     {
-                        row.Add(value ?? string.Empty);
+                        row.Add(value?.ToString() ?? "");
                     }
                     else
                     {
-                        row.Add(string.Empty);
+                        row.Add("");
                     }
                 }
-                return row;
+                while (row.Count < request.ColumnOrder.Count)
+                {
+                    row.Add("");
+                }
+
+                return (IList<object>)row;
             }).ToList();
 
             GoogleCredential credential;
@@ -110,10 +113,10 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 
                 var valueRange = new ValueRange
                 {
-                    Values = data.Select(d => (IList<object>)d).ToList()
+                    Values = data
                 };
 
-                var appendRequest = service.Spreadsheets.Values.Append(valueRange, spreadSheetId, $"{sheet}!A:A");
+                var appendRequest = service.Spreadsheets.Values.Append(valueRange, spreadSheetId, "Trang tính1");
                 appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
                 var appendResponse = await appendRequest.ExecuteAsync(cancellationToken);
             }

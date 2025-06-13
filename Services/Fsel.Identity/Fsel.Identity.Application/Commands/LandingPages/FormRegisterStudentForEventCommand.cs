@@ -377,8 +377,9 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
         private async Task AddContactInfoToGGSheet(RegisterStudentForEventCommandModel request)
         {
-            var columnOrder = new List<string> { "FullName", "Email", "PhoneNumber", "Time" };
-
+            var columnOrder = new List<string> { "FullName", "Email", "PhoneNumber", "Time", "DiscountCode",
+                "CampaignId", "CampaignSource", "CampaignMedium", "CampaignName", "CampaignTerm", "CampaignContent"
+            };
             var dict = new Dictionary<string, object>();
 
             foreach (var column in columnOrder)

@@ -20,9 +20,6 @@ namespace Fsel.System.Application.Commands.GoogleSheets
     public class AddContactInfoToGoogleSheetFileCommand : IRequest<MethodResult<bool>>
     {
         public IList<AddContactInfoToGoogleSheetFileCommandModel>? Model { get; set; }
-        public string? OverrideSpreadSheetId { get; set; }
-        public string? OverrideSheet { get; set; }
-        public IList<string>? ColumnOrder { get; set; }
     }
 
     public class AddContactInfoToGoogleSheetFileCommandHandler : IRequestHandler<AddContactInfoToGoogleSheetFileCommand, MethodResult<bool>>
@@ -39,12 +36,8 @@ namespace Fsel.System.Application.Commands.GoogleSheets
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var spreadSheetId = !string.IsNullOrEmpty(request.OverrideSpreadSheetId)
-                ? request.OverrideSpreadSheetId
-                : _appSetting.GoogleSheetConfig?.LandingPageSpreadSheetId;
-            var sheet = !string.IsNullOrEmpty(request.OverrideSheet)
-                ? request.OverrideSheet
-                : _appSetting.GoogleSheetConfig?.LandingPageSheet;
+            var spreadSheetId = _appSetting.GoogleSheetConfig?.LandingPageSpreadSheetId;
+            var sheet = _appSetting.GoogleSheetConfig?.LandingPageSheet;
 
             if (string.IsNullOrEmpty(spreadSheetId))
             {
@@ -54,28 +47,7 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 
             var credentialsPath = ResourceSettings.I18NCredentialsFilePath;
 
-            var defaultOrder = new List<string> { "Email", "PhoneNumber", "FullName", "Time" };
-            var columnOrder = request.ColumnOrder?.Any() == true ? request.ColumnOrder : defaultOrder;
-
-            var data = request.Model?.Select(item =>
-            {
-                var row = new List<object>();
-                foreach (var col in columnOrder)
-                {
-                    if (string.Equals(col, "Time", StringComparison.OrdinalIgnoreCase))
-                    {
-                        row.Add(DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam)
-                            .ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture));
-                        continue;
-                    }
-
-                    var prop = item?.GetType().GetProperty(col);
-                    var value = prop?.GetValue(item) ?? string.Empty;
-                    row.Add(value);
-                }
-                return row;
-            }).ToList();
-
+            var data = request.Model?.Select(item => new List<object> { item?.Email ?? string.Empty, item?.PhoneNumber ?? string.Empty, item?.FullName ?? string.Empty, DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam).ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture) }).ToList();
 
             GoogleCredential credential;
 
