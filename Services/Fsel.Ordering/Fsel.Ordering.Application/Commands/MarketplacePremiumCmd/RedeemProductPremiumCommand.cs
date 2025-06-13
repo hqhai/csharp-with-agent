@@ -139,15 +139,15 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                 return methodResult;
             }
 
-            student.NumberOfToken -= product.Price;
-            await _cacheService.SetAsync(key, student, TimeSpan.FromSeconds(5));
-
             var token = student.NumberOfToken;
             if (token < product.Price)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(token), token);
                 return methodResult;
             }
+
+            student.NumberOfToken -= product.Price;
+            await _cacheService.SetAsync(key, student, TimeSpan.FromSeconds(5));
 
             if (product.MarketPlaceType == EnumMarketPlaceType.UrBox && product.IsPremium)
             {
