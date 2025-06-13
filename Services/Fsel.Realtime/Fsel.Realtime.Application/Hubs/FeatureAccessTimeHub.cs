@@ -21,7 +21,19 @@ namespace Fsel.Realtime.Application.Hubs
         private readonly FeatureAccessTimePublisher _accessTimePublisher;
         private readonly AuthContext _authContext;
         private readonly ILogger<FeatureAccessTimeHub> _logger;
-        private string? UserAgent => Context.GetHttpContext()?.Request.Headers["User-Agent"].ToString();
+        private string? UserAgent
+        {
+            get
+            {
+                var httpContext = Context.GetHttpContext();
+                // Ưu tiên lấy từ query string
+                var userAgentFromQuery = httpContext?.Request.Query["User-Agent"].ToString();
+                if (!string.IsNullOrEmpty(userAgentFromQuery))
+                    return userAgentFromQuery;
+                // Nếu không có thì lấy từ header
+                return httpContext?.Request.Headers["User-Agent"].ToString();
+            }
+        }
 
         public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher, AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor, ILogger<FeatureAccessTimeHub> logger) : base(authContext, ipApiService, httpContextAccessor)
         {
