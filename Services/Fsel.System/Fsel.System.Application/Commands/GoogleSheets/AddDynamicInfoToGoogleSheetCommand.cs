@@ -6,6 +6,8 @@ namespace Fsel.System.Application.Commands.GoogleSheets
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.System.Application.Services.GoogleSheetServices;
     using Fsel.System.Domain.Models.CommandModels.GoogleSheets;
     using Fsel.System.Infrastructure.ValueSettings;
     using global::System;
@@ -27,11 +29,11 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 
     public class AddDynamicInfoToGoogleSheetFileCommandHandler : IRequestHandler<AddDynamicInfoToGoogleSheetFileCommand, MethodResult<bool>>
     {
-        private readonly AppSetting _appSetting;
+        private readonly IGoogleSheetService _googleSheetService;
 
-        public AddDynamicInfoToGoogleSheetFileCommandHandler(AppSetting appSetting)
+        public AddDynamicInfoToGoogleSheetFileCommandHandler(IGoogleSheetService googleSheetService)
         {
-            _appSetting = appSetting;
+            _googleSheetService = googleSheetService;
         }
 
         public async Task<MethodResult<bool>> Handle(AddDynamicInfoToGoogleSheetFileCommand request, CancellationToken cancellationToken)
@@ -41,23 +43,18 @@ namespace Fsel.System.Application.Commands.GoogleSheets
 
             if (request.ColumnOrder == null || !request.ColumnOrder.Any())
             {
-                methodResult.AddErrorBadRequest("ColumnOrder is required.");
+                methodResult.AddErrorBadRequest(nameof(EnumValidateInputDataErrorCode.DataIsRequired));
                 return methodResult;
             }
 
             if (request.Model == null || !request.Model.Any())
             {
-                methodResult.AddErrorBadRequest("Model data is required.");
+                methodResult.AddErrorBadRequest(nameof(EnumValidateInputDataErrorCode.DataIsRequired));
                 return methodResult;
             }
 
-            var spreadSheetId = !string.IsNullOrEmpty(request.OverrideSpreadSheetId)
-                ? request.OverrideSpreadSheetId
-                : _appSetting.GoogleSheetConfig?.LandingPageSpreadSheetId;
-
-            var sheet = !string.IsNullOrEmpty(request.OverrideSheet)
-                ? request.OverrideSheet
-                : _appSetting.GoogleSheetConfig?.LandingPageSheet;
+            var spreadSheetId = request.OverrideSpreadSheetId;
+            var sheet = request.OverrideSheet;
 
             if (string.IsNullOrEmpty(spreadSheetId) || string.IsNullOrEmpty(sheet))
             {
@@ -65,63 +62,32 @@ namespace Fsel.System.Application.Commands.GoogleSheets
                 return methodResult;
             }
 
-            var credentialsPath = ResourceSettings.I18NCredentialsFilePath;
+            // Build data rows
+            var data = request.Model.Select(item => BuildRowFromItem(item, request.ColumnOrder)).ToList();
 
-            var data = request.Model.Select(item =>
-            {
-                var row = new List<object>();
+            // Append to Google Sheet
+            await _googleSheetService.AppendRowsAsync(spreadSheetId, sheet, data, cancellationToken);
 
-                foreach (var col in request.ColumnOrder!)
-                {
-                    if (string.Equals(col, "Time", StringComparison.OrdinalIgnoreCase))
-                    {
-                        row.Add(DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam)
-                            .ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture));
-                    }
-                    else if (item.TryGetValue(col, out var value))
-                    {
-                        row.Add(value?.ToString() ?? "");
-                    }
-                    else
-                    {
-                        row.Add("");
-                    }
-                }
-                while (row.Count < request.ColumnOrder.Count)
-                {
-                    row.Add("");
-                }
-
-                return (IList<object>)row;
-            }).ToList();
-
-            GoogleCredential credential;
-            using (var stream = new FileStream(credentialsPath, FileMode.Open, FileAccess.Read))
-            {
-                credential = GoogleCredential.FromStream(stream)
-                    .CreateScoped(new[] { SheetsService.Scope.Spreadsheets });
-            }
-
-            using (var service = new SheetsService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "Google Sheets Integration",
-            }))
-            {
-                var requestBody = service.Spreadsheets.Values.Get(spreadSheetId, $"{sheet}!A:A");
-                var response = await requestBody.ExecuteAsync(cancellationToken);
-
-                var valueRange = new ValueRange
-                {
-                    Values = data
-                };
-
-                var appendRequest = service.Spreadsheets.Values.Append(valueRange, spreadSheetId, "Trang tính1");
-                appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
-                var appendResponse = await appendRequest.ExecuteAsync(cancellationToken);
-            }
-
+            methodResult.Result = true;
             return methodResult;
+        }
+
+        private IList<object> BuildRowFromItem(Dictionary<string, object> item, IList<string> columnOrder)
+        {
+            var row = new List<object>();
+            foreach (var col in columnOrder)
+            {
+                if (string.Equals(col, "Time", StringComparison.OrdinalIgnoreCase))
+                {
+                    row.Add(DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam)
+                        .ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture));
+                }
+                else
+                {
+                    row.Add(item.TryGetValue(col, out var value) ? value?.ToString() ?? "" : "");
+                }
+            }
+            return row;
         }
     }
 }
