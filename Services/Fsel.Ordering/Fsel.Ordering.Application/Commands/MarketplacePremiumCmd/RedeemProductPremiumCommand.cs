@@ -153,6 +153,8 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
             {
                 var result = await _mediator.Send(new RedeemUrboxPremiumCommand()
                 {
+                    ProductId = product.Id,
+                    Price = product.Price,
                     PhoneNumber = request.PhoneNumber,
                     DataBuy = new List<DataBuyCommandModel>()
                     {

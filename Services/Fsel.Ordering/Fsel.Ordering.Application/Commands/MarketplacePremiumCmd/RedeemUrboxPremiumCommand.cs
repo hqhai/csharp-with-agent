@@ -27,7 +27,6 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
     public class RedeemUrboxPremiumCommand : CreateRedemptionRequestCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
     {
         public Guid ProductId { get; set; }
-        public Guid UserId { get; set; }
         public long Price { get; set; }
     }
 
@@ -181,7 +180,7 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
 
                 var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
                 {
-                    UserId = request.UserId,
+                    UserId = _authContext.CurrentUserId,
                     NumberOfCoinsDeducted = request.Price,
                     Feature = EnumTokenFeature.MarketPlace,
                     Mission = EnumTokenMission.MarketPlacePremium,
