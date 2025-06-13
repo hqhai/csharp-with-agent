@@ -6,16 +6,17 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Domain.IRepositories;
+    using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class CheckShowMarketplacePremiumQuery : IRequest<MethodResult<bool>>
+    public class CheckShowMarketplacePremiumQuery : IRequest<MethodResult<CheckShowMarketplacePremiumModel>>
     {
     }
 
-    public class CheckShowMarketplacePremiumQueryHandler : IRequestHandler<CheckShowMarketplacePremiumQuery, MethodResult<bool>>
+    public class CheckShowMarketplacePremiumQueryHandler : IRequestHandler<CheckShowMarketplacePremiumQuery, MethodResult<CheckShowMarketplacePremiumModel>>
     {
         private readonly IOrderRepository _orderRepository;
         private readonly IPackageRepository _packageRepository;
@@ -30,20 +31,28 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
             _packageRepository = packageRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(CheckShowMarketplacePremiumQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CheckShowMarketplacePremiumModel>> Handle(CheckShowMarketplacePremiumQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<CheckShowMarketplacePremiumModel>();
 
-            methodResult.Result = false;
+            var model = new CheckShowMarketplacePremiumModel();
 
             var startDate = _appSetting.MarketplacePremiumConfig?.StartDate;
             var endDate = _appSetting.MarketplacePremiumConfig?.EndDate;
             var packages = _appSetting.MarketplacePremiumConfig?.Packages;
+            var startDateButton = _appSetting.MarketplacePremiumConfig?.StartDateButton;
+            var endDateButton = _appSetting.MarketplacePremiumConfig?.EndDateButton;
 
-            if (!startDate.HasValue || !endDate.HasValue || packages == null || !packages.Any())
+            if (!startDate.HasValue || !endDate.HasValue || packages == null || !packages.Any() || !startDateButton.HasValue || !endDateButton.HasValue)
             {
                 return methodResult;
+            }
+
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            if (startDateButton.Value <= currentDate && endDateButton >= currentDate)
+            {
+                model.IsShowButton = true;
             }
 
             var orders = await (from o in _orderRepository.Queryable
@@ -69,12 +78,12 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
 
                     if (isInPackage && isInDateRange)
                     {
-                        methodResult.Result = true;
-                        return methodResult;
+                        model.IsUserPremium = true;
+                        break;
                     }
                 }
             }
-
+            methodResult.Result = model;
             return methodResult;
         }
     }

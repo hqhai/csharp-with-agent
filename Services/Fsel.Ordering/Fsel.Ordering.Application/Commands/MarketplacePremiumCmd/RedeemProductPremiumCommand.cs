@@ -80,7 +80,7 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                 methodResult.AddError(checkResult.ErrorMessages);
                 return methodResult;
             }
-            if (!checkResult.Result)
+            if (checkResult.Result == null || !checkResult.Result.IsUserPremium)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotPartOfTheEvent), nameof(checkResult));
                 return methodResult;
