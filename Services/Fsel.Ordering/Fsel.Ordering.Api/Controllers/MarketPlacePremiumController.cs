@@ -86,5 +86,17 @@ namespace Fsel.Ordering.Api.Controllers
             var commandResult = await _mediator.Send(new CheckShowMarketplacePremiumQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        ///// <summary>
+        ///// Redeem product
+        ///// </summary>
+        //[HttpPost("spam-redeem")]
+        //[ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        //[ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        //public async Task<IActionResult> SpamRedeemProduct([FromBody] SpamRedeemProductPremiumCommand command)
+        //{
+        //    var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+        //    return commandResult.GetActionResult();
+        //}
     }
 }

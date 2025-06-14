@@ -6,7 +6,6 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
     using Fsel.Common.Caching;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Common.ValueSettings;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.MarketplacePremiumQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
@@ -24,11 +23,16 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc.ModelBinding;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
+
+    public class RedeemProductPremiumCache
+    {
+        public Guid ProductId { get; set; }
+        public int Quantity { get; set; }
+        public int RedeemQuantity { get; set; }
+    }
 
     public class RedeemProductPremiumCommand : RedeemProductPremiumCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
     {
@@ -45,10 +49,11 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
         private readonly IOrderTransactionRepository _orderTransactionRepository;
         private readonly IHostEnvironment _hostEnvironment;
         private readonly IProductRepository _productRepository;
-        private readonly ICacheService<StudentModel> _cacheService;
+        private readonly ICacheService<RedeemProductPremiumCache> _cacheProduct;
+        private readonly ICacheService<StudentModel> _cacheStudent;
         private readonly ILogger<RedeemProductPremiumCommandHandler> _logger;
 
-        public RedeemProductPremiumCommandHandler(IUrBoxService urBoxService, CreateTokenHistoryPublisher createTokenHistoryPublisher, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository, IHostEnvironment hostEnvironment, IProductRepository productRepository, ICacheService<StudentModel> cacheService, ILogger<RedeemProductPremiumCommandHandler> logger)
+        public RedeemProductPremiumCommandHandler(IUrBoxService urBoxService, CreateTokenHistoryPublisher createTokenHistoryPublisher, AppSetting appSetting, IMediator mediator, AuthContext authContext, IUserService userService, IOrderTransactionRepository orderTransactionRepository, IHostEnvironment hostEnvironment, IProductRepository productRepository, ICacheService<RedeemProductPremiumCache> cacheProduct, ILogger<RedeemProductPremiumCommandHandler> logger, ICacheService<StudentModel> cacheStudent)
         {
             _urBoxService = urBoxService;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -59,8 +64,9 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
             _orderTransactionRepository = orderTransactionRepository;
             _hostEnvironment = hostEnvironment;
             _productRepository = productRepository;
-            _cacheService = cacheService;
+            _cacheProduct = cacheProduct;
             _logger = logger;
+            _cacheStudent = cacheStudent;
         }
 
         public async Task<MethodResult<RedemptionResponseModel>> Handle(RedeemProductPremiumCommand request, CancellationToken cancellationToken)
@@ -105,7 +111,25 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                             p.Status == EnumOrderTransactionStatus.Received || p.Status == EnumOrderTransactionStatus.Success)
                 .Count();
 
-            if (quantityChanged >= product.Quantity)
+            var keyRedeem = $"ProductPremium_{request.ProductId}";
+
+            var redeemProductPremiumCache = await _cacheProduct.GetAsync(keyRedeem);
+            if (redeemProductPremiumCache == null)
+            {
+                redeemProductPremiumCache = new RedeemProductPremiumCache
+                {
+                    ProductId = product.Id,
+                    Quantity = product.Quantity,
+                    RedeemQuantity = quantityChanged + 1,
+                };
+            }
+            else
+            {
+                redeemProductPremiumCache.RedeemQuantity += 1;
+            }
+            await _cacheProduct.SetAsync(keyRedeem, redeemProductPremiumCache, TimeSpan.FromSeconds(5));
+
+            if (redeemProductPremiumCache.RedeemQuantity > redeemProductPremiumCache.Quantity)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.OutOfQuantity));
                 return methodResult;
@@ -123,31 +147,32 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                 return methodResult;
             }
 
-            var key = $"NumberOfToken_{_authContext.CurrentUserId}";
-            var student = _cacheService.Get(key,
-                TimeSpan.FromMinutes(1),
-                () => studentResult.Content.Result,
-                _logger);
-
-            if (student == null)
-            {
-                student = studentResult.Content.Result;
-            }
+            var student = studentResult.Content.Result;
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
-            var token = student.NumberOfToken;
-            if (token < product.Price)
+            var keyStudent = $"StudentRedeemProductPremium_{request.ProductId}";
+
+            var studentRedeemProductPremiumCache = await _cacheStudent.GetAsync(keyStudent);
+            if (studentRedeemProductPremiumCache == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(token), token);
-                return methodResult;
+                student.NumberOfToken -= product.Price;
+            }
+            else
+            {
+                student.NumberOfToken = studentRedeemProductPremiumCache.NumberOfToken - product.Price;
             }
 
-            student.NumberOfToken -= product.Price;
-            await _cacheService.SetAsync(key, student, TimeSpan.FromSeconds(5));
+            await _cacheStudent.SetAsync(keyStudent, student, TimeSpan.FromSeconds(5));
+
+            if (student.NumberOfToken < 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(student.NumberOfToken), student.NumberOfToken);
+                return methodResult;
+            }
 
             if (product.MarketPlaceType == EnumMarketPlaceType.UrBox && product.IsPremium)
             {
