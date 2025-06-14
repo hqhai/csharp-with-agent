@@ -83,6 +83,10 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ILevelRepository, LevelRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
 builder.Services.AddScoped<ISkillLevelRepository, SkillLevelRepository>();
+builder.Services.AddScoped<IFlowRepository, FlowRepository>();
+builder.Services.AddScoped<IActionFlowRepository, ActionFlowRepository>();
+builder.Services.AddScoped<IStepFlowRepository, StepFlowRepository>();
+builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();

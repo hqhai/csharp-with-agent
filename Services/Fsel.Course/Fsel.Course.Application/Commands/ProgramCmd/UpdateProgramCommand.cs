@@ -8,6 +8,7 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Programs;
@@ -45,6 +46,7 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
             Regex regexCode = new Regex("^[A-Z0-9_]$");
 
             #region Validate
+
             if (string.IsNullOrEmpty(request.Name) || (!string.IsNullOrEmpty(request.Name) && regexName.IsMatch(request.Name)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NameNotValid), nameof(request.Name), request.Name);
@@ -63,13 +65,31 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
-            #endregion
+            var category = await _categoryRepository.GetByIdAsync(request.Id);
+            if (category == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
+                return methodResult;
+            }
+            var programs = await _categoryRepository.Queryable.Where(x => x.ParentId == category.ParentId).ToListAsync(cancellationToken);
+            if (request.IsTestDefault && programs.Any(x => x.IsTestDefault))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.IsTestDefault), request.IsTestDefault);
+                return methodResult;
+            }
+            if (request.TestMode.HasValue && request.TestMode.Value == EnumTestMode.Default && !programs.Any(x => x.IsTestDefault))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.TestMode), programs.Any(x => x.IsTestDefault));
+                return methodResult;
+            }
 
-            var category = await _categoryRepository.Queryable
-                                                    .Include(x => x.Levels)
-                                                    .ThenInclude(x => x.SkillLevels)
-                                                    .ThenInclude(x => x.Skill)
-                                                    .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            #endregion Validate
+
+            category = await _categoryRepository.Queryable
+                                                   .Include(x => x.Levels)
+                                                   .ThenInclude(x => x.SkillLevels)
+                                                   .ThenInclude(x => x.Skill)
+                                                   .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (category == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(category), request.Id);

@@ -7,12 +7,12 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Programs;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -45,6 +45,7 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
             Regex regexCode = new Regex("^[A-Z0-9_]$");
 
             #region Validate
+
             if (string.IsNullOrEmpty(request.Name) || (!string.IsNullOrEmpty(request.Name) && regexName.IsMatch(request.Name)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NameNotValid), nameof(request.Name), request.Name);
@@ -63,7 +64,25 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
-            #endregion
+            var parentCategory = await _categoryRepository.GetByIdAsync(request.ParentId);
+            if (parentCategory == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ParentId), request.ParentId);
+                return methodResult;
+            }
+            var programs = await _categoryRepository.Queryable.Where(x => x.ParentId == request.ParentId).ToListAsync(cancellationToken);
+            if (request.IsTestDefault && programs.Any(x => x.IsTestDefault))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.IsTestDefault), request.IsTestDefault);
+                return methodResult;
+            }
+            if (request.TestMode.HasValue && request.TestMode.Value == EnumTestMode.Default && !programs.Any(x => x.IsTestDefault))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.TestMode), programs.Any(x => x.IsTestDefault));
+                return methodResult;
+            }
+
+            #endregion Validate
 
             var category = _mapper.Map<Category>(request);
             category.Type = Shared.Enums.EnumTypeCategory.Program;

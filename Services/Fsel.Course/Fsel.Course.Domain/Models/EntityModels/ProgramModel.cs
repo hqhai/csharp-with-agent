@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Models.EntityModels.FlowModels;
     using Fsel.Shared.Enums;
 
     public class ProgramModel : BaseModel
@@ -18,5 +19,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumStatus Status { get; set; }
 
         public IList<LevelModel>? Levels { get; set; }
+        public IList<FlowModel>? Flows { get; set; }
     }
 }

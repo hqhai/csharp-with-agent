@@ -3,8 +3,11 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.FlowConfigs;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class Category : Entity
@@ -24,10 +27,16 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid? ParentId { get; set; }
 
+        public bool IsTestDefault { get; set; }
+
+        [RequiredIf(nameof(Type), nameof(EnumTypeCategory.Program), ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        public EnumTestMode? TestMode { get; set; }
+
         public Category? CategoryParent { get; set; }
 
         public ICollection<Category> Categorys { get; set; } = new List<Category>();
-
         public ICollection<Level> Levels { get; set; } = new List<Level>();
+        public ICollection<CategoryTestBank> CategoryTestBanks { get; set; } = new List<CategoryTestBank>();
+        public ICollection<Flow> Flows { get; set; } = new List<Flow>();
     }
 }

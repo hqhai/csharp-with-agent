@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.FlowConfigs;
 
     public class Level : Entity
     {
@@ -24,5 +25,6 @@ namespace Fsel.Course.Domain.Entities
         public Category? Category { get; set; }
 
         public ICollection<SkillLevel> SkillLevels { get; set; } = new List<SkillLevel>();
+        public ICollection<StepFlow> StepFlows { get; set; } = new List<StepFlow>();
     }
 }

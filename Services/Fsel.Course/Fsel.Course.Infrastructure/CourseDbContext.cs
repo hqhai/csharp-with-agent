@@ -3,6 +3,7 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Entities.FlowConfigs;
 using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
@@ -93,6 +94,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<Category> Categorys { get; set; }
         public DbSet<Skill> Skills { get; set; }
         public DbSet<SkillLevel> SkillLevels { get; set; }
+        public DbSet<Flow> Flows { get; set; }
+        public DbSet<StepFlow> StepFlows { get; set; }
+        public DbSet<ActionFlow> ActionFlows { get; set; }
+        public DbSet<CategoryTestBank> CategoryTestBanks { get; set; }
 
         #region Report
 
@@ -201,26 +206,33 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new LevelEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SkillEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SkillLevelEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FlowEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StepFlowEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ActionFlowEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CategoryTestBankEntityTypeConfiguration());
 
-            //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
-            //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
-            //modelBuilder.Ignore<PercentEvaluateInputResultModel>();
-            //modelBuilder.Ignore<LevelEvaluateInputResultModel>();
-            //modelBuilder.Ignore<SchoolSummaryModel>();
-            //modelBuilder.Ignore<TotalLearningProgressModel>();
-            //modelBuilder.Ignore<AverageLearningProgressModel>();
-            //modelBuilder.Ignore<UnitDoneLearningProgressIeltsModel>();
-            //modelBuilder.Ignore<UnitDoneLearningProgressAcademicModel>();
-            //modelBuilder.Ignore<LessonDoneLearningProgressIeltsModel>();
-            //modelBuilder.Ignore<LessonDoneLearningProgressAcademicModel>();
-            //modelBuilder.Ignore<TotalLearningModel>();
-            //modelBuilder.Ignore<RateLearningModel>();
-            //modelBuilder.Ignore<TotalLearningQualityModel>();
-            //modelBuilder.Ignore<TotalDetailLearningQualityModel>();
-            //modelBuilder.Ignore<SchoolInfoModel>();
-            //modelBuilder.Ignore<CourseCompleteReportModel>();
-            //modelBuilder.Ignore<SchoolInfoFilterModel>();
-            //modelBuilder.Ignore<DistrictInfoModel>();
+            modelBuilder.Ignore<TotalEvaluateInputResultModel>();
+            modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
+            modelBuilder.Ignore<PercentEvaluateInputResultModel>();
+            modelBuilder.Ignore<LevelEvaluateInputResultModel>();
+            modelBuilder.Ignore<SchoolSummaryModel>();
+            modelBuilder.Ignore<TotalLearningProgressModel>();
+            modelBuilder.Ignore<AverageLearningProgressModel>();
+            modelBuilder.Ignore<UnitDoneLearningProgressIeltsModel>();
+            modelBuilder.Ignore<UnitDoneLearningProgressAcademicModel>();
+            modelBuilder.Ignore<LessonDoneLearningProgressIeltsModel>();
+            modelBuilder.Ignore<LessonDoneLearningProgressAcademicModel>();
+            modelBuilder.Ignore<TotalLearningModel>();
+            modelBuilder.Ignore<RateLearningModel>();
+            modelBuilder.Ignore<TotalLearningQualityModel>();
+            modelBuilder.Ignore<TotalDetailLearningQualityModel>();
+            modelBuilder.Ignore<SchoolInfoModel>();
+            modelBuilder.Ignore<CourseCompleteReportModel>();
+            modelBuilder.Ignore<SchoolInfoFilterModel>();
+            modelBuilder.Ignore<DistrictInfoModel>();
+            modelBuilder.Ignore<ReportLearningProcessModel>();
+            modelBuilder.Ignore<ReportLearningResultModel>();
+            modelBuilder.Ignore<ExportSummaryReportCommandModel>();
 
             base.OnModelCreating(modelBuilder);
         }
