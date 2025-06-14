@@ -221,22 +221,7 @@ namespace Fsel.Ordering.Application.Commands.Products
                         return methodResult;
                     }
 
-                    if (studentResult.Content?.Result == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                        return methodResult;
-                    }
-
-                    var key = $"NumberOfToken_{_authContext.CurrentUserId}";
-                    var student = _cacheService.Get(key,
-                        TimeSpan.FromMinutes(1),
-                        () => studentResult.Content.Result,
-                        _logger);
-
-                    if (student == null)
-                    {
-                        student = studentResult.Content.Result;
-                    }
+                    var student = studentResult.Content?.Result;
 
                     if (student == null)
                     {
@@ -244,13 +229,20 @@ namespace Fsel.Ordering.Application.Commands.Products
                         return methodResult;
                     }
 
-                    student.NumberOfToken -= product.Price;
+                    var key = $"StudentRedeemProduct_{_authContext.CurrentUserId}";
+
+                    var studentRedeemProductCache = await _cacheService.GetAsync(key);
+                    if (studentRedeemProductCache != null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.TransactionInProgress));
+                        return methodResult;
+                    }
+
                     await _cacheService.SetAsync(key, student, TimeSpan.FromSeconds(5));
 
-                    var token = student.NumberOfToken;
-                    if (token < product.Price)
+                    if (student.NumberOfToken < product.Price)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(token), token);
+                        methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(student.NumberOfToken), student.NumberOfToken);
                         return methodResult;
                     }
 

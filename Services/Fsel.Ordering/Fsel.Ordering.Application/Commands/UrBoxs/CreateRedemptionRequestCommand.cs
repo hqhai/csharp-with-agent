@@ -80,7 +80,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 return methodResult;
             }
 
-            if (request.DataBuy == null || request.DataBuy.Count == 0)
+            if (request.DataBuy == null || request.DataBuy.Count == 0 || request.DataBuy.Count != 1)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
@@ -96,36 +96,6 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
             }
 
             if (string.IsNullOrEmpty(request.PhoneNumber))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(studentResult.Error);
-                return methodResult;
-            }
-
-            if (studentResult.Content?.Result == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            var key = $"NumberOfToken_{_authContext.CurrentUserId}";
-            var student = _cacheService.Get(key,
-                TimeSpan.FromMinutes(1),
-                () => studentResult.Content.Result,
-                _logger);
-
-            if (student == null)
-            {
-                student = studentResult.Content.Result;
-            }
-
-            if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
@@ -179,15 +149,37 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                 return methodResult;
             }
 
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+
+            var student = studentResult.Content?.Result;
+
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            var key = $"StudentRedeemUrBox_{_authContext.CurrentUserId}";
+
+            var studentRedeemUrBoxCache = await _cacheService.GetAsync(key);
+            if (studentRedeemUrBoxCache != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.TransactionInProgress));
+                return methodResult;
+            }
+
+            await _cacheService.SetAsync(key, student, TimeSpan.FromSeconds(10));
+
             var totalPrice = quantity * price;
 
-            student.NumberOfToken -= totalPrice;
-            await _cacheService.SetAsync(key, student, TimeSpan.FromSeconds(5));
-
-            var token = student.NumberOfToken;
-            if (token < totalPrice)
+            if (student.NumberOfToken < totalPrice)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(token), token);
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(student.NumberOfToken), student.NumberOfToken);
                 return methodResult;
             }
 
@@ -249,14 +241,19 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                     return methodResult;
                 }
 
-                var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
+                var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
+                if (createRedemptionRequest.Content?.Status == 200)
                 {
-                    UserId = student?.Human?.UserId ?? default,
-                    NumberOfCoinsDeducted = totalPrice,
-                    Feature = EnumTokenFeature.MarketPlace,
-                    Mission = EnumTokenMission.UrBox,
-                    ObjectId = orderTransaction.Id,
-                    Translations = new List<TokenHistoryTranslationModel>()
+                    methodResult.Result = createRedemptionRequest.Content;
+
+                    var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
+                    {
+                        UserId = student?.Human?.UserId ?? default,
+                        NumberOfCoinsDeducted = totalPrice,
+                        Feature = EnumTokenFeature.MarketPlace,
+                        Mission = EnumTokenMission.UrBox,
+                        ObjectId = orderTransaction.Id,
+                        Translations = new List<TokenHistoryTranslationModel>()
                     {
                         new TokenHistoryTranslationModel()
                         {
@@ -274,18 +271,13 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
                                 }
                         },
                     }
-                });
+                    });
 
-                if (!result.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(result.Error);
-                    return methodResult;
-                }
-
-                var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
-                if (createRedemptionRequest.Content?.Status == 200)
-                {
-                    methodResult.Result = createRedemptionRequest.Content;
+                    if (!result.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(result.Error);
+                        return methodResult;
+                    }
                 }
                 else
                 {
