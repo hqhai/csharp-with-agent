@@ -26,14 +26,17 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
         private readonly ProgramConverter _programConverter;
+        private readonly IPlacementTestRepository _placementTestRepository;
 
         public CreateProgramCommandHandler(ICategoryRepository categoryRepository,
                                            IMapper mapper,
-                                           ProgramConverter programConverter)
+                                           ProgramConverter programConverter,
+                                           IPlacementTestRepository placementTestRepository)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
             _programConverter = programConverter;
+            _placementTestRepository = placementTestRepository;
         }
 
         public async Task<MethodResult<ProgramModel>> Handle(CreateProgramCommand request, CancellationToken cancellationToken)
@@ -81,12 +84,28 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.TestMode), programs.Any(x => x.IsTestDefault));
                 return methodResult;
             }
+            if (request.PlacementTestIds != null && request.PlacementTestIds.Any())
+            {
+                var placementTests = await _placementTestRepository.Queryable.WhereBulkContains(request.PlacementTestIds, x => x.Id).ToListAsync(cancellationToken);
+                if (placementTests.Count != request.PlacementTestIds.Distinct().Count())
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NotEnoughPlacementTests));
+                    return methodResult;
+                }
+            }
 
             #endregion Validate
 
             var category = _mapper.Map<Category>(request);
             category.Type = Shared.Enums.EnumTypeCategory.Program;
-
+            if (request.PlacementTestIds != null && request.PlacementTestIds.Any())
+            {
+                category.CategoryTestBanks = request.PlacementTestIds.Distinct().Select(x => new CategoryTestBank
+                {
+                    TestId = x,
+                    TestType = EnumTestType.PlacementTest,
+                }).ToList();
+            }
             if (request.Levels == null || !request.Levels.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Levels), request.Levels);

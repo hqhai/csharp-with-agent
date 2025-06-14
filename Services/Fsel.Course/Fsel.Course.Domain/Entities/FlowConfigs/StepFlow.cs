@@ -18,7 +18,7 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
 
         public Level? Level { get; set; }
         public Guid LevelId { get; set; }
-        public ICollection<PlacementTestResult> PlacementTestResult { get; set; } = new List<PlacementTestResult>();
+        public ICollection<PlacementTestResult> PlacementTestResults { get; set; } = new List<PlacementTestResult>();
         public ICollection<StepFlow> StepFlows { get; set; } = new List<StepFlow>();
         public ICollection<ActionFlow> ChildActionFlows { get; set; } = new List<ActionFlow>();
         public ICollection<ActionFlow> ParentActionFlows { get; set; } = new List<ActionFlow>();

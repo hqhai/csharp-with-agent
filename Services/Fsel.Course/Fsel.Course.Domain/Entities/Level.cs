@@ -26,5 +26,6 @@ namespace Fsel.Course.Domain.Entities
 
         public ICollection<SkillLevel> SkillLevels { get; set; } = new List<SkillLevel>();
         public ICollection<StepFlow> StepFlows { get; set; } = new List<StepFlow>();
+        public ICollection<PlacementTest> PlacementTests { get; set; } = new List<PlacementTest>();
     }
 }

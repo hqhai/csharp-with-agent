@@ -200,7 +200,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             }
             else if (extraPractice != null && extraPractice.PlacementTest != null)
             {
-                if (extraPractice.PlacementTest.Level == EnumPlacementTestLevel.IELTS)
+                if (extraPractice.PlacementTest.PlacementTestLevel == EnumPlacementTestLevel.IELTS)
                 {
                     correctTotal = 40 * 2;
                 }

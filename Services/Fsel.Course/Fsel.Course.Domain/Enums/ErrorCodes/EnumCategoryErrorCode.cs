@@ -6,6 +6,8 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
     {
         NameNotValid,
 
-        CodeNotValid
+        CodeNotValid,
+
+        NotEnoughPlacementTests
     }
 }

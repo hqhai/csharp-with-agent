@@ -8,6 +8,7 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -27,14 +28,17 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
         private readonly ProgramConverter _programConverter;
+        private readonly IPlacementTestRepository _placementTestRepository;
 
         public UpdateProgramCommandHandler(ICategoryRepository categoryRepository,
                                            IMapper mapper,
-                                           ProgramConverter programConverter)
+                                           ProgramConverter programConverter,
+                                           IPlacementTestRepository placementTestRepository)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
             _programConverter = programConverter;
+            _placementTestRepository = placementTestRepository;
         }
 
         public async Task<MethodResult<ProgramModel>> Handle(UpdateProgramCommand request, CancellationToken cancellationToken)
@@ -82,10 +86,19 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.TestMode), programs.Any(x => x.IsTestDefault));
                 return methodResult;
             }
+            if (request.PlacementTestIds != null && request.PlacementTestIds.Any())
+            {
+                var placementTests = await _placementTestRepository.Queryable.WhereBulkContains(request.PlacementTestIds, x => x.Id).ToListAsync(cancellationToken);
+                if (placementTests.Count != request.PlacementTestIds.Count)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NotEnoughPlacementTests));
+                    return methodResult;
+                }
+            }
 
             #endregion Validate
 
-            category = await _categoryRepository.Queryable
+            category = await _categoryRepository.Queryable.Include(x => x.CategoryTestBanks)
                                                    .Include(x => x.Levels)
                                                    .ThenInclude(x => x.SkillLevels)
                                                    .ThenInclude(x => x.Skill)
@@ -108,7 +121,26 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 methodResult.AddErrorBadRequest(category.ErrorMessages);
                 return methodResult;
             }
-
+            var incomingIds = request.PlacementTestIds?.Distinct().ToList() ?? new List<Guid>();
+            foreach (var oldBank in category.CategoryTestBanks)
+            {
+                if (!incomingIds.Contains(oldBank.TestId))
+                {
+                    category.CategoryTestBanks.Remove(oldBank);
+                }
+            }
+            var existingIds = category.CategoryTestBanks.Select(x => x.TestId).ToHashSet();
+            foreach (var id in incomingIds)
+            {
+                if (!existingIds.Contains(id))
+                {
+                    category.CategoryTestBanks.Add(new CategoryTestBank
+                    {
+                        TestId = id,
+                        TestType = EnumTestType.PlacementTest
+                    });
+                }
+            }
             var levelIds = category.Levels.Select(x => x.Id).ToList();
             var levelRequestIds = request.Levels.Where(x => x.Id.HasValue).Select(x => x.Id!.Value).ToList();
             var duplicateIds = levelIds.Intersect(levelRequestIds).ToList();

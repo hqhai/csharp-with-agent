@@ -36,7 +36,7 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
 
         public Category? Category { get; set; }
         public Guid ProgramId { get; set; }
-        public ICollection<PlacementTestGroupResult> PlacementTestGroupResult { get; set; } = new List<PlacementTestGroupResult>();
+        public ICollection<PlacementTestGroupResult> PlacementTestGroupResults { get; set; } = new List<PlacementTestGroupResult>();
         public ICollection<StepFlow> StepFlows { get; set; } = new List<StepFlow>();
     }
 }

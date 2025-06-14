@@ -234,7 +234,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// get program by id
         /// </summary>
         [HttpGet("program/{programId}")]
-        [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ProgramModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetProgramById([FromRoute] Guid programId)
         {
