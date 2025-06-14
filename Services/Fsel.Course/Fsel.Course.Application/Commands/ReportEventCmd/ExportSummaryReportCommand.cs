@@ -54,12 +54,12 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
 
             var keyCache = $"ExportSummaryReportCommand_{ConvertHelper.Serialize(request)}_{_authContext.CurrentUserId}";
             var data = await _cacheService.GetAsync(keyCache);
-            //if (data != null && _appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
-            //{
-            //    exportSummaryReports = data.ToList();
-            //    methodResult.Result = ExportExcelTemplate(exportSummaryReports, request.CheckByGroup);
-            //    return methodResult;
-            //}
+            if (data != null && _appSetting.CacheConfig != null && _appSetting.CacheConfig.TurnOnCaching)
+            {
+                exportSummaryReports = data.ToList();
+                methodResult.Result = ExportExcelTemplate(exportSummaryReports, request.CheckByGroup);
+                return methodResult;
+            }
 
             var result = await _courseDbContext.Set<ExportSummaryReportCommandModel>()
                                                .FromSqlRaw("EXEC ExportSchoolSummary1  @UserId, @CheckByGroup",
@@ -412,18 +412,18 @@ namespace Fsel.Course.Application.Commands.ReportEventCmd
                 excelWorksheet.Cells[startRow, 29].Value = $"{((double)(item.TotalTeacherPTProgress ?? default)).GetPercent((item.ElevationOfRefHeight ?? default), 2)}%";
 
                 excelWorksheet.Cells[startRow, 30].Value = totalPTComplete;
-                excelWorksheet.Cells[startRow, 31].Value = $"{totalPTComplete.GetPercent((item.TotalStudentDefault ?? default), 2)}%";
-                excelWorksheet.Cells[startRow, 32].Value = $"{totalPTComplete.GetPercent((item.TotalStudent ?? default), 2)}%";
+                excelWorksheet.Cells[startRow, 31].Value = $"{totalPTComplete.GetPercent((item.TotalStudent ?? default), 2)}%";
+                excelWorksheet.Cells[startRow, 32].Value = $"{totalPTComplete.GetPercent((item.TotalStudentDefault ?? default), 2)}%";
 
                 excelWorksheet.Cells[startRow, 33].Value = totalPTProgress;
-                excelWorksheet.Cells[startRow, 34].Value = $"{totalPTProgress.GetPercent((item.TotalStudentDefault ?? default), 2)}%";
-                excelWorksheet.Cells[startRow, 35].Value = $"{totalPTProgress.GetPercent((item.TotalStudent ?? default), 2)}%";
+                excelWorksheet.Cells[startRow, 34].Value = $"{totalPTProgress.GetPercent((item.TotalStudent ?? default), 2)}%";
+                excelWorksheet.Cells[startRow, 35].Value = $"{totalPTProgress.GetPercent((item.TotalStudentDefault ?? default), 2)}%";
 
                 excelWorksheet.Cells[startRow, 36].Value = item.TotalStudentLearnProgress;
-                excelWorksheet.Cells[startRow, 37].Value = $"{((double)(item.TotalStudentLearnProgress ?? default)).GetPercent((item.RegisterStudent ?? default), 2)}%";
+                excelWorksheet.Cells[startRow, 37].Value = $"{((double)(item.TotalStudentLearnProgress ?? default)).GetPercent((item.ElevationOfTerrain ?? default), 2)}%";
 
                 excelWorksheet.Cells[startRow, 38].Value = item.TotalTeacherLearnProgress;
-                excelWorksheet.Cells[startRow, 39].Value = $"{((double)(item.TotalTeacherLearnProgress ?? default)).GetPercent((item.RegisterTeacher ?? default), 2)}%";
+                excelWorksheet.Cells[startRow, 39].Value = $"{((double)(item.TotalTeacherLearnProgress ?? default)).GetPercent((item.ElevationOfRefHeight ?? default), 2)}%";
 
                 var totalLearn = (double)(item.TotalStudentLearnProgress ?? default) + (item.TotalTeacherLearnProgress ?? default);
                 excelWorksheet.Cells[startRow, 40].Value = totalLearn;
