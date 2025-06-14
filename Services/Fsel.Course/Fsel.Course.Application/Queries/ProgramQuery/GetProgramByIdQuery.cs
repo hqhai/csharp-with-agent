@@ -10,6 +10,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.FlowModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -100,11 +101,11 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                            .ThenInclude(x => x.ChildActionFlows.OrderBy(af => af.CreatedDate))
                            .Include(x => x.StepFlows)
                            .ThenInclude(x => x.Level)
-                           .Where(x => x.ProgramId == programId).ToListAsync(cancellationToken);
-            foreach (var flow in flows)
+                           .Where(x => x.ProgramId == programId && x.Status == EnumStatus.Active)
+                           .ToListAsync(cancellationToken);
+            foreach (var flow in flows.OrderBy(x => x.CreatedDate))
             {
                 var isPT = await _placementTestGroupResultRepository.Queryable.AnyAsync(x => x.FlowId == flow.Id, cancellationToken);
-
                 foreach (var stepFlow in flow.StepFlows)
                 {
                     await LoadStepFlowRecursively(stepFlow, cancellationToken);

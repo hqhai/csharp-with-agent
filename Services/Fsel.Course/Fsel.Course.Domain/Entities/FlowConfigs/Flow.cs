@@ -7,6 +7,8 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
+    using Fsel.Common.Helpers;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     public class Flow : Entity
     {
@@ -19,6 +21,18 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
         public int ToAge { get; set; }
 
         public EnumStatus Status { get; set; }
+
+        /// <summary>
+        /// Config
+        /// </summary>
+        public string? ConfigStr { get; set; }
+
+        [NotMapped]
+        public object? Config
+        {
+            get { return ConvertHelper.Deserialize<object>(ConfigStr); }
+            set { ConfigStr = ConvertHelper.Serialize(value); }
+        }
 
         public Category? Category { get; set; }
         public Guid ProgramId { get; set; }

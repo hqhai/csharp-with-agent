@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.FlowModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
@@ -9,10 +10,12 @@ namespace Fsel.Course.Domain.Models.EntityModels.FlowModels
     {
         public Guid Id { get; set; }
         public DateTime? CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
         public EnumFlowType Type { get; set; }
         public int FromAge { get; set; }
         public int ToAge { get; set; }
         public bool IsUsedInPlacementTest { get; set; }
+        public object? Config { get; set; }
         public EnumStatus Status { get; set; }
         public IList<StepFlowModel> StepFlows { get; set; } = new List<StepFlowModel>();
     }
