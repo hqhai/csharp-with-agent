@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.Programs
 {
+    using Fsel.Shared.Enums;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.CommandModels.Flows;
 
@@ -14,10 +15,11 @@ namespace Fsel.Course.Domain.Models.CommandModels.Programs
         public string? Code { get; set; }
 
         public string? Description { get; set; }
+
+        public EnumStatus Status { get; set; }
         public bool IsTestDefault { get; set; }
         public EnumTestMode? TestMode { get; set; }
         public IList<UpdateLevelCommandModel>? Levels { get; set; }
-        public IList<SaveFlowCommandModel>? Flows { get; set; }
     }
 
     public class UpdateLevelCommandModel

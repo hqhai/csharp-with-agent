@@ -6,9 +6,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class CategoryTreeModel
     {
-        public Guid Label { get; set; }
+        public string? Label { get; set; }
 
-        public string? Data { get; set; }
+        public Guid Data { get; set; }
 
         public EnumTypeCategory ExpandedIcon { get; set; }
 
