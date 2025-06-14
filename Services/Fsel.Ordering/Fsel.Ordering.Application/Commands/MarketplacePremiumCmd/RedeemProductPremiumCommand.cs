@@ -31,7 +31,7 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
     {
         public Guid ProductId { get; set; }
         public int Quantity { get; set; }
-        public int RedeemQuantity { get; set; }
+        public int QuantityChanged { get; set; }
     }
 
     public class RedeemProductPremiumCommand : RedeemProductPremiumCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
@@ -114,22 +114,22 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
             var keyRedeem = $"ProductPremium_{request.ProductId}";
 
             var redeemProductPremiumCache = await _cacheProduct.GetAsync(keyRedeem);
-            if (redeemProductPremiumCache == null)
+            if (redeemProductPremiumCache != null)
             {
-                redeemProductPremiumCache = new RedeemProductPremiumCache
-                {
-                    ProductId = product.Id,
-                    Quantity = product.Quantity,
-                    RedeemQuantity = quantityChanged + 1,
-                };
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.TransactionInProgress));
+                return methodResult;
             }
-            else
+
+            redeemProductPremiumCache = new RedeemProductPremiumCache
             {
-                redeemProductPremiumCache.RedeemQuantity += 1;
-            }
+                ProductId = product.Id,
+                Quantity = product.Quantity,
+                QuantityChanged = quantityChanged + 1,
+            };
+
             await _cacheProduct.SetAsync(keyRedeem, redeemProductPremiumCache, TimeSpan.FromSeconds(5));
 
-            if (redeemProductPremiumCache.RedeemQuantity > redeemProductPremiumCache.Quantity)
+            if (redeemProductPremiumCache.QuantityChanged > redeemProductPremiumCache.Quantity)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.OutOfQuantity));
                 return methodResult;
@@ -154,21 +154,18 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                 return methodResult;
             }
 
-            var keyStudent = $"StudentRedeemProductPremium_{request.ProductId}";
+            var keyStudent = $"StudentRedeemProductPremium_{_authContext.CurrentUserId}";
 
             var studentRedeemProductPremiumCache = await _cacheStudent.GetAsync(keyStudent);
-            if (studentRedeemProductPremiumCache == null)
+            if (studentRedeemProductPremiumCache != null)
             {
-                student.NumberOfToken -= product.Price;
-            }
-            else
-            {
-                student.NumberOfToken = studentRedeemProductPremiumCache.NumberOfToken - product.Price;
+                methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.TransactionInProgress));
+                return methodResult;
             }
 
             await _cacheStudent.SetAsync(keyStudent, student, TimeSpan.FromSeconds(5));
 
-            if (student.NumberOfToken < 0)
+            if (student.NumberOfToken - product.Price < 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(student.NumberOfToken), student.NumberOfToken);
                 return methodResult;
@@ -224,8 +221,10 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                 code = Shared.Helpers.NumberHelper.GenerateCode(7);
             } while (codes.Contains(code));
 
-            await _productRepository.ExecuteTransactionAsync(async () =>
+            var strategy = _productRepository.DbContext.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
+                await using var transaction = await _productRepository.DbContext.Database.BeginTransactionAsync();
                 var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
                 {
                     UserId = userId,
@@ -237,7 +236,7 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                         Language = p.Language,
                         Config = new List<object>
                         {
-                                new { Title = p.Name }
+                            new { Title = p.Name }
                         }
                     }).ToList()
                 });
@@ -257,7 +256,8 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                     RequestBody = request
                 });
 
-                await _orderTransactionRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _productRepository.DbContext.SaveChangesAsync();
+                await transaction.CommitAsync();
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;

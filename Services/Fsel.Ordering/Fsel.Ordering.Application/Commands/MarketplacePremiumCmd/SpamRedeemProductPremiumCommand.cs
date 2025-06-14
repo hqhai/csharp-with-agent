@@ -7,6 +7,7 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
     using Fsel.Ordering.Application.Services.UrBoxService.Models.Response;
     using Fsel.Ordering.Domain.Models.CommandModels.MarketPlacePremium;
     using MediatR;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
 
     public class SpamRedeemProductPremiumCommand : RedeemProductPremiumCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
@@ -17,11 +18,13 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
     {
         private readonly IMediator _mediator;
         private readonly ILogger<SpamRedeemProductPremiumCommandHandler> _logger;
+        private readonly IServiceScopeFactory _scopeFactory;
 
-        public SpamRedeemProductPremiumCommandHandler(IMediator mediator, ILogger<SpamRedeemProductPremiumCommandHandler> logger)
+        public SpamRedeemProductPremiumCommandHandler(IMediator mediator, ILogger<SpamRedeemProductPremiumCommandHandler> logger, IServiceScopeFactory scopeFactory)
         {
             _mediator = mediator;
             _logger = logger;
+            _scopeFactory = scopeFactory;
         }
 
         public async Task<MethodResult<RedemptionResponseModel>> Handle(SpamRedeemProductPremiumCommand request, CancellationToken cancellationToken)
@@ -31,14 +34,16 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
 
             var tasks = new List<Task>();
 
-            var range = Enumerable.Range(0, 10);
+            var range = Enumerable.Range(0, 50);
             object consoleLock = new();
             await Parallel.ForEachAsync(range, cancellationToken, async (i, ct) =>
             {
+                using var scope = _scopeFactory.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
                 try
                 {
                     Console.WriteLine($"Redeem #{i + 1} time: {DateTime.Now.ToString()}");
-                    var result = await _mediator.Send(new RedeemProductPremiumCommand()
+                    var result = await mediator.Send(new RedeemProductPremiumCommand()
                     {
                         ProductId = request.ProductId,
                         PhoneNumber = request.PhoneNumber
@@ -46,14 +51,17 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
 
                     if (!result.IsOK)
                     {
+                        _logger.LogError($"Redeem #{i + 1} time: {DateTime.Now.ToString()} error: {result.Serialize()}");
                     }
-
-                    _logger.LogError($"Redeem #{i + 1} completed: {result.Serialize()}");
-
-                    lock (consoleLock)
+                    else
                     {
-                        Console.WriteLine($"Redeem #{i + 1} completed: {result.Serialize()}");
+                        _logger.LogError($"Redeem #{i + 1} time: {DateTime.Now.ToString()} completed: {result.Serialize()}");
                     }
+
+                    //lock (consoleLock)
+                    //{
+                    //    Console.WriteLine($"Redeem #{i + 1} completed: {result.Serialize()}");
+                    //}
                 }
                 catch (Exception ex)
                 {
