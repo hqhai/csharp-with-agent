@@ -178,14 +178,19 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                     return methodResult;
                 }
 
-                var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
+                var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
+                if (createRedemptionRequest.Content?.Status == 200)
                 {
-                    UserId = _authContext.CurrentUserId,
-                    NumberOfCoinsDeducted = request.Price,
-                    Feature = EnumTokenFeature.MarketPlace,
-                    Mission = EnumTokenMission.MarketPlacePremium,
-                    ObjectId = request.ProductId,
-                    Translations = new List<TokenHistoryTranslationModel>()
+                    methodResult.Result = createRedemptionRequest.Content;
+
+                    var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
+                    {
+                        UserId = _authContext.CurrentUserId,
+                        NumberOfCoinsDeducted = request.Price,
+                        Feature = EnumTokenFeature.MarketPlace,
+                        Mission = EnumTokenMission.MarketPlacePremium,
+                        ObjectId = request.ProductId,
+                        Translations = new List<TokenHistoryTranslationModel>()
                     {
                         new TokenHistoryTranslationModel()
                         {
@@ -203,18 +208,13 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                                 }
                         },
                     }
-                });
+                    });
 
-                if (!result.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(result.Error);
-                    return methodResult;
-                }
-
-                var createRedemptionRequest = await _urBoxService.CreateRedemptionRequest(redemptionRequest, signature);
-                if (createRedemptionRequest.Content?.Status == 200)
-                {
-                    methodResult.Result = createRedemptionRequest.Content;
+                    if (!result.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(result.Error);
+                        return methodResult;
+                    }
                 }
                 else
                 {

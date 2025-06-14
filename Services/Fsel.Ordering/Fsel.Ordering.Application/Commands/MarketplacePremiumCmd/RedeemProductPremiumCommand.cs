@@ -34,11 +34,18 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
         public int QuantityChanged { get; set; }
     }
 
-    public class RedeemProductPremiumCommand : RedeemProductPremiumCommandModel, IRequest<MethodResult<RedemptionResponseModel>>
+    public class RedeemProductPremiumModel
+    {
+        public EnumMarketPlaceType MarketPlaceType { get; set; }
+        public string? Code { get; set; }
+        public RedemptionResponseModel? RedemptionResponse { get; set; }
+    }
+
+    public class RedeemProductPremiumCommand : RedeemProductPremiumCommandModel, IRequest<MethodResult<RedeemProductPremiumModel>>
     {
     }
 
-    public class RedeemProductPremiumCommandHandler : IRequestHandler<RedeemProductPremiumCommand, MethodResult<RedemptionResponseModel>>
+    public class RedeemProductPremiumCommandHandler : IRequestHandler<RedeemProductPremiumCommand, MethodResult<RedeemProductPremiumModel>>
     {
         private readonly IUrBoxService _urBoxService;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
@@ -69,10 +76,10 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
             _cacheStudent = cacheStudent;
         }
 
-        public async Task<MethodResult<RedemptionResponseModel>> Handle(RedeemProductPremiumCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<RedeemProductPremiumModel>> Handle(RedeemProductPremiumCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<RedemptionResponseModel>();
+            var methodResult = new MethodResult<RedeemProductPremiumModel>();
 
             if (string.IsNullOrEmpty(request.PhoneNumber) || !request.PhoneNumber.IsValidPhoneNumber())
             {
@@ -195,10 +202,16 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                     methodResult.AddError(result.ErrorMessages);
                     return methodResult;
                 }
+
+                methodResult.Result = new RedeemProductPremiumModel()
+                {
+                    MarketPlaceType = EnumMarketPlaceType.UrBox,
+                    RedemptionResponse = result.Result
+                };
             }
             else if (product.MarketPlaceType == EnumMarketPlaceType.FSEL && product.IsPremium)
             {
-                await RedeemProductFSEL(product, student?.Human?.UserId ?? default, request, methodResult, cancellationToken);
+                await RedeemProductFSEL(product, student.Human?.UserId ?? default, request, methodResult, cancellationToken);
                 return methodResult;
             }
             else
@@ -210,7 +223,7 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
             return methodResult;
         }
 
-        private async Task<MethodResult<RedemptionResponseModel>> RedeemProductFSEL(Product product, Guid userId, RedeemProductPremiumCommandModel request, MethodResult<RedemptionResponseModel> methodResult, CancellationToken cancellationToken)
+        private async Task<MethodResult<RedeemProductPremiumModel>> RedeemProductFSEL(Product product, Guid userId, RedeemProductPremiumCommandModel request, MethodResult<RedeemProductPremiumModel> methodResult, CancellationToken cancellationToken)
         {
             var codes = await _orderTransactionRepository.Queryable
                 .Where(p => !string.IsNullOrEmpty(p.Code))
@@ -260,6 +273,12 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
 
                 await _productRepository.DbContext.SaveChangesAsync();
                 await transaction.CommitAsync();
+
+                methodResult.Result = new RedeemProductPremiumModel()
+                {
+                    MarketPlaceType = EnumMarketPlaceType.FSEL,
+                    Code = code
+                };
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
