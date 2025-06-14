@@ -163,9 +163,11 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
                 return methodResult;
             }
 
+            student.NumberOfToken -= product.Price;
+
             await _cacheStudent.SetAsync(keyStudent, student, TimeSpan.FromSeconds(5));
 
-            if (student.NumberOfToken - product.Price < 0)
+            if (student.NumberOfToken < 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumProductErrorCode.NotEnoughTokens), nameof(student.NumberOfToken), student.NumberOfToken);
                 return methodResult;
