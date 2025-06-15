@@ -6,7 +6,7 @@
     "index": 1,
     "config": {
       "id": 1,
-      "codeTitle": "HOME_PAGE.HOME",
+      "code_title": "HOME_PAGE.HOME",
       "link": "/home",
       "icon": "Home.svg",
       "parentId": 0,
@@ -23,7 +23,7 @@
     "index": 2,
     "config": {
       "id": 2,
-      "codeTitle": "HOME_PAGE.USER_MANAGEMENT",
+      "code_title": "HOME_PAGE.USER_MANAGEMENT",
       "link": "/user",
       "icon": "People.svg",
       "parentId": 0,
@@ -40,7 +40,7 @@
     "index": 3,
     "config": {
       "id": 27,
-      "codeTitle": "i18n_user_permissions",
+      "code_title": "i18n_user_permissions",
       "link": "/user-permissions",
       "icon": "Star.png",
       "parentId": 0,
@@ -49,7 +49,7 @@
       "children": [
         {
           "id": 270,
-          "codeTitle": "i18n_user_group",
+          "code_title": "i18n_user_group",
           "link": "/user-permissions/user-group",
           "icon": "",
           "parentId": 27,
@@ -58,7 +58,7 @@
         },
         {
           "id": 271,
-          "codeTitle": "i18n_permission_group",
+          "code_title": "i18n_permission_group",
           "link": "/user-permissions/permission-group",
           "icon": "",
           "parentId": 27,
@@ -67,7 +67,7 @@
         },
         {
           "id": 272,
-          "codeTitle": "i18n_permission",
+          "code_title": "i18n_permission",
           "link": "/user-permissions/permission-list",
           "icon": "",
           "parentId": 27,
@@ -76,7 +76,7 @@
         },
         {
           "id": 273,
-          "codeTitle": "i18n_permission_access",
+          "code_title": "i18n_permission_access",
           "link": "/user-permissions/permission-access",
           "icon": "",
           "parentId": 27,
@@ -94,7 +94,7 @@
     "index": 4,
     "config": {
       "id": 2,
-      "codeTitle": "HOME_PAGE.PERSONAL_INFORMATION",
+      "code_title": "HOME_PAGE.PERSONAL_INFORMATION",
       "link": "/user/detail",
       "icon": "People.svg",
       "parentId": 0,
@@ -111,7 +111,7 @@
     "index": 5,
     "config": {
       "id": 3,
-      "codeTitle": "HOME_PAGE.CLASS_MANAGER",
+      "code_title": "HOME_PAGE.CLASS_MANAGER",
       "link": "/class",
       "icon": "Presentation.svg",
       "parentId": 0,
@@ -128,7 +128,7 @@
     "index": 6,
     "config": {
       "id": 4,
-      "codeTitle": "HOME_PAGE.STUDENT_MANAGEMENT",
+      "code_title": "HOME_PAGE.STUDENT_MANAGEMENT",
       "link": "/student",
       "icon": "Students.svg",
       "parentId": 0,
@@ -145,7 +145,7 @@
     "index": 7,
     "config": {
       "id": 4,
-      "codeTitle": "HOME_PAGE.STUDENT_MANAGEMENT",
+      "code_title": "HOME_PAGE.STUDENT_MANAGEMENT",
       "link": "/student-admin",
       "icon": "Students.svg",
       "parentId": 0,
@@ -162,7 +162,7 @@
     "index": 8,
     "config": {
       "id": 5,
-      "codeTitle": "HOME_PAGE.MANAGE_LIVE_TIME_FRAMES",
+      "code_title": "HOME_PAGE.MANAGE_LIVE_TIME_FRAMES",
       "link": "/live-time",
       "icon": "Livestream.svg",
       "parentId": 0,
@@ -179,7 +179,7 @@
     "index": 9,
     "config": {
       "id": 6,
-      "codeTitle": "HOME_PAGE.LIVE_CLASS",
+      "code_title": "HOME_PAGE.LIVE_CLASS",
       "link": "/live-class",
       "icon": "Livestream.svg",
       "parentId": 0,
@@ -196,7 +196,7 @@
     "index": 10,
     "config": {
       "id": 7,
-      "codeTitle": "HOME_PAGE.EMPTY_CALENDAR",
+      "code_title": "HOME_PAGE.EMPTY_CALENDAR",
       "link": "/empty-calendar",
       "icon": "Livestream.svg",
       "parentId": 0,
@@ -213,7 +213,7 @@
     "index": 11,
     "config": {
       "id": 8,
-      "codeTitle": "HOME_PAGE.EXERCISE_MANAGEMENT",
+      "code_title": "HOME_PAGE.EXERCISE_MANAGEMENT",
       "link": "/exercise-management",
       "icon": "Edit.svg",
       "parentId": 0,
@@ -230,7 +230,7 @@
     "index": 12,
     "config": {
       "id": 9,
-      "codeTitle": "HOME_PAGE.MANAGE_REVIEWS",
+      "code_title": "HOME_PAGE.MANAGE_REVIEWS",
       "link": "/review",
       "icon": "Review.svg",
       "parentId": 0,
@@ -247,7 +247,7 @@
     "index": 13,
     "config": {
       "id": 10,
-      "codeTitle": "HOME_PAGE.SET_TIME",
+      "code_title": "HOME_PAGE.SET_TIME",
       "link": "/setup-time",
       "icon": "Clock.svg",
       "parentId": 0,
@@ -264,7 +264,7 @@
     "index": 14,
     "config": {
       "id": 11,
-      "codeTitle": "HOME_PAGE.STORE_OF_FORBIDDEN_WORDS",
+      "code_title": "HOME_PAGE.STORE_OF_FORBIDDEN_WORDS",
       "link": "/forbidden-word",
       "icon": "Forbiden.svg",
       "parentId": 0,
@@ -281,7 +281,7 @@
     "index": 15,
     "config": {
       "id": 12,
-      "codeTitle": "HOME_PAGE.PAYMENT_TITLE",
+      "code_title": "HOME_PAGE.PAYMENT_TITLE",
       "link": "/payment",
       "icon": "payment-icon.png",
       "parentId": 0,
@@ -298,7 +298,7 @@
     "index": 16,
     "config": {
       "id": 13,
-      "codeTitle": "HOME_PAGE.VOUCHER-MANAGEMENT",
+      "code_title": "HOME_PAGE.VOUCHER-MANAGEMENT",
       "link": "/voucher-management",
       "icon": "payment-icon.png",
       "parentId": 0,
@@ -315,7 +315,7 @@
     "index": 17,
     "config": {
       "id": 14,
-      "codeTitle": "HOME_PAGE.CLASS_FORUM_MANAGEMENT",
+      "code_title": "HOME_PAGE.CLASS_FORUM_MANAGEMENT",
       "link": "/class-forum-management",
       "icon": "Chat.svg",
       "parentId": 0,
@@ -332,7 +332,7 @@
     "index": 18,
     "config": {
       "id": 15,
-      "codeTitle": "HOME_PAGE.QUEST_BOARD_MANAGEMENT",
+      "code_title": "HOME_PAGE.QUEST_BOARD_MANAGEMENT",
       "link": "/quest-board",
       "icon": "payment-icon.png",
       "parentId": 0,
@@ -349,7 +349,7 @@
     "index": 19,
     "config": {
       "id": 16,
-      "codeTitle": "HOME_PAGE.STUDENT_PROGRESS_MANAGEMENT",
+      "code_title": "HOME_PAGE.STUDENT_PROGRESS_MANAGEMENT",
       "link": "/student-progress",
       "icon": "payment-icon.png",
       "parentId": 0,
@@ -366,7 +366,7 @@
     "index": 20,
     "config": {
       "id": 18,
-      "codeTitle": "HOME_PAGE.HELP_AND_SUPPORT_MANAGEMENT",
+      "code_title": "HOME_PAGE.HELP_AND_SUPPORT_MANAGEMENT",
       "link": "/help-and-support-management",
       "icon": "Star.png",
       "parentId": 0,
@@ -383,7 +383,7 @@
     "index": 21,
     "config": {
       "id": 19,
-      "codeTitle": "HOME_PAGE.ERROR_REPORT_MANAGEMENT",
+      "code_title": "HOME_PAGE.ERROR_REPORT_MANAGEMENT",
       "link": "/error-reporting-management",
       "icon": "Star.png",
       "parentId": 0,
@@ -400,7 +400,7 @@
     "index": 22,
     "config": {
       "id": 20,
-      "codeTitle": "HOME_PAGE.PRICE_LIST_MANAGEMENT",
+      "code_title": "HOME_PAGE.PRICE_LIST_MANAGEMENT",
       "link": "/price-management",
       "icon": "Star.png",
       "parentId": 0,
@@ -417,7 +417,7 @@
     "index": 23,
     "config": {
       "id": 21,
-      "codeTitle": "Quản lý mã giới thiệu",
+      "code_title": "Quản lý mã giới thiệu",
       "link": "/invite-friends",
       "icon": "Star.png",
       "parentId": 0,
@@ -434,7 +434,7 @@
     "index": 24,
     "config": {
       "id": 22,
-      "codeTitle": "Quản lý voucher",
+      "code_title": "Quản lý voucher",
       "link": "/voucher",
       "icon": "Star.png",
       "parentId": 0,
@@ -451,7 +451,7 @@
     "index": 25,
     "config": {
       "id": 23,
-      "codeTitle": "Cấu hình thứ tự popup",
+      "code_title": "Cấu hình thứ tự popup",
       "link": "/popup-order-config",
       "icon": "Star.png",
       "parentId": 0,
@@ -468,7 +468,7 @@
     "index": 26,
     "config": {
       "id": 229,
-      "codeTitle": "Quản lý mục tiêu khóa học",
+      "code_title": "Quản lý mục tiêu khóa học",
       "link": "/course-target",
       "icon": "Star.png",
       "parentId": 0,
@@ -485,7 +485,7 @@
     "index": 27,
     "config": {
       "id": 30,
-      "codeTitle": "Quản lý quà tặng FSEL",
+      "code_title": "Quản lý quà tặng FSEL",
       "link": "/gift",
       "icon": "Star.png",
       "parentId": 0,
@@ -502,7 +502,7 @@
     "index": 28,
     "config": {
       "id": 29,
-      "codeTitle": "Quản lý Banner",
+      "code_title": "Quản lý Banner",
       "link": "/banner",
       "icon": "Star.png",
       "parentId": 0,
@@ -519,7 +519,7 @@
     "index": 29,
     "config": {
       "id": 24,
-      "codeTitle": "Quản lý báo cáo",
+      "code_title": "Quản lý báo cáo",
       "link": "/report-management",
       "icon": "Star.png",
       "parentId": 0,
@@ -528,7 +528,7 @@
       "children": [
         {
           "id": 220,
-          "codeTitle": "Kết quả đánh giá đầu vào",
+          "code_title": "Kết quả đánh giá đầu vào",
           "link": "/report-management/pt-result",
           "icon": "",
           "parentId": 22,
@@ -537,7 +537,7 @@
         },
         {
           "id": 221,
-          "codeTitle": "Tiến độ học tập",
+          "code_title": "Tiến độ học tập",
           "link": "/report-management/learning-progress",
           "icon": "",
           "parentId": 22,
@@ -546,7 +546,7 @@
         },
         {
           "id": 222,
-          "codeTitle": "Kết quả học tập",
+          "code_title": "Kết quả học tập",
           "link": "/report-management/learning-result",
           "icon": "",
           "parentId": 22,
@@ -555,7 +555,7 @@
         },
         {
           "id": 223,
-          "codeTitle": "Chuyên cần",
+          "code_title": "Chuyên cần",
           "link": "/report-management/assiduity",
           "icon": "",
           "parentId": 22,
@@ -573,7 +573,7 @@
     "index": 30,
     "config": {
       "id": 25,
-      "codeTitle": "Dashboard",
+      "code_title": "Dashboard",
       "link": "/dashboard",
       "icon": "Star.png",
       "parentId": 0,
@@ -582,7 +582,7 @@
       "children": [
         {
           "id": 250,
-          "codeTitle": "Báo cáo tiến độ học tập",
+          "code_title": "Báo cáo tiến độ học tập",
           "link": "/dashboard/progress-learn",
           "icon": "",
           "parentId": 25,
@@ -591,7 +591,7 @@
         },
         {
           "id": 251,
-          "codeTitle": "Báo cáo kết quả đánh giá đầu vào",
+          "code_title": "Báo cáo kết quả đánh giá đầu vào",
           "link": "/dashboard/result-pt",
           "icon": "",
           "parentId": 25,
@@ -600,7 +600,7 @@
         },
         {
           "id": 252,
-          "codeTitle": "Báo cáo kết quả học tập",
+          "code_title": "Báo cáo kết quả học tập",
           "link": "/dashboard/result-learn",
           "icon": "",
           "parentId": 25,
@@ -609,7 +609,7 @@
         },
         {
           "id": 253,
-          "codeTitle": "Chuyên cần",
+          "code_title": "Chuyên cần",
           "link": "/dashboard/diligence",
           "icon": "",
           "parentId": 25,
@@ -627,7 +627,7 @@
     "index": 31,
     "config": {
       "id": 26,
-      "codeTitle": "Thêm học sinh vào túi mù",
+      "code_title": "Thêm học sinh vào túi mù",
       "link": "/blind-box",
       "icon": "Star.png",
       "parentId": 0,
@@ -644,7 +644,7 @@
     "index": 32,
     "config": {
       "id": 27,
-      "codeTitle": "Hướng dẫn sử dụng",
+      "code_title": "Hướng dẫn sử dụng",
       "link": "/guide",
       "icon": "Star.png",
       "parentId": 0,

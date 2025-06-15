@@ -49,6 +49,8 @@ namespace Fsel.Identity.Application.Queries.MenuQuery
                                where r.Name == role && pg.MenuId.HasValue
                                select pg.MenuId).ToListAsync(cancellationToken);
 
+            query = query.Distinct().ToList();
+
             var menus = await _menuRepository.Queryable.WhereBulkContains(query, p => p.Id).OrderBy(p => p.Index).ToListAsync(cancellationToken);
 
             methodResult.Result = menus.Where(p => p.Config != null).Select(p => p.Config!).ToList();
