@@ -18,7 +18,6 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.GoogleSheets;
-    using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;

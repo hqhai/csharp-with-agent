@@ -28,14 +28,5 @@ namespace Fsel.Shared.Models.ShareModels
         public string? ParentPhoneNumber { get; set; }
         public bool IsBussinessCheckBox { get; set; }
         public string? StudentMainMajor { get; set; }
-
-        //Thêm thuộc tính cho task "Mùa Hè Tự Học"
-        public string? DiscountCode { get; set; }
-        public string? CampaignId { get; set; }
-        public string? CampaignSource { get; set; }
-        public string? CampaignMedium { get; set; }
-        public string? CampaignName { get; set; }
-        public string? CampaignTerm { get; set; }
-        public string? CampaignContent { get; set; }
     }
 }
