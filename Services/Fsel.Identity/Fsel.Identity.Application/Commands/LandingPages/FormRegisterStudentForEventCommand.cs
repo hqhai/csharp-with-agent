@@ -288,7 +288,6 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     await SendMailRegisterEvent(request, competitionEvent, EnumSenderTemplate.MailRegisterEvent, Subject, CultureInfo.InvariantCulture).ConfigureAwait(false);
                 }
 
-                await AddContactInfoToGGSheet(request);
                 return methodResult;
             });
             return methodResult;
@@ -371,48 +370,6 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 Template = senderTemplate,
                 Subject = subject,
                 Params = param,
-            });
-        }
-
-        private async Task AddContactInfoToGGSheet(RegisterStudentForEventCommandModel request)
-        {
-            var columnOrder = new List<string> { "FullName", "Email", "PhoneNumber","DiscountCode", "Time",
-                "CampaignId", "CampaignSource", "CampaignMedium", "CampaignName", "CampaignTerm", "CampaignContent"
-            };
-            var dict = new Dictionary<string, object>();
-
-            foreach (var column in columnOrder)
-            {
-                if (string.Equals(column, "Time", StringComparison.OrdinalIgnoreCase))
-                {
-                    dict["Time"] = DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam)
-                        .ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture);
-                    continue;
-                }
-
-                // Special handling if column is derived (e.g., "FullName")
-                if (string.Equals(column, "FullName", StringComparison.OrdinalIgnoreCase))
-                {
-                    dict["FullName"] = $"{request.LastName} {request.FirstName}".Trim();
-                    continue;
-                }
-
-                var prop = request.GetType().GetProperty(column);
-                var value = prop?.GetValue(request) ?? string.Empty;
-                dict[column] = value;
-            }
-
-            var modelDictList = new List<Dictionary<string, object>> { dict };
-
-            var sheetName = _appSetting?.GoogleSheetConfig?.SummerSelfLearningSheet;
-            var spreadSheetId = _appSetting?.GoogleSheetConfig?.SummerSelfLearningSpreadSheetId;
-
-            await _systemService.AddDynamicInfoToGoogleSheetFile(new CreateDynamicInfosToGoogleSheetFileCommandModel
-            {
-                Model = modelDictList,
-                OverrideSheet = sheetName,
-                OverrideSpreadSheetId = spreadSheetId,
-                ColumnOrder = columnOrder
             });
         }
     }
