@@ -26,7 +26,7 @@ namespace Fsel.Identity.Application.Queries.MenuQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<MenuModel>>();
-            var menus = await _menuRepository.Queryable.ToListAsync(cancellationToken);
+            var menus = await _menuRepository.Queryable.OrderBy(p => p.Index).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<MenuModel>>(menus);
             return methodResult;
         }
