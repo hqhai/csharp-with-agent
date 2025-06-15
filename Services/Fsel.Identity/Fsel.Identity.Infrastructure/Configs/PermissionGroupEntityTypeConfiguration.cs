@@ -12,7 +12,7 @@ namespace Fsel.Identity.Infrastructure.Configs
 
             builder.HasOne(a => a.Menu)
                 .WithOne(b => b.PermissionGroup)
-                .HasForeignKey<Menu>(b => b.Id)
+                .HasForeignKey<PermissionGroup>(b => b.MenuId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

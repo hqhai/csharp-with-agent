@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    [Migration("20250615073851_Create_MenuTable")]
+    [Migration("20250615084255_Create_MenuTable")]
     partial class Create_MenuTable
     {
         /// <inheritdoc />
@@ -601,6 +601,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Menu", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
@@ -2189,6 +2190,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MenuId")
+                        .IsUnique()
+                        .HasFilter("[MenuId] IS NOT NULL");
 
                     b.ToTable("PermissionGroups");
 
@@ -4878,17 +4883,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Menu", b =>
-                {
-                    b.HasOne("Fsel.Identity.Domain.Entities.PermissionGroup", "PermissionGroup")
-                        .WithOne("Menu")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.Menu", "Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("PermissionGroup");
-                });
-
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Parent", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.Human", "Human")
@@ -4924,6 +4918,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("PermissionGroup");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.PermissionGroup", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.Menu", "Menu")
+                        .WithOne("PermissionGroup")
+                        .HasForeignKey("Fsel.Identity.Domain.Entities.PermissionGroup", "MenuId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Menu");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Student", b =>
@@ -5150,6 +5154,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Menu", b =>
+                {
+                    b.Navigation("PermissionGroup");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Parent", b =>
                 {
                     b.Navigation("ParentStudents");
@@ -5162,8 +5171,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.PermissionGroup", b =>
                 {
-                    b.Navigation("Menu");
-
                     b.Navigation("Permissions");
 
                     b.Navigation("RoleClaims");

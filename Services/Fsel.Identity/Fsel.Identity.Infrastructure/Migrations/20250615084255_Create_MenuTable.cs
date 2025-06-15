@@ -42,12 +42,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Menus", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Menus_PermissionGroups_Id",
-                        column: x => x.Id,
-                        principalTable: "PermissionGroups",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.InsertData(
@@ -265,13 +259,36 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     { new Guid("90897566-3edf-4aae-969a-9acb31c80c0b"), "SchoolStudentManagement.Delete", new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, null, false, "Xóa học sinh", new Guid("618be731-43b3-45ed-bfad-262945ef0d51"), true, null, null, null },
                     { new Guid("ce8b975b-6f31-454e-b21f-18a35061e266"), "SchoolStudentManagement.Add", new DateTime(2025, 6, 15, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, null, false, "Thêm mới học sinh", new Guid("618be731-43b3-45ed-bfad-262945ef0d51"), true, null, null, null }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PermissionGroups_MenuId",
+                table: "PermissionGroups",
+                column: "MenuId",
+                unique: true,
+                filter: "[MenuId] IS NOT NULL");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_PermissionGroups_Menus_MenuId",
+                table: "PermissionGroups",
+                column: "MenuId",
+                principalTable: "Menus",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_PermissionGroups_Menus_MenuId",
+                table: "PermissionGroups");
+
             migrationBuilder.DropTable(
                 name: "Menus");
+
+            migrationBuilder.DropIndex(
+                name: "IX_PermissionGroups_MenuId",
+                table: "PermissionGroups");
 
             migrationBuilder.DeleteData(
                 table: "Permissions",
