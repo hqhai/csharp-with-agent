@@ -115,7 +115,7 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
                         Id = urboxTransaction.Product.Id.ToString(),
                         GiftId = gift.PriceId,
                         GiftName = giftDetail?.Data?.Title,
-                        Price = "" + gift.Price,
+                        Price = "" + urboxTransaction.Product.Price,
                         Content = giftDetail?.Data?.Content,
                         Note = giftDetail?.Data?.Note,
                         Expired = gift.Expired,
