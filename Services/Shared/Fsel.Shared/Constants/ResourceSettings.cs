@@ -22,6 +22,7 @@ namespace Fsel.Shared.Constants
         public const string PermissionGroupName = "Resources//PermissionGroup.json";
         public const string PermissionName = "Resources//Permission.json";
         public const string RoleClaimName = "Resources//RoleClaim.json";
+        public const string MenuName = "Resources//Menu.json";
 
         public const string PackageFileName = "Resources//Packages.json";
         public const string TechieActionFileName = "Resources//TechieAction.json";

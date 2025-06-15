@@ -601,5 +601,41 @@
     "status": true,
     "permissionGroupId": "6f12e0d0-774c-4868-a062-e94b0b6ecf2d",
     "createdDate": "2025-04-09"
+  },
+  {
+    "id": "79e900b5-cb1a-49bb-a8ad-33925b97e095",
+    "claimValue": "SchoolStudentManagement.View",
+    "name": "Xem và tìm kiếm danh sách, thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "ce8b975b-6f31-454e-b21f-18a35061e266",
+    "claimValue": "SchoolStudentManagement.Add",
+    "name": "Thêm mới học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "1e938573-3317-449a-b322-76225eb87039",
+    "claimValue": "SchoolStudentManagement.Update",
+    "name": "Chỉnh sửa thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "90897566-3edf-4aae-969a-9acb31c80c0b",
+    "claimValue": "SchoolStudentManagement.Delete",
+    "name": "Xóa học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
   }
 ]

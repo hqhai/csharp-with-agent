@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250615073851_Create_MenuTable")]
+    partial class Create_MenuTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,6 +27,38 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.HasSequence<int>("UserSequence")
                 .StartsAt(100000L);
+
+            modelBuilder.Entity("Fsel.Core.Entities.RoleClaimEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("RoleClaimEntity");
+
+                    b.UseTphMappingStrategy();
+                });
 
             modelBuilder.Entity("Fsel.Core.Entities.UserClaimEntity", b =>
                 {
@@ -68,21 +103,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("AspNetUserLogins", (string)null);
-                });
-
-            modelBuilder.Entity("Fsel.Core.Entities.UserRoleEntity", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetUserRoles", (string)null);
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.CSO", b =>
@@ -2622,13 +2642,22 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<string>("Discription")
+                    b.Property<string>("Description")
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
+
+                    b.Property<string>("LocationIdStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
@@ -2667,6 +2696,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "Student",
                             NormalizedName = "Student"
@@ -2677,6 +2708,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "Teacher",
                             NormalizedName = "Teacher"
@@ -2687,6 +2720,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "Parent",
                             NormalizedName = "Parent"
@@ -2697,6 +2732,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "TeacherLive",
                             NormalizedName = "TeacherLive"
@@ -2707,6 +2744,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "Moderator",
                             NormalizedName = "Moderator"
@@ -2717,6 +2756,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "Admin",
                             NormalizedName = "Admin"
@@ -2727,6 +2768,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "CSO",
                             NormalizedName = "CSO"
@@ -2737,6 +2780,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "MasterAdmin",
                             NormalizedName = "MasterAdmin"
@@ -2747,6 +2792,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "Guest",
                             NormalizedName = "Guest"
@@ -2757,6 +2804,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "EducationDepartment",
                             NormalizedName = "EducationDepartment"
@@ -2767,6 +2816,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "EducationDivision",
                             NormalizedName = "EducationDivision"
@@ -2777,68 +2828,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
                             IsDeleted = false,
                             Name = "DepartmentAdmin",
                             NormalizedName = "DepartmentAdmin"
-                        });
-                });
-
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.RoleClaim", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ClaimType")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ClaimValue")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("PermissionGroupId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("PermissionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PermissionGroupId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.HasIndex("RoleId");
-
-                    b.ToTable("AspNetRoleClaims", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            ClaimType = "AuthorizationManagement",
-                            ClaimValue = "AuthorizationManagement.View",
-                            PermissionGroupId = new Guid("f9142961-5fe0-4015-8d01-9e12d202a7ae"),
-                            PermissionId = new Guid("89b2e2df-df40-4cb9-9f86-7a7fa315a112"),
-                            RoleId = new Guid("69976022-5dbb-4292-bab6-e94b6701061e"),
-                            Status = true
-                        },
-                        new
-                        {
-                            Id = 2,
-                            ClaimType = "AuthorizationManagement",
-                            ClaimValue = "AuthorizationManagement.Update",
-                            PermissionGroupId = new Guid("f9142961-5fe0-4015-8d01-9e12d202a7ae"),
-                            PermissionId = new Guid("19b8e2df-d240-4cb6-9f86-7a7fa315a186"),
-                            RoleId = new Guid("69976022-5dbb-4292-bab6-e94b6701061e"),
-                            Status = true
                         });
                 });
 
@@ -3047,10 +3041,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "SchoolId", "SchoolClass"), new[] { "BaseCourseLevel", "BeginnerGuideStr", "ClassId", "CourseId", "CourseLevel", "CreatedByParent", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DistrictId", "ExpiredDate", "HumanId", "NumberOfShield", "Occupation", "PackageId", "ParentEmail", "ParentPhoneNumber", "ProvinceId", "School", "SchoolFaculty", "SchoolGrade", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
-                    b.ToTable("Students", t =>
-                        {
-                            t.HasCheckConstraint("CK_Student_NumberOfToken_NonNegative", "[NumberOfToken] >= 0");
-                        });
+                    b.ToTable("Students");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentCompetitionEvent", b =>
@@ -4515,6 +4506,24 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("UserReferrals");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserRole", b =>
+                {
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RoleId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSchool", b =>
                 {
                     b.Property<Guid>("Id")
@@ -4741,6 +4750,57 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.RoleClaim", b =>
+                {
+                    b.HasBaseType("Fsel.Core.Entities.RoleClaimEntity");
+
+                    b.Property<Guid>("PermissionGroupId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PermissionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.HasIndex("PermissionGroupId");
+
+                    b.HasIndex("PermissionId");
+
+                    b.HasDiscriminator().HasValue("RoleClaim");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ClaimType = "AuthorizationManagement",
+                            ClaimValue = "AuthorizationManagement.View",
+                            RoleId = new Guid("69976022-5dbb-4292-bab6-e94b6701061e"),
+                            PermissionGroupId = new Guid("f9142961-5fe0-4015-8d01-9e12d202a7ae"),
+                            PermissionId = new Guid("89b2e2df-df40-4cb9-9f86-7a7fa315a112"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ClaimType = "AuthorizationManagement",
+                            ClaimValue = "AuthorizationManagement.Update",
+                            RoleId = new Guid("69976022-5dbb-4292-bab6-e94b6701061e"),
+                            PermissionGroupId = new Guid("f9142961-5fe0-4015-8d01-9e12d202a7ae"),
+                            PermissionId = new Guid("19b8e2df-d240-4cb6-9f86-7a7fa315a186"),
+                            Status = true
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.Core.Entities.RoleClaimEntity", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Fsel.Core.Entities.UserClaimEntity", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", null)
@@ -4752,21 +4812,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Core.Entities.UserLoginEntity", b =>
                 {
-                    b.HasOne("Fsel.Identity.Domain.Entities.User", null)
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("Fsel.Core.Entities.UserRoleEntity", b =>
-                {
-                    b.HasOne("Fsel.Identity.Domain.Entities.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("Fsel.Identity.Domain.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -4877,31 +4922,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasForeignKey("PermissionGroupId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("PermissionGroup");
-                });
-
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.RoleClaim", b =>
-                {
-                    b.HasOne("Fsel.Identity.Domain.Entities.PermissionGroup", "PermissionGroup")
-                        .WithMany("RoleClaims")
-                        .HasForeignKey("PermissionGroupId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Fsel.Identity.Domain.Entities.Permission", "Permission")
-                        .WithMany("RoleClaims")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Fsel.Identity.Domain.Entities.Role", null)
-                        .WithMany()
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
 
                     b.Navigation("PermissionGroup");
                 });
@@ -5048,6 +5068,21 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserRole", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.Role", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fsel.Identity.Domain.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSchool", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
@@ -5076,6 +5111,25 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.RoleClaim", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.PermissionGroup", "PermissionGroup")
+                        .WithMany("RoleClaims")
+                        .HasForeignKey("PermissionGroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fsel.Identity.Domain.Entities.Permission", "Permission")
+                        .WithMany("RoleClaims")
+                        .HasForeignKey("PermissionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("PermissionGroup");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.CompetitionEvent", b =>
