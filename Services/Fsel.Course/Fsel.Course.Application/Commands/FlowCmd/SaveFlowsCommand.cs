@@ -7,6 +7,7 @@ namespace Fsel.Course.Application.Commands.FlowCmd
     using System;
     using System.Collections.Generic;
     using System.Linq.Dynamic.Core;
+    using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -45,7 +46,7 @@ namespace Fsel.Course.Application.Commands.FlowCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<FlowModel>>();
 
-            var program = await _categoryRepository.Queryable.Include(x => x.Flows).FirstOrDefaultAsync(x => x.Id == request.ProgramId, cancellationToken);
+            var program = await _categoryRepository.Queryable.Include(x => x.Flows).ThenInclude(x => x.StepFlows).FirstOrDefaultAsync(x => x.Id == request.ProgramId, cancellationToken);
             if (program == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(program), request.ProgramId);
@@ -53,21 +54,15 @@ namespace Fsel.Course.Application.Commands.FlowCmd
             }
             if (request.Flows == null || !request.Flows.Any())
             {
-                await _flowRepository.DeleteListAsync(program.Flows);
-                await _flowRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _programConverter.DeleteFlowsAsync(program.Flows.ToList(), cancellationToken);
                 return methodResult;
             }
-            foreach (var current in request.Flows)
+            var ageRanges = request.Flows.Select(f => (f.FromAge, f.ToAge)).ToList();
+            var methodValidate = ValidateSequentialNonOverlappingRanges(ageRanges);
+            if (!methodValidate.IsOK)
             {
-                foreach (var compare in request.Flows)
-                {
-                    bool isOverlap = !(current.ToAge < compare.FromAge || compare.ToAge < current.FromAge);
-                    if (isOverlap)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), $"Age range [{current.FromAge}-{current.ToAge}] overlaps with [{compare.FromAge}-{compare.ToAge}]");
-                        return methodResult;
-                    }
-                }
+                methodResult.AddErrorBadRequest(methodValidate.ErrorMessages);
+                return methodResult;
             }
 
             var method = await _programConverter.SaveFlowsAsync(request.Flows);
@@ -77,14 +72,14 @@ namespace Fsel.Course.Application.Commands.FlowCmd
                 return methodResult;
             }
             var listFlow = method.Result;
-            if (listFlow != null && !listFlow.Any())
+            if (listFlow != null && listFlow.Any())
             {
                 var incomingFlowIds = listFlow.Select(f => f.Id).ToHashSet();
                 var existingFlows = program.Flows.ToList();
                 var flowsToRemove = existingFlows.Where(f => !incomingFlowIds.Contains(f.Id)).ToList();
                 if (flowsToRemove.Any())
                 {
-                    await _flowRepository.DeleteListAsync(flowsToRemove);
+                    await _programConverter.DeleteFlowsAsync(flowsToRemove, cancellationToken);
                 }
                 foreach (var item in listFlow)
                 {
@@ -103,6 +98,47 @@ namespace Fsel.Course.Application.Commands.FlowCmd
             }
 
             methodResult.Result = _mapper.Map<IList<FlowModel>>(listFlow);
+            return methodResult;
+        }
+
+        public VoidMethodResult ValidateSequentialNonOverlappingRanges(List<(int From, int To)> flows)
+        {
+            var methodResult = new VoidMethodResult();
+            if (flows == null || flows.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), "No flows provided.");
+                return methodResult;
+            }
+
+            // Danh sách các khoảng đã "chiếm dụng"
+            var covered = new List<(int From, int To)>();
+
+            foreach (var flow in flows)
+            {
+                if (flow.From >= flow.To)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), $"Invalid flow range: [{flow.From}-{flow.To}]");
+                    return methodResult;
+                }
+
+                // Kiểm tra xem có chồng lên các khoảng đã được duyệt không
+                foreach (var (from, to) in covered)
+                {
+                    bool isOverlap = !(flow.To <= from || flow.From >= to);
+                    if (isOverlap)
+                    {
+                        methodResult.AddErrorBadRequest(
+                            nameof(EnumSystemErrorCode.InValidFormat),
+                            $"Flow [{flow.From}-{flow.To}] overlaps with existing range [{from}-{to}]"
+                        );
+                        return methodResult;
+                    }
+                }
+
+                // Thêm vào danh sách đã bao phủ
+                covered.Add(flow);
+            }
+
             return methodResult;
         }
     }

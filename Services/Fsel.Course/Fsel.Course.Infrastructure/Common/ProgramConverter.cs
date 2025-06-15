@@ -30,6 +30,8 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IActionFlowRepository _actionFlowRepository;
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
         public List<ActionFlow> DeleteActionFlows = new List<ActionFlow>();
+        public List<ActionFlow> DeleteListActionFlow = new List<ActionFlow>();
+        public List<StepFlow> DeleteListStepFlow = new List<StepFlow>();
 
         public ProgramConverter(ILevelRepository levelRepository,
                                 IMapper mapper,
@@ -363,6 +365,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(level));
                 return methodResult;
             }
+            stepFlow.LevelId = level.Id;
             stepFlow.ParentFlowStep = parentStepFlow;
             stepFlow.Type = EnumStepFlowType.Step;
 
@@ -373,8 +376,15 @@ namespace Fsel.Course.Infrastructure.Common
             var incomingActionFlowIds = new List<Guid>();
             var actionFlows = new List<ActionFlow>();
 
-            if (stepFlowModel.ActionFlows != null)
+            if (stepFlowModel.ActionFlows != null && stepFlowModel.ActionFlows.Any())
             {
+                var percentRanges = stepFlowModel.ActionFlows.Select(f => (f.StartPercent, f.EndPercent)).ToList();
+                var methodValidate = ValidateCompleteAndNonOverlappingPercents(percentRanges);
+                if (!methodValidate.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(methodValidate.ErrorMessages);
+                    return methodResult;
+                }
                 foreach (var actionFlowModel in stepFlowModel.ActionFlows)
                 {
                     if (actionFlowModel.StepFlow == null)
@@ -427,6 +437,136 @@ namespace Fsel.Course.Infrastructure.Common
 
             methodResult.Result = stepFlow;
             return methodResult;
+        }
+
+        public VoidMethodResult ValidateCompleteAndNonOverlappingPercents(List<(int Start, int End)> percents)
+        {
+            var methodResult = new VoidMethodResult();
+
+            if (percents == null || percents.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), "No percent ranges provided.");
+                return methodResult;
+            }
+
+            // Bước 1: Kiểm tra từng đoạn hợp lệ
+            foreach (var (start, end) in percents)
+            {
+                if (start < 0 || end > 100 || start >= end)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat),
+                        $"Invalid percent range: [{start}-{end}] must be in 0–100 and Start < End.");
+                    return methodResult;
+                }
+            }
+
+            // Bước 2: Gộp các khoảng phần trăm
+            var merged = percents
+                .OrderBy(p => p.Start)
+                .Aggregate(new List<(int Start, int End)>(), (acc, curr) =>
+                {
+                    if (acc.Count == 0 || curr.Start > acc[^1].End)
+                    {
+                        acc.Add(curr);
+                    }
+                    else if (curr.Start < acc[^1].End)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat),
+                            $"Percent range [{curr.Start}-{curr.End}] overlaps with existing range [{acc[^1].Start}-{acc[^1].End}].");
+                    }
+                    else
+                    {
+                        acc[^1] = (acc[^1].Start, Math.Max(acc[^1].End, curr.End));
+                    }
+                    return acc;
+                });
+
+            if (!methodResult.IsOK)
+            {
+                return methodResult;
+            }
+            // Bước 3: Kiểm tra phủ đủ 0–100
+            int prev = 0;
+            foreach (var (start, end) in merged)
+            {
+                if (start > prev)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat),
+                        $"Missing percent range: [{prev}-{start}]");
+                }
+                prev = Math.Max(prev, end);
+            }
+
+            if (prev < 100)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat),
+                    $"Missing percent range: [{prev}-100]");
+            }
+
+            return methodResult;
+        }
+
+        public async Task DeleteFlowsAsync(IList<Flow> flows, CancellationToken cancellationToken)
+        {
+            if (flows == null || !flows.Any())
+            {
+                return;
+            }
+
+            foreach (var flow in flows)
+            {
+                if (flow.StepFlows != null && flow.StepFlows.Any())
+                {
+                    await DeleteStepFlowRecursiveAsync(flow.StepFlows.ToList());
+                }
+
+                await _flowRepository.DeleteAsync(flow);
+            }
+            await _flowRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            if (DeleteListActionFlow.Any())
+            {
+                await _actionFlowRepository.DeleteListAsync(DeleteListActionFlow);
+                await _actionFlowRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            if (DeleteListStepFlow.Any())
+            {
+                await _stepFlowRepository.DeleteListAsync(DeleteListStepFlow);
+                await _stepFlowRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private async Task DeleteStepFlowRecursiveAsync(IList<StepFlow> stepFlows)
+        {
+            if (stepFlows == null || !stepFlows.Any())
+            {
+                return;
+            }
+            foreach (var stepFlow in stepFlows)
+            {
+                // Truy vấn lại từ DB nếu cần, bao gồm ActionFlows và ToStepFlow con
+                var fullStepFlow = await _stepFlowRepository.Queryable
+                    .Include(sf => sf.ChildActionFlows)
+                        .ThenInclude(af => af.ToStepFlow)
+                    .FirstOrDefaultAsync(sf => sf.Id == stepFlow.Id);
+
+                if (fullStepFlow == null)
+                {
+                    continue;
+                }
+                if (fullStepFlow.ChildActionFlows != null)
+                {
+                    foreach (var actionFlow in fullStepFlow.ChildActionFlows)
+                    {
+                        if (actionFlow.ToStepFlow != null)
+                        {
+                            await DeleteStepFlowRecursiveAsync(new List<StepFlow> { actionFlow.ToStepFlow });
+                        }
+
+                        DeleteListActionFlow.Add(actionFlow);
+                    }
+                }
+                DeleteListStepFlow.Add(fullStepFlow);
+            }
         }
     }
 }
