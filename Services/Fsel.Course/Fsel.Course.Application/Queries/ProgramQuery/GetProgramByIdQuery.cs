@@ -58,6 +58,9 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                      {
                                          Id = b.Id,
                                          Name = b.Name,
+                                         Code = b.Code,
+                                         LevelOrder = b.LevelOrder,
+                                         Description = b.Description,
                                          Skils = _skillLevelRepository.Queryable
                                                                       .Include(x => x.Skill)
                                                                       .Where(sl => sl.LevelId == b.Id)
