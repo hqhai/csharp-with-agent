@@ -4,6 +4,7 @@ namespace Fsel.System.Domain.Entities
 {
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
+    using global::System.ComponentModel.DataAnnotations;
 
     public class FeatureAccessTime : Entity
     {
@@ -32,5 +33,8 @@ namespace Fsel.System.Domain.Entities
         public Guid? CourseId { get; set; }
         public Guid? UnitId { get; set; }
         public Guid? LessonId { get; set; }
+
+        [MaxLength(255)]
+        public string? UserAgent { get; set; }
     }
 }

@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Hosting;
     using Refit;
+    using Microsoft.Extensions.Logging;
 
     public class CreateCFRPendingWordContentCommand : CreateCFRPendingWordContentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -44,6 +45,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         private readonly ISystemService _systemService;
         private readonly SpeechToTextPendingAiPublisher _speechToTextPendingAiPublisher;
         private readonly IStorageService _storageService;
+        private readonly IMediator _mediator;
+        private readonly ILogger<CreateCFRPendingWordContentCommand> _logger;
         private const int MaxClassForumDetailResultRecord = 2;
         private const int MaxPendingSpeechToText = 2;
         private const int TimeStartJobTest = 10;
@@ -58,7 +61,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                                                          AuthContext authContext,
                                                          ISystemService systemService,
                                                          SpeechToTextPendingAiPublisher speechToTextPendingAiPublisher,
-                                                         IStorageService storageService)
+                                                         IStorageService storageService,
+                                                         IMediator mediator,
+                                                        ILogger<CreateCFRPendingWordContentCommand> logger)
         {
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
@@ -70,6 +75,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             _systemService = systemService;
             _speechToTextPendingAiPublisher = speechToTextPendingAiPublisher;
             _storageService = storageService;
+            _mediator = mediator;
+            _logger = logger;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateCFRPendingWordContentCommand request, CancellationToken cancellationToken)
@@ -195,6 +202,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 ContentType = request.FormFile.ContentType,
                 FileData = memoryStream.ToArray()
             }, cancellationToken);
+
+            _logger.LogError($"LogParamPendingSTT: classForumDetailResult: {classForumDetailResult.Id} value: {request.FormFile.FileName} - {request.FormFile.ContentType} - {memoryStream.ToArray()}");
 
             return methodResult;
         }
