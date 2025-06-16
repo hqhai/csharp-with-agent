@@ -21,6 +21,19 @@ namespace Fsel.Realtime.Application.Hubs
         private readonly FeatureAccessTimePublisher _accessTimePublisher;
         private readonly AuthContext _authContext;
         private readonly ILogger<FeatureAccessTimeHub> _logger;
+        private string? UserAgent
+        {
+            get
+            {
+                var httpContext = Context.GetHttpContext();
+                // Ưu tiên lấy từ query string
+                var userAgentFromQuery = httpContext?.Request.Query["User-Agent"].ToString();
+                if (!string.IsNullOrEmpty(userAgentFromQuery))
+                    return userAgentFromQuery;
+                // Nếu không có thì lấy từ header
+                return httpContext?.Request.Headers["User-Agent"].ToString();
+            }
+        }
 
         public FeatureAccessTimeHub(FeatureAccessTimePublisher accessTimePublisher, AuthContext authContext, IIpApiService ipApiService, IHttpContextAccessor httpContextAccessor, ILogger<FeatureAccessTimeHub> logger) : base(authContext, ipApiService, httpContextAccessor)
         {
@@ -37,6 +50,8 @@ namespace Fsel.Realtime.Application.Hubs
         }
         public async Task AccessFeature(TrackingTimeModel model)
         {
+            var userAgent = UserAgent;
+            model.UserAgent = userAgent;
             var trackingModel = ConnectionTracker.Instance.GetModel(Context.ConnectionId);
 
             _logger.LogInformation($"TrackingModelt: {Context.ConnectionId}, type: {model.EnumFeature}, lessonId : {model.LessonId},Objectd: {model.ObjectId}, courseId: {model.CourseId}");
@@ -55,6 +70,9 @@ namespace Fsel.Realtime.Application.Hubs
 
         public override async Task OnDisconnectedHubAsync(Exception? exception)
         {
+
+            var userAgent = UserAgent;
+
             string type = (Context.GetHttpContext()?.Request.Query["Type"].ToString()!);
             var duration = ConnectionTracker.Instance.RecordConnectionEnd(Context.ConnectionId);
 
@@ -83,7 +101,8 @@ namespace Fsel.Realtime.Application.Hubs
                     UnitId = string.IsNullOrEmpty(unitId) ? null : new Guid(unitId),
                     LessonId = string.IsNullOrEmpty(lessonId) ? null : new Guid(lessonId),
                     CourseId = string.IsNullOrEmpty(courseId) ? null : new Guid(courseId),
-                    AccessTime = duration
+                    AccessTime = duration,
+                    UserAgent = userAgent
                 };
 
                 if (!string.IsNullOrEmpty(userId.ToString()))

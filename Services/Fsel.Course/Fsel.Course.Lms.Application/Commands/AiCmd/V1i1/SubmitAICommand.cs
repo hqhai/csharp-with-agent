@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i1
                     Format = new
                     {
                         Type = "json_schema",
-                        Name = "criteria_schema",
+                        Name = request.NameSchema,
                         Schema = request.Text
                     }
                 },

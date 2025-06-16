@@ -71,6 +71,8 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? AddCoinSpreadSheetId { get; set; }
         public string? AddCoinBuyCourseSpreadSheetId { get; set; }
         public string? AddCoinFselEventSpreadSheetId { get; set; }
+        public string? SummerSelfLearningSpreadSheetId { get; set; }
+        public string? SummerSelfLearningSheet { get; set; }
     }
 
     public class UserDeletionConfig
