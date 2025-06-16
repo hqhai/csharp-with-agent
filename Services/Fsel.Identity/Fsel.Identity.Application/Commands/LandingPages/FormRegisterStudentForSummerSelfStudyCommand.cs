@@ -19,8 +19,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
     public class FormRegisterStudentForSummerSelfStudyCommand : IRequest<MethodResult<bool>>
     {
-        public required string FirstName { get; set; }
-        public required string LastName { get; set; }
+        public required string FullName { get; set; }
         public required string Email { get; set; }
         public required string PhoneNumber { get; set; }
         public string? DiscountCode { get; set; }
@@ -59,12 +58,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
             }
-            if (string.IsNullOrEmpty(request.FirstName))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumValidateInputDataErrorCode.DataIsRequired));
-                return methodResult;
-            }
-            if (string.IsNullOrEmpty(request.LastName))
+            if (string.IsNullOrEmpty(request.FullName))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumValidateInputDataErrorCode.DataIsRequired));
                 return methodResult;
@@ -86,13 +80,6 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 {
                     dict["Time"] = DateTimeHelper.ConvertTimeFromUtc(DateTime.UtcNow, EnumCountryKey.Vietnam)
                         .ToString("dd-MM-yyyy HH:mm", CultureInfo.CurrentCulture);
-                    continue;
-                }
-
-                // Special handling if column is derived (e.g., "FullName")
-                if (string.Equals(column, "FullName", StringComparison.OrdinalIgnoreCase))
-                {
-                    dict["FullName"] = $"{request.LastName} {request.FirstName}".Trim();
                     continue;
                 }
 
