@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Flows
     public class SaveFlowCommandModel
     {
         public Guid? Id { get; set; }
+        public string? Name { get; set; }
         public bool IsModified { get; set; }
         public int FromAge { get; set; }
         public int ToAge { get; set; }

@@ -2,14 +2,15 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.FlowModels
 {
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class FlowModel
     {
         public Guid Id { get; set; }
+        public string? Name { get; set; }
         public DateTime? CreatedDate { get; set; }
+        public string? CreatedFullName { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public EnumFlowType Type { get; set; }
         public int FromAge { get; set; }

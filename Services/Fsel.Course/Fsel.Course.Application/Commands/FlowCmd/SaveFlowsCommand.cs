@@ -124,8 +124,8 @@ namespace Fsel.Course.Application.Commands.FlowCmd
                 // Kiểm tra xem có chồng lên các khoảng đã được duyệt không
                 foreach (var (from, to) in covered)
                 {
-                    bool isOverlap = !(flow.To <= from || flow.From >= to);
-                    if (isOverlap)
+                    bool isOverlapOrAdjacent = !(flow.To < from || flow.From > to);
+                    if (isOverlapOrAdjacent)
                     {
                         methodResult.AddErrorBadRequest(
                             nameof(EnumSystemErrorCode.InValidFormat),
@@ -134,7 +134,6 @@ namespace Fsel.Course.Application.Commands.FlowCmd
                         return methodResult;
                     }
                 }
-
                 // Thêm vào danh sách đã bao phủ
                 covered.Add(flow);
             }

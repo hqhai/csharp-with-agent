@@ -12,6 +12,9 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
 
     public class Flow : Entity
     {
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Name { get; set; }
+
         public EnumFlowType Type { get; set; }
 
         [Range(0, 150, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
