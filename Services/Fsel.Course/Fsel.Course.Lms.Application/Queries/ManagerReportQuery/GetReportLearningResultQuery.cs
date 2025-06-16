@@ -139,8 +139,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             foreach (var item in students)
             {
                 var countUnit = request.CourseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca :
-                request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS :
-                item.CourseLevel == EnumCourseLevel.EFA1 ? CourseProgressValue.CountUnitRFIA1 : CourseProgressValue.CountUnitRFIA2;
+                                request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS :
+                                request.CourseType == EnumCourseType.EnglishFoundation ? CourseProgressValue.CountUnitRFIA2 : default;
 
                 var unitResultGroup = unitResultGroups.FirstOrDefault(x => x.StudentId == item.Id);
                 var courseUnitResults = unitResultGroup?.UnitResults.OrderBy(x => x.CreatedDate).Select((y, index) => new
