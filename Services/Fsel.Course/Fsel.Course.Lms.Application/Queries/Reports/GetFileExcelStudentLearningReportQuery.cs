@@ -53,7 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
 
-            string fileName = $"Student_Learning_Process_{NumberHelper.GenerateCodeNumber(5)}_{DateTime.Now.Ticks}.xlsx";
+            string fileName = $"Student_Learning_Process_{request.EventCodeStr}_{request.CourseType}_{NumberHelper.GenerateCodeNumber(5)}_{DateTime.Now.Ticks}.xlsx";
             await _exportFileExcelStudentLearningProcessPublisher.Publish(new ExportReportStudentLearningProcessQueueModel
             {
                 CourseType = request.CourseType,
