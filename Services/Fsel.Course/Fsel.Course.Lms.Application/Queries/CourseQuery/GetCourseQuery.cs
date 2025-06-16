@@ -212,7 +212,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var course = await _courseRepository.Queryable
                           .Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate))
                           .Include(x => x.CourseTeachers)
-                          .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
+                          .Include(x => x.CourseResults.Where(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active))
                           .Where(x => x.Id == id)
                           .AsNoTracking()
                           .FirstOrDefaultAsync();
