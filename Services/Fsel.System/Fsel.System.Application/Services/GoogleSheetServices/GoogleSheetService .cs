@@ -10,22 +10,24 @@ namespace Fsel.System.Application.Services.GoogleSheetServices
     public class GoogleSheetService : IGoogleSheetService, IDisposable
     {
         private readonly SheetsService _sheetsService;
+        private static SheetsService? _sharedService;
 
         public GoogleSheetService(string credentialsFilePath)
         {
-            GoogleCredential credential;
-
-            using (var stream = new FileStream(credentialsFilePath, FileMode.Open, FileAccess.Read))
+            if (_sharedService == null)
             {
-                credential = GoogleCredential.FromStream(stream)
+                using var stream = new FileStream(credentialsFilePath, FileMode.Open, FileAccess.Read);
+                var credential = GoogleCredential.FromStream(stream)
                     .CreateScoped(SheetsService.Scope.Spreadsheets);
+
+                _sharedService = new SheetsService(new BaseClientService.Initializer
+                {
+                    HttpClientInitializer = credential,
+                    ApplicationName = "FSEL"
+                });
             }
 
-            _sheetsService = new SheetsService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = "FSEL"
-            });
+            _sheetsService = _sharedService!;
         }
 
         public IList<IList<object>> ReadDataFromSheet(string spreadsheetId, string sheetName)
@@ -37,6 +39,16 @@ namespace Fsel.System.Application.Services.GoogleSheetServices
             IList<IList<object>> values = response.Values;
 
             return values;
+        }
+
+        public async Task AppendRowsAsync(string spreadsheetId, string sheetName, IList<IList<object>> rows, CancellationToken cancellationToken)
+        {
+            var valueRange = new ValueRange { Values = rows };
+
+            var appendRequest = _sheetsService.Spreadsheets.Values.Append(valueRange, spreadsheetId, sheetName);
+            appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+
+            await appendRequest.ExecuteAsync(cancellationToken);
         }
 
         protected virtual void Dispose(bool disposing)
