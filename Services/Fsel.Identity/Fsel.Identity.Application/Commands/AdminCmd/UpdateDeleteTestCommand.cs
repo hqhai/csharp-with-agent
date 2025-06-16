@@ -41,6 +41,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             int age = DateTimeHelper.GetYearOld(student.Human.Birthday);
             student.BaseCourseLevel = null;
             student.CourseId = null;
+            student.ClassId = null;
             if (age <= 13)
             {
                 student.CourseLevel = EnumCourseLevel.A2;
