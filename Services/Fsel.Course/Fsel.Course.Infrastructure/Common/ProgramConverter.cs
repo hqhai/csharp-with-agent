@@ -129,10 +129,15 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (skillIds.Any())
             {
-                level.SkillLevels = skillIds?.Select(x => new SkillLevel
+                var skillLevels = level.SkillLevels.Any() ? level.SkillLevels.ToList() : new List<SkillLevel>();
+
+                var newSkillLevels = skillIds?.Select(x => new SkillLevel
                 {
                     SkillId = x
                 }).ToList() ?? new List<SkillLevel>();
+
+                skillLevels.AddRange(newSkillLevels);
+                level.SkillLevels = skillLevels;
             }
 
             return methodResult;
