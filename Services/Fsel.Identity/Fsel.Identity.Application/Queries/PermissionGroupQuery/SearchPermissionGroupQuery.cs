@@ -35,6 +35,7 @@ namespace Fsel.Identity.Application.Queries.PermissionGroupQuery
                 Description = p.Description,
                 Status = p.Status,
                 CreatedDate = p.CreatedDate,
+                MenuId = p.MenuId,
                 Permissions = p.Permissions.Select(x => new PermissionModel()
                 {
                     Id = x.Id,
