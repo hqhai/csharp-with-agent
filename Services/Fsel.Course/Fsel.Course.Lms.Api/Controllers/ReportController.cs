@@ -6,12 +6,14 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queries.Reports;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -185,7 +187,8 @@ namespace Fsel.Course.Lms.Api.Controllers
             {
                 return queryResult.GetActionResult();
             }
-            return File(queryResult.Result, Settings.Excels.ContentType, "export-file-learning-process-district.xlsx");
+            string url = $"export-file-learning-process-district-{query.EventCodeStr}-{query.CourseType}-{query.CourseLevel}-{query.EducationLevel}-{NumberHelper.GenerateCodeNumber(5)}.xlsx";
+            return File(queryResult.Result, Settings.Excels.ContentType, url);
         }
 
         ///// <summary>
@@ -241,6 +244,23 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Expot File Learning Process District
+        /// </summary>
+        [HttpPost("export-file")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportReportSelfStudyMonthlyQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, $"{query.FileName}_{query.EducationLevel.GetDescription()}.xlsx");
         }
     }
 }
