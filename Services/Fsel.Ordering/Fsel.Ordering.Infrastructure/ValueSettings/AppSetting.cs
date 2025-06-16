@@ -139,7 +139,6 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     {
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
-        public IList<int>? Packages { get; set; }
         public string? BrandImage { get; set; }
         public string? BrandName { get; set; }
         public DateTime? StartDateButton { get; set; }

@@ -40,11 +40,10 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
 
             var startDate = _appSetting.MarketplacePremiumConfig?.StartDate;
             var endDate = _appSetting.MarketplacePremiumConfig?.EndDate;
-            var packages = _appSetting.MarketplacePremiumConfig?.Packages;
             var startDateButton = _appSetting.MarketplacePremiumConfig?.StartDateButton;
             var endDateButton = _appSetting.MarketplacePremiumConfig?.EndDateButton;
 
-            if (!startDate.HasValue || !endDate.HasValue || packages == null || !packages.Any() || !startDateButton.HasValue || !endDateButton.HasValue)
+            if (!startDate.HasValue || !endDate.HasValue || !startDateButton.HasValue || !endDateButton.HasValue)
             {
                 return methodResult;
             }
@@ -68,15 +67,13 @@ namespace Fsel.Ordering.Application.Queries.MarketplacePremiumQuery
             {
                 foreach (var orderItem in orders)
                 {
-                    bool isInPackage = packages.Contains(orderItem.Package.MonthNumber);
-
                     DateTime orderDate = orderItem.Order.UpdatedDate.HasValue
                         ? orderItem.Order.UpdatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam)
                         : orderItem.Order.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
                     bool isInDateRange = orderDate >= startDate && orderDate <= endDate;
 
-                    if (isInPackage && isInDateRange)
+                    if (isInDateRange)
                     {
                         model.IsUserPremium = true;
                         break;
