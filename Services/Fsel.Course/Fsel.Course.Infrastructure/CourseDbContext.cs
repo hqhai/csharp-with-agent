@@ -213,6 +213,9 @@ namespace Fsel.Course.Infrastructure
             //modelBuilder.Ignore<CourseCompleteReportModel>();
             //modelBuilder.Ignore<SchoolInfoFilterModel>();
             //modelBuilder.Ignore<DistrictInfoModel>();
+            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
+            //modelBuilder.Ignore<ReportLearningProcessModel>();
+            //modelBuilder.Ignore<ReportLearningResultModel>();
 
             base.OnModelCreating(modelBuilder);
         }

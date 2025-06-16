@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Lms.Application.Commands.StudentCmd;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -24,13 +25,15 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly IMediator _mediator;
 
         public DeletePlacementTestCommandHandler(IPlacementTestGroupResultRepository placementTestGroupResultRepository,
             IUserService userService,
             IPlacementTestResultRepository placementTestResultRepository,
             ISectionGroupResultRepository sectionGroupResultRepository,
             IPlacementTestAnswerRepository placementTestAnswerRepository,
-            ICourseResultRepository courseResultRepository)
+            ICourseResultRepository courseResultRepository,
+            IMediator mediator)
         {
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
             _userService = userService;
@@ -38,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             _sectionGroupResultRepository = sectionGroupResultRepository;
             _placementTestAnswerRepository = placementTestAnswerRepository;
             _courseResultRepository = courseResultRepository;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(DeletePlacementTestCommand request, CancellationToken cancellationToken)
@@ -52,23 +56,12 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 return methodResult;
             }
             var student = studentResult.Content?.Result;
-            if (student == null)
+            if (student == null || student.Human == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), request.StudentId);
                 return methodResult;
             }
-            var courseResults = await _courseResultRepository.Queryable.Where(x => x.StudentId == request.StudentId && x.WorkingStatus == EnumWorkingStatus.Active).ToListAsync(cancellationToken);
-            if (courseResults.Any())
-            {
-                await _courseResultRepository.BulkUpdateList(courseResults.Select(courseResult =>
-                {
-                    courseResult.WorkingStatus = EnumWorkingStatus.NotWorking;
-                    return courseResult;
-                }), bulk =>
-                {
-                    bulk.ColumnInputExpression = entity => new { entity.WorkingStatus };
-                });
-            }
+            var userId = student.Human.UserId;
 
             var placementTestGroupResult = await _placementTestGroupResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == request.StudentId, cancellationToken);
             var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == request.StudentId).ToListAsync(cancellationToken);
@@ -95,6 +88,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 await _placementTestGroupResultRepository.DeleteAsync(placementTestGroupResult);
                 await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
+
+            await _mediator.Send(new DeleteListDataUserCommand { UserId = userId ?? default }, cancellationToken).ConfigureAwait(false);
             methodResult.Result = true;
             return methodResult;
         }
