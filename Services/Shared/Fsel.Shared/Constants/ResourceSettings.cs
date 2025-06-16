@@ -120,5 +120,7 @@ namespace Fsel.Shared.Constants
         public const string ReportSchoolStudent = "Resources//ExportExcelTemplates//Report_School_Student.xlsx";
 
         public const string ForbiddenClassForumSchema = "Resources//AIPrompt//JsonSchemas//ForbiddenClassForumSchema.json";
+
+        public const string ProductFileName = "Resources//Products.json";
     }
 }

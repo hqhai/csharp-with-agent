@@ -79,5 +79,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/google-sheet/add-dynamic-info-to-google-sheet-file")]
         Task<IApiResponse<MethodResult<bool>>> AddDynamicInfoToGoogleSheetFile([Body] CreateDynamicInfosToGoogleSheetFileCommandModel model);
+
+        [Post("/v1/token-history/create-history-deduct-coin-of-student")]
+        Task<IApiResponse<MethodResult<bool>>> CreateHistoryDeductCoinOfStudent([Body] CreateHistoryDeductCoinOfStudentCommandModel query);
     }
 }
