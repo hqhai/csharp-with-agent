@@ -244,7 +244,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 countTests.Add(await GetUnitCompletes(unitIds, courseResult));
             }
-            if (course.CourseType == EnumCourseType.Academic)
+            if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
             {
                 var finalTestId = course.CourseUnitMockTests.Where(x => x.FinalTestId.HasValue).Select(x => x.FinalTestId.GetValueOrDefault()).FirstOrDefault();
                 var countDoneFinalTest = await _finalTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
@@ -454,7 +454,8 @@ namespace Fsel.Course.Infrastructure.Common
                                                     .Select(n => n.Number).FirstOrDefault()).FirstOrDefault(),
                             };
                 courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
-            };
+            }
+            ;
             return courseCompletes;
         }
 
@@ -540,7 +541,8 @@ namespace Fsel.Course.Infrastructure.Common
                                                   .Select(x => x.skmt.Id).Distinct().Count(),
                             };
                 courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
-            };
+            }
+            ;
             return courseCompletes;
         }
 

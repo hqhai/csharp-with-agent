@@ -71,7 +71,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             var addCoin = await _systemService.AddCoinBuyCourse(new AddCoinBuyCourseModel
             {
                 UserIds = userIds,
-                Coin = request.Coin,
+                Coins = request.Coin,
                 Month = request.Month
             });
             if (!addCoin.IsSuccessStatusCode)
