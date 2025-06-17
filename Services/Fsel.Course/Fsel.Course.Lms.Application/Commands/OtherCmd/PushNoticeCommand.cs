@@ -3,6 +3,7 @@ using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Lms.Application.Queues.Publishers;
+using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Course.Lms.Application.Services.UserServices.Models;
@@ -25,14 +26,16 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
         private readonly IUserService _userService;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
+        private readonly IOrderService _orderService;
 
-        public PushNoticeCommandHandler(ITrainingService trainingService, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IUserService userService, NotificationMessagePublisher notificationMessagePublisher, IPlacementTestGroupResultRepository placementTestGroupResultRepository)
+        public PushNoticeCommandHandler(ITrainingService trainingService, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IUserService userService, NotificationMessagePublisher notificationMessagePublisher, IPlacementTestGroupResultRepository placementTestGroupResultRepository, IOrderService orderService)
         {
             _trainingService = trainingService;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _userService = userService;
             _notificationMessagePublisher = notificationMessagePublisher;
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
+            _orderService = orderService;
         }
 
         public async Task<MethodResult<bool>> Handle(PushNoticeCommand request, CancellationToken cancellationToken)
@@ -52,14 +55,27 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
 
             var studentChooseLevelIds = studentChooseLevels?.Select(p => p.StudentId).ToList();
 
-            studentDonePTs = studentDonePTs.Where(p => studentChooseLevelIds != null && !studentChooseLevelIds.Contains(p.StudentId)).ToList();
+            var donePTOne = studentDonePTs.Where(p => studentChooseLevelIds == null || !studentChooseLevelIds.Contains(p.StudentId)).ToList();
+            var donePTTwo = studentDonePTs.Where(p => studentChooseLevelIds != null && studentChooseLevelIds.Contains(p.StudentId)).ToList();
+
+            var userIdsDonePT = await GetUserIdsHasOrderPayment(donePTTwo.Select(p => p.CreatedUserId).ToList());
+
+            donePTTwo = donePTTwo.Where(p => userIdsDonePT == null || !userIdsDonePT.Contains(p.CreatedUserId)).ToList();
+
+            var userIdsDonePayment = await GetUserIdsHasOrderPayment(studentDonePTs.Select(p => p.CreatedUserId).ToList());
+
+            studentDonePTs = donePTOne.Concat(donePTTwo).ToList();
+
+            var userIdsHasOrderPayment = await GetUserIdsHasOrderPayment(studentChooseLevels?.Select(p => p.UserId).ToList());
+
+            studentChooseLevels = studentChooseLevels?.Where(p => userIdsHasOrderPayment != null && userIdsHasOrderPayment.Contains(p.UserId)).ToList();
 
             if (studentChooseLevels == null && studentDonePTs == null)
             {
                 return methodResult;
             }
 
-            var studentHasTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.WhereBulkContains(studentChooseLevelIds, p => p.StudentId).Where(p => p.CreatedDate.Date >= sevenDaysAgo.Date).Select(p => p.StudentId).Distinct().ToListAsync(cancellationToken);
+            var studentHasTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.WhereBulkContains(studentChooseLevelIds, p => p.StudentId).Select(p => p.StudentId).Distinct().ToListAsync(cancellationToken);
 
             studentChooseLevels = studentChooseLevels?.Where(p => !studentHasTimeCodeResults.Contains(p.StudentId)).ToList();
 
@@ -222,11 +238,55 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
             return methodResult;
         }
 
-        private async Task<IList<Guid>?> GetStudentIdsInEvent(IList<Guid>? studentIds)
+        private async Task<IList<Guid>> GetStudentIdsInEvent(IList<Guid>? studentIds, int batchSize = 10000)
         {
-            var studentEventResults = await _userService.GetStudentsInEventByStudentIds(new GetStudentIdsInEventByStudentIdsQueryModel() { StudentIds = studentIds });
-            var studentEvents = studentEventResults.Content?.Result;
-            return studentEvents;
+            if (studentIds == null || studentIds.Count == 0)
+                return new List<Guid>();
+
+            var tasks = new List<Task<IList<Guid>>>();
+
+            for (int i = 0; i < studentIds.Count; i += batchSize)
+            {
+                var batch = studentIds.Skip(i).Take(batchSize).ToList();
+
+                tasks.Add(Task.Run(async () =>
+                {
+                    var result = await _userService.GetStudentsInEventByStudentIds(new GetStudentIdsInEventByStudentIdsQueryModel
+                    {
+                        StudentIds = batch
+                    });
+
+                    return result.Content?.Result ?? new List<Guid>();
+                }));
+            }
+
+            var results = await Task.WhenAll(tasks);
+
+            return results.SelectMany(r => r ?? Enumerable.Empty<Guid>()).ToList();
+        }
+
+        private async Task<IList<Guid>> GetUserIdsHasOrderPayment(IList<Guid>? userIds, int batchSize = 10000)
+        {
+            if (userIds == null || userIds.Count == 0)
+                return new List<Guid>();
+
+            var tasks = new List<Task<IList<Guid>>>();
+
+            for (int i = 0; i < userIds.Count; i += batchSize)
+            {
+                var batch = userIds.Skip(i).Take(batchSize).ToList();
+
+                tasks.Add(Task.Run(async () =>
+                {
+                    var result = await _orderService.GetUsersHasOrderPayment(batch);
+
+                    return result.Content?.Result ?? new List<Guid>();
+                }));
+            }
+
+            var results = await Task.WhenAll(tasks);
+
+            return results.SelectMany(r => r ?? Enumerable.Empty<Guid>()).ToList();
         }
 
         private static IList<Guid>? GetStudentsChooseLevel(IList<StudentsIn7DayChooseLevelModel>? students, int day, DateTime dateTimeVietNam)
