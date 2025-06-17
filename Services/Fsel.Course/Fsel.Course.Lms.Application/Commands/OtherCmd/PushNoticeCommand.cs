@@ -4,6 +4,7 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.OrderServices;
+using Fsel.Course.Lms.Application.Services.OrderServices.Model;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Course.Lms.Application.Services.UserServices.Models;
@@ -53,18 +54,11 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
 
             var studentDonePTs = await _placementTestGroupResultRepository.Queryable.Where(p => p.CompletionDate.HasValue && p.CompletionDate.Value.Date >= sevenDaysAgo.Date).ToListAsync(cancellationToken);
 
-            var studentChooseLevelIds = studentChooseLevels?.Select(p => p.StudentId).ToList();
+            var userIdsDonePT = await GetUserIdsHasOrderPayment(studentDonePTs.Select(p => p.CreatedUserId).ToList());
 
-            var donePTOne = studentDonePTs.Where(p => studentChooseLevelIds == null || !studentChooseLevelIds.Contains(p.StudentId)).ToList();
-            var donePTTwo = studentDonePTs.Where(p => studentChooseLevelIds != null && studentChooseLevelIds.Contains(p.StudentId)).ToList();
+            studentDonePTs = studentDonePTs.Where(p => userIdsDonePT == null || !userIdsDonePT.Contains(p.CreatedUserId)).OrderByDescending(p => p.CreatedDate).ToList();
 
-            var userIdsDonePT = await GetUserIdsHasOrderPayment(donePTTwo.Select(p => p.CreatedUserId).ToList());
-
-            donePTTwo = donePTTwo.Where(p => userIdsDonePT == null || !userIdsDonePT.Contains(p.CreatedUserId)).ToList();
-
-            var userIdsDonePayment = await GetUserIdsHasOrderPayment(studentDonePTs.Select(p => p.CreatedUserId).ToList());
-
-            studentDonePTs = donePTOne.Concat(donePTTwo).ToList();
+            studentDonePTs = studentDonePTs.DistinctBy(p => p.StudentId).ToList();
 
             var userIdsHasOrderPayment = await GetUserIdsHasOrderPayment(studentChooseLevels?.Select(p => p.UserId).ToList());
 
@@ -75,9 +69,15 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
                 return methodResult;
             }
 
+            var studentChooseLevelIds = studentChooseLevels?.Select(p => p.StudentId).ToList();
+
             var studentHasTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.WhereBulkContains(studentChooseLevelIds, p => p.StudentId).Select(p => p.StudentId).Distinct().ToListAsync(cancellationToken);
 
             studentChooseLevels = studentChooseLevels?.Where(p => !studentHasTimeCodeResults.Contains(p.StudentId)).ToList();
+
+            studentChooseLevels = studentChooseLevels?.OrderByDescending(p => p.UserId).ToList();
+
+            studentChooseLevels = studentChooseLevels?.DistinctBy(p => p.UserId).ToList();
 
             studentChooseLevelIds = studentChooseLevels?.Select(p => p.StudentId).ToList();
 
@@ -241,7 +241,9 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
         private async Task<IList<Guid>> GetStudentIdsInEvent(IList<Guid>? studentIds, int batchSize = 10000)
         {
             if (studentIds == null || studentIds.Count == 0)
+            {
                 return new List<Guid>();
+            }
 
             var tasks = new List<Task<IList<Guid>>>();
 
@@ -268,7 +270,9 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
         private async Task<IList<Guid>> GetUserIdsHasOrderPayment(IList<Guid>? userIds, int batchSize = 10000)
         {
             if (userIds == null || userIds.Count == 0)
+            {
                 return new List<Guid>();
+            }
 
             var tasks = new List<Task<IList<Guid>>>();
 
@@ -278,7 +282,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
 
                 tasks.Add(Task.Run(async () =>
                 {
-                    var result = await _orderService.GetUsersHasOrderPayment(batch);
+                    var result = await _orderService.GetUsersHasOrderPayment(new GetUsersHasOrderPaymentModel() { UserIds = batch });
 
                     return result.Content?.Result ?? new List<Guid>();
                 }));

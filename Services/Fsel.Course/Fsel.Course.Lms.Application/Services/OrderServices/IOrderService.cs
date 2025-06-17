@@ -29,6 +29,6 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
 
         [Post("/v1.2/order/get-users-has-order-payment")]
-        Task<IApiResponse<MethodResult<IList<Guid>>>> GetUsersHasOrderPayment([Body] IList<Guid> userIds);
+        Task<IApiResponse<MethodResult<IList<Guid>>>> GetUsersHasOrderPayment([Body] GetUsersHasOrderPaymentModel model);
     }
 }
