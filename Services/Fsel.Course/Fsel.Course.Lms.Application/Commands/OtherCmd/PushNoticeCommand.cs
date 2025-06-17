@@ -50,13 +50,20 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
             var studentChooseLevelResults = await _trainingService.GetStudentsIn7DayChooseLevel();
             var studentChooseLevels = studentChooseLevelResults.Content?.Result;
 
+            var studentChooseLevelIds = studentChooseLevels?.Select(p => p.StudentId).ToList();
+
             var sevenDaysAgo = DateTime.UtcNow.AddDays(-7);
 
             var studentDonePTs = await _placementTestGroupResultRepository.Queryable.Where(p => p.CompletionDate.HasValue && p.CompletionDate.Value.Date >= sevenDaysAgo.Date).ToListAsync(cancellationToken);
 
-            var userIdsDonePT = await GetUserIdsHasOrderPayment(studentDonePTs.Select(p => p.CreatedUserId).ToList());
+            var donePT1 = studentDonePTs.Where(p => studentChooseLevelIds == null || !studentChooseLevelIds.Contains(p.StudentId)).ToList();
+            var donePT2 = studentDonePTs.Where(p => studentChooseLevelIds != null && studentChooseLevelIds.Contains(p.StudentId)).ToList();
 
-            studentDonePTs = studentDonePTs.Where(p => userIdsDonePT == null || !userIdsDonePT.Contains(p.CreatedUserId)).OrderByDescending(p => p.CreatedDate).ToList();
+            var userIdsDonePT = await GetUserIdsHasOrderPayment(donePT2.Select(p => p.CreatedUserId).ToList());
+
+            donePT2 = donePT2.Where(p => userIdsDonePT == null || !userIdsDonePT.Contains(p.CreatedUserId)).ToList();
+
+            studentDonePTs = donePT1.Concat(donePT2).OrderByDescending(p => p.CreatedDate).ToList();
 
             studentDonePTs = studentDonePTs.DistinctBy(p => p.StudentId).ToList();
 
@@ -64,12 +71,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
 
             studentChooseLevels = studentChooseLevels?.Where(p => userIdsHasOrderPayment != null && userIdsHasOrderPayment.Contains(p.UserId)).ToList();
 
-            if (studentChooseLevels == null && studentDonePTs == null)
-            {
-                return methodResult;
-            }
-
-            var studentChooseLevelIds = studentChooseLevels?.Select(p => p.StudentId).ToList();
+            studentChooseLevelIds = studentChooseLevels?.Select(p => p.StudentId).ToList();
 
             var studentHasTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.WhereBulkContains(studentChooseLevelIds, p => p.StudentId).Select(p => p.StudentId).Distinct().ToListAsync(cancellationToken);
 
@@ -80,6 +82,11 @@ namespace Fsel.Course.Lms.Application.Commands.OtherCmd
             studentChooseLevels = studentChooseLevels?.DistinctBy(p => p.UserId).ToList();
 
             studentChooseLevelIds = studentChooseLevels?.Select(p => p.StudentId).ToList();
+
+            if (studentChooseLevels == null && studentDonePTs == null)
+            {
+                return methodResult;
+            }
 
             if (request.TimeNotifyType == EnumPushNoticeTimeType.EveryHour)
             {
