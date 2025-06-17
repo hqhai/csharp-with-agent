@@ -24,10 +24,12 @@ namespace Fsel.Course.Lms.Api.Controllers
     public class ReportController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private ILogger<ReportController> _logger;
 
-        public ReportController(IMediator mediator)
+        public ReportController(IMediator mediator, ILogger<ReportController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -148,6 +150,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventSchoolQuery query)
         {
+            _logger.LoggerRequest($"ExportReportPlacementTestEventSchoolQuery : {query.Serialize()}");
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             if (!queryResult.IsOK || queryResult.Result == null)
             {
@@ -166,6 +169,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventDistrictSchoolQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+
             if (!queryResult.IsOK || queryResult.Result == null)
             {
                 return queryResult.GetActionResult();
