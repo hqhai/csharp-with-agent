@@ -185,74 +185,6 @@ namespace Fsel.Course.Infrastructure.Common
             await AddChildentCategory(competitionEvents.ToArray(), cancellationToken);
         }
 
-        //public List<Flow>? CreateFlows(IList<CreateFlowCommandModel>? requestFlows)
-        //{
-        //    if (requestFlows == null || !requestFlows.Any())
-        //    {
-        //        return null;
-        //    }
-        //    var listFlow = new List<Flow>();
-        //    foreach (var requestFlow in requestFlows)
-        //    {
-        //        var flow = _mapper.Map<Flow>(requestFlow);
-        //        flow.Id = Guid.NewGuid();
-
-        //        if (requestFlow.StepFlow == null)
-        //        {
-        //            continue;
-        //        }
-        //        // Tạo StepFlow gốc (Start)
-        //        var rootStepFlow = _mapper.Map<StepFlow>(requestFlow.StepFlow);
-        //        rootStepFlow.Id = Guid.NewGuid();
-        //        rootStepFlow.FlowId = flow.Id;
-        //        rootStepFlow.Type = EnumStepFlowType.Start;
-        //        // Gọi hàm đệ quy để xử lý cây bước tiếp theo
-        //        ProcessStepFlow(flow.Id, rootStepFlow, requestFlow.StepFlow.ActionFlows);
-        //        flow.StepFlows = new List<StepFlow>() { rootStepFlow };
-        //        listFlow.Add(flow);
-        //    }
-        //    return listFlow;
-        //}
-
-        //private void ProcessStepFlow(Guid flowId, StepFlow fromStepFlow, IList<CreateActionFlowCommandModel>? actionFlowRequests)
-        //{
-        //    if (actionFlowRequests == null || !actionFlowRequests.Any())
-        //    {
-        //        return;
-        //    }
-        //    var listActionFlow = new List<ActionFlow>();
-
-        //    foreach (var actionFlowRequest in actionFlowRequests)
-        //    {
-        //        if (actionFlowRequest.StepFlow == null)
-        //        {
-        //            continue;
-        //        }
-        //        // Tạo StepFlow con
-        //        var childStepFlow = _mapper.Map<StepFlow>(actionFlowRequest.StepFlow);
-        //        childStepFlow.Id = Guid.NewGuid();
-        //        childStepFlow.FlowId = flowId;
-        //        childStepFlow.ParentId = fromStepFlow.Id;
-        //        childStepFlow.Type = EnumStepFlowType.Step;
-
-        //        // Nếu không có bước con => END
-        //        if (actionFlowRequest.StepFlow.ActionFlows == null || !actionFlowRequest.StepFlow.ActionFlows.Any())
-        //        {
-        //            childStepFlow.Type = EnumStepFlowType.End;
-        //        }
-
-        //        // Tạo ActionFlow từ fromStepFlow đến childStepFlow
-        //        var actionFlow = _mapper.Map<ActionFlow>(actionFlowRequest);
-        //        actionFlow.FromStepFlowId = fromStepFlow.Id;
-        //        actionFlow.FromStepFlow = childStepFlow;
-        //        actionFlow.ToStepFlowId = childStepFlow.Id;
-
-        //        // Đệ quy: xử lý tiếp các bước con nếu có
-        //        ProcessStepFlow(flowId, childStepFlow, actionFlowRequest.StepFlow.ActionFlows);
-        //        listActionFlow.Add(actionFlow);
-        //    }
-        //    fromStepFlow.ChildActionFlows = listActionFlow;
-        //}
         public async Task<MethodResult<List<Flow>>> SaveFlowsAsync(IList<SaveFlowCommandModel>? requestFlows)
         {
             var methodResult = new MethodResult<List<Flow>>();
@@ -439,68 +371,51 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public VoidMethodResult ValidateCompleteAndNonOverlappingPercents(List<(int Start, int End)> percents)
+        public static VoidMethodResult ValidateCompleteAndNonOverlappingPercents(List<(int Start, int End)> percents)
         {
             var methodResult = new VoidMethodResult();
 
             if (percents == null || percents.Count == 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), "No percent ranges provided.");
+                methodResult.AddErrorBadRequest("InValidFormat", "No percent ranges provided.");
                 return methodResult;
             }
 
-            // Bước 1: Kiểm tra từng đoạn hợp lệ
+            // 1. Kiểm tra từng đoạn
             foreach (var (start, end) in percents)
             {
                 if (start < 0 || end > 100 || start >= end)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat),
+                    methodResult.AddErrorBadRequest("InValidFormat",
                         $"Invalid percent range: [{start}-{end}] must be in 0–100 and Start < End.");
                     return methodResult;
                 }
             }
 
-            // Bước 2: Gộp các khoảng phần trăm
-            var merged = percents
-                .OrderBy(p => p.Start)
-                .Aggregate(new List<(int Start, int End)>(), (acc, curr) =>
-                {
-                    if (acc.Count == 0 || curr.Start > acc[^1].End)
-                    {
-                        acc.Add(curr);
-                    }
-                    else if (curr.Start < acc[^1].End)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat),
-                            $"Percent range [{curr.Start}-{curr.End}] overlaps with existing range [{acc[^1].Start}-{acc[^1].End}].");
-                    }
-                    else
-                    {
-                        acc[^1] = (acc[^1].Start, Math.Max(acc[^1].End, curr.End));
-                    }
-                    return acc;
-                });
+            // 2. Sắp xếp theo Start
+            var sorted = percents.OrderBy(p => p.Start).ToList();
+            int expectedStart = 0;
 
-            if (!methodResult.IsOK)
+            foreach (var (start, end) in sorted)
             {
-                return methodResult;
-            }
-            // Bước 3: Kiểm tra phủ đủ 0–100
-            int prev = 0;
-            foreach (var (start, end) in merged)
-            {
-                if (start > prev)
+                if (start > expectedStart)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat),
-                        $"Missing percent range: [{prev}-{start}]");
+                    methodResult.AddErrorBadRequest("InValidFormat",
+                        $"Missing percent range: [{expectedStart}-{start - 1}]");
                 }
-                prev = Math.Max(prev, end);
+                else if (start < expectedStart)
+                {
+                    methodResult.AddErrorBadRequest("InValidFormat",
+                        $"Percent range [{start}-{end}] overlaps with previous range ending at {expectedStart - 1}");
+                }
+
+                expectedStart = end + 1;
             }
 
-            if (prev < 100)
+            if (expectedStart <= 100)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat),
-                    $"Missing percent range: [{prev}-100]");
+                methodResult.AddErrorBadRequest("InValidFormat",
+                    $"Missing percent range: [{expectedStart}-100]");
             }
 
             return methodResult;
