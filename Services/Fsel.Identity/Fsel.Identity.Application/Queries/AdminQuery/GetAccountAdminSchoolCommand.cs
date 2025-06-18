@@ -80,7 +80,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                              EventCode = d.EventCode,
                              SchoolName = d.SchoolName
                          })
-                         .OrderByDescending(x => x.CreatedDate)
+                        .OrderByDescending(x => x.CreatedDate)
                         .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -89,7 +89,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
 
             int totalItem = await users.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await users.ApplySort(request)
+            var lists = await users.ApplySortAndPaging(request)
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken: cancellationToken)
                                    .ConfigureAwait(false);
