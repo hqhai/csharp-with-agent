@@ -2,6 +2,7 @@
 
 using System.Net;
 using Asp.Versioning;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
@@ -19,6 +20,7 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -31,11 +33,13 @@ namespace Fsel.Identity.Api.Controllers
     {
         private readonly IMediator _mediator;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IMapper _mapper;
 
-        public EventController(IMediator mediator, ICompetitionEventsRepository competitionEventsRepository)
+        public EventController(IMediator mediator, ICompetitionEventsRepository competitionEventsRepository, IMapper mapper)
         {
             _mediator = mediator;
             _competitionEventsRepository = competitionEventsRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -107,8 +111,11 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
         {
-            var result = await _competitionEventsRepository.GetListResultAsync<CompetitionEventsModel>(query);
-            return result.GetActionResult();
+            var competitionEvents = await _competitionEventsRepository.Queryable.ToListAsync(CancellationToken.None);
+            var competitionEventModels = _mapper.Map<IList<CompetitionEventsModel>>(competitionEvents);
+            var methodResult = new MethodResult<IList<CompetitionEventsModel>>();
+            methodResult.Result = competitionEventModels;
+            return methodResult.GetActionResult();
         }
 
         /// <summary>
@@ -220,6 +227,15 @@ namespace Fsel.Identity.Api.Controllers
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        [HttpGet("get-tree-events")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEvent>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTreeCompetitionEvent([FromQuery] GetTreeCompetitionEventQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

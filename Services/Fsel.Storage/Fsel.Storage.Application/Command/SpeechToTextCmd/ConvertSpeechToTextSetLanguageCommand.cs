@@ -21,20 +21,24 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     {
         private readonly IOpenAIService _openAIService;
         private readonly AppSetting _appSetting;
+        private readonly IHttpClientFactory _httpClient;
 
         public ConvertSpeechToTextSetLanguageCommandHandler(IOpenAIService openAIService,
-                                                            AppSetting appSetting)
+                                                            AppSetting appSetting,
+                                                            IHttpClientFactory httpClient)
         {
             _openAIService = openAIService;
             _appSetting = appSetting;
+            _httpClient = httpClient;
         }
 
         public async Task<MethodResult<string>> Handle(ConvertSpeechToTextSetLanguageCommand request, CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(request.FilePath);
             MethodResult<string> methodResult = new MethodResult<string>();
 
-            using var httpClient = new HttpClient();
+            var httpClient = _httpClient.CreateClient();
             var response = await httpClient.GetAsync(request.FilePath, cancellationToken);
             if (!response.IsSuccessStatusCode)
             {
