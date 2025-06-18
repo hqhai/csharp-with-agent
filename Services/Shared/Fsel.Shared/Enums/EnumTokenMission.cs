@@ -189,8 +189,10 @@ namespace Fsel.Shared.Enums
         PurchaseChestSixth,
 
         [Description("Mở rương nhận Fsel coins")]
-        OpenChestCoins
+        OpenChestCoins,
 
         #endregion
+
+        MarketPlacePremium
     }
 }

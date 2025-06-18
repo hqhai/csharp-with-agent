@@ -247,7 +247,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 countTests.Add(await GetUnitCompletes(unitIds, courseResult));
             }
-            if (course.CourseType == EnumCourseType.Academic)
+            if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
             {
                 var finalTestId = course.CourseUnitMockTests.Where(x => x.FinalTestId.HasValue).Select(x => x.FinalTestId.GetValueOrDefault()).FirstOrDefault();
                 var countDoneFinalTest = await _finalTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)

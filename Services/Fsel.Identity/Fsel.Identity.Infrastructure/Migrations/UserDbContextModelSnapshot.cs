@@ -1254,7 +1254,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "SchoolId", "SchoolClass"), new[] { "BaseCourseLevel", "BeginnerGuideStr", "ClassId", "CourseId", "CourseLevel", "CreatedByParent", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DistrictId", "ExpiredDate", "HumanId", "NumberOfShield", "Occupation", "PackageId", "ParentEmail", "ParentPhoneNumber", "ProvinceId", "School", "SchoolFaculty", "SchoolGrade", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
-                    b.ToTable("Students");
+                    b.ToTable("Students", t =>
+                        {
+                            t.HasCheckConstraint("CK_Student_NumberOfToken_NonNegative", "[NumberOfToken] >= 0");
+                        });
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.StudentCompetitionEvent", b =>

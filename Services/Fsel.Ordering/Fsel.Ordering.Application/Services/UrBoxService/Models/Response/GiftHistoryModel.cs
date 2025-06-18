@@ -2,6 +2,8 @@
 
 namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Response
 {
+    using Fsel.Shared.Enums;
+
     public class GiftHistoryModel
     {
         public string? Id { get; set; }
@@ -20,5 +22,6 @@ namespace Fsel.Ordering.Application.Services.UrBoxService.Models.Response
         public string? Pin { get; set; }
         public string? Serial { get; set; }
         public IList<string?>? Offices { get; set; }
+        public EnumMarketPlaceType? MarketPlaceType { get; set; }
     }
 }
