@@ -14,6 +14,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class UpdateStatusUsersCommand : IRequest<MethodResult<bool>>
     {
         public IList<Guid>? Ids { get; set; }
+        public EnumUserStatus Status { get; set; }
     }
 
     public class UpdateStatusUsersCommandHandler : IRequestHandler<UpdateStatusUsersCommand, MethodResult<bool>>
@@ -41,7 +42,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             foreach (var user in users)
             {
-                user.Status = (!user.Status.HasValue || user.Status == EnumUserStatus.Inactive) ? EnumUserStatus.Active : EnumUserStatus.Inactive;
+                user.Status = request.Status;
                 await _userManager.UpdateAsync(user);
             }
 
