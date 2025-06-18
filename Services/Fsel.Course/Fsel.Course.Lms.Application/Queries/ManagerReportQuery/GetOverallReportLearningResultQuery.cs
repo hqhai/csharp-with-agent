@@ -187,7 +187,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                                  MockTestResult = mtr
                                              }).ToListAsync();
 
-                var mockTestGroups = (await _courseUnitMockTestRepository.Queryable.WhereBulkContains(courseIds, x => x.CourseId)
+                var mockTestGroups = (await _courseUnitMockTestRepository.Queryable.Include(x => x.Course).WhereBulkContains(courseIds, x => x.CourseId)
                                            .Where(x => x.MockTestId.HasValue).ToListAsync())
                                            .GroupBy(x => new { x.Number, x.Course!.CourseLevel })
                                            .Select(x => new
