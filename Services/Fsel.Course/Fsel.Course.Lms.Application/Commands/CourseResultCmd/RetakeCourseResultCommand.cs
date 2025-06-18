@@ -222,6 +222,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     courseResultNew.CourseId = courseClone.Id;
                 }
             }
+            if (!courseResultNew.IsValid())
+            {
+                methodResult.AddErrorBadRequest(courseResultNew.ErrorMessages);
+                return methodResult;
+            }
             try
             {
                 await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResultNew }, bulk =>

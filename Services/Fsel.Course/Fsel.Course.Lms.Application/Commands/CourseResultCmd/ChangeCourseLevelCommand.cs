@@ -160,7 +160,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                         Status = EnumResultStatus.New,
                         WorkingStatus = EnumWorkingStatus.Active
                     };
-
+                    if (!courseResult.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
+                        return methodResult;
+                    }
                     try
                     {
                         await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
@@ -178,15 +182,15 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 else
                 {
                     courseResult.WorkingStatus = EnumWorkingStatus.Active;
+                    if (!courseResult.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
+                        return methodResult;
+                    }
                     await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
                     {
                         bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
                     });
-                }
-                if (!courseResult.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
-                    return methodResult;
                 }
 
                 methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
