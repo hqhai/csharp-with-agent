@@ -338,13 +338,16 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             if (!course.CourseResults.Any())
             {
-                _courseResultRepository.Add(new CourseResult
+                var courseResult = new CourseResult
                 {
                     StudentId = studentId ?? default,
                     Status = EnumResultStatus.New,
                     CourseId = course.Id
+                };
+                await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId };
                 });
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();

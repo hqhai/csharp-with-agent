@@ -205,10 +205,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 {
                     videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
                 }
-                _videoResultRepository.Update(videoResult, false, x => x.VideoId, x => x.LessonResultId, x => x.StudentId);
+                await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.VideoId, c.StudentId, c.LessonResultId };
+                });
                 await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false, x => x.VideoTimeCodeId, x => x.VideoResultId, x => x.StudentId);
-                await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _videoTimeCodeResultRepository.BulkUpdateList(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.VideoTimeCodeId, c.StudentId, c.VideoResultId };
+                });
 
                 return methodResult;
             });
@@ -244,8 +250,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                     StudentId = videoResult.StudentId,
                     Status = EnumResultStatus.New
                 };
-                videoTimeCodeResult = _videoTimeCodeResultRepository.Add(videoTimeCodeResult);
-                await _videoTimeCodeResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+
+                await _videoTimeCodeResultRepository.BulkMergeAsync(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeId, c.StudentId, c.VideoResultId };
+                });
             }
             return videoTimeCodeResult;
         }

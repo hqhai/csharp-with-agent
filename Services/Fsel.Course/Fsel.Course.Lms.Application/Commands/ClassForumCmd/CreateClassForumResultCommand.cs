@@ -265,8 +265,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(classForumDetailResult.ErrorMessages);
                 return methodResult;
             }
-            classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult, false, x => x.ClassForumResultId, x => x.SubmissionCount);
-            await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+            });
 
             methodResult.Result = classForumDetailResult;
             return methodResult;
@@ -299,7 +302,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         methodResult.AddErrorBadRequest(classForumResult.ErrorMessages);
                         return methodResult;
                     }
-                    classForumResult = _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
+                    await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                    });
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
@@ -325,11 +331,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             };
 
             classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
-            _classForumDetailResultRepository.Add(classForumDetailResult);
 
             try
             {
-                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumDetailResultRepository.BulkMergeAsync(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                });
             }
             catch (Exception ex)
             {
@@ -348,12 +356,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 ClassForumId = classForum.Id,
                 SubmissionCount = EnumSubmissionCount.FirstSubmit,
             };
-            classForumResult = _classForumResultRepository.Add(classForumResult);
+
             if (request.IsSubmit)
             {
                 classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
                 try
                 {
+                    await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                    });
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -364,14 +376,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
             else
             {
-                try
+                await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
                 {
-                    await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning($"Log Duplicate ClassForumResult : {ex.Message}");
-                }
+                    bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                });
             }
             return classForumResult;
         }

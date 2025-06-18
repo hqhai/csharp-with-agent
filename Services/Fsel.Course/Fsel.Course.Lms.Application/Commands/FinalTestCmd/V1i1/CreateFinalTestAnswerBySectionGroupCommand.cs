@@ -233,7 +233,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
                 }
 
-                _finalTestResultRepository.Update(finalTestResult, false, x => x.CourseId, x => x.FinalTestId, x => x.StudentId);
+                await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult> { finalTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId };
+                });
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }

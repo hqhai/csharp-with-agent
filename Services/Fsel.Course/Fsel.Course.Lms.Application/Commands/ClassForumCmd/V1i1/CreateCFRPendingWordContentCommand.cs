@@ -183,7 +183,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 else
                 {
                     classForumDetailResult = await CreateClassForumDetailResultAsync(classForumResult.Id, EnumSubmissionCount.SecondSubmit, request.Content ?? string.Empty, request.FormFile, cancellationToken);
-                    await UpdateClassForumResult(classForumResult, cancellationToken);
+                    await UpdateClassForumResult(classForumResult);
                 }
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -219,7 +219,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 IsPendingSpeechToText = true
             };
 
-            classForumResult = _classForumResultRepository.Add(classForumResult);
+            await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.ClassForumId, c.StudentId };
+            });
             await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return classForumResult;
         }
@@ -252,16 +255,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 ClassForumResultFiles = new List<ClassForumResultFile> { new ClassForumResultFile { FilePath = filePath } }
             };
 
-            _classForumDetailResultRepository.Add(classForumDetailResult);
-            await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _classForumDetailResultRepository.BulkMergeAsync(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.SubmissionCount, c.ClassForumResultId };
+            });
             return classForumDetailResult;
         }
 
-        private async Task UpdateClassForumResult(ClassForumResult classForumResult, CancellationToken cancellationToken)
+        private async Task UpdateClassForumResult(ClassForumResult classForumResult)
         {
             classForumResult.IsPendingSpeechToText = true;
-            _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = entity => new { entity.ClassForumId, entity.LessonResultId, entity.StudentId };
+            });
         }
     }
 }
