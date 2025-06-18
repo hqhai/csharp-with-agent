@@ -3,6 +3,7 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
@@ -118,6 +119,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
         public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
         public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
+
+        public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
+        public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
+        public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
