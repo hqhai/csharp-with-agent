@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 return methodResult;
             }
             var lesson = method.Result;
-            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.HomeWorkResults).FirstOrDefaultAsync(x => x.Id == request.LessonResultId, cancellationToken);
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.New)
             {
                 lessonResult = await UpdateLessonResult(lesson, lessonResult, cancellationToken);
@@ -114,7 +114,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         private async Task<LessonResult> UpdateLessonResult(Lesson? lesson, LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lesson);
-            if (lessonResult.VideoResult == null)
+
+            if (!await _videoResultRepository.Queryable.AnyAsync(x => x.LessonResultId == lessonResult.Id, cancellationToken))
             {
                 var videoResult = new VideoResult
                 {
@@ -128,8 +129,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                     bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.VideoId };
                 });
             }
-
-            if (lessonResult.HomeWorkResults.Any())
+            if (!await _homeWorkResultRepository.Queryable.AnyAsync(x => x.LessonResultId == lessonResult.Id, cancellationToken))
             {
                 var homeWorks = await _homeWorkRepository.Queryable.Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
                                            .Include(x => x.HomeWorkQuestions)
