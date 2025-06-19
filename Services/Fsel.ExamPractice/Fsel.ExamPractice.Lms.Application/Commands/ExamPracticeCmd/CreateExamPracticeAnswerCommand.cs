@@ -10,6 +10,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
     using Fsel.Core.Base;
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Enums;
+    using Fsel.ExamPractice.Domain.Enums.ErrorCodes;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAnswers;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
@@ -97,9 +98,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeResult), request.ExamPracticeResultId);
                 return methodResult;
             }
+            //Note 2
             if (examPracticeResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(examPracticeResult.Status), examPracticeResult.Status);
+                methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.TestAlreadySubmitted), nameof(examPracticeResult.Status), examPracticeResult.Status);
                 return methodResult;
             }
             var examPractice = await _examPracticeRepository.GetByIdAsync(examPracticeResult.ExamPracticeId);

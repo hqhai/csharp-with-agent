@@ -64,6 +64,12 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPractice), request.Id);
                 return methodResult;
             }
+            // Note 5
+            if (examPractice.Status != EnumExamPracticeStatus.Active)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.TestStatusUpdated), nameof(examPractice.Status), examPractice.Status);
+                return methodResult;
+            }
             var examPracticeRetry = await _examPracticeRetryRepository.Queryable.FirstOrDefaultAsync(x => x.ExamPracticeId == examPractice.Id && x.StudentId == student.Id, cancellationToken);
             if (examPracticeRetry == null)
             {
@@ -83,6 +89,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeResult));
                 return methodResult;
             }
+
             await _examPracticeRetryRepository.ExecuteTransactionAsync(async () =>
             {
                 examPracticeRetry.RetryCount--;

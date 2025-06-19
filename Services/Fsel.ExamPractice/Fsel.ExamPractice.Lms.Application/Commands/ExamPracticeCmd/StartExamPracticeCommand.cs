@@ -12,6 +12,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Entities.Configs;
     using Fsel.ExamPractice.Domain.Enums;
+    using Fsel.ExamPractice.Domain.Enums.ErrorCodes;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
@@ -80,6 +81,13 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPractice), request.Id);
                 return methodResult;
             }
+            // Note 5
+            if (examPractice.Status != EnumExamPracticeStatus.Active)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.TestStatusUpdated), nameof(examPractice.Status), examPractice.Status);
+                return methodResult;
+            }
+
             if (examPractice.SubType == EnumExamPracticeSubType.FullMockTest)
             {
                 if (request.PracticeMode == EnumPracticeMode.Practice)
@@ -170,9 +178,17 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             var examPracticeResult = await _examPracticeResultRepository.Queryable
                                           .Where(x => x.ExamPracticeRetryId == examPracticeRetry.Id && x.WorkingStatus == EnumWorkingStatus.Active)
                                           .FirstOrDefaultAsync(cancellationToken);
+            // Note 4
+            if (examPracticeResult != null && examPracticeResult.Status == EnumResultStatus.Done)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.TestJustSubmittedOnAnotherDevice), nameof(examPracticeResult));
+                return methodResult;
+            }
+
+            // Note 1
             if (examPracticeResult != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(examPracticeResult));
+                methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.SessionOnOtherDevice), nameof(examPracticeResult));
                 return methodResult;
             }
 
