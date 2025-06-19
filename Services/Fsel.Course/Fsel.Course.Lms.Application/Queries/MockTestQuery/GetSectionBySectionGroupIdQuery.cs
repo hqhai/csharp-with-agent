@@ -160,6 +160,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
                     {
                         bulk.ColumnPrimaryKeyExpression = c => new { c.SectionGroupId, c.StudentId, c.PlacementTestResultId, c.FinalTestResultId, c.MockTestResultId };
                     });
+                    sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == sectionGroupResult.Id) ?? sectionGroupResult;
                 }
                 catch (Exception ex)
                 {

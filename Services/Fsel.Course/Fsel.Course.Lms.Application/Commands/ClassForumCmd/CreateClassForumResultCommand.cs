@@ -51,6 +51,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
         private readonly SetTimeClassForumDonePublisher _setTimeClassForumDonePublisher;
         private readonly IHostEnvironment _environment;
+        private readonly IClassForumResultFileRepository _classForumResultFileRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
         public const int DisplayOrderFirst = 0;
@@ -59,7 +60,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         public CreateClassForumResultCommandHandler(IMapper mapper,
             ICourseResultRepository courseResultRepository,
             ILogger<CreateClassForumResultCommand> logger,
-            CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, QuestBoardPublisher questBoardPublisher, IHostEnvironment environment)
+            CreateTokenHistoryPublisher createTokenHistoryPublisher,
+            ICourseRepository courseRepository,
+            AuthContext authContext,
+            IUserService userService,
+            IClassForumResultRepository classForumResultRepository,
+            IClassForumRepository classForumRepository,
+            ILessonResultRepository lessonResultRepository,
+            SubmitClassForumGradingPublisher submitClassForumGradingPublisher,
+            ISystemService systemService,
+            IClassForumDetailResultRepository classForumDetailResultRepository,
+            SetTimeClassForumDonePublisher setTimeClassForumDonePublisher,
+            QuestBoardPublisher questBoardPublisher,
+            IHostEnvironment environment,
+            IClassForumResultFileRepository classForumResultFileRepository)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -77,6 +91,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _setTimeClassForumDonePublisher = setTimeClassForumDonePublisher;
             _questBoardPublisher = questBoardPublisher;
             _environment = environment;
+            _classForumResultFileRepository = classForumResultFileRepository;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)

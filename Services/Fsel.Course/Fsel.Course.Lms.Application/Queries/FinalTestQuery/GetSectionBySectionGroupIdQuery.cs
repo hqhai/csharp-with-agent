@@ -136,6 +136,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
                     {
                         bulk.ColumnPrimaryKeyExpression = c => new { c.SectionGroupId, c.StudentId, c.FinalTestResultId };
                     });
+
+                    sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == sectionGroupResult.Id) ?? sectionGroupResult;
                 }
                 catch (Exception ex)
                 {
