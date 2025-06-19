@@ -101,19 +101,24 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             return false;
         }
 
-        public bool IsValidate(CreateExamPracticeCommandModel request)
-        {
-            ArgumentNullException.ThrowIfNull(request);
-            if (request.IsDraft)
-            {
-                return true;
-            }
-
-            return true;
-        }
-
         public async Task<bool> IsValidateActiveStatus(ExamPractice examPractice)
         {
+            if (examPractice == null)
+            {
+                return false;
+            }
+            if (!examPractice.StartDate.HasValue || !examPractice.EndDate.HasValue)
+            {
+                return false;
+            }
+            if (new[] { EnumExamPracticeSubType.Practice, EnumExamPracticeSubType.HighschoolEntrance }.Any(x => x == examPractice.SubType) && !examPractice.ProvinceId.HasValue)
+            {
+                return false;
+            }
+            if (examPractice.SubType == EnumExamPracticeSubType.Practice && string.IsNullOrEmpty(examPractice.SchoolGrade))
+            {
+                return false;
+            }
             var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPractice.Id).ToListAsync();
             var currentSections = await GetLeafSectionsWithQuestionsAsync(examPracticeSections);
             return AllSectionsHaveAtLeastOneQuestion(currentSections);
@@ -359,7 +364,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
         {
             var voidMethodResult = new VoidMethodResult();
 
-            if (examPracticeSections == null)
+            if (examPracticeSections == null || !examPracticeSections.Any())
             {
                 return voidMethodResult;
             }
