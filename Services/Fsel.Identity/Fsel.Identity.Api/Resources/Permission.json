@@ -637,5 +637,41 @@
     "status": true,
     "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
     "createdDate": "2025-06-15"
+  },
+  {
+    "id": "6df0f361-0d99-4a38-b5be-706225b7f22b",
+    "claimValue": "ReportManagement.ViewPT",
+    "name": "Xem báo cáo kết quả đánh giá đầu vào",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "a092a54c-1306-4600-af02-8cae97875977",
+    "claimValue": "ReportManagement.ViewLearningProgress",
+    "name": "Xem báo cáo tiến độ học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "27b1c0ae-d63a-4553-a130-e008183940c7",
+    "claimValue": "ReportManagement.ViewLearningResults",
+    "name": "Xem báo cáo kết quả học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "09748430-9ce7-4f22-a777-2516fc98d16c",
+    "claimValue": "ReportManagement.ViewDiligence",
+    "name": "Xem báo cáo chuyên cần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
   }
 ]
