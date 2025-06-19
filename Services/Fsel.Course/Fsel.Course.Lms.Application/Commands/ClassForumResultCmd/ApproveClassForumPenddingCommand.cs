@@ -107,7 +107,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 //Thông báo cho user khi bài viết được phê duyệt
-                await SendNotification(classForumResult, enumNotification, cancellationToken);
+                //await SendNotification(classForumResult, enumNotification, cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
