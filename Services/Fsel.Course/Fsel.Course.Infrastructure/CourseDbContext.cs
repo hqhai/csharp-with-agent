@@ -90,6 +90,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
+        public DbSet<Level> Levels { get; set; }
+        public DbSet<Category> Categorys { get; set; }
+        public DbSet<Skill> Skills { get; set; }
+        public DbSet<SkillLevel> SkillLevels { get; set; }
 
         #region Report
 
@@ -198,6 +202,10 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LevelEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SkillEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SkillLevelEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
