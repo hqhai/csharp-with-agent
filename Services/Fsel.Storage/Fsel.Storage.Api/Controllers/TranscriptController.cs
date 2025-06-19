@@ -145,5 +145,17 @@ namespace Fsel.Storage.Api.Controllers
             var methodResult = await _mediator.Send(command);
             return methodResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Speech To Text Set Language
+        /// </summary>
+        [HttpPost("speech-to-text-language")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ConvertSpeechToTextSetLanguage([FromBody] ConvertSpeechToTextSetLanguageCommand request)
+        {
+            var methodResult = await _mediator.Send(request);
+            return methodResult.GetActionResult();
+        }
     }
 }

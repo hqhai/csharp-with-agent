@@ -210,6 +210,8 @@ namespace Fsel.System.Application.Commands.DailyQuiz
             {
                 if (!string.IsNullOrEmpty(code))
                 {
+                    var dailyQuizWinners = new List<DailyQuizWinner>();
+
                     var dailyQuizWinner = new DailyQuizWinner()
                     {
                         Code = code,
@@ -217,10 +219,26 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                         CompetitionEventId = @event.Id,
                         IsWin = false
                     };
-                    _dailyQuizWinnerRepository.Add(dailyQuizWinner);
+
+                    if (!dailyQuizWinner.IsValid())
+                    {
+                        methodResult.AddError(dailyQuizWinner.ErrorMessages);
+                        return methodResult;
+                    }
+
+                    dailyQuizWinners.Add(dailyQuizWinner);
+
+                    await _dailyQuizWinnerRepository.BulkMergeAsync(dailyQuizWinners, x =>
+                    {
+                        x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.CreatedDateLocal };
+                    });
                 }
 
-                await _dailyQuizHistoryRepository.AddList(dailyQuizHistories);
+                await _dailyQuizHistoryRepository.BulkMergeAsync(dailyQuizHistories, x =>
+                {
+                    x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.DailyQuizQuestionId, c.CreatedDateLocal };
+                });
+
                 await _dailyQuizHistoryRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 return methodResult;

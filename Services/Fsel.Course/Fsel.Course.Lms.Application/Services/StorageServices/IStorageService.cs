@@ -22,5 +22,8 @@ namespace Fsel.Course.Lms.Application.Services.StorageServices
         [Post("/v1/transcript/convert-speech-to-text")]
         Task<IApiResponse<MethodResult<string>>> ConvertSpeechToText(ConvertSpeechToTextModel command);
 
+
+        [Post("/v1/transcript/speech-to-text-language")]
+        Task<IApiResponse<MethodResult<string?>>> ConvertSpeechToTextSetLanguage(ConvertSpeechToTextSetLanguageModel model);
     }
 }

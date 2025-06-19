@@ -26,7 +26,6 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
         private readonly UserManager<User> _userManager;
         private readonly ISystemService _systemService;
         private const string Sheet = "Sheet1";
-        private const string SpreadSheetId = "1TbVoTgNwvGIgpzfsbNYocHaOwy-gDBYs_SoAwoy3sjk";
 
         public AddCoinFselEventRewardBySheetCommandHandler(AppSetting appSetting,
                                                            UserManager<User> userManager,
@@ -43,7 +42,15 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            IList<IList<object>> dataResults = _googleSheetService.ReadDataFromSheet(SpreadSheetId, Sheet);
+            var spreadSheetId = _appSetting.GoogleSheetConfig?.AddCoinFselEventSpreadSheetId;
+
+            if (string.IsNullOrEmpty(spreadSheetId))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
+            IList<IList<object>> dataResults = _googleSheetService.ReadDataFromSheet(spreadSheetId, Sheet);
             if (dataResults == null || dataResults.Count < 2)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));

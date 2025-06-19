@@ -9,27 +9,22 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class AddCoinBuyCourseCommand : IRequest<MethodResult<bool>>
+    public class AddCoinWhenCoursePurchasedCommand : AddCoinWhenCoursePurchasedCommandModel, IRequest<MethodResult<bool>>
     {
-        public IList<Guid>? UserIds { get; set; }
-
-        public double Coin { get; set; }
-
-        public int Month { get; set; }
     }
 
-    public class AddCoinBuyCourseCommandHandler : IRequestHandler<AddCoinBuyCourseCommand, MethodResult<bool>>
+    public class AddCoinWhenCoursePurchasedCommandHandler : IRequestHandler<AddCoinWhenCoursePurchasedCommand, MethodResult<bool>>
     {
         private readonly IMediator _mediator;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
 
-        public AddCoinBuyCourseCommandHandler(IMediator mediator, NotificationMessagePublisher notificationMessagePublisher)
+        public AddCoinWhenCoursePurchasedCommandHandler(IMediator mediator, NotificationMessagePublisher notificationMessagePublisher)
         {
             _mediator = mediator;
             _notificationMessagePublisher = notificationMessagePublisher;
         }
 
-        public async Task<MethodResult<bool>> Handle(AddCoinBuyCourseCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(AddCoinWhenCoursePurchasedCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(request.UserIds);
@@ -41,8 +36,9 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 {
                     new TokenHistoryQueueModel
                     {
-                        VolatileToken = request.Coin,
+                        VolatileToken = request.Coins,
                         UserId = userId,
+                        ObjectId = request.ObjectId,
                         Feature = EnumTokenFeature.Payment,
                         Type = EnumTokenHistoryType.Recevived,
                         TokenHistoryTranslations = new List<TokenHistoryTranslationModel>
@@ -94,7 +90,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 ObjectId = Guid.Empty,
                 Type = EnumNotificationType.Text,
                 Content = EnumNotificationContent.AddCoinBuyCourse,
-                ParamsMessage = new List<object> { request.Coin, request.Month },
+                ParamsMessage = new List<object> { request.Coins, request.Month },
                 SenderId = Guid.Empty,
                 PlatformCode = EnumPlatformCode.LMS
             }, cancellationToken);

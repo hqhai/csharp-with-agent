@@ -4,7 +4,9 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
@@ -36,20 +38,23 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
-        private readonly IEventRegistrationRepository _eventRegistrationRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
+        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
 
         public GetStudentEventRegistrationsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
-            IEventRegistrationRepository eventRegistrationRepository,
-            IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
+            IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
+            IHumanRepository humanRepository,
+            UserManager<User> userManager)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
-            _eventRegistrationRepository = eventRegistrationRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
+            _humanRepository = humanRepository;
+            _userManager = userManager;
         }
 
         public async Task<MethodResult<IList<EventRegistrationModel>>> Handle(GetStudentEventRegistrationsQuery request, CancellationToken cancellationToken)
@@ -76,42 +81,55 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                 var district = locationDistricts?.FirstOrDefault(x => x.Name != null && x.Name.ToLower(System.Globalization.CultureInfo.CurrentCulture).Trim() == request.DistrictName);
                 competitionEvents = competitionEvents.Where(x => district != null && x.Id == district.Id).ToList();
             }
+            var schoolIds = competitionEvents.SelectMany(x => x.SchoolIds ?? new List<Guid>()).ToList();
+            var schoolResults = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel { Ids = schoolIds });
+            var schools = schoolResults.Content?.Result ?? new List<SchoolModel>();
+
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
-            var eventRegistrations = await (from baseQ in _studentRepository.Queryable
-                                            join er in _eventRegistrationRepository.Queryable on baseQ.Id equals er.StudentId
-                                            join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
-                                            where competitionEventIds.Contains(er.CompetitionEventId)
-                                            && (!request.StudentId.HasValue || baseQ.Id == request.StudentId.Value)
-                                            && baseQ.CourseLevel.HasValue && courseLevels.Contains(baseQ.CourseLevel.Value)
-                                            && baseQ.CourseId.HasValue
+            var eventRegistrations = await (from baseQ in _studentRepository.Queryable.Where(x => x.CourseId.HasValue)
+                                            join sce in _studentCompetitionEventsRepository.Queryable.WhereBulkContains(competitionEventIds, x => x.CompetitionEventId) on baseQ.Id equals sce.StudentId
+                                            join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id
+                                            join h in _humanRepository.Queryable on baseQ.HumanId equals h.Id
+                                            join u in _userManager.Users on h.UserId equals u.Id
+                                            where (!request.StudentId.HasValue || baseQ.Id == request.StudentId.Value)
+                                            && baseQ.CourseLevel.HasValue
+                                            && courseLevels.Contains(baseQ.CourseLevel.Value)
                                             select new EventRegistrationModel
                                             {
-                                                StudentId = er.StudentId,
-                                                BirthDay = er.BirthDay,
-                                                District = er.District,
-                                                DistrictId = er.DistrictId,
-                                                Email = er.Email,
+                                                StudentId = baseQ.Id,
+                                                BirthDay = h.Birthday,
+                                                District = ce.Name,
+                                                UserName = u.UserName,
+                                                DistrictId = ce.LocationId,
+                                                Email = h.Email,
                                                 ExpiredDate = baseQ.ExpiredDate,
-                                                FirstName = er.FirstName,
-                                                LastName = er.LastName,
-                                                IsBussinessCheckBox = er.IsBussinessCheckBox,
-                                                ParentEmail = er.ParentEmail,
-                                                ParentPhoneNumber = er.ParentPhoneNumber,
-                                                PhoneNumber = er.PhoneNumber,
-                                                Province = er.Province,
-                                                ProvinceId = er.ProvinceId,
-                                                School = er.School,
-                                                SchoolClass = er.SchoolClass,
-                                                SchoolGrade = er.SchoolGrade,
-                                                SchoolId = er.SchoolId,
-                                                SchoolStudentCode = er.SchoolStudentCode,
-                                                Status = er.Status,
-                                                StudentMainMajor = er.StudentMainMajor,
-                                                TeacherPhoneNumber = er.TeacherPhoneNumber,
+                                                FullName = h.FullName,
+                                                IsBussinessCheckBox = false,
+                                                ParentEmail = baseQ.ParentEmail,
+                                                ParentPhoneNumber = baseQ.ParentPhoneNumber,
+                                                PhoneNumber = h.PhoneNumber,
+                                                Province = string.Empty,
+                                                ProvinceId = baseQ.ProvinceId ?? ce.LocationId,
+                                                School = baseQ.School,
+                                                SchoolClass = baseQ.SchoolClass,
+                                                SchoolGrade = baseQ.SchoolGrade,
+                                                SchoolId = baseQ.SchoolId,
+                                                SchoolStudentCode = string.Empty,
+                                                Status = EnumEventRegistrationStatus.Active,
+                                                StudentMainMajor = string.Empty,
+                                                TeacherPhoneNumber = string.Empty,
                                                 CourseId = baseQ.CourseId,
                                                 CourseLevel = baseQ.CourseLevel,
                                             }).ToListAsync(cancellationToken);
+            foreach (var item in eventRegistrations)
+            {
+                var names = item.FullName?.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var school = schools.FirstOrDefault(x => x.Id == item.SchoolId);
 
+                item.FirstName = names != null && names.Length > 1 ? string.Join(' ', names.Take(names.Length - 1)) : string.Empty;
+                item.LastName = names != null && names.Length > 0 ? names.Last() : string.Empty;
+                item.District = item.District ?? locationDistricts?.FirstOrDefault(x => x.Id == item.DistrictId)?.Name;
+            }
             methodResult.Result = eventRegistrations;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
