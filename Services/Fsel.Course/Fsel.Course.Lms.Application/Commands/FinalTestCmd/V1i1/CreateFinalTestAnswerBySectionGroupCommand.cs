@@ -298,7 +298,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 {
                     await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionQuestionId, entity.FinalTestResultId, entity.SectionGroupResultId };
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionQuestionId, entity.FinalTestResultId, entity.SectionGroupResultId, entity.IsDeleted };
                     });
                 }
                 if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())

@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 };
                 await _mockTestResultRepository.BulkMergeAsync(new List<MockTestResult> { mockTestResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId, c.IsDeleted };
                 });
             }
 

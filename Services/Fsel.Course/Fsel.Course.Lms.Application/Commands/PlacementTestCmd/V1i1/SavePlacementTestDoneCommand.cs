@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             };
             await _placementTestGroupResultRepository.BulkMergeAsync(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
             {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId };
+                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.IsDeleted };
             });
         }
 
@@ -167,7 +167,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
             {
-                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestId };
+                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestId, c.IsDeleted };
             });
         }
     }

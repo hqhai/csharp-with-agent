@@ -216,7 +216,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                 {
                     await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId };
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId, entity.IsDeleted };
                     });
                 }
 

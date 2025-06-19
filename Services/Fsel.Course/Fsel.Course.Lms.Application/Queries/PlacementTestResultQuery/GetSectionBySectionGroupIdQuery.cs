@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 {
                     await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestResultId, c.SectionGroupId };
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestResultId, c.SectionGroupId, c.IsDeleted };
                     });
                     sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == sectionGroupResult.Id) ?? sectionGroupResult;
                 }

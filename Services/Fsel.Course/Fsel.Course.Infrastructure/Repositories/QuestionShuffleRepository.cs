@@ -36,7 +36,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                     {
                         await BulkUpdateList(updateQuestionShuffles, bulk =>
                         {
-                            bulk.IgnoreOnUpdateExpression = entity => new { entity.StudentId, entity.QuestionId };
+                            bulk.IgnoreOnUpdateExpression = entity => new { entity.StudentId, entity.QuestionId, entity.IsDeleted };
                         });
                         return methodResult;
                     });

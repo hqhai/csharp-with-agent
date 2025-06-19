@@ -159,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             {
                 await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId, c.IsDeleted };
                 });
             }
             catch (Exception ex)

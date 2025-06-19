@@ -159,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                 {
                     await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId };
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId, entity.IsDeleted };
                     });
                 }
                 else if (updateExtraPracticeAnswers.Count > 0)

@@ -154,7 +154,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
                     {
                         await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
                         {
-                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId };
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
                         });
                     }
                     catch (Exception ex)

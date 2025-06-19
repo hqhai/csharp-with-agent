@@ -147,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                 }).ToList();
                 await _lessonResultRepository.BulkMergeAsync(lessonResults, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId, c.IsDeleted };
                 });
             }
         }
@@ -168,7 +168,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
 
                 await _mockTestResultRepository.BulkMergeAsync(mockTestResults, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId, c.IsDeleted };
                 });
             }
         }

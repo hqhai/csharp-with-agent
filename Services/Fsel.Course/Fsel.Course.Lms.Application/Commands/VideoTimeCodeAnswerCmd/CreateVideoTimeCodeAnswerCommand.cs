@@ -186,7 +186,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                     await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId };
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.VideoResultId, entity.VideoTimeCodeResultId, entity.QuestionId, entity.IsDeleted };
                     });
                 }
                 else if (updateVideoTimeCodeAnswers.Any())
@@ -253,7 +253,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
                 await _videoTimeCodeResultRepository.BulkMergeAsync(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeId, c.StudentId, c.VideoResultId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.VideoTimeCodeId, c.StudentId, c.VideoResultId, c.IsDeleted };
                 });
             }
             return videoTimeCodeResult;

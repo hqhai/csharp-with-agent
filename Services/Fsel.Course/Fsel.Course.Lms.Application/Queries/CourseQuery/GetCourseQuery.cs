@@ -346,7 +346,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 };
                 await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
                 });
             }
 
@@ -390,7 +390,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 var unitResults = course.UnitResults.ToList();
                 await _unitResultRepository.BulkMergeAsync(unitResults, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.UnitId, entity.CourseId, entity.StudentId };
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.UnitId, entity.CourseId, entity.StudentId, entity.IsDeleted };
                 });
             }
             if (course.FinalTestResults.Any())
@@ -398,7 +398,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 var finalTestResults = course.FinalTestResults.ToList();
                 await _finalTestResultRepository.BulkMergeAsync(finalTestResults, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.FinalTestId, entity.CourseId, entity.StudentId };
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.FinalTestId, entity.CourseId, entity.StudentId, entity.IsDeleted };
                 });
             }
             if (course.MockTestResults.Any())
@@ -406,7 +406,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 var mockTestResults = course.MockTestResults.ToList();
                 await _mockTestResultRepository.BulkMergeAsync(mockTestResults, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.UnitId, entity.CourseId, entity.StudentId, entity.MockTestId };
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.CourseId, entity.StudentId, entity.MockTestId, entity.IsDeleted };
                 });
             }
         }

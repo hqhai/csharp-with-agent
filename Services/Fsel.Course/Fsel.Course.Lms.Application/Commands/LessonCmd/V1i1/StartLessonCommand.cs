@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
                 };
                 await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.VideoId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.VideoId, c.IsDeleted };
                 });
             }
 
@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1
 
                 await _homeWorkResultRepository.BulkMergeAsync(homeWorkResults, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId, c.IsDeleted };
                 });
             }
 

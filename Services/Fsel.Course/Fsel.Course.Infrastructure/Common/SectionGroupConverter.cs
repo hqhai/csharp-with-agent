@@ -383,7 +383,7 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.SectionId, c.SectionQuestionId, c.SectionTimeCodeId, c.SectionGroupResultId, c.MockTestResultId };
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.SectionId, c.SectionQuestionId, c.SectionTimeCodeId, c.SectionGroupResultId, c.MockTestResultId, c.IsDeleted };
                     });
                 }
                 catch (Exception ex)
@@ -415,7 +415,7 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         await _finalTestAnswerRepository.BulkMergeAsync(finalTestAnswers, bulk =>
                         {
-                            bulk.ColumnPrimaryKeyExpression = c => new { c.SectionQuestionId, c.SectionGroupResultId, c.FinalTestResultId };
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.SectionQuestionId, c.SectionGroupResultId, c.FinalTestResultId, c.IsDeleted };
                         });
                     }
                     catch (Exception ex)
@@ -438,7 +438,7 @@ namespace Fsel.Course.Infrastructure.Common
                     {
                         await _placementTestAnswerRepository.BulkMergeAsync(placementTestAnswers, bulk =>
                         {
-                            bulk.ColumnPrimaryKeyExpression = c => new { c.SectionQuestionId, c.SectionGroupResultId, c.PlacementTestResultId };
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.SectionQuestionId, c.SectionGroupResultId, c.PlacementTestResultId, c.IsDeleted };
                         });
                     }
                     catch (Exception ex)

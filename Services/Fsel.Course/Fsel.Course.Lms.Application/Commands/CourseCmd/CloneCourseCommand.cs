@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 {
                     await _courseRepository.BulkMergeAsync(new List<Course> { courseClone }, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ParentCourseId, entity.Priority };
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ParentCourseId, entity.Priority, entity.IsDeleted };
                     });
                 }
                 catch (Exception ex)

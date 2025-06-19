@@ -180,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
             {
                 await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId };
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId, entity.IsDeleted };
                 });
             }
 

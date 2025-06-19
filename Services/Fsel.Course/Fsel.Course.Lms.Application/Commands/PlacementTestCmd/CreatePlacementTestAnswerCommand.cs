@@ -229,7 +229,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             {
                 await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.PlacementTestId, c.StudentId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.PlacementTestId, c.StudentId, c.IsDeleted };
                 });
                 placementTestResults.Add(placementTestResult);
                 placementTestResults = placementTestResults.OrderBy(x => x.CreatedDate).ToList();

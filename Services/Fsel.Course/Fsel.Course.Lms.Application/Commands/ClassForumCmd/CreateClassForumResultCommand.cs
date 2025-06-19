@@ -351,7 +351,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             {
                 await _classForumDetailResultRepository.BulkMergeAsync(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.IsDeleted };
                 });
             }
             catch (Exception ex)
@@ -379,7 +379,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 {
                     await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId, c.IsDeleted };
                     });
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }

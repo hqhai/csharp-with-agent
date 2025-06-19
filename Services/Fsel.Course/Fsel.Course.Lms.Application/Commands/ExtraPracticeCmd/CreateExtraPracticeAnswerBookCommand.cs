@@ -106,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                 };
                 await _extraPracticeExerciseResultRepository.BulkMergeAsync(new List<ExtraPracticeExerciseResult> { extraPracticeExerciseResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.ExtraPracticeResultId, c.ExtraPracticeExerciseId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.ExtraPracticeResultId, c.ExtraPracticeExerciseId, c.IsDeleted };
                 });
             }
 

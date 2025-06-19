@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
                 await _finalTestResultRepository.BulkMergeAsync(new List<FinalTestResult> { finalTestResult }, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId, c.IsDeleted };
                 });
             }
             else if (finalTestResult.Status == EnumResultStatus.Done)
