@@ -60,13 +60,16 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             {
                 var competitionEvents = await GetSchoolByEvent(request.EventCodes, cancellationToken);
                 var schoolIds = competitionEvents.Result?.Where(x => x.SchoolIds != null).SelectMany(x => x.SchoolIds!).ToList();
-                userSchools = userSchools.Where(x => schoolIds != null && schoolIds.Contains(x.SchoolId));
+                if (schoolIds != null && schoolIds.Any())
+                {
+                    userSchools = userSchools.WhereBulkContains(schoolIds, x => x.SchoolId);
+                }
             }
 
             var users = (from a in _userManager.Users
                          join b in _userRoleRepository.Queryable on a.Id equals b.UserId
                          join c in _roleManager.Roles on b.RoleId equals c.Id
-                         let d = (_userSchoolRepository.Queryable.Where(m => m.UserId == a.Id)).Select(x => x).FirstOrDefault()
+                         join m in userSchools on a.Id equals m.UserId
                          where c.Name == EnumRole.AdminSchool.ToString()
                          select new AccountAdminSchoolModel
                          {
@@ -75,10 +78,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                              DefaultPassword = a.DefaultPassword,
                              UserName = a.UserName,
                              Status = a.Status,
-                             LocalId = d.LocalId,
-                             City = d.City,
-                             EventCode = d.EventCode,
-                             SchoolName = d.SchoolName
+                             LocalId = m.LocalId,
+                             City = m.City,
+                             EventCode = m.EventCode,
+                             SchoolName = m.SchoolName
                          })
                         .OrderByDescending(x => x.CreatedDate)
                         .AsQueryable();
