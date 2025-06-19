@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Lms.Application.Services.StorageServices;
     using Fsel.Course.Lms.Application.Services.StorageServices.Models;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IStorageService _storageService;
         private const int Max_Time_Retry = 4;
         private const int IntervalRetryTime = 30;
+        private const string NameSchema = "criteria_schema";
 
         public UpdateClassForumDetailResultCommandHandler(IClassForumDetailResultRepository classForumDetailResultRepository,
                                                           IClassForumRepository classForumRepository,
@@ -65,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                                                                                 .Include(x => x.ClassForumResult)
                                                                                 .Include(x => x.ClassForumResultFiles)
                                                                                 .FirstOrDefaultAsync(x => x.Id == request.ClassForumDetailResultId, cancellationToken);
-            if (classForumDetailResult == null)
+            if (classForumDetailResult == null || classForumDetailResult.ClassForumResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumDetailResult));
                 return methodResult;
@@ -83,9 +85,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             }
 
-            if (!string.IsNullOrEmpty(classForumDetailResult.ClassForumResult?.GradingAlFeedback))
+            if (!string.IsNullOrEmpty(classForumDetailResult.ClassForumResult.GradingAlFeedback))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendingForGrading), nameof(classForumDetailResult.ClassForumResult.GradingAlFeedback));
+                return methodResult;
+            }
+
+            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumDetailResult.ClassForumResult.ClassForumId, cancellationToken);
+            if (classForum == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
 
@@ -102,14 +111,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     return methodResult;
                 }
 
-                var retryChatGpt = await RetryChatGpt(speechToText.Result, classForumDetailResult.ClassForumResult?.ClassForumId ?? Guid.Empty, cancellationToken);
+                var retryChatGpt = await RetryChatGpt(speechToText.Result, classForum, cancellationToken);
 
                 classForumDetailResult.WordContent = speechToText.Result;
                 classForumDetailResult.GradingAlFeedback = retryChatGpt.Result;
             }
             else if (!string.IsNullOrEmpty(request.WordContent))
             {
-                var retryChatGpt = await RetryChatGpt(request.WordContent, classForumDetailResult.ClassForumResult?.ClassForumId ?? Guid.Empty, cancellationToken);
+                var retryChatGpt = await RetryChatGpt(request.WordContent, classForum, cancellationToken);
 
                 classForumDetailResult.WordContent = request.WordContent;
                 classForumDetailResult.GradingAlFeedback = retryChatGpt.Result;
@@ -126,6 +135,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
             {
+                if (classForum.CourseSkill == EnumCourseSkill.Writing)
+                {
+                    classForumDetailResult.Content = classForumDetailResult.WordContent;
+                }
+
                 _classForumDetailResultRepository.Update(classForumDetailResult);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -137,17 +151,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             return methodResult;
         }
 
-        private async Task<MethodResult<string>> RetryChatGpt(string wordContent, Guid classForumId, CancellationToken cancellationToken)
+        private async Task<MethodResult<string>> RetryChatGpt(string wordContent, ClassForum classForum, CancellationToken cancellationToken)
         {
             MethodResult<string> methodResult = new MethodResult<string>();
             int countRetry = 0;
-
-            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumId, cancellationToken);
-            if (classForum == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
-                return methodResult;
-            }
 
             var retryAI = Policy.HandleResult<UserAiModel>(result => result.ClassForumAIs == null || result.ClassForumAIs.Count == 0 || !result.ConditionRetry)
                                     .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromMinutes(IntervalRetryTime), async (result, timeSpan, retryCount, context) =>
@@ -181,7 +188,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     SettingTopP = classForum.SettingTopP,
                     SystemRoleAlConfig = classForum.SystemRoleAlConfig,
                     UserAIConfig = userAiConfig,
-                    Text = successCriteriaSchema
+                    Text = successCriteriaSchema,
+                    NameSchema = NameSchema
                 }, cancellationToken).ConfigureAwait(false);
 
                 aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
