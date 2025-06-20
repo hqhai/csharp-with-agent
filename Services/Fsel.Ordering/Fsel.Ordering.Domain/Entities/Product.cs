@@ -103,6 +103,20 @@ namespace Fsel.Ordering.Domain.Entities
             set { DescriptionStr = value.Serialize(); }
         }
 
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? GlobalId { get; set; }
+
+        public bool IsPremium { get; set; }
+
+        public string? ProductGlobalConfigStr { get; set; }
+
+        [NotMapped]
+        public ProductGlobalConfig? ProductGlobalConfig
+        {
+            get { return ProductGlobalConfigStr.Deserialize<ProductGlobalConfig>(); }
+            set { ProductGlobalConfigStr = value.Serialize(); }
+        }
+
         public ICollection<ProductTranslation> Translations { get; set; } = new List<ProductTranslation>();
         public ICollection<OrderTransaction> OrderTransactions { get; set; } = new List<OrderTransaction>();
     }
@@ -136,5 +150,14 @@ namespace Fsel.Ordering.Domain.Entities
         public Product? Product { get; set; }
 
         public string? Language { get; set; }
+    }
+
+    public class ProductGlobalConfig
+    {
+        public string? BrandName { get; set; }
+        public string? BrandImage { get; set; }
+        public string? Content { get; set; }
+        public string? Note { get; set; }
+        public IList<string>? Addresses { get; set; }
     }
 }
