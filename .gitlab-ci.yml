@@ -55,7 +55,7 @@ build-multi-subject-prod-auth:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-gateway:
   stage: build-multi-subject-prod
@@ -77,7 +77,7 @@ build-multi-subject-prod-gateway:
     - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-hangfire:
   stage: build-multi-subject-prod
@@ -99,7 +99,7 @@ build-multi-subject-prod-hangfire:
     - Services/Fsel.Hangfire/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-interaction:
   stage: build-multi-subject-prod
@@ -121,7 +121,7 @@ build-multi-subject-prod-interaction:
     - Services/Fsel.Interaction/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-lcmsapi:
   stage: build-multi-subject-prod
@@ -143,7 +143,7 @@ build-multi-subject-prod-lcmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-lmsapi:
   stage: build-multi-subject-prod
@@ -165,7 +165,7 @@ build-multi-subject-prod-lmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-notification:
   stage: build-multi-subject-prod
@@ -187,7 +187,7 @@ build-multi-subject-prod-notification:
     - Services/Fsel.Notification/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-ordering:
   stage: build-multi-subject-prod
@@ -209,7 +209,7 @@ build-multi-subject-prod-ordering:
     - Services/Fsel.Ordering/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-realtime:
   stage: build-multi-subject-prod
@@ -231,7 +231,7 @@ build-multi-subject-prod-realtime:
     - Services/Fsel.Realtime/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-sender:
   stage: build-multi-subject-prod
@@ -253,7 +253,7 @@ build-multi-subject-prod-sender:
     - Services/Fsel.Sender/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-storage:
   stage: build-multi-subject-prod
@@ -275,7 +275,7 @@ build-multi-subject-prod-storage:
     - Services/Fsel.Storage/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-system:
   stage: build-multi-subject-prod
@@ -297,7 +297,7 @@ build-multi-subject-prod-system:
     - Services/Fsel.System/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-training:
   stage: build-multi-subject-prod
@@ -319,7 +319,7 @@ build-multi-subject-prod-training:
     - Services/Fsel.Training/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-identity:
   stage: build-multi-subject-prod
@@ -341,7 +341,7 @@ build-multi-subject-prod-identity:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-cms-planetdefender:
   stage: build-multi-subject-prod
@@ -363,7 +363,7 @@ build-multi-subject-prod-cms-planetdefender:
     - Services/Fsel.Cms.PlanetDefender/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-exam-practice:
   stage: build-multi-subject-prod
@@ -385,7 +385,7 @@ build-multi-subject-prod-exam-practice:
     - Services/Fsel.ExamPractice/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
 
 build-multi-subject-prod-exam-practice-lms:
   stage: build-multi-subject-prod
@@ -407,4 +407,4 @@ build-multi-subject-prod-exam-practice-lms:
     - Services/Fsel.ExamPractice/**/*
     - Services/Shared/**/*
     refs:
-    - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
+    - main-multiple-subject
