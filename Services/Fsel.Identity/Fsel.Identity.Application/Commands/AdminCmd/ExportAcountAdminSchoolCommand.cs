@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.CommandModels.Admins;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -76,13 +77,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                          join c in _roleManager.Roles on b.RoleId equals c.Id
                          join m in userSchools on a.Id equals m.UserId
                          where c.Name == EnumRole.AdminSchool.ToString()
-                         select new AccountAdminSchoolModel
+                         select new ExportAcountAdminSchoolCommandModel
                          {
-                             Id = a.Id,
                              CreatedDate = a.CreatedDate,
                              DefaultPassword = a.DefaultPassword,
                              UserName = a.UserName,
-                             Status = a.Status,
                              LocalId = m.LocalId,
                              City = m.City,
                              EventCode = m.EventCode,
