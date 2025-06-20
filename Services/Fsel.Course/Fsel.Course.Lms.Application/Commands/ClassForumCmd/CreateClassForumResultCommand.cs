@@ -285,7 +285,22 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             {
                 bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
             });
+            var classForumResultFileNews = classForumDetailResult.ClassForumResultFiles;
 
+            var classForumResultFiles = await _classForumResultFileRepository.Queryable.Where(x => x.ClassForumDetailResultId == classForumDetailResult.Id).ToListAsync(cancellationToken);
+            if (classForumResultFiles.Any())
+            {
+                await _classForumResultFileRepository.DeleteListAsync(classForumResultFiles);
+                await _classForumResultFileRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            if (classForumResultFileNews.Any())
+            {
+                foreach (var file in classForumResultFileNews)
+                {
+                    file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
+                }
+                await _classForumResultFileRepository.BulkMergeAsync(classForumResultFileNews);
+            }
             methodResult.Result = classForumDetailResult;
             return methodResult;
         }
@@ -353,6 +368,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 {
                     bulk.ColumnPrimaryKeyExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.IsDeleted };
                 });
+                var classForumResultFiles = classForumDetailResult.ClassForumResultFiles;
+                if (classForumResultFiles.Any())
+                {
+                    foreach (var file in classForumResultFiles)
+                    {
+                        file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
+                    }
+                    await _classForumResultFileRepository.BulkMergeAsync(classForumResultFiles);
+                }
             }
             catch (Exception ex)
             {

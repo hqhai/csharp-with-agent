@@ -28,6 +28,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Microsoft.Extensions.Hosting;
     using Refit;
     using Microsoft.Extensions.Logging;
+    using Fsel.Course.Infrastructure.Repositories;
 
     public class CreateCFRPendingWordContentCommand : CreateCFRPendingWordContentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -47,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         private readonly IStorageService _storageService;
         private readonly IMediator _mediator;
         private readonly ILogger<CreateCFRPendingWordContentCommand> _logger;
+        private readonly IClassForumResultFileRepository _classForumResultFileRepository;
         private const int MaxClassForumDetailResultRecord = 2;
         private const int MaxPendingSpeechToText = 2;
         private const int TimeStartJobTest = 10;
@@ -63,7 +65,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                                                          SpeechToTextPendingAiPublisher speechToTextPendingAiPublisher,
                                                          IStorageService storageService,
                                                          IMediator mediator,
-                                                        ILogger<CreateCFRPendingWordContentCommand> logger)
+                                                        ILogger<CreateCFRPendingWordContentCommand> logger,
+                                                        IClassForumResultFileRepository classForumResultFileRepository)
         {
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
@@ -77,6 +80,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             _storageService = storageService;
             _mediator = mediator;
             _logger = logger;
+            _classForumResultFileRepository = classForumResultFileRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateCFRPendingWordContentCommand request, CancellationToken cancellationToken)
@@ -259,6 +263,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             {
                 bulk.ColumnPrimaryKeyExpression = c => new { c.SubmissionCount, c.ClassForumResultId, c.IsDeleted };
             });
+            if (classForumDetailResult.ClassForumResultFiles.Any())
+            {
+                foreach (var file in classForumDetailResult.ClassForumResultFiles)
+                {
+                    file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
+                }
+                await _classForumResultFileRepository.BulkMergeAsync(classForumDetailResult.ClassForumResultFiles);
+            }
             return classForumDetailResult;
         }
 
