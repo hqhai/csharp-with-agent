@@ -66,6 +66,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 }
             }
 
+            if (request.LocationIds != null && (request.EventCodes == null || !request.EventCodes.Any()))
+            {
+                methodResult.Result = new PagingItemsModel<AccountAdminSchoolModel> { Items = null, PagingInfo = new PagingInfoModel { Page = request.Page, PageSize = request.PageSize, TotalItems = 0 } };
+                return methodResult;
+            }
+
             var users = (from a in _userManager.Users
                          join b in _userRoleRepository.Queryable on a.Id equals b.UserId
                          join c in _roleManager.Roles on b.RoleId equals c.Id
