@@ -107,8 +107,7 @@ namespace Fsel.System.Application.Commands.TechieCmd
 
             await _studentTechieRepository.ExecuteTransactionAsync(async () =>
             {
-                _studentTechieRepository.Add(studentTechie);
-                await _studentTechieRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await _studentTechieRepository.BulkMergeAsync(new List<StudentTechie> { studentTechie });
 
                 StudentTechieMessageModel socketModel = new StudentTechieMessageModel
                 {
