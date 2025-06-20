@@ -21,7 +21,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 var query = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
 
-                if (query != null && query.Level == EnumPlacementTestLevel.IELTS)
+                if (query != null && query.PlacementTestLevel == EnumPlacementTestLevel.IELTS)
                 {
                     query = await Queryable.Include(x => x.ExtraPractice)
                                 .Include(x => x.PlacementTestSections.Where(n => n.SectionGroup != null))
@@ -60,7 +60,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 var query = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
 
                 PlacementTestModel? placement = null;
-                if (query != null && query.Level == EnumPlacementTestLevel.IELTS)
+                if (query != null && query.PlacementTestLevel == EnumPlacementTestLevel.IELTS)
                 {
                     placement = await Queryable.Include(x => x.PlacementTestSections.Where(y => !y.IsDeleted))
                                     .ThenInclude(x => x.SectionGroup)
@@ -73,7 +73,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     {
                                         Id = x.Id,
                                         Name = x.Name,
-                                        Level = x.Level,
+                                        Level = x.PlacementTestLevel,
                                         CreatedDate = x.CreatedDate,
                                         IsActive = x.IsActive,
                                         SectionGroups = x.PlacementTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
@@ -123,7 +123,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                    {
                                        Id = x.Id,
                                        Name = x.Name,
-                                       Level = x.Level,
+                                       Level = x.PlacementTestLevel,
                                        CreatedDate = x.CreatedDate,
                                        IsActive = x.IsActive,
                                        SectionGroups = x.PlacementTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel

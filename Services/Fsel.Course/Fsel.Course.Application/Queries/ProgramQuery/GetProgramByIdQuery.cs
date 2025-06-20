@@ -4,9 +4,13 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities.FlowConfigs;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.FlowModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -21,14 +25,32 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
         private readonly ICategoryRepository _categoryRepository;
         private readonly ILevelRepository _levelRepository;
         private readonly ISkillLevelRepository _skillLevelRepository;
+        private readonly IFlowRepository _flowRepository;
+        private readonly IStepFlowRepository _stepFlowRepository;
+        private readonly IMapper _mapper;
+        private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
+        private readonly IPlacementTestRepository _placementTestRepository;
+        private readonly ICategoryTestBankRepository _categoryTestBankRepository;
 
         public GetProgramByIdQueryHandler(ICategoryRepository categoryRepository,
                                           ILevelRepository levelRepository,
-                                          ISkillLevelRepository skillLevelRepository)
+                                          ISkillLevelRepository skillLevelRepository,
+                                          IFlowRepository flowRepository,
+                                          IStepFlowRepository stepFlowRepository,
+                                          IMapper mapper,
+                                          IPlacementTestGroupResultRepository placementTestGroupResultRepository,
+                                          IPlacementTestRepository placementTestRepository,
+                                          ICategoryTestBankRepository categoryTestBankRepository)
         {
             _categoryRepository = categoryRepository;
             _levelRepository = levelRepository;
             _skillLevelRepository = skillLevelRepository;
+            _flowRepository = flowRepository;
+            _stepFlowRepository = stepFlowRepository;
+            _mapper = mapper;
+            _placementTestGroupResultRepository = placementTestGroupResultRepository;
+            _placementTestRepository = placementTestRepository;
+            _categoryTestBankRepository = categoryTestBankRepository;
         }
 
         public async Task<MethodResult<ProgramModel>> Handle(GetProgramByIdQuery request, CancellationToken cancellationToken)
@@ -69,12 +91,76 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                                                           Id = sl.SkillId,
                                                                           Name = sl.Skill != null ? sl.Skill.Name : string.Empty
                                                                       }).ToList()
-                                     }).ToList()
+                                     }).ToList(),
+                                     TestIds = _categoryTestBankRepository.Queryable.Where(y => y.ProgramId == g.Key.Id).OrderBy(x => x.CreatedDate).Select(x => x.TestId).ToList(),
                                  }).FirstOrDefaultAsync(cancellationToken);
+            if (program != null)
+            {
+                if (program.TestIds != null && program.TestIds.Any())
+                {
+                    var tests = await _placementTestRepository.Queryable.WhereBulkContains(program.TestIds, x => x.Id).Select(x => new TestModel
+                    {
+                        Id = x.Id,
+                        Name = x.Name,
+                    }).ToListAsync(cancellationToken);
+                    program.Tests = tests.OrderBy(x => program.TestIds.IndexOf(x.Id)).ToList();
+                }
 
+                program.Flows = await GetFlowsAsync(program.Id, cancellationToken);
+            }
             methodResult.Result = program;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<IList<FlowModel>> GetFlowsAsync(Guid programId, CancellationToken cancellationToken)
+        {
+            var flowModels = new List<FlowModel>();
+            var flows = await _flowRepository.Queryable
+                           .Include(x => x.StepFlows)
+                           .ThenInclude(x => x.ChildActionFlows.OrderBy(af => af.CreatedDate))
+                           .Include(x => x.StepFlows)
+                           .ThenInclude(x => x.Level)
+                           .Where(x => x.ProgramId == programId && x.Status == EnumStatus.Active)
+                           .ToListAsync(cancellationToken);
+            foreach (var flow in flows.OrderBy(x => x.CreatedDate))
+            {
+                var isPT = await _placementTestGroupResultRepository.Queryable.AnyAsync(x => x.FlowId == flow.Id, cancellationToken);
+                foreach (var stepFlow in flow.StepFlows)
+                {
+                    await LoadStepFlowRecursively(stepFlow, cancellationToken);
+                }
+                var flowModel = _mapper.Map<FlowModel>(flow);
+                flowModel.IsUsedInPlacementTest = isPT;
+                flowModels.Add(flowModel);
+            }
+            return flowModels;
+        }
+
+        private async Task LoadStepFlowRecursively(StepFlow stepFlow, CancellationToken cancellationToken)
+        {
+            if (stepFlow?.ChildActionFlows == null || !stepFlow.ChildActionFlows.Any())
+            {
+                return;
+            }
+
+            foreach (var actionFlow in stepFlow.ChildActionFlows)
+            {
+                actionFlow.ToStepFlow = await _stepFlowRepository.Queryable
+                                                 .Include(x => x.Level)
+                                                 .Include(x => x.ChildActionFlows.OrderBy(af => af.CreatedDate)) // cần load tiếp để đệ quy
+                                                 .FirstOrDefaultAsync(sf => sf.Id == actionFlow.ToStepFlowId, cancellationToken);
+
+                if (actionFlow.ToStepFlow != null)
+                {
+                    if (actionFlow.ToStepFlow.Type == Domain.Enums.EnumStepFlowType.End)
+                    {
+                        actionFlow.ToStepFlow.ParentActionFlows.Clear();
+                    }
+
+                    await LoadStepFlowRecursively(actionFlow.ToStepFlow, cancellationToken);
+                }
+            }
         }
     }
 }

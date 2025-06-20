@@ -96,7 +96,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
 
             await _placementTestRepository.ExecuteTransactionAsync(async () =>
             {
-                if (placementTest.Level == EnumPlacementTestLevel.IELTS)
+                if (placementTest.PlacementTestLevel == EnumPlacementTestLevel.IELTS)
                 {
                     placementTest.ExtraPractice = new ExtraPractice
                     {
@@ -105,7 +105,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
                         IsActive = placementTest.IsActive,
                         InstructionContent = placementTest.InstructionContent,
                         Type = EnumExtraPracticeType.MockTest,
-                        CourseLevel = placementTest.Level.GetCourseLevelByPlacementTestLevel()
+                        CourseLevel = placementTest.PlacementTestLevel.GetCourseLevelByPlacementTestLevel()
                     };
                 }
 

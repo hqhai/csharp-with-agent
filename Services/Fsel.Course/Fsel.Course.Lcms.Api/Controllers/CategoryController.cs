@@ -19,6 +19,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Course.Application.Commands.ProgramCmd;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Application.Queries.ProgramQuery;
+    using Fsel.Course.Domain.Models.EntityModels.FlowModels;
+    using Fsel.Course.Application.Queries.OtherQuery;
+    using Fsel.Course.Application.Commands.FlowCmd;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -105,6 +108,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Save flows
+        /// </summary>
+        [HttpPost("save-flows")]
+        [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SaveFlows([FromBody] SaveFlowsCommand command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
         }
 
         /// <summary>
@@ -219,7 +234,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// get program by id
         /// </summary>
         [HttpGet("program/{programId}")]
-        [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<ProgramModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetProgramById([FromRoute] Guid programId)
         {

@@ -198,7 +198,7 @@ namespace Fsel.Course.Application.Queries.ArchiveQuery
         {
             var placementTest = await _placementTestRepository.GetListByPageAsync<PlacementTestArchiveModel>(_placementTestRepository.Queryable.Where(x => x.IsArchive)
                 .Where(k => string.IsNullOrEmpty(request.Keyword) || (k.Name ?? string.Empty).Contains(request.Keyword ?? string.Empty))
-                .Where(n => request.PlacementTestLevel == null || n.Level == request.PlacementTestLevel), request, cancellationToken);
+                .Where(n => request.PlacementTestLevel == null || n.PlacementTestLevel == request.PlacementTestLevel), request, cancellationToken);
             methodResult.Result = new PagingItemsModel<object> { Items = _mapper.Map<IList<object>>(placementTest.Items), PagingInfo = placementTest.PagingInfo };
         }
     }
