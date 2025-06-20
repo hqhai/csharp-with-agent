@@ -21,7 +21,7 @@ before_script:
 stages:
 - build-image
 - deploy
-- build-multi-subject-testing
+- build-multi-subject-prod
 
 ".build-image-gitlab-registry":
   stage: build-image
@@ -35,8 +35,8 @@ stages:
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
 
-build-multi-subject-testing-auth:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-auth:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -57,8 +57,8 @@ build-multi-subject-testing-auth:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-gateway:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-gateway:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -79,8 +79,8 @@ build-multi-subject-testing-gateway:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-hangfire:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-hangfire:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -101,8 +101,8 @@ build-multi-subject-testing-hangfire:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-interaction:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-interaction:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -123,8 +123,8 @@ build-multi-subject-testing-interaction:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-lcmsapi:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-lcmsapi:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -145,8 +145,8 @@ build-multi-subject-testing-lcmsapi:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-lmsapi:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-lmsapi:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -167,8 +167,8 @@ build-multi-subject-testing-lmsapi:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-notification:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-notification:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -189,8 +189,8 @@ build-multi-subject-testing-notification:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-ordering:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-ordering:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -211,8 +211,8 @@ build-multi-subject-testing-ordering:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-realtime:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-realtime:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -233,8 +233,8 @@ build-multi-subject-testing-realtime:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-sender:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-sender:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -255,8 +255,8 @@ build-multi-subject-testing-sender:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-storage:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-storage:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -277,8 +277,8 @@ build-multi-subject-testing-storage:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-system:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-system:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -299,8 +299,8 @@ build-multi-subject-testing-system:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-training:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-training:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -321,8 +321,8 @@ build-multi-subject-testing-training:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-identity:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-identity:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -343,8 +343,8 @@ build-multi-subject-testing-identity:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-cms-planetdefender:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-cms-planetdefender:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -365,8 +365,8 @@ build-multi-subject-testing-cms-planetdefender:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-exam-practice:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-exam-practice:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
@@ -387,8 +387,8 @@ build-multi-subject-testing-exam-practice:
     refs:
     - "/^multi-prod-[0-9]+\\.[0-9]+\\.[0-9]+$/"
 
-build-multi-subject-testing-exam-practice-lms:
-  stage: build-multi-subject-testing
+build-multi-subject-prod-exam-practice-lms:
+  stage: build-multi-subject-prod
   tags:
   - docker-runner
   retry:
