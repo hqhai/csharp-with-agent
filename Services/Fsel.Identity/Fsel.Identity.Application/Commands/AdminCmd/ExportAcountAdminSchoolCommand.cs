@@ -2,13 +2,12 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.CommandModels.Admins;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -56,27 +55,38 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 request.EventCodes = eventLocations.Where(x => x.EventCode != null).Select(x => x.EventCode!).ToList();
             }
 
+            if (request.LocationIds != null && (request.EventCodes == null || !request.EventCodes.Any()))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                return methodResult;
+            }
+
             if (request.EventCodes != null && request.EventCodes.Any())
             {
                 var competitionEvents = await GetSchoolByEvent(request.EventCodes, cancellationToken);
                 var schoolIds = competitionEvents.Result?.Where(x => x.SchoolIds != null).SelectMany(x => x.SchoolIds!).ToList();
-                userSchools = userSchools.Where(x => schoolIds != null && schoolIds.Contains(x.SchoolId));
+                if (schoolIds != null && schoolIds.Any())
+                {
+                    userSchools = userSchools.WhereBulkContains(schoolIds, x => x.SchoolId);
+                }
             }
 
             var users = (from a in _userManager.Users
                          join b in _userRoleRepository.Queryable on a.Id equals b.UserId
                          join c in _roleManager.Roles on b.RoleId equals c.Id
-                         let d = (_userSchoolRepository.Queryable.Where(m => m.UserId == a.Id)).Select(x => x).FirstOrDefault()
+                         join m in userSchools on a.Id equals m.UserId
                          where c.Name == EnumRole.AdminSchool.ToString()
-                         select new ExportAcountAdminSchoolCommandModel
+                         select new AccountAdminSchoolModel
                          {
+                             Id = a.Id,
                              CreatedDate = a.CreatedDate,
                              DefaultPassword = a.DefaultPassword,
                              UserName = a.UserName,
-                             LocalId = d.LocalId,
-                             City = d.City,
-                             EventCode = d.EventCode,
-                             SchoolName = d.SchoolName
+                             Status = a.Status,
+                             LocalId = m.LocalId,
+                             City = m.City,
+                             EventCode = m.EventCode,
+                             SchoolName = m.SchoolName
                          })
                         .OrderByDescending(x => x.CreatedDate)
                         .AsQueryable();
