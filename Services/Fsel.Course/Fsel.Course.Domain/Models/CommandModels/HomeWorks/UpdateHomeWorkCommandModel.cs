@@ -12,7 +12,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.HomeWorks
 
         public string? Code { get; set; }
         public string? MediaPost { get; set; }
-
+        public Guid? SkillId { get; set; }
         public bool IsActive { get; set; }
         public IList<CreateQuestionCommandModel>? Questions { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }

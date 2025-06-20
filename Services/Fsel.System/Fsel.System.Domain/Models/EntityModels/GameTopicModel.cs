@@ -12,7 +12,8 @@ namespace Fsel.System.Domain.Models.EntityModels
         public string? Value { get; set; }
 
         public EnumCourseSkill Skill { get; set; }
-
+        public Guid? SkillId { get; set; }
+        public string? SkillName { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
     }
 }

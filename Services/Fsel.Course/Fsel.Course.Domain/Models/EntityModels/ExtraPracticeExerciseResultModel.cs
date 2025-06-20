@@ -8,6 +8,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class ExtraPracticeExerciseResultModel : BaseResultModel
     {
         public int ExecuteCount { get; set; }
+        public string? SkillName { get; set; }
+        public Guid? SkillId { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
         public Guid ExtraPracticeExerciseId { get; set; }
     }

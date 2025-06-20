@@ -25,9 +25,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
-                    .ThenInclude(x => x.Question)
-                    .Where(x => x.Id == id)
+                return await Queryable.Where(x => x.Id == id)
                     .Select(x => new HomeWorkModel
                     {
                         Id = x.Id,
@@ -37,6 +35,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                         IsActive = x.LessonHomeWorks.Any(),
                         CourseLevel = x.CourseLevel,
                         CourseSkill = x.CourseSkill,
+                        SkillId = x.SkillId,
+                        SkillName = x.Skill != null ? x.Skill.Name : null,
                         Questions = x.HomeWorkQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                         {
                             Id = m!.Id,
@@ -46,7 +46,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                             CorrectTotal = m.CorrectTotal,
                             Config = m.Config
                         }).ToList()
-                    }).FirstOrDefaultAsync();
+                    }).AsNoTracking().FirstOrDefaultAsync();
             }
             catch (Exception)
             {

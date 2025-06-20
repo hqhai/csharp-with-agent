@@ -15,7 +15,8 @@ namespace Fsel.System.Domain.Entities
         public string? Value { get; set; }
 
         public EnumCourseSkill Skill { get; set; }
-
+        public Guid? SkillId { get; set; }
+        public string? SkillName { get; set; }
         public EnumGameCourseLevel CourseLevel { get; set; }
         public ICollection<GameVocabulary> GameVocabularies { get; set; } = new List<GameVocabulary>();
     }

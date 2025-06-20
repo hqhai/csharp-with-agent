@@ -39,8 +39,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var homeWorkQuery = _homeWorkRepository.Queryable.Where(p => !p.IsArchive)
-                                    .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
+            var query = _homeWorkRepository.Queryable.Where(p => !p.IsArchive)
                                     .Select(x => new HomeWorkSearchModel
                                     {
                                         Id = x.Id,
@@ -51,6 +50,8 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                                         IsActive = x.LessonHomeWorks.Where(n => !n.IsDeleted).Any(),
                                         CourseLevel = x.CourseLevel,
                                         CourseSkill = x.CourseSkill,
+                                        SkillId = x.SkillId,
+                                        SkillName = x.Skill != null ? x.Skill.Name : null,
                                     });
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
@@ -58,22 +59,25 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
             {
                 if (Guid.TryParse(request.Keyword, out var guid))
                 {
-                    homeWorkQuery = homeWorkQuery.Where(m => m.Id == guid);
+                    query = query.Where(m => m.Id == guid);
                 }
                 else
                 {
-                    homeWorkQuery = homeWorkQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    query = query.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
                 }
             }
-
+            if (request.SkillId.HasValue)
+            {
+                query = query.Where(x => x.SkillId == request.SkillId);
+            }
             if (request.CourseLevel != null)
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.CourseLevel == request.CourseLevel);
+                query = query.Where(m => m.CourseLevel == request.CourseLevel);
             }
 
             if (request.CourseSkill != null)
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.CourseSkill == request.CourseSkill);
+                query = query.Where(m => m.CourseSkill == request.CourseSkill);
             }
 
             request.SortBy.Add(new Common.Models.GenericSortModel
@@ -82,8 +86,8 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 IsDesc = false
             });
 
-            int totalItem = await homeWorkQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await homeWorkQuery
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)

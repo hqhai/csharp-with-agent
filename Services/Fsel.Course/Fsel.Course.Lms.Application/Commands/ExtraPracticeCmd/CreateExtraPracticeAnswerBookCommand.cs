@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             }
             var studentId = student?.Content?.Result?.Id;
 
-            var extraPracticeExercise = await _extraPracticeExerciseRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.ExtraPracticeExerciseId, cancellationToken);
+            var extraPracticeExercise = await _extraPracticeExerciseRepository.Queryable.Include(x => x.Exercise).FirstOrDefaultAsync(x => x.Id == request.ExtraPracticeExerciseId, cancellationToken);
             if (extraPracticeExercise == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -101,7 +101,8 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     ExtraPracticeExerciseId = request.ExtraPracticeExerciseId,
                     ExtraPracticeResultId = request.ExtraPracticeResultId,
                     StudentId = studentId ?? default,
-                    Status = EnumResultStatus.Process
+                    Status = EnumResultStatus.Process,
+                    SkillId = extraPracticeExercise.Exercise?.SkillId
                 };
                 extraPracticeExerciseResult = _extraPracticeExerciseResultRepository.Add(extraPracticeExerciseResult);
                 await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

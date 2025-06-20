@@ -18,7 +18,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.ClassForums
 
         public EnumCourseSkill CourseSkill { get; set; }
         public bool IsAlFeedBack { get; set; }
-
+        public Guid? SkillId { get; set; }
         public string? SystemRoleAlConfig { get; set; }
 
         public string? UserAlConfig { get; set; }

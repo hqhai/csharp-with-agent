@@ -25,6 +25,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IExtraPracticeResultRepository _extraPracticeResultRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly QuestionTypeConverter _questionTypeConverter;
+        private readonly ISkillRepository _skillRepository;
 
         public ExtraPracticeConverter(IExtraPracticeRepository extraPracticeRepository, IMapper mapper
             , VideoConverter videoConverter
@@ -35,6 +36,7 @@ namespace Fsel.Course.Infrastructure.Common
             , IExtraPracticeResultRepository extraPracticeResultRepository
             , IQuestionRepository questionRepository
             , QuestionTypeConverter questionTypeConverter
+            , ISkillRepository skillRepository
             )
         {
             _extraPracticeRepository = extraPracticeRepository;
@@ -47,6 +49,7 @@ namespace Fsel.Course.Infrastructure.Common
             _extraPracticeResultRepository = extraPracticeResultRepository;
             _questionRepository = questionRepository;
             _questionTypeConverter = questionTypeConverter;
+            _skillRepository = skillRepository;
         }
 
         public VoidMethodResult AddExtraPracticeChapterExercise(dynamic extraPracticeChapters, IList<CreateExtraPracticeChapterCommandModel>? exercisePracticeChapters)
@@ -85,7 +88,7 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public VoidMethodResult AddExerciseToExtraPractice(dynamic extraPracticeExercises, IList<CreateExerciseCommandModel>? exercises)
+        public async Task<VoidMethodResult> AddExerciseToExtraPractice(dynamic extraPracticeExercises, IList<CreateExerciseCommandModel>? exercises)
         {
             ArgumentNullException.ThrowIfNull(exercises);
             VoidMethodResult methodResult = new VoidMethodResult();
@@ -101,6 +104,16 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(exercise));
                     return methodResult;
                 }
+                if (exercise.SkillId.HasValue)
+                {
+                    var skillExists = await _skillRepository.AnyGuidAsync(exercise.SkillId.Value);
+                    if (!skillExists)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(exercise.SkillId), exercise.SkillId);
+                        return methodResult;
+                    }
+                }
+
                 Exercise excerciseNew = _mapper.Map<Exercise>(exercise);
                 var method = _videoConverter.AddQuestionToExercise(excerciseNew, exercise);
                 if (!method.IsOK)
@@ -145,7 +158,7 @@ namespace Fsel.Course.Infrastructure.Common
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Exercises));
                     return methodResult;
                 }
-                var method = AddExerciseToExtraPractice(extraPracticeExercises, request.Exercises);
+                var method = await AddExerciseToExtraPractice(extraPracticeExercises, request.Exercises);
                 if (!method.IsOK)
                 {
                     methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -220,7 +233,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (request.Type == EnumExtraPracticeType.VideoEmbed || request.Type == EnumExtraPracticeType.Exercise)
             {
-                var method = AddExerciseToExtraPractice(extraPracticeExercises, request.Exercises);
+                var method = await AddExerciseToExtraPractice(extraPracticeExercises, request.Exercises);
                 if (!method.IsOK)
                 {
                     methodResult.AddErrorBadRequest(method.ErrorMessages);

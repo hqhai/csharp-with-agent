@@ -501,7 +501,8 @@ namespace Fsel.Course.Infrastructure.Common
                     sectionGroup.SectionGroupResult = await GetSectionGroupResult(sectionGroupResult);
                 }
                 sectionGroupModels.Add(sectionGroup);
-            };
+            }
+            ;
             return sectionGroupModels;
         }
 
@@ -634,6 +635,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
+            sectionGroupModel.SkillName = sectionGroup.Skill?.Name;
             sectionGroupModel.TotalQuestion = GetTotalQuestion(sectionGroup);
             sectionGroupModel.MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(sectionGroup.MockTestScores);
             sectionGroupModel.Sections = sectionGroup.Sections.OrderBy(x => x.CreatedDate).Select(x => GetSection(x, isDisableAnswers)).ToList();

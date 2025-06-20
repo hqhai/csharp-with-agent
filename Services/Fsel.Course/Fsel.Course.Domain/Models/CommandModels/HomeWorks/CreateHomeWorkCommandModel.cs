@@ -14,5 +14,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.HomeWorks
         public bool IsActive { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
+        public Guid? SkillId { get; set; }
     }
 }
