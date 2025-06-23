@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.TestConfig;
 
     public class Skill : Entity
     {
@@ -27,5 +28,6 @@ namespace Fsel.Course.Domain.Entities
         public LessonInstruction? LessonInstruction { get; set; }
         public ExtraPracticeExerciseResult? ExtraPracticeExerciseResult { get; set; }
         public ICollection<SkillLevel> SkillLevels { get; set; } = new List<SkillLevel>();
+        public ICollection<Part>? Parts { get; set; }
     }
 }
