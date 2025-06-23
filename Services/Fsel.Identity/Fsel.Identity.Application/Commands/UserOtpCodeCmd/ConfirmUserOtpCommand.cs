@@ -34,11 +34,18 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var userOtp = await _userOtpRepository.Queryable.FirstOrDefaultAsync(x =>
-            (x.UserId == request.UserId || x.VerifyId == request.VerifyId) &&
-            x.Status == EnumOtpCodeStatus.New &&
-            x.OtpCode == request.Otp, cancellationToken);
 
+            var query = _userOtpRepository.Queryable.Where(x => x.Status == EnumOtpCodeStatus.New && x.OtpCode == request.Otp);
+            if (request.UserId.HasValue)
+            {
+                query = query.Where(x => x.UserId == request.UserId);
+            }
+            if (request.VerifyId.HasValue)
+            {
+                query = query.Where(x => x.VerifyId == request.VerifyId);
+            }
+
+            var userOtp = await query.FirstOrDefaultAsync(cancellationToken);
             if (userOtp == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserOtpCodeErrorCode.OtpInvalid), nameof(request.Otp), request.Otp);
