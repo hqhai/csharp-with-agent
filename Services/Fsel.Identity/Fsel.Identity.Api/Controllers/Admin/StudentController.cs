@@ -14,6 +14,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Application.Queries.ManagerReportQuery;
     using Fsel.Identity.Application.Queries.ParentQuery;
+    using Fsel.Identity.Application.Queries.StudentEditHistoryQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Application.Queries.UserOtpCodeQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -337,6 +338,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> ToolSynchronousParentInfo()
         {
             var queryResult = await _mediator.Send(new ToolSynchronousParentInfoCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student edit histories
+        /// </summary>
+        [HttpPost("get-student-edit-histories")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentEditHistoryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentEditHistories([FromQuery] GetStudentEditHistoriesByStudentIdQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
