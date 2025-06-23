@@ -65,6 +65,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentEditHistoryEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -98,16 +99,19 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserSchool> UserSchools { get; set; }
         public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
         public DbSet<StudentEventLearningRecord> StudentEventLearningRecords { get; set; }
+        public DbSet<StudentEditHistory> StudentEditHistories { get; set; }
 
         #endregion Db Set
 
         #region report
+
         public DbSet<OverallStudentModel> OverallStudentResults { get; set; }
 
         public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
 
         public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
-        #endregion
+
+        #endregion report
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

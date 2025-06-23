@@ -60,6 +60,7 @@ builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
 builder.Services.AddScoped<ISchoolImportHistoryRepository, SchoolImportHistoryRepository>();
 builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
 builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
+builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
