@@ -30,6 +30,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     public class ExportReportSelfStudyMonthlyQueryHandler : IRequestHandler<ExportReportSelfStudyMonthlyQuery, MethodResult<Stream>>
     {
         private readonly CourseDbContext _courseDbContext;
+        public const double ContentCompleteWeight = 75.0;
+        public const double FinalScoreWeight = 0.25;
 
         public ExportReportSelfStudyMonthlyQueryHandler(CourseDbContext courseDbContext)
         {
@@ -192,6 +194,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 }
                 if (exportDistrictModels != null && exportDistrictModels.Any())
                 {
+                    var countComplete = 75;
+                    var b = 0.25;
+
                     foreach (var item in exportDistrictModels)
                     {
                         var excelWorksheet = excelPackage.Workbook.Worksheets.Copy(originalWorksheet.Name, item.LocationName);
@@ -217,9 +222,11 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                             excelWorksheet.Cells[startRow, 16].Value = itemReport.NumberofCommentsonPosts;
                             excelWorksheet.Cells[startRow, 17].Value = itemReport.ScoreLevelComment;
                             excelWorksheet.Cells[startRow, 18].Value = itemReport.TotalScore;
-                            excelWorksheet.Cells[startRow, 19].Value = itemReport.LocalId;
-                            excelWorksheet.Cells[startRow, 20].Value = itemReport.GlobalId;
-                            excelWorksheet.Cells[startRow, 21].Value = itemReport.EventCode;
+                            excelWorksheet.Cells[startRow, 19].Value = itemReport.PercentComplete;
+                            excelWorksheet.Cells[startRow, 20].Value = (itemReport.PercentComplete ?? default) * ContentCompleteWeight + (itemReport.LevelCompletionRate ?? default) * FinalScoreWeight;
+                            excelWorksheet.Cells[startRow, 21].Value = itemReport.LocalId;
+                            excelWorksheet.Cells[startRow, 22].Value = itemReport.GlobalId;
+                            excelWorksheet.Cells[startRow, 23].Value = itemReport.EventCode;
                             startRow++;
                         }
                     }
