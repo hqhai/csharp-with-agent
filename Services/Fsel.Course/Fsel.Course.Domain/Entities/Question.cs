@@ -12,6 +12,9 @@ namespace Fsel.Course.Domain.Entities
 {
     public class Question : Entity
     {
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public required string Exercisename { get; set; }
+
         /// <summary>
         /// Loại câu hỏi
         /// </summary>

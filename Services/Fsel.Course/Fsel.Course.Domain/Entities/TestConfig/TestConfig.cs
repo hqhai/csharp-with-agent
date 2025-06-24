@@ -5,9 +5,6 @@ namespace Fsel.Course.Domain.Entities.TestConfig
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
@@ -32,11 +29,9 @@ namespace Fsel.Course.Domain.Entities.TestConfig
 
         public bool IsActive { get; set; }
 
+        //--> Mapp to Program to get LevelId
         public Guid? ProgarmId { get; set; }
-
         public ICollection<Skill> Skills { get; set; } = new List<Skill>();
-
-        public TestLayout TestLayout { get; set; }
-
+        public ICollection<TestLayout>? TestLayouts { get; set; }
     }
 }
