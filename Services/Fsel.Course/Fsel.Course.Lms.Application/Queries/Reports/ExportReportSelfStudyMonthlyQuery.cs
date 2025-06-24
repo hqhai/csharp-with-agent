@@ -194,9 +194,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 }
                 if (exportDistrictModels != null && exportDistrictModels.Any())
                 {
-                    var countComplete = 75;
-                    var b = 0.25;
-
                     foreach (var item in exportDistrictModels)
                     {
                         var excelWorksheet = excelPackage.Workbook.Worksheets.Copy(originalWorksheet.Name, item.LocationName);
