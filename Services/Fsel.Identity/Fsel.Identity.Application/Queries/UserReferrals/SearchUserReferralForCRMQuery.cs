@@ -104,11 +104,11 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                 if (order != null)
                 {
                     p.Package = $"{order.Package?.MonthNumber} tháng";
-                    p.Status = "Đã thanh toán";
+                    p.Status = ReferralHistoryStatus.Payment;
                 }
                 else
                 {
-                    p.Status = "Chưa thanh toán";
+                    p.Status = ReferralHistoryStatus.NotPayment;
                 }
             });
 

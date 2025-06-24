@@ -1,5 +1,6 @@
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
+    using System.ComponentModel;
     using Fsel.Core.Base.BaseModels;
 
     public class UserReferralForCRMModel : BaseModel
@@ -11,6 +12,15 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Name { get; set; }
         public string? ReferralCode { get; set; }
         public string? Package { get; set; }
-        public string? Status { get; set; }
+        public ReferralHistoryStatus? Status { get; set; }
+    }
+
+    public enum ReferralHistoryStatus
+    {
+        [Description("Student not payment.")]
+        NotPayment = 0,
+
+        [Description("Student payment.")]
+        Payment = 1
     }
 }
