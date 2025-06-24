@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
     using OfficeOpenXml;
 
     public class ExportReportPlacementTestEventSchoolQuery : IRequest<MethodResult<Stream>>
@@ -28,13 +29,16 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     {
         private readonly IUserService _userService;
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
+        private readonly ILogger<ExportReportPlacementTestEventSchoolQueryHandler> _logger;
 
         public ExportReportPlacementTestEventSchoolQueryHandler(
             IUserService userService,
-            IPlacementTestGroupResultRepository placementTestGroupResultRepository)
+            IPlacementTestGroupResultRepository placementTestGroupResultRepository,
+            ILogger<ExportReportPlacementTestEventSchoolQueryHandler> logger)
         {
             _userService = userService;
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
+            _logger = logger;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportReportPlacementTestEventSchoolQuery request, CancellationToken cancellationToken)
@@ -53,6 +57,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 return methodResult;
             }
+            _logger.LoggerRequest($"ExportReportPlacementTestEventSchoolQueryHandler : {reportCompetitionEvents.Select(x => x.DistrictName).Serialize()}");
+
             var reportPlacementTestEvents = new List<ReportPlacementTestEventModel>();
             var studentIds = reportCompetitionEvents.Where(x => x.StudentIds != null && x.StudentIds.Any()).SelectMany(x => x.StudentIds ?? new List<Guid>()).ToList();
             var placementTestResultGroups = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)

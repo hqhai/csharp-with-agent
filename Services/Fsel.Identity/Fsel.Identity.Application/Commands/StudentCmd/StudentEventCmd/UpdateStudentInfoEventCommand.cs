@@ -83,37 +83,55 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 return methodResult;
             }
 
-            var user = await UpdateUserAsync(request, cancellationToken);
-            if (user != null)
+            var method = await UpdateUserAsync(request, cancellationToken);
+            if (!method.IsOK)
             {
-                await UpdateStudentAsync(request, user.Id, cancellationToken);
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+
+            var studentMethod = await UpdateStudentAsync(request, _authContext.CurrentUserId, cancellationToken);
+            if (!studentMethod.IsOK)
+            {
+                methodResult.AddErrorBadRequest(studentMethod.ErrorMessages);
+                return methodResult;
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;
             return methodResult;
         }
 
-        private async Task<User?> UpdateUserAsync(UpdateStudentInfoEventCommand request, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> UpdateUserAsync(UpdateStudentInfoEventCommand request, CancellationToken cancellationToken)
         {
+            var methodResult = new VoidMethodResult();
             var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             if (user == null)
             {
-                return user;
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user), _authContext.CurrentUserId);
+                return methodResult;
             }
             user.Email = request.Email;
             user.Birthday = request.Birthday;
             user.EmailConfirmed = true;
             user.NormalizedEmail = request.Email?.ToUpper(System.Globalization.CultureInfo.CurrentCulture);
+            if (!user.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
+                return methodResult;
+            }
             await _userManager.UpdateAsync(user);
-            return user;
+
+            return methodResult;
         }
 
-        private async Task UpdateStudentAsync(UpdateStudentInfoEventCommand request, Guid userId, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> UpdateStudentAsync(UpdateStudentInfoEventCommand request, Guid userId, CancellationToken cancellationToken)
         {
+            var methodResult = new VoidMethodResult();
             var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
             if (student == null)
             {
-                return;
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), userId);
+                return methodResult;
             }
             int age = Shared.Helpers.DateTimeHelper.GetYearOld(request.Birthday);
             if (age <= AgeMilestone.ChildrenAge)
@@ -126,8 +144,42 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             }
             student.ParentEmail = request.ParentEmail;
             student.ParentPhoneNumber = request.ParentPhoneNumber;
+            if (!student.IsValid())
+            {
+                methodResult.AddErrorBadRequest(student.ErrorMessages);
+                return methodResult;
+            }
             _studentRepository.Update(student);
             await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            await AddParentAsync(request, student.Id, cancellationToken);
+
+            return methodResult;
+        }
+
+        private async Task AddParentAsync(UpdateStudentInfoEventCommand request, Guid studentId, CancellationToken cancellationToken)
+        {
+            var user = new User()
+            {
+                FirstName = "N/A",
+                LastName = "N/A",
+                PhoneNumber = request.ParentPhoneNumber,
+                Email = request.ParentEmail,
+                Parent = new Parent()
+                {
+                    ParentStudents = new List<ParentStudent>()
+                    {
+                        new ParentStudent()
+                        {
+                            StudentId = studentId
+                        }
+                    }
+                }
+            };
+            if (user.IsValid())
+            {
+                await _userManager.CreateAsync(user);
+            }
         }
     }
 }

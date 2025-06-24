@@ -21,5 +21,6 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public string? School { get; set; }
         public string? SchoolName { get; set; }
         public bool? EmailConfirmed { get; set; }
+        public EnumUserStatus? Status { get; set; }
     }
 }

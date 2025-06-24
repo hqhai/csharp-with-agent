@@ -66,7 +66,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _mediator.Send(new AutoApprovalClassForumCommand
             {
-                ClassForumResulId = classForumResult.Id
+                ClassForumResulId = classForumResult.Id,
+                ClassForumDetailResulId = classForumDetailResult.Id
             }, cancellationToken);
 
             #region RankedStudent

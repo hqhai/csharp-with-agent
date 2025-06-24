@@ -51,6 +51,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
         private const string WorkingPT = "Đang làm PT";
         private const string ConfirmOTP = "Confirm OTP";
         private const string NotConfirmOTP = "Chưa confirm OTP";
+        private const string CutoffData = "Cutoff dữ liệu";
         private const int NumberOfMinutes = 10080;
         private readonly UserDbContext _userDbContext;
         private readonly IUserRoleRepository _userRoleRepository;
@@ -123,14 +124,14 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             {
                 query = query.Where(m => m.Student.SchoolId.HasValue && m.Student.SchoolId == request.SchoolId);
             }
-            if (request.Grades != null && request.Grades.Count > 0)
-            {
-                query = query.WhereBulkContains(request.Grades, x => x.Student.SchoolGrade);
-            }
-            if (request.Classes != null && request.Classes.Count > 0)
-            {
-                query = query.WhereBulkContains(request.Classes, x => x.Student.SchoolGrade);
-            }
+            //if (request.Grades != null && request.Grades.Count > 0)
+            //{
+            //    query = query.WhereBulkContains(request.Grades, x => x.Student.SchoolGrade);
+            //}
+            //if (request.Classes != null && request.Classes.Count > 0)
+            //{
+            //    query = query.WhereBulkContains(request.Classes, x => x.Student.SchoolGrade);
+            //}
 
             var users = query.Select(p => new StudentSearchAdminModel
             {
@@ -157,13 +158,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 CourseId = p.Student.CourseId,
                 ProvinceId = p.Student.ProvinceId,
                 DistrictId = p.Student.DistrictId,
+                Status = p.User.Status.ToString(),
             });
 
             int totalItem = await users.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            var a = users
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking();
 
             var lists = await users
                     .ApplySortAndPaging(request)
@@ -232,6 +230,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            if (user.Status == EnumUserStatus.Disable.ToString())
+            {
+                user.Status = CutoffData;
+                return;
+            }
 
             if (orders != null && orders.Any(p => p.Status == EnumOrderStatus.Payment && p.RevenueType == EnumPaymentRevenueType.Revenue) && user.ExpiredDate.HasValue && user.CourseId.HasValue)
             {

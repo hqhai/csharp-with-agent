@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 using System.Globalization;
-using System.Threading;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
@@ -136,6 +135,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 case EnumRoleRegisterWithAdmin.Moderator:
                     await AddUserToPlatForm(user, EnumPlatformCode.LMSAdmin, cancellationToken);
                     break;
+
                 default:
                     await AddUserToPlatForm(user, EnumPlatformCode.LMS, cancellationToken);
                     break;
@@ -143,6 +143,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #endregion Add Platform to User
 
+            if (!user.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
+                return methodResult;
+            }
             result = await _userManager.CreateAsync(user, newPassword);
             if (!result.Succeeded)
             {

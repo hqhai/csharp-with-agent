@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SenderService;
@@ -41,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly ISenderService _senderService;
         private const int Max_Time_Retry = 4;
         private const int _intervalRetryTime = 30;
+        private const string NameSchema = "criteria_schema";
         private readonly IUserService _userService;
         private readonly ILogger<SubmitAIResponseCommandHandler> _logger;
 
@@ -74,6 +76,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         public async Task<bool> Handle(SubmitClassForumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+
+            var checkForbidden = await _mediator.Send(new CheckForbiddenClassForumCommand { ClassForumDetailResultId = request.ClassForumDetailResultId }, cancellationToken);
+            if (checkForbidden != null && checkForbidden.Result)
+            {
+                return false;
+            }
 
             try
             {
@@ -145,7 +153,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         SettingTopP = request.SettingTopP,
                         SystemRoleAlConfig = request.SystemRoleAlConfig,
                         UserAIConfig = userAiConfig,
-                        Text = successCriteriaSchema
+                        Text = successCriteriaSchema,
+                        NameSchema = NameSchema
                     }, cancellationToken).ConfigureAwait(false);
 
                     aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);

@@ -86,8 +86,9 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             return methodResult;
         }
 
-        private async Task<User?> CreateUserStudentAsync(CreateStudentByParentCommandModel request, Parent parent, CancellationToken cancellationToken)
+        private async Task<MethodResult<User>> CreateUserStudentAsync(CreateStudentByParentCommandModel request, Parent parent, CancellationToken cancellationToken)
         {
+            var methodResult = new MethodResult<User>();
             var user = _mapper.Map<User>(request);
 
             #region Add Platform to User
@@ -103,22 +104,35 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
 
             #endregion Add Platform to User
 
+            if (!user.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
+                return methodResult;
+            }
             var identityResult = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
             if (!identityResult.Succeeded)
             {
-                return null;
+                return methodResult;
             }
 
             await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await _userManager.ConfirmEmailAsync(user, token);
-            await SaveUserAsync(request, user, parent);
-            return user;
+
+            var method = await CreateStudentAsync(request, user, parent);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            methodResult.Result = user;
+            return methodResult;
         }
 
-        private async Task SaveUserAsync(CreateStudentByParentCommandModel request, User user, Parent parent)
+        private async Task<VoidMethodResult> CreateStudentAsync(CreateStudentByParentCommandModel request, User user, Parent parent)
         {
+            var methodResult = new VoidMethodResult();
             user.Student = new Student
             {
                 School = request.School,
@@ -127,7 +141,13 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
                 ParentStudents = new List<ParentStudent> { new ParentStudent { ParentId = parent.Id } },
                 Occupation = "Student"
             };
+            if (!user.Student.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.Student.ErrorMessages);
+                return methodResult;
+            }
             await _userManager.UpdateAsync(user).ConfigureAwait(false);
+            return methodResult;
         }
     }
 }

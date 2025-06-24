@@ -18,6 +18,8 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public PurchaseSettings? PurchaseSettings { get; set; }
         public ResourceContent? ResourceContent { get; set; }
         public BlindBoxConfigs? BlindBoxConfigs { get; set; }
+        public OrderConfigs? OrderConfigs { get; set; }
+        public MarketplacePremiumConfig? MarketplacePremiumConfig { get; set; }
     }
 
     public class BlindBoxConfigs
@@ -126,5 +128,20 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class OrderConfigs
+    {
+        public int TrialPeriod { get; set; }
+    }
+
+    public class MarketplacePremiumConfig
+    {
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string? BrandImage { get; set; }
+        public string? BrandName { get; set; }
+        public DateTime? StartDateButton { get; set; }
+        public DateTime? EndDateButton { get; set; }
     }
 }

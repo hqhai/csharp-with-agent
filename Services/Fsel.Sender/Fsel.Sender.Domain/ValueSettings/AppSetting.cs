@@ -11,6 +11,7 @@ namespace Fsel.Sender.Domain.ValueSettings
         public SmtpGoogle? SmtpGoogle { get; set; }
         public EmailConfig? EmailConfig { get; set; }
         public SMSConfig? SMSConfig { get; set; }
+        public ZaloConfig? ZaloConfig { get; set; }
         public new Services? Services { get; set; }
     }
 
@@ -54,6 +55,13 @@ namespace Fsel.Sender.Domain.ValueSettings
         public string? Password { get; set; }
         public string? AwsAccessKeyId { get; set; }
         public string? AwsSecretAccessKey { get; set; }
+    }
+
+    public class ZaloConfig
+    {
+        public string? BrandName { get; set; }
+        public string? Token { get; set; }
+        public string? OTPTemplateId { get; set; }
     }
 
     public class SmtpGoogle

@@ -65,15 +65,15 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     return methodResult;
                 }
             }
-            if (!string.IsNullOrEmpty(request.Email))
-            {
-                var checkEmail = await _userManager.Users.AnyAsync(x => x.Id != user.Id && x.Email == request.Email, cancellationToken);
-                if (checkEmail)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
-                    return methodResult;
-                }
-            }
+            //if (!string.IsNullOrEmpty(request.Email))
+            //{
+            //    var checkEmail = await _userManager.Users.AnyAsync(x => x.Id != user.Id && x.Email == request.Email, cancellationToken);
+            //    if (checkEmail)
+            //    {
+            //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
+            //        return methodResult;
+            //    }
+            //}
 
             #endregion Validate PhoneNumber
 
@@ -82,6 +82,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var student = user.Student;
             _mapper.Map(request, user);
             student = _mapper.Map(request, user.Student);
+
             if (!user.IsValid())
             {
                 methodResult.AddErrorBadRequest(user.ErrorMessages);
@@ -94,12 +95,19 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
+            if (student != null)
+            {
+                student.ParentEmail = string.IsNullOrEmpty(request.Parent?.Email) ? null : request.Parent?.Email;
+                student.ParentPhoneNumber = string.IsNullOrEmpty(request.Parent?.PhoneNumber) ? null : request.Parent?.PhoneNumber;
+            }
+
             #endregion Validate User
 
             #region Save Parent
 
-            if (request.Parent != null && !string.IsNullOrEmpty(request.Parent.FullName))
+            if (request.Parent != null)
             {
+                request.Parent.FullName = !string.IsNullOrEmpty(request.Parent.FullName) ? request.Parent.FullName : "N/A";
                 var userParent = student?.ParentStudents.FirstOrDefault()?.Parent?.User;
                 var userResult = await SaveParent(request, student, userParent, cancellationToken);
                 if (!userResult.IsOK)

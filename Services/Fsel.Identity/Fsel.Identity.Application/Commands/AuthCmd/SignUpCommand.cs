@@ -87,6 +87,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
                 user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim(), cancellationToken: cancellationToken);
+
+                if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
+                {
+                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
+                    return methodResult;
+                }
                 if (user != null && (user.EmailConfirmed || user.Student != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
@@ -101,6 +107,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
                 user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken: cancellationToken);
+
+                if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
+                {
+                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
+                    return methodResult;
+                }
                 if (user != null && (user.EmailConfirmed || user.Student != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);

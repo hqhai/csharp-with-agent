@@ -9,6 +9,7 @@ using Fsel.System.Application.Queues.Publisher;
 using Fsel.System.Application.Services.AIServices;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.DictionaryServices;
+using Fsel.System.Application.Services.GoogleSheetServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.SenderServices;
 using Fsel.System.Application.Services.StorageServices;
@@ -105,6 +106,13 @@ builder.Services.AddScoped<SendNotifyBuyBlindBoxPublisher>();
 builder.Services.AddScoped<DictionaryPublisher>();
 builder.Services.AddScoped<CrawDictionaryDataPublisher>();
 
+//Add GoogleSheetService
+builder.Services.AddSingleton<IGoogleSheetService>(provider =>
+{
+    return new GoogleSheetService(ResourceSettings.I18NCredentialsFilePath);
+});
+
+
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
@@ -119,6 +127,9 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
         httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {appSetting?.OpenAiConfig?.ApiKey}");
     }
 });
+
+
+
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
@@ -138,7 +149,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.BuyBlindBox, typeof(BuyBlindBoxConsumer) },
     { QueueSettings.SystemQueue.NameQueue.ChooseDailyQuizWinners, typeof(ChooseDailyQuizWinnersConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.DictionaryRealTime, typeof(DictionaryConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.CrawDictionaryData, typeof(CrawDictionaryDataConsumer) },
+    { QueueSettings.OrderingQueue.NameQueue.AddCoinWhenCoursePurchased, typeof(AddCoinWhenCoursePurchasedConsumer) }
 });
 
 var app = builder.Build();

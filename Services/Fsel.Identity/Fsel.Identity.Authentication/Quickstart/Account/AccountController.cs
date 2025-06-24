@@ -32,7 +32,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.EntityFrameworkCore;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Core.Caching;
+using Fsel.Common.Caching;
 using Fsel.Identity.Application.Commands.UserReferrals;
 using static IdentityServer4.IdentityServerConstants;
 using System.Text;

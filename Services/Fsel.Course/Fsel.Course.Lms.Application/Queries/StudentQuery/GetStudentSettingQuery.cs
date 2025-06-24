@@ -83,7 +83,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 BaseCourseLevel = student.BaseCourseLevel,
                 ClassId = student.ClassId,
                 EmailConfirmed = student.User?.EmailConfirmed ?? default,
-                TurnOnTouchpoint = _appSetting.TouchpointConfig?.TurnOnTouchpoint ?? false
+                TurnOnTouchpoint = _appSetting.TouchpointConfig?.TurnOnTouchpoint ?? false,
+                UserStatus = student?.User?.Status
             };
 
             await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);

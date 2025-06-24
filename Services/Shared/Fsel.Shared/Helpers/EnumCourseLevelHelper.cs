@@ -181,6 +181,11 @@ namespace Fsel.Shared.Helpers
             return courseLevels;
         }
 
+        public static IList<EnumCourseLevel> GetEnumCourseLevels(this EnumCourseType courseType)
+        {
+            return s_courseTypeLevel.Where(x => x.Key == courseType).Select(x => x.Value).ToList();
+        }
+
         public static string? GetCodeByEnumCourseLevel(this EnumCourseLevel? enumCourseLevel)
         {
             string? classCode;
