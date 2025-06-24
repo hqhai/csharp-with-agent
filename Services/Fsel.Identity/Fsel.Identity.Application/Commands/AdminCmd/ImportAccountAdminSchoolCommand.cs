@@ -70,9 +70,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ImportAccountAdminSchoolModel> methodResult = new MethodResult<ImportAccountAdminSchoolModel>();
-            var regexSchoolName = new Regex("^[a-zA-Z0-9]$");
-            var regexPassword = new Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9])$");
-
+            //var regexSchoolName = new Regex("^[a-zA-Z0-9]+$");
+            var regexPassword = new Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[^a-zA-Z0-9]).+$");
             if (request.FormFile == null)
             {
                 methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
@@ -119,7 +118,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             var result = request.FormFile.ImportAndValidateExcel(async (ImportAccountAdminSchoolCommandModel x, IList<ImportAccountAdminSchoolCommandModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                if (string.IsNullOrEmpty(x.SchoolName) || regexSchoolName.IsMatch(x.SchoolName))
+                if (string.IsNullOrEmpty(x.SchoolName))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.SchoolName), Message = SchoolName });
                 }
@@ -145,7 +144,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.UserName), Message = UserNameExistInList });
                 }
 
-                if (string.IsNullOrEmpty(x.Password) || regexPassword.IsMatch(x.Password))
+                if (string.IsNullOrEmpty(x.Password) || !regexPassword.IsMatch(x.Password))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Password), Message = PasswordInValid });
                 }
