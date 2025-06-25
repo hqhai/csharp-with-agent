@@ -344,7 +344,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Get student edit histories
         /// </summary>
-        [HttpPost("get-student-edit-histories")]
+        [HttpGet("get-student-edit-histories")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentEditHistoryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetStudentEditHistories([FromQuery] GetStudentEditHistoriesByStudentIdQuery query)
