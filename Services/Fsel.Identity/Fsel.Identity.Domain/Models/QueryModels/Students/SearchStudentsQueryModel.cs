@@ -1,6 +1,8 @@
 namespace Fsel.Identity.Domain.Models.QueryModels.Students
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Microsoft.AspNetCore.Mvc.ModelBinding;
 
     public class SearchStudentsQueryModel : BaseQueryModel
@@ -9,7 +11,6 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Students
         public string? SchoolName { get; set; }
         public string? ListSchoolGrade { get; set; }
         public string? ListSchoolClass { get; set; }
-
         public bool IsDelete { get; set; }
 
         [BindNever]
@@ -17,12 +18,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Students
         {
             get
             {
-                return string.IsNullOrWhiteSpace(ListSchoolGrade)
-                ? new List<string>()
-                : ListSchoolGrade.Split(',')
-                                 .Select(s => s.Trim())
-                                 .Where(s => !string.IsNullOrEmpty(s))
-                                 .ToList();
+                return ListSchoolGrade.ToList<string>();
             }
         }
 
@@ -31,13 +27,13 @@ namespace Fsel.Identity.Domain.Models.QueryModels.Students
         {
             get
             {
-                return string.IsNullOrWhiteSpace(ListSchoolClass)
-                ? new List<string>()
-                : ListSchoolClass.Split(',')
-                                 .Select(s => s.Trim())
-                                 .Where(s => !string.IsNullOrEmpty(s))
-                                 .ToList();
+                return ListSchoolClass.ToList<string>();
             }
         }
+
+        public bool IsCourseProcess { get; set; }
+
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public EnumCourseType? CourseType { get; set; }
     }
 }

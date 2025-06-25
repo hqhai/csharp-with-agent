@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Enums;
@@ -10,6 +11,15 @@ namespace Fsel.Course.Domain.Entities
 
     public class BaseResult : Entity
     {
+        [NotMapped]
+        public override Guid? DeletedUserId { get; set; }
+
+        [NotMapped]
+        public override string? DeletedFullName { get; set; }
+
+        [NotMapped]
+        public override DateTime? DeletedDate { get; set; }
+
         /// <summary>
         /// Số câu trả lời đúng của Student
         /// </summary>

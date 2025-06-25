@@ -1,3 +1,4 @@
+using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 
 namespace Fsel.System.Domain.Entities.DailyQuiz
@@ -8,5 +9,6 @@ namespace Fsel.System.Domain.Entities.DailyQuiz
         public Guid DailyQuizAnswerId { get; set; }
         public DailyQuizQuestion? DailyQuizQuestion { get; set; }
         public DailyQuizAnswer? DailyQuizAnswer { get; set; }
+        public DateTime? CreatedDateLocal { get; set; } = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
     }
 }

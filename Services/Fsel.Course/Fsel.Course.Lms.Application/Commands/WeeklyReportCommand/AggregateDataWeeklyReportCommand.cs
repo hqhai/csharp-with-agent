@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
+    using Fsel.Course.Lms.Application.Services.SystemService.QueryModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
@@ -46,6 +47,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
         private readonly AppSetting _appSetting;
         private readonly ILogger<AggregateDataWeeklyReportCommandHandler> _logger;
         private readonly IWeeklyReportRepository _weeklyReportRepository;
+
+        private const int ChunkSize = 10000;
 
         public AggregateDataWeeklyReportCommandHandler(IUserService userService, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, ISystemService systemService, ILessonResultRepository lessonResultRepository, IUnitResultRepository unitResultRepository, IMediator mediator, AppSetting appSetting, ILogger<AggregateDataWeeklyReportCommandHandler> logger, IWeeklyReportRepository weeklyReportRepository)
         {
@@ -91,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             UserSettingQuery query = new UserSettingQuery
             {
-                UserIds = students!.Select(x => x.Human!.UserId).ToList(),
+                UserIds = students.Select(x => x.Human!.UserId).ToList(),
             };
 
             //Lấy những học sinh bật thông báo Gửi Email hàng tuần
@@ -104,6 +107,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             }
             //filter những học sinh bật thông báo email.
             students = students.Where(x => x.Human != null && studentFilterResult.Contains(x.Human.UserId)).OrderBy(x => x.Human!.Email).ToList();
+
+            var userIds = students.Where(p => p.Human != null && p.Human.UserId.HasValue).Select(x => x.Human!.UserId!.Value).Distinct().ToList();
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
@@ -132,39 +137,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             //    }
             //});
 
-            var featureAccessTimeResults = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
-            {
-                Filters = new List<GenericFilterModel>() {
-                    new GenericFilterModel()
-                    {
-                        Property = "CreatedDate",
-                        Operator = EnumFilterOperator.GreaterThanOrEqual,
-                        Value = lastFridayAt13
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "CreatedDate",
-                        Operator = EnumFilterOperator.LessThanOrEqual,
-                        Value = currentDate
-                    }
-                }
-            });
-
-            var previousFeatureAccessTimeResults = await _systemService.GetListFeatureAccessTime(new BaseQueryModel()
-            {
-                Filters = new List<GenericFilterModel>() { new GenericFilterModel()
-                {
-                    Property = "CreatedDate",
-                    Operator = EnumFilterOperator.GreaterThan,
-                    Value = lastLastFridayAt13
-                },
-                new GenericFilterModel()
-                {
-                    Property = "CreatedDate",
-                    Operator = EnumFilterOperator.LessThan,
-                    Value = lastFridayAt13
-                }}
-            });
+            var featureAccessTimeResults = await GetFeatureAccessTimesInChunks(userIds, lastFridayAt13, currentDate);
+            var previousFeatureAccessTimeResults = await GetFeatureAccessTimesInChunks(userIds, lastLastFridayAt13, lastFridayAt13);
 
             var skillScoresHtml = await SendMailHelper.GetTemplateFromPath(AppDomain.CurrentDomain.BaseDirectory, SendMailSetting.Skill, cancellationToken);
 
@@ -185,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                     continue;
                 }
 
-                var studentDailyStreaks = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
+                var studentDailyStreaks = featureAccessTimeResults.Where(p => p.CreatedUserId == item.Human?.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
 
                 var weeklyReport = new WeeklyReportModel()
                 {
@@ -215,8 +189,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 CheckAndAssignStatusDate(weeklyReport, studentDailyStreaks, dates.ToList());
 
-                var featureAccessTimes = featureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
-                var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Content?.Result?.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
+                var featureAccessTimes = featureAccessTimeResults.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
+                var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
 
                 AddTimeIntoTemplate(weeklyReport, featureAccessTimes, previousFeatureAccessTimes);
 
@@ -523,6 +497,29 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 return SenderSettings.TitleWeekly4;
             }
+        }
+
+        private async Task<List<FeatureAccessTimeModel>> GetFeatureAccessTimesInChunks(List<Guid> userIds, DateTime startDate, DateTime endDate)
+        {
+            var allResults = new List<FeatureAccessTimeModel>();
+
+            foreach (var chunk in userIds.Chunk(ChunkSize))
+            {
+                var result = await _systemService.GetListFeatureAccessTimeByUserIds(
+                    new GetFeatureAccessTimesByUserIdsQueryModel
+                    {
+                        UserIds = chunk.ToList(),
+                        StartDate = startDate,
+                        EndDate = endDate
+                    });
+
+                if (result.Content?.Result != null)
+                {
+                    allResults.AddRange(result.Content.Result);
+                }
+            }
+
+            return allResults;
         }
     }
 }

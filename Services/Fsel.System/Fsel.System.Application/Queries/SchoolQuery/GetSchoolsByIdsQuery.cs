@@ -55,7 +55,8 @@ namespace Fsel.System.Application.Queries.SchoolQuery
                 LongPath = p.LongPath,
                 ShortPath = p.ShortPath,
                 IdPath = p.IdPath,
-                EducationLevel = Enum.IsDefined(typeof(EnumEducationLevel), (int?)p.TypeLevel ?? default) ? (EnumEducationLevel?)p.TypeLevel : null
+                EducationLevel = Enum.IsDefined(typeof(EnumEducationLevel), (int?)p.TypeLevel ?? default) ? (EnumEducationLevel?)p.TypeLevel : null,
+                LocalId = p.LocalId,
             }).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
