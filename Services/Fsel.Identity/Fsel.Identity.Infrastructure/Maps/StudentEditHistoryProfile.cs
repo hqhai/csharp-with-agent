@@ -11,6 +11,7 @@ namespace Fsel.Identity.Infrastructure.Maps
         public StudentEditHistoryProfile()
         {
             CreateMap<CreateStudentEditHistoryCommandModel, StudentEditHistory>().IgnoreAllNonExisting();
+            CreateMap<StudentEditHistoryDetailModel, StudentEditHistoryDetail>().IgnoreAllNonExisting();
             CreateMap<StudentEditHistory, StudentEditHistoryModel>().IgnoreAllNonExisting();
             CreateMap<StudentEditHistoryDetail, StudentEditHistoryDetailModel>().IgnoreAllNonExisting();
         }
