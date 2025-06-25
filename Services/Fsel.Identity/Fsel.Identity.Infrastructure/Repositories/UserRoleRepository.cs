@@ -9,7 +9,10 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage;
+    using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Enums;
+    using Microsoft.AspNetCore.Identity;
 
     public class UserRoleRepository : IUserRoleRepository
     {
@@ -37,19 +40,31 @@ namespace Fsel.Identity.Infrastructure.Repositories
             var strategy = _userDbContext.Database.CreateExecutionStrategy();
             return await strategy.ExecuteAsync(async () =>
             {
-                using var transaction = await _userDbContext.Database.BeginTransactionAsync();
-                try
+                // Kiểm tra xem đã có transaction chưa
+                if (_userDbContext.Database.CurrentTransaction != null)
                 {
+                    // Đã có transaction, chỉ cần remove và save
                     _userDbContext.UserRoles.Remove(userRole);
                     await _userDbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
                     return true;
                 }
-                catch (Exception)
+                else
                 {
-                    await transaction.RollbackAsync();
-                    throw;
+                    // Chưa có transaction, tạo mới
+                    using var transaction = await _userDbContext.Database.BeginTransactionAsync();
+                    try
+                    {
+                        _userDbContext.UserRoles.Remove(userRole);
+                        await _userDbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
                 }
             });
         }
@@ -59,19 +74,31 @@ namespace Fsel.Identity.Infrastructure.Repositories
             var strategy = _userDbContext.Database.CreateExecutionStrategy();
             return await strategy.ExecuteAsync(async () =>
             {
-                using var transaction = await _userDbContext.Database.BeginTransactionAsync();
-                try
+                // Kiểm tra xem đã có transaction chưa
+                if (_userDbContext.Database.CurrentTransaction != null)
                 {
+                    // Đã có transaction, chỉ cần add và save
                     await _userDbContext.UserRoles.AddAsync(userRole);
                     await _userDbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
                     return true;
                 }
-                catch (Exception)
+                else
                 {
-                    await transaction.RollbackAsync();
-                    throw;
+                    // Chưa có transaction, tạo mới
+                    using var transaction = await _userDbContext.Database.BeginTransactionAsync();
+                    try
+                    {
+                        await _userDbContext.UserRoles.AddAsync(userRole);
+                        await _userDbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
                 }
             });
         }
@@ -81,19 +108,31 @@ namespace Fsel.Identity.Infrastructure.Repositories
             var strategy = _userDbContext.Database.CreateExecutionStrategy();
             return await strategy.ExecuteAsync(async () =>
             {
-                using var transaction = await _userDbContext.Database.BeginTransactionAsync();
-                try
+                // Kiểm tra xem đã có transaction chưa
+                if (_userDbContext.Database.CurrentTransaction != null)
                 {
+                    // Đã có transaction, chỉ cần add range và save
                     await _userDbContext.UserRoles.AddRangeAsync(userRoles);
                     await _userDbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
                     return true;
                 }
-                catch (Exception)
+                else
                 {
-                    await transaction.RollbackAsync();
-                    throw;
+                    // Chưa có transaction, tạo mới
+                    using var transaction = await _userDbContext.Database.BeginTransactionAsync();
+                    try
+                    {
+                        await _userDbContext.UserRoles.AddRangeAsync(userRoles);
+                        await _userDbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
                 }
             });
         }
@@ -103,19 +142,31 @@ namespace Fsel.Identity.Infrastructure.Repositories
             var strategy = _userDbContext.Database.CreateExecutionStrategy();
             return await strategy.ExecuteAsync(async () =>
             {
-                using var transaction = await _userDbContext.Database.BeginTransactionAsync();
-                try
+                // Kiểm tra xem đã có transaction chưa
+                if (_userDbContext.Database.CurrentTransaction != null)
                 {
+                    // Đã có transaction, chỉ cần update và save
                     _userDbContext.UserRoles.Update(userRole);
                     await _userDbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
                     return true;
                 }
-                catch (Exception)
+                else
                 {
-                    await transaction.RollbackAsync();
-                    throw;
+                    // Chưa có transaction, tạo mới
+                    using var transaction = await _userDbContext.Database.BeginTransactionAsync();
+                    try
+                    {
+                        _userDbContext.UserRoles.Update(userRole);
+                        await _userDbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
                 }
             });
         }
@@ -125,19 +176,31 @@ namespace Fsel.Identity.Infrastructure.Repositories
             var strategy = _userDbContext.Database.CreateExecutionStrategy();
             return await strategy.ExecuteAsync(async () =>
             {
-                using var transaction = await _userDbContext.Database.BeginTransactionAsync();
-                try
+                // Kiểm tra xem đã có transaction chưa
+                if (_userDbContext.Database.CurrentTransaction != null)
                 {
+                    // Đã có transaction, chỉ cần update range và save
                     _userDbContext.UserRoles.UpdateRange(userRoles);
                     await _userDbContext.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
                     return true;
                 }
-                catch (Exception)
+                else
                 {
-                    await transaction.RollbackAsync();
-                    throw;
+                    // Chưa có transaction, tạo mới
+                    using var transaction = await _userDbContext.Database.BeginTransactionAsync();
+                    try
+                    {
+                        _userDbContext.UserRoles.UpdateRange(userRoles);
+                        await _userDbContext.SaveChangesAsync();
+                        await transaction.CommitAsync();
+
+                        return true;
+                    }
+                    catch (Exception)
+                    {
+                        await transaction.RollbackAsync();
+                        throw;
+                    }
                 }
             });
         }
