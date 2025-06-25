@@ -37,10 +37,8 @@ namespace Fsel.Identity.Domain.Entities
         [Required]
         public string? LastName { get; set; }
 
-        public string? FullName
-        {
-            get { return string.Concat(LastName, " ", FirstName).Trim(); }
-        }
+        [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+        public string? FullName { get; private set; }
 
         public DateTime? Birthday { get; set; }
 

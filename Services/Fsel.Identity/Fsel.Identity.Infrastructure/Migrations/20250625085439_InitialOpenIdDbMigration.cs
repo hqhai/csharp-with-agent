@@ -50,21 +50,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 table: "UserOtpCodes",
                 newName: "IX_UserOtpCodes_IsDeleted_OtpCode_Status");
 
-            migrationBuilder.RenameColumn(
-                name: "FullName",
-                table: "AspNetUsers",
-                newName: "LastName");
-
             migrationBuilder.AlterColumn<string>(
                 name: "OtpCode",
                 table: "UserOtpCodes",
-                type: "nvarchar(100)",
-                maxLength: 100,
+                type: "nvarchar(20)",
+                maxLength: 20,
                 nullable: false,
                 defaultValue: "",
                 oldClrType: typeof(string),
-                oldType: "nvarchar(100)",
-                oldMaxLength: 100,
+                oldType: "nvarchar(20)",
+                oldMaxLength: 20,
                 oldNullable: true);
 
             migrationBuilder.AddColumn<Guid>(
@@ -114,6 +109,14 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 type: "nvarchar(100)",
                 maxLength: 100,
                 nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "LastName",
+                table: "AspNetUsers",
+                type: "nvarchar(250)",
+                maxLength: 250,
+                nullable: false,
+                defaultValue: "");
 
             migrationBuilder.CreateTable(
                 name: "DataProtectionKeys",
@@ -218,15 +221,15 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     -- FirstName
                     FirstName    = TRIM(
                         CASE 
-                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) = 0 THEN ISNULL(H.FullName, U.LastName)
-                            ELSE STUFF(ISNULL(H.FullName, U.LastName), 1, CHARINDEX(' ', ISNULL(H.FullName, U.LastName)), '')
+                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 THEN ISNULL(H.FullName, U.FullName)
+                            ELSE STUFF(ISNULL(H.FullName, U.FullName), 1, CHARINDEX(' ', ISNULL(H.FullName, U.FullName)), '')
                         END
                     ),
                     -- LastName
                     LastName   = TRIM(
                         CASE 
-                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) = 0 THEN ISNULL(H.FullName, U.LastName)
-                            ELSE LEFT(ISNULL(H.FullName, U.LastName), CHARINDEX(' ', ISNULL(H.FullName, U.LastName)) - 1)
+                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 THEN ISNULL(H.FullName, U.FullName)
+                            ELSE LEFT(ISNULL(H.FullName, U.FullName), CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) - 1)
                         END
                     )
                 FROM AspNetUsers U
@@ -265,6 +268,17 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 DROP TABLE #NewUsers;
                 DROP TABLE #HumansWithoutUser;
             ");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "FullName",
+                table: "AspNetUsers",
+                type: "nvarchar(max)",
+                nullable: true,
+                computedColumnSql: "[LastName] + ' ' + [FirstName]",
+                stored: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(100)",
+                oldMaxLength: 100);
 
             migrationBuilder.RenameColumn(
                 name: "HumanId",
@@ -402,12 +416,24 @@ namespace Fsel.Identity.Infrastructure.Migrations
             migrationBuilder.AlterColumn<string>(
                 name: "OTPCode",
                 table: "UserOtpCodes",
-                type: "nvarchar(100)",
-                maxLength: 100,
+                type: "nvarchar(20)",
+                maxLength: 20,
                 nullable: true,
                 oldClrType: typeof(string),
-                oldType: "nvarchar(100)",
-                oldMaxLength: 100);
+                oldType: "nvarchar(20)",
+                oldMaxLength: 20);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "FullName",
+                table: "AspNetUsers",
+                type: "nvarchar(100)",
+                maxLength: 100,
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true,
+                oldComputedColumnSql: "[LastName] + ' ' + [FirstName]");
 
             migrationBuilder.CreateTable(
                 name: "Humans",
@@ -428,9 +454,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Address = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
                     AvatarPath = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
                     Birthday = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Code = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: true),
+                    Code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(70)", maxLength: 70, nullable: true),
-                    FullName = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Gender = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     PhoneNumber = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true)
                 },
@@ -476,8 +502,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     U.Code,
                     -- Rollback FullName = concat FirstName + LastName, có xử lý nếu FirstName hoặc LastName bị null
                     TRIM(CONCAT(
-                        NULLIF(U.LastName, ''), 
-                        IIF(U.LastName IS NOT NULL AND U.FirstName IS NOT NULL AND U.LastName <> '' AND U.FirstName <> '', ' ', ''), 
+                        NULLIF(U.FullName, ''), 
+                        IIF(U.FullName IS NOT NULL AND U.FirstName IS NOT NULL AND U.FullName <> '' AND U.FirstName <> '', ' ', ''), 
                         NULLIF(U.FirstName, '')
                     )),
                     U.Gender,
@@ -541,6 +567,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 name: "Gender",
                 table: "AspNetUsers");
 
+            migrationBuilder.DropColumn(
+                name: "LastName",
+                table: "AspNetUsers");
+
             migrationBuilder.RenameColumn(
                 name: "UserId",
                 table: "Teachers",
@@ -580,11 +610,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 name: "IX_CSOs_UserId",
                 table: "CSOs",
                 newName: "IX_CSOs_HumanId");
-
-            migrationBuilder.RenameColumn(
-                name: "LastName",
-                table: "AspNetUsers",
-                newName: "FullName");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Students_IsDeleted",
