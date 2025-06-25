@@ -91,12 +91,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                     },
                     Description = Description
                 });
-                methodResult.Result = true;
                 if (!result.IsOK)
                 {
                     methodResult.AddError(result.ErrorMessages);
                     return methodResult;
                 }
+                methodResult.Result = true;
                 return methodResult;
             });
 

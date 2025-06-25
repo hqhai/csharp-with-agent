@@ -29,7 +29,7 @@ namespace Fsel.Identity.Application.Commands.StudentEditHistoryCmd
             var methodResult = new MethodResult<bool>();
 
             var studentEditHistory = _mapper.Map<StudentEditHistory>(request);
-            if (studentEditHistory.IsValid())
+            if (!studentEditHistory.IsValid())
             {
                 methodResult.AddError(studentEditHistory.ErrorMessages);
                 return methodResult;
