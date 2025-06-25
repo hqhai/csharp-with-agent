@@ -1,10 +1,11 @@
+using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Infrastructure.ValueSettings;
+using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
+using Fsel.Shared.Enums;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 using Microsoft.CognitiveServices.Speech.PronunciationAssessment;
-using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
-using Fsel.Course.Infrastructure.ValueSettings;
-using Fsel.Shared.Enums;
-using Fsel.Course.Domain.Models.EntityModels;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 {
@@ -15,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     {
         private SpeechConfig _speechConfig;
         private readonly AppSetting _appSetting;
+        private readonly ILogger<PronuciationAssessmentService> _logger;
         private const int LowAccuracyScore = 60;
         private const int MediumAccuracyScore = 80;
 
@@ -23,10 +25,10 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// </summary>
         /// <param name="subscriptionKey">Khóa đăng ký của Azure</param>
         /// <param name="region">Khu vực của dịch vụ</param>
-        public PronuciationAssessmentService(AppSetting appSetting, IUnitRepository unitRepository, ILogger<PronuciationAssessmentService> logger)
+        public PronuciationAssessmentService(AppSetting appSetting, ILogger<PronuciationAssessmentService> logger)
         {
             _appSetting = appSetting;
-            _unitRepository = unitRepository;
+            _logger = logger;
             _speechConfig = SpeechConfig.FromSubscription(_appSetting!.AzureAiConfig!.SecondApiKey, _appSetting!.AzureAiConfig!.Location);
             _speechConfig.SpeechRecognitionLanguage = _appSetting!.AzureAiConfig!.SpeechRecognitionLanguage;
 
@@ -34,8 +36,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             _speechConfig.SetProperty(PropertyId.Speech_SegmentationSilenceTimeoutMs, "1000");
             _speechConfig.SetProperty(PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "1000");
             _speechConfig.SetProperty(PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs, "1000");
-
-            _logger = logger;
         }
 
         /// <summary>
@@ -43,13 +43,12 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// </summary>
         /// <param name="referenceText">Văn bản tham chiếu</param>
         /// <returns>Kết quả đánh giá phát âm</returns>
-        public async Task<PronunciationAssessmentModel> AssessPronunciationFromMicrophoneAsync(string referenceText, Guid unitId = default)
+        public async Task<PronunciationAssessmentModel> AssessPronunciationFromMicrophoneAsync(string referenceText)
         {
             if (string.IsNullOrEmpty(referenceText))
             {
                 throw new ArgumentNullException(nameof(referenceText), "Văn bản tham chiếu không được để trống");
             }
-            var unit = await _unitRepository.GetByIdAsync(unitId);
             var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Word\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true}}");
 
             using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
@@ -58,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             pronunciationConfig.ApplyTo(recognizer);
             var result = await recognizer.RecognizeOnceAsync();
 
-            return await ProcessPronunciationResult(result, unit);
+            return await ProcessPronunciationResult(result);
         }
 
         /// <summary>
@@ -157,7 +156,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// <returns>Kết quả đánh giá phát âm</returns>
         public async Task<PronunciationAssessmentModel> AssessPronunciationFromFileAsync(string audioFilePath, string referenceText)
         {
-
             if (string.IsNullOrEmpty(audioFilePath))
                 throw new ArgumentNullException(nameof(audioFilePath), "Đường dẫn file âm thanh không được để trống");
 
@@ -165,7 +163,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 throw new ArgumentNullException(nameof(referenceText), "Văn bản tham chiếu không được để trống");
 
             string errorMessage = string.Empty;
-            var unit = await _unitRepository.GetByIdAsync(unitId);
             string? convertedFilePath = null;
             string localFilePath = audioFilePath;
 
@@ -222,7 +219,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 recognizer.Properties.SetProperty(PropertyId.Speech_SegmentationSilenceTimeoutMs, "1000");
 
                 var result = await recognizer.RecognizeOnceAsync();
-                return await ProcessPronunciationResult(result, unit, errorMessage);
+                return await ProcessPronunciationResult(result, errorMessage);
             }
             finally
             {
@@ -250,7 +247,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// </summary>
         /// <param name="result">Kết quả nhận dạng giọng nói</param>
         /// <returns>Kết quả đánh giá phát âm</returns>
-        private async Task<PronunciationAssessmentModel> ProcessPronunciationResult(SpeechRecognitionResult result, Domain.Entities.Unit? unit, string? errorMessage = "")
+        private async Task<PronunciationAssessmentModel> ProcessPronunciationResult(SpeechRecognitionResult result, string? errorMessage = "")
         {
             var response = new PronunciationAssessmentModel
             {
@@ -285,15 +282,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 foreach (var word in words)
                 {
                     var accuracyScoreWord = word.AccuracyScore;
-                    EnumSyllableMarked colorWord;
-                    if (unit != null && unit.HighlightRanges != null && unit.HighlightRanges.Any())
-                    {
-                        colorWord = unit.HighlightRanges.FirstOrDefault(x => x.From <= accuracyScoreWord && x.To >= accuracyScoreWord)?.SyllableMarked ?? default;
-                    }
-                    else
-                    {
-                        colorWord = GetColorBasedOnAccuracy(accuracyScoreWord);
-                    }
+                    EnumSyllableMarked colorWord = GetColorBasedOnAccuracy(accuracyScoreWord);
+
                     var wordImprovement = new SpokenWord
                     {
                         Word = word.Word,
@@ -307,15 +297,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     {
                         foreach (var syllable in word.Syllables)
                         {
-                            EnumSyllableMarked color;
-                            if (unit != null && unit.HighlightRanges != null && unit.HighlightRanges.Any())
-                            {
-                                color = unit.HighlightRanges.FirstOrDefault(x => x.From <= syllable.AccuracyScore && x.To >= syllable.AccuracyScore)?.SyllableMarked ?? default;
-                            }
-                            else
-                            {
-                                color = GetColorBasedOnAccuracy(syllable.AccuracyScore);
-                            }
+                            EnumSyllableMarked color = GetColorBasedOnAccuracy(syllable.AccuracyScore);
+
                             var syllableInfo = new SyllableInfo
                             {
                                 Syllable = syllable.Syllable,

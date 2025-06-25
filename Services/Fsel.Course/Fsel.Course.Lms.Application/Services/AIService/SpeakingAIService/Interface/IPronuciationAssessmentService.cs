@@ -1,4 +1,5 @@
 using Fsel.Course.Domain.Models.EntityModels;
+
 namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface
 {
     /// <summary>
@@ -20,6 +21,5 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Inter
         /// <param name="referenceText">Văn bản tham chiếu</param>
         /// <returns>Kết quả đánh giá phát âm</returns>
         Task<PronunciationAssessmentModel> AssessPronunciationFromFileAsync(string audioFilePath, string referenceText);
-
     }
-} 
+}
