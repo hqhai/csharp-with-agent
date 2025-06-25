@@ -320,7 +320,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// cập nhật expired date cho students
         /// </summary>
-        [HttpPut("update-expired-date-for-students")]
+        [HttpPut("update-expired-date-for-student")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateExpiredDateStudentHasValueCommand cmd)
