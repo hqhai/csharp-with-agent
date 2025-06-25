@@ -18,5 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumStatus Status { get; set; }
 
         public Guid? ParentId { get; set; }
+
+        public IList<LevelModel>? Levels { get; set; }
     }
 }

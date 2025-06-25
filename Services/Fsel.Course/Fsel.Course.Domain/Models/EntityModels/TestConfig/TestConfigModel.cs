@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestConfig
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.TestConfig;
+    using Fsel.Course.Domain.Models.EntityModels.SkillModels;
 
     public class TestConfigModel : BaseModel
     {
@@ -13,8 +14,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestConfig
         public bool IsActive { get; set; }
         public long TotalQuestion { get; set; }
         public double ExecutionTime { get; set; }
-        public Category? Program { get; set; }
-        public IList<Skill>? Skills { get; set; }
-        public IList<TestLayout>? TestLayouts { get; set; }
+        public CategoryModel? Program { get; set; }
+        public IList<SkillModel>? Skills { get; set; }
+        public IList<TestLayoutModel>? TestLayouts { get; set; }
     }
 }

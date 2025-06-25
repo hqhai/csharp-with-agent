@@ -21,7 +21,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateMockTestCommand : CreateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
+    public class CreateMockTestCommand : CreateTestConfigCommandModel, IRequest<MethodResult<MockTestModel>>
     {
     }
 

@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Models.EntityModels.SkillModels;
 
     public class TestConfigSearchModel : BaseModel
     {
@@ -12,6 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool IsActive { get; set; }
 
         //Program
-        public Category? Program { get; set; }
+        public CategoryModel? Program { get; set; }
+        public IList<SkillModel>? Skills { get; set; }
     }
 }

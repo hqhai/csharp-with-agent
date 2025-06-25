@@ -23,7 +23,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using Microsoft.EntityFrameworkCore;
     using static Fsel.Shared.Constants.ValueSettings;
 
-    public class UpdateMockTestCommand : UpdateMockTestCommandModel, IRequest<MethodResult<MockTestModel>>
+    public class UpdateMockTestCommand : UpdateTestConfigCommandModel, IRequest<MethodResult<MockTestModel>>
     {
     }
 

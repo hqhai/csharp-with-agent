@@ -15,8 +15,8 @@ namespace Fsel.Course.Infrastructure.Maps
         public MockTestProfile()
         {
             CreateMap<MockTest, MockTestModel>().IgnoreAllNonExisting();
-            CreateMap<CreateMockTestCommandModel, MockTest>().IgnoreAllNonExisting();
-            CreateMap<UpdateMockTestCommandModel, MockTest>().IgnoreAllNonExisting();
+            CreateMap<CreateTestConfigCommandModel, MockTest>().IgnoreAllNonExisting();
+            CreateMap<UpdateTestConfigCommandModel, MockTest>().IgnoreAllNonExisting();
 
             CreateMap<CreateMockTestAnswerCommandModel, MockTestAnswer>().IgnoreAllNonExisting();
             CreateMap<MockTestScore, MockTestScoreModel>().IgnoreAllNonExisting();

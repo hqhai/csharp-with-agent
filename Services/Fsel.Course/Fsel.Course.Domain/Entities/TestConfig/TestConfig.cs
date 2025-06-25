@@ -26,7 +26,6 @@ namespace Fsel.Course.Domain.Entities.TestConfig
 
         public bool IsActive { get; set; }
 
-        // ProgramId
         public Guid? ProgramId { get; set; }
 
         public virtual Category? Program { get; set; }
