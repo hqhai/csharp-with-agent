@@ -458,7 +458,7 @@ namespace Fsel.Shared.Helpers
 
             if (firstSpaceIndex == -1)
             {
-                return (fullName, string.Empty);
+                return (fullName, fullName);
             }
 
             string lastName = fullName[..firstSpaceIndex];

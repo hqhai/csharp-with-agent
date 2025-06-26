@@ -53,6 +53,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 CourseLevel = p.CourseLevel,
                 BaseCourseLevel = p.BaseCourseLevel,
                 ClassId = p.ClassId,
+                UserId = p.UserId,
             }).ToListAsync(cancellationToken);
 
             //var schoolResults = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
