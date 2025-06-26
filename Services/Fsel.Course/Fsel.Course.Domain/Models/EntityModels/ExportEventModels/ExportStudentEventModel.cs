@@ -18,6 +18,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.ExportEventModels
         public double TargetLessonCompletionRate { get; set; }
         public double ScoreLevelLesson { get; set; }
         public double? PercentComplete { get; set; }
+        public int? TotalComplete { get; set; }
+        public double? CountComplete { get; set; }
         public double? LevelCompletionRate { get; set; }
         public double? AchievedScore { get; set; }
         public double? AssignmentClassForum { get; set; }
