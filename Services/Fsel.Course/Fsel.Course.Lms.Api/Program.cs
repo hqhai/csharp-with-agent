@@ -117,6 +117,7 @@ builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGro
 builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository>();
 builder.Services.AddScoped<IWeeklyReportRepository, WeeklyReportRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
+builder.Services.AddScoped<IVideoSubFilePathRepository, VideoSubFilePathRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

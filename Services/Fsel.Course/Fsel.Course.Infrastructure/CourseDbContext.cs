@@ -90,6 +90,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
+        public DbSet<WeeklyReport> WeeklyReports { get; set; }
+        public DbSet<VideoSubFilePath> VideoSubFilePaths { get; set; }
 
         #region Report
 
@@ -116,10 +118,8 @@ namespace Fsel.Course.Infrastructure
         #endregion Report
 
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
-        public DbSet<WeeklyReport> WeeklyReports { get; set; }
         public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
         public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
-
         public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
         public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
         public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
@@ -198,6 +198,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoSubFilePathEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
