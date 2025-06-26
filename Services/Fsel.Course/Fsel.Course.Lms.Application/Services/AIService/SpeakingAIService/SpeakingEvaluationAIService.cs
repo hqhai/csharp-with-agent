@@ -3,17 +3,16 @@
 namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Threading.Tasks;
-    using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
-    using Microsoft.CognitiveServices.Speech.Audio;
-    using Microsoft.CognitiveServices.Speech;
-    using Fsel.Course.Infrastructure.ValueSettings;
-    using Newtonsoft.Json;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Interfaces;
-    using Fsel.Common.ActionResults;
-    using System.Diagnostics;
+    using Fsel.Course.Infrastructure.ValueSettings;
+    using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
+    using Fsel.Shared.Constants;
+    using Microsoft.CognitiveServices.Speech;
+    using Microsoft.CognitiveServices.Speech.Audio;
+    using Microsoft.CognitiveServices.Speech.PronunciationAssessment;
 
     public class SpeakingEvaluationAIService : ISpeakingEvaluationAIService
     {
@@ -26,116 +25,193 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             _systemFileProvider = systemFileProvider;
         }
 
+        //public async Task<double> EvaluationSpeaking(string? question, string url)
+        //{
+        //    if (string.IsNullOrEmpty(url))
+        //    {
+        //        return 0;
+        //    }
+        //    // Creates an instance of a speech config with specified subscription key and service region.
+        //    var config = SpeechConfig.FromSubscription(_appSetting.AzureAiConfig?.SecondApiKey, _appSetting.AzureAiConfig?.Location);
+        //    string language = "en-US";
+        //    string topic = question ?? string.Empty;
+        //    //url = "https://s3-sgn10.fptcloud.com/fsel-public/Videos/What_is_your_name_1716804591.mp3";
+
+        //    // Download the file
+        //    var localPath = _systemFileProvider.TransformFileFromUrl(url, ".wav");
+
+        //    // Create AudioConfig from local file path
+        //    var audioConfig = AudioConfig.FromWavFileInput(localPath);
+        //    var speechRecognizer = new SpeechRecognizer(config, language.Replace("_", "-"), audioConfig);
+
+        //    var connection = Connection.FromRecognizer(speechRecognizer);
+
+        //    var phraseDetectionConfig = new
+        //    {
+        //        enrichment = new
+        //        {
+        //            pronunciationAssessment = new
+        //            {
+        //                referenceText = "",
+        //                gradingSystem = "HundredMark",
+        //                granularity = "Word",
+        //                dimension = "Comprehensive",
+        //                enableMiscue = "False"
+        //            },
+        //            contentAssessment = new
+        //            {
+        //                topic = topic
+        //            }
+        //        }
+        //    };
+        //    connection.SetMessageProperty("speech.context", "phraseDetection", JsonConvert.SerializeObject(phraseDetectionConfig));
+
+        //    var phraseOutputConfig = new
+        //    {
+        //        format = "Detailed",
+        //        detailed = new
+        //        {
+        //            options = new[]
+        //            {
+        //                "WordTimings",
+        //                "PronunciationAssessment",
+        //                "ContentAssessment",
+        //                "SNR",
+        //            }
+        //        }
+        //    };
+        //    connection.SetMessageProperty("speech.context", "phraseOutput", JsonConvert.SerializeObject(phraseOutputConfig));
+
+        //    var done = false;
+        //    var fullRecognizedText = "";
+
+        //    speechRecognizer.SessionStopped += (s, e) =>
+        //    {
+        //        Console.WriteLine("ClOSING on {0}", e);
+        //        done = true;
+        //    };
+
+        //    speechRecognizer.Canceled += (s, e) =>
+        //    {
+        //        Console.WriteLine("ClOSING on {0}", e);
+        //        done = true;
+        //    };
+        //    PronunciationAssessment pronunciationScore = new PronunciationAssessment();
+        //    connection.MessageReceived += (s, e) =>
+        //    {
+        //        if (e.Message.IsTextMessage())
+        //        {
+        //            var messageText = e.Message.GetTextMessage();
+        //            var json = Newtonsoft.Json.Linq.JObject.Parse(messageText);
+        //            if (json.ContainsKey("NBest"))
+        //            {
+        //                string pronunciationScoreStr = json["NBest"]?[0]?["PronunciationAssessment"]?.ToString()?.Trim() ?? string.Empty;
+
+        //                if (!string.IsNullOrEmpty(pronunciationScoreStr))
+        //                {
+        //                    pronunciationScore = ConvertHelper.Deserialize<PronunciationAssessment>(pronunciationScoreStr);
+        //                }
+        //            }
+        //        }
+        //    };
+
+        //    // Starts continuous recognition.
+        //    await speechRecognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+
+        //    while (!done)
+        //    {
+        //        // Allow the program to run and process results continuously.
+        //        await Task.Delay(1000); // Adjust the delay as needed.
+        //    }
+
+        //    await speechRecognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
+
+        //    // Ensure audioConfig and speechRecognizer are disposed properly
+        //    audioConfig.Dispose();
+        //    speechRecognizer.Dispose();
+
+        //    // Remove the file
+        //    await RemoveFile(localPath);
+
+        //    return pronunciationScore.PronScore;
+        //}
+
         public async Task<double> EvaluationSpeaking(string? question, string url)
         {
-            if (string.IsNullOrEmpty(url))
+            if (string.IsNullOrWhiteSpace(url))
             {
-                return 0;
+                return ValueSettings.ValueDefault;
             }
-            // Creates an instance of a speech config with specified subscription key and service region.
-            var config = SpeechConfig.FromSubscription(_appSetting.AzureAiConfig?.SecondApiKey, _appSetting.AzureAiConfig?.Location);
+            var config = SpeechConfig.FromSubscription(
+                _appSetting.AzureAiConfig?.SecondApiKey,
+                _appSetting.AzureAiConfig?.Location
+            );
+            config.SpeechRecognitionLanguage = _appSetting.AzureAiConfig?.SpeechRecognitionLanguage ?? "en-US";
 
-            string language = "en-US";
-            string topic = question ?? string.Empty;
-            //url = "https://s3-sgn10.fptcloud.com/fsel-public/Videos/What_is_your_name_1716804591.mp3";
-
-            // Download the file
+            var listPronScore = new List<double>();
+            var topic = question ?? string.Empty;
             var localPath = _systemFileProvider.TransformFileFromUrl(url, ".wav");
 
-            // Create AudioConfig from local file path
-            var audioConfig = AudioConfig.FromWavFileInput(localPath);
-            var speechRecognizer = new SpeechRecognizer(config, language.Replace("_", "-"), audioConfig);
-
-            var connection = Connection.FromRecognizer(speechRecognizer);
-
-            var phraseDetectionConfig = new
+            try
             {
-                enrichment = new
+                using var audioConfig = AudioConfig.FromWavFileInput(localPath);
+                using var recognizer = new SpeechRecognizer(config, audioConfig);
+
+                var pronConfig = new PronunciationAssessmentConfig(
+                    referenceText: "",
+                    gradingSystem: GradingSystem.HundredMark,
+                    granularity: Granularity.Word,
+                    enableMiscue: false
+                );
+                pronConfig.EnableProsodyAssessment();
+                pronConfig.EnableContentAssessmentWithTopic(topic);
+                pronConfig.ApplyTo(recognizer);
+
+                var stopRecognition = new TaskCompletionSource<int>();
+
+                recognizer.Recognized += (s, e) =>
                 {
-                    pronunciationAssessment = new
+                    if (e.Result.Reason == ResultReason.RecognizedSpeech)
                     {
-                        referenceText = "",
-                        gradingSystem = "HundredMark",
-                        granularity = "Word",
-                        dimension = "Comprehensive",
-                        enableMiscue = "False"
-                    },
-                    contentAssessment = new
-                    {
-                        topic = topic
-                    }
-                }
-            };
-            connection.SetMessageProperty("speech.context", "phraseDetection", JsonConvert.SerializeObject(phraseDetectionConfig));
-
-            var phraseOutputConfig = new
-            {
-                format = "Detailed",
-                detailed = new
-                {
-                    options = new[]
-                    {
-                        "WordTimings",
-                        "PronunciationAssessment",
-                        "ContentAssessment",
-                        "SNR",
-                    }
-                }
-            };
-            connection.SetMessageProperty("speech.context", "phraseOutput", JsonConvert.SerializeObject(phraseOutputConfig));
-
-            var done = false;
-            var fullRecognizedText = "";
-
-            speechRecognizer.SessionStopped += (s, e) =>
-            {
-                Console.WriteLine("ClOSING on {0}", e);
-                done = true;
-            };
-
-            speechRecognizer.Canceled += (s, e) =>
-            {
-                Console.WriteLine("ClOSING on {0}", e);
-                done = true;
-            };
-            PronunciationAssessment pronunciationScore = new PronunciationAssessment();
-            connection.MessageReceived += (s, e) =>
-            {
-                if (e.Message.IsTextMessage())
-                {
-                    var messageText = e.Message.GetTextMessage();
-                    var json = Newtonsoft.Json.Linq.JObject.Parse(messageText);
-                    if (json.ContainsKey("NBest"))
-                    {
-                        string pronunciationScoreStr = json["NBest"]?[0]?["PronunciationAssessment"]?.ToString()?.Trim() ?? string.Empty;
-
-                        if (!string.IsNullOrEmpty(pronunciationScoreStr))
+                        var pronResult = PronunciationAssessmentResult.FromResult(e.Result);
+                        if (pronResult != null && pronResult.Words.Any())
                         {
-                            pronunciationScore = ConvertHelper.Deserialize<PronunciationAssessment>(pronunciationScoreStr);
+                            listPronScore.Add(pronResult.PronunciationScore);
                         }
                     }
-                }
-            };
+                    else if (e.Result.Reason == ResultReason.NoMatch)
+                    {
+                        Console.WriteLine("NoMatch: Could not recognize.");
+                    }
+                };
 
-            // Starts continuous recognition.
-            await speechRecognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
+                recognizer.SessionStopped += (s, e) =>
+                {
+                    Console.WriteLine("Session stopped.");
+                    stopRecognition.TrySetResult(ValueSettings.ValueDefault);
+                };
 
-            while (!done)
-            {
-                // Allow the program to run and process results continuously.
-                await Task.Delay(1000); // Adjust the delay as needed.
+                recognizer.Canceled += (s, e) =>
+                {
+                    Console.WriteLine($"Recognition canceled: {e.Reason}");
+                    stopRecognition.TrySetResult(ValueSettings.ValueDefault);
+                };
+
+                await recognizer.StartContinuousRecognitionAsync();
+                await stopRecognition.Task;
+                await recognizer.StopContinuousRecognitionAsync();
+
+                return listPronScore.Any() ? listPronScore.Average() : ValueSettings.ValueDefault;
             }
-
-            await speechRecognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
-
-            // Ensure audioConfig and speechRecognizer are disposed properly
-            audioConfig.Dispose();
-            speechRecognizer.Dispose();
-
-            // Remove the file
-            await RemoveFile(localPath);
-
-            return pronunciationScore.PronScore;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EvaluationSpeaking] ERROR: {ex.Message}");
+                return ValueSettings.ValueDefault;
+            }
+            finally
+            {
+                await RemoveFile(localPath);
+            }
         }
 
         private async Task RemoveFile(string filePath)
