@@ -5,5 +5,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Inter
     public interface ISpeakingEvaluationAIService
     {
         Task<double> EvaluationSpeaking(string? question, string? url);
+
+        Task<double> EvaluationSpeakingV1(string? question, string? url);
     }
 }

@@ -9,14 +9,12 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
     [ApiController]
-    //[Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class MockTestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -37,7 +35,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
             MethodResult<SectionGroupResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
 
         /// <summary>
         /// Create MockTestAnswers

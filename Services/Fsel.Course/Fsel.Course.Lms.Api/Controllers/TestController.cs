@@ -190,7 +190,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin) })]
         public async Task<double> TestAi([FromQuery] string? question, [FromQuery] string? file)
         {
-            return await _speakingEvaluationAIService.EvaluationSpeaking(question, file);
+            return await _speakingEvaluationAIService.EvaluationSpeakingV1(question, file);
         }
     }
 
