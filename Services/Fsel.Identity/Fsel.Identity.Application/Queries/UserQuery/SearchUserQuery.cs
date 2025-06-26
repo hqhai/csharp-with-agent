@@ -73,7 +73,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
             if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
-                userQuery = from u in _userManager.Users
+                userQuery = from u in query
                             join t in _teacherRepository.Queryable on u.Id equals t.UserId
                             where usersByRole.Select(x => x.Id).Contains(u.Id)
                             select new UserSearchModel
@@ -101,7 +101,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
-                userQuery = from u in _userManager.Users
+                userQuery = from u in query
                             join cso in _cSORepository.Queryable on u.Id equals cso.UserId
                             where usersByRole.Select(x => x.Id).Contains(u.Id)
                             select new UserSearchModel
@@ -118,7 +118,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
             {
-                userQuery = from u in _userManager.Users
+                userQuery = from u in query
                             where usersByRole.Select(x => x.Id).Contains(u.Id)
                             select new UserSearchModel
                             {

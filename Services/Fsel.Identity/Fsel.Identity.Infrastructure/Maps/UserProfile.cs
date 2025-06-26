@@ -29,6 +29,9 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<UpdateUserCommandModel, User>()
                 .AfterMap<ParseFullNameMappingAction<UpdateUserCommandModel>>()
                 .IgnoreAllNonExisting();
+            CreateMap<UpdateParentCommandModel, User>()
+                .AfterMap<ParseFullNameMappingAction<UpdateParentCommandModel>>()
+                .IgnoreAllNonExisting();
             CreateMap<UpdateStudentByAdminCommandModel, User>()
                 .BeforeMap((m, c) =>
                 {
