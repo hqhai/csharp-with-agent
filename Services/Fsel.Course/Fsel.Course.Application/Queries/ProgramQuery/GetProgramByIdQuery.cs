@@ -69,7 +69,10 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                      Code = g.Key.Code,
                                      Description = g.Key.Description,
                                      Status = g.Key.Status,
+                                     TestMode = g.Key.TestMode,
+                                     IsTestDefault = g.Key.IsTestDefault,
                                      Type = g.Key.Type,
+                                     ParentId = g.Key.ParentId,
                                      CreatedDate = g.Key.CreatedDate,
                                      CreatedFullName = g.Key.CreatedFullName,
                                      CreatedUserId = g.Key.CreatedUserId,
@@ -104,6 +107,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                 }
 
                 program.Flows = await GetFlowsAsync(program.Id, cancellationToken);
+                program.IsSubjectTestDefault = await _categoryRepository.Queryable.AnyAsync(x => x.ParentId == program.ParentId && x.IsTestDefault, cancellationToken);
             }
             methodResult.Result = program;
             methodResult.StatusCode = StatusCodes.Status200OK;
