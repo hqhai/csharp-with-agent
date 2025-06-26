@@ -67,7 +67,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
 
-            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId))).Where(x => lessonIds.Contains(x.LessonId)).ToListAsync();
+            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId))).Where(x => x.LessonId.HasValue && lessonIds.Contains(x.LessonId.Value)).ToListAsync();
 
             var listDones = classForums.Select(x => new
             {

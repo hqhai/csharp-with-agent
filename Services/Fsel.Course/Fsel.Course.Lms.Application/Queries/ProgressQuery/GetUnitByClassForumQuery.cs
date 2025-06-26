@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                            .ThenInclude(x => x.ClassForumDetailResults)
                                                            .WhereBulkContains(lessonIds, x => x.LessonId)
                                                            .ToListAsync();
-            return classForums.OrderBy(x => lessonIds.IndexOf(x.LessonId)).Select(x =>
+            return classForums.Where(x => x.LessonId.HasValue).OrderBy(x => lessonIds.IndexOf(x.LessonId!.Value)).Select(x =>
             {
                 var lessonResult = lessonResults.FirstOrDefault(y => y.LessonId == x.LessonId);
                 var classForumReport = _mapper.Map<ClassForumReportModel>(x);

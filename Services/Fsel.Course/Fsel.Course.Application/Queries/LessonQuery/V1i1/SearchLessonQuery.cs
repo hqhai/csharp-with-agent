@@ -1,0 +1,126 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
+{
+    using System.Globalization;
+    using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.EntityModels.V1i1;
+    using Fsel.Course.Domain.Models.QueryModels.Lessons.V1i1;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class SearchLessonQuery : SearchLessonQueryModel, IRequest<MethodResult<PagingItemsModel<LessonSearchModel>>>
+    {
+    }
+
+    public class SearchLessonQueryHandler : IRequestHandler<SearchLessonQuery, MethodResult<PagingItemsModel<LessonSearchModel>>>
+    {
+        private readonly ILessonRepository _lessonRepository;
+        private readonly ILessonModuleRepository _lessonModuleRepository;
+        private readonly IVideoRepository _videoRepository;
+        private readonly ILevelRepository _levelRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+
+        public SearchLessonQueryHandler(ILessonRepository lessonRepository,
+                                        ILessonModuleRepository lessonModuleRepository,
+                                        IVideoRepository videoRepository,
+                                        ILevelRepository levelRepository,
+                                        ICategoryRepository categoryRepository,
+                                        IVideoTimeCodeRepository videoTimeCodeRepository)
+        {
+            _lessonRepository = lessonRepository;
+            _lessonModuleRepository = lessonModuleRepository;
+            _videoRepository = videoRepository;
+            _levelRepository = levelRepository;
+            _categoryRepository = categoryRepository;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+        }
+
+        public async Task<MethodResult<PagingItemsModel<LessonSearchModel>>> Handle(SearchLessonQuery request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            MethodResult<PagingItemsModel<LessonSearchModel>> methodResult = new MethodResult<PagingItemsModel<LessonSearchModel>>();
+            if (request.PageSize > 100)
+            {
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+
+            var lessonQuery = from a in _lessonRepository.Queryable
+                              where a.Status != Shared.Enums.EnumStatus.Archive
+                              select new
+                              {
+                                  Lesson = a,
+                                  Program = _categoryRepository.Queryable.FirstOrDefault(x => x.Id == a.ProgramId),
+                                  Level = _levelRepository.Queryable.FirstOrDefault(x => x.Id == a.LevelId),
+                                  Videos = (from b in _lessonModuleRepository.Queryable
+                                            join v in _videoRepository.Queryable on b.VideoId equals v.Id
+                                            where b.LessonId == a.Id
+                                            select v).ToList()
+                              };
+
+            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                lessonQuery = lessonQuery.Where(m => m.Lesson.Name != null && m.Lesson.Name.Contains(request.Keyword));
+            }
+
+            if (request.ProgramId.HasValue)
+            {
+                lessonQuery = lessonQuery.Where(x => x.Lesson.ProgramId == request.ProgramId);
+            }
+
+            if (request.LevelId.HasValue)
+            {
+                lessonQuery = lessonQuery.Where(x => x.Lesson.LevelId == request.LevelId);
+            }
+
+            if (request.TeacherId.HasValue)
+            {
+                lessonQuery = lessonQuery.Where(x => x.Videos.Any(v => v.TeacherId == request.TeacherId));
+            }
+
+            if (request.TimeCodeType.HasValue)
+            {
+                lessonQuery = lessonQuery.Where(x => x.Videos.Any(v => v.VideoTimeCodes.Any(t => t.TimeCodeType == request.TimeCodeType)));
+            }
+
+            var lesson = lessonQuery.Select(x => new LessonSearchModel
+            {
+                Id = x.Lesson.Id,
+                CreatedDate = x.Lesson.CreatedDate,
+                CreatedUserId = x.Lesson.CreatedUserId,
+                CreatedFullName = x.Lesson.CreatedFullName,
+                UpdatedDate = x.Lesson.UpdatedDate,
+                UpdatedFullName = x.Lesson.UpdatedFullName,
+                UpdatedUserId = x.Lesson.UpdatedUserId,
+                Name = x.Lesson.Name,
+                Status = x.Lesson.Status,
+                LevelId = x.Lesson.LevelId,
+                NameLevel = x.Level.Name,
+                ProgramId = x.Lesson.ProgramId,
+                NameProgram = x.Program.Name,
+                Videos = x.Videos.Select(v => new VideoSearchModel
+                {
+                    TeacherId = v.TeacherId,
+                    TimeCodeTypes = v.VideoTimeCodes.Select(t => t.TimeCodeType).ToList(),
+                }).ToList()
+            });
+
+            int totalItem = await lesson.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await lesson.ApplySortAndPaging(request)
+                                    .AsNoTracking()
+                                    .ToListAsync(cancellationToken: cancellationToken)
+                                    .ConfigureAwait(false);
+
+            methodResult.Result = new PagingItemsModel<LessonSearchModel>(lists, request, totalItem);
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            return methodResult;
+        }
+    }
+}

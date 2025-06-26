@@ -11,6 +11,7 @@ using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Fsel.Course.Domain.Entities.V1i1;
 
 namespace Fsel.Course.Infrastructure
 {
@@ -99,6 +100,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<StepFlow> StepFlows { get; set; }
         public DbSet<ActionFlow> ActionFlows { get; set; }
         public DbSet<CategoryTestBank> CategoryTestBanks { get; set; }
+        public DbSet<LessonModule> LessonModules { get; set; }
+        public DbSet<Document> Documents { get; set; }
 
         #region Report
 
@@ -122,16 +125,17 @@ namespace Fsel.Course.Infrastructure
         public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
         public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
 
-        #endregion Report
-
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
-        public DbSet<WeeklyReport> WeeklyReports { get; set; }
         public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
         public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
 
         public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
         public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
         public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
+
+        #endregion Report
+
+        public DbSet<WeeklyReport> WeeklyReports { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -215,6 +219,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new StepFlowEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ActionFlowEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CategoryTestBankEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonModuleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DocumentEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
