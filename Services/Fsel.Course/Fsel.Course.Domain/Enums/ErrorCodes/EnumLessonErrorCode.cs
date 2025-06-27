@@ -34,5 +34,9 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         PercentNotValid,
 
         AlConfigNotNull,
+
+        OpenOrderOutOfSequence,
+
+        DisplayOrderOutOfSequence,
     }
 }

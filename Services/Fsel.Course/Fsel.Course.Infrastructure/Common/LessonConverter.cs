@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.LessonInstructions;
     using Fsel.Course.Domain.Models.CommandModels.LessonModules;
+    using Fsel.Course.Infrastructure.Repositories;
     using Microsoft.EntityFrameworkCore;
 
     public class LessonConverter
@@ -24,14 +25,12 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly ISkillRepository _skillRepository;
         private readonly IClassForumRepository _classForumRepository;
-        private readonly IDocumentRepository _documentRepository;
 
         public LessonConverter(IMapper mapper,
                                IVideoRepository videoRepository,
                                IHomeWorkRepository homeWorkRepository,
                                ISkillRepository skillRepository,
-                               IClassForumRepository classForumRepository,
-                               IDocumentRepository documentRepository)
+                               IClassForumRepository classForumRepository)
         {
             _lessonModule = new Dictionary<EnumLessonConfigType, Func<CreateLessonModuleCommandModel, LessonModule, CancellationToken, Task<MethodResult<bool>>>>()
             {
@@ -45,7 +44,6 @@ namespace Fsel.Course.Infrastructure.Common
             _homeWorkRepository = homeWorkRepository;
             _skillRepository = skillRepository;
             _classForumRepository = classForumRepository;
-            _documentRepository = documentRepository;
         }
 
         public async Task<MethodResult<bool>> LessonInstructionHandler(IList<CreateLessonInstructionCommandModel> lessonInstructions, Lesson lesson, CancellationToken cancellationToken)
@@ -104,9 +102,26 @@ namespace Fsel.Course.Infrastructure.Common
             double maxPercent = 100;
             var sumPercent = lessonModules.Sum(x => x.Percent);
 
-            if (sumPercent < minPercent && sumPercent > maxPercent)
+            // check percent
+            if (sumPercent < minPercent || sumPercent > maxPercent)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.PercentNotValid), nameof(sumPercent), sumPercent);
+                return methodResult;
+            }
+
+            // check open order
+            List<int> openOrders = lessonModules.Select(x => x.OpenOrder).Distinct().ToList();
+            if (!IsValidNumber(openOrders))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.OpenOrderOutOfSequence), nameof(openOrders), openOrders);
+                return methodResult;
+            }
+
+            // check display order
+            List<int> displayOrders = lessonModules.Select(x => x.DisplayOrder).Distinct().ToList();
+            if (!IsValidNumber(displayOrders))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.DisplayOrderOutOfSequence), nameof(displayOrders), displayOrders);
                 return methodResult;
             }
 
@@ -142,6 +157,10 @@ namespace Fsel.Course.Infrastructure.Common
 
                     lesson.LessonModules.Add(lessonModule);
                 }
+
+                // thêm display number
+                var lessonModuleSameTypes = lessonModules.Where(x => x.LessonConfigType == request.LessonConfigType).OrderBy(x => x.DisplayOrder).ToList();
+                lessonModule.DisplayNumber = lessonModuleSameTypes.IndexOf(request) + 1;
 
                 var fun = _lessonModule[request.LessonConfigType];
                 var handler = await fun(request, lessonModule, cancellationToken);
@@ -298,6 +317,26 @@ namespace Fsel.Course.Infrastructure.Common
             await _classForumRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             return await Task.FromResult(methodResult);
+        }
+
+        private static bool IsValidNumber(List<int> numbers)
+        {
+            if (numbers == null || !numbers.Any())
+            {
+                return true;
+            }
+
+            numbers.Sort();
+
+            for (int i = 1; i < numbers.Count; i++)
+            {
+                if (numbers[i] != numbers[i - 1] + 1)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

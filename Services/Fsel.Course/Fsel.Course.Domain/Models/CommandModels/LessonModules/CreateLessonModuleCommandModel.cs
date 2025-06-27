@@ -22,8 +22,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.LessonModules
 
         public int DisplayOrder { get; set; }
 
-        public int DisplayNumber { get; set; }
-
         public int OpenOrder { get; set; }
 
         public Guid? VideoId { get; set; }

@@ -115,14 +115,14 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                                         Percent = x.lm.Percent,
                                         LessonConfigType = x.lm.LessonConfigType,
                                         ClassForumId = x.lm.ClassForumId,
-                                        ClassForum = _mapper.Map<ClassForumModel>(_classForumRepository.Queryable.FirstOrDefault(c => c.Id == x.lm.ClassForumId)),
+                                        ClassForum = _mapper.Map<ClassForumModel>(_classForumRepository.Queryable.Include(c => c.ClassForumFiles).FirstOrDefault(c => c.Id == x.lm.ClassForumId)),
                                         HomeWorkId = x.lm.HomeWorkId,
                                         HomeWork = _mapper.Map<Domain.Models.EntityModels.HomeWorkModel>(_homeWorkRepository.Queryable.FirstOrDefault(c => c.Id == x.lm.HomeWorkId)),
                                         DocumentId = x.lm.DocumentId,
                                         Document = _mapper.Map<DocumentModel>(_documentRepository.Queryable.FirstOrDefault(c => c.Id == x.lm.DocumentId)),
                                         VideoId = x.lm.VideoId,
-                                        Video = _mapper.Map<Domain.Models.EntityModels.VideoModel>(_videoRepository.Queryable.FirstOrDefault(c => c.Id == x.lm.VideoId))
-                                    }).OrderByDescending(x => x.CreatedDate).ToList(),
+                                        Video = _mapper.Map<Domain.Models.EntityModels.VideoModel>(_videoRepository.Queryable.Include(x => x.VideoTimeCodes).FirstOrDefault(c => c.Id == x.lm.VideoId))
+                                    }).OrderByDescending(x => x.DisplayOrder).ToList(),
                                 }).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
             if (lesson == null)

@@ -65,7 +65,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
                 return methodResult;
             }
 
-            var checkCode = await _lessonRepository.Queryable.AnyAsync(x => x.Status != EnumStatus.InActive && x.Name == request.Name.Trim(), cancellationToken);
+            var checkCode = await _lessonRepository.Queryable.AnyAsync(x => x.Name == request.Name.Trim(), cancellationToken);
             if (checkCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeAlreadyExist), request.Name);

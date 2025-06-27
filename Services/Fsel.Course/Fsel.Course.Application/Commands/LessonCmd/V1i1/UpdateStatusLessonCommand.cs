@@ -43,7 +43,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
 
             if (request.Status == EnumStatus.Active)
             {
-                var checkCode = await _lessonRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Name == lesson.Name, cancellationToken).ConfigureAwait(false);
+                var checkCode = await _lessonRepository.Queryable.AnyAsync(x => x.Status == EnumStatus.Active && x.Id != request.Id && x.Name == lesson.Name, cancellationToken).ConfigureAwait(false);
                 if (checkCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeAlreadyExist), nameof(checkCode), nameof(lesson.Name));

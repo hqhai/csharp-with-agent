@@ -48,6 +48,9 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
 
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
         {
+
+            // tạm thời pending đợi BA chốt lại rule nghiệp vụ
+
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
             Regex regexCode = new Regex("^[a-zA-Z0-9._]+$");
