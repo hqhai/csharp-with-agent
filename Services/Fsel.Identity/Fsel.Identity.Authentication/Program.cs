@@ -98,7 +98,14 @@ builder.Services.AddAuthentication()
                 }
 
                 return Task.CompletedTask;
-            }
+            },
+            OnRemoteFailure = context =>
+            {
+                var redirectUri = context.Properties?.RedirectUri ?? string.Empty;
+                context.Response.Redirect(redirectUri);
+                context.HandleResponse();
+                return Task.CompletedTask;
+            },
         };
     })
     .AddFacebook(facebookOptions =>
@@ -126,7 +133,14 @@ builder.Services.AddAuthentication()
                 }
 
                 return Task.CompletedTask;
-            }
+            },
+            OnRemoteFailure = context =>
+            {
+                var redirectUri = context.Properties?.RedirectUri ?? string.Empty;
+                context.Response.Redirect(redirectUri);
+                context.HandleResponse();
+                return Task.CompletedTask;
+            },
         };
     })
     .AddOAuth<OAuthOptions, ZaloOAuthHandler>(LoginProvider.Zalo, options =>
