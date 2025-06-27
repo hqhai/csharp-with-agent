@@ -22,16 +22,13 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
     {
         private readonly IMapper _mapper;
         private readonly ITestConfigRepository _testConfigRepository;
-        private readonly ISkillRepository _skillRepository;
 
         public CreateTestConfigCommandHandler(IMapper mapper
             , ITestConfigRepository testConfigRepository
-            , ISkillRepository skillRepository
             )
         {
             _mapper = mapper;
             _testConfigRepository = testConfigRepository;
-            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<TestConfigModel>> Handle(CreateTestConfigCommand request, CancellationToken cancellationToken)
