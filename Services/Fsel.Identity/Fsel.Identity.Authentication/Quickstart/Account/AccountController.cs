@@ -36,6 +36,9 @@ using Fsel.Common.Caching;
 using Fsel.Identity.Application.Commands.UserReferrals;
 using static IdentityServer4.IdentityServerConstants;
 using System.Text;
+using Fsel.Identity.Infrastructure.Repositories;
+using System.Threading;
+using Fsel.Common.Enums.ErrorCodes;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -64,6 +67,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IParentRepository _parentRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IUserOtpCodeRepository _userOtpRepository;
+        private readonly IPlatformRepository _platformRepository;
         private readonly IUserRepository _userRepository;
         private readonly Core.Base.AuthContext _languageContext;
         private readonly IStringLocalizer _localizer;
@@ -87,7 +91,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             IUserRepository userRepository,
             Core.Base.AuthContext languageContext,
             IStringLocalizer localizer,
-            ICacheService<UserOtpCodeModel> userOtpCache)
+            ICacheService<UserOtpCodeModel> userOtpCache,
+            IPlatformRepository platformRepository)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -111,6 +116,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             _languageContext = languageContext;
             _localizer = localizer;
             _userOtpCache = userOtpCache;
+            _platformRepository = platformRepository;
         }
 
         /// <summary>
@@ -623,44 +629,15 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         {
             ArgumentNullException.ThrowIfNull(model);
 
-            // check if we are in the context of an authorization request
+            var vm = await BuildLoginViewModelAsync(model);
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-
-            //// the user clicked the "cancel" button
-            //if (button != "login")
-            //{
-            //    if (context != null)
-            //    {
-            //        // if the user cancels, send a result back into IdentityServer as if they
-            //        // denied the consent (even if this client does not require consent).
-            //        // this will send back an access denied OIDC error response to the client.
-            //        await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
-
-            //        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-            //        if (context.IsNativeClient())
-            //        {
-            //            // The client is native, so this change in how to
-            //            // return the response is for better UX for the end user.
-            //            return this.LoadingPage("Redirect", model.ReturnUrl ?? string.Empty);
-            //        }
-
-            //        return Redirect(model.ReturnUrl ?? string.Empty);
-            //    }
-            //    else
-            //    {
-            //        // since we don't have a valid context, then we just go back to the home page
-            //        return Redirect("~/");
-            //    }
-            //}
 
             if (ModelState.IsValid)
             {
                 var user = await _signInManager.UserManager.FindByNameAsync(model.Username ?? string.Empty);
-                if (user is not null)
+                if (user is not null && await ValidateLogin(user))
                 {
                     var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, true);
-
-                    // validate username/password against in-memory store
                     if (userLogin.Succeeded)
                     {
                         await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
@@ -733,16 +710,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, _localizer["i18n_Invalid_Credentials"], clientId: context?.Client.ClientId));
             }
 
-            // something went wrong, show form with error
-            var vm = await BuildLoginViewModelAsync(model);
-
             return View(vm);
         }
 
         private async Task<IActionResult> LoginWithoutPassword(User? user, string? returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            if (user is not null)
+            if (user is not null && await ValidateLogin(user))
             {
                 var props = new AuthenticationProperties
                 {
@@ -881,12 +855,17 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             {
                 return RedirectToAction(nameof(Login), new { returnUrl });
             }
+            var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            if (user != null && !await ValidateLogin(user))
+            {
+                return RedirectToAction(nameof(Login), new { returnUrl });
+            }
             var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (signInResult.Succeeded)
             {
                 return Redirect(returnUrl);
             }
-            if (signInResult.IsLockedOut)
+            else if (signInResult.IsLockedOut)
             {
                 return RedirectToAction(nameof(Forgot), new { returnUrl });
             }
@@ -948,6 +927,17 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 result = await _userManager.AddLoginAsync(user, info);
                 if (result.Succeeded)
                 {
+                    var roles = await _userManager.GetRolesAsync(user);
+                    if (!roles.Contains(EnumRole.Student.ToString()))
+                    {
+                        user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
+                        result = await _userManager.UpdateAsync(user);
+                        result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                    }
+                    if (!await ValidateLogin(user))
+                    {
+                        return View(request);
+                    }
                     await _signInManager.SignInAsync(user, isPersistent: false);
                     return Redirect(request.ReturnUrl ?? returnUrl ?? string.Empty);
                 }
@@ -995,6 +985,41 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             }
 
             return View(request);
+        }
+
+        private async Task<bool> ValidateLogin(User? user)
+        {
+            if (user != null)
+            {
+                var platformCodes = await _platformRepository.Queryable
+                    .Include(x => x.UserPlatforms)
+                    .Where(x => x.UserPlatforms.Any(n => n.UserId == user.Id))
+                    .Select(x => x.Code)
+                    .ToListAsync();
+
+                if (platformCodes != null && platformCodes.Count > 0 && !platformCodes.Contains(EnumPlatformCode.LMS))
+                {
+                    ModelState.AddModelError(string.Empty, _localizer[nameof(EnumAuthUserErrorCode.UserIsNotOnAnyPlatform)]);
+                }
+                else if (user.Status == EnumUserStatus.Inactive)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer[nameof(EnumAuthUserErrorCode.AccountHasBeenLocked)]);
+                }
+                else if (user.Status == EnumUserStatus.Disable)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer[nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff)]);
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                ModelState.AddModelError(string.Empty, _localizer[nameof(EnumSystemErrorCode.DataNotExist)]);
+            }
+
+            return false;
         }
 
         [HttpGet]

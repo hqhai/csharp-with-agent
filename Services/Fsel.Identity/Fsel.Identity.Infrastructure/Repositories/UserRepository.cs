@@ -13,15 +13,17 @@ namespace Fsel.Identity.Infrastructure.Repositories
         private readonly UserManager<User> _userManager;
         private readonly IStudentRepository _studentRepository;
         private readonly IParentRepository _parentRepository;
+        private readonly IPlatformRepository _platformRepository;
         private readonly UserDbContext _userDbContext;
         public DbContext DbContext => _userDbContext;
 
-        public UserRepository(UserManager<User> userManager, IStudentRepository studentRepository, IParentRepository parentRepository, UserDbContext userDbContext)
+        public UserRepository(UserManager<User> userManager, IStudentRepository studentRepository, IParentRepository parentRepository, UserDbContext userDbContext, IPlatformRepository platformRepository)
         {
             _userManager = userManager;
             _studentRepository = studentRepository;
             _parentRepository = parentRepository;
             _userDbContext = userDbContext;
+            _platformRepository = platformRepository;
         }
 
         public async Task<User> GenerateUserDataAsync(User user, EnumRoleRegister role)
@@ -53,18 +55,31 @@ namespace Fsel.Identity.Infrastructure.Repositories
                     level = EnumCourseLevel.B1;
                 }
 
-                user.Student = new Student
+                user.Student ??= new Student
                 {
                     UserId = user.Id,
                     CreatedByParent = false,
                     Occupation = nameof(Student),
                     CourseLevel = level
                 };
+                user.UserSettings ??= new List<UserSetting>()
+                {
+                    new UserSetting(true)
+                };
+
+                var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, CancellationToken.None);
+                if (platform != null && !user.UserPlatforms.Any(x => x.PlatformId == platform.Id))
+                {
+                    user.UserPlatforms.Add(new UserPlatform
+                    {
+                        PlatformId = platform.Id
+                    });
+                }
             }
             else if (role == EnumRoleRegister.Parent)
             {
                 var stt = await _parentRepository.Queryable.CountAsync();
-                user.Parent = new Parent
+                user.Parent ??= new Parent
                 {
                     UserId = user.Id,
                 };
