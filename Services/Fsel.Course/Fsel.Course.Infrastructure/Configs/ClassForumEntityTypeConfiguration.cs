@@ -38,8 +38,8 @@ namespace Fsel.Course.Infrastructure.Configs
                 .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(a => a.Skill)
-                .WithOne(b => b.ClassForum)
-                .HasForeignKey<ClassForum>(p => p.SkillId)
+                .WithMany(b => b.ClassForums)
+                .HasForeignKey(p => p.SkillId)
                 .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(a => a.Category)

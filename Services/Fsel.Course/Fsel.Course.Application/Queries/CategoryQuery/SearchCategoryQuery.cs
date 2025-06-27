@@ -29,7 +29,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<CategoryModel>> methodResult = new MethodResult<PagingItemsModel<CategoryModel>>();
 
-            var categoryQueries = _categoryRepository.Queryable.Where(x => x.Type == Shared.Enums.EnumTypeCategory.Subject && !x.ParentId.HasValue && x.Status != EnumStatus.Archive).AsQueryable();
+            var categoryQueries = _categoryRepository.Queryable.Where(x => x.Type == EnumTypeCategory.Subject && !x.ParentId.HasValue && x.Status != EnumStatus.Archive).AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
