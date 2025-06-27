@@ -7,6 +7,7 @@ using System.Text.Json;
 using AutoMapper;
 using Fsel.Authentication.Infrastructure.Configs;
 using Fsel.Common.Constants;
+using Fsel.Common.Helpers;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Events;
 using Fsel.Identity.Application.Queues.Publishers;
@@ -136,6 +137,9 @@ builder.Services.AddAuthentication()
             },
             OnRemoteFailure = context =>
             {
+                var logger = context.HttpContext.RequestServices.GetService<ILogger<RemoteFailureContext>>();
+                logger.LogCritical("facebookOptions.OnRemoteFailure", context.Properties.Serialize());
+
                 var redirectUri = context.Properties?.RedirectUri ?? string.Empty;
                 context.Response.Redirect(redirectUri);
                 context.HandleResponse();
