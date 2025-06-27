@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250627092831_Update_Table_To_Skill_Unique1")]
+    partial class Update_Table_To_Skill_Unique1
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,9 +71,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<bool>("IsTestDefault")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Name")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
@@ -82,10 +82,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("TestMode")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -110,75 +106,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("ParentId");
 
                     b.ToTable("Categorys");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.CategoryTestBank", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<Guid>("ProgramId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("TestId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("TestType")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProgramId");
-
-                    b.ToTable("CategoryTestBanks");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForum", b =>
@@ -2105,242 +2032,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.ToTable("FinalTestSections");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.FlowConfigs.ActionFlow", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<int>("EndPercent")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("FromStepFlowId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<int>("StartPercent")
-                        .HasColumnType("int");
-
-                    b.Property<string>("SystemAutoCode")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<Guid>("ToStepFlowId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FromStepFlowId");
-
-                    b.HasIndex("ToStepFlowId");
-
-                    b.ToTable("ActionFlows");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.FlowConfigs.Flow", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<string>("ConfigStr")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<int>("FromAge")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<Guid>("ProgramId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<int>("ToAge")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProgramId");
-
-                    b.ToTable("Flows");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.FlowConfigs.StepFlow", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<Guid?>("FlowId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<Guid>("LevelId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ParentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FlowId");
-
-                    b.HasIndex("LevelId");
-
-                    b.HasIndex("ParentId");
-
-                    b.ToTable("StepFlows");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWork", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3863,21 +3554,15 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid?>("LevelId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Level")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("PlacementTestLevel")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<Guid?>("ProgramId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -3893,10 +3578,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LevelId");
-
-                    b.HasIndex("ProgramId");
 
                     b.ToTable("PlacementTests");
                 });
@@ -4015,9 +3696,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<Guid?>("FlowId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
@@ -4066,8 +3744,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedDate"), new[] { "StudentId" });
 
-                    b.HasIndex("FlowId");
-
                     b.HasIndex("StudentId")
                         .IsUnique();
 
@@ -4084,9 +3760,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
-
-                    b.Property<Guid?>("ActionFlowId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("CorrectCount")
                         .HasColumnType("int");
@@ -4137,9 +3810,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<Guid?>("StepFlowId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
@@ -4161,15 +3831,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActionFlowId");
-
                     b.HasIndex("CreatedUserId");
 
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "ActionFlowId", "CorrectCount", "CorrectTotal", "CountQuestion", "CreatedDate", "CreatedFullName", "IsDeleted", "Level", "Percent", "PlacementTestGroupResultId", "PlacementTestId", "SkillScoresStr", "Status", "StepFlowId", "StudentId", "TotalQuestion", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "CorrectCount", "CorrectTotal", "CountQuestion", "CreatedDate", "CreatedFullName", "IsDeleted", "Level", "Percent", "PlacementTestGroupResultId", "PlacementTestId", "SkillScoresStr", "Status", "StudentId", "TotalQuestion", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
                     b.HasIndex("PlacementTestGroupResultId");
-
-                    b.HasIndex("StepFlowId");
 
                     b.HasIndex("StudentId");
 
@@ -6298,17 +5964,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("CategoryParent");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.CategoryTestBank", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.Category", "Category")
-                        .WithMany("CategoryTestBanks")
-                        .HasForeignKey("ProgramId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForum", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.Lesson", "Lesson")
@@ -6709,61 +6364,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("SectionGroup");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.FlowConfigs.ActionFlow", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.FlowConfigs.StepFlow", "FromStepFlow")
-                        .WithMany("ChildActionFlows")
-                        .HasForeignKey("FromStepFlowId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Fsel.Course.Domain.Entities.FlowConfigs.StepFlow", "ToStepFlow")
-                        .WithMany("ParentActionFlows")
-                        .HasForeignKey("ToStepFlowId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("FromStepFlow");
-
-                    b.Navigation("ToStepFlow");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.FlowConfigs.Flow", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.Category", "Category")
-                        .WithMany("Flows")
-                        .HasForeignKey("ProgramId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.FlowConfigs.StepFlow", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.FlowConfigs.Flow", "Flow")
-                        .WithMany("StepFlows")
-                        .HasForeignKey("FlowId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Fsel.Course.Domain.Entities.Level", "Level")
-                        .WithMany("StepFlows")
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("Fsel.Course.Domain.Entities.FlowConfigs.StepFlow", "ParentFlowStep")
-                        .WithMany("StepFlows")
-                        .HasForeignKey("ParentId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Flow");
-
-                    b.Navigation("Level");
-
-                    b.Navigation("ParentFlowStep");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWork", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.Skill", "Skill")
@@ -7081,23 +6681,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("SectionGroup");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.PlacementTest", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.Level", "Level")
-                        .WithMany("PlacementTests")
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Fsel.Course.Domain.Entities.Category", "Program")
-                        .WithMany("PlacementTests")
-                        .HasForeignKey("ProgramId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Level");
-
-                    b.Navigation("Program");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.PlacementTestAnswer", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.PlacementTestResult", "PlacementTestResult")
@@ -7124,23 +6707,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("SectionQuestion");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.PlacementTestGroupResult", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.FlowConfigs.Flow", "Flow")
-                        .WithMany("PlacementTestGroupResults")
-                        .HasForeignKey("FlowId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Flow");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.PlacementTestResult", b =>
                 {
-                    b.HasOne("Fsel.Course.Domain.Entities.FlowConfigs.ActionFlow", "ActionFlow")
-                        .WithMany("PlacementTestResults")
-                        .HasForeignKey("ActionFlowId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("Fsel.Course.Domain.Entities.PlacementTestGroupResult", "PlacementTestGroupResult")
                         .WithMany("PlacementTestResults")
                         .HasForeignKey("PlacementTestGroupResultId")
@@ -7151,18 +6719,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasForeignKey("PlacementTestId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fsel.Course.Domain.Entities.FlowConfigs.StepFlow", "StepFlow")
-                        .WithMany("PlacementTestResults")
-                        .HasForeignKey("StepFlowId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("ActionFlow");
-
                     b.Navigation("PlacementTest");
 
                     b.Navigation("PlacementTestGroupResult");
-
-                    b.Navigation("StepFlow");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.PlacementTestSection", b =>
@@ -7514,15 +7073,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Category", b =>
                 {
-                    b.Navigation("CategoryTestBanks");
-
                     b.Navigation("Categorys");
 
-                    b.Navigation("Flows");
-
                     b.Navigation("Levels");
-
-                    b.Navigation("PlacementTests");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForum", b =>
@@ -7634,29 +7187,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("SectionGroupResults");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.FlowConfigs.ActionFlow", b =>
-                {
-                    b.Navigation("PlacementTestResults");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.FlowConfigs.Flow", b =>
-                {
-                    b.Navigation("PlacementTestGroupResults");
-
-                    b.Navigation("StepFlows");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.FlowConfigs.StepFlow", b =>
-                {
-                    b.Navigation("ChildActionFlows");
-
-                    b.Navigation("ParentActionFlows");
-
-                    b.Navigation("PlacementTestResults");
-
-                    b.Navigation("StepFlows");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWork", b =>
                 {
                     b.Navigation("HomeWorkQuestions");
@@ -7706,11 +7236,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Level", b =>
                 {
-                    b.Navigation("PlacementTests");
-
                     b.Navigation("SkillLevels");
-
-                    b.Navigation("StepFlows");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTest", b =>

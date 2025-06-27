@@ -24,8 +24,8 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<SectionGroup> SectionGroups { get; set; } = new List<SectionGroup>();
         public ICollection<ClassForum> ClassForums { get; set; } = new List<ClassForum>();
         public ICollection<HomeWork> HomeWorks { get; set; } = new List<HomeWork>();
-        public LessonInstruction? LessonInstruction { get; set; }
-        public ExtraPracticeExerciseResult? ExtraPracticeExerciseResult { get; set; }
+        public ICollection<LessonInstruction> LessonInstructions { get; set; } = new List<LessonInstruction>();
+        public ICollection<ExtraPracticeExerciseResult> ExtraPracticeExerciseResults { get; set; } = new List<ExtraPracticeExerciseResult>();
         public ICollection<SkillLevel> SkillLevels { get; set; } = new List<SkillLevel>();
     }
 }
