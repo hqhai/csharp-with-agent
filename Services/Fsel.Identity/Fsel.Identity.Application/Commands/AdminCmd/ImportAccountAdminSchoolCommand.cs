@@ -71,7 +71,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<ImportAccountAdminSchoolModel> methodResult = new MethodResult<ImportAccountAdminSchoolModel>();
             //var regexSchoolName = new Regex("^[a-zA-Z0-9]+$");
-            var regexPassword = new Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*d)(?=.*[^a-zA-Z0-9]).{8,}$");
+            var regexPassword = new Regex("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^a-zA-Z0-9]).{8,}$");
             if (request.FormFile == null)
             {
                 methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
