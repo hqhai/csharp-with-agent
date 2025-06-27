@@ -12,6 +12,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumTypeCategory ExpandedIcon { get; set; }
 
+        public DateTime CreatedDate { get; set; }
+
         public IList<CategoryTreeModel>? Children { get; set; }
     }
 }
