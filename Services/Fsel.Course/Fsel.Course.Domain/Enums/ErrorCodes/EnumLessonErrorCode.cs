@@ -33,7 +33,7 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
 
         PercentNotValid,
 
-        AlConfigNotNull,
+        AiConfigNotNull,
 
         OpenOrderOutOfSequence,
 

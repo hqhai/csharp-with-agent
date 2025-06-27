@@ -14,7 +14,6 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.LessonInstructions;
     using Fsel.Course.Domain.Models.CommandModels.LessonModules;
-    using Fsel.Course.Infrastructure.Repositories;
     using Microsoft.EntityFrameworkCore;
 
     public class LessonConverter
@@ -25,6 +24,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly ISkillRepository _skillRepository;
         private readonly IClassForumRepository _classForumRepository;
+        private static readonly Regex s_regexInstruction = new Regex("^[^<>&#*]{1,1000}$", RegexOptions.Compiled);
 
         public LessonConverter(IMapper mapper,
                                IVideoRepository videoRepository,
@@ -51,11 +51,10 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(lesson);
             ArgumentNullException.ThrowIfNull(lessonInstructions);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            Regex regexInstruction = new Regex("^[^<>&#*]{1,1000}$");
 
             foreach (var request in lessonInstructions)
             {
-                if (!string.IsNullOrEmpty(request.Instruction) && !regexInstruction.IsMatch(request.Instruction))
+                if (!string.IsNullOrEmpty(request.Instruction) && !s_regexInstruction.IsMatch(request.Instruction))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.InstructionNotValid), request.Instruction);
                     return methodResult;
@@ -215,6 +214,8 @@ namespace Fsel.Course.Infrastructure.Common
         private async Task<MethodResult<bool>> LessonModuleDocumentHandler(CreateLessonModuleCommandModel request, LessonModule lessonModule, CancellationToken cancellationToken)
         {
             MethodResult<bool> methodResult = new MethodResult<bool>();
+            int minLenghtName = 150;
+            int minLenghtFilePath = 3000;
 
             if (request.Document == null)
             {
@@ -236,13 +237,13 @@ namespace Fsel.Course.Infrastructure.Common
                     return methodResult;
                 }
 
-                if (file.Name.Length > 150)
+                if (file.Name.Length > minLenghtName)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumDocumentErrorCode.NameFileMaxLength), nameof(file.Name));
                     return methodResult;
                 }
 
-                if (file.FilePath.Length > 3000)
+                if (file.FilePath.Length > minLenghtFilePath)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumDocumentErrorCode.FilePathMaxLength), nameof(file.FilePath));
                     return methodResult;
@@ -279,7 +280,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (request.ClassForum.IsAlFeedBack && (string.IsNullOrEmpty(request.ClassForum.SystemRoleAlConfig) && string.IsNullOrEmpty(request.ClassForum.UserAlConfig)))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.AlConfigNotNull), nameof(request.ClassForum));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.AiConfigNotNull), nameof(request.ClassForum));
                 return methodResult;
             }
 

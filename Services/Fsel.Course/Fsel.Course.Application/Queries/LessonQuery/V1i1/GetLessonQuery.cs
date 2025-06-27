@@ -84,18 +84,13 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                                     Name = g.Key.Name,
                                     Status = g.Key.Status,
                                     LevelId = g.Key.LevelId,
-                                    NameLevel = _levelRepository.Queryable.FirstOrDefault(x => x.Id == g.Key.LevelId) != null ?
-                                                _levelRepository.Queryable.FirstOrDefault(x => x.Id == g.Key.LevelId)!.Name : default,
                                     ProgramId = g.Key.ProgramId,
-                                    NameProgram = _categoryRepository.Queryable.FirstOrDefault(x => x.Id == g.Key.ProgramId) != null ?
-                                                  _categoryRepository.Queryable.FirstOrDefault(x => x.Id == g.Key.ProgramId)!.Name : default,
                                     LessonInstructions = _lessonInstructionRepository.Queryable.Where(x => x.LessonId == g.Key.Id).Select(x => new Domain.Models.EntityModels.LessonInstructionModel
                                     {
                                         Id = x.Id,
                                         SkillId = x.SkillId,
                                         Instruction = x.Instruction,
-                                        SkillName = _skillRepository.Queryable.FirstOrDefault(c => c.Id == x.SkillId) != null ?
-                                                    _skillRepository.Queryable.FirstOrDefault(c => c.Id == x.SkillId)!.Name : default,
+
                                     }).ToList(),
                                     LessonModules = g.Select(x => new LessonModuleModel
                                     {
@@ -115,13 +110,9 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                                         Percent = x.lm.Percent,
                                         LessonConfigType = x.lm.LessonConfigType,
                                         ClassForumId = x.lm.ClassForumId,
-                                        ClassForum = _mapper.Map<ClassForumModel>(_classForumRepository.Queryable.Include(c => c.ClassForumFiles).FirstOrDefault(c => c.Id == x.lm.ClassForumId)),
                                         HomeWorkId = x.lm.HomeWorkId,
-                                        HomeWork = _mapper.Map<Domain.Models.EntityModels.HomeWorkModel>(_homeWorkRepository.Queryable.FirstOrDefault(c => c.Id == x.lm.HomeWorkId)),
                                         DocumentId = x.lm.DocumentId,
-                                        Document = _mapper.Map<DocumentModel>(_documentRepository.Queryable.FirstOrDefault(c => c.Id == x.lm.DocumentId)),
-                                        VideoId = x.lm.VideoId,
-                                        Video = _mapper.Map<Domain.Models.EntityModels.VideoModel>(_videoRepository.Queryable.Include(x => x.VideoTimeCodes).FirstOrDefault(c => c.Id == x.lm.VideoId))
+                                        VideoId = x.lm.VideoId
                                     }).OrderByDescending(x => x.DisplayOrder).ToList(),
                                 }).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
 
@@ -131,9 +122,74 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                 return methodResult;
             }
 
+            await SetFieldName(lesson, cancellationToken);
+
             methodResult.Result = lesson;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task SetFieldName(LessonModel lesson, CancellationToken cancellationToken)
+        {
+            var level = await _levelRepository.Queryable.FirstOrDefaultAsync(x => x.Id == lesson.LevelId, cancellationToken);
+            lesson.NameLevel = level?.Name;
+            var category = await _categoryRepository.Queryable.FirstOrDefaultAsync(x => x.Id == lesson.ProgramId, cancellationToken);
+            lesson.NameProgram = category?.Name;
+
+            if (lesson.LessonInstructions != null && lesson.LessonInstructions.Any())
+            {
+                var skillIds = lesson.LessonInstructions.Where(x => x.SkillId.HasValue).Select(x => x.SkillId!.Value).ToList() ?? new List<Guid>();
+                var skills = await _skillRepository.Queryable.WhereBulkContains(skillIds, x => x.Id).AsNoTracking().ToListAsync(cancellationToken);
+
+                foreach (var lessonInstruction in lesson.LessonInstructions)
+                {
+                    if (lessonInstruction.SkillId.HasValue)
+                    {
+                        lessonInstruction.SkillName = skills.FirstOrDefault(c => c.Id == lessonInstruction.SkillId)?.Name;
+                    }
+                }
+            }
+
+            if (lesson.LessonModules != null && lesson.LessonModules.Any())
+            {
+                var classForumIds = lesson.LessonModules.Where(x => x.ClassForumId.HasValue).Select(x => x.ClassForumId!.Value).ToList() ?? new List<Guid>();
+                var classForum = await _classForumRepository.Queryable.WhereBulkContains(classForumIds, x => x.Id).Include(c => c.ClassForumFiles).AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false);
+
+                var videoIds = lesson.LessonModules.Where(x => x.VideoId.HasValue).Select(x => x.VideoId!.Value).ToList() ?? new List<Guid>();
+                var videos = await _videoRepository.Queryable.WhereBulkContains(videoIds, x => x.Id).Include(x => x.VideoTimeCodes.OrderBy(c => c.DisplayTime)).AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false);
+
+                var homeWorkIds = lesson.LessonModules.Where(x => x.HomeWorkId.HasValue).Select(x => x.HomeWorkId!.Value).ToList() ?? new List<Guid>();
+                var homeWorks = await _homeWorkRepository.Queryable.WhereBulkContains(homeWorkIds, x => x.Id).AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false);
+
+                var documentIds = lesson.LessonModules.Where(x => x.DocumentId.HasValue).Select(x => x.DocumentId!.Value).ToList() ?? new List<Guid>();
+                var documents = await _documentRepository.Queryable.WhereBulkContains(documentIds, x => x.Id).AsNoTracking().ToListAsync(cancellationToken).ConfigureAwait(false);
+
+                foreach (var lessonModule in lesson.LessonModules)
+                {
+                    if (lessonModule.ClassForumId.HasValue)
+                    {
+                        lessonModule.ClassForum = _mapper.Map<ClassForumModel>(classForum.FirstOrDefault(c => c.Id == lessonModule.ClassForumId));
+                    }
+
+                    if (lessonModule.HomeWorkId.HasValue)
+                    {
+                        lessonModule.HomeWork = _mapper.Map<Domain.Models.EntityModels.HomeWorkModel>(homeWorks.FirstOrDefault(c => c.Id == lessonModule.HomeWorkId));
+
+                    }
+
+                    if (lessonModule.VideoId.HasValue)
+                    {
+                        lessonModule.Video = _mapper.Map<Domain.Models.EntityModels.VideoModel>(videos.FirstOrDefault(c => c.Id == lessonModule.VideoId));
+
+                    }
+
+                    if (lessonModule.DocumentId.HasValue)
+                    {
+                        lessonModule.Document = _mapper.Map<DocumentModel>(documents.FirstOrDefault(c => c.Id == lessonModule.DocumentId));
+
+                    }
+                }
+            }
         }
     }
 }

@@ -31,6 +31,8 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
         private readonly ICategoryRepository _categoryRepository;
         private readonly ILevelRepository _levelRepository;
         private readonly LessonConverter _lessonConverter;
+        private static readonly Regex s_regexCode = new Regex("^[a-zA-Z0-9._]+$", RegexOptions.Compiled);
+        private static readonly Regex s_regexInstructionContent = new Regex("^[^<>&#*]{1,2000}$", RegexOptions.Compiled);
 
         public CreateLessonCommandHandler(ILessonRepository lessonRepository,
                                           IMapper mapper,
@@ -49,8 +51,6 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
-            Regex regexCode = new Regex("^[a-zA-Z0-9._]+$");
-            Regex regexInstructionContent = new Regex("^[^<>&#*]{1,2000}$");
 
             #region Validate
             if (string.IsNullOrEmpty(request.Name))
@@ -59,7 +59,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
                 return methodResult;
             }
 
-            if (!regexCode.IsMatch(request.Name))
+            if (!s_regexCode.IsMatch(request.Name))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotValid), request.Name);
                 return methodResult;
@@ -86,7 +86,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
                 return methodResult;
             }
 
-            if (!string.IsNullOrEmpty(request.InstructionContent) && !regexInstructionContent.IsMatch(request.InstructionContent))
+            if (!string.IsNullOrEmpty(request.InstructionContent) && !s_regexInstructionContent.IsMatch(request.InstructionContent))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.InstructionContentNotValid), request.InstructionContent);
                 return methodResult;

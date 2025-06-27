@@ -58,8 +58,6 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                               select new
                               {
                                   Lesson = a,
-                                  Program = _categoryRepository.Queryable.FirstOrDefault(x => x.Id == a.ProgramId),
-                                  Level = _levelRepository.Queryable.FirstOrDefault(x => x.Id == a.LevelId),
                                   Videos = (from b in _lessonModuleRepository.Queryable
                                             join v in _videoRepository.Queryable on b.VideoId equals v.Id
                                             where b.LessonId == a.Id
@@ -104,9 +102,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                 Name = x.Lesson.Name,
                 Status = x.Lesson.Status,
                 LevelId = x.Lesson.LevelId,
-                NameLevel = x.Level.Name,
                 ProgramId = x.Lesson.ProgramId,
-                NameProgram = x.Program.Name,
                 Videos = x.Videos.Select(v => new VideoSearchModel
                 {
                     TeacherId = v.TeacherId,
@@ -119,6 +115,15 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                                     .AsNoTracking()
                                     .ToListAsync(cancellationToken: cancellationToken)
                                     .ConfigureAwait(false);
+
+            foreach (var item in lists)
+            {
+                var level = await _levelRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.LevelId, cancellationToken);
+                item.NameLevel = level?.Name;
+
+                var category = await _categoryRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.ProgramId, cancellationToken);
+                item.NameProgram = category?.Name;
+            }
 
             var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lessonQuery.SelectMany(x => x.Videos.Select(c => c.TeacherId).ToList()).ToList() });
             if (teacherResults.IsSuccessStatusCode)
