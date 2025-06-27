@@ -57,7 +57,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IUserVoucherLockRepository _userVoucherLockRepository;
         private readonly AddCoinWhenCoursePurchasedPublisher _addCoinWhenCoursePurchasedPublisher;
         private const string PaymentApproval = "Phê duyệt thanh toán";
-        private const string BuyPackage = "Mua gói học";
+        private const string BuyPackage = "Thanh toán gói phí";
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -169,21 +169,21 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
 
                         await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                         {
-                            StudentEditHistoryType = GetStudentEditHistory(role).Item1,
+                            StudentEditHistoryType = GetStudentEditHistory(role, package.MonthNumber).Item1,
                             StudentId = student.Id,
                             Month = package.MonthNumber + packageEvent.MonthBonus + monthBonus,
                             Day = packageEvent.DayBonus,
-                            Description = GetStudentEditHistory(role).Item2
+                            Description = GetStudentEditHistory(role, package.MonthNumber).Item2
                         }, cancellationToken);
                     }
                     else
                     {
                         await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                         {
-                            StudentEditHistoryType = GetStudentEditHistory(role).Item1,
+                            StudentEditHistoryType = GetStudentEditHistory(role, package.MonthNumber).Item1,
                             StudentId = student.Id,
                             ExpiredDate = order.ExpireDate,
-                            Description = GetStudentEditHistory(role).Item2
+                            Description = GetStudentEditHistory(role, package.MonthNumber).Item2
                         }, cancellationToken);
                     }
 
@@ -356,11 +356,11 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
             return number == (int)number;
         }
 
-        private (EnumStudentEditHistoryType, string) GetStudentEditHistory(string? role)
+        private (EnumStudentEditHistoryType, string) GetStudentEditHistory(string? role, int package)
         {
             if (role == null || role == EnumRole.Student.ToString())
             {
-                return (EnumStudentEditHistoryType.BuyPackage, BuyPackage);
+                return (EnumStudentEditHistoryType.BuyPackage, BuyPackage + $"{package} tháng");
             }
             else
             {
