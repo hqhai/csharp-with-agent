@@ -5,7 +5,6 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
-    using Fsel.Course.Domain.Entities.TestConfig;
 
     public class Skill : Entity
     {

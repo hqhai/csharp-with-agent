@@ -3,7 +3,6 @@
 namespace Fsel.Course.Domain.Models.EntityModels.SkillModels
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
 
     public class SkillModel : BaseModel
     {

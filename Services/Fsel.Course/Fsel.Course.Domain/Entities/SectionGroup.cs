@@ -24,7 +24,6 @@ namespace Fsel.Course.Domain.Entities
 
         public string? AudioPath { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
-
         public Skill? Skill { get; set; }
         public Guid? SkillId { get; set; }
 

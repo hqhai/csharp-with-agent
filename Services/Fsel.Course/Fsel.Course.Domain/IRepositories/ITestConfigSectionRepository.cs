@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.IRepositories
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.TestConfig;
 
-    public interface ITestLayoutRepository : IRepository<TestLayout>
+    public interface ITestConfigSectionRepository : IRepository<TestConfigSection>
     {
     }
 }

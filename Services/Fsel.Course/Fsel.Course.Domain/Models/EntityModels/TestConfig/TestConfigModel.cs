@@ -3,19 +3,24 @@
 namespace Fsel.Course.Domain.Models.EntityModels.TestConfig
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Entities.TestConfig;
-    using Fsel.Course.Domain.Models.EntityModels.SkillModels;
+    using Fsel.Shared.Enums;
 
     public class TestConfigModel : BaseModel
     {
         public string? Name { get; set; }
         public string? Code { get; set; }
         public bool IsActive { get; set; }
-        public long TotalQuestion { get; set; }
+        public double TotalScore { get; set; }
         public double ExecutionTime { get; set; }
-        public CategoryModel? Program { get; set; }
-        public IList<SkillModel>? Skills { get; set; }
-        public IList<TestLayoutModel>? TestLayouts { get; set; }
+        public Guid? ProgramId { get; set; }
+        public string? ProgramName { get; set; }
+
+        public Guid? LevelId { get; set; }
+        public string? LevelName { get; set; }
+
+        public EnumTestLayoutType LayoutType { get; set; }
+
+        public IList<string?>? SkillLevels { get; set; }
+        public IList<TestConfigSectionModel>? TestConfigSectionModels { get; set; }
     }
 }

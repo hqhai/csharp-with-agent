@@ -10,69 +10,52 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.TestConfig;
     using Fsel.Course.Domain.Models.QueryModels.MockTests;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchTestConfigQuery : SearchTestConfigQueryModel, IRequest<MethodResult<PagingItemsModel<TestConfigSearchModel>>>
+    public class SearchTestConfigQuery : SearchTestConfigQueryModel, IRequest<MethodResult<PagingItemsModel<TestConfigModel>>>
     {
     }
 
-    public class SearchTestConfigQueryHandler : IRequestHandler<SearchTestConfigQuery, MethodResult<PagingItemsModel<TestConfigSearchModel>>>
+    public class SearchTestConfigQueryHandler : IRequestHandler<SearchTestConfigQuery, MethodResult<PagingItemsModel<TestConfigModel>>>
     {
         private readonly ITestConfigRepository _testConfigRepository;
-        private readonly ISkillRepository _skillRepository;
 
-        public SearchTestConfigQueryHandler(ITestConfigRepository testConfigRepository, ISkillRepository skillLevelRepository)
+        public SearchTestConfigQueryHandler(ITestConfigRepository testConfigRepository)
         {
             _testConfigRepository = testConfigRepository;
-            _skillRepository = skillLevelRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<TestConfigSearchModel>>> Handle(SearchTestConfigQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<TestConfigModel>>> Handle(SearchTestConfigQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<PagingItemsModel<TestConfigSearchModel>> methodResult = new MethodResult<PagingItemsModel<TestConfigSearchModel>>();
+            MethodResult<PagingItemsModel<TestConfigModel>> methodResult = new MethodResult<PagingItemsModel<TestConfigModel>>();
 
             var testConfigQuery = _testConfigRepository.Queryable
-                                .Include(tc => tc.Program)
-                                .Select(x => new TestConfigSearchModel
-                                {
-                                    Id = x.Id,
-                                    Name = x.Name,
-                                    Code = x.Code,
-                                    IsActive = x.IsActive,
-                                    Program = x.Program != null ? new CategoryModel
+                                    .Include(x => x.Program)
+                                    .Include(x => x.Level)
+                                    .Select(x => new TestConfigModel
                                     {
-                                        Name = x.Program.Name,
-                                        Code = x.Program.Code,
-                                        Levels = x.Program.Levels.Any() ?
-                                            x.Program.Levels.Select(z => new LevelModel
-                                            {
-                                                Name = z.Name,
-                                                Code = z.Code,
-                                                LevelOrder = z.LevelOrder,
-                                                Description = z.Description,
-                                            }).ToList()
-                                        : new List<LevelModel>(),
-                                    } : new CategoryModel(),
-                                    CreatedFullName = x.CreatedFullName,
-                                    UpdatedFullName = x.UpdatedFullName,
-                                    CreatedDate = x.CreatedDate,
-                                    CreatedUserId = x.CreatedUserId,
-                                    UpdatedDate = x.UpdatedDate,
-                                    UpdatedUserId = x.UpdatedUserId,
-                                    Skills = _skillRepository.Queryable.Where(z => x.Skills.Any(y => y.Id == z.Id))
-                                    .Select(s => new Domain.Models.EntityModels.SkillModels.SkillModel
-                                    {
-                                        Id = s.Id,
-                                        Name = s.Name,
-                                        Code = s.Code,
-                                    }).ToList(),
-                                });
-
+                                        Id = x.Id,
+                                        Name = x.Name,
+                                        Code = x.Code,
+                                        IsActive = x.IsActive,
+                                        CreatedFullName = x.CreatedFullName,
+                                        CreatedDate = x.CreatedDate,
+                                        ProgramId = x.ProgramId,
+                                        ProgramName = x.Program != null ? x.Program.Name : null,
+                                        LevelId = x.LevelId,
+                                        LevelName = x.Level != null ? x.Level.Name : null,
+                                        SkillLevels = x.Level != null && x.Level.SkillLevels != null
+                                                ? x.Level.SkillLevels
+                                                    .Where(z => z.Level != null)
+                                                    .Select(z => z.Level!.Name)
+                                                    .ToList()
+                                                : new List<string?>()
+                                    });
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -90,22 +73,27 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
             if (request.LevelId != null)
             {
                 testConfigQuery = testConfigQuery
-                    .Where(m => m.Program != null
-                                && m.Program.Levels.Any(z => z.Id == request.LevelId));
+                    .Where(m => m.LevelId == request.LevelId);
             }
             if (request.ProgramId != null)
             {
                 testConfigQuery = testConfigQuery
-                    .Where(m => m.Program != null && m.Program.Id == request.ProgramId);
+                    .Where(m => m.ProgramId == request.ProgramId);
+            }
+            if (request.LayoutType != null)
+            {
+                testConfigQuery = testConfigQuery
+                    .Where(m => m.LayoutType == request.LayoutType);
             }
 
             int totalItem = await testConfigQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await testConfigQuery
+            var testConfigModels = await testConfigQuery
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
+                    .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
-            methodResult.Result = new PagingItemsModel<TestConfigSearchModel>(lists, request, totalItem);
+
+            methodResult.Result = new PagingItemsModel<TestConfigModel>(testConfigModels, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

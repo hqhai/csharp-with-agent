@@ -1,21 +1,16 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.TestConfigCmd
+namespace Fsel.Course.Application.Commands.TestConfigCmd
 {
     using System.Text.RegularExpressions;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.TestConfig;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.TestConfig;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.CommandModels.TestConfigs;
     using Fsel.Course.Domain.Models.EntityModels.TestConfig;
-    using Fsel.Course.Infrastructure.Common;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -27,13 +22,16 @@ namespace Fsel.Course.Lms.Application.Commands.TestConfigCmd
     {
         private readonly IMapper _mapper;
         private readonly ITestConfigRepository _testConfigRepository;
+        private readonly ISkillRepository _skillRepository;
 
         public CreateTestConfigCommandHandler(IMapper mapper
             , ITestConfigRepository testConfigRepository
+            , ISkillRepository skillRepository
             )
         {
             _mapper = mapper;
             _testConfigRepository = testConfigRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<TestConfigModel>> Handle(CreateTestConfigCommand request, CancellationToken cancellationToken)
@@ -60,13 +58,12 @@ namespace Fsel.Course.Lms.Application.Commands.TestConfigCmd
                 return methodResult;
             }
             var testConfig = _mapper.Map<TestConfig>(request);
+
             if (!testConfig.IsValid())
             {
                 methodResult.AddErrorBadRequest(testConfig.ErrorMessages);
                 return methodResult;
             }
-
-
 
 
             return methodResult;

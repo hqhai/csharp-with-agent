@@ -8,9 +8,8 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.TestConfig;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.EntityModels.SkillModels;
     using Fsel.Course.Domain.Models.EntityModels.TestConfig;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -24,105 +23,89 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
     public class GetTestConfigQueryHandler : IRequestHandler<GetTestConfigQuery, MethodResult<TestConfigModel>>
     {
         private readonly ITestConfigRepository _testConfigRepository;
-        private readonly ITestLayoutRepository _testLayoutRepository;
+        private readonly ITestConfigSectionRepository _testConfigSectionRepository;
         private readonly ISkillRepository _skillRepository;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly ISkillLevelRepository _skillLevelRepository;
-        private readonly IStepFlowRepository _stepFlowRepository;
-        private readonly IPlacementTestRepository _placementTestRepository;
-        private readonly ILevelRepository _levelRepository;
 
-        public GetTestConfigQueryHandler(ITestConfigRepository testConfigRepository, ISkillRepository skillRepository,
-            ICategoryRepository categoryRepository, ITestLayoutRepository testLayoutRepository, ISkillLevelRepository skillLevelRepository,
-            IStepFlowRepository stepFlowRepository, IPlacementTestRepository placementTestRepository, ILevelRepository levelRepository)
+        public GetTestConfigQueryHandler(
+            ITestConfigRepository testConfigRepository,
+            ITestConfigSectionRepository testConfigSectionRepository,
+            ISkillRepository skillRepository)
         {
             _testConfigRepository = testConfigRepository;
+            _testConfigSectionRepository = testConfigSectionRepository;
             _skillRepository = skillRepository;
-            _categoryRepository = categoryRepository;
-            _testLayoutRepository = testLayoutRepository;
-            _skillLevelRepository = skillLevelRepository;
-            _stepFlowRepository = stepFlowRepository;
-            _placementTestRepository = placementTestRepository;
-            _levelRepository = levelRepository;
         }
 
         public async Task<MethodResult<TestConfigModel>> Handle(GetTestConfigQuery request, CancellationToken cancellationToken)
         {
             MethodResult<TestConfigModel> methodResult = new MethodResult<TestConfigModel>();
             ArgumentNullException.ThrowIfNull(request);
-            var testConfig = _testConfigRepository.Queryable;
-            var skill = _skillRepository.Queryable;
-            var category = _categoryRepository.Queryable;
-            var testLayout = _testLayoutRepository.Queryable;
-            var testConfigResult = await _testConfigRepository.Queryable
-                                .Where(tc => tc.Id == request.Id)
-                                .Select(tc => new TestConfigModel
-                                {
-                                    Id = tc.Id,
-                                    Name = tc.Name,
-                                    Skills = tc.Skills.Select(s => new SkillModel //-------------> CODE
-                                    {
-                                        Id = s.Id,
-                                        Name = s.Name,
-                                        Code = s.Code,
-                                    }).ToList(),
-                                    TestLayouts = tc.TestLayouts != null //--------------> TESTLAYOUT
-                                    ? tc.TestLayouts
-                                    .Select(tl => new TestLayoutModel
-                                    {
-                                        Name = tl.Name,
-                                        TotalScore = tl.TotalScore,
-                                        ExcutionTime = tl.ExcutionTime,
-                                        Section = tl.Section != null ? new SectionModel
-                                        {
-                                            Id = tl.Section.Id,
-                                            Name = tl.Section.Name,
-                                            MediaPost = tl.Section.MediaPost,
 
-                                            TargetWord = tl.Section.TargetWord,
-                                            VideoFilePath = tl.Section.VideoFilePath,
-                                            SubFilePath = tl.Section.SubFilePath,
-                                            DisplayOrder = tl.Section.DisplayOrder,
-                                            Questions = tl.Section.SectionQuestions
-                                            .Select(sq => sq.Question != null ? new QuestionModel
-                                            {
-                                                Id = sq.Question.Id,
-                                                QuestionType = sq.Question.QuestionType,
-                                                Ungraded = sq.Question.Ungraded,
-                                                Explanation = sq.Question.Explanation,
-                                                CorrectTotal = sq.Question.CorrectTotal,
-                                                Description = sq.Question.Description,
-                                                Config = sq.Question.Config,
-                                                SubQuestionIndexs = sq.Question.SubQuestionIndexs,
-                                            } : new QuestionModel())
-                                            .ToList(),
-                                        } : null
-                                    }).ToList() : new List<TestLayoutModel>(),
-                                    Program = tc.Program != null ? new CategoryModel //----------> PROGRAM
-                                    {
-                                        Id = tc.Program.Id,
-                                        Name = tc.Program.Name,
-                                        Code = tc.Program.Code,
-                                        Levels = tc.Program.Levels.Select(lv => new LevelModel
-                                        {
-                                            Id = lv.Id,
-                                            Name = lv.Name,
-                                            Code = lv.Code,
-                                            Description = lv.Description,
-                                            LevelOrder = lv.LevelOrder,
-                                        }).ToList(),
-                                    } : new CategoryModel(),
-                                })
-                             .FirstOrDefaultAsync(cancellationToken);
+            // 1. Lấy TestConfig + Program + Level
+            var testConfigResult = await _testConfigRepository.Queryable
+                .Include(x => x.Program)
+                .Include(x => x.Level)
+                .Where(tc => tc.Id == request.Id)
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (testConfigResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-            methodResult.Result = testConfigResult;
+
+            // 2. Lấy toàn bộ Section theo TestConfigId
+            var allSections = await _testConfigSectionRepository.Queryable
+                .Where(s => s.TestConfigId == request.Id)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
+
+            // 3. Lấy toàn bộ Skill
+            var allSkills = await _skillRepository.Queryable
+                .AsNoTracking()
+                .ToDictionaryAsync(x => x.Id, cancellationToken);
+
+            // 4. Mapping sang TestConfigModel
+            var config = new TestConfigModel
+            {
+                Id = testConfigResult.Id,
+                Name = testConfigResult.Name,
+                Code = testConfigResult.Code,
+                IsActive = testConfigResult.IsActive,
+                ProgramId = testConfigResult.ProgramId,
+                ProgramName = testConfigResult.Program?.Name,
+                CreatedFullName = testConfigResult.CreatedFullName,
+                CreatedDate = testConfigResult.CreatedDate,
+                LevelId = testConfigResult.LevelId,
+                LevelName = testConfigResult.Level?.Name,
+                TestConfigSectionModels = BuildSectionTree(allSections, allSkills)
+            };
+
+            // 5. Trả kết quả
+            methodResult.Result = config;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private List<TestConfigSectionModel> BuildSectionTree(List<TestConfigSection> sections, Dictionary<Guid, Skill>? skills = null, Guid? parentId = null)
+        {
+            return sections
+                .Where(s => s.ParentId == parentId)
+                .OrderBy(s => s.DisplayOrder)
+                .Select(s => new TestConfigSectionModel
+                {
+                    Id = s.Id,
+                    Name = s.Name,
+                    TargetWord = s.TargetWord,
+                    DisplayOrder = s.DisplayOrder,
+                    ExecutionTime = s.ExecutionTime,
+                    LayoutType = s.LayoutType,
+                    TotalScore = s.TotalScore,
+                    Skill = s.Skill ?? (s.SkillId != null && skills != null && skills.TryGetValue(s.SkillId.Value, out var skill) ? skill : null),
+                    ParentId = s.ParentId ?? Guid.Empty,
+                    Config = s.Config,
+                    Children = BuildSectionTree(sections, skills, s.Id)
+                }).ToList();
         }
     }
 }

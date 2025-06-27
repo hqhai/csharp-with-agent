@@ -8,6 +8,8 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
+    using Fsel.Course.Domain.Models.CommandModels.TestConfig;
+    using Fsel.Course.Domain.Models.CommandModels.TestConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
 
     public class MockTestProfile : Profile
