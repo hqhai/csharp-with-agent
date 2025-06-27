@@ -7,24 +7,36 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     using System.IO;
     using System.Threading.Tasks;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.Interfaces;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Helpers;
     using Microsoft.CognitiveServices.Speech;
     using Microsoft.CognitiveServices.Speech.Audio;
     using Microsoft.CognitiveServices.Speech.PronunciationAssessment;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
 
     public class SpeakingEvaluationAIService : ISpeakingEvaluationAIService
     {
         private readonly AppSetting _appSetting;
         private readonly ISystemFileProvider _systemFileProvider;
+        private readonly ILogger<SpeakingEvaluationAIService> _logger;
+        private readonly AuthContext _authContext;
+        private const string LanguageUS = "en-US";
 
-        public SpeakingEvaluationAIService(AppSetting appSetting, ISystemFileProvider systemFileProvider)
+        public SpeakingEvaluationAIService(AppSetting appSetting,
+            ISystemFileProvider systemFileProvider,
+            ILogger<SpeakingEvaluationAIService> logger,
+            AuthContext authContext)
         {
             _appSetting = appSetting;
             _systemFileProvider = systemFileProvider;
+            _logger = logger;
+            _authContext = authContext;
         }
 
         public async Task<double> EvaluationSpeaking(string? question, string url)
@@ -35,7 +47,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             }
             // Creates an instance of a speech config with specified subscription key and service region.
             var config = SpeechConfig.FromSubscription(_appSetting.AzureAiConfig?.SecondApiKey, _appSetting.AzureAiConfig?.Location);
-            string language = "en-US";
             string topic = question ?? string.Empty;
             //url = "https://s3-sgn10.fptcloud.com/fsel-public/Videos/What_is_your_name_1716804591.mp3";
 
@@ -44,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
             // Create AudioConfig from local file path
             var audioConfig = AudioConfig.FromWavFileInput(localPath);
-            var speechRecognizer = new SpeechRecognizer(config, language.Replace("_", "-"), audioConfig);
+            var speechRecognizer = new SpeechRecognizer(config, LanguageUS.Replace("_", "-"), audioConfig);
 
             var connection = Connection.FromRecognizer(speechRecognizer);
 
@@ -148,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 _appSetting.AzureAiConfig?.SecondApiKey,
                 _appSetting.AzureAiConfig?.Location
             );
-            config.SpeechRecognitionLanguage = _appSetting.AzureAiConfig?.SpeechRecognitionLanguage ?? "en-US";
+            config.SpeechRecognitionLanguage = _appSetting.AzureAiConfig?.SpeechRecognitionLanguage ?? LanguageUS;
 
             var listPronScore = new List<double>();
             var topic = question ?? string.Empty;
@@ -160,7 +171,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 using var recognizer = new SpeechRecognizer(config, audioConfig);
 
                 var pronConfig = new PronunciationAssessmentConfig(
-                    referenceText: "",
+                    referenceText: string.Empty,
                     gradingSystem: GradingSystem.HundredMark,
                     granularity: Granularity.Word,
                     enableMiscue: false
@@ -183,19 +194,17 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     }
                     else if (e.Result.Reason == ResultReason.NoMatch)
                     {
-                        Console.WriteLine("NoMatch: Could not recognize.");
+                        _logger.LoggerRequest($"Code={nameof(EnumOtherErrorCode.NoMatch)} | Question='{question}' | URL='{url}' | UserId='{_authContext.CurrentUserId}'");
                     }
                 };
 
                 recognizer.SessionStopped += (s, e) =>
                 {
-                    Console.WriteLine("Session stopped.");
                     stopRecognition.TrySetResult(ValueSettings.ValueDefault);
                 };
 
                 recognizer.Canceled += (s, e) =>
                 {
-                    Console.WriteLine($"Recognition canceled: {e.Reason}");
                     stopRecognition.TrySetResult(ValueSettings.ValueDefault);
                 };
 
@@ -207,7 +216,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[EvaluationSpeaking] ERROR: {ex.Message}");
+                _logger.LoggerRequest($"Code={nameof(EnumOtherErrorCode.EvaluationSpeaking)} | Question='{question}' | URL={url} | Ex={ex.Message} | UserId='{_authContext.CurrentUserId}'");
                 return ValueSettings.ValueDefault;
             }
             finally
