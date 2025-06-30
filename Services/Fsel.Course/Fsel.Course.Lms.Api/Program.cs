@@ -124,6 +124,8 @@ builder.Services.AddScoped<ISkillLevelRepository, SkillLevelRepository>();
 builder.Services.AddScoped<IFlowRepository, FlowRepository>();
 builder.Services.AddScoped<IStepFlowRepository, StepFlowRepository>();
 builder.Services.AddScoped<IActionFlowRepository, ActionFlowRepository>();
+builder.Services.AddScoped<ILessonModuleRepository, LessonModuleRepository>();
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
@@ -146,6 +148,7 @@ builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
 builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<ProgramConverter>();
+builder.Services.AddScoped<LessonConverter>();
 
 // Helper
 builder.Services.AddScoped<LinQHelper>();

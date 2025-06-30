@@ -6,8 +6,12 @@ namespace Fsel.Course.Domain.Models.CommandModels.LessonInstructions
 
     public class CreateLessonInstructionCommandModel
     {
+        public Guid? Id { get; set; }
+
         public string? Instruction { get; set; }
+
         public Guid? SkillId { get; set; }
+
         public EnumCourseSkill CourseSkill { get; set; }
     }
 }

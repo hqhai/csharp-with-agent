@@ -3,6 +3,7 @@
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
+using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
@@ -53,5 +54,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
         public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
+        public ICollection<LessonModule> LessonModules { get; set; } = new List<LessonModule>();
     }
 }

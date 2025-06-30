@@ -4,24 +4,22 @@ namespace Fsel.Course.Lcms.Api.Controllers
 {
     using System.Net;
     using System.Threading.Tasks;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Common.Models;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Application.Commands.CategoryCmd;
+    using Fsel.Course.Application.Commands.FlowCmd;
+    using Fsel.Course.Application.Commands.ProgramCmd;
     using Fsel.Course.Application.Queries.CategoryQuery;
+    using Fsel.Course.Application.Queries.ProgramQuery;
+    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Course.Application.Commands.CategoryCmd;
-    using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Application.Commands.ProgramCmd;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Application.Queries.ProgramQuery;
-    using Fsel.Course.Domain.Models.EntityModels.FlowModels;
-    using Fsel.Course.Application.Queries.OtherQuery;
-    using Fsel.Course.Application.Commands.FlowCmd;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -239,6 +237,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         public async Task<IActionResult> GetProgramById([FromRoute] Guid programId)
         {
             var methodResult = await _mediator.Send(new GetProgramByIdQuery { ProgramId = programId }).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// search program
+        /// </summary>
+        [HttpGet("program")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CategoryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetProgram([FromQuery] GetProgramQuery query)
+        {
+            var methodResult = await _mediator.Send(query).ConfigureAwait(false);
             return methodResult.GetActionResult();
         }
     }

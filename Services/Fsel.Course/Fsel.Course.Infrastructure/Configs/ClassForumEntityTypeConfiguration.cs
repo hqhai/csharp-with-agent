@@ -19,20 +19,33 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumGradingStyle>());
+
+            builder.Property(e => e.Layout)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                       v => v.ToString(),
+                       v => v.EnumParse<EnumClassForumLayout>());
+
             builder.Property(e => e.CourseSkill)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseSkill>());
+
             builder.HasOne(a => a.Lesson)
                 .WithOne(b => b.ClassForum)
                 .HasForeignKey<ClassForum>(p => p.LessonId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(a => a.Skill)
                 .WithMany(b => b.ClassForums)
                 .HasForeignKey(p => p.SkillId)
                 .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Category)
+                   .WithMany(b => b.ClassForums)
+                   .HasForeignKey(x => x.ProgramId)
+                   .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasIndex(x => x.LessonId).IsUnique(false);
         }

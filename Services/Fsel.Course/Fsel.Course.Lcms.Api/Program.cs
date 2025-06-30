@@ -87,6 +87,8 @@ builder.Services.AddScoped<IFlowRepository, FlowRepository>();
 builder.Services.AddScoped<IActionFlowRepository, ActionFlowRepository>();
 builder.Services.AddScoped<IStepFlowRepository, StepFlowRepository>();
 builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
+builder.Services.AddScoped<ILessonModuleRepository, LessonModuleRepository>();
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -99,6 +101,7 @@ builder.Services.AddScoped<DateTimeConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<ProgramConverter>();
+builder.Services.AddScoped<LessonConverter>();
 
 // Helper
 builder.Services.AddScoped<LinQHelper>();
