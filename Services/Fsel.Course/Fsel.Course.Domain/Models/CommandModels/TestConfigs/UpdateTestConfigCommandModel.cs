@@ -3,7 +3,7 @@
 namespace Fsel.Course.Domain.Models.CommandModels.TestConfigs
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Models.CommandModels.TestConfigSections;
+    using Fsel.Course.Domain.Models.EntityModels.TestConfig;
 
     public class UpdateTestConfigCommandModel : BaseCommandModel
     {
@@ -12,6 +12,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.TestConfigs
         public Guid ProgramId { get; set; }
         public Guid LevelId { get; set; }
         public bool IsActive { get; set; }
-        public IList<CreateTestConfigSectionCommandModel>? TestConfigSections { get; set; }
+        public IList<TestConfigSectionModel>? TestConfigSections { get; set; }
     }
 }

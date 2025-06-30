@@ -17,10 +17,11 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestConfig
         public object? Config { get; set; }
         public string? ConfigStr { get; set; }
         public Guid? ParentId { get; set; }
+        public TestConfigSectionModel? Parent { get; set; }
         public Guid? TestConfigId { get; set; }
         public Guid? SkillId { get; set; }
         public Skill? Skill { get; set; }
-        //public TestConfigSectionModel? Parent { get; set; }
         public IList<TestConfigSectionModel>? Children { get; set; }
+        public IList<QuestionModel>? Questions { get; set; }
     }
 }
