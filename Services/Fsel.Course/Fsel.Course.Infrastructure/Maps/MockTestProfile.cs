@@ -8,8 +8,6 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.CommandModels.MockTestResults;
     using Fsel.Course.Domain.Models.CommandModels.MockTests;
-    using Fsel.Course.Domain.Models.CommandModels.TestConfig;
-    using Fsel.Course.Domain.Models.CommandModels.TestConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
 
     public class MockTestProfile : Profile
@@ -17,8 +15,8 @@ namespace Fsel.Course.Infrastructure.Maps
         public MockTestProfile()
         {
             CreateMap<MockTest, MockTestModel>().IgnoreAllNonExisting();
-            CreateMap<CreateTestConfigCommandModel, MockTest>().IgnoreAllNonExisting();
-            CreateMap<UpdateTestConfigCommandModel, MockTest>().IgnoreAllNonExisting();
+            CreateMap<CreateMockTestCommandModel, MockTest>().IgnoreAllNonExisting();
+            CreateMap<UpdateMockTestCommandModel, MockTest>().IgnoreAllNonExisting();
 
             CreateMap<CreateMockTestAnswerCommandModel, MockTestAnswer>().IgnoreAllNonExisting();
             CreateMap<MockTestScore, MockTestScoreModel>().IgnoreAllNonExisting();
