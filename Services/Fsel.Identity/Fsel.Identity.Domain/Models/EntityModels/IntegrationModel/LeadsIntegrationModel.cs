@@ -16,5 +16,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
 
         public long? AccessTime { get; set; }
 
+        public IList<OrderIntegrationModel> OrderIntegration { get; set; } = new List<OrderIntegrationModel>();
     }
 }

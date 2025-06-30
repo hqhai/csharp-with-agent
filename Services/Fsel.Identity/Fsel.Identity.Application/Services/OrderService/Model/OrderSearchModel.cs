@@ -2,9 +2,11 @@
 
 namespace Fsel.Identity.Application.Services.OrderService.Model
 {
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
     using Fsel.Shared.Enums;
 
-    public class OrderSearchModel
+    public class OrderSearchModel : BaseModel
     {
         public string? FullName { get; set; }
 
@@ -24,10 +26,6 @@ namespace Fsel.Identity.Application.Services.OrderService.Model
 
         public Guid? PackageId { get; set; }
 
-        public DateTime? UpdatedDate { get; set; }
-
-        public DateTime? CreatedDate { get; set; }
-
         public DateTime? ExpireDate { get; set; }
 
         public bool IsTrial { get; set; }
@@ -41,5 +39,15 @@ namespace Fsel.Identity.Application.Services.OrderService.Model
         public string? StatusCourseResult { get; set; }
 
         public EnumPaymentRevenueType? RevenueType { get; set; }
+
+        public string? Address { get; set; }
+
+        public string? PhoneNumber { get; set; }
+
+        public double Price { get; set; }
+
+        public string? ReferralCode { get; set; }
+
+        public VoucherIntegrationModel? Voucher { get; set; }
     }
 }

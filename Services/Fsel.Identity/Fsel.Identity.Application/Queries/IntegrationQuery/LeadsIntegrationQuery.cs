@@ -197,10 +197,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             foreach (var item in leadsIntegrations)
             {
                 var orderItem = orderResults?.Where(x => x.UserId == item.UserId).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault();
-                if (orderItem != null && !orderItem.IsTrial)
-                {
-                    continue;
-                }
 
                 var ptTestResult = ptTestResults?.FirstOrDefault(x => x.UserId == item.UserId);
                 var unitResult = unitResults?.FirstOrDefault(x => x.UserId == item.UserId);
@@ -263,6 +259,47 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     }
 
                     item.CourseLevel = orderItem.CourseName.ToString() ?? string.Empty;
+                }
+
+                if (orderResults != null && orderResults.Any())
+                {
+                    List<OrderIntegrationModel> orderIntegrations = new List<OrderIntegrationModel>();
+                    foreach (var order in orderResults.Where(x => x.UserId == item.UserId).ToList())
+                    {
+                        var courseName = EnumCourseType.Ielts.ToString();
+                        if (order.CourseName != null && (int)order.CourseName <= 5)
+                        {
+                            courseName = EnumCourseType.Academic.ToString();
+                        }
+
+                        var orderIntegration = new OrderIntegrationModel
+                        {
+                            OrderCode = order.Code,
+                            StartDate = order.UpdatedDate ?? default,
+                            EndDate = order.ExpireDate ?? default,
+                            Program = courseName,
+                            CourseLevel = order.CourseName.ToString(),
+                            CoursePackage = order.MonthNumber ?? default,
+                            PaymentMethod = order.PaymentMethod ?? default,
+                            DiscountPrice = order.DiscountPrice,
+                            TotalPrice = order.TotalPrice,
+                            StatusCourseResult = order.StatusCourseResult,
+                            Status = order.Status,
+                            RevenueType = order.RevenueType,
+                            Address = order.Address,
+                            PhoneNumber = order.PhoneNumber,
+                            Price = order.Price,
+                            Voucher = order.Voucher,
+                            CreatedDate = order.CreatedDate,
+                            CreatedFullName = order.CreatedFullName,
+                            UpdatedDate = order.UpdatedDate,
+                            UpdatedFullName = order.UpdatedFullName,
+                            ReferralCode = order.ReferralCode
+                        };
+                        orderIntegrations.Add(orderIntegration);
+                    }
+
+                    item.OrderIntegration = orderIntegrations.OrderByDescending(x => x.CreatedDate).ToList();
                 }
             };
             #endregion

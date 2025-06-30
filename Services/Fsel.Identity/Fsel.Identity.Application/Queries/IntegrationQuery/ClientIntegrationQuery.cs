@@ -241,7 +241,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         PaymentMethod = order.PaymentMethod ?? default,
                         DiscountPrice = order.DiscountPrice,
                         TotalPrice = order.TotalPrice,
-                        Status = order.StatusCourseResult,
+                        StatusCourseResult = order.StatusCourseResult,
+                        Status = order.Status,
                         RevenueType = order.RevenueType
                     };
                     orderIntegrations.Add(orderIntegration);

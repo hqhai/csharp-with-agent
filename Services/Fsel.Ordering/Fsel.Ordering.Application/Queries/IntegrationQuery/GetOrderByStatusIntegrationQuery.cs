@@ -49,6 +49,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             {
                 orders = await _orderRepository.Queryable
                                                .Include(p => p.Package)
+                                               .Include(p => p.Voucher)
                                                .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
                                                .ToListAsync(cancellationToken);
 
@@ -60,6 +61,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             {
                 orders = await _orderRepository.Queryable
                                                .Include(p => p.Package)
+                                               .Include(p => p.Voucher)
                                                .Where(x => request.UserIds.Contains(x.UserId))
                                                .ToListAsync(cancellationToken);
 
@@ -99,6 +101,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             {
                 var userExpire = await _orderRepository.Queryable
                                                        .Include(p => p.Package)
+                                                       .Include(p => p.Voucher)
                                                        .Where(x => (x.ExpireDate >= request.StartDate) && (x.ExpireDate <= request.EndDate))
                                                        .ToListAsync(cancellationToken);
 
@@ -106,6 +109,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
 
                 if (userExpire == null || !userExpire.Any())
                 {
+                    methodResult.Result = orders;
                     return methodResult;
                 }
 
