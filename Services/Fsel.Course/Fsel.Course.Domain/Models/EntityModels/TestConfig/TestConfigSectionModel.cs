@@ -14,9 +14,13 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestConfig
         public double? ExecutionTime { get; set; }
         public EnumTestLayoutType LayoutType { get; set; }
         public double? TotalScore { get; set; }
-        public Skill? Skill { get; set; }
         public object? Config { get; set; }
+        public string? ConfigStr { get; set; }
         public Guid? ParentId { get; set; }
+        public Guid? TestConfigId { get; set; }
+        public Guid? SkillId { get; set; }
+        public Skill? Skill { get; set; }
+        //public TestConfigSectionModel? Parent { get; set; }
         public IList<TestConfigSectionModel>? Children { get; set; }
     }
 }

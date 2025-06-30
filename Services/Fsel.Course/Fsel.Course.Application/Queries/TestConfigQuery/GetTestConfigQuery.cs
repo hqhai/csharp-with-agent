@@ -104,6 +104,7 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
                     Skill = s.Skill ?? (s.SkillId != null && skills != null && skills.TryGetValue(s.SkillId.Value, out var skill) ? skill : null),
                     ParentId = s.ParentId ?? Guid.Empty,
                     Config = s.Config,
+                    ConfigStr = s.ConfigStr,
                     Children = BuildSectionTree(sections, skills, s.Id)
                 }).ToList();
         }

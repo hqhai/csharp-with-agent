@@ -42,6 +42,7 @@ namespace Fsel.Course.Domain.Entities.TestConfig
         public TestConfig? TestConfig { get; set; }
 
         public Guid? ParentId { get; set; }
+        public TestConfigSection? Parent { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? ConfigStr { get; set; }

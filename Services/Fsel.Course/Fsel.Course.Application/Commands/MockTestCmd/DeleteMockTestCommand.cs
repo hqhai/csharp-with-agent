@@ -14,12 +14,12 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class DeleteMockTestCommand : IRequest<MethodResult<bool>>
+    public class DeleteTestConfigSectionCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
     }
 
-    public class DeleteMockTestCommandHandler : IRequestHandler<DeleteMockTestCommand, MethodResult<bool>>
+    public class DeleteMockTestCommandHandler : IRequestHandler<DeleteTestConfigSectionCommand, MethodResult<bool>>
     {
         private readonly IMockTestRepository _mockTestRepository;
         private readonly SectionGroupManagerConverter _sectionGroupManagerConverter;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Application.Commands.MockTestCmd
             _sectionGroupManagerConverter = sectionGroupManagerConverter;
         }
 
-        public async Task<MethodResult<bool>> Handle(DeleteMockTestCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(DeleteTestConfigSectionCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
