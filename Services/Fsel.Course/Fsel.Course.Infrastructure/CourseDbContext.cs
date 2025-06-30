@@ -220,6 +220,10 @@ namespace Fsel.Course.Infrastructure
             //modelBuilder.Ignore<DistrictInfoModel>();
             //modelBuilder.Ignore<ReportLearningProcessModel>();
             //modelBuilder.Ignore<ReportLearningResultModel>();
+            //modelBuilder.Ignore<ExportSchoolEventModel>();
+            //modelBuilder.Ignore<ExportStudentEventModel>();
+            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
+            //modelBuilder.Ignore<ExportDistrictEventModel>();
 
             base.OnModelCreating(modelBuilder);
         }
