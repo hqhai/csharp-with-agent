@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Questions
 {
     public class CreateQuestionCommandModel
     {
+        public Guid? Id { get; set; }
         public EnumQuestionType QuestionType { get; set; }
         public string? Explanation { get; set; }
         public string? Description { get; set; }

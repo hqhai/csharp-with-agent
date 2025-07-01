@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestConfig
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Shared.Enums;
 
     public class TestConfigSectionModel : BaseModel
@@ -22,6 +23,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestConfig
         public Guid? SkillId { get; set; }
         public Skill? Skill { get; set; }
         public IList<TestConfigSectionModel>? Children { get; set; }
-        public IList<QuestionModel>? Questions { get; set; }
+        public IList<CreateQuestionCommandModel>? Questions { get; set; }
     }
 }

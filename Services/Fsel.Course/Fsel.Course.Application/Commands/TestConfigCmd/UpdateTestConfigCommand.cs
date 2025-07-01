@@ -10,8 +10,9 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
     using Fsel.Course.Domain.Entities.TestConfig;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.CommandModels.TestConfigs;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.CommandModels.TestConfigSections;
     using Fsel.Course.Domain.Models.EntityModels.TestConfig;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -100,7 +101,7 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                     .ToListAsync(cancellationToken);
 
                 // Xử lý sync section
-                var incomingSections = request.TestConfigSections ?? new List<TestConfigSectionModel>();
+                var incomingSections = request.TestConfigSections ?? new List<UpdateTestConfigSectionCommandModel>();
                 await SyncSections(incomingSections, existingSections, testConfig.Id, null, cancellationToken);
 
                 await _testConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
@@ -113,7 +114,7 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
         }
 
         private async Task SyncSections(
-            IList<TestConfigSectionModel> incoming,
+            IList<UpdateTestConfigSectionCommandModel> incoming,
             List<TestConfigSection> existing,
             Guid testConfigId,
             Guid? parentId,
@@ -148,7 +149,7 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
 
                     // Đệ quy cho các section con
                     await SyncSections(
-                        sectionModel.Children ?? new List<TestConfigSectionModel>(),
+                        sectionModel.Childrens ?? new List<UpdateTestConfigSectionCommandModel>(),
                         existing,
                         testConfigId,
                         newSection.Id,
@@ -175,7 +176,7 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
 
                     // Đệ quy cho các section con
                     await SyncSections(
-                        sectionModel.Children ?? new List<TestConfigSectionModel>(),
+                        sectionModel.Childrens ?? new List<UpdateTestConfigSectionCommandModel>(),
                         existing,
                         testConfigId,
                         existingSection.Id,
@@ -197,7 +198,7 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
         }
 
         private async Task SyncQuestions(
-            IList<QuestionModel>? incomingQuestions,
+            IList<CreateQuestionCommandModel>? incomingQuestions,
             Guid sectionId,
             CancellationToken cancellationToken)
         {
@@ -220,7 +221,7 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
             foreach (var qModel in incomingQuestions)
             {
                 Question? question;
-                if (qModel.Id == Guid.Empty)
+                if (qModel.Id != null && qModel.Id == Guid.Empty)
                 {
                     // 2.1 Thêm mới SectionQuestion
                     var newQuestion = _mapper.Map<Question>(qModel);
