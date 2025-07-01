@@ -34,5 +34,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<CategoryTestBank> CategoryTestBanks { get; set; } = new List<CategoryTestBank>();
         public ICollection<Flow> Flows { get; set; } = new List<Flow>();
         public ICollection<PlacementTest> PlacementTests { get; set; } = new List<PlacementTest>();
+        public ICollection<ClassForum> ClassForums { get; set; } = new List<ClassForum>();
+        public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
     }
 }

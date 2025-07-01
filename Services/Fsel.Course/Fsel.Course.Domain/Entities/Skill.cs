@@ -20,12 +20,12 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
-        public Exercise? Exercise { get; set; }
-        public SectionGroup? SectionGroup { get; set; }
-        public ClassForum? ClassForum { get; set; }
-        public HomeWork? HomeWork { get; set; }
-        public LessonInstruction? LessonInstruction { get; set; }
-        public ExtraPracticeExerciseResult? ExtraPracticeExerciseResult { get; set; }
+        public ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
+        public ICollection<SectionGroup> SectionGroups { get; set; } = new List<SectionGroup>();
+        public ICollection<ClassForum> ClassForums { get; set; } = new List<ClassForum>();
+        public ICollection<HomeWork> HomeWorks { get; set; } = new List<HomeWork>();
+        public ICollection<LessonInstruction> LessonInstructions { get; set; } = new List<LessonInstruction>();
+        public ICollection<ExtraPracticeExerciseResult> ExtraPracticeExerciseResults { get; set; } = new List<ExtraPracticeExerciseResult>();
         public ICollection<SkillLevel> SkillLevels { get; set; } = new List<SkillLevel>();
         public ICollection<Section>? Sections { get; set; }
     }

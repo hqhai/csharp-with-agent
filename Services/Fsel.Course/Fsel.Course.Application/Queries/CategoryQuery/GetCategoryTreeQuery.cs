@@ -50,7 +50,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
             var categoryTrees = _mapper.Map<IList<CategoryTreeModel>>(categories);
             await _programConverter.AddChildentCategory(categoryTrees, cancellationToken);
 
-            methodResult.Result = categoryTrees;
+            methodResult.Result = categoryTrees.OrderByDescending(x => x.CreatedDate).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

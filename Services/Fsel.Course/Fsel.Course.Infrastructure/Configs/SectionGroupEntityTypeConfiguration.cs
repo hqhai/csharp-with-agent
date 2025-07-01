@@ -21,8 +21,8 @@ namespace Fsel.Course.Infrastructure.Configs
                          v => v.EnumParse<EnumCourseSkill>());
 
             builder.HasOne(a => a.Skill)
-               .WithOne(b => b.SectionGroup)
-               .HasForeignKey<SectionGroup>(p => p.SkillId)
+               .WithMany(b => b.SectionGroups)
+               .HasForeignKey(p => p.SkillId)
                .OnDelete(DeleteBehavior.NoAction);
         }
     }

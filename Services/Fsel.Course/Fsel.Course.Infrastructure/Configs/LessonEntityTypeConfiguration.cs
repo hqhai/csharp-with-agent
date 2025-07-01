@@ -19,6 +19,22 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseLevel>());
+
+            builder.Property(e => e.Status)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                       v => v.ToString(),
+                       v => v.EnumParse<EnumStatus>());
+
+            builder.HasOne(a => a.Level)
+                   .WithMany(b => b.Lessons)
+                   .HasForeignKey(p => p.LevelId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(a => a.Category)
+                   .WithMany(b => b.Lessons)
+                   .HasForeignKey(p => p.ProgramId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

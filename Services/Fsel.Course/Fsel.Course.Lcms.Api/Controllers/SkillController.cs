@@ -90,5 +90,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteSkillCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Skill By Level
+        /// </summary>
+        [HttpGet("skill-level/{levelId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<SkillModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetSkillByLevel([FromRoute] Guid levelId)
+        {
+            MethodResult<IList<SkillModel>> queryResult = await _mediator.Send(new GetSkillByLevelQuery { LevelId = levelId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

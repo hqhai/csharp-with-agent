@@ -237,7 +237,7 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
             }
 
-            var method = AddTimeCodeToVideo(video, request.VideoTimeCodes);
+            var method = await AddTimeCodeToVideo(video, request.VideoTimeCodes);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
@@ -275,7 +275,7 @@ namespace Fsel.Course.Infrastructure.Common
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNameIsExist), nameof(request.Name), request.Name);
                 return methodResult;
             }
-            var method = AddTimeCodeToVideo(video, request.VideoTimeCodes);
+            var method = await AddTimeCodeToVideo(video, request.VideoTimeCodes);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);

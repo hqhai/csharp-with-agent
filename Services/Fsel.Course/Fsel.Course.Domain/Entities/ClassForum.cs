@@ -2,9 +2,9 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Fsel.Common.Attributes;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
+using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
@@ -17,7 +17,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumGradingStyle GradingStyle { get; set; }
 
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(300, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PromptName { get; set; }
 
         /// <summary>
@@ -48,15 +48,17 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public Guid LessonId { get; set; }
+        public Guid? LessonId { get; set; }
         public Lesson? Lesson { get; set; }
 
         public bool IsAlFeedBack { get; set; }
 
-        [RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        //[RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SystemRoleAlConfig { get; set; }
 
-        [RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        //[RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? UserAlConfig { get; set; }
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -79,10 +81,18 @@ namespace Fsel.Course.Domain.Entities
 
         public Skill? Skill { get; set; }
         public Guid? SkillId { get; set; }
+
+        public Guid? ProgramId { get; set; }
+        public Category? Category { get; set; }
+
+        public EnumClassForumLayout Layout { get; set; }
+
         public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
 
         public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();
 
         public ICollection<ClassForumFile> ClassForumFiles { get; set; } = new List<ClassForumFile>();
+
+        public ICollection<LessonModule> LessonModules { get; set; } = new List<LessonModule>();
     }
 }

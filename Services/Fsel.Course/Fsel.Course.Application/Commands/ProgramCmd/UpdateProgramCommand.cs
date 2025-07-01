@@ -122,13 +122,19 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 return methodResult;
             }
             var incomingIds = request.PlacementTestIds?.Distinct().ToList() ?? new List<Guid>();
+            var toRemoves = new List<CategoryTestBank>();
             foreach (var oldBank in category.CategoryTestBanks)
             {
                 if (!incomingIds.Contains(oldBank.TestId))
                 {
-                    category.CategoryTestBanks.Remove(oldBank);
+                    toRemoves.Add(oldBank);
                 }
             }
+            foreach (var item in toRemoves)
+            {
+                category.CategoryTestBanks.Remove(item);
+            }
+
             var existingIds = category.CategoryTestBanks.Select(x => x.TestId).ToHashSet();
             foreach (var id in incomingIds)
             {
