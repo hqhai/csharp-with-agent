@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -51,7 +51,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         name: "FK_CategoryTestBanks_Categorys_ProgramId",
                         column: x => x.ProgramId,
                         principalTable: "Categorys",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
