@@ -88,7 +88,12 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                 {
                     foreach (var section in request.TestConfigSections)
                     {
-                        await InsertSectionRecursive(section, createdTestConfig.Id, null, cancellationToken);
+                        var sectionResult = await InsertSectionRecursiveAsync(section, createdTestConfig.Id, null, cancellationToken);
+                        if (!sectionResult.IsOK)
+                        {
+                            methodResult.AddErrorBadRequest(sectionResult.ErrorMessages);
+                            return methodResult;
+                        }
                     }
                 }
 
@@ -99,8 +104,10 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
             return methodResult;
         }
 
-        private async Task InsertSectionRecursive(CreateTestConfigSectionCommandModel dto, Guid testConfigId, Guid? parentId, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> InsertSectionRecursiveAsync(CreateTestConfigSectionCommandModel dto, Guid testConfigId, Guid? parentId, CancellationToken cancellationToken)
         {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
             var entity = new TestConfigSection
             {
                 Name = dto.Name,
@@ -126,6 +133,11 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                     {
                         var newQuestion = _mapper.Map<Question>(question);
                         var method = _questionConverter.HandleQuestion(newQuestion);
+                        if (!method.IsOK)
+                        {
+                            methodResult.AddErrorBadRequest(method.ErrorMessages);
+                            return methodResult;
+                        }
                         if (method.Result != null)
                         {
                             var qResult = _questionRepository.Add(method.Result);
@@ -135,6 +147,7 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                                 QuestionId = qResult.Id,
                             });
                         }
+
                     }
                 }
 
@@ -143,10 +156,11 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                 {
                     foreach (var child in dto.Childrens)
                     {
-                        await InsertSectionRecursive(child, testConfigId, testConfigSectionResult.Id, cancellationToken);
+                        await InsertSectionRecursiveAsync(child, testConfigId, testConfigSectionResult.Id, cancellationToken);
                     }
                 }
             }
+            return methodResult;
         }
     }
 }

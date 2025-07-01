@@ -4,6 +4,7 @@ namespace Fsel.Shared.Enums.ErrorCodes
 {
     public enum EnumTestConfigErrorCode
     {
-        SectionIdDuplicate
+        SectionIdDuplicate,
+        NullObject
     }
 }

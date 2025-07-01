@@ -114,8 +114,12 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                     methodResult.AddErrorBadRequest(nameof(EnumTestConfigErrorCode.SectionIdDuplicate), "testConfigSections", errorId);
                     return methodResult;
                 }
-                await SyncSections(incomingSections, existingSections, testConfig.Id, null, cancellationToken);
-
+                var sectionResult = await SyncSections(incomingSections, existingSections, testConfig.Id, null, cancellationToken);
+                if (!sectionResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(sectionResult.ErrorMessages);
+                    return methodResult;
+                }
                 await _testConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -125,13 +129,15 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
             return methodResult;
         }
 
-        private async Task SyncSections(
+        private async Task<VoidMethodResult> SyncSections(
             IList<UpdateTestConfigSectionCommandModel> incoming,
             List<TestConfigSection> existing,
             Guid testConfigId,
             Guid? parentId,
             CancellationToken cancellationToken)
         {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
             foreach (var sectionModel in incoming)
             {
                 var existingSection = existing.FirstOrDefault(x => x.Id == sectionModel.Id);
@@ -157,8 +163,12 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                     _testConfigSectionRepository.Add(newSection);
 
                     // Thêm mới: chỉ cần truyền newSection.Id là đủ
-                    await SyncQuestions(sectionModel.Questions, newSection.Id, cancellationToken);
-
+                    var questionResult = await SyncQuestions(sectionModel.Questions, newSection.Id, cancellationToken);
+                    if (!questionResult.IsOK)
+                    {
+                        questionResult.AddErrorBadRequest(questionResult.ErrorMessages);
+                        return methodResult;
+                    }
                     // Đệ quy cho các section con
                     await SyncSections(
                         sectionModel.Childrens ?? new List<UpdateTestConfigSectionCommandModel>(),
@@ -184,8 +194,12 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                     _testConfigSectionRepository.Update(existingSection);
 
                     // Cập nhật câu hỏi trong bảng trung gian
-                    await SyncQuestions(sectionModel.Questions, existingSection.Id, cancellationToken);
-
+                    var questionResult = await SyncQuestions(sectionModel.Questions, existingSection.Id, cancellationToken);
+                    if (!questionResult.IsOK)
+                    {
+                        questionResult.AddErrorBadRequest(questionResult.ErrorMessages);
+                        return methodResult;
+                    }
                     // Đệ quy cho các section con
                     await SyncSections(
                         sectionModel.Childrens ?? new List<UpdateTestConfigSectionCommandModel>(),
@@ -207,16 +221,21 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
             {
                 await _testConfigSectionRepository.DeleteListAsync(toDelete);
             }
+            return methodResult;
         }
 
-        private async Task SyncQuestions(
-            IList<CreateQuestionCommandModel>? incomingQuestions,
-            Guid sectionId,
-            CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> SyncQuestions(
+    IList<CreateQuestionCommandModel>? incomingQuestions,
+    Guid sectionId,
+    CancellationToken cancellationToken)
         {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
             if (incomingQuestions == null)
             {
-                return;
+                methodResult.AddErrorBadRequest(nameof(EnumTestConfigErrorCode.NullObject), "Questions", sectionId);
+
+                return methodResult;
             }
 
             // 1. Lấy các SectionQuestion
@@ -237,6 +256,11 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                     // 2.1 Thêm mới Question và SectionQuestion
                     var newQuestion = _mapper.Map<Question>(qModel);
                     var method = _questionConverter.HandleQuestion(newQuestion);
+                    if (!method.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                        return methodResult;
+                    }
                     if (method.Result != null)
                     {
                         var qResult = _questionRepository.Add(method.Result);
@@ -247,7 +271,6 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                         };
                         _testConfigSectionQuestionRepository.Add(newSectionQuestion);
                     }
-                    //var questionResult = _questionRepository.Add(newQuestion);
                 }
                 else
                 {
@@ -269,6 +292,8 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
             {
                 await _testConfigSectionQuestionRepository.DeleteListAsync(toRemove);
             }
+
+            return methodResult;
         }
 
         private bool HasDuplicateSectionIds(
@@ -307,6 +332,5 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
             errorSectionId = null;
             return false;
         }
-
     }
 }
