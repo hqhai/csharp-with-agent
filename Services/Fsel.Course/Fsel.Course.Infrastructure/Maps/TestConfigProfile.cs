@@ -21,6 +21,14 @@ namespace Fsel.Course.Infrastructure.Maps
                 .ForMember(dest => dest.TestConfigSections, opt => opt.Ignore())
                 .IgnoreAllNonExisting();
 
+
+            CreateMap<UpdateTestConfigCommandModel, TestConfig>().IgnoreAllNonExisting();
+            CreateMap<UpdateTestConfigSectionCommandModel, TestConfigSection>().IgnoreAllNonExisting();
+
+            CreateMap<UpdateTestConfigCommandModel, TestConfig>()
+                .ForMember(dest => dest.TestConfigSections, opt => opt.Ignore())
+                .IgnoreAllNonExisting();
+
         }
     }
 }

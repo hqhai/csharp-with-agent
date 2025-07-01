@@ -14,6 +14,5 @@ namespace Fsel.Course.Domain.IRepositories
         Task<List<Question>?> GetIncludeSectionByIdAsync(IEnumerable<Guid> ids, double? version = null);
 
         Task<List<Question>> GetIncludeByHomeWorkAsync(IEnumerable<Guid> ids);
-        Task<Question?> GetByIdAsync(Guid? id);
     }
 }
