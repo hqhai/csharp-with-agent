@@ -57,7 +57,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IUserVoucherLockRepository _userVoucherLockRepository;
         private readonly AddCoinWhenCoursePurchasedPublisher _addCoinWhenCoursePurchasedPublisher;
         private const string PaymentApproval = "Phê duyệt thanh toán";
-        private const string BuyPackage = "Thanh toán gói phí";
+        private const string BuyPackage = "Thanh toán gói phí: ";
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
