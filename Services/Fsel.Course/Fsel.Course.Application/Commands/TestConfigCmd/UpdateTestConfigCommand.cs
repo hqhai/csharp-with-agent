@@ -10,7 +10,6 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
     using Fsel.Course.Domain.Entities.TestConfig;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.CommandModels.TestConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.TestConfig;

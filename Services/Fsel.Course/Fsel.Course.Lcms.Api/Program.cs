@@ -89,6 +89,7 @@ builder.Services.AddScoped<IStepFlowRepository, StepFlowRepository>();
 builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
 builder.Services.AddScoped<ITestConfigRepository, TestConfigRepository>();
 builder.Services.AddScoped<ITestConfigSectionRepository, TestConfigSectionRepository>();
+builder.Services.AddScoped<ITestConfigSectionQuestionRepository, TestConfigSectionQuestionRepository>();
 
 
 builder.Services.AddScoped<QuestionTypeConverter>();

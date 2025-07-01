@@ -35,59 +35,67 @@ namespace Fsel.Course.Application.Commands.TestConfigSectionCmd
 
         public async Task<MethodResult<bool>> Handle(DeleteTestConfigSectionCommand request, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
-
-            var rootSection = await _testConfigSectionRepository.GetIncludeByIdAsync(request.Id);
-            if (rootSection == null)
+            try
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
-                return methodResult;
-            }
+                ArgumentNullException.ThrowIfNull(request);
+                MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            await _testConfigSectionRepository.ExecuteTransactionAsync(async () =>
-            {
-                // 1. Lấy toàn bộ section con theo cây
-                var allSections = await _testConfigSectionRepository
-                    .Queryable
-                    .Where(x => x.TestConfigId == rootSection.TestConfigId)
-                    .ToListAsync(cancellationToken);
-
-                var sectionIdsToDelete = GetDescendantSectionIds(rootSection.Id, allSections);
-                sectionIdsToDelete.Add(rootSection.Id);
-
-                // 2. Lấy và xóa tất cả Question thuộc các Section này
-                var sectionQuestionsToDelete = await _testConfigSectionQuestionRepository
-                    .Queryable
-                    .Where(q => sectionIdsToDelete.Contains(q.TestConfigSectionId))
-                    .ToListAsync(cancellationToken);
-                if (sectionQuestionsToDelete.Any())
+                var rootSection = await _testConfigSectionRepository.GetIncludeByIdAsync(request.Id);
+                if (rootSection == null)
                 {
-                    await _testConfigSectionQuestionRepository.DeleteListAsync(sectionQuestionsToDelete);
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
+                    return methodResult;
+                }
 
-                    //3.Lấy và xóa tất cả Question thuộc các Section này
-                    var questionsToDelete = await _questionRepository
+                await _testConfigSectionRepository.ExecuteTransactionAsync(async () =>
+                {
+                    // 1. Lấy toàn bộ section con theo cây
+                    var allSections = await _testConfigSectionRepository
                         .Queryable
-                        .Where(q => sectionQuestionsToDelete.Select(z => z.QuestionId).Contains(q.Id))
+                        .Where(x => x.TestConfigId == rootSection.TestConfigId)
                         .ToListAsync(cancellationToken);
 
-                    if (questionsToDelete.Any())
+                    var sectionIdsToDelete = GetDescendantSectionIds(rootSection.Id, allSections);
+                    sectionIdsToDelete.Add(rootSection.Id);
+
+                    // 2. Lấy và xóa tất cả Question thuộc các Section này
+                    var sectionQuestionsToDelete = await _testConfigSectionQuestionRepository
+                        .Queryable
+                        .Where(q => sectionIdsToDelete.Contains(q.TestConfigSectionId))
+                        .ToListAsync(cancellationToken);
+                    if (sectionQuestionsToDelete.Any())
                     {
-                        await _questionRepository.DeleteListAsync(questionsToDelete);
+                        await _testConfigSectionQuestionRepository.DeleteListAsync(sectionQuestionsToDelete);
+
+                        //3.Lấy và xóa tất cả Question thuộc các Section này
+                        var questionsToDelete = await _questionRepository
+                            .Queryable
+                            .Where(q => sectionQuestionsToDelete.Select(z => z.QuestionId).Contains(q.Id))
+                            .ToListAsync(cancellationToken);
+
+                        if (questionsToDelete.Any())
+                        {
+                            await _questionRepository.DeleteListAsync(questionsToDelete);
+                        }
                     }
-                }
-                // 3. Xóa các TestConfigSection
-                var sectionsToDelete = allSections.Where(s => sectionIdsToDelete.Contains(s.Id)).ToList();
-                await _testConfigSectionRepository.DeleteListAsync(sectionsToDelete);
+                    // 3. Xóa các TestConfigSection
+                    var sectionsToDelete = allSections.Where(s => sectionIdsToDelete.Contains(s.Id)).ToList();
+                    await _testConfigSectionRepository.DeleteListAsync(sectionsToDelete);
 
-                // 4. Lưu thay đổi
-                await _testConfigSectionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
+                    // 4. Lưu thay đổi
+                    await _testConfigSectionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
 
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = true;
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = true;
+                    return methodResult;
+                });
                 return methodResult;
-            });
-            return methodResult;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
+
         }
 
         /// <summary>

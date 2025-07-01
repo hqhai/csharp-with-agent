@@ -49,54 +49,61 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
 
         public async Task<MethodResult<TestConfigModel>> Handle(CreateTestConfigCommand request, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            MethodResult<TestConfigModel> methodResult = new MethodResult<TestConfigModel>();
-            var testNameRegex = new Regex(@"^[a-zA-Z0-9_ ]{1,150}$");
-            var testCodeRegex = new Regex(@"^[a-zA-Z0-9_]{1,150}$");
-            if (string.IsNullOrEmpty(request.Name) || (!string.IsNullOrEmpty(request.Name) && !testNameRegex.IsMatch(request.Name)))
+            try
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NameNotValid), nameof(request.Name), request.Name);
-                return methodResult;
-            }
-
-            if (string.IsNullOrEmpty(request.Code) || (!string.IsNullOrEmpty(request.Code) && !testCodeRegex.IsMatch(request.Code)))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.CodeNotValid), nameof(request.Code), request.Code);
-                return methodResult;
-            }
-            var checkCode = await _testConfigRepository.Queryable.AnyAsync(x => x.Code == request.Code.Trim(), cancellationToken);
-            if (checkCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
-                return methodResult;
-            }
-            var testConfig = _mapper.Map<TestConfig>(request);
-
-            if (!testConfig.IsValid())
-            {
-                methodResult.AddErrorBadRequest(testConfig.ErrorMessages);
-                return methodResult;
-            }
-            await _testConfigRepository.ExecuteTransactionAsync(async () =>
-            {
-                // Step 1: Insert TestConfig
-                var createdTestConfig = _testConfigRepository.Add(testConfig);
-                await _testConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
-
-                // Step 2: Insert Sections if any
-                if (request.TestConfigSections?.Any() == true)
+                ArgumentNullException.ThrowIfNull(request);
+                MethodResult<TestConfigModel> methodResult = new MethodResult<TestConfigModel>();
+                var testNameRegex = new Regex(@"^[a-zA-Z0-9_ ]{1,150}$");
+                var testCodeRegex = new Regex(@"^[a-zA-Z0-9_]{1,150}$");
+                if (string.IsNullOrEmpty(request.Name) || (!string.IsNullOrEmpty(request.Name) && !testNameRegex.IsMatch(request.Name)))
                 {
-                    foreach (var section in request.TestConfigSections)
-                    {
-                        await InsertSectionRecursive(section, createdTestConfig.Id, null, cancellationToken);
-                    }
+                    methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NameNotValid), nameof(request.Name), request.Name);
+                    return methodResult;
                 }
 
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<TestConfigModel>(createdTestConfig);
+                if (string.IsNullOrEmpty(request.Code) || (!string.IsNullOrEmpty(request.Code) && !testCodeRegex.IsMatch(request.Code)))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.CodeNotValid), nameof(request.Code), request.Code);
+                    return methodResult;
+                }
+                var checkCode = await _testConfigRepository.Queryable.AnyAsync(x => x.Code == request.Code.Trim(), cancellationToken);
+                if (checkCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
+                    return methodResult;
+                }
+                var testConfig = _mapper.Map<TestConfig>(request);
+
+                if (!testConfig.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(testConfig.ErrorMessages);
+                    return methodResult;
+                }
+                await _testConfigRepository.ExecuteTransactionAsync(async () =>
+                {
+                    // Step 1: Insert TestConfig
+                    var createdTestConfig = _testConfigRepository.Add(testConfig);
+                    await _testConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
+
+                    // Step 2: Insert Sections if any
+                    if (request.TestConfigSections?.Any() == true)
+                    {
+                        foreach (var section in request.TestConfigSections)
+                        {
+                            await InsertSectionRecursive(section, createdTestConfig.Id, null, cancellationToken);
+                        }
+                    }
+
+                    methodResult.StatusCode = StatusCodes.Status201Created;
+                    methodResult.Result = _mapper.Map<TestConfigModel>(createdTestConfig);
+                    return methodResult;
+                });
                 return methodResult;
-            });
-            return methodResult;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
         private async Task InsertSectionRecursive(CreateTestConfigSectionCommandModel dto, Guid testConfigId, Guid? parentId, CancellationToken cancellationToken)
@@ -119,7 +126,7 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
 
             if (testConfigSectionResult.Id != Guid.Empty)
             {
-                //Handle Section Question
+                // Insert questions
                 if (dto.Questions?.Any() == true)
                 {
                     foreach (var question in dto.Questions)
@@ -138,16 +145,14 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                     }
                 }
 
-                //Handle Children
+                // Insert children with correct ParentId
                 if (dto.Childrens?.Any() == true)
                 {
                     foreach (var child in dto.Childrens)
                     {
-                        await InsertSectionRecursive(child, testConfigId, entity.Id, cancellationToken);
+                        await InsertSectionRecursive(child, testConfigId, testConfigSectionResult.Id, cancellationToken);
                     }
                 }
-
-
             }
         }
     }

@@ -136,6 +136,8 @@ namespace Fsel.Course.Infrastructure
 
         public DbSet<TestConfig> TestConfigs { get; set; }
         public DbSet<TestConfigSection> TestConfigSections { get; set; }
+        public DbSet<TestConfigSectionQuestion> TestConfigSectionQuestions { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
