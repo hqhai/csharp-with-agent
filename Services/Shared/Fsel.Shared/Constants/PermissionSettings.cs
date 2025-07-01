@@ -187,4 +187,13 @@ namespace Fsel.Shared.Constants
         public const string ViewLearningResultsReport = $"{ClaimType}.ViewLearningResultsReport";
         public const string ViewAttendanceReport = $"{ClaimType}.ViewAttendanceReport";
     }
+
+    public static class SchoolStudentManagement
+    {
+        public const string ClaimType = nameof(SchoolStudentManagement);
+        public const string Add = $"{ClaimType}.Add";
+        public const string View = $"{ClaimType}.View";
+        public const string Update = $"{ClaimType}.Update";
+        public const string Export = $"{ClaimType}.Export";
+    }
 }
