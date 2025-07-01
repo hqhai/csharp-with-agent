@@ -40,7 +40,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
 
         public string? ReferralCode { get; set; }
 
-        public VoucherIntegrationModel? Voucher { get; set; }
+        public string? Voucher { get; set; }
     }
 
     public class VoucherIntegrationModel

@@ -243,7 +243,18 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                         TotalPrice = order.TotalPrice,
                         StatusCourseResult = order.StatusCourseResult,
                         Status = order.Status,
-                        RevenueType = order.RevenueType
+                        RevenueType = order.RevenueType,
+                        Address = order.Address,
+                        CreatedDate = order.CreatedDate ?? default(DateTime),
+                        CreatedFullName = order.CreatedFullName,
+                        CreatedUserId = order.CreatedUserId,
+                        PhoneNumber = order.PhoneNumber,
+                        ReferralCode = order.ReferralCode,
+                        Price = order.Price,
+                        UpdatedDate = order.UpdatedDate,
+                        UpdatedFullName = order.UpdatedFullName,
+                        UpdatedUserId = order.UpdatedUserId,
+                        Voucher = order.Voucher?.Code
                     };
                     orderIntegrations.Add(orderIntegration);
                 }

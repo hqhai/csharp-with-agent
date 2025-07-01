@@ -8,7 +8,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Application.Services.OrderService;
@@ -289,12 +288,14 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                             Address = order.Address,
                             PhoneNumber = order.PhoneNumber,
                             Price = order.Price,
-                            Voucher = order.Voucher,
+                            Voucher = order.Voucher?.Code,
                             CreatedDate = order.CreatedDate,
                             CreatedFullName = order.CreatedFullName,
                             UpdatedDate = order.UpdatedDate,
                             UpdatedFullName = order.UpdatedFullName,
-                            ReferralCode = order.ReferralCode
+                            ReferralCode = order.ReferralCode,
+                            UpdatedUserId = order.UpdatedUserId,
+                            CreatedUserId = order.CreatedUserId
                         };
                         orderIntegrations.Add(orderIntegration);
                     }
