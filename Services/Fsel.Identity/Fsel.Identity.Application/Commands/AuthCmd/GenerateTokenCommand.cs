@@ -3,10 +3,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
+using Fsel.Common.ValueSettings;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Base.Managers;
+using Fsel.Core.Entities;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
@@ -15,6 +19,7 @@ using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -28,18 +33,21 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class GenerateTokenCommand : IRequest<MethodResult<TokenModel>>
     {
         public Guid? Id { get; set; }
+        public string? UserName { get; set; }
     }
 
     public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand, MethodResult<TokenModel>>
     {
-        private readonly UserManager<User> _userManager;
-        private readonly IInteractionService _interactionService;
-        private readonly ITrainingService _trainingService;
-        private readonly ILmsCourseService _lmsCourseService;
-        private readonly IUserTokenRepository _userTokenRepository;
-        private readonly IOrderService _orderService;
+        private UserManager<User> _userManager;
+        private IInteractionService _interactionService;
+        private ITrainingService _trainingService;
+        private ILmsCourseService _lmsCourseService;
+        private IUserTokenRepository _userTokenRepository;
+        private IOrderService _orderService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AppSetting _appSetting;
+        private readonly IMapper _mapper;
+        private readonly ITenantProvider _tenantProvider;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
             IInteractionService interactionService,
@@ -48,7 +56,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IUserTokenRepository userTokenRepository,
             IOrderService orderService,
             AppSetting appSetting,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IMapper mapper,
+            ITenantProvider tenantProvider)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -58,12 +68,23 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _orderService = orderService;
             _appSetting = appSetting;
             _httpContextAccessor = httpContextAccessor;
+            _mapper = mapper;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
+
+            var tenant = await _tenantProvider.GetCurrentTenantAsync(request.UserName);
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.UserName) ?? _userManager;
+            _userTokenRepository = await _tenantProvider.CreateRepositoryAsync<IUserTokenRepository, UserDbContext>(request.UserName) ?? _userTokenRepository;
+            _interactionService = await _tenantProvider.CreateServiceAsync<IInteractionService>(request.UserName, _appSetting.Services?.InteractionApiUrl) ?? _interactionService;
+            _trainingService = await _tenantProvider.CreateServiceAsync<ITrainingService>(request.UserName, _appSetting.Services?.TrainingApiUrl) ?? _trainingService;
+            _lmsCourseService = await _tenantProvider.CreateServiceAsync<ILmsCourseService>(request.UserName, _appSetting.Services?.LmsCourseApiUrl) ?? _lmsCourseService;
+            _orderService = await _tenantProvider.CreateServiceAsync<IOrderService>(request.UserName, _appSetting.Services?.OrderApiUrl) ?? _orderService;
+
             var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
@@ -81,6 +102,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(JwtClaimNames.UserId, user.Id.ToString()),
                 new Claim(JwtClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
                 new Claim(JwtClaimNames.Jti, jti),
+                new Claim(JwtClaimNames.TenantId, tenant?.Id.ToString() ?? string.Empty),
             };
 
             foreach (var userRole in userRoles)
