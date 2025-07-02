@@ -4,56 +4,64 @@
     "name": "Student",
     "normalizedName": "Student",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "1eeba88e-ed0c-48c4-8d7e-a17c5a2cc3fe",
     "name": "Teacher",
     "normalizedName": "Teacher",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "24ce207d-8732-4a32-83ef-c5f05805f124",
     "name": "Parent",
     "normalizedName": "Parent",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "4cfaa242-a625-4e02-86d9-862d48a413c8",
     "name": "TeacherLive",
     "normalizedName": "TeacherLive",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "65ff6784-21d7-4986-8394-681cf711a4f7",
     "name": "Moderator",
     "normalizedName": "Moderator",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "69976022-5dbb-4292-bab6-e94b6701061e",
     "name": "Admin",
     "normalizedName": "Admin",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "8d89a29a-b40a-4045-b0ed-679d7a5ff990",
     "name": "CSO",
     "normalizedName": "CSO",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "c8c28631-0bc0-4166-b062-4aff0d38e70c",
     "name": "MasterAdmin",
     "normalizedName": "MasterAdmin",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "7753a049-ba55-4901-bf6a-ae65ff9ac8fc",
@@ -67,20 +75,23 @@
     "name": "EducationDepartment",
     "normalizedName": "EducationDepartment",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "73CD33E9-2F40-453A-B153-4AB59EAA6B73",
     "name": "EducationDivision",
     "normalizedName": "EducationDivision",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   },
   {
     "id": "E8FC0D37-1AAE-4AE6-9DC0-1FFE864BEF45",
     "name": "DepartmentAdmin",
     "normalizedName": "DepartmentAdmin",
     "createdDate": "2023-07-21",
-    "createdFullName": ""
+    "createdFullName": "",
+    "isDefault": true
   }
 ]
