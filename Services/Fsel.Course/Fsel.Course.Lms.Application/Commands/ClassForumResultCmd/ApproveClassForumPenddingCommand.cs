@@ -103,8 +103,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     };
                 }
 
-                _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
-                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                });
 
                 //Thông báo cho user khi bài viết được phê duyệt
                 //await SendNotification(classForumResult, enumNotification, cancellationToken);
