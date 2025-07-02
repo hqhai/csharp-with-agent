@@ -201,13 +201,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
             await _speechToTextPendingAiPublisher.Publish(new SpeechToTextPendingAiConsumerModel
             {
+                UserId = _authContext.CurrentUserId,
                 ClassForumDetailResultId = classForumDetailResult.Id,
                 FileName = request.FormFile.FileName,
                 ContentType = request.FormFile.ContentType,
                 FileData = memoryStream.ToArray()
             }, cancellationToken);
 
-            _logger.LogError($"LogParamPendingSTT: classForumDetailResult: {classForumDetailResult.Id} value: {request.FormFile.FileName} - {request.FormFile.ContentType} - {memoryStream.ToArray()}");
+            _logger.LogError($"LogParamPendingSTT: userId: {_authContext.CurrentUserId} classForumDetailResult: {classForumDetailResult.Id} value: {request.FormFile.FileName} - {request.FormFile.ContentType} - {memoryStream.ToArray()}");
 
             return methodResult;
         }
