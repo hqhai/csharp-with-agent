@@ -148,16 +148,17 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                         Status = EnumResultStatus.New,
                         PlacementTestGroupResultId = placementTestGroupResult.Id
                     };
-                    _placementTestResultRepository.Add(placementTestResult);
 
                     try
                     {
-                        await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.PlacementTestId, c.StudentId, c.IsDeleted };
+                        });
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Level == level).FirstOrDefaultAsync(cancellationToken);
-                        _logger.LogWarning($"Log Duplicate PlacementTestResult : {ex.Message}");
                     }
                 }
             }
@@ -182,8 +183,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 NewDate = DateTime.UtcNow,
                 Status = EnumResultStatus.New,
             };
-            _placementTestGroupResultRepository.Add(placementTestGroupResult);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestGroupResultRepository.BulkMergeAsync(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.IsDeleted };
+            });
             return placementTestGroupResult;
         }
     }

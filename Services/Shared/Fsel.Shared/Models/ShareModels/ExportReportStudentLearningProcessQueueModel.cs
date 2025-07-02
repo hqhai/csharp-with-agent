@@ -11,6 +11,7 @@ namespace Fsel.Shared.Models.ShareModels
         public Guid? StudentId { get; set; }
         public EnumCourseType CourseType { get; set; }
         public string? FileName { get; set; }
+        public string? UserNameStr { get; set; }
     }
 
     public class ExportReportSchoolLearningProcessQueueModel
