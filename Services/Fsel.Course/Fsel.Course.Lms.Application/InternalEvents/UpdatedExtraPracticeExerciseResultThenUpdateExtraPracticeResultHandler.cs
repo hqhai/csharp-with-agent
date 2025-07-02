@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -93,8 +94,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                     if (extraPracticeExerciseResult != null)
                                     {
                                         extraPracticeExerciseResult.Status = EnumResultStatus.New;
-                                        _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
-                                        await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                                        await _extraPracticeExerciseResultRepository.BulkUpdateList(new List<ExtraPracticeExerciseResult> { extraPracticeExerciseResult }, bulk =>
+                                        {
+                                            bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeResultId, c.StudentId, c.ExtraPracticeExerciseId };
+                                        });
                                     }
                                     await UpdateExtraPracticeExerciseResultTypeBook(extraPracticeResult, cancellationToken);
                                 }
@@ -108,8 +111,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                     if (extraPracticeExerciseResult != null)
                                     {
                                         extraPracticeExerciseResult.Status = EnumResultStatus.New;
-                                        _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
-                                        await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                                        await _extraPracticeExerciseResultRepository.BulkUpdateList(new List<ExtraPracticeExerciseResult> { extraPracticeExerciseResult }, bulk =>
+                                        {
+                                            bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeResultId, c.StudentId, c.ExtraPracticeExerciseId };
+                                        });
                                     }
                                 }
                             }
@@ -142,8 +147,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 if (extraPracticeExerciseResult != null)
                                 {
                                     extraPracticeExerciseResult.Status = EnumResultStatus.New;
-                                    _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
-                                    await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                                    await _extraPracticeExerciseResultRepository.BulkUpdateList(new List<ExtraPracticeExerciseResult> { extraPracticeExerciseResult }, bulk =>
+                                    {
+                                        bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeResultId, c.StudentId, c.ExtraPracticeExerciseId };
+                                    });
                                 }
                             }
                         }
@@ -166,8 +173,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 };
             extraPracticeResult.CorrectCount = correctCounts.Sum(x => x.CorrectCount);
             extraPracticeResult.Status = EnumResultStatus.Done;
-            _extraPracticeResultRepository.Update(extraPracticeResult);
-            await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _extraPracticeResultRepository.BulkUpdateList(new List<ExtraPracticeResult> { extraPracticeResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeId, c.StudentId };
+            });
         }
 
         private async Task UpdateExtraPracticeResultTypeBook(ExtraPracticeResult? extraPracticeResult, CancellationToken cancellationToken)
@@ -186,8 +195,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             extraPracticeResult.CorrectCount = correctCounts.Sum(x => x.CorrectCount);
             extraPracticeResult.Status = EnumResultStatus.Done;
-            _extraPracticeResultRepository.Update(extraPracticeResult);
-            await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _extraPracticeResultRepository.BulkUpdateList(new List<ExtraPracticeResult> { extraPracticeResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeId, c.StudentId };
+            });
         }
 
         private async Task UpdateExtraPracticeExerciseResultTypeBook(ExtraPracticeResult? extraPracticeResult, CancellationToken cancellationToken)
@@ -206,8 +217,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             extraPracticeResult.CorrectCount = correctCounts.Sum(x => x.CorrectCount);
             extraPracticeResult.Status = EnumResultStatus.Process;
-            _extraPracticeResultRepository.Update(extraPracticeResult);
-            await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _extraPracticeResultRepository.BulkUpdateList(new List<ExtraPracticeResult> { extraPracticeResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeId, c.StudentId };
+            });
         }
     }
 }
