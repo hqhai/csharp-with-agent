@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Commands.AdminCmd
 {
+    using System.Globalization;
     using System.Linq;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -12,6 +13,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.Models.CommandModels.Admins;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Identity;
@@ -128,9 +130,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     var user = new User();
                     user.UserName = item.Email;
                     user.Email = item.Email;
-                    user.FullName = item.FullName ?? item.Email;
+                    user.FirstName = item.FullName.ParseFullName().FirstName;
+                    user.LastName = item.FullName.ParseFullName().LastName;
                     user.EmailConfirmed = true;
-                    if (Guid.TryParse(item.SchoolId, out Guid schoolId))
+                    if (Guid.TryParse(item.SchoolId, CultureInfo.InvariantCulture, out Guid schoolId))
                     {
                         user.UserSchools = new List<UserSchool>
                         {

@@ -92,8 +92,8 @@ namespace Fsel.Training.Application.Queries.TeacherFreeTimeQuery
             var teacher = teacherResult.Content?.Result;
             foreach (var item in teacherFreeTimeModel)
             {
-                item.TeacherName = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
-                item.TeacherCode = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.Code;
+                item.TeacherName = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.User?.FullName;
+                item.TeacherCode = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.User?.Code;
             }
 
             methodResult.Result = teacherFreeTimeModel;

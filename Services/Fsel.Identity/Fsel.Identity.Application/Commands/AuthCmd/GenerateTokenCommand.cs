@@ -85,7 +85,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _lmsCourseService = await _tenantProvider.CreateServiceAsync<ILmsCourseService>(request.UserName, _appSetting.Services?.LmsCourseApiUrl) ?? _lmsCourseService;
             _orderService = await _tenantProvider.CreateServiceAsync<IOrderService>(request.UserName, _appSetting.Services?.OrderApiUrl) ?? _orderService;
 
-            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Human).ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
                 methodResult.StatusCode = StatusCodes.Status401Unauthorized;
@@ -142,12 +142,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
-                Code = user.Human?.Code
+                Code = user.Code
             };
 
             if (userRoles.Contains(EnumRole.Student.ToString()))
             {
-                var student = user.Human?.Student;
+                var student = user.Student;
                 tokenLogin.IsOrder = false;
                 tokenLogin.ClassId = student?.ClassId;
                 var classStudent = await _trainingService.GetClassToStudentId(student?.Id ?? default);

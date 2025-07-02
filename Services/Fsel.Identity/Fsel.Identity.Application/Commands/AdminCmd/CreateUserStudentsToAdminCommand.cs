@@ -230,7 +230,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
                 if (_httpContextAccessor.HttpContext != null)
                 {
-                    _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = tokenAdmin;
+                    _httpContextAccessor.HttpContext.SetHeader(HeaderNames.Authorization, tokenAdmin);
                 }
             }
             methodResult.Result = listUser.ExportExcel();

@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
         private async Task SavePlacementTestDoneAsync(StudentModel student, EnumCourseLevel desiredLevel, EnumPlacementTestLevel startingLevel, CancellationToken cancellationToken)
         {
-            int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+            int age = DateTimeHelper.GetYearOld(student.User?.Birthday);
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                           .OrderByDescending(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);
@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 if (isLock)
                 {
                     await UpdatePlacementGroupResultDoneAsync(placementTestResultDone, desiredLevel, levelNext);
-                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = student.Human?.UserId ?? default, CourseLevel = levelNext ?? default, BaseCourseLevel = levelNext ?? default });
+                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = student?.UserId ?? default, CourseLevel = levelNext ?? default, BaseCourseLevel = levelNext ?? default });
                     return;
                 }
                 else if (levelNext.HasValue)

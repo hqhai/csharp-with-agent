@@ -18,8 +18,8 @@ namespace Fsel.Identity.Infrastructure.Repositories
             try
             {
                 return await Queryable
-                .Include(x => x.Human)
-                .FirstOrDefaultAsync(x => x.Human!.UserId == userId);
+                .Include(x => x.User)
+                .FirstOrDefaultAsync(x => x.UserId == userId);
             }
             catch (Exception)
             {

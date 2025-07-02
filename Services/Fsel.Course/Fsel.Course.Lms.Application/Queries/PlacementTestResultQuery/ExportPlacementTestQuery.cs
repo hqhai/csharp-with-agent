@@ -107,14 +107,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 {
                     placementTestResultExports.Add(new PlacementTestReportExportModel
                     {
-                        Name = student.Human?.FullName,
-                        Birthday = student.Human?.Birthday,
-                        Email = student.Human?.Email,
+                        Name = student.User?.FullName,
+                        Birthday = student.User?.Birthday,
+                        Email = student.User?.Email,
                     });
                     continue;
                 }
 
-                int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
 
                 var (levelCompleted, isLock) = placementTestResultEnd.Level.GetLevelInScore(placementTestResultEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultStart?.Level, age));
                 var courseResult = courseResults.FirstOrDefault(x => x.StudentId == item.StudentId);
@@ -122,9 +122,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
                 placementTestResultExports.Add(new PlacementTestReportExportModel
                 {
-                    Name = student.Human?.FullName,
-                    Birthday = student.Human?.Birthday,
-                    Email = student.Human?.Email,
+                    Name = student.User?.FullName,
+                    Birthday = student.User?.Birthday,
+                    Email = student.User?.Email,
                     CompletionLevel = isLock ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestResultEnd.Level.GetCourseLevelByPlacementTestLevel()) : null,
                     ChooseLevel = isLock ? student.CourseLevel.GetCodeByEnumCourseLevel() : null,
                     SuggetLevel = isLock ? placementTestResultEnd.Status == EnumResultStatus.Done ? levelCompleted.GetCodeByEnumCourseLevel() : EnumCourseLevelHelper.GetCodeByEnumCourseLevel(placementTestResultEnd.Level.GetCourseLevelByPlacementTestLevel()) : null,

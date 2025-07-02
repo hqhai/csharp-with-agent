@@ -18,7 +18,10 @@ namespace Fsel.Shared.Constants
         public const string IeltsStudentsName = "Resources//IeltsStudents.json";
         public const string IeltsStudentsNameTestName = "Resources//IeltsStudents.Testing.json";
         public const string IeltsStudentsStagingName = "Resources//IeltsStudents.Staging.json";
+
         public const string RoleFileName = "Resources//Role.json";
+        public const string UserFileName = "Resources//User.json";
+        public const string UserRoleFileName = "Resources//UserRole.json";
 
         public const string PackageFileName = "Resources//Packages.json";
         public const string TechieActionFileName = "Resources//TechieAction.json";

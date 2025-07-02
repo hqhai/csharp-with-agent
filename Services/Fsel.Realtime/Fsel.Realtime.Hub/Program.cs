@@ -12,8 +12,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 var appSetting = builder.AddAppSettings<BaseAppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.Services.AddScoped<FeatureAccessTimePublisher>();
 builder.Services.AddScoped<SetTimeModulePublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();

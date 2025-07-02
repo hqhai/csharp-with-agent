@@ -66,7 +66,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
 
-            var user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(p => p.Human).ThenInclude(p => p.Student).FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
+            var user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(p => p.Student).FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user), request.PhoneNumber);
@@ -105,23 +105,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             user.EmailConfirmed = true;
             user.PhoneNumberConfirmed = true;
             user.Email = request.Email;
-            user.Human!.Email = request.Email;
-            user.Human.Birthday = request.Birthday;
-            user.Human.Student!.ParentEmail = request.ParentEmail;
-            user.Human.Student.ParentPhoneNumber = request.ParentPhoneNumber;
+            user.Birthday = request.Birthday;
+            user.Student!.ParentEmail = request.ParentEmail;
+            user.Student.ParentPhoneNumber = request.ParentPhoneNumber; 
             if (!user.IsValid())
             {
                 methodResult.AddErrorBadRequest(user.ErrorMessages);
                 return methodResult;
             }
-            if (user.Human != null && !user.Human.IsValid())
+            if (user.Student != null && !user.Student.IsValid())
             {
-                methodResult.AddErrorBadRequest(user.Human.ErrorMessages);
-                return methodResult;
-            }
-            if (user.Human?.Student != null && !user.Human.Student.IsValid())
-            {
-                methodResult.AddErrorBadRequest(user.Human.Student.ErrorMessages);
+                methodResult.AddErrorBadRequest(user.Student.ErrorMessages);
                 return methodResult;
             }
             await _userManager.UpdateAsync(user);

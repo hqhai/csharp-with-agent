@@ -53,8 +53,7 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PoliceClearancePath { get; set; }
 
-        public Human? Human { get; set; }
-
-        public Guid HumanId { get; set; }
+        public virtual User? User { get; set; }
+        public Guid UserId { get; set; }
     }
 }

@@ -35,8 +35,7 @@ namespace Fsel.Identity.Application.Queries.DailyStreakQuery
             var methodResult = new MethodResult<IList<DateTime>>();
 
             var student = await _studentRepository.Queryable
-                            .Include(i => i.Human)
-                            .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == _authContext.CurrentUserId, cancellationToken);
+                            .FirstOrDefaultAsync(i => i.UserId == _authContext.CurrentUserId, cancellationToken);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));

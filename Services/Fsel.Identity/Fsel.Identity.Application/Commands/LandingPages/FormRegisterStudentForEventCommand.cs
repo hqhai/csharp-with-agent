@@ -14,6 +14,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
     using Fsel.Identity.Application.Services;
     using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SenderService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -155,32 +156,27 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             user = new User()
             {
                 UserName = request.Email,
-                FullName = $"{request.FirstName} {request.LastName}",
+                FirstName = request.FirstName,
+                LastName = request.LastName,
                 Email = request.Email,
                 EmailConfirmed = true,
                 PhoneNumber = request.PhoneNumber,
+                Birthday = request.BirthDay,
                 PhoneNumberConfirmed = false,
-                Human = new Human()
+                Student = new Student()
                 {
-                    FullName = $"{request.FirstName} {request.LastName}",
-                    Birthday = request.BirthDay,
-                    PhoneNumber = request.PhoneNumber,
-                    Email = request.Email,
-                    Student = new Student()
-                    {
-                        Occupation = "Student",
-                        CourseLevel = EnumCourseLevel.A1,
-                        CreatedByParent = false,
-                        SchoolId = request.SchoolId,
-                        School = request.School,
-                        SchoolClass = request.SchoolClass,
-                        SchoolGrade = request.SchoolGrade,
-                        ProvinceId = request.ProvinceId,
-                        DistrictId = request.DistrictId,
-                        ParentEmail = request.ParentEmail,
-                        ParentPhoneNumber = request.ParentPhoneNumber,
-                        SchoolFaculty = request.SchoolFaculty,
-                    }
+                    Occupation = "Student",
+                    CourseLevel = EnumCourseLevel.A1,
+                    CreatedByParent = false,
+                    SchoolId = request.SchoolId,
+                    School = request.School,
+                    SchoolClass = request.SchoolClass,
+                    SchoolGrade = request.SchoolGrade,
+                    ProvinceId = request.ProvinceId,
+                    DistrictId = request.DistrictId,
+                    ParentEmail = request.ParentEmail,
+                    ParentPhoneNumber = request.ParentPhoneNumber,
+                    SchoolFaculty = request.SchoolFaculty,
                 },
                 UserPlatforms = new List<UserPlatform>()
                 {
@@ -219,18 +215,18 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             }
             await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday, SchoolId = request.SchoolId, ProvinceId = request.ProvinceId, DistrictId = request.DistrictId }, cancellationToken);
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Birthday, SchoolId = request.SchoolId, ProvinceId = request.ProvinceId, DistrictId = request.DistrictId }, cancellationToken);
             if (!updateCode.IsOK)
             {
                 methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
                 return methodResult;
             }
 
-            await Register(request, competitionEvent, user.Human.Student.Id, false, methodResult, cancellationToken);
+            await Register(request, competitionEvent, user.Student.Id, false, methodResult, cancellationToken);
 
             await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
             {
-                var studentCompetitionEvent = _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent { StudentId = user.Human.Student.Id, CompetitionEventId = competitionEvent.Id });
+                var studentCompetitionEvent = _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent { StudentId = user.Student.Id, CompetitionEventId = competitionEvent.Id });
                 await _studentCompetitionEventsRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;

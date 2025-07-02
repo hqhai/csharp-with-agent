@@ -149,8 +149,8 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 }
 
                 var studentDict = students
-                    .Where(x => x.Human != null && x.Human.UserId.HasValue)
-                    .ToDictionary(x => x.Human?.UserId ?? default, x => x);
+                    .Where(x => x.UserId != Guid.Empty)
+                    .ToDictionary(x => x.UserId, x => x);
 
                 if (studentDict != null)
                 {
@@ -158,10 +158,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     {
                         if (studentDict.TryGetValue(p.UserId, out var student))
                         {
-                            p.StudentCode = student.Human?.Code;
-                            p.StudentPhoneNumber = student.Human?.PhoneNumber;
-                            p.StudentEmail = student.Human?.Email;
-                            p.StudentFullName = student.Human?.FullName;
+                            p.StudentCode = student.User?.Code;
+                            p.StudentPhoneNumber = student.User?.PhoneNumber;
+                            p.StudentEmail = student.User?.Email;
+                            p.StudentFullName = student.User?.FullName;
                             p.ExpiredDate = student.ExpiredDate;
                         }
                     });

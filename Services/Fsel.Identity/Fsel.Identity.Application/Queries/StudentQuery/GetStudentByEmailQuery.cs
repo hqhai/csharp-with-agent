@@ -36,12 +36,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
 
             var queryUserName = _studentRepository.Queryable
-                                    .Include(x => x.Human)
-                                    .Where(x => x.Human.User.UserName == request.Email);
+                                    .Include(x => x.User)
+                                    .Where(x => x.User.UserName == request.Email);
 
             var queryEmail = _studentRepository.Queryable
-                                    .Include(x => x.Human)
-                                    .Where(x => x.Human.User.Email == request.Email);
+                                    .Include(x => x.User)
+                                    .Where(x => x.User.Email == request.Email);
 
             var student = await queryUserName.Union(queryEmail).FirstOrDefaultAsync(cancellationToken: cancellationToken);
             methodResult.Result = _mapper.Map<StudentModel>(student);

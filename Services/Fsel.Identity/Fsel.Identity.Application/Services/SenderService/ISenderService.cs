@@ -5,7 +5,7 @@ using Fsel.Shared.Enums;
 using Fsel.Shared.Models.ShareModels;
 using Refit;
 
-namespace Fsel.Identity.Application.Services
+namespace Fsel.Identity.Application.Services.SenderService
 {
     public interface ISenderService
     {

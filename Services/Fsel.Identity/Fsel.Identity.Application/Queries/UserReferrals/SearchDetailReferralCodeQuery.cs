@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
 
             var userReferrals = await _userReferralRepository.Queryable.Where(p => p.SenderId == request.SenderId).ToListAsync(cancellationToken);
             var receiverIds = userReferrals.Select(p => p.ReceiverId).ToList();
-            var users = _userManager.Users.Include(p => p.Human).Where(p => receiverIds != null && receiverIds.Contains(p.Id));
+            var users = _userManager.Users.Where(p => receiverIds != null && receiverIds.Contains(p.Id));
 
             var models = new List<SearchDetailReferralCodeModel>();
 

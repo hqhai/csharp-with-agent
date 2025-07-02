@@ -19,18 +19,15 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
 
     public class GetStudentInfoEventQueryHandler : IRequestHandler<GetStudentInfoEventQuery, MethodResult<StudentInfoEventModel>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly AuthContext _authContext;
         private readonly UserManager<User> _userManager;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
 
         public GetStudentInfoEventQueryHandler(
-            IHumanRepository humanRepository,
             AuthContext authContext,
             UserManager<User> userManager,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
         {
-            _humanRepository = humanRepository;
             _authContext = authContext;
             _userManager = userManager;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
@@ -40,11 +37,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentInfoEventModel>();
-            var human = await _humanRepository.Queryable.Include(x => x.Student).Include(x => x.User)
-                                                        .FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken);
-            var user = human?.User;
-            var student = human?.Student;
-            if (user == null || human == null || student == null)
+            var user = await _userManager.Users.Include(x => x.Student)
+                                                        .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
+            var student = user?.Student;
+            if (user == null || student == null)
             {
                 return methodResult;
             }
@@ -56,15 +52,15 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
             var isChangePassword = await _userManager.CheckPasswordAsync(user, user.DefaultPassword ?? string.Empty);
             var studentInfoEvent = new StudentInfoEventModel
             {
-                Birthday = human.Birthday,
-                Email = human.Email,
-                FullName = human.FullName,
-                ParentEmail = human.Student?.ParentEmail,
-                ParentPhoneNumber = human.Student?.ParentPhoneNumber,
-                PhoneNumber = human.PhoneNumber,
-                School = human.Student?.School,
-                SchoolClass = human.Student?.SchoolClass,
-                SchoolGrade = human.Student?.SchoolGrade,
+                Birthday = user.Birthday,
+                Email = user.Email,
+                FullName = user.FullName,
+                ParentEmail = user.Student?.ParentEmail,
+                ParentPhoneNumber = user.Student?.ParentPhoneNumber,
+                PhoneNumber = user.PhoneNumber,
+                School = user.Student?.School,
+                SchoolClass = user.Student?.SchoolClass,
+                SchoolGrade = user.Student?.SchoolGrade,
                 EmailConfirmed = user.EmailConfirmed,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 IsChangePassword = !isChangePassword,

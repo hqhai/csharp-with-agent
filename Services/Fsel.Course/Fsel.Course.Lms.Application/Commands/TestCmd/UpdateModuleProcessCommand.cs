@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -94,13 +95,13 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var userId = student.Human?.UserId ?? default;
+            var userId = student?.UserId ?? default;
 
             var tokenResult = await _userService.GetJWTAsync(userId);
             var authToken = tokenResult.Content?.Result;
             if (authToken != null && _httpContextAccessor.HttpContext != null)
             {
-                _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = "Bearer " + authToken.AccessToken;
+                _httpContextAccessor.HttpContext.SetHeader(HeaderNames.Authorization, "Bearer " + authToken.AccessToken);
                 _authContext.CurrentUsername = authToken.FullName;
                 _authContext.CurrentUserId = userId;
                 _authContext.CurrentFullName = authToken.FullName;
@@ -169,7 +170,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             await UpdateUnitResultAsync(request, student);
             if (request.UnitId.HasValue)
             {
-                await _mediator.Send(new GetLessonsQuery { CourseId = request.CourseId, UnitId = request.UnitId.Value, UserId = student.Human?.UserId ?? default }, cancellationToken);
+                await _mediator.Send(new GetLessonsQuery { CourseId = request.CourseId, UnitId = request.UnitId.Value, UserId = student?.UserId ?? default }, cancellationToken);
             }
         }
 
@@ -212,7 +213,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                         UnitId = request.UnitId.Value,
                         LessonId = lessonResult.LessonId,
                         LessonResultId = lessonResult.Id,
-                        UserId = student.Human?.UserId ?? default
+                        UserId = student?.UserId ?? default
                     }, cancellationToken);
                 }
             }

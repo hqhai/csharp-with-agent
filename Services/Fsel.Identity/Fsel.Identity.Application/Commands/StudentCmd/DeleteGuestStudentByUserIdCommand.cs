@@ -22,12 +22,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class DeleteGuestStudentByUserIdCommandHandler : IRequestHandler<DeleteGuestStudentByUserIdCommand, VoidMethodResult>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
+        private readonly IStudentRepository _studentRepository;
 
-        public DeleteGuestStudentByUserIdCommandHandler(UserManager<User> userManager, IHumanRepository humanRepository)
+        public DeleteGuestStudentByUserIdCommandHandler(UserManager<User> userManager, IStudentRepository studentRepository)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
+            _studentRepository = studentRepository;
         }
 
         public async Task<VoidMethodResult> Handle(DeleteGuestStudentByUserIdCommand request, CancellationToken cancellationToken)
@@ -35,12 +35,18 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            var user = await _userManager.Users.Include(x => x.Human).ThenInclude(x => x.Student).Where(x => x.Id == request.Id).FirstOrDefaultAsync(cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Student).Where(x => x.Id == request.Id).FirstOrDefaultAsync(cancellationToken);
+            if (user == null)
+            {
+                return methodResult;
+            }
 
-            await _userManager.DeleteAsync(user!);
-
-            await _humanRepository.DeleteAsync(user?.Human ?? new Human());
-            await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _userManager.DeleteAsync(user);
+            if (user.Student != null)
+            {
+                await _studentRepository.DeleteAsync(user.Student);
+                await _studentRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

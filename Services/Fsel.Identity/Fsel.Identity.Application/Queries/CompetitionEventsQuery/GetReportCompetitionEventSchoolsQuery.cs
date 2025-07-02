@@ -39,21 +39,18 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
 
         public GetReportCompetitionEventSchoolsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-            IHumanRepository humanRepository,
             UserManager<User> userManager)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
-            _humanRepository = humanRepository;
             _userManager = userManager;
         }
 
@@ -88,8 +85,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             var studentSchoolIds = (await (from baseQ in _studentRepository.Queryable.Where(x => x.SchoolId != null)
                                            join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
-                                           join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
-                                           join user in _userManager.Users on human.UserId equals user.Id
+                                           join user in _userManager.Users on baseQ.UserId equals user.Id
                                            where competitionEventIds.Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
                                            select new
                                            {

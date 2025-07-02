@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var studentId = student.Id;
-            var userId = student.Human?.UserId;
+            var userId = student.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null || course.CourseType == EnumCourseType.Academic)
             {
@@ -86,10 +86,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             var mockTestResults = await _mockTestResultRepository.Queryable.Include(x => x.MockTest).Where(x => mockTestIds.Contains(x.MockTestId) && x.CourseId == request.CourseId && x.StudentId == request.StudentId).ToListAsync(cancellationToken);
             var featureAccessTimes = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
-                UserId = userId ?? default,
+                UserId = userId,
                 FeatureAccessTimes = mockTestResults.Select(x => x.Id).Select(x => new FeatureAccessTimeQueryModel
                 {
-                    UserId = userId ?? default,
+                    UserId = userId,
                     ObjectId = x,
                     EnumFeature = EnumFeature.MockTest,
                     CourseId = course.Id

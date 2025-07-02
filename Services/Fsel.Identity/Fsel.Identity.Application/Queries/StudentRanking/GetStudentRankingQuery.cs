@@ -48,7 +48,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                                                                                 .ToListAsync(cancellationToken);
 
             var studentIds = studentRankingsQuery.Select(s => s.StudentId);
-            var studentInfo = _studentRepository.Queryable.Include(x => x.Human).Where(x => studentIds.Contains(x.Id)).ToList();
+            var studentInfo = _studentRepository.Queryable.Include(x => x.User).Where(x => studentIds.Contains(x.Id)).ToList();
             var studentRankingResult = _mapper.Map<List<StudentRankingModel>>(studentRankingsQuery);
 
             var studentDailyStreak = _studentDailyStreakRepository.Queryable.Where(x => studentIds.Contains(x.StudentId)).ToList();
@@ -60,16 +60,15 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 ConsecutiveDays = GetConsecutiveDays(studentDailyStreak, studentId)
             }).ToList();
 
-
             studentRankingResult.ForEach(x =>
             {
                 var student = studentInfo.FirstOrDefault(s => s.Id == x.StudentId);
                 var dailyStreak = listDailyStreakByStudents.FirstOrDefault(d => d.StudentId == x.StudentId)?.ConsecutiveDays ?? 0;
                 if (student != null)
                 {
-                    x.FullName = student.Human?.FullName;
-                    x.AvatarPath = student.Human?.AvatarPath;
-                    x.UserId = student.Human?.UserId;
+                    x.FullName = student.User?.FullName;
+                    x.AvatarPath = student.User?.AvatarPath;
+                    x.UserId = student.UserId;
                     x.DailyStreak = dailyStreak;
                 }
             });
@@ -121,7 +120,5 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             return consecutiveDays;
         }
-
-
     }
 }

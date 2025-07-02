@@ -186,8 +186,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
                 var studentProgressReport = new StudentProgressReportModel
                 {
-                    FullName = student.Human?.FullName,
-                    Email = student.Human?.Email,
+                    FullName = student.User?.FullName,
+                    Email = student.User?.Email,
                     School = student.School ?? schools?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name,
                     ProcessDate = courseResult?.ProcessDate,
                     ExpiredDate = student.ExpiredDate,
@@ -233,7 +233,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         {
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimeBusiness(new GetFeatureAccessTimeBusinessQueryModel
             {
-                UserId = student.Human?.UserId ?? default,
+                UserId = student?.UserId ?? default,
                 CourseId = courseResult.CourseId
             });
 

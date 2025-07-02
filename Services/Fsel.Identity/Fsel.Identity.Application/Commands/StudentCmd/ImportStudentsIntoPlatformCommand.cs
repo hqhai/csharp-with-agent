@@ -18,6 +18,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Kros.Extensions;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -250,27 +251,22 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 {
                                     UserName = student.Email.ToLower(cultureInfo).Trim(),
                                     Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
-                                    FullName = student.FullName?.Trim() ?? string.Empty,
+                                    LastName = student.FullName?.Trim().ParseFullName().LastName,
+                                    FirstName = student.FullName?.Trim().ParseFullName().FirstName,
                                     PhoneNumber = !string.IsNullOrEmpty(student.PhoneNumber?.Trim()) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()) : null,
+                                    Birthday = student.DateOfBirth,
+                                    Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
                                     EmailConfirmed = true,
                                     PhoneNumberConfirmed = false,
                                     Status = EnumUserStatus.Active,
                                     DefaultPassword = password,
-                                    Human = new Human()
+                                    Student = new Student()
                                     {
-                                        FullName = student.FullName?.Trim(),
-                                        PhoneNumber = !string.IsNullOrEmpty(student.PhoneNumber?.Trim()) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()) : null,
-                                        Birthday = student.DateOfBirth,
-                                        Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
-                                        Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
-                                        Student = new Student()
-                                        {
-                                            CreatedByParent = false,
-                                            Occupation = nameof(Student),
-                                            SchoolClass = student.SchoolClass,
-                                            SchoolGrade = student.SchoolGrade,
-                                            CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
-                                        }
+                                        CreatedByParent = false,
+                                        Occupation = nameof(Student),
+                                        SchoolClass = student.SchoolClass,
+                                        SchoolGrade = student.SchoolGrade,
+                                        CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
                                     },
                                     UserPlatforms = new List<UserPlatform>()
                                     {

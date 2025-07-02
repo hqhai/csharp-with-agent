@@ -67,21 +67,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         countUser++;
                     }
                     user.Email = user.UserName + "@gmail.com";
-                    user.FullName = user.UserName;
+                    user.FirstName = user.UserName;
+                    user.Code = user.Email;
                     user.EmailConfirmed = true;
 
                     #endregion User initialization
 
-                    #region Add Human and Student to User
-
-                    user.Human = new Human
-                    {
-                        FullName = user.UserName,
-                        Code = user.UserName,
-                        Student = new Student()
-                    };
-
-                    #endregion Add Human and Student to User
+                    user.Student = new Student();
 
                     #region Add Platform to User
 

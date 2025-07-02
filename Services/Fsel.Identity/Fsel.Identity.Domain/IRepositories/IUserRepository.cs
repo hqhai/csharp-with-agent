@@ -2,7 +2,14 @@
 
 namespace Fsel.Identity.Domain.IRepositories
 {
+    using Fsel.Identity.Domain.Entities;
+    using Fsel.Shared.Enums;
+    using Microsoft.EntityFrameworkCore;
+
     public interface IUserRepository
     {
+        DbContext DbContext { get; }
+
+        Task<User> GenerateUserDataAsync(User user, EnumRoleRegister role);
     }
 }

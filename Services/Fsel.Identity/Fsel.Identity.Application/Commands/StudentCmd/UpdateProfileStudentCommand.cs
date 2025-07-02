@@ -38,7 +38,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserModel>();
 
-            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -50,15 +50,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 return methodResult;
             }
             _mapper.Map(request, user);
-            _mapper.Map(request, user.Human);
             if (!user.IsValid())
             {
                 methodResult.AddErrorBadRequest(user.ErrorMessages);
-                return methodResult;
-            }
-            if (user.Human != null && !user.Human.IsValid())
-            {
-                methodResult.AddErrorBadRequest(user.Human.ErrorMessages);
                 return methodResult;
             }
             await _userManager.UpdateAsync(user);

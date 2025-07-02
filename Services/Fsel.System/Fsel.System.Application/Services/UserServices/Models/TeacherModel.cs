@@ -15,7 +15,7 @@ namespace Fsel.System.Application.Services.UserServices.Models
         public string? UniversityDegreePath { get; set; }
         public string? CertificationPath { get; set; }
         public string? PoliceClearancePath { get; set; }
-        public Guid HumanId { get; set; }
-        public HumanModel? Human { get; set; }
+        public UserModel? User { get; set; }
+        public Guid UserId { get; set; }
     }
 }

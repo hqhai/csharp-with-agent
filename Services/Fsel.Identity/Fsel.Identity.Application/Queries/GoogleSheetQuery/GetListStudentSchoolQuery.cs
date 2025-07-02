@@ -84,13 +84,13 @@ namespace Fsel.Identity.Application.Queries.GoogleSheetQuery
                     }
                 }
 
-                var existsStudent = _studentRepository.Queryable.Include(x => x.Human).ThenInclude(x => x.User)
-                                                             .Where(x => x.Human != null && students.Select(y => y.Email).Contains(x.Human.User!.Email))
+                var existsStudent = _studentRepository.Queryable.Include(x => x.User)
+                                                             .Where(x => x.User != null && students.Select(y => y.Email).Contains(x.User!.Email))
                                                              .Select(x => new
                                                              {
-                                                                 StudentId = x.Human!.Student!.Id,
-                                                                 UserId = x.Human!.User!.Id,
-                                                                 Email = x.Human!.User!.Email
+                                                                 StudentId = x.Id,
+                                                                 UserId = x!.User!.Id,
+                                                                 Email = x!.User!.Email
                                                              }).ToList();
 
                 // Gán StudentId và UserId vào danh sách students

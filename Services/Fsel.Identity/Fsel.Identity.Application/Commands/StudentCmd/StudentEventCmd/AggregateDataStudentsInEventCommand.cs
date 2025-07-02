@@ -26,19 +26,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISystemService _systemService;
         private readonly IStudentEventLearningRecordRepository _studentEventLearningRecordRepository;
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
 
-        public AggregateDataStudentsInEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IHumanRepository humanRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService, ISystemService systemService, IStudentEventLearningRecordRepository studentEventLearningRecordRepository, IStudentDailyStreakRepository studentDailyStreakRepository)
+        public AggregateDataStudentsInEventCommandHandler(ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService, ISystemService systemService, IStudentEventLearningRecordRepository studentEventLearningRecordRepository, IStudentDailyStreakRepository studentDailyStreakRepository)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _studentRepository = studentRepository;
-            _humanRepository = humanRepository;
             _userManager = userManager;
             _lmsCourseService = lmsCourseService;
             _systemService = systemService;
@@ -76,8 +74,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             var studentIds = await _studentCompetitionEventsRepository.Queryable.WhereBulkContains(competitionEventIds, p => p.CompetitionEventId).Select(p => p.StudentId).ToListAsync(cancellationToken);
 
             var students = await (from s in _studentRepository.Queryable.WhereBulkContains(studentIds, p => p.Id)
-                                  join h in _humanRepository.Queryable on s.HumanId equals h.Id
-                                  join u in _userManager.Users on h.UserId equals u.Id
+                                  join u in _userManager.Users on s.UserId equals u.Id
                                   join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
                                   select new StudentCompetitionEventModel
                                   {

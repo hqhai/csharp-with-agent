@@ -15,5 +15,6 @@ namespace Fsel.System.Domain.Models.EntityModels
         public string? Name { get; set; }
         public string? LocalId { get; set; }
         public string? LongPath { get; set; }
+        public string? LocationName { get; set; }
     }
 }

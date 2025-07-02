@@ -109,7 +109,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
             foreach (var item in lists)
             {
                 var teacher = teachers!.FirstOrDefault(x => x.Id == item.TeacherId);
-                item.TeacherName = teacher?.Human?.FullName;
+                item.TeacherName = teacher?.User?.FullName;
                 var liveTimeFrame = liveTimeFrames?.FirstOrDefault(p => p.Id == item.LiveTimeFrameId);
                 item.StartTime = liveTimeFrame?.StartTime;
                 item.EndTime = liveTimeFrame?.EndTime;

@@ -56,9 +56,9 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 {
                     liveSessionInformation.Students = students.Select(x => new StudentInfoModel
                     {
-                        FullName = x.Human?.FullName,
-                        PhoneNumber = x.Human?.PhoneNumber,
-                        Email = x.Human?.Email,
+                        FullName = x.User?.FullName,
+                        PhoneNumber = x.User?.PhoneNumber,
+                        Email = x.User?.Email,
                     }).ToList();
                 }
             }
@@ -75,7 +75,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                 }
                 teacher = teacherResult.Content?.Result;
             }
-            liveSessionInformation.TeacherName = teacher?.Human?.FullName;
+            liveSessionInformation.TeacherName = teacher?.User?.FullName;
             methodResult.Result = liveSessionInformation;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

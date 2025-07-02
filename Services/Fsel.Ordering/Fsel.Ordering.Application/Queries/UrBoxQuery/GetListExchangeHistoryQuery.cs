@@ -32,14 +32,14 @@ namespace Fsel.Ordering.Application.Queries.UrBoxQuery
         private readonly IMapper _mapper;
         private readonly AuthContext _languageContext;
 
-        public GetListExchangeHistoryQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext authContext, IOrderTransactionRepository orderTransactionRepository, IMapper mapper, AuthContext languageContext)
+        public GetListExchangeHistoryQueryHandler(IUrBoxService urBoxService, AppSetting appSetting, AuthContext authContext, IOrderTransactionRepository orderTransactionRepository, IMapper mapper)
         {
             _urBoxService = urBoxService;
             _appSetting = appSetting;
             _authContext = authContext;
             _orderTransactionRepository = orderTransactionRepository;
             _mapper = mapper;
-            _languageContext = languageContext;
+            _languageContext = authContext;
         }
 
         public async Task<MethodResult<ExchangeHistoryModel>> Handle(GetListExchangeHistoryQuery request, CancellationToken cancellationToken)

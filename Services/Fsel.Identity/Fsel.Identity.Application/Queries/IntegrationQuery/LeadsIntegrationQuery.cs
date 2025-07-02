@@ -8,12 +8,14 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
     using Fsel.Identity.Domain.Models.QueryModels.Integration;
@@ -29,19 +31,19 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     public class LeadsIntegrationQueryHandler : IRequestHandler<LeadsIntegrationQuery, MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
     {
         private readonly IOrderService _orderService;
-        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
 
         public LeadsIntegrationQueryHandler(IOrderService orderService,
-                                            IHumanRepository humanRepository,
+                                            UserManager<User> userManager,
                                             ILmsCourseService lmsCourseService,
                                             ISystemService systemService,
                                             IMapper mapper)
         {
             _orderService = orderService;
-            _humanRepository = humanRepository;
+            _userManager = userManager;
             _lmsCourseService = lmsCourseService;
             _systemService = systemService;
             _mapper = mapper;
@@ -107,7 +109,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 var userOrderIds = orderResultHasTimes.Select(x => x.UserId).Distinct().ToList();
 
                 //lấy User đăng ký trong khoảng thời gian
-                var users = await _humanRepository.Queryable
+                var users = await _userManager.Users
                                                   .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
                                                   .ToListAsync(cancellationToken);
                 if (users == null)
@@ -115,7 +117,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(users));
                     return methodResult;
                 }
-                var userIdentityHasTimeIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
+                var userIdentityHasTimeIds = users.Select(x => x.Id).ToList();
 
                 // hợp nhất UserId chưa có order
                 var userIds = userIdentityHasTimeIds.Concat(userPtTestHasTimeIds).Concat(userUnitResultHasTimeIds).Concat(userOrderIds).ToList();
@@ -123,14 +125,14 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             }
             else
             {
-                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken);
+                var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken);
 
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
                     return methodResult;
                 }
-                distinctUserIds.Add(user.UserId!.Value);
+                distinctUserIds.Add(user.Id);
             }
 
             // lấy client
@@ -172,13 +174,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var unitResults = units.Content?.Result;
 
             // lấy all user từ list hợp nhất
-            var userCombines = await _humanRepository.Queryable
-                                                     .Include(x => x.User)
+            var userCombines = await _userManager.Users
                                                      .Include(x => x.Student)
                                                      .ThenInclude(x => x!.ParentStudents)
                                                      .ThenInclude(x => x.Parent)
-                                                     .ThenInclude(x => x!.Human)
-                                                     .Where(x => x.UserId.HasValue && paging.Contains(x.UserId.Value))
+                                                     .ThenInclude(x => x!.User)
+                                                     .Where(x => paging.Contains(x.Id))
                                                      .ToListAsync(cancellationToken);
 
             // lấy thông tin trường học
@@ -214,7 +215,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 item.LessonCompleted = unitResult?.LessonCompleted;
 
                 var dateOrder = orderItem?.UpdatedDate ?? orderItem?.CreatedDate;
-                var dateUser = userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate != null ? userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.UpdatedDate : userCombines.FirstOrDefault(x => x.UserId == item.UserId)?.CreatedDate;
+                var dateUser = userCombines.FirstOrDefault(x => x.Id == item.UserId)?.UpdatedDate != null ? userCombines.FirstOrDefault(x => x.Id == item.UserId)?.UpdatedDate : userCombines.FirstOrDefault(x => x.Id == item.UserId)?.CreatedDate;
 
                 var dateEdits = new[] { dateOrder, ptTestResult?.DateEdit, unitResult?.DateEdit, dateUser };
                 if (dateEdits.Any() && dateEdits.Any(x => x.HasValue))

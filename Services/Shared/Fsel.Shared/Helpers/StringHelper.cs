@@ -446,5 +446,25 @@ namespace Fsel.Shared.Helpers
                 return answers.Select(ans => CleanText(ans)).ToList();
             }
         }
+
+        public static (string? FirstName, string? LastName) ParseFullName(this string? fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                return (string.Empty, string.Empty);
+            }
+
+            int firstSpaceIndex = fullName.IndexOf(' ', StringComparison.InvariantCulture);
+
+            if (firstSpaceIndex == -1)
+            {
+                return (fullName, fullName);
+            }
+
+            string lastName = fullName[..firstSpaceIndex];
+            string firstName = fullName[(firstSpaceIndex + 1)..];
+
+            return (firstName, lastName);
+        }
     }
 }

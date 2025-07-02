@@ -92,12 +92,12 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => studentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
                 foreach (var student in students)
                 {
-                    var userId = student.Human?.UserId ?? default;
+                    var userId = student?.UserId ?? default;
                     var courseResult = courseResults?.FirstOrDefault(x => x.StudentId == student.Id);
                     var reportProgress = new StudentProgressExportModel
                     {
-                        FullName = student.Human?.FullName,
-                        Email = student.Human?.Email,
+                        FullName = student?.User?.FullName,
+                        Email = student?.User?.Email,
                         CourseName = courseResult?.Course?.Name,
                         ExpiredDate = student.ExpiredDate,
                         Status = courseResult == null ? ValueStatusUser.NotStarted : ValueStatusUser.InProgress,
@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                         var (currentProgress, progress) = await _managerProgressHelper.GetCompleteCourseAsync(courseResultModel);
                         reportProgress.ProgressPercent = NumberHelper.GetPercent(currentProgress, progress);
 
-                        var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { UserId = student?.Human?.UserId ?? default, CourseId = courseResult.CourseId });
+                        var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { UserId = student?.UserId ?? default, CourseId = courseResult.CourseId });
                         if (featureAccessTimeResult.IsSuccessStatusCode)
                         {
                             reportProgress.TotalTime = featureAccessTimeResult.Content?.Result?.AccessTime ?? default;

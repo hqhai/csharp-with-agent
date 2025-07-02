@@ -110,7 +110,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery
                 var teachers = teacherResults.Content?.Result;
                 foreach (var item in lists)
                 {
-                    item.TeacherName = teachers?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
+                    item.TeacherName = teachers?.FirstOrDefault(x => x.Id == item.TeacherId)?.User?.FullName;
                 }
             }
 

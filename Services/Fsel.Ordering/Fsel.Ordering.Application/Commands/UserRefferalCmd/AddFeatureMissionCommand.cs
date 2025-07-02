@@ -65,7 +65,7 @@ namespace Fsel.Ordering.Application.Commands.UserRefferalCmd
 
             if (request.FeatureUserReferral == EnumFeatureUserReferral.Payment)
             {
-                var orders = await _orderRepository.Queryable.Where(p => !p.IsTrial && p.Status == EnumOrderStatus.Payment && p.UserId == student.Human!.UserId).ToListAsync(cancellationToken);
+                var orders = await _orderRepository.Queryable.Where(p => !p.IsTrial && p.Status == EnumOrderStatus.Payment && p.UserId == student!.UserId).ToListAsync(cancellationToken);
                 if (orders.Count != 1)
                 {
                     return methodResult;

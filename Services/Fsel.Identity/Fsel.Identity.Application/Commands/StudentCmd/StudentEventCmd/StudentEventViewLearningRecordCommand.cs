@@ -22,15 +22,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
         private readonly AuthContext _authContext;
         private readonly IStudentEventLearningRecordRepository _studentEventLearningRecordRepository;
         private readonly IStudentRepository _studentRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
 
-        public StudentEventViewLearningRecordCommandHandler(AuthContext authContext, IStudentEventLearningRecordRepository studentEventLearningRecordRepository, IStudentRepository studentRepository, IHumanRepository humanRepository, UserManager<User> userManager)
+        public StudentEventViewLearningRecordCommandHandler(AuthContext authContext, IStudentEventLearningRecordRepository studentEventLearningRecordRepository, IStudentRepository studentRepository, UserManager<User> userManager)
         {
             _authContext = authContext;
             _studentEventLearningRecordRepository = studentEventLearningRecordRepository;
             _studentRepository = studentRepository;
-            _humanRepository = humanRepository;
             _userManager = userManager;
         }
 
@@ -42,8 +40,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
             var student = await (from s in _studentRepository.Queryable
-                                 join h in _humanRepository.Queryable on s.HumanId equals h.Id
-                                 join u in _userManager.Users on h.UserId equals u.Id
+                                 join u in _userManager.Users on s.UserId equals u.Id
                                  where u.Id == userId
                                  select s).FirstOrDefaultAsync(cancellationToken);
             if (student == null)

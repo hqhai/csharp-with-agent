@@ -49,19 +49,19 @@ namespace Fsel.Course.Lms.Application.Commands.CutOffCmd
                 return methodResult;
             }
 
-            if (users.All(x => x.Human?.User?.Status != Shared.Enums.EnumUserStatus.Disable))
+            if (users.All(x => x.User?.Status != Shared.Enums.EnumUserStatus.Disable))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOtherErrorCode.NotStatusCutOff), nameof(users), users);
                 return methodResult;
             }
 
-            if (users.Any(x => x.Human?.User?.Status != Shared.Enums.EnumUserStatus.Disable))
+            if (users.Any(x => x?.User?.Status != Shared.Enums.EnumUserStatus.Disable))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOtherErrorCode.OnlyUsersCutOff), nameof(users), users);
                 return methodResult;
             }
 
-            var userNames = users.Where(x => x.Human?.User?.UserName != null).Select(x => x.Human?.User?.UserName!).ToList();
+            var userNames = users.Where(x => x?.User?.UserName != null).Select(x => x?.User?.UserName!).ToList();
 
             const int BatchSize = 50;
             var totalUsers = userNames.Count;

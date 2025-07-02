@@ -1,0 +1,174 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer Localizer
+@model Fsel.Identity.Domain.Models.CommandModels.Quickstarts.VerifyOtpModel
+@using Fsel.Identity.Authentication.Quickstart.Account;
+
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    var isError = ViewContext.ModelState.IsValid;
+    // ViewData["Title"] = "Register";
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/assets/css/pages/verify-otp.css" />
+}
+
+<div class="all-content">
+    <div class="content">
+        <div class="langs">
+            @await Component.InvokeAsync("Languages")
+        </div>
+
+        <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        @if (Model.Type == nameof(AccountController.Register))
+        {
+            <h1 class="title">@Localizer["i18n_verify_otp"]</h1>
+        }
+        else
+        {
+            <h1 class="title">@Localizer["i18n_forgot_password"]</h1>
+        }
+
+        <form id="form-VerifyOtp" asp-route="VerifyOtp">
+            @if (Model.Type == nameof(AccountController.Register))
+            {
+                <p class="sub-title sub-verify-otp">
+                    @Localizer["i18nSignUpContentCheckmailotp"]
+                </p>
+            }
+            else
+            {
+                <p class="sub-title"></p>
+            }
+
+            <input type="hidden" asp-for="ReturnUrl" />
+            <input type="hidden" asp-for="Type" />
+            <div class="hidden" id="RemainSecond" data-value="@Model.RemainSecond"></div>
+            @Html.AntiForgeryToken()
+
+            <div>
+                <div class="number-list @(ViewContext.ModelState.IsValid ? "" : "number-list-error")">
+                    <input @* onkeydown="moveToNext(event, this, 'otp-1', 'otp-2')"
+                           onpaste="autoFill(event, this)" *@
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           @* required  *@
+                           maxlength="1"
+                           id="otp-1"
+                           autocomplete="off"
+                           name="otp-1" />
+                    <input @* onkeydown="moveToNext(event, this, 'otp-1', 'otp-3')"
+                           onpaste="autoFill(event, this)" *@
+                           id="otp-2"
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           @* required *@
+                           maxlength="1"
+                           name="otp-2" />
+                    <input id="otp-3"
+                    @* onkeydown="moveToNext(event, this, 'otp-2', 'otp-4')"
+                           onpaste="autoFill(event, this)" *@
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           @* required *@
+                           maxlength="1"
+                           autocomplete="off"
+                           name="otp-3" />
+                    <input id="otp-4"
+                    @* onkeydown="moveToNext(event, this, 'otp-3', 'otp-5')"
+                           onpaste="autoFill(event, this)" *@
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           @* required *@
+                           maxlength="1"
+                           autocomplete="off"
+                           name="otp-4" />
+                    <input id="otp-5"
+                    @* onkeydown="moveToNext(event, this, 'otp-4', 'otp-6')"
+                           onpaste="autoFill(event, this)" *@
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           @* required *@
+                           maxlength="1"
+                           autocomplete="off"
+                           name="otp-5" />
+                    <input id="otp-6"
+                    @* onkeydown="moveToNext(event, this, 'otp-5', null)"
+                           onpaste="autoFill(event, this)" *@
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           @* required *@
+                           maxlength="1"
+                           autocomplete="off"
+                           name="otp-6" />
+                </div>
+                <div class="mt-2">
+                    <input type="hidden"
+                           name="Otp"
+                           id="otp"
+                           placeholder=" "
+                           autocomplete="off"
+                           asp-for="Otp" />
+                    @* <input type="hidden"
+                           name="Otp"
+                           id="otp"
+                           placeholder=" "
+                           autocomplete="off"
+                           required
+                           asp-for="Otp" /> *@
+                    @* @Html.CustomValidationMessageFor(model => model.Otp, Localizer, "", new { @class = "content-text-danger" }) *@
+                </div>
+
+                @if (!ViewContext.ModelState.IsValid)
+                {
+                    foreach (var item in ViewContext.ModelState.Values.SelectMany(x => x.Errors).Select(x => x.ErrorMessage))
+                    {
+                        <div class="message-otp-error mt-4">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 width="24"
+                                 height="24"
+                                 viewBox="0 0 24 24"
+                                 fill="none">
+                                <path d="M11.9952 22.0518C17.4761 22.0518 22 17.5256 22 12.0518C22 6.57787 17.4664 2.05176 11.9855 2.05176C6.51426 2.05176 2 6.57787 2 12.0518C2 17.5256 6.52392 22.0518 11.9952 22.0518ZM11.9952 13.7055C11.4248 13.7055 11.0962 13.3864 11.0768 12.8061L10.9415 7.98019C10.9222 7.38058 11.3475 6.96472 11.9855 6.96472C12.6042 6.96472 13.0585 7.39025 13.0391 7.98986L12.8845 12.8061C12.8652 13.3961 12.5462 13.7055 11.9952 13.7055ZM11.9952 17.0518C11.3378 17.0518 10.7965 16.5779 10.7965 15.9396C10.7965 15.3013 11.3282 14.8274 11.9952 14.8274C12.6525 14.8274 13.1841 15.3013 13.1841 15.9396C13.1841 16.5875 12.6428 17.0518 11.9952 17.0518Z"
+                                      fill="#C54E59" />
+                            </svg>
+                            @item
+                        </div>
+                    }
+                }
+
+            </div>
+            <button type="submit" class="btn">@Localizer["i18n_verify"]</button>
+
+            <div class="resend-otp">
+                <div class="resend-otp-1 @(Model.RemainSecond.HasValue ? "" : "hidden")" data-value="@Localizer["i18n_send_otp_after"]">
+                    @Html.Raw(Model.RemainSecond.HasValue ? $"{Localizer["i18n_send_otp_after"].ToString()?.Replace("{{timeResetOtp}}", $"<a>{Model.RemainSecond.Value.ToString()}")}</a>" : "")
+                </div>
+                <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
+                    @Localizer["i18n_did_not_a_code"]
+                    <button type="submit" name="button" value="resend">@Localizer["i18n_resend_otp"]</button>
+                </div>
+
+                @* <a href="@Url.Action("ResendOtp", "Account", new { Model.ReturnUrl, type = Model.Type })">@Localizer["i18n_resend_otp"]</a> *@
+            </div>
+        </form>
+    </div>
+
+    @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })
+
+    @* <partial class="mt-3" name="_ValidationSummary" /> *@
+</div>
+
+@section scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+        <script src="~/assets/js/pages/verify-otp.js"></script>
+    }
+}
+

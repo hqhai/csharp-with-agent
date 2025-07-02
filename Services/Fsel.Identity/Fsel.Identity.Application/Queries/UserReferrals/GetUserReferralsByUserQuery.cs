@@ -36,7 +36,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
 
             var userReferralsModel = new UserReferralsModel();
 
-            var userReferrals = await _userReferralRepository.Queryable.Include(p => p.Receiver).ThenInclude(x => x.Human).Where(p => p.SenderId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
+            var userReferrals = await _userReferralRepository.Queryable.Include(p => p.Receiver).Where(p => p.SenderId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
 
             var mission = StringHelper.GetEnumNames<EnumFeatureUserReferral>();
 
@@ -61,7 +61,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                 {
                     ReceiverId = receiver.ReceiverId,
                     FullName = receiver.Receiver?.FullName,
-                    AvatarPath = receiver.Receiver?.Human?.AvatarPath,
+                    AvatarPath = receiver.Receiver?.AvatarPath,
                     FeatureMissions = receiver.FeatureMissions
                 });
             }

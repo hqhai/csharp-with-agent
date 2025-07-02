@@ -1,0 +1,32 @@
+[
+  {
+    "clientId": "app.angular",
+    "allowedGrantTypes": [ "authorization_code" ],
+    "clientSecrets": [
+      {
+        "value": "1767d194ec743d879a6e7b385fc491037b51c6305293f87592657e1332a9dbfd" //app.fsel.angular_secret
+      }
+    ],
+    "allowedScopes": [ "api" ]
+  },
+  {
+    "clientId": "app.flutter",
+    "allowedGrantTypes": [ "authorization_code" ],
+    "clientSecrets": [
+      {
+        "value": "0ca33a3c3ca5538607fe959054ce7f6add6781b6f4cd7fb3c57de4137ac01c0d" //app.fsel.flutter_secret
+      }
+    ],
+    "allowedScopes": [ "api" ]
+  },
+  {
+    "clientId": "test.mvc",
+    "allowedGrantTypes": [ "authorization_code" ],
+    "clientSecrets": [
+      {
+        "value": "87a180c99ba31d4a921478de7dc7a19ec3e6910925c0d32e4bc29abf7c04926c" //test.fsel.mvc_secret
+      }
+    ],
+    "allowedScopes": [ "api" ]
+  }
+]

@@ -104,7 +104,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             {
                 _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = "Bearer " + tokenResult.Result?.AccessToken;
             }
-            var student = await _studentRepository.Queryable.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == user.Id, cancellationToken);
+            var student = await _studentRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.UserId == user.Id, cancellationToken);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
@@ -171,8 +171,8 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 UserId = user.Id,
                 Month = competitionEvent.EventContent?.PaymentMonth,
                 ExpiredDate = competitionEvent.EventContent?.PaymentDate,
-                FullName = student.Human?.FullName,
-                Email = student.Human?.Email,
+                FullName = student.User?.FullName,
+                Email = student.User?.Email,
                 PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
                 PackageId = default,
                 EventId = default

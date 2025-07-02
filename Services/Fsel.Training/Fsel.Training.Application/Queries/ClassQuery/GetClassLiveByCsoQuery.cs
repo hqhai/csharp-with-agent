@@ -59,7 +59,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                                     }).FirstOrDefaultAsync(cancellationToken);
             var teacherResult = await _userService.GetTeacherByIdAsync(classLiveModel!.Class?.TeacherId ?? default);
             var teacher = teacherResult.Content?.Result;
-            classLiveModel.Class!.TeacherName = teacher?.Human?.FullName;
+            classLiveModel.Class!.TeacherName = teacher?.User?.FullName;
 
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(classLiveModel.Class.ClassStudents!.Select(x => x.StudentId).ToList());
             var students = studentResult.Content?.Result;
@@ -68,9 +68,9 @@ namespace Fsel.Training.Application.Queries.ClassQuery
                 foreach (var item in classLiveModel.Class!.ClassStudents)
                 {
                     var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                    item.StudentName = student?.Human?.FullName;
-                    item.PhoneNumber = student?.Human?.PhoneNumber;
-                    item.Email = student?.Human?.Email;
+                    item.StudentName = student?.User?.FullName;
+                    item.PhoneNumber = student?.User?.PhoneNumber;
+                    item.Email = student?.User?.Email;
                 }
             }
 

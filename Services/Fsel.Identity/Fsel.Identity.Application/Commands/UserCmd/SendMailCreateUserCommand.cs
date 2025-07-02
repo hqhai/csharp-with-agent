@@ -6,7 +6,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Identity.Application.Services;
+    using Fsel.Identity.Application.Services.SenderService;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using MediatR;

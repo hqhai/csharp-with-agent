@@ -104,7 +104,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 {
                     studentResults = new List<CompetitionStudentProgressModel>();
                 }
-                var studentInfos = _studentRepository.Queryable.Include(x => x.Human).Where(x => competitionStudentIds.Contains(x.Id)).ToList();
+                var studentInfos = _studentRepository.Queryable.Include(x => x.User).Where(x => competitionStudentIds.Contains(x.Id)).ToList();
 
                 studentRanking = (from studentFile in listStudentCompetion
                                   where studentFile != null
@@ -123,7 +123,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                                       CompetitionEndDate = weekEventRules!.EndDate,
                                       FullName = studentFile.FullName,
                                       Email = studentFile.Email,
-                                      AvatarPath = studentInfo?.Human?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
+                                      AvatarPath = studentInfo?.User?.AvatarPath ?? string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
                                       UserId = studentFile.UserId,
                                       RankingScore = Process_Ratio * (studentResult?.ContentCompleted ?? 0) + Overall_Ratio * (studentResult?.TotalScore ?? 0),
                                       CourseResultId = studentResult.CourseResultId,

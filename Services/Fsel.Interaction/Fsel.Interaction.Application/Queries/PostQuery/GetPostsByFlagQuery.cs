@@ -98,8 +98,8 @@ namespace Fsel.Interaction.Application.Queries.PostQuery
             dynamic? GetStudentToObj(Guid id, dynamic obj)
             {
                 var student = students?.FirstOrDefault(x => x.Id == id);
-                obj.FullName = student?.Human?.FullName;
-                obj.AvatarPath = student?.Human?.AvatarPath;
+                obj.FullName = student?.FullName;
+                obj.AvatarPath = student?.AvatarPath;
                 return obj;
             }
 

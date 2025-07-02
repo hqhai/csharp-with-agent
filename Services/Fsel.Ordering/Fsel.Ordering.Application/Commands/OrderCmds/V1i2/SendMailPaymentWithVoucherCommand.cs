@@ -73,7 +73,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
             await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
             {
-                ToEmails = new List<string> { student.Human?.Email ?? string.Empty },
+                ToEmails = new List<string> { student.User?.Email ?? string.Empty },
                 Subject = "Biên nhận của bạn từ FSEL",
                 Params = new
                 {

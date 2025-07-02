@@ -74,10 +74,10 @@ namespace Fsel.Course.Lms.Application.Queries.IntegrationQuery
                                                  UserId = x.Key,
                                                  Level = (x.OrderByDescending(x => x.CreatedDate).FirstOrDefault() != null &&
                                                           x.OrderByDescending(x => x.CreatedDate).FirstOrDefault()!.Status == EnumResultStatus.Done &&
-                                                          userResults != null && userResults.Any(c => c.Human?.UserId == x.Key)) ?
+                                                          userResults != null && userResults.Any(c => c?.UserId == x.Key)) ?
                                                           x.OrderByDescending(x => x.CreatedDate).FirstOrDefault()!.Level.GetLevelInScore(x.OrderByDescending(x => x.CreatedDate)
                                                           .FirstOrDefault()?.Percent, IeltsScoreHelper.GetInitialAge(x.OrderBy(x => x.CreatedDate)
-                                                          .FirstOrDefault()?.Level, DateTimeHelper.GetYearOld(userResults.FirstOrDefault(c => c.Human?.UserId == x.Key)?.Human?.Birthday))).Item1!.Value : null,
+                                                          .FirstOrDefault()?.Level, DateTimeHelper.GetYearOld(userResults.FirstOrDefault(c => c?.UserId == x.Key)?.User?.Birthday))).Item1!.Value : null,
                                                  Status = x.OrderByDescending(x => x.CreatedDate).FirstOrDefault() != null ? x.OrderByDescending(x => x.CreatedDate).FirstOrDefault()!.Status.ToString() : default,
                                                  PlacementTestResults = x.OrderBy(x => x.CreatedDate).Select(c => new IntegrationPlacementTestResultModels
                                                  {

@@ -50,8 +50,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 var allCSO = allCSOResult.Content?.Result?.Select(x => new CSOTeacherModel
                 {
                     Id = x.Id,
-                    Name = x.Human!.FullName,
-                    Code = x.Human.Code,
+                    Name = x.User?.FullName,
+                    Code = x.User?.Code,
                     CourseLevels = x.CourseLevels,
                     CountClass = allClass.Count(p => p.CsoId == x.Id),
                 }).ToList();
@@ -88,8 +88,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 var allTeacher = allTeacherResult.Content?.Result?.Select(x => new CSOTeacherModel
                 {
                     Id = x.Id,
-                    Name = x.Human!.FullName,
-                    Code = x.Human.Code,
+                    Name = x.User?.FullName,
+                    Code = x.User?.Code,
                     CourseLevels = x.CourseLevels,
                     CountClass = allClass.Count(p => p.TeacherId == x.Id),
                 }).ToList();

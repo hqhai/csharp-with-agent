@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
 
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
-            var student = await _studentRepository.Queryable.Include(p => p.Human).FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == userId, cancellationToken);
+            var student = await _studentRepository.Queryable.Include(p => p.User).FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
             var studentRankingEvents = await _studentCompetitionEventsRepository.Queryable
                 .Include(x => x.CompetitionEvents)
                 .Where(x => student != null && x.StudentId == student.Id)

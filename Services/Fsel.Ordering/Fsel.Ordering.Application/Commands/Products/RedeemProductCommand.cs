@@ -263,7 +263,7 @@ namespace Fsel.Ordering.Application.Commands.Products
                     {
                         var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
                         {
-                            UserId = student?.Human?.UserId ?? default,
+                            UserId = student?.UserId ?? default,
                             NumberOfCoinsDeducted = product.Price,
                             Feature = EnumTokenFeature.MarketPlace,
                             Mission = EnumTokenMission.FselStore,

@@ -6,7 +6,9 @@ using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -20,12 +22,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     public class ConfirmOtpResetPasswordCommandHandler : IRequestHandler<ConfirmOtpResetPasswordCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
+        private readonly IParentRepository _parentRepository;
         private readonly IMediator _mediator;
 
-        public ConfirmOtpResetPasswordCommandHandler(UserManager<User> userManager, IMediator mediator)
+        public ConfirmOtpResetPasswordCommandHandler(UserManager<User> userManager, IMediator mediator, IParentRepository parentRepository)
         {
             _userManager = userManager;
             _mediator = mediator;
+            _parentRepository = parentRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ConfirmOtpResetPasswordCommand request, CancellationToken cancellationToken)
@@ -50,13 +54,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
             }
-            if (!user.EmailConfirmed && user.Human == null)
+            if (!user.EmailConfirmed && (user.Student == null || user.Parent == null || user.CSO == null || user.Teacher == null))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
@@ -77,6 +81,32 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;
             return methodResult;
+        }
+
+        private async Task<User> UpdateUserAsync(IList<string> roles, User user)
+        {
+            var currentDate = DateTime.UtcNow;
+            var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
+
+            if (roles.Contains(EnumRoleRegister.Student.ToString()))
+            {
+                user.Student = new Student
+                {
+                    UserId = user.Id,
+                    CreatedByParent = false,
+                    Occupation = "Student"
+                };
+            }
+            else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
+            {
+                var stt = await _parentRepository.Queryable.CountAsync();
+                user.Parent = new Parent
+                {
+                    UserId = user.Id,
+                };
+                user.Code = $"PH_{weekNumber}{stt:0000}";
+            }
+            return user;
         }
     }
 }

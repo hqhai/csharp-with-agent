@@ -26,28 +26,28 @@ namespace Fsel.Identity.Application.Commands.DailyStreakCmd
     public class ReceiveTokensStudentCommandHandler : IRequestHandler<ReceiveTokensStudentCommand, MethodResult<double?>>
     {
         private readonly IStudentRepository _studentRepository;
-        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly AuthContext _authContext;
         private readonly IStudentDailyStreakRepository _studentDailyStreakRepository;
         private readonly ISystemService _systemService;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
 
-        public ReceiveTokensStudentCommandHandler(IStudentRepository studentRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILmsCourseService lmsCourseService, AuthContext authContext, IStudentDailyStreakRepository studentDailyStreakRepository, ISystemService systemService)
+        public ReceiveTokensStudentCommandHandler(IStudentRepository studentRepository, ILmsCourseService lmsCourseService, AuthContext authContext, IStudentDailyStreakRepository studentDailyStreakRepository, ISystemService systemService, CreateTokenHistoryPublisher createTokenHistoryPublisher)
         {
             _studentRepository = studentRepository;
-            _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _lmsCourseService = lmsCourseService;
             _authContext = authContext;
             _studentDailyStreakRepository = studentDailyStreakRepository;
             _systemService = systemService;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
         }
 
         public async Task<MethodResult<double?>> Handle(ReceiveTokensStudentCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<double?>();
-            var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks).Include(x => x.Human)
-                                                  .FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == _authContext.CurrentUserId, cancellationToken: cancellationToken);
+            var student = await _studentRepository.Queryable.Include(x => x.StudentDailyStreaks)
+                                                  .FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken: cancellationToken);
             if (student == null)
             {
                 methodResult.Result = default;

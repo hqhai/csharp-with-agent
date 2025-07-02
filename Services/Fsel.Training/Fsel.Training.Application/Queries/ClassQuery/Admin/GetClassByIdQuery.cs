@@ -28,6 +28,7 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
         private readonly IOrderService _orderService;
         private readonly IUserService _userService;
         private readonly IClassStudentRepository _classStudentRepository;
+
         public GetClassByIdQueryHandler(IClassRepository classRepository, IMapper mapper, IOrderService orderService, IUserService userService, IClassStudentRepository classStudentRepository)
         {
             _classRepository = classRepository;
@@ -60,11 +61,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 var countClass = await _classRepository.Queryable.Where(p => p.TeacherId == classModel.TeacherId).CountAsync(cancellationToken);
                 classModel.Teacher = new CSOTeacherModel
                 {
-                    Name = teacher?.Human?.FullName,
-                    Phonenumber = teacher?.Human?.PhoneNumber,
-                    Email = teacher?.Human?.Email,
+                    Name = teacher?.User?.FullName,
+                    Phonenumber = teacher?.User?.PhoneNumber,
+                    Email = teacher?.User?.Email,
                     CountClass = countClass,
-                    AvatarPath = teacher?.Human?.AvatarPath,
+                    AvatarPath = teacher?.User?.AvatarPath,
                 };
             }
             if (classModel.CsoId.HasValue)
@@ -74,11 +75,11 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
                 var countClass = await _classRepository.Queryable.Where(p => p.CsoId == classModel.CsoId).CountAsync(cancellationToken);
                 classModel.Cso = new CSOTeacherModel
                 {
-                    Name = cso?.FullName,
-                    Phonenumber = cso?.PhoneNumber,
-                    Email = cso?.Email,
+                    Name = cso?.User?.FullName,
+                    Phonenumber = cso?.User?.PhoneNumber,
+                    Email = cso?.User?.Email,
                     CountClass = countClass,
-                    AvatarPath = cso?.AvatarPath
+                    AvatarPath = cso?.User?.AvatarPath
                 };
             }
 

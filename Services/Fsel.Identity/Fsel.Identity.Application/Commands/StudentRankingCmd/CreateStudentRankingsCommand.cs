@@ -94,7 +94,6 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             var previousLeaderBoard = await _studentRankingRepository.Queryable.ToListAsync(cancellationToken);
             var previousLeaderBoardResult = _mapper.Map<List<StudentRanking>>(previousLeaderBoard);
 
-
             //Kiểm tra sự thay đổi của 2 danh sách, nếu không có thay đổi thì không làm gì cả
             bool allElementsMatch = studentRankings.All(currentItem =>
                 previousLeaderBoardResult.Exists(prevItem =>
@@ -118,15 +117,15 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             {
                 await UpdateStudentRankingDatabase(toAdd, toUpdate, toDelete);
                 var studentIds = studentRankings.Select(s => s.StudentId);
-                var studentInfo = _studentRepository.Queryable.Include(x => x.Human).Where(x => studentIds.Contains(x.Id)).ToList();
+                var studentInfo = _studentRepository.Queryable.Include(x => x.User).Where(x => studentIds.Contains(x.Id)).ToList();
                 var studentRankingRealTime = _mapper.Map<List<StudentRankingRealTime>>(studentRankings);
                 studentRankingRealTime.ForEach(x =>
                 {
                     var student = studentInfo.FirstOrDefault(s => s.Id == x.StudentId);
                     if (student != null)
                     {
-                        x.FullName = student.Human?.FullName;
-                        x.AvatarPath = student.Human?.AvatarPath;
+                        x.FullName = student.User?.FullName;
+                        x.AvatarPath = student.User?.AvatarPath;
                     }
                 });
 
@@ -141,6 +140,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
         }
 
         #region Handler Data
+
         /// <summary>
         /// Lấy LeaderBoard hiện tại
         /// </summary>
@@ -171,7 +171,6 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
 
             return groupedStudentRankings;
         }
-
 
         /// <summary>
         /// Tính toán chuỗi dailystreaks của học sinh
@@ -264,7 +263,6 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
             return (ToAdd: toAdd, ToUpdate: toUpdate, ToDelete: toDelete);
         }
 
-
         /// <summary>
         /// Gửi dữ liệu qua webSocket
         /// </summary>
@@ -277,7 +275,6 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
 
             foreach (EnumCourseLevel courseLevel in enumValues)
             {
-
                 LeaderBoardQueueModel leaderBoards = new LeaderBoardQueueModel
                 {
                     StudentRankings = studentRankingRealTime.Where(x => x.CourseLevel == courseLevel).ToList(),
@@ -286,9 +283,6 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
 
                 await _leaderBoardPublisher.Publish(leaderBoards, cancellationToken);
             }
-
-
-
         }
 
         /// <summary>
@@ -317,6 +311,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
 
             await _studentRankingRepository.UnitOfWork.SaveEntitiesAsync();
         }
-        #endregion
+
+        #endregion Handler Data
     }
 }

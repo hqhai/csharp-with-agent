@@ -77,13 +77,13 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            if (student.Human == null)
+            if (student.User == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.User));
                 return methodResult;
             }
 
-            int age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+            int age = DateTimeHelper.GetYearOld(student.User.Birthday);
             if (!student.CourseLevel.HasValue)
             {
                 student.CourseLevel = age >= ValueSettings.AgeMilestone.StudentAge ? EnumCourseLevel.B1 : EnumCourseLevel.A2;

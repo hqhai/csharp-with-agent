@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var studentId = student.Id;
-            var userId = student.Human?.UserId;
+            var userId = student.UserId;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {
@@ -107,12 +107,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 CourseId = request.CourseId,
                 UnitId = request.UnitId,
                 LessonId = x.Id,
-                UserId = userId ?? default
+                UserId = userId
             }).ToList();
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimesAsync(new FeatureAccessTimesQueryModel
             {
                 FeatureAccessTimes = featureAccessTimeQuerys,
-                UserId = userId ?? default
+                UserId = userId
             });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
@@ -150,7 +150,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                         CourseId = request.CourseId,
                         UnitId = request.UnitId,
                         ObjectId = mockTestResult.Id,
-                        UserId = userId ?? default,
+                        UserId = userId,
                         EnumFeature = EnumFeature.MockTest
                     });
                     var featureAccessTimeTest = featureAccessTimeResult?.Content?.Result;

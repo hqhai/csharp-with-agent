@@ -53,9 +53,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            if (student.Human == null)
+            if (student.User == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.User));
                 return methodResult;
             }
             var placementTestGroupResult = await _placementTestGroupResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id, cancellationToken);
@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusNotDone), nameof(placementTestGroupResult.Status));
                 return methodResult;
             }
-            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human.Birthday);
+            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User.Birthday);
             var pathConfigPlacementTest = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ConfigPlacementTest);
             var configPlacementTests = ConvertHelper.DeserializeFromFilePath<IList<PlacementTestReportConfigModel>>(pathConfigPlacementTest);
 
@@ -82,11 +82,11 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
             var placementTestReportOveall = new PlacementTestReportOveallModel
             {
-                FullName = student.Human.FullName,
+                FullName = student.User.FullName,
                 SuggetLevel = placementTestGroupResult.SuggetLevel,
                 CurrentLevel = currentLevel,
                 IsPreA1 = isPreA1,
-                PlacementTestViewReport = GetPlacementTestReportViewConfig(configPlacementTestViews, age, placementTestGroupResult.SuggetLevel, student.Human.FullName),
+                PlacementTestViewReport = GetPlacementTestReportViewConfig(configPlacementTestViews, age, placementTestGroupResult.SuggetLevel, student.User.FullName),
             };
             var placementTestAgeLevels = placementTestConfigAgeLevels.Where(x => x.AgeStart <= age && (!x.AgeEnd.HasValue || age < x.AgeEnd)).ToList();
             var placementTestAgeLevel = placementTestAgeLevels.FirstOrDefault();

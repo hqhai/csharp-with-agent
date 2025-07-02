@@ -109,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 {
                     return new GetFeatureAccessTimeExportQueryModel
                     {
-                        UserId = student.Human?.UserId ?? default,
+                        UserId = student?.UserId ?? default,
                     };
                 }).ToList()
             };
@@ -153,15 +153,15 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
             foreach (var student in students)
             {
-                var userId = student.Human?.UserId ?? default;
+                var userId = student.UserId;
                 var featureAccessTimeResult = featureAccessTimes?.FirstOrDefault(x => x.CreatedUserId == userId);
                 var courseProgressComplete = courseProgressCompletes.FirstOrDefault(x => x.StudentId == student.Id);
                 var courseResult = courseResults.FirstOrDefault(x => x.StudentId == student.Id);
                 var reportProgress = new ReportProgressStudentExportModel
                 {
-                    FullName = student.Human?.FullName,
-                    Birthday = student.Human?.Birthday,
-                    Email = student.Human?.Email,
+                    FullName = student.User?.FullName,
+                    Birthday = student.User?.Birthday,
+                    Email = student.User?.Email,
                     CourseName = student.ExpiredDate.HasValue ? EnumCourseLevelHelper.GetCodeByEnumCourseLevel(courseResult?.Course?.CourseLevel) : string.Empty,
                     LastEntry = featureAccessTimeResult?.LastVisited,
                     FinalStudyPeriod = featureAccessTimeResult?.LearnLastVisited,

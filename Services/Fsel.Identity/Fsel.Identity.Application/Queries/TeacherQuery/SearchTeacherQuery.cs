@@ -41,7 +41,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
             }
 
             var teacherQuery = _teacherRepository.Queryable
-                              .Include(x => x.Human)
+                              .Include(x => x.User)
                               .AsQueryable();
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                 }
                 else
                 {
-                    teacherQuery = teacherQuery.Where(m => m.Human != null && m.Human.FullName!.Contains(request.Keyword));
+                    teacherQuery = teacherQuery.Where(m => m.User != null && m.User.FullName!.Contains(request.Keyword));
                 }
             }
 
@@ -66,23 +66,23 @@ namespace Fsel.Identity.Application.Queries.TeacherQuery
                 UniversityDegreePath = x.UniversityDegreePath,
                 CertificationPath = x.CertificationPath,
                 PoliceClearancePath = x.PoliceClearancePath,
-                HumanId = x.HumanId,
+                UserId = x.UserId,
                 CreatedDate = x.CreatedDate,
                 CreatedUserId = x.CreatedUserId,
                 CreatedFullName = x.CreatedFullName,
                 UpdatedDate = x.UpdatedDate,
                 UpdatedUserId = x.UpdatedUserId,
                 UpdatedFullName = x.UpdatedFullName,
-                Human = new HumanModel
+                User = new UserModel
                 {
-                    Id = x!.Human!.Id,
-                    FullName = x.Human.FullName,
-                    AvatarPath = x.Human.AvatarPath,
-                    Birthday = x.Human.Birthday,
-                    PhoneNumber = x.Human.PhoneNumber,
-                    Gender = x.Human.Gender,
-                    Email = x.Human.Email,
-                    Address = x.Human.Address
+                    Id = x!.User!.Id,
+                    FullName = x.User.FullName,
+                    AvatarPath = x.User.AvatarPath,
+                    Birthday = x.User.Birthday,
+                    PhoneNumber = x.User.PhoneNumber,
+                    Gender = x.User.Gender,
+                    Email = x.User.Email,
+                    Address = x.User.Address
                 }
             });
 

@@ -3,12 +3,14 @@
 namespace Fsel.System.Api.Controllers
 {
     using Asp.Versioning;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Queries.LocationQuery;
+    using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
     using MediatR;
@@ -21,10 +23,12 @@ namespace Fsel.System.Api.Controllers
     public class LocationController : BaseController
     {
         private readonly IMediator _mediator;
+        private readonly ILocationRepository _locationRepository;
 
-        public LocationController(IMediator mediator)
+        public LocationController(IMediator mediator, ILocationRepository locationRepository)
         {
             _mediator = mediator;
+            _locationRepository = locationRepository;
         }
 
         /// <summary>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -58,9 +58,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_UserCourseSettings", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserCourseSettings_AspNetUsers_UserId",
+                        name: "FK_UserCourseSettings_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "AspNetUsers",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });

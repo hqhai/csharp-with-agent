@@ -66,9 +66,9 @@ namespace Fsel.Identity.Application.Queries.UserOtpCodeQuery
 
             methodResult.Result = new OTPModel()
             {
-                OTPEmail = otpEmail == null ? null : otpEmail.OTPCode,
+                OTPEmail = otpEmail == null ? null : otpEmail.OtpCode,
                 IsConfirmOTPEmail = otpEmail == null ? null : (otpEmail.Status == EnumOtpCodeStatus.Verified),
-                OTPPhoneNumber = otpPhoneNumber == null ? null : otpPhoneNumber.OTPCode,
+                OTPPhoneNumber = otpPhoneNumber == null ? null : otpPhoneNumber.OtpCode,
                 IsConfirmOTPPhoneNumber = otpPhoneNumber == null ? null : (otpPhoneNumber.Status == EnumOtpCodeStatus.Verified)
             };
             return methodResult;

@@ -39,7 +39,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             //var students = _studentRepository.Queryable.Where(x => x.SchoolId == schoolId).ToList();
 
             var students = await _studentRepository.Queryable
-                .Include(s => s.Human)
+                .Include(s => s.User)
                 .Where(x => x.SchoolId == schoolId)
                 .ToListAsync(cancellationToken);
 

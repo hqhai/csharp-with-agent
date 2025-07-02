@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var cso = await _csoRepository.Queryable.Include(x => x.Human).Where(x => x.Human != null && x.Human.UserId.HasValue && request.UserIds.Contains(x.Human.UserId.Value))
+            var cso = await _csoRepository.Queryable.Include(x => x.User).Where(x => request.UserIds.Contains(x.UserId))
                             .ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<CSOModel>>(cso);

@@ -28,17 +28,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IStudentRepository _studentRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly IOrderService _orderService;
 
-        public DeleteStudentsInEventByAdminSchoolCommandHandler(AuthContext authContext, UserManager<User> userManager, IStudentRepository studentRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ICompetitionEventsRepository competitionEventsRepository, IHumanRepository humanRepository, IOrderService orderService)
+        public DeleteStudentsInEventByAdminSchoolCommandHandler(AuthContext authContext, UserManager<User> userManager, IStudentRepository studentRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, ICompetitionEventsRepository competitionEventsRepository, IOrderService orderService)
         {
             _authContext = authContext;
             _userManager = userManager;
             _studentRepository = studentRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _competitionEventsRepository = competitionEventsRepository;
-            _humanRepository = humanRepository;
             _orderService = orderService;
         }
 

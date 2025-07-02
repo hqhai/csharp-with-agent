@@ -10,12 +10,13 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Commands.UserCmd;
-    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Services;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Application.Services.SystemService;
+    using Fsel.Identity.Application.Services.SenderService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
@@ -120,20 +121,18 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             };
 
             var queryByUserName = _userManager.Users
-                .Include(p => p.Human)
-                .ThenInclude(p => p.Student)
+                .Include(p => p.Student)
                 .Where(p => p.UserName == request.Email);
 
             var queryByEmail = _userManager.Users
-                .Include(p => p.Human)
-                .ThenInclude(p => p.Student)
+                .Include(p => p.Student)
                 .Where(p => p.Email == request.Email);
 
             var user = await queryByUserName
                 .Union(queryByEmail)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (user == null)
+            if (user == null || user.Student == null)
             {
                 await CreateUser(request, @event, user, methodResult, cancellationToken);
 
@@ -145,12 +144,12 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             {
                 var currentDate = DateTime.UtcNow;
 
-                var studentEvents = await _studentCompetitionEventsRepository.Queryable.Include(p => p.CompetitionEvents).Where(p => p.StudentId == user.Human.Student.Id).ToListAsync(cancellationToken);
+                var studentEvents = await _studentCompetitionEventsRepository.Queryable.Include(p => p.CompetitionEvents).Where(p => p.StudentId == user.Student.Id).ToListAsync(cancellationToken);
 
                 if (studentEvents.Any(p => p.CompetitionEvents != null && p.CompetitionEvents.EventContent != null && p.CompetitionEvents.EventContent.StartDate.HasValue && p.CompetitionEvents.EventContent.EndDate.HasValue && p.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date && p.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date))
                 {
                     await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.WasInAnotherEvent, WasInAnotherEvent);
-                    await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user.Human!.Student!.Id, methodResult, cancellationToken);
+                    await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user!.Student!.Id, methodResult, cancellationToken);
                     return methodResult;
                 }
 
@@ -166,7 +165,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id, ExpiredTime = @event.EventContent?.EndDate?.Date }, cancellationToken);
                     param.LinkResetProgress = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkResetProgress ?? string.Empty, user.Email, userOtpCode.Result, @event.EventCode);
                     // sai tại Phuc Xo
-                    var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == user.Human.Student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
+                    var userCourseSetting = await _userCourseSettingRepository.Queryable.FirstOrDefaultAsync(x => x.CourseLevel == user.Student.CourseLevel && x.UserId == user.Id && x.Type == EnumUserCourseType.ResetAndLearnAgain, cancellationToken);
                     var userCourseSettingModel = _mapper.Map<UserCourseSettingModel>(userCourseSetting);
                     if (!userCourseSettingModel.HasRemainingAttempts())
                     {
@@ -177,7 +176,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                     {
                         await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.LearnedOnThePlatform, LearnedOnThePlatform);
                     }
-                    await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user.Human!.Student!.Id, methodResult, cancellationToken);
+                    await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user!.Student!.Id, methodResult, cancellationToken);
                     return methodResult;
                 }
 
@@ -185,7 +184,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 {
                     _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent()
                     {
-                        StudentId = user.Human.Student.Id,
+                        StudentId = user.Student.Id,
                         CompetitionEventId = @event.Id
                     });
                     await _studentCompetitionEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -195,7 +194,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 await SendMail(request.Email ?? string.Empty, param, EnumSenderTemplate.SignUpEventSuccess, SignUpEventSuccess);
                 await AddToGoogleSheet(request);
 
-                await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user.Human!.Student!.Id, methodResult, cancellationToken);
+                await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user!.Student!.Id, methodResult, cancellationToken);
 
                 return methodResult;
             }
@@ -246,30 +245,25 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             user = new User()
             {
                 UserName = request.Email,
-                FullName = request.FirstName + " " + request.LastName,
+                FirstName = request.FirstName,
+                LastName = request.LastName,
                 Email = request.Email,
-                EmailConfirmed = true,
                 PhoneNumber = request.PhoneNumber,
+                Birthday = request.BirthDay,
+                EmailConfirmed = true,
                 PhoneNumberConfirmed = false,
-                Human = new Human()
+                Student = new Student()
                 {
-                    FullName = request.FirstName + " " + request.LastName,
-                    Birthday = request.BirthDay,
-                    PhoneNumber = request.PhoneNumber,
-                    Email = request.Email,
-                    Student = new Student()
-                    {
-                        Occupation = "Student",
-                        CourseLevel = EnumCourseLevel.A1,
-                        CreatedByParent = false,
-                        School = request.School,
-                        SchoolId = request.SchoolId,
-                        SchoolClass = request.SchoolClass,
-                        SchoolGrade = request.SchoolGrade,
-                        ParentPhoneNumber = request.ParentPhoneNumber,
-                        ParentEmail = request.ParentEmail,
-                        SchoolFaculty = request.SchoolFaculty,
-                    }
+                    Occupation = "Student",
+                    CourseLevel = EnumCourseLevel.A1,
+                    CreatedByParent = false,
+                    School = request.School,
+                    SchoolId = request.SchoolId,
+                    SchoolClass = request.SchoolClass,
+                    SchoolGrade = request.SchoolGrade,
+                    ParentPhoneNumber = request.ParentPhoneNumber,
+                    ParentEmail = request.ParentEmail,
+                    SchoolFaculty = request.SchoolFaculty,
                 },
                 UserPlatforms = new List<UserPlatform>()
                         {
@@ -308,7 +302,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 }
                 await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-                var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday }, cancellationToken);
+                var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Birthday }, cancellationToken);
                 if (!updateCode.IsOK)
                 {
                     methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
@@ -331,7 +325,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
 
                 _studentCompetitionEventsRepository.Add(new StudentCompetitionEvent()
                 {
-                    StudentId = user.Human.Student.Id,
+                    StudentId = user.Student.Id,
                     CompetitionEventId = @event.Id
                 });
                 await _studentCompetitionEventsRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
@@ -339,7 +333,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             });
 
-            await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user.Human.Student.Id, methodResult, cancellationToken);
+            await UpdateEventRegistration(user.Email ?? string.Empty, @event.Id, user.Student.Id, methodResult, cancellationToken);
 
             return methodResult;
         }

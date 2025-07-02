@@ -19,14 +19,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
     public class RestoreDeleteAccountCommandHandler : IRequestHandler<RestoreDeleteAccountCommand, MethodResult<bool>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly UserDbContext _userDbContext;
         private readonly UserManager<User> _userManager;
 
-        public RestoreDeleteAccountCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserDbContext userDbContext, UserManager<User> userManager)
+        public RestoreDeleteAccountCommandHandler(IStudentRepository studentRepository, UserDbContext userDbContext, UserManager<User> userManager)
         {
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _userDbContext = userDbContext;
             _userManager = userManager;
@@ -45,15 +43,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             var query = await (from u in _userDbContext.Users.IgnoreQueryFilters()
 
-                               join h in _humanRepository.Queryable.IgnoreQueryFilters()
-                               on u.Id equals h.UserId
-
                                join s in _studentRepository.Queryable.IgnoreQueryFilters()
-                               on h.Id equals s.HumanId
+                               on u.Id equals s.UserId
 
                                where request.UserIds.Contains(u.Id)
 
-                               select new { Users = u, Humans = h, Students = s }).ToListAsync(cancellationToken);
+                               select new { Users = u, Students = s }).ToListAsync(cancellationToken);
 
             var users = query.Select(p => p.Users).ToList();
             if (users == null || !users.Any())
@@ -76,19 +71,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
-            var humans = query.Select(p => p.Humans).ToList();
-
-            bool hasDuplicateHuman = humans.GroupBy(p => p.UserId)
-                          .Any(g => g.Count() > 1);
-            if (hasDuplicateHuman)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(hasDuplicateHuman));
-                return methodResult;
-            }
-
             var students = query.Select(p => p.Students).ToList();
 
-            bool hasDuplicateStudent = students.GroupBy(p => p.HumanId)
+            bool hasDuplicateStudent = students.GroupBy(p => p.UserId)
                          .Any(g => g.Count() > 1);
 
             if (hasDuplicateStudent)
@@ -97,17 +82,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
-            await _humanRepository.ExecuteTransactionAsync(async () =>
+            await _studentRepository.ExecuteTransactionAsync(async () =>
             {
                 if (users.Any())
                 {
                     users.ForEach(p => p.IsDeleted = false);
                     _userDbContext.Users.UpdateRange(users);
-                }
-                if (humans.Any())
-                {
-                    humans.ForEach(p => p.IsDeleted = false);
-                    _humanRepository.UpdateList(humans);
                 }
                 if (students.Any())
                 {
@@ -115,7 +95,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     _studentRepository.UpdateList(students);
                 }
 
-                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = true;
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;

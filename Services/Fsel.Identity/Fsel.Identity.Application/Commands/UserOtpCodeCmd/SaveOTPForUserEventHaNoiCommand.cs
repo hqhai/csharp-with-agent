@@ -7,7 +7,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Services;
+    using Fsel.Identity.Application.Services.SenderService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
@@ -94,7 +94,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     lastOTP = new UserOtpCode
                     {
                         UserId = user.Id,
-                        OTPCode = otp,
+                        OtpCode = otp,
                         Status = EnumOtpCodeStatus.New,
                         Type = EnumUserOtpCodeType.SMS,
                         RetryCount = 1,
@@ -117,7 +117,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     Params = new
                     {
                         CountOTP = lastOTP.RetryCount,
-                        OTP = lastOTP.OTPCode,
+                        OTP = lastOTP.OtpCode,
                     },
                     IsCheckDuplicate = false,
                 });

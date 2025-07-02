@@ -61,7 +61,7 @@ namespace Fsel.System.Application.Queries.CourseSuggestConfigQuery
                 return methodResult;
             }
 
-            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
 
             var courseSuggestConfigs = await _courseSuggestConfigRepository.Queryable
                                                                            .Where(x => x.PlacementTestLevel == student.BaseCourseLevel && x.FromAge <= age && x.ToAge >= age)

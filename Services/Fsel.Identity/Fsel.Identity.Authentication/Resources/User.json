@@ -1,0 +1,19 @@
+[
+  {
+    "id": "28886c7b-fd8d-49c0-babe-5a3ee2cd83a4",
+    "userName": "Admin",
+    "normalizedUserName": "ADMIN",
+    "firstName": "ADMIN",
+    "lastName": "ACC",
+    "email": "admin@gmail.com",
+    "normalizedEmail": "ADMIN@GMAIL.COM",
+    "emailConfirmed": true,
+    "fullName": "Admin",
+    "phoneNumber": "1234567890",
+    "PasswordHash": "AQAAAAIAAYagAAAAEODaFKz0IP1OYMn3cJDd8rSt8W+JNWJljuw3ereBa2Nka8y/zOoqzxZHVmc+u3NuVQ==",
+    "SecurityStamp": "AEW57AWQEQTK7XBWGWWOIMHLRWVD6ZYD",
+    "ConcurrencyStamp": "082af315-bc6a-40d5-a1a3-bc3060d1b9cf",
+    "createdDate": "2023-07-21",
+    "createdFullName": ""
+  }
+]

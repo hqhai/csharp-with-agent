@@ -24,15 +24,13 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
     public class SearchUserReferralForCRMQueryHandler : IRequestHandler<SearchUserReferralForCRMQuery, MethodResult<PagingItemsModel<UserReferralForCRMModel>>>
     {
         private readonly IStudentRepository _studentRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
         private readonly IUserReferralRepository _userReferralRepository;
         private readonly IOrderService _orderService;
 
-        public SearchUserReferralForCRMQueryHandler(IStudentRepository studentRepository, IHumanRepository humanRepository, UserManager<User> userManager, IUserReferralRepository userReferralRepository, IOrderService orderService)
+        public SearchUserReferralForCRMQueryHandler(IStudentRepository studentRepository, UserManager<User> userManager, IUserReferralRepository userReferralRepository, IOrderService orderService)
         {
             _studentRepository = studentRepository;
-            _humanRepository = humanRepository;
             _userManager = userManager;
             _userReferralRepository = userReferralRepository;
             _orderService = orderService;
@@ -44,13 +42,11 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
             var methodResult = new MethodResult<PagingItemsModel<UserReferralForCRMModel>>();
 
             var query = from u in _userManager.Users
-                        join h in _humanRepository.Queryable on u.Id equals h.UserId
-                        join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                        join s in _studentRepository.Queryable on u.Id equals s.UserId
                         join ur in _userReferralRepository.Queryable on u.Id equals ur.ReceiverId
                         select new
                         {
                             User = u,
-                            Human = h,
                             Student = s,
                             UserReferral = ur
                         };
@@ -76,7 +72,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                 Id = x.UserReferral.Id,
                 CreatedDate = x.UserReferral.CreatedDate.AddHours(7),
                 StudentId = x.Student.Id,
-                StudentCode = x.Human.Code,
+                StudentCode = x.User.Code,
                 Name = x.User.FullName,
                 SenderId = x.UserReferral.SenderId,
                 ReceiveId = x.UserReferral.ReceiverId
@@ -90,7 +86,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                     .ConfigureAwait(false);
 
             var senderIds = lists.Select(p => p.SenderId).ToList();
-            var humans = await _humanRepository.Queryable.WhereBulkContains(senderIds, p => p.UserId).ToListAsync(cancellationToken);
+            var users = await _userManager.Users.WhereBulkContains(senderIds, p => p.Id).ToListAsync(cancellationToken);
 
             var receiveIds = lists.Select(p => p.ReceiveId).ToList();
             var orderResults = await _orderService.GetUserHasOrderRevenue(new GetUserHasOrderRevenueModel() { UserIds = receiveIds });
@@ -98,8 +94,8 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
 
             lists.ForEach(p =>
             {
-                var human = humans.FirstOrDefault(x => x.UserId == p.SenderId);
-                p.ReferralCode = human?.Code;
+                var user = users.FirstOrDefault(x => x.Id == p.SenderId);
+                p.ReferralCode = user?.Code;
                 var order = orders?.FirstOrDefault(x => x.UserId == p.ReceiveId);
                 if (order != null)
                 {

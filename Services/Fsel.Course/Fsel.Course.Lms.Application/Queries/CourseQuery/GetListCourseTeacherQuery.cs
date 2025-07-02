@@ -83,7 +83,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 foreach (var item in courses.SelectMany(x => x.CourseTeachers!).ToList())
                 {
                     var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
-                    item.FullName = teacher?.Human?.FullName;
+                    item.FullName = teacher?.User?.FullName;
                 }
             }
             var couseClasses = courses.Select(x => new CourseClassModel { CourseId = x.Id, Code = x.Code }).ToList();

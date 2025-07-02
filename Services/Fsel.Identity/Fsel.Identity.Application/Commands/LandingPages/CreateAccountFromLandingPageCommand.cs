@@ -15,6 +15,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -84,23 +85,18 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             user = new User()
             {
                 UserName = request.Email,
-                FullName = request.FullName,
+                FirstName = request.FullName.ParseFullName().FirstName,
+                LastName = request.FullName.ParseFullName().LastName,
                 Email = request.Email,
                 EmailConfirmed = true,
                 PhoneNumber = request.PhoneNumber,
+                Birthday = request.Birthday,
                 PhoneNumberConfirmed = false,
-                Human = new Human()
+                Student = new Student()
                 {
-                    FullName = request.FullName,
-                    Birthday = request.Birthday,
-                    PhoneNumber = request.PhoneNumber,
-                    Email = request.Email,
-                    Student = new Student()
-                    {
-                        Occupation = "Student",
-                        CourseLevel = EnumCourseLevel.A1,
-                        CreatedByParent = false
-                    }
+                    Occupation = nameof(Student),
+                    CourseLevel = EnumCourseLevel.A1,
+                    CreatedByParent = false
                 },
                 UserPlatforms = new List<UserPlatform>()
                 {
@@ -137,7 +133,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
             }
             await _userManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Human.Birthday }, cancellationToken);
+            var updateCode = await _mediator.Send(new UpdateCodeStudentCommand { UserId = user.Id, Gender = EnumGender.Male, Birthday = user.Birthday }, cancellationToken);
             if (!updateCode.IsOK)
             {
                 methodResult.AddErrorBadRequest(updateCode.ErrorMessages);

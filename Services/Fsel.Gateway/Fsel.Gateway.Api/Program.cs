@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 var appSetting = builder.AddAppSettings<BaseAppSetting>();
 builder.AddServices(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 
 builder.Services.AddSwaggerForOcelot(builder.Configuration);
 builder.Services.AddSwaggerGen();

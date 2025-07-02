@@ -68,7 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 }
                 var student = studentResult.Content?.Result;
                 studentId = student?.FirstOrDefault()?.Id;
-                userId = student?.FirstOrDefault()?.Human?.UserId;
+                userId = student?.FirstOrDefault()?.UserId;
             }
 
             var courseResult = await _courseResultRepository.Queryable.Include(p => p.Course).FirstOrDefaultAsync(p => p.CourseId == request.CourseId && p.StudentId == studentId, cancellationToken);

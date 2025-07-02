@@ -131,7 +131,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     QuestionTypes = student.QuestionTypes?.ToList()
                 };
 
-                int age = DateTimeHelper.GetYearOld(student?.Student.Human?.Birthday);
+                int age = DateTimeHelper.GetYearOld(student?.Student.User?.Birthday);
 
                 var placementTestResultDone = student.PlacementTestResults?.Where(x => x.Status == EnumResultStatus.Done)
                                                                            .OrderByDescending(x => x.CreatedDate)

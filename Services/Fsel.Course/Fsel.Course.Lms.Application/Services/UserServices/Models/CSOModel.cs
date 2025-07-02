@@ -14,15 +14,10 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public IList<string>? PackageNames { get; set; }
         public IList<Guid>? PackageIds { get; set; }
         public string? PassportPath { get; set; }
-
         public string? UniversityDegreePath { get; set; }
-
         public string? CertificationPath { get; set; }
-
         public string? PoliceClearancePath { get; set; }
-
-        public Guid HumanId { get; set; }
-
-        public HumanModel? Human { get; set; }
+        public Guid UserId { get; set; }
+        public UserModel? User { get; set; }
     }
 }

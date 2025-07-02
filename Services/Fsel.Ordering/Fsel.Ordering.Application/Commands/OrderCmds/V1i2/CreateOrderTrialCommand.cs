@@ -70,13 +70,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
             var student = studentResult.Content?.Result;
 
-            if (student == null || string.IsNullOrEmpty(student.Human?.FullName) || string.IsNullOrEmpty(student.Human?.Email))
+            if (student == null || string.IsNullOrEmpty(student.User?.FullName) || string.IsNullOrEmpty(student.User?.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;
             }
 
-            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.Human?.Code }, cancellationToken).ConfigureAwait(false);
+            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.User?.Code }, cancellationToken).ConfigureAwait(false);
             string code = codeSend.Result ?? string.Empty;
 
             if (string.IsNullOrEmpty(code) || await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
@@ -88,9 +88,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             var orderTrial = new Order()
             {
                 Code = code,
-                FullName = student.Human?.FullName,
-                Email = student.Human?.Email,
-                PhoneNumber = student.Human?.PhoneNumber,
+                FullName = student?.User?.FullName,
+                Email = student?.User?.Email,
+                PhoneNumber = student?.User?.PhoneNumber,
                 Status = EnumOrderStatus.Payment,
                 ExpireDate = DateTime.UtcNow.AddDays(trialPeriod.Value),
                 IsTrial = true,

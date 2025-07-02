@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
 
             var result = new ReviewTeacherRatingDetailSearchModel
             {
-                FullName = teacher?.Human?.FullName
+                FullName = teacher?.User?.FullName
             };
 
             var videoResultQuery = from baseQ in _videoResultRepository.Queryable

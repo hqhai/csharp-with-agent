@@ -8,7 +8,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Users;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -25,17 +24,14 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly AuthContext _authContext;
-        private readonly IHumanRepository _humanRepository;
 
         public UpdateUserProfileCommandHandler(UserManager<User> userManager,
             IMapper mapper,
-            AuthContext authContext,
-            IHumanRepository humanRepository)
+            AuthContext authContext)
         {
             _userManager = userManager;
             _mapper = mapper;
             _authContext = authContext;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(UpdateUserProfileCommand request, CancellationToken cancellationToken)
@@ -124,8 +120,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private async Task<MethodResult<User>> UpdateTeacherAsync(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<User>();
-            var userView = await _userManager.Users.Include(x => x.Human)
-                                                   .ThenInclude(x => x!.Teacher)
+            var userView = await _userManager.Users.Include(x => x!.Teacher)
                                                    .ThenInclude(x => x!.TeacherBankAccounts)
                                                    .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             if (userView == null)
@@ -133,7 +128,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(User), userId);
                 return methodResult;
             }
-            var teacherBankAccounts = userView.Human?.Teacher?.TeacherBankAccounts;
+            var teacherBankAccounts = userView.Teacher?.TeacherBankAccounts;
             if (teacherBankAccounts != null && teacherBankAccounts.Any())
             {
                 var teacherBankAccountNew = teacherBankAccounts.FirstOrDefault(x => x.Status == EnumBankStatus.New);
@@ -145,29 +140,22 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 {
                     var teacherBankAccount = _mapper.Map<TeacherBankAccount>(request.TeacherBankAccount);
                     teacherBankAccount.Status = EnumBankStatus.New;
-                    userView.Human?.Teacher?.TeacherBankAccounts?.Add(teacherBankAccount);
+                    userView.Teacher?.TeacherBankAccounts?.Add(teacherBankAccount);
                 }
             }
-            _mapper.Map(request, userView.Human?.Teacher);
+            _mapper.Map(request, userView.Teacher);
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             if (!userView.IsValid())
             {
                 methodResult.AddErrorBadRequest(userView.ErrorMessages);
                 return methodResult;
             }
-            if (userView.Human != null && !userView.Human.IsValid())
+
+            if (userView?.Teacher != null && !userView.Teacher.IsValid())
             {
-                methodResult.AddErrorBadRequest(userView.Human.ErrorMessages);
+                methodResult.AddErrorBadRequest(userView.Teacher.ErrorMessages);
                 return methodResult;
             }
-
-            if (userView.Human?.Teacher != null && !userView.Human.Teacher.IsValid())
-            {
-                methodResult.AddErrorBadRequest(userView.Human.Teacher.ErrorMessages);
-                return methodResult;
-            }
-
             await _userManager.UpdateAsync(userView);
 
             methodResult.Result = userView;
@@ -177,34 +165,26 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private async Task<MethodResult<User>> UpdateCSOAsync(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<User>();
-            var userView = await _userManager.Users.Include(x => x.Human)
-                                                  .ThenInclude(x => x!.CSO)
+            var userView = await _userManager.Users.Include(x => x!.CSO)
                                                   .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             if (userView == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(User), userId);
                 return methodResult;
             }
-            _mapper.Map(request, userView.Human?.CSO);
+            _mapper.Map(request, userView.CSO);
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             if (!userView.IsValid())
             {
                 methodResult.AddErrorBadRequest(userView.ErrorMessages);
                 return methodResult;
             }
-            if (userView.Human != null && !userView.Human.IsValid())
+
+            if (userView.CSO != null && !userView.CSO.IsValid())
             {
-                methodResult.AddErrorBadRequest(userView.Human.ErrorMessages);
+                methodResult.AddErrorBadRequest(userView.CSO.ErrorMessages);
                 return methodResult;
             }
-
-            if (userView.Human?.CSO != null && !userView.Human.CSO.IsValid())
-            {
-                methodResult.AddErrorBadRequest(userView.Human.CSO.ErrorMessages);
-                return methodResult;
-            }
-
             await _userManager.UpdateAsync(userView);
             methodResult.Result = userView;
             return methodResult;
@@ -213,8 +193,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private async Task<MethodResult<User>> UpdateStudentAsync(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<User>();
-            var userView = await _userManager.Users.Include(x => x.Human)
-                                                   .ThenInclude(x => x!.Student)
+            var userView = await _userManager.Users.Include(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
                                                    .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             if (userView == null)
@@ -222,7 +201,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(User), userId);
                 return methodResult;
             }
-            var student = userView.Human?.Student;
+            var student = userView.Student;
             if (student != null)
             {
                 student.ParentEmail = string.IsNullOrEmpty(request.Parent?.Email) ? null : request.Parent?.Email;
@@ -238,82 +217,70 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                         return methodResult;
                     }
 
-                    Human newHuman = _mapper.Map<Human>(request.Parent);
-                    newHuman.Parent = _mapper.Map<Parent>(request.Parent);
-                    newHuman.Parent.ParentStudents.Add(new ParentStudent
+                    userView.Parent = _mapper.Map<Parent>(request.Parent);
+                    userView.Parent.ParentStudents.Add(new ParentStudent
                     {
                         Student = student
                     });
 
-                    if (!newHuman.IsValid())
+                    if (!userView.IsValid())
                     {
                         methodResult.AddErrorBadRequest(userView.ErrorMessages);
                         return methodResult;
                     }
-                    if (newHuman.Parent != null && !newHuman.Parent.IsValid())
+                    if (userView.Parent != null && !userView.Parent.IsValid())
                     {
-                        methodResult.AddErrorBadRequest(newHuman.Parent.ErrorMessages);
+                        methodResult.AddErrorBadRequest(userView.Parent.ErrorMessages);
                         return methodResult;
                     }
-
-                    _humanRepository.Add(newHuman);
-                    await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _userManager.UpdateAsync(userView);
                 }
                 else
                 {
-                    userView = await _userManager.Users.Include(x => x.Human)
-                                               .ThenInclude(x => x!.Student)
+                    userView = await _userManager.Users.Include(x => x!.Student)
                                                .ThenInclude(x => x!.ParentStudents)
                                                .ThenInclude(x => x.Parent)
-                                               .ThenInclude(x => x!.Human)
+                                               .ThenInclude(x => x!.User)
                                                .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
                     if (userView == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(User), userId);
                         return methodResult;
                     }
-                    var human = userView.Human?.Student?.ParentStudents.FirstOrDefault()?.Parent?.Human;
-                    if (human != null)
+                    var user = userView?.Student?.ParentStudents.FirstOrDefault()?.Parent?.User;
+                    if (user != null)
                     {
-                        _mapper.Map(request.Parent, human);
-                        _mapper.Map(request.Parent, human.Parent);
+                        _mapper.Map(request.Parent, user);
+                        _mapper.Map(request.Parent, user.Parent);
 
-                        if (!human.IsValid())
+                        if (!user.IsValid())
                         {
-                            methodResult.AddErrorBadRequest(userView.ErrorMessages);
+                            methodResult.AddErrorBadRequest(user.ErrorMessages);
                             return methodResult;
                         }
-                        if (human.Parent != null && !human.Parent.IsValid())
+                        if (user.Parent != null && !user.Parent.IsValid())
                         {
-                            methodResult.AddErrorBadRequest(human.Parent.ErrorMessages);
+                            methodResult.AddErrorBadRequest(user.Parent.ErrorMessages);
                             return methodResult;
                         }
 
-                        _humanRepository.Update(human);
-                        await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                        await _userManager.UpdateAsync(user);
                     }
                 }
             }
-            _mapper.Map(request, userView.Human?.Student);
+            _mapper.Map(request, userView.Student);
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             if (!userView.IsValid())
             {
                 methodResult.AddErrorBadRequest(userView.ErrorMessages);
                 return methodResult;
             }
-            if (userView.Human != null && !userView.Human.IsValid())
+
+            if (userView.Student != null && !userView.Student.IsValid())
             {
-                methodResult.AddErrorBadRequest(userView.Human.ErrorMessages);
+                methodResult.AddErrorBadRequest(userView.Student.ErrorMessages);
                 return methodResult;
             }
-
-            if (userView.Human?.Student != null && !userView.Human.Student.IsValid())
-            {
-                methodResult.AddErrorBadRequest(userView.Human.Student.ErrorMessages);
-                return methodResult;
-            }
-
             await _userManager.UpdateAsync(userView);
             methodResult.Result = userView;
             return methodResult;
@@ -326,8 +293,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             User? userView = null;
             if (request.Students != null && request.Students.Any())
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                             .ThenInclude(x => x!.Parent)
+                userView = await _userManager.Users.Include(x => x!.Parent)
                                              .ThenInclude(x => x!.ParentStudents.Where(y => !y.IsDeleted && y.Student != null))
                                              .ThenInclude(x => x.Student)
                                              .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
@@ -339,27 +305,20 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
                 foreach (var item in request.Students)
                 {
-                    var userStudent = await _userManager.Users.Include(x => x.Human)
-                                              .ThenInclude(x => x!.Student).FirstOrDefaultAsync(x => x.Human!.Student!.Id == item.StudentId, cancellationToken);
+                    var userStudent = await _userManager.Users.Include(x => x!.Student).FirstOrDefaultAsync(x => x.Student!.Id == item.StudentId, cancellationToken);
                     if (userStudent != null)
                     {
                         _mapper.Map(item, userStudent);
-                        _mapper.Map(item, userStudent.Human);
-                        _mapper.Map(item, userStudent.Human?.Student);
+                        _mapper.Map(item, userStudent.Student); 
                         if (!userStudent.IsValid())
                         {
                             methodResult.AddErrorBadRequest(userView.ErrorMessages);
                             return methodResult;
                         }
-                        if (userStudent.Human != null && !userStudent.Human.IsValid())
-                        {
-                            methodResult.AddErrorBadRequest(userStudent.Human.ErrorMessages);
-                            return methodResult;
-                        }
 
-                        if (userStudent.Human?.Student != null && !userStudent.Human.Student.IsValid())
+                        if (userStudent.Student != null && !userStudent.Student.IsValid())
                         {
-                            methodResult.AddErrorBadRequest(userStudent.Human.Student.ErrorMessages);
+                            methodResult.AddErrorBadRequest(userStudent.Student.ErrorMessages);
                             return methodResult;
                         }
                         users.Add(userStudent);
@@ -368,8 +327,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
             else
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                             .ThenInclude(x => x!.Parent)
+                userView = await _userManager.Users.Include(x => x!.Parent)
                                              .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
                 if (userView == null)
                 {
@@ -377,27 +335,19 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     return methodResult;
                 }
             }
-
-            _mapper.Map(request, userView.Human?.Parent);
+            _mapper.Map(request, userView.Parent);
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             if (!userView.IsValid())
             {
                 methodResult.AddErrorBadRequest(userView.ErrorMessages);
                 return methodResult;
             }
-            if (userView.Human != null && !userView.Human.IsValid())
+
+            if (userView.Parent != null && !userView.Parent.IsValid())
             {
-                methodResult.AddErrorBadRequest(userView.Human.ErrorMessages);
+                methodResult.AddErrorBadRequest(userView.Parent.ErrorMessages);
                 return methodResult;
             }
-
-            if (userView.Human?.Parent != null && !userView.Human.Parent.IsValid())
-            {
-                methodResult.AddErrorBadRequest(userView.Human.Parent.ErrorMessages);
-                return methodResult;
-            }
-
             await _userManager.UpdateAsync(userView);
             foreach (var item in users)
             {
@@ -410,23 +360,16 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private async Task<MethodResult<User>> UpdateRoleRemainingAsync(Guid userId, UpdateUserProfileCommand request, CancellationToken cancellationToken)
         {
             MethodResult<User> methodResult = new MethodResult<User>();
-            var userView = await _userManager.Users.Include(x => x.Human)
-                                     .FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
+            var userView = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == userId, cancellationToken);
             if (userView == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(User), userId);
                 return methodResult;
             }
             _mapper.Map(request, userView);
-            _mapper.Map(request, userView.Human);
             if (!userView.IsValid())
             {
                 methodResult.AddErrorBadRequest(userView.ErrorMessages);
-                return methodResult;
-            }
-            if (userView.Human != null && !userView.Human.IsValid())
-            {
-                methodResult.AddErrorBadRequest(userView.Human.ErrorMessages);
                 return methodResult;
             }
 

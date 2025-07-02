@@ -34,7 +34,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                 methodResult.Result = null;
                 return methodResult;
             }
-            var sender = await _userManager.Users.Include(p => p.Human).FirstOrDefaultAsync(p => p.Human != null && p.Human.Code == request.ReferralCode.Trim(), cancellationToken);
+            var sender = await _userManager.Users.FirstOrDefaultAsync(p => p.Code == request.ReferralCode.Trim(), cancellationToken);
 
             if (sender == null)
             {
@@ -45,8 +45,8 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
             methodResult.Result = new SenderModel()
             {
                 SenderId = sender.Id,
-                Code = sender.Human?.Code,
-                FullName = sender.Human?.FullName,
+                Code = sender.Code,
+                FullName = sender.FullName,
             };
             return methodResult;
         }

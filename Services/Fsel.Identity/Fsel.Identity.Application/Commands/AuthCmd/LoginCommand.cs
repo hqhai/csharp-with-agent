@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Linq.Dynamic.Core;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Base.Managers;
@@ -30,7 +29,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private Microsoft.AspNetCore.Identity.SignInManager<User> _signInManager;
         private IPlatformRepository _platformRepository;
         private IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
-        private IHumanRepository _humanRepository;
         private IStudentRepository _studentRepository;
         private ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IMediator _mediator;
@@ -41,7 +39,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IMediator mediator,
             IPlatformRepository platformRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-            IHumanRepository humanRepository,
             IStudentRepository studentRepository,
             ICompetitionEventsRepository competitionEventsRepository,
             ITenantProvider tenantProvider)
@@ -51,7 +48,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _mediator = mediator;
             _platformRepository = platformRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _competitionEventsRepository = competitionEventsRepository;
             _tenantProvider = tenantProvider;
@@ -73,7 +69,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.Username) ?? _signInManager;
             _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(request.Username) ?? _platformRepository;
             _studentCompetitionEventsRepository = await _tenantProvider.CreateRepositoryAsync<IStudentCompetitionEventsRepository, UserDbContext>(request.Username) ?? _studentCompetitionEventsRepository;
-            _humanRepository = await _tenantProvider.CreateRepositoryAsync<IHumanRepository, UserDbContext>(request.Username) ?? _humanRepository;
             _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>(request.Username) ?? _studentRepository;
             _competitionEventsRepository = await _tenantProvider.CreateRepositoryAsync<ICompetitionEventsRepository, UserDbContext>(request.Username) ?? _competitionEventsRepository;
 
@@ -110,11 +105,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var competitionEvent = await (from baseQ in _humanRepository.Queryable
-                                          join s in _studentRepository.Queryable on baseQ.Id equals s.HumanId
+            var competitionEvent = await (from baseQ in _userManager.Users
+                                          join s in _studentRepository.Queryable on baseQ.Id equals s.UserId
                                           join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
                                           join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id
-                                          where baseQ.UserId == user.Id
+                                          where baseQ.Id == user.Id
                                           select ce).FirstOrDefaultAsync(cancellationToken);
 
             var isByPassEmailComfirm = competitionEvent?.EventContent?.IsByPassEmailComfirm ?? default;

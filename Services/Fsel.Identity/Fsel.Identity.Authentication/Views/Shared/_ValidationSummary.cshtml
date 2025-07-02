@@ -1,0 +1,65 @@
+@if (!ViewContext.ModelState.IsValid)
+{
+    @* <div class="alert alert-danger">
+        <strong>Error</strong>
+        <div asp-validation-summary="All" class="danger"></div>
+    </div> *@
+
+    @*
+    <div class="message-successfully" style="display: none">
+        <div class="message">
+            <i class="fa fa-check"></i>
+            <span> conect successfully</span>
+        </div>
+    </div>
+    <div class="message-error" style="display: none">
+        <div class="message">
+            <i class="fa fa-times-circle"></i>
+            <span> conect successfully</span>
+        </div>
+    </div>
+    *@
+
+    <div class="message-error">
+        @foreach (var item in ViewContext.ModelState.Where(x => string.IsNullOrEmpty(x.Key) && x.Value != null).SelectMany(x => x.Value!.Errors).Select(x => x.ErrorMessage))
+        {
+            <div class="message mt-3">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     width="20"
+                     height="20"
+                     viewBox="0 0 20 20"
+                     fill="none">
+                    <path fill-rule="evenodd"
+                          clip-rule="evenodd"
+                          d="M5.66976 -0.000976562H14.3398C17.7298 -0.000976562 19.9998 2.37902 19.9998 5.91902V14.09C19.9998 17.62 17.7298 19.999 14.3398 19.999H5.66976C2.27976 19.999 -0.000244141 17.62 -0.000244141 14.09V5.91902C-0.000244141 2.37902 2.27976 -0.000976562 5.66976 -0.000976562ZM13.0098 12.999C13.3498 12.66 13.3498 12.11 13.0098 11.77L11.2298 9.99002L13.0098 8.20902C13.3498 7.87002 13.3498 7.31002 13.0098 6.97002C12.6698 6.62902 12.1198 6.62902 11.7698 6.97002L9.99976 8.74902L8.21976 6.97002C7.86976 6.62902 7.31976 6.62902 6.97976 6.97002C6.63976 7.31002 6.63976 7.87002 6.97976 8.20902L8.75976 9.99002L6.97976 11.76C6.63976 12.11 6.63976 12.66 6.97976 12.999C7.14976 13.169 7.37976 13.26 7.59976 13.26C7.82976 13.26 8.04976 13.169 8.21976 12.999L9.99976 11.23L11.7798 12.999C11.9498 13.18 12.1698 13.26 12.3898 13.26C12.6198 13.26 12.8398 13.169 13.0098 12.999Z"
+                          fill="#FBF1F2" />
+                </svg>
+                <span>
+                    @item
+                </span>
+            </div>
+        }
+    </div>
+}
+
+@* successfully *@
+@if (ViewBag.Success != null && !string.IsNullOrEmpty(ViewBag.Success))
+{
+    <div class="message-successfully">
+        <div class="message mt-3">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="24"
+                 height="24"
+                 viewBox="0 0 24 24"
+                 fill="none">
+                <path fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M22 12.0518C22 17.5256 17.4761 22.0518 11.9952 22.0518C6.52392 22.0518 2 17.5256 2 12.0518C2 6.57787 6.51426 2.05176 11.9855 2.05176C17.4664 2.05176 22 6.57787 22 12.0518ZM17.7121 9.75928C18.096 9.36873 18.096 8.74106 17.7121 8.35052C17.3205 7.95217 16.6795 7.95217 16.2879 8.35052L10.125 14.6199L7.71206 12.1653C7.32048 11.7669 6.67952 11.7669 6.28794 12.1653C5.90402 12.5558 5.90402 13.1835 6.28794 13.574L9.41294 16.753C9.80452 17.1513 10.4455 17.1513 10.8371 16.753L17.7121 9.75928Z"
+                      fill="#F1FAF1" />
+            </svg>
+            <span>
+                @ViewBag.Success
+            </span>
+        </div>
+    </div>
+}

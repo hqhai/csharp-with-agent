@@ -17,6 +17,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? SchoolName { get; set; }
         public EnumGender? Gender { get; set; }
         public bool? PhoneNumberConfirmed { get; set; }
+        public bool EmailConfirmed { get; set; }
         public string? Email { get; set; }
 
         private string? _avatarPath;

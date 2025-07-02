@@ -11,12 +11,12 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<Teacher> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(a => a.Human)
+            builder.HasOne(a => a.User)
                     .WithOne(b => b.Teacher)
-                    .HasForeignKey<Teacher>(b => b.HumanId)
+                    .HasForeignKey<Teacher>(b => b.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => x.HumanId).IsUnique(false);
+            builder.HasIndex(x => x.UserId).IsUnique(false);
         }
     }
 }

@@ -62,8 +62,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 var studentInfoResult = studentQuery?.Content?.Result;
                 var studentInfo = new LeaderBoardModel
                 {
-                    AvatarPath = studentInfoResult?.Human?.AvatarPath,
-                    FullName = studentInfoResult?.Human?.FullName,
+                    AvatarPath = studentInfoResult?.User?.AvatarPath,
+                    FullName = studentInfoResult?.User?.FullName,
                     TotalScore = 0
                 };
 
@@ -82,8 +82,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 return new LeaderBoardModel
                 {
                     Id = student.Id,
-                    AvatarPath = student.Human?.AvatarPath,
-                    FullName = student.Human?.FullName,
+                    AvatarPath = student.User?.AvatarPath,
+                    FullName = student.User?.FullName,
                     TotalScore = totalQuestion != 0 ? Math.Round((scores / totalQuestion) * 100, ROUND_DIGIT) : 0,
                     CourseLevel = student.CourseLevel
                 };

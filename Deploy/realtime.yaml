@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: realtime-dev
+spec:
+  selector:
+    matchLabels:
+      app: realtime-dev
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: realtime-dev
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-staging
+      containers:
+      - name: realtime-dev
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/realtime:auth-openid-...............
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-staging
+        operator: Exists
+      imagePullSecrets:
+        - name: dev-image-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: realtime-dev
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: realtime-dev
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: realtime-dev
+  annotations:
+#    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+#    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+#    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+#    nginx.ingress.kubernetes.io/x-forwarded-proto: "https"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,realtimeorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
+spec:
+  ingressClassName: nginx-public
+  rules:
+  - host: fsel-realtime-dev.fsel.edu.vn
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: realtime-dev
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - fsel-realtime-dev.fsel.edu.vn
+    secretName: fsel-realtime-dev.fsel.edu.vn-wildcard
+
+status:
+  loadBalancer:
+    ingress:
+    - hostname: 103.22.218.217.nip.io

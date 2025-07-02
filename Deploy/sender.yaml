@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sender-dev
+spec:
+  selector:
+    matchLabels:
+      app: sender-dev
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: sender-dev
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-staging
+      containers:
+      - name: sender-dev
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/sender:auth-openid-...............
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-staging
+        operator: Exists
+      imagePullSecrets:
+        - name: dev-image-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sender-dev
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: sender-dev

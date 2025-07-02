@@ -76,9 +76,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             var query = teachers?.OrderBy(x => x.CreatedDate).Select(x => new ReviewTeacherRatingSearchModel
             {
                 Id = x.Id,
-                Code = x.Human!.Code,
+                Code = x.User?.Code,
                 CreatedDate = x.CreatedDate,
-                FullName = x.Human.FullName,
+                FullName = x.User?.FullName,
             }).ToList();
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.InvariantCulture);

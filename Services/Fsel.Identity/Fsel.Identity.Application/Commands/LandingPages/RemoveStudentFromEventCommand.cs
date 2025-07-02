@@ -2,7 +2,7 @@ using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base.Managers;
-using Fsel.Identity.Application.Services;
+using Fsel.Identity.Application.Services.SenderService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.StudentRanking;
@@ -50,7 +50,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
-            var userQuery = _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student);
+            var userQuery = _userManager.Users.Include(p => p.Student);
             var usersByUserName = userQuery.Where(p => p.UserName != null && request.Emails.Contains(p.UserName));
             var usersByEmail = userQuery.Where(p => p.Email != null && request.Emails.Contains(p.Email));
 
@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.LandingPages
                 return methodResult;
             }
 
-            var studentIds = users.Select(p => p.Human).Select(p => p.Student).Select(p => p.Id).ToList();
+            var studentIds = users.Select(p => p.Student).Select(p => p.Id).ToList();
 
             var studentEvents = await _studentCompetitionEventsRepository.Queryable.Where(p => studentIds != null && studentIds.Contains(p.StudentId) && p.CompetitionEventId == @event.Id).ToListAsync(cancellationToken);
 

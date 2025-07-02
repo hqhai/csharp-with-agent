@@ -35,7 +35,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 methodResult.Result = new List<UserModel>();
                 return methodResult;
             }
-            var users = await _userManager.Users.Include(x => x.Human).Where(x => request.UserIds.Contains(x.Id)).ToListAsync(cancellationToken);
+            var users = await _userManager.Users.Where(x => request.UserIds.Contains(x.Id)).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<UserModel>>(users);
             return methodResult;
         }

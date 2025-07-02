@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
                 {
                     continue;
                 }
-                var userIds = students.Select(x => x.Human).Where(x => x != null && x.UserId != null).Select(x => x!.UserId ?? default).ToList();
+                var userIds = students.Select(x => x.UserId).ToList();
                 var leaderBoardsToAdd = students.Select(student =>
                 {
                     var unitResultCaculate = _unitResultRepository.Queryable.Where(x => x.StudentId == student.Id && x.Status != EnumResultStatus.Unfinished);

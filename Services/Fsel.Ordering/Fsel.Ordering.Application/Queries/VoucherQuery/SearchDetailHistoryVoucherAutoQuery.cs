@@ -57,7 +57,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             {
                 var studentResult = await _userService.GetStudentByEmail(request.Keyword);
                 var student = studentResult.Content?.Result;
-                var userId = student?.Human?.UserId;
+                var userId = student?.UserId;
                 if (userId.HasValue)
                 {
                     vouchers = vouchers.Where(p => p.UserId == userId);
@@ -95,8 +95,8 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             var students = studentResults.Content?.Result;
             lists.ForEach(p =>
             {
-                p.StudentCode = students?.FirstOrDefault(x => x.Human?.UserId == p.UserId)?.Human?.Code;
-                p.Email = students?.FirstOrDefault(x => x.Human?.UserId == p.UserId)?.Human?.Email;
+                p.StudentCode = students?.FirstOrDefault(x => x?.UserId == p.UserId)?.User?.Code;
+                p.Email = students?.FirstOrDefault(x => x?.UserId == p.UserId)?.User?.Email;
             });
             methodResult.Result = new PagingItemsModel<HistoryVoucherModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

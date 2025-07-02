@@ -104,15 +104,15 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                                                  .ToListAsync(cancellationToken);
                 foreach (var student in students)
                 {
-                    var userId = student.Human?.UserId ?? default;
+                    var userId = student?.UserId ?? default;
                     var courseResult = courseResults?.FirstOrDefault(x => x.StudentId == student.Id);
                     var reportProgress = new ReportStudentInfoExportModel
                     {
-                        FullName = student?.Human?.FullName,
-                        Birthday = student?.Human?.Birthday,
-                        Email = student?.Human?.Email,
+                        FullName = student?.User?.FullName,
+                        Birthday = student?.User?.Birthday,
+                        Email = student?.User?.Email,
                         CourseName = courseResult?.Course?.Name,
-                        PhoneNumber = student?.Human?.PhoneNumber,
+                        PhoneNumber = student?.User?.PhoneNumber,
                         CreatedDate = student?.CreatedDate,
                         CourseLevel = EnumCourseLevelHelper.GetCodeByEnumCourseLevel(courseResult?.Course?.CourseLevel),
                         SchoolName = student?.School
@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                             reportProgress.EndTrial = order.ExpireDate;
                         }
                     }
-                    var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { UserId = student?.Human?.UserId ?? default });
+                    var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeAsync(new FeatureAccessTimeQueryModel { UserId = student?.UserId ?? default });
                     if (featureAccessTimeResult.IsSuccessStatusCode)
                     {
                         reportProgress.LastEntry = featureAccessTimeResult.Content?.Result?.LastVisited;
@@ -234,7 +234,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             {
                 return (status, level);
             }
-            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                           .OrderByDescending(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);

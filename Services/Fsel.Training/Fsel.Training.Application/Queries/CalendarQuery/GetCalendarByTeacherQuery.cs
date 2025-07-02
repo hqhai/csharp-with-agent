@@ -125,8 +125,8 @@ namespace Fsel.Training.Application.Queries.CalendarQuery
 
             lists.ForEach(item =>
             {
-                item.TeacherName = teacher.Human?.FullName;
-                item.TeacherAvatar = teacher.Human?.AvatarPath;
+                item.TeacherName = teacher?.User?.FullName;
+                item.TeacherAvatar = teacher?.User?.AvatarPath;
 
                 var course = courses?.FirstOrDefault(x => x.Id == item.Class?.CourseId);
                 item.Class!.CourseLevel = course?.CourseLevel;

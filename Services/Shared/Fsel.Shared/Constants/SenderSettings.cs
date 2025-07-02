@@ -31,5 +31,6 @@ namespace Fsel.Shared.Constants
         public const string TitlePT = "[FSEL] CÙNG XEM KẾT QUẢ ĐÁNH GIÁ ĐẦU VÀO BẠN NHÉ!";
         public const string MidCourseTitle = "[FSEL] BÁO CÁO HỌC TẬP GIỮA KHÓA";
         public const string PaymentApproval = "[FSEL] TÀI KHOẢN CỦA BẠN ĐÃ ĐƯỢC PHÊ DUYỆT";
+        public const string CreateAccountFromCRM = "Chào mừng tới FSEL!";
     }
 }

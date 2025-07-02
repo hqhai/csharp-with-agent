@@ -77,11 +77,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 var joinedData = result.Join(
                                    users,
                                    r => r[2].ToString(),
-                                   u => u.Human.Email,
+                                   u => u.User?.Email,
                                    (r, u) => new StudentUpdateClassForum
                                    {
                                        LessonName = r[3].ToString(),
-                                       UserId = (Guid)u.Human.UserId
+                                       UserId = u.UserId
                                    }
                                ).ToList();
 

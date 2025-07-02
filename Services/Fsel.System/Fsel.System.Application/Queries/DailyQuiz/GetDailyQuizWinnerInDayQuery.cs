@@ -61,14 +61,14 @@ namespace Fsel.System.Application.Queries.DailyQuiz
 
                 students.ForEach(p =>
                 {
-                    var winner = winners.FirstOrDefault(x => x.CreatedUserId == p.Human?.UserId);
+                    var winner = winners.FirstOrDefault(x => x.CreatedUserId == p?.UserId);
                     if (winner != null)
                     {
                         var school = schools.FirstOrDefault(x => x.GlobalId == winner.SchoolId);
                         studentModels.Add(new DailyQuizWinnerModel()
                         {
                             UserId = winner.CreatedUserId,
-                            FullName = p.Human?.FullName,
+                            FullName = p.User?.FullName,
                             School = school?.Name,
                             Code = winner.Code
                         });

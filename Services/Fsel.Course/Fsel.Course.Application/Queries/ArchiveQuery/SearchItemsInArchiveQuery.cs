@@ -105,7 +105,7 @@ namespace Fsel.Course.Application.Queries.ArchiveQuery
             var teachers = teachersResult.Content?.Result;
             lesson.Items.ForEach(x =>
             {
-                x.TeacherName = teachers?.FirstOrDefault(n => n.Id == x.TeacherId)?.Human?.FullName;
+                x.TeacherName = teachers?.FirstOrDefault(n => n.Id == x.TeacherId)?.User?.FullName;
             });
             methodResult.Result = new PagingItemsModel<object> { Items = _mapper.Map<IList<object>>(lesson.Items), PagingInfo = lesson.PagingInfo };
         }
@@ -123,7 +123,7 @@ namespace Fsel.Course.Application.Queries.ArchiveQuery
             {
                 x.CourseTeachers.ForEach(p =>
                 {
-                    p.FullName = teachers?.FirstOrDefault(n => n.Id == p.TeacherId)?.Human?.FullName;
+                    p.FullName = teachers?.FirstOrDefault(n => n.Id == p.TeacherId)?.User?.FullName;
                 });
             });
             methodResult.Result = new PagingItemsModel<object> { Items = _mapper.Map<IList<object>>(course.Items), PagingInfo = course.PagingInfo };
@@ -142,7 +142,7 @@ namespace Fsel.Course.Application.Queries.ArchiveQuery
             {
                 x.Teachers.ForEach(p =>
                 {
-                    p.TeacherName = teachers?.FirstOrDefault(n => n.Id == p.TeacherId)?.Human?.FullName;
+                    p.TeacherName = teachers?.FirstOrDefault(n => n.Id == p.TeacherId)?.User?.FullName;
                 });
             });
             methodResult.Result = new PagingItemsModel<object> { Items = _mapper.Map<IList<object>>(unit.Items), PagingInfo = unit.PagingInfo };

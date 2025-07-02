@@ -11,7 +11,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using MediatR;
     using Microsoft.AspNetCore.Identity;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Application.Services;
+    using Fsel.Identity.Application.Services.SenderService;
     using Microsoft.EntityFrameworkCore;
     using Fsel.Core.Base;
     using System.Linq.Dynamic.Core;
@@ -74,7 +74,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     userOtpCode = new UserOtpCode
                     {
                         UserId = user.Id,
-                        OTPCode = otp,
+                        OtpCode = otp,
                         Status = EnumOtpCodeStatus.New,
                         Type = EnumUserOtpCodeType.SMS,
                         RetryCount = 1,
@@ -98,7 +98,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                         Template = EnumSendSMSTemplate.SendOTP,
                         Params = new
                         {
-                            OTP = userOtpCode.OTPCode,
+                            OTP = userOtpCode.OtpCode,
                             CountOTP = userOtpCode.RetryCount
                         },
                         IsCheckDuplicate = false,
@@ -113,7 +113,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                         Template = EnumZaloTemplate.OTP,
                         Params = new
                         {
-                            otp = userOtpCode.OTPCode
+                            otp = userOtpCode.OtpCode
                         },
                         UseUnicode = 0
                     });

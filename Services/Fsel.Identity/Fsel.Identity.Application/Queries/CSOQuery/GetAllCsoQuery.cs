@@ -32,7 +32,7 @@ namespace Fsel.Identity.Application.Queries.CSOQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<CSOModel>>();
 
-            var allCSo = await _csoRepository.Queryable.Include(p => p.Human).ToListAsync(cancellationToken);
+            var allCSo = await _csoRepository.Queryable.Include(x => x.User).ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<CSOModel>>(allCSo);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

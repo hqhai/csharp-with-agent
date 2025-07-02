@@ -169,9 +169,9 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
 
                     await _createTokenHistoryPublisher.Publish(tokenHistories, cancellationToken).ConfigureAwait(false);
 
-                    var friendInformation = await _studentRepository.Queryable.Where(x => x.Human != null && x.Human.UserId == userReferral.ReceiverId).FirstOrDefaultAsync(cancellationToken);
+                    var friendInformation = await _studentRepository.Queryable.Where(x => x.UserId == userReferral.ReceiverId).FirstOrDefaultAsync(cancellationToken);
 
-                    await SendNotification(friendInformation?.Human?.FullName ?? string.Empty, token, userReferral.SenderId, userReferral.ReceiverId, notificationContent, cancellationToken);
+                    await SendNotification(friendInformation?.User?.FullName ?? string.Empty, token, userReferral.SenderId, userReferral.ReceiverId, notificationContent, cancellationToken);
                 }
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
