@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -55,8 +56,10 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             {
                 courseResult.ProcessDate = DateTime.UtcNow;
                 courseResult.Status = EnumResultStatus.Process;
-                _courseResultRepository.Update(courseResult, false, x => x.CourseId, x => x.StudentId);
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                });
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

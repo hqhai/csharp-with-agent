@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -99,9 +100,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
                     StudentId = studentId ?? default,
                     Status = EnumResultStatus.Unfinished
                 };
-
-                _mockTestResultRepository.Add(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestResultRepository.BulkMergeAsync(new List<MockTestResult> { mockTestResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId, c.IsDeleted };
+                });
             }
 
             var mockTest = await _mockTestRepository.Queryable
