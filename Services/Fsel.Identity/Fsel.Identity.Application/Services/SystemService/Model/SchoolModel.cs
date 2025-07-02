@@ -8,7 +8,6 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
 
     public class SchoolModel : BaseModel
     {
-
         public string? Name { get; set; }
 
         public EnumEducationLevel? EducationLevel { get; set; }
@@ -35,9 +34,8 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
 
         public string? ShortPath { get; set; }
         public Guid? LocationId { get; set; }
-
+        public string? LocalId { get; set; }
         public bool IsActive { get; set; }
-
         public LocationModel? Location { get; set; }
     }
 
