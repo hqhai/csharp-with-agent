@@ -6,15 +6,12 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
     using System.Globalization;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -121,6 +118,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
 
             var leaderBoards = await (from a in _courseResultRepository.Queryable
                                       join b in _courseRepository.Queryable on a.CourseId equals b.Id
+                                      where a.WorkingStatus == EnumWorkingStatus.Active
                                       group a by b.CourseLevel into g
                                       select new
                                       {
