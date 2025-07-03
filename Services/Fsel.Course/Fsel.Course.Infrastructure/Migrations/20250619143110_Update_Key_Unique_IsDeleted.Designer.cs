@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250619143110_Update_Key_Unique_IsDeleted")]
+    partial class Update_Key_Unique_IsDeleted
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3173,11 +3176,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("CourseId", "MockTestId", "StudentId")
                         .IsUnique()
-                        .HasFilter("[UnitId] IS NULL AND [IsDeleted] = 0");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("CourseId", "MockTestId", "UnitId", "StudentId")
                         .IsUnique()
-                        .HasFilter("[IsDeleted] = 0");
+                        .HasFilter("[UnitId] IS NOT NULL");
 
                     b.ToTable("MockTestResults");
                 });
