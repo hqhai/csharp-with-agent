@@ -58,31 +58,31 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             #region Validate New
 
-            //Category? program = null;
-            //if (request.ProgramId.HasValue)
-            //{
-            //    program = await _categoryRepository.Queryable.Where(x => x.Id == request.ProgramId && x.Type == EnumTypeCategory.Program).FirstOrDefaultAsync(cancellationToken);
-            //    if (program == null)
-            //    {
-            //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ProgramId), request.ProgramId);
-            //        return methodResult;
-            //    }
-            //}
-            //Level? level = null;
-            //if (request.LevelId.HasValue)
-            //{
-            //    level = await _levelRepository.GetByIdAsync(request.LevelId.Value);
-            //    if (level == null)
-            //    {
-            //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LevelId), request.LevelId);
-            //        return methodResult;
-            //    }
-            //}
-            //if (level != null && program != null && level.ProgramId != request.ProgramId)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ProgramId), request.ProgramId);
-            //    return methodResult;
-            //}
+            Category? program = null;
+            if (request.ProgramId.HasValue)
+            {
+                program = await _categoryRepository.Queryable.Where(x => x.Id == request.ProgramId && x.Type == EnumTypeCategory.Program).FirstOrDefaultAsync(cancellationToken);
+                if (program == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ProgramId), request.ProgramId);
+                    return methodResult;
+                }
+            }
+            Level? level = null;
+            if (request.LevelId.HasValue)
+            {
+                level = await _levelRepository.GetByIdAsync(request.LevelId.Value);
+                if (level == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LevelId), request.LevelId);
+                    return methodResult;
+                }
+            }
+            if (level != null && program != null && level.ProgramId != request.ProgramId)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ProgramId), request.ProgramId);
+                return methodResult;
+            }
 
             if (!request.Name.IsValidCode())
             {
@@ -115,28 +115,28 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.NotEdited), nameof(video.VersionStatus), video.VersionStatus);
                 return methodResult;
             }
-            //if (await _videoResultRepository.Queryable.AnyAsync(x => x.VideoId == request.Id, cancellationToken))
-            //{
-            //}
-            //else
-            //{
-            //    _mapper.Map(request, video);
-            //    if (!video.IsValid())
-            //    {
-            //        methodResult.AddErrorBadRequest(video.ErrorMessages);
-            //        return methodResult;
-            //    }
-            //    var method = await _videoConverter.UpdateTimeCodeToVideo(video, request);
-            //    if (!method.IsOK)
-            //    {
-            //        methodResult.AddErrorBadRequest(method.ErrorMessages);
-            //        return methodResult;
-            //    }
-            //}
-            video.VersionStatus = EnumVersionStatus.OldVersion;
-            var model = _mapper.Map<CreateVideoCommandModel>((UpdateVideoCommandModel)request);
-            model.OriginalId = video.OriginalId ?? video.Id;
-            await _mediator.Send(model.Serialize().Deserialize<CreateVideoCommand>(), cancellationToken).ConfigureAwait(false);
+            if (await _videoResultRepository.Queryable.AnyAsync(x => x.VideoId == request.Id, cancellationToken))
+            {
+                video.VersionStatus = EnumVersionStatus.OldVersion;
+                var model = _mapper.Map<CreateVideoCommandModel>((UpdateVideoCommandModel)request);
+                model.OriginalId = video.OriginalId ?? video.Id;
+                await _mediator.Send(model.Serialize().Deserialize<CreateVideoCommand>(), cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                _mapper.Map(request, video);
+                if (!video.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(video.ErrorMessages);
+                    return methodResult;
+                }
+                var method = await _videoConverter.UpdateTimeCodeToVideo(video, request);
+                if (!method.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    return methodResult;
+                }
+            }
 
             #endregion Validation
 
