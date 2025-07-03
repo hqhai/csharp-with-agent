@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using AutoMapper;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
@@ -14,11 +15,16 @@ namespace Fsel.Course.Infrastructure.Repositories
     public class VideoRepository : BaseRepository<Video>, IVideoRepository
     {
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
 
-        public VideoRepository(CourseDbContext dbContext, AuthContext authContext, ILessonResultRepository lessonResultRepository, AutoMapper.IMapper mapper, ILessonRepository lessonRepository) : base(dbContext, authContext, mapper)
+        public VideoRepository(CourseDbContext dbContext,
+            AuthContext authContext,
+            ILessonResultRepository lessonResultRepository,
+            AutoMapper.IMapper mapper, ILessonRepository lessonRepository) : base(dbContext, authContext, mapper)
         {
             _lessonResultRepository = lessonResultRepository;
+            _mapper = mapper;
             _lessonRepository = lessonRepository;
         }
 
@@ -74,7 +80,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
+                return await Queryable
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                 .ThenInclude(x => x.Exercise)
@@ -86,11 +92,15 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     Id = i.Id,
                                     Name = i.Name,
                                     VideoFilePath = i.VideoFilePath,
-                                    IsActive = i.LessonVideos.Any(),
                                     TeacherId = i.TeacherId,
                                     SubFilePath = i.SubFilePath,
                                     Type = i.Type,
                                     CourseLevel = i.CourseLevel,
+                                    VersionStatus = i.VersionStatus,
+                                    Version = i.Version,
+                                    Program = _mapper.Map<ProgramModel>(i.Program),
+                                    Level = _mapper.Map<LevelModel>(i.Level),
+                                    IsUseStudent = i.VideoResults.Any(),
                                     VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                                     {
                                         Id = x.Id,

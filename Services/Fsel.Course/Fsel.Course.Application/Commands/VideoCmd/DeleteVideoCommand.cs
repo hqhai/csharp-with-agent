@@ -46,9 +46,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
-
+            if (video.VersionStatus == Domain.Enums.EnumVersionStatus.OldVersion)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.NotDelete), nameof(video.VersionStatus), video.VersionStatus);
+                return methodResult;
+            }
             var isVideoUsed = await _videoRepository.IsVideoUsed(request.Id);
-
             if (isVideoUsed)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoUsed), nameof(request.Id), request.Id);
