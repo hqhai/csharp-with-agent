@@ -108,18 +108,9 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
         {
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            var entity = new TestConfigSection
-            {
-                Name = dto.Name,
-                DisplayOrder = dto.DisplayOrder,
-                TargetWord = dto.TargetWord,
-                TestConfigId = testConfigId,
-                ParentId = parentId,
-                ConfigStr = dto.ConfigStr,
-                LayoutType = dto.LayoutType,
-                TotalScore = dto.TotalScore,
-                SkillId = dto.SkillId,
-            };
+            var entity = _mapper.Map<TestConfigSection>(dto);
+            entity.TestConfigId = testConfigId;
+            entity.ParentId = parentId;
 
             var testConfigSectionResult = _testConfigSectionRepository.Add(entity);
             await _testConfigSectionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
@@ -147,7 +138,6 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                                 QuestionId = qResult.Id,
                             });
                         }
-
                     }
                 }
 

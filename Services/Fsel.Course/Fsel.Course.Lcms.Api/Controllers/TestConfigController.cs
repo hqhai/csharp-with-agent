@@ -12,6 +12,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Course.Application.Queries.TestConfigQuery;
     using Fsel.Course.Domain.Models.EntityModels.TestConfig;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 

@@ -5,6 +5,7 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
     using System;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
@@ -25,15 +26,18 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
         private readonly ITestConfigRepository _testConfigRepository;
         private readonly ITestConfigSectionRepository _testConfigSectionRepository;
         private readonly ISkillRepository _skillRepository;
+        private readonly IMapper _mapper;
 
         public GetTestConfigQueryHandler(
             ITestConfigRepository testConfigRepository,
             ITestConfigSectionRepository testConfigSectionRepository,
-            ISkillRepository skillRepository)
+            ISkillRepository skillRepository,
+            IMapper mapper)
         {
             _testConfigRepository = testConfigRepository;
             _testConfigSectionRepository = testConfigSectionRepository;
             _skillRepository = skillRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<TestConfigModel>> Handle(GetTestConfigQuery request, CancellationToken cancellationToken)
@@ -66,20 +70,8 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
                 .ToDictionaryAsync(x => x.Id, cancellationToken);
 
             // 4. Mapping sang TestConfigModel
-            var config = new TestConfigModel
-            {
-                Id = testConfigResult.Id,
-                Name = testConfigResult.Name,
-                Code = testConfigResult.Code,
-                IsActive = testConfigResult.IsActive,
-                ProgramId = testConfigResult.ProgramId,
-                ProgramName = testConfigResult.Program?.Name,
-                CreatedFullName = testConfigResult.CreatedFullName,
-                CreatedDate = testConfigResult.CreatedDate,
-                LevelId = testConfigResult.LevelId,
-                LevelName = testConfigResult.Level?.Name,
-                TestConfigSectionModels = BuildSectionTree(allSections, allSkills)
-            };
+            var config = _mapper.Map<TestConfigModel>(testConfigResult);
+            config.TestConfigSectionModels = BuildSectionTree(allSections, allSkills);
 
             // 5. Trả kết quả
             methodResult.Result = config;
@@ -87,26 +79,29 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
             return methodResult;
         }
 
-        private List<TestConfigSectionModel> BuildSectionTree(List<TestConfigSection> sections, Dictionary<Guid, Skill>? skills = null, Guid? parentId = null)
+        private List<TestConfigSectionModel> BuildSectionTree(
+                List<TestConfigSection> sections,
+                Dictionary<Guid, Skill>? skills = null,
+                Guid? parentId = null)
         {
-            return sections
+            var children = sections
                 .Where(s => s.ParentId == parentId)
                 .OrderBy(s => s.DisplayOrder)
-                .Select(s => new TestConfigSectionModel
-                {
-                    Id = s.Id,
-                    Name = s.Name,
-                    TargetWord = s.TargetWord,
-                    DisplayOrder = s.DisplayOrder,
-                    ExecutionTime = s.ExecutionTime,
-                    LayoutType = s.LayoutType,
-                    TotalScore = s.TotalScore,
-                    Skill = s.Skill ?? (s.SkillId != null && skills != null && skills.TryGetValue(s.SkillId.Value, out var skill) ? skill : null),
-                    ParentId = s.ParentId ?? Guid.Empty,
-                    Config = s.Config,
-                    ConfigStr = s.ConfigStr,
-                    Children = BuildSectionTree(sections, skills, s.Id)
-                }).ToList();
+                .ToList();
+
+            var mappedChildren = _mapper.Map<List<TestConfigSectionModel>>(children);
+
+            foreach (var child in mappedChildren)
+            {
+                var original = children.First(x => x.Id == child.Id);
+                // Gán Skill từ Dictionary nếu chưa có
+                child.Skill = original.Skill ?? (original.SkillId != null && skills != null && skills.TryGetValue(original.SkillId.Value, out var skill) ? skill : null);
+                // Gán Children đệ quy
+                child.Children = BuildSectionTree(sections, skills, child.Id);
+            }
+
+            return mappedChildren;
         }
+
     }
 }

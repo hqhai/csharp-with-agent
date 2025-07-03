@@ -145,21 +145,9 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                 if (existingSection == null)
                 {
                     // Thêm mới section
-                    var newSection = new TestConfigSection
-                    {
-                        Id = Guid.NewGuid(),
-                        Name = sectionModel.Name,
-                        TestConfigId = testConfigId,
-                        ParentId = parentId,
-                        DisplayOrder = sectionModel.DisplayOrder,
-                        LayoutType = sectionModel.LayoutType,
-                        TargetWord = sectionModel.TargetWord,
-                        ExecutionTime = sectionModel.ExecutionTime,
-                        TotalScore = sectionModel.TotalScore,
-                        SkillId = sectionModel.SkillId,
-                        ConfigStr = sectionModel.ConfigStr ?? ""
-                    };
-
+                    var newSection = _mapper.Map<TestConfigSection>(sectionModel);
+                    newSection.TestConfigId = testConfigId;
+                    newSection.ParentId = parentId;
                     _testConfigSectionRepository.Add(newSection);
 
                     // Thêm mới: chỉ cần truyền newSection.Id là đủ
@@ -181,14 +169,9 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                 else
                 {
                     // Cập nhật section
-                    existingSection.Name = sectionModel.Name;
-                    existingSection.DisplayOrder = sectionModel.DisplayOrder;
-                    existingSection.LayoutType = sectionModel.LayoutType;
-                    existingSection.TargetWord = sectionModel.TargetWord;
-                    existingSection.ExecutionTime = sectionModel.ExecutionTime;
-                    existingSection.TotalScore = sectionModel.TotalScore;
-                    existingSection.SkillId = sectionModel.SkillId;
-                    existingSection.ConfigStr = sectionModel.ConfigStr ?? "";
+                    _mapper.Map(sectionModel, existingSection);
+
+                    existingSection.TestConfigId = testConfigId;
                     existingSection.ParentId = parentId;
 
                     _testConfigSectionRepository.Update(existingSection);

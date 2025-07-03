@@ -6,6 +6,7 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -23,10 +24,12 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
     public class SearchTestConfigQueryHandler : IRequestHandler<SearchTestConfigQuery, MethodResult<PagingItemsModel<TestConfigModel>>>
     {
         private readonly ITestConfigRepository _testConfigRepository;
+        private readonly IMapper _mapper;
 
-        public SearchTestConfigQueryHandler(ITestConfigRepository testConfigRepository)
+        public SearchTestConfigQueryHandler(ITestConfigRepository testConfigRepository, IMapper mapper)
         {
             _testConfigRepository = testConfigRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<PagingItemsModel<TestConfigModel>>> Handle(SearchTestConfigQuery request, CancellationToken cancellationToken)
@@ -37,25 +40,7 @@ namespace Fsel.Course.Application.Queries.TestConfigQuery
             var testConfigQuery = _testConfigRepository.Queryable
                                     .Include(x => x.Program)
                                     .Include(x => x.Level)
-                                    .Select(x => new TestConfigModel
-                                    {
-                                        Id = x.Id,
-                                        Name = x.Name,
-                                        Code = x.Code,
-                                        IsActive = x.IsActive,
-                                        CreatedFullName = x.CreatedFullName,
-                                        CreatedDate = x.CreatedDate,
-                                        ProgramId = x.ProgramId,
-                                        ProgramName = x.Program != null ? x.Program.Name : null,
-                                        LevelId = x.LevelId,
-                                        LevelName = x.Level != null ? x.Level.Name : null,
-                                        SkillLevels = x.Level != null && x.Level.SkillLevels != null
-                                                ? x.Level.SkillLevels
-                                                    .Where(z => z.Level != null)
-                                                    .Select(z => z.Level!.Name)
-                                                    .ToList()
-                                                : new List<string?>()
-                                    });
+                                    .Select(x => _mapper.Map<TestConfigModel>(x));
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
