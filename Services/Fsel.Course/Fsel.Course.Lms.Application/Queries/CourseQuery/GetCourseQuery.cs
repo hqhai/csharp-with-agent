@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             if (course == null)
             {
                 course = await _courseRepository.Queryable
-                         .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId))
+                         .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId && x.WorkingStatus == EnumWorkingStatus.Active))
                          .Include(x => x.CourseUnitMockTests)
                          .AsNoTracking()
                          .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
@@ -212,7 +212,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var course = await _courseRepository.Queryable
                           .Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate))
                           .Include(x => x.CourseTeachers)
-                          .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
+                          .Include(x => x.CourseResults.Where(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active))
                           .Where(x => x.Id == id)
                           .AsNoTracking()
                           .FirstOrDefaultAsync();
