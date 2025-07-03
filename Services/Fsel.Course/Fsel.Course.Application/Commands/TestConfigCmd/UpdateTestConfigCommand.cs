@@ -138,26 +138,28 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
         {
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            foreach (var sectionModel in incoming)
+            // clone để tránh "Collection was modified" khi thao tác đệ quy hoặc xóa
+            var incomingClone = incoming.ToList();
+            var existingClone = existing.ToList();
+
+            foreach (var sectionModel in incomingClone)
             {
-                var existingSection = existing.FirstOrDefault(x => x.Id == sectionModel.Id);
+                var existingSection = existingClone.FirstOrDefault(x => x.Id == sectionModel.Id);
 
                 if (existingSection == null)
                 {
-                    // Thêm mới section
                     var newSection = _mapper.Map<TestConfigSection>(sectionModel);
                     newSection.TestConfigId = testConfigId;
                     newSection.ParentId = parentId;
                     _testConfigSectionRepository.Add(newSection);
 
-                    // Thêm mới: chỉ cần truyền newSection.Id là đủ
                     var questionResult = await SyncQuestions(sectionModel.Questions, newSection.Id, cancellationToken);
                     if (!questionResult.IsOK)
                     {
                         questionResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    // Đệ quy cho các section con
+
                     await SyncSections(
                         sectionModel.Childrens ?? new List<UpdateTestConfigSectionCommandModel>(),
                         existing,
@@ -168,22 +170,19 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                 }
                 else
                 {
-                    // Cập nhật section
                     _mapper.Map(sectionModel, existingSection);
-
                     existingSection.TestConfigId = testConfigId;
                     existingSection.ParentId = parentId;
 
                     _testConfigSectionRepository.Update(existingSection);
 
-                    // Cập nhật câu hỏi trong bảng trung gian
                     var questionResult = await SyncQuestions(sectionModel.Questions, existingSection.Id, cancellationToken);
                     if (!questionResult.IsOK)
                     {
                         questionResult.AddErrorBadRequest(questionResult.ErrorMessages);
                         return methodResult;
                     }
-                    // Đệ quy cho các section con
+
                     await SyncSections(
                         sectionModel.Childrens ?? new List<UpdateTestConfigSectionCommandModel>(),
                         existing,
@@ -194,9 +193,9 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
                 }
             }
 
-            // Tìm section bị xóa (so với cha hiện tại)
-            var incomingIds = incoming.Select(x => x.Id).Where(id => id != Guid.Empty).ToHashSet();
-            var toDelete = existing
+            // xử lý xóa an toàn
+            var incomingIds = incomingClone.Select(x => x.Id).Where(id => id != Guid.Empty).ToHashSet();
+            var toDelete = existingClone
                 .Where(x => x.ParentId == parentId && !incomingIds.Contains(x.Id))
                 .ToList();
 
@@ -204,6 +203,7 @@ namespace Fsel.Course.Application.Commands.TestConfigCmd
             {
                 await _testConfigSectionRepository.DeleteListAsync(toDelete);
             }
+
             return methodResult;
         }
 

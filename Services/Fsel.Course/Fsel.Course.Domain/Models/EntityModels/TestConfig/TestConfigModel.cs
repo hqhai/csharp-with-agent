@@ -14,12 +14,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestConfig
         public double ExecutionTime { get; set; }
         public Guid? ProgramId { get; set; }
         public string? ProgramName { get; set; }
-
         public Guid? LevelId { get; set; }
         public string? LevelName { get; set; }
-
         public EnumTestLayoutType LayoutType { get; set; }
-
         public IList<string?>? SkillLevels { get; set; }
         public IList<TestConfigSectionModel>? TestConfigSectionModels { get; set; }
     }
