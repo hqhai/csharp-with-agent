@@ -14,7 +14,6 @@ namespace Fsel.Course.Domain.Entities.V1i1
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
