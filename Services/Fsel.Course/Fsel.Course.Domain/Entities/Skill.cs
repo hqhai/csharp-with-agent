@@ -27,6 +27,5 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonInstruction> LessonInstructions { get; set; } = new List<LessonInstruction>();
         public ICollection<ExtraPracticeExerciseResult> ExtraPracticeExerciseResults { get; set; } = new List<ExtraPracticeExerciseResult>();
         public ICollection<SkillLevel> SkillLevels { get; set; } = new List<SkillLevel>();
-        public ICollection<Section>? Sections { get; set; }
     }
 }

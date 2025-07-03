@@ -9,7 +9,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.TestConfigSections
     {
         public Guid? Id { get; set; }
         public required string Name { get; set; }
-        public string? ConfigStr { get; set; }
+        //public string? ConfigStr { get; set; }
+        public object? ConfigStr { get; set; }
         public int DisplayOrder { get; set; }
         public double? ExecutionTime { get; set; }
         public double? TotalScore { get; set; }

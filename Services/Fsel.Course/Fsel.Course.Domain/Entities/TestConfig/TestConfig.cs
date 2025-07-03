@@ -22,6 +22,6 @@ namespace Fsel.Course.Domain.Entities.TestConfig
         public Category? Program { get; set; }
         public Guid? LevelId { get; set; }
         public Level? Level { get; set; }
-        public ICollection<TestConfigSection>? TestConfigSections { get; set; }
+        public ICollection<TestConfigSection>? TestConfigSections { get; set; } = new List<TestConfigSection>();
     }
 }

@@ -12,6 +12,5 @@ namespace Fsel.Course.Domain.Models.CommandModels.Questions
         public string? Description { get; set; }
         public bool Ungraded { get; set; }
         public object? Config { get; set; }
-        public string? ConfigStr { get; set; }
     }
 }

@@ -23,6 +23,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestConfig
         public Guid? SkillId { get; set; }
         public Skill? Skill { get; set; }
         public IList<TestConfigSectionModel>? Children { get; set; }
-        public IList<CreateQuestionCommandModel>? Questions { get; set; }
+        public IList<QuestionModel>? Questions { get; set; }
     }
 }
