@@ -35,18 +35,27 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
+        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
+        private readonly BaseIntegrationQuery _baseIntegrationQuery;
 
         public LeadsIntegrationQueryHandler(IOrderService orderService,
                                             IHumanRepository humanRepository,
                                             ILmsCourseService lmsCourseService,
                                             ISystemService systemService,
-                                            IMapper mapper)
+                                            IMapper mapper,
+                                            IUserOtpCodeRepository userOtpCodeRepository,
+                                            IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
+                                            BaseIntegrationQuery baseIntegrationQuery)
         {
             _orderService = orderService;
             _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
             _systemService = systemService;
             _mapper = mapper;
+            _userOtpCodeRepository = userOtpCodeRepository;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
+            _baseIntegrationQuery = baseIntegrationQuery;
         }
         public async Task<MethodResult<PagingItemsModel<LeadsIntegrationModel>>> Handle(LeadsIntegrationQuery request, CancellationToken cancellationToken)
         {
@@ -55,10 +64,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             #region Lấy dữ liệu thay đổi trong khoảng thời gian
             List<Guid> distinctUserIds = new List<Guid>();
+            List<OrderSearchModel> orderClients = new List<OrderSearchModel>();
 
             if (string.IsNullOrEmpty(request.Email))
             {
-                var userInteractedInRange = await UserInteractedInRange(request.StartDate, request.EndDate, cancellationToken);
+                var userInteractedInRange = await _baseIntegrationQuery.UserInteractedInRange(request.StartDate, request.EndDate, false, cancellationToken);
                 if (!userInteractedInRange.IsOK || userInteractedInRange.Result == null)
                 {
                     methodResult.AddErrorBadRequest(userInteractedInRange.ErrorMessages);
@@ -66,6 +76,16 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 }
 
                 distinctUserIds = userInteractedInRange.Result.ToList();
+
+                // lấy client
+                var clientUsers = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { StartDate = request.StartDate, EndDate = request.EndDate, Status = true });
+                if (!clientUsers.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(clientUsers.Error);
+                    return methodResult;
+                }
+
+                orderClients = clientUsers.Content?.Result?.ToList() ?? new List<OrderSearchModel>();
             }
             else
             {
@@ -77,28 +97,26 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 }
 
                 distinctUserIds.Add(user.UserId!.Value);
+
+                // lấy client
+                var clientUsers = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
+                if (!clientUsers.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(clientUsers.Error);
+                    return methodResult;
+                }
+
+                orderClients = clientUsers.Content?.Result?.ToList() ?? new List<OrderSearchModel>();
             }
             #endregion
 
             #region Lấy dữ liệu
-            // lấy client
-            var clientUsers = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { StartDate = request.StartDate, EndDate = request.EndDate, Status = true });
-            if (!clientUsers.IsSuccessStatusCode)
-            {
-                methodResult.AddError(clientUsers.Error);
-                return methodResult;
-            }
-
-            var clientUserResults = clientUsers.Content?.Result;
-            if (clientUserResults == null)
-            {
-                methodResult.AddError(clientUsers.Error);
-                return methodResult;
-            }
-
             // bỏ những lead đã thành client
-            var clientUserResultIds = clientUserResults.Select(x => x.UserId).Distinct().ToList();
-            distinctUserIds = distinctUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
+            if (orderClients.Any())
+            {
+                var clientUserResultIds = orderClients.Select(x => x.UserId).Distinct().ToList();
+                distinctUserIds = distinctUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
+            }
 
             // phân trang
             var paging = distinctUserIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
@@ -127,7 +145,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                      .ThenInclude(x => x!.ParentStudents)
                                                      .ThenInclude(x => x.Parent)
                                                      .ThenInclude(x => x!.Human)
-                                                     .Where(x => x.UserId.HasValue && paging.Contains(x.UserId.Value))
+                                                     .WhereBulkContains(paging, x => x.UserId)
                                                      .ToListAsync(cancellationToken);
 
             // lấy thông tin trường học
@@ -150,6 +168,30 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 }).ToList()
             });
             var courseSuggests = courseSuggestResults.Content?.Result;
+
+            // lấy OTP
+            var userOtps = await _userOtpCodeRepository.Queryable
+                                                       .WhereBulkContains(paging, x => x.UserId)
+                                                       .GroupBy(x => x.UserId)
+                                                       .Select(x => new OtpIntegrationModel
+                                                       {
+                                                           UserId = x.Key ?? Guid.Empty,
+                                                           OTPPhoneNumber = x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.SMS) != null ?
+                                                                            x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.SMS)!.OTPCode : default,
+                                                           OTPEmail = x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.Email) != null ?
+                                                                      x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.Email)!.OTPCode : default
+                                                       }).ToListAsync(cancellationToken);
+
+            // lấy sự kiện
+            var studentIds = userCombines.Where(x => x.Student != null).Select(x => x.Student!.Id).ToList();
+            var events = await _studentCompetitionEventsRepository.Queryable
+                                                                  .WhereBulkContains(studentIds, x => x.StudentId)
+                                                                  .GroupBy(x => x.StudentId)
+                                                                  .Select(x => new EventUserIntegrationModel
+                                                                  {
+                                                                      StudentId = x.Key,
+                                                                      EventCode = x.OrderByDescending(c => c.CreatedUserId).FirstOrDefault() != null ? x.OrderByDescending(c => c.CreatedUserId).FirstOrDefault()!.CompetitionEvents!.EventCode : null,
+                                                                  }).ToListAsync(cancellationToken);
             #endregion
 
             #region SetData
@@ -163,12 +205,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
                 if (userCombines != null && userCombines.Any())
                 {
-                    SetUserData(leadsIntegration, userCombines, out isCutOff);
+                    _baseIntegrationQuery.SetUserData(leadsIntegration, userCombines, out isCutOff);
                 }
 
                 if (ptTestResults != null && ptTestResults.Any())
                 {
-                    SetPalcementTestData(leadsIntegration, ptTestResults);
+                    _baseIntegrationQuery.SetPalcementTestData(leadsIntegration, ptTestResults);
                 }
 
                 if (orderResults != null && orderResults.Any())
@@ -183,22 +225,32 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
                 if (schools != null && schools.Any())
                 {
-                    SetSchoolData(leadsIntegration, schools);
+                    _baseIntegrationQuery.SetSchoolData(leadsIntegration, schools);
                 }
 
                 if (featureAccessTimes != null && featureAccessTimes.Any())
                 {
-                    SetFeatureAccessTimeData(leadsIntegration, featureAccessTimes);
+                    _baseIntegrationQuery.SetFeatureAccessTimeData(leadsIntegration, featureAccessTimes);
                 }
 
                 if (infoCourses != null && infoCourses.Any())
                 {
-                    SetCourseData(leadsIntegration, infoCourses);
+                    _baseIntegrationQuery.SetCourseData(leadsIntegration, infoCourses);
                 }
 
                 if (courseSuggests != null && courseSuggests.Any())
                 {
-                    SetCourseSuggestData(leadsIntegration, courseSuggests);
+                    _baseIntegrationQuery.SetCourseSuggestData(leadsIntegration, courseSuggests);
+                }
+
+                if (userOtps != null && userOtps.Any())
+                {
+                    _baseIntegrationQuery.SetOtpData(leadsIntegration, userOtps);
+                }
+
+                if (events != null && events.Any() && userCombines != null && userCombines.Any())
+                {
+                    _baseIntegrationQuery.SetEventData(leadsIntegration, userCombines, events);
                 }
             };
             #endregion
@@ -207,102 +259,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             methodResult.Result = new PagingItemsModel<LeadsIntegrationModel>(leadsIntegrations, request, distinctUserIds.Count);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private async Task<MethodResult<IList<Guid>>> UserInteractedInRange(DateTime startDate, DateTime endDate, CancellationToken cancellationToken)
-        {
-            MethodResult<IList<Guid>> methodResult = new MethodResult<IList<Guid>>();
-
-            var courseIntegrationHasTimeQueryModel = new CourseIntegrationQueryModel
-            {
-                StartDate = startDate,
-                EndDate = endDate
-            };
-
-            // lấy Pt có thay đổi trong khoảng thời gian
-            var ptTestHasTimes = await _lmsCourseService.GetPalcementTestResults(courseIntegrationHasTimeQueryModel);
-            if (!ptTestHasTimes.IsSuccessStatusCode)
-            {
-                methodResult.AddError(ptTestHasTimes.Error);
-                return methodResult;
-            }
-            var ptTestResultHasTimes = ptTestHasTimes.Content?.Result;
-            if (ptTestResultHasTimes == null)
-            {
-                methodResult.AddError(ptTestHasTimes.Error);
-                return methodResult;
-            }
-            var userPtTestHasTimeIds = ptTestResultHasTimes.Select(x => x.UserId).Distinct().ToList();
-
-            // lấy unit lesson có thay đổi trong khoảng thời gian
-            var unitHasTimes = await _lmsCourseService.GetUnitResults(courseIntegrationHasTimeQueryModel);
-            if (!unitHasTimes.IsSuccessStatusCode)
-            {
-                methodResult.AddError(unitHasTimes.Error);
-                return methodResult;
-            }
-            var unitResultHasTimes = unitHasTimes.Content?.Result;
-            if (unitResultHasTimes == null)
-            {
-                methodResult.AddError(unitHasTimes.Error);
-                return methodResult;
-            }
-            var userUnitResultHasTimeIds = unitResultHasTimes.Select(x => x.UserId).Distinct().ToList();
-
-            // lấy order có thay đổi trong khoảng thời gian
-            var orderHasTimes = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { StartDate = startDate, EndDate = endDate, Status = false });
-            if (!orderHasTimes.IsSuccessStatusCode)
-            {
-                methodResult.AddError(orderHasTimes.Error);
-                return methodResult;
-            }
-            var orderResultHasTimes = orderHasTimes.Content?.Result;
-            if (orderResultHasTimes == null)
-            {
-                methodResult.AddError(orderHasTimes.Error);
-                return methodResult;
-            }
-            var userOrderIds = orderResultHasTimes.Select(x => x.UserId).Distinct().ToList();
-
-            //lấy User đăng ký trong khoảng thời gian
-            var users = await _humanRepository.Queryable
-                                              .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= startDate && x.CreatedDate <= endDate) : (x.UpdatedDate.Value >= startDate && x.UpdatedDate.Value <= endDate))
-                                              .ToListAsync(cancellationToken);
-            if (users == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(users));
-                return methodResult;
-            }
-            var userIdentityHasTimeIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
-
-            // hợp nhất UserId chưa có order
-            var userIds = userIdentityHasTimeIds.Concat(userPtTestHasTimeIds).Concat(userUnitResultHasTimeIds).Concat(userOrderIds).ToList();
-
-
-            methodResult.Result = userIds.Distinct().ToList();
-            return methodResult;
-        }
-
-        private static void SetUserData(LeadsIntegrationModel leadsIntegration, IList<Human> humans, out bool isCutOff)
-        {
-            var human = humans.FirstOrDefault(x => x.UserId == leadsIntegration.UserId);
-            if (human != null && human.User != null && (human.User.EmailConfirmed || human.User.PhoneNumberConfirmed))
-            {
-                leadsIntegration.Status = EnumIntegrationStatus.Confirm;
-            }
-
-            isCutOff = human?.User?.Status == EnumUserStatus.Disable;
-        }
-
-        private static void SetPalcementTestData(LeadsIntegrationModel leadsIntegration, IList<PlacementTestResultModel> placementTestResults)
-        {
-            var ptTestResult = placementTestResults?.FirstOrDefault(x => x.UserId == leadsIntegration.UserId);
-            if (ptTestResult != null)
-            {
-                leadsIntegration.PTLevel = ptTestResult.Level;
-                leadsIntegration.PlacementTestResults = ptTestResult.PlacementTestResults;
-                leadsIntegration.Status = ptTestResult.Status == "Done" ? EnumIntegrationStatus.PTDone : EnumIntegrationStatus.PTProgress;
-            }
         }
 
         private static void SetOrderData(LeadsIntegrationModel leadsIntegration, IList<OrderSearchModel> orders)
@@ -368,32 +324,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             {
                 leadsIntegration.Status = EnumIntegrationStatus.Expired;
             }
-        }
-
-        private static void SetSchoolData(LeadsIntegrationModel leadsIntegration, IList<SchoolModel> schools)
-        {
-            var school = schools.FirstOrDefault(x => x.Id == leadsIntegration.SchoolId);
-            leadsIntegration.LongPathSchool = school?.LongPath;
-            leadsIntegration.LongPathLocation = school?.Location?.LongPath;
-        }
-
-        private static void SetFeatureAccessTimeData(LeadsIntegrationModel leadsIntegration, IList<GetFeatureAccessTimeQueryModel> featureAccessTimes)
-        {
-            var featureAccessTime = featureAccessTimes.FirstOrDefault(x => x.CreatedUserId == leadsIntegration.UserId);
-            leadsIntegration.LastDate = featureAccessTime?.LastVisited;
-            leadsIntegration.AccessTime = featureAccessTime?.AccessTime;
-        }
-
-        private static void SetCourseData(LeadsIntegrationModel leadsIntegration, IList<InfoCourseIntegrationModel> infoCourses)
-        {
-            var infoCourseUsers = infoCourses.Where(x => x.UserId == leadsIntegration.UserId).Where(x => x.InfoCourseIntegrationDetails != null).SelectMany(x => x.InfoCourseIntegrationDetails!).ToList();
-            leadsIntegration.CourseIntegrations = infoCourseUsers;
-        }
-
-        private static void SetCourseSuggestData(LeadsIntegrationModel leadsIntegration, IList<CourseSuggestUsersModel> courseSuggestUsers)
-        {
-            var courseSuggestUser = courseSuggestUsers.FirstOrDefault(x => x.UserId == leadsIntegration.UserId);
-            leadsIntegration.CourseSuggests = courseSuggestUser?.CourseSuggestConfigs;
         }
     }
 }
