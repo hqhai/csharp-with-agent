@@ -11,6 +11,7 @@ using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Fsel.Course.Domain.Entities.TestConfig;
 using Fsel.Course.Domain.Entities.V1i1;
 
 namespace Fsel.Course.Infrastructure
@@ -136,7 +137,9 @@ namespace Fsel.Course.Infrastructure
         #endregion Report
 
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
-
+        public DbSet<TestConfig> TestConfigs { get; set; }
+        public DbSet<TestConfigSection> TestConfigSections { get; set; }
+        public DbSet<TestConfigSectionQuestion> TestConfigSectionQuestions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);

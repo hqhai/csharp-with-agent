@@ -1,12 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Shared.Enums;
-
 namespace Fsel.Course.Domain.Models.CommandModels.Questions
 {
-    public class CreateQuestionCommandModel
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
+
+    public class UpdateQuestionCommandModel : BaseCommandModel
     {
-        public Guid? Id { get; set; }
         public EnumQuestionType QuestionType { get; set; }
         public string? Explanation { get; set; }
         public string? Description { get; set; }
