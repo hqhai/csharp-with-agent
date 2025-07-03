@@ -79,5 +79,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/report/aggregate-data-students-in-event")]
         Task<IApiResponse<MethodResult<IList<AggregateDataLearnStudentsInEventModel>>>> AggregateDataStudentsInEvent([Body] AggregateDataLearnStudentsInEventQueryModel students);
+
+        [Post("/v1/course-integration/info-course-integration")]
+        Task<IApiResponse<MethodResult<IList<InfoCourseIntegrationModel>>>> GetInfoCourseIntegration([FromBody] CourseIntegrationQueryModel query);
     }
 }

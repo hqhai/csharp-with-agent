@@ -3,7 +3,6 @@
 namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
 {
     using System.Text.Json.Serialization;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 

@@ -41,6 +41,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
         public string? ReferralCode { get; set; }
 
         public string? Voucher { get; set; }
+
+        public bool IsTrial { get; set; }
     }
 
     public class VoucherIntegrationModel

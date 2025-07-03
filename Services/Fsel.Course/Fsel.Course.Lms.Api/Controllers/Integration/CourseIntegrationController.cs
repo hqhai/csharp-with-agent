@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Integration
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Course.Domain.Models.EntityModels.IntegrationModels;
     using Fsel.Course.Lms.Application.Queries.IntegrationQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
@@ -42,6 +43,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Integration
         [ProducesResponseType(typeof(MethodResult<IList<object>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetIntegrationUnitResults([FromBody] IntegrationUnitResultsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Integration Info Course
+        /// </summary>
+        [HttpPost("info-course-integration")]
+        [ProducesResponseType(typeof(MethodResult<IList<InfoCourseIntegrationModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetInfoCourseIntegration([FromBody] GetInfoCourseIntegrationQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

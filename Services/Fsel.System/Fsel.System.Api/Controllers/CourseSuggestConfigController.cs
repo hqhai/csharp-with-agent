@@ -13,10 +13,10 @@ namespace Fsel.System.Api.Controllers
     using Fsel.System.Application.Queries.CourseSuggestConfigQuery;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
+    using Fsel.System.Domain.Models.EntityModels.IntegrationModels;
     using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Refit;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -120,6 +120,18 @@ namespace Fsel.System.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
         public async Task<IActionResult> CheckCourseSuggetConfigByStudent([FromQuery] CheckCourseSuggetConfigByStudentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Course Suggest Config
+        /// </summary>
+        [HttpPost("level-suggestion-users")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseSuggestUsersModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseSuggestByUserIds([FromBody] GetCourseSuggestByUserIdsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
