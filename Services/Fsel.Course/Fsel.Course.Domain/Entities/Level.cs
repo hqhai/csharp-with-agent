@@ -29,5 +29,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<PlacementTest> PlacementTests { get; set; } = new List<PlacementTest>();
         public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
         public ICollection<Video> Videos { get; set; } = new List<Video>();
+        public ICollection<Unit> Units { get; set; } = new List<Unit>();
     }
 }

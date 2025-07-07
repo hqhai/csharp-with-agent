@@ -5,10 +5,9 @@ using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Course.Infrastructure.Common;
+using Fsel.Course.Infrastructure.Common.UnitHelper;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Unit = Fsel.Course.Domain.Entities.Unit;
 
 namespace Fsel.Course.Application.Commands.UnitCmd
 {
@@ -20,35 +19,34 @@ namespace Fsel.Course.Application.Commands.UnitCmd
     {
         private readonly IUnitRepository _unitRepository;
         private readonly IMapper _mapper;
-        private readonly UnitHelper _unitHelper;
 
-        public CreateUnitCommandHandler(IUnitRepository unitRepository
-            , UnitHelper unitHelper
-            , IMapper mapper)
+        public CreateUnitCommandHandler(IUnitRepository unitRepository, IMapper mapper)
         {
-            _unitHelper = unitHelper;
             _unitRepository = unitRepository;
             _mapper = mapper;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(CreateUnitCommand request, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
-            var method = await _unitHelper.Validate(request);
-            if (!method.IsOK)
+            var methodResult = new MethodResult<UnitModel>();
+            var validation = await UnitCreateValidation.Create(request)
+                                    .ValidateRequestData()
+                                    .ValidateDuplicateUnit(_unitRepository);
+
+            var validationResult = validation.GetResult();
+            if (validationResult.ErrorMessages.Any())
             {
-                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(validationResult.ErrorMessages);
                 return methodResult;
             }
 
-            Unit unit = _mapper.Map<Unit>(request);
-            _unitHelper.SetUnitData(unit, request);
+            var unit = UnitFactory.Create(request).Build();
             if (!unit.IsValid())
             {
                 methodResult.AddErrorBadRequest(unit.ErrorMessages);
                 return methodResult;
             }
+
             await _unitRepository.ExecuteTransactionAsync(async () =>
             {
                 unit = _unitRepository.Add(unit);

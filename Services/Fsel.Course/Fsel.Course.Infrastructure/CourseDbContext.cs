@@ -102,6 +102,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<CategoryTestBank> CategoryTestBanks { get; set; }
         public DbSet<LessonModule> LessonModules { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<UnitModule> UnitModules { get; set; }
+
 
         #region Report
 
@@ -224,6 +226,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new CategoryTestBankEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonModuleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DocumentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitModuleEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
