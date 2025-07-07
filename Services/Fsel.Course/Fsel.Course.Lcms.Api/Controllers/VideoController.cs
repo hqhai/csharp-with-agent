@@ -90,5 +90,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteVideoCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Video version
+        /// </summary>
+        [HttpGet("get-version")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<VideoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetVersionVideo([FromQuery] GetVideoVersionQuery query)
+        {
+            MethodResult<PagingItemsModel<VideoModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

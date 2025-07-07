@@ -3,16 +3,15 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Entities.FlowConfigs;
+using Fsel.Course.Domain.Entities.TestConfig;
+using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Fsel.Course.Domain.Entities.TestConfig;
-using Fsel.Course.Domain.Entities.V1i1;
 
 namespace Fsel.Course.Infrastructure
 {
@@ -106,33 +105,33 @@ namespace Fsel.Course.Infrastructure
 
         #region Report
 
-        public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
-        public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
-        public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
-        public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
-        public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
-        public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
-        public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
-        public DbSet<UnitDoneLearningProgressIeltsModel> UnitDoneLearningProgressIelts { get; set; }
-        public DbSet<UnitDoneLearningProgressAcademicModel> UnitDoneLearningProgressAcademics { get; set; }
-        public DbSet<LessonDoneLearningProgressIeltsModel> LessonDoneLearningProgressIelts { get; set; }
-        public DbSet<LessonDoneLearningProgressAcademicModel> LessonDoneLearningProgressAcademics { get; set; }
-        public DbSet<TotalLearningModel> TotalLearnings { get; set; }
-        public DbSet<RateLearningModel> RateLearnings { get; set; }
-        public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
-        public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
-        public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
-        public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
-        public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
-        public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
+        //public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
+        //public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
+        //public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
+        //public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
+        //public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
+        //public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
+        //public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
+        //public DbSet<UnitDoneLearningProgressIeltsModel> UnitDoneLearningProgressIelts { get; set; }
+        //public DbSet<UnitDoneLearningProgressAcademicModel> UnitDoneLearningProgressAcademics { get; set; }
+        //public DbSet<LessonDoneLearningProgressIeltsModel> LessonDoneLearningProgressIelts { get; set; }
+        //public DbSet<LessonDoneLearningProgressAcademicModel> LessonDoneLearningProgressAcademics { get; set; }
+        //public DbSet<TotalLearningModel> TotalLearnings { get; set; }
+        //public DbSet<RateLearningModel> RateLearnings { get; set; }
+        //public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
+        //public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
+        //public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
+        //public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
+        //public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
+        //public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
 
-        public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
-        public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
-        public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
+        //public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
+        //public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
+        //public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
 
-        public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
-        public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
-        public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
+        //public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
+        //public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
+        //public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
 
         #endregion Report
 
@@ -140,6 +139,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<TestConfig> TestConfigs { get; set; }
         public DbSet<TestConfigSection> TestConfigSections { get; set; }
         public DbSet<TestConfigSectionQuestion> TestConfigSectionQuestions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
