@@ -63,10 +63,9 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
             ArgumentNullException.ThrowIfNull(request);
 
             var lesson = await (from l in _lessonRepository.Queryable
-                                join li in _lessonInstructionRepository.Queryable on l.Id equals li.LessonId
                                 join lm in _lessonModuleRepository.Queryable on l.Id equals lm.LessonId
                                 where l.Status != Shared.Enums.EnumStatus.Archive
-                                group new { lm, li } by l into g
+                                group new { lm } by l into g
                                 select new LessonModel
                                 {
                                     Id = g.Key.Id,

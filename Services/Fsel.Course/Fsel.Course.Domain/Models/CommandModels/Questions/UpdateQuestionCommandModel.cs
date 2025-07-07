@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.Questions
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
     public class UpdateQuestionCommandModel

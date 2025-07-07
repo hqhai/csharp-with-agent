@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using AutoMapper;
+using Amazon.Runtime.Internal.Util;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
@@ -9,6 +10,7 @@ using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
@@ -17,15 +19,19 @@ namespace Fsel.Course.Infrastructure.Repositories
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
+        private readonly ILogger<VideoRepository> _logger;
 
         public VideoRepository(CourseDbContext dbContext,
             AuthContext authContext,
             ILessonResultRepository lessonResultRepository,
-            AutoMapper.IMapper mapper, ILessonRepository lessonRepository) : base(dbContext, authContext, mapper)
+            AutoMapper.IMapper mapper, 
+            ILessonRepository lessonRepository, 
+            ILogger<VideoRepository> logger) : base(dbContext, authContext, mapper)
         {
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
             _lessonRepository = lessonRepository;
+            _logger = logger;
         }
 
         public async Task<bool> IsVideoUsed(Guid? id)
@@ -78,6 +84,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<VideoModel?> GetIncludeAllAsync(Guid? id)
         {
+            var video = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
+            _logger.LogError("Invalid column name QuestionName", video);
             try
             {
                 return await Queryable
@@ -129,8 +137,9 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     }).ToList(),
                                 }).FirstOrDefaultAsync();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError("Invalid column name QuestionName", e);
                 throw;
             }
         }

@@ -1,0 +1,319 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Application.Commands.TestConfigCmd
+{
+    using System.Linq;
+    using System.Text.RegularExpressions;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.TestConfig;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.CommandModels.Questions;
+    using Fsel.Course.Domain.Models.CommandModels.TestConfigs;
+    using Fsel.Course.Domain.Models.CommandModels.TestConfigSections;
+    using Fsel.Course.Domain.Models.EntityModels.TestConfig;
+    using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums.ErrorCodes;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class UpdateTestConfigCommand : UpdateTestConfigCommandModel, IRequest<MethodResult<TestConfigModel>>
+    {
+    }
+
+    public class UpdateTestConfigCommandHandler : IRequestHandler<UpdateTestConfigCommand, MethodResult<TestConfigModel>>
+    {
+        private readonly IMapper _mapper;
+        private readonly ITestConfigRepository _testConfigRepository;
+        private readonly ITestConfigSectionRepository _testConfigSectionRepository;
+        private readonly ITestConfigSectionQuestionRepository _testConfigSectionQuestionRepository;
+        private readonly IQuestionRepository _questionRepository;
+        private readonly QuestionConverter _questionConverter;
+
+        public UpdateTestConfigCommandHandler(IMapper mapper
+            , ITestConfigRepository testConfigRepository
+            , ITestConfigSectionRepository testConfigSectionRepository
+            , ITestConfigSectionQuestionRepository testConfigSectionQuestionRepository
+            , IQuestionRepository questionRepository
+            , QuestionConverter questionConverter)
+        {
+            _mapper = mapper;
+            _testConfigRepository = testConfigRepository;
+            _testConfigSectionRepository = testConfigSectionRepository;
+            _testConfigSectionQuestionRepository = testConfigSectionQuestionRepository;
+            _questionRepository = questionRepository;
+            _questionConverter = questionConverter;
+        }
+
+        public async Task<MethodResult<TestConfigModel>> Handle(UpdateTestConfigCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<TestConfigModel>();
+
+            var testConfig = await _testConfigRepository.GetIncludeByIdAsync(request.Id);
+            if (testConfig == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
+                return methodResult;
+            }
+
+            // Validate
+            var testNameRegex = new Regex(@"^[a-zA-Z0-9_ ]{1,150}$");
+            var testCodeRegex = new Regex(@"^[a-zA-Z0-9_]{1,150}$");
+
+            if (string.IsNullOrEmpty(request.Name) || !testNameRegex.IsMatch(request.Name))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NameNotValid), nameof(request.Name), request.Name);
+                return methodResult;
+            }
+
+            if (string.IsNullOrEmpty(request.Code) || !testCodeRegex.IsMatch(request.Code))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.CodeNotValid), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+
+            var codeExists = await _testConfigRepository.Queryable
+                .AnyAsync(x => x.Code == request.Code.Trim() && x.Id != request.Id, cancellationToken);
+
+            if (codeExists)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+
+            _mapper.Map(request, testConfig);
+            if (!testConfig.IsValid())
+            {
+                methodResult.AddErrorBadRequest(testConfig.ErrorMessages);
+                return methodResult;
+            }
+
+            // Bắt đầu transaction
+            await _testConfigRepository.ExecuteTransactionAsync(async () =>
+            {
+                // Cập nhật TestConfig
+                _testConfigRepository.Update(testConfig);
+
+                // Lấy tất cả sections hiện tại
+                var existingSections = await _testConfigSectionRepository
+                    .Queryable
+                    .Where(x => x.TestConfigId == testConfig.Id)
+                    .ToListAsync(cancellationToken);
+
+                // Xử lý sync section
+                var incomingSections = request.TestConfigSections ?? new List<UpdateTestConfigSectionCommandModel>();
+                // Validate trùng ID trong cây section
+                var seenIds = new HashSet<Guid>();
+                if (HasDuplicateSectionIds(incomingSections, seenIds, out var errorId))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumTestConfigErrorCode.SectionIdDuplicate), "testConfigSections", errorId);
+                    return methodResult;
+                }
+                var sectionResult = await SyncSections(incomingSections, existingSections, testConfig.Id, null, cancellationToken);
+                if (!sectionResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(sectionResult.ErrorMessages);
+                    return methodResult;
+                }
+                await _testConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = _mapper.Map<TestConfigModel>(testConfig);
+                return methodResult;
+            });
+            return methodResult;
+        }
+
+        private async Task<VoidMethodResult> SyncSections(
+            IList<UpdateTestConfigSectionCommandModel> incoming,
+            List<TestConfigSection> existing,
+            Guid testConfigId,
+            Guid? parentId,
+            CancellationToken cancellationToken)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            // clone để tránh "Collection was modified" khi thao tác đệ quy hoặc xóa
+            var incomingClone = incoming.ToList();
+            var existingClone = existing.ToList();
+
+            foreach (var sectionModel in incomingClone)
+            {
+                var existingSection = existingClone.FirstOrDefault(x => x.Id == sectionModel.Id);
+
+                if (existingSection == null)
+                {
+                    var newSection = _mapper.Map<TestConfigSection>(sectionModel);
+                    newSection.TestConfigId = testConfigId;
+                    newSection.ParentId = parentId;
+                    _testConfigSectionRepository.Add(newSection);
+
+                    var questionResult = await SyncQuestions(sectionModel.Questions, newSection.Id, cancellationToken);
+                    if (!questionResult.IsOK)
+                    {
+                        questionResult.AddErrorBadRequest(questionResult.ErrorMessages);
+                        return methodResult;
+                    }
+
+                    await SyncSections(
+                        sectionModel.Childrens ?? new List<UpdateTestConfigSectionCommandModel>(),
+                        existing,
+                        testConfigId,
+                        newSection.Id,
+                        cancellationToken
+                    );
+                }
+                else
+                {
+                    _mapper.Map(sectionModel, existingSection);
+                    existingSection.TestConfigId = testConfigId;
+                    existingSection.ParentId = parentId;
+
+                    _testConfigSectionRepository.Update(existingSection);
+
+                    var questionResult = await SyncQuestions(sectionModel.Questions, existingSection.Id, cancellationToken);
+                    if (!questionResult.IsOK)
+                    {
+                        questionResult.AddErrorBadRequest(questionResult.ErrorMessages);
+                        return methodResult;
+                    }
+
+                    await SyncSections(
+                        sectionModel.Childrens ?? new List<UpdateTestConfigSectionCommandModel>(),
+                        existing,
+                        testConfigId,
+                        existingSection.Id,
+                        cancellationToken
+                    );
+                }
+            }
+
+            // xử lý xóa an toàn
+            var incomingIds = incomingClone.Select(x => x.Id).Where(id => id != Guid.Empty).ToHashSet();
+            var toDelete = existingClone
+                .Where(x => x.ParentId == parentId && !incomingIds.Contains(x.Id))
+                .ToList();
+
+            if (toDelete.Any())
+            {
+                await _testConfigSectionRepository.DeleteListAsync(toDelete);
+            }
+
+            return methodResult;
+        }
+
+        private async Task<VoidMethodResult> SyncQuestions(
+    IList<CreateQuestionCommandModel>? incomingQuestions,
+    Guid sectionId,
+    CancellationToken cancellationToken)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            if (incomingQuestions == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumTestConfigErrorCode.NullObject), "Questions", sectionId);
+
+                return methodResult;
+            }
+
+            // 1. Lấy các SectionQuestion
+            var existingLinks = await _testConfigSectionQuestionRepository
+                .Queryable
+                .Where(x => x.TestConfigSectionId == sectionId)
+                .ToListAsync(cancellationToken);
+
+            var incomingQuestionIds = incomingQuestions
+                .Where(x => x.Id != Guid.Empty)
+                .Select(x => x.Id)
+                .ToHashSet();
+
+            foreach (var qModel in incomingQuestions)
+            {
+                if (!qModel.Id.HasValue || qModel.Id == Guid.Empty)
+                {
+                    // 2.1 Thêm mới Question và SectionQuestion
+                    var newQuestion = _mapper.Map<Question>(qModel);
+                    var method = _questionConverter.HandleQuestion(newQuestion);
+                    if (!method.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(method.ErrorMessages);
+                        return methodResult;
+                    }
+                    if (method.Result != null)
+                    {
+                        var qResult = _questionRepository.Add(method.Result);
+                        var newSectionQuestion = new TestConfigSectionQuestion
+                        {
+                            TestConfigSectionId = sectionId,
+                            QuestionId = qResult.Id,
+                        };
+                        _testConfigSectionQuestionRepository.Add(newSectionQuestion);
+                    }
+                }
+                else
+                {
+                    var question = await _questionRepository.GetByIdAsync(qModel.Id.Value);
+                    if (question != null)
+                    {
+                        _mapper.Map(qModel, question);
+                        _questionRepository.Update(question);
+                    }
+                }
+            }
+
+            // 3. Xóa các liên kết không còn trong danh sách mới
+            var toRemove = existingLinks
+                .Where(link => !incomingQuestionIds.Contains(link.QuestionId))
+                .ToList();
+
+            if (toRemove.Any())
+            {
+                await _testConfigSectionQuestionRepository.DeleteListAsync(toRemove);
+            }
+
+            return methodResult;
+        }
+
+        private bool HasDuplicateSectionIds(
+            IList<UpdateTestConfigSectionCommandModel> sections,
+            HashSet<Guid> seenIds,
+            out string? errorSectionId)
+        {
+            foreach (var section in sections)
+            {
+                if (section.Id != Guid.Empty && section.Id != null)
+                {
+                    if (seenIds.Contains((Guid)section.Id))
+                    {
+                        errorSectionId = section.Id.ToString();
+                        return true;
+                    }
+
+                    if (section.Id == section.ParentId)
+                    {
+                        errorSectionId = $"SectionId {section.Id} cannot be its own parent.";
+                        return true;
+                    }
+
+                    seenIds.Add((Guid)section.Id);
+                }
+
+                if (section.Childrens != null && section.Childrens.Count > 0)
+                {
+                    if (HasDuplicateSectionIds(section.Childrens, seenIds, out errorSectionId))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            errorSectionId = null;
+            return false;
+        }
+    }
+}

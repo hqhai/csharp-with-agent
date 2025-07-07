@@ -126,6 +126,8 @@ builder.Services.AddScoped<IStepFlowRepository, StepFlowRepository>();
 builder.Services.AddScoped<IActionFlowRepository, ActionFlowRepository>();
 builder.Services.AddScoped<ILessonModuleRepository, LessonModuleRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+builder.Services.AddScoped<ITestConfigRepository, TestConfigRepository>();
+builder.Services.AddScoped<ITestConfigSectionRepository, TestConfigSectionRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
