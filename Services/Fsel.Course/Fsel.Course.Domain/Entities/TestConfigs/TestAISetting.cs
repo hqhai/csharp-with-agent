@@ -1,8 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Entities
+namespace Fsel.Course.Domain.Entities.TestConfigs
 {
-    using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
@@ -10,11 +9,8 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Models.CommandModels.AiGradeSetting;
 
-    public class MockTestAISetting : Entity
+    public class TestAISetting : Entity
     {
-        public string? SystemRoleAlConfig { get; set; }
-        public string? UserAlConfig { get; set; }
-
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SettingModel { get; set; }
 
@@ -33,24 +29,24 @@ namespace Fsel.Course.Domain.Entities
         [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingPresence { get; set; }
 
-        public Guid? SectionId { get; set; }
-
+        public string? SystemRoleAlConfig { get; set; }
+        public string? UserAlConfig { get; set; }
         public string? Task { get; set; }
 
         public string? PromptStr { get; set; }
 
         [NotMapped]
-        public IList<MockTestPromptModel>? Prompts
+        public IList<TestPromptModel>? Prompts
         {
             get
             {
-                return ConvertHelper.Deserialize<IList<MockTestPromptModel>>(PromptStr);
+                return ConvertHelper.Deserialize<IList<TestPromptModel>>(PromptStr);
             }
             set { PromptStr = ConvertHelper.Serialize(value); }
         }
 
-        public Section? Section { get; set; }
-
-        public IList<MockTestAICriteriaSetting>? MockTestAICriteriaSettings { get; set; }
+        public Guid TestSectionId { get; set; }
+        public TestSection? TestSection { get; set; }
+        public ICollection<TestAICriteriaSetting> TestAICriteriaSettings { get; set; } = new List<TestAICriteriaSetting>();
     }
 }

@@ -89,10 +89,9 @@ builder.Services.AddScoped<IStepFlowRepository, StepFlowRepository>();
 builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
 builder.Services.AddScoped<ILessonModuleRepository, LessonModuleRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
-builder.Services.AddScoped<ITestConfigRepository, TestConfigRepository>();
-builder.Services.AddScoped<ITestConfigSectionRepository, TestConfigSectionRepository>();
-builder.Services.AddScoped<ITestConfigSectionQuestionRepository, TestConfigSectionQuestionRepository>();
-
+builder.Services.AddScoped<ITestRepository, TestRepository>();
+builder.Services.AddScoped<ITestSectionRepository, TestSectionRepository>();
+builder.Services.AddScoped<ITestSectionQuestionRepository, TestConfigSectionQuestionRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -108,7 +107,6 @@ builder.Services.AddScoped<ProgramConverter>();
 builder.Services.AddScoped<LessonConverter>();
 
 // Helper
-builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

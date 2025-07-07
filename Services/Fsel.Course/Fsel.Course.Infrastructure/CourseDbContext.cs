@@ -3,16 +3,16 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Entities.FlowConfigs;
+using Fsel.Course.Domain.Entities.TestConfigs;
+using Fsel.Course.Domain.Entities.V1i1;
+using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Fsel.Course.Domain.Entities.TestConfig;
-using Fsel.Course.Domain.Entities.V1i1;
 
 namespace Fsel.Course.Infrastructure
 {
@@ -137,9 +137,12 @@ namespace Fsel.Course.Infrastructure
         #endregion Report
 
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
-        public DbSet<TestConfig> TestConfigs { get; set; }
-        public DbSet<TestConfigSection> TestConfigSections { get; set; }
-        public DbSet<TestConfigSectionQuestion> TestConfigSectionQuestions { get; set; }
+        public DbSet<Test> Tests { get; set; }
+        public DbSet<TestSection> TestSections { get; set; }
+        public DbSet<TestSectionQuestion> TestSectionQuestions { get; set; }
+        public DbSet<TestAICriteriaSetting> TestAICriteriaSettings { get; set; }
+        public DbSet<TestAISetting> TestAISettings { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
@@ -224,6 +227,11 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new CategoryTestBankEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonModuleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DocumentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestAICriteriaSettingEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestAISettingEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestSectionQuestionEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

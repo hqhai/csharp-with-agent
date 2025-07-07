@@ -15,6 +15,6 @@ namespace Fsel.Course.Domain.Entities.V1i1
         public int OpenOrder { get; set; }
         public Unit? Unit { get; set; }
         public Guid UnitId { get; set; }
-        public Guid? ObjectId { get; set; }
+        public Guid OriginalId { get; set; }
     }
 }

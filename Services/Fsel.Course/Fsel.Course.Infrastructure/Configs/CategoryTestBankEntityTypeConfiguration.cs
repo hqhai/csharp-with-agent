@@ -5,7 +5,6 @@ namespace Fsel.Course.Infrastructure.Configs
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,6 +23,11 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.Category)
                    .WithMany(b => b.CategoryTestBanks)
                    .HasForeignKey(p => p.ProgramId)
+                   .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(a => a.Test)
+                   .WithMany(b => b.CategoryTestBanks)
+                   .HasForeignKey(p => p.TestId)
                    .OnDelete(DeleteBehavior.Cascade);
         }
     }

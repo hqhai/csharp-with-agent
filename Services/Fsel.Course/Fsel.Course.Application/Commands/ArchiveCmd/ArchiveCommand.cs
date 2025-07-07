@@ -12,6 +12,7 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
     using Fsel.Course.Domain.Entities;
     using Microsoft.AspNetCore.Http;
     using Fsel.Shared.Enums;
+    using Fsel.Course.Domain.Entities.TestConfigs;
 
     public class ArchiveCommand : IRequest<MethodResult<bool>>
     {
@@ -30,8 +31,18 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IVideoRepository _videoRepository;
+        private readonly ITestRepository _testRepository;
 
-        public ArchiveCommandHandler(ICourseRepository courseRepository, ILessonRepository lessonRepository, IUnitRepository unitRepository, IHomeWorkRepository homeWorkRepository, IExtraPracticeRepository extraPracticeRepository, IMockTestRepository mockTestRepository, IFinalTestRepository finalTestRepository, IPlacementTestRepository placementTestRepository, IVideoRepository videoRepository)
+        public ArchiveCommandHandler(ICourseRepository courseRepository,
+            ILessonRepository lessonRepository,
+            IUnitRepository unitRepository,
+            IHomeWorkRepository homeWorkRepository,
+            IExtraPracticeRepository extraPracticeRepository,
+            IMockTestRepository mockTestRepository,
+            IFinalTestRepository finalTestRepository,
+            IPlacementTestRepository placementTestRepository,
+            IVideoRepository videoRepository,
+            ITestRepository testRepository)
         {
             _courseRepository = courseRepository;
             _lessonRepository = lessonRepository;
@@ -42,6 +53,7 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
             _finalTestRepository = finalTestRepository;
             _placementTestRepository = placementTestRepository;
             _videoRepository = videoRepository;
+            _testRepository = testRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ArchiveCommand request, CancellationToken cancellationToken)
@@ -88,6 +100,10 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
             else if (request.ObjectName == nameof(PlacementTest))
             {
                 await ArchivePlacementTests(request.Ids, cancellationToken);
+            }
+            else if (request.ObjectName == nameof(Test))
+            {
+                await ArchiveTests(request.Ids, cancellationToken);
             }
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -197,6 +213,17 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
                 placementTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
                 _placementTestRepository.UpdateList(placementTests);
                 await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private async Task ArchiveTests(IList<Guid> ids, CancellationToken cancellationToken)
+        {
+            var tests = await _testRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
+            if (tests != null)
+            {
+                tests.ForEach(p => { p.IsArchive = !p.IsArchive; });
+                _testRepository.UpdateList(tests);
+                await _testRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

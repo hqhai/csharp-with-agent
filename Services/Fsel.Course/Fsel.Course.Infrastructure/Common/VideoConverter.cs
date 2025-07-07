@@ -35,7 +35,6 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly QuestionConverter _questionConverter;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
         private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
-        private readonly LinQHelper _linQHelper;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly IMapper _mapper;
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
@@ -55,7 +54,6 @@ namespace Fsel.Course.Infrastructure.Common
             , QuestionConverter questionConverter
             , IExerciseQuestionRepository exerciseQuestionRepository
             , ITimeCodeExerciseRepository timeCodeExerciseRepository
-            , LinQHelper linQHelper
             , DateTimeConverter dateTimeConverter
             , IMapper mapper
             , IQuestionShuffleRepository questionShuffleRepository
@@ -74,7 +72,6 @@ namespace Fsel.Course.Infrastructure.Common
             _questionConverter = questionConverter;
             _exerciseQuestionRepository = exerciseQuestionRepository;
             _timeCodeExerciseRepository = timeCodeExerciseRepository;
-            _linQHelper = linQHelper;
             _dateTimeConverter = dateTimeConverter;
             _mapper = mapper;
             _questionShuffleRepository = questionShuffleRepository;
@@ -464,7 +461,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return default;
             }
-            return _linQHelper.GetHighestStreak(highestStreaks);
+            return highestStreaks.GetHighestStreak();
         }
 
         public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
@@ -473,7 +470,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                 .Include(x => x.Question)
                                                                 .OrderBy(x => x.Question!.CreatedDate)
                                                                 .Select(x => x.IsCorrect == true && x.IsFirstSubmit).ToListAsync();
-            return _linQHelper.GetHighestStreak(answers);
+            return answers.GetHighestStreak();
         }
 
         private static bool GetUngraded(VideoTimeCode? videoTimeCode)

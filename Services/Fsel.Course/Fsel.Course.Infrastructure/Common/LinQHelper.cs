@@ -2,12 +2,9 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
-    using System.Text.RegularExpressions;
-    using Fsel.Common.Helpers;
-
-    public class LinQHelper
+    public static class LinQHelper
     {
-        public int GetHighestStreak(IList<bool>? data)
+        public static int GetHighestStreak(this IList<bool>? data)
         {
             if (data != null && data.Any())
             {
@@ -21,17 +18,6 @@ namespace Fsel.Course.Infrastructure.Common
                 return highestStreak > 0 ? highestStreak : default;
             }
             return default;
-        }
-
-        public static bool IsValidSkillCode(string input)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-                return false;
-
-            // Regex: chỉ chấp nhận ký tự Latin (A-Z, a-z), số, ký tự đặc biệt ASCII, KHÔNG chứa khoảng trắng, KHÔNG unicode
-            var regex = new Regex("^[\\x21-\\x7E]+$");
-
-            return regex.IsMatch(input);
         }
     }
 }
