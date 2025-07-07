@@ -14,6 +14,8 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<Exercise, ExerciseModel>().ForMember(p => p.SkillName, x => x.MapFrom(n => n.Skill != null ? n.Skill.Name : null));
             CreateMap<CreateExerciseCommandModel, Exercise>().IgnoreAllNonExisting();
+            CreateMap<UpdateExerciseCommandModel, Exercise>().IgnoreAllNonExisting();
+            CreateMap<UpdateExerciseCommandModel, CreateExerciseCommandModel>().ForMember(p => p.Id, x => x.Ignore()).IgnoreAllNonExisting();
         }
     }
 }

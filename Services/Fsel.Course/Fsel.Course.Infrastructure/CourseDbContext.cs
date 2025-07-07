@@ -3,16 +3,16 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Entities.FlowConfigs;
+using Fsel.Course.Domain.Entities.TestConfig;
+using Fsel.Course.Domain.Entities.V1i1;
+using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Fsel.Course.Domain.Entities.TestConfig;
-using Fsel.Course.Domain.Entities.V1i1;
 
 namespace Fsel.Course.Infrastructure
 {
@@ -130,15 +130,17 @@ namespace Fsel.Course.Infrastructure
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
         public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
         public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
-        #endregion Report
 
         public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
         public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
         public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
+        #endregion Report
+
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
         public DbSet<TestConfig> TestConfigs { get; set; }
         public DbSet<TestConfigSection> TestConfigSections { get; set; }
         public DbSet<TestConfigSectionQuestion> TestConfigSectionQuestions { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);

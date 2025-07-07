@@ -109,7 +109,6 @@ builder.Services.AddScoped<ProgramConverter>();
 builder.Services.AddScoped<LessonConverter>();
 
 // Helper
-builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
 builder.Services.AddScoped<SubjectConditionHelper>();
 
