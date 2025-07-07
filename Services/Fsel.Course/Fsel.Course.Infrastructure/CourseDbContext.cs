@@ -103,9 +103,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<CategoryTestBank> CategoryTestBanks { get; set; }
         public DbSet<LessonModule> LessonModules { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<SubjectCondition> SubjectConditions { get; set; }
+        public DbSet<SubjectConditionRule> SubjectConditionRules { get; set; }
 
         #region Report
-
         public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
         public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
         public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
@@ -129,13 +130,11 @@ namespace Fsel.Course.Infrastructure
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
         public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
         public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
+        #endregion Report
 
         public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
         public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
         public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
-
-        #endregion Report
-
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
         public DbSet<TestConfig> TestConfigs { get; set; }
         public DbSet<TestConfigSection> TestConfigSections { get; set; }
@@ -224,6 +223,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new CategoryTestBankEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonModuleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DocumentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SubjectConditionTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SubjectConditionRuleTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

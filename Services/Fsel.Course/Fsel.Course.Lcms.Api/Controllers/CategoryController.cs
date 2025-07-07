@@ -126,6 +126,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPost("create-category")]
         [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryCommand command)
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -138,6 +139,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPut("update-category")]
         [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryCommand command)
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -150,6 +152,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpDelete("delete-category/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
             var methodResult = await _mediator.Send(new DeleteCategoryCommand { Id = id }).ConfigureAwait(false);
@@ -162,6 +165,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPut("archive-category/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> ArchiveCategory([FromRoute] Guid id)
         {
             var methodResult = await _mediator.Send(new ArchiveCategoryCommand { Id = id }).ConfigureAwait(false);
@@ -174,6 +178,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("category/{id}")]
         [ProducesResponseType(typeof(MethodResult<CategoryModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> GetCategoryById([FromRoute] Guid id)
         {
             var methodResult = await _mediator.Send(new GetCategoryByIdQuery { Id = id }).ConfigureAwait(false);
@@ -186,6 +191,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("category-tree")]
         [ProducesResponseType(typeof(MethodResult<IList<CategoryTreeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> GetCategoryTree([FromQuery] GetCategoryTreeQuery command)
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -198,6 +204,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("search-category")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CategoryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> SearchCategory([FromQuery] SearchCategoryQuery command)
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -210,6 +217,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPost("create-program")]
         [ProducesResponseType(typeof(MethodResult<ProgramModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> CreateProgram([FromBody] CreateProgramCommand command)
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -222,6 +230,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPut("update-program")]
         [ProducesResponseType(typeof(MethodResult<ProgramModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> UpdateProgram([FromBody] UpdateProgramCommand command)
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -234,6 +243,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("program/{programId}")]
         [ProducesResponseType(typeof(MethodResult<ProgramModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> GetProgramById([FromRoute] Guid programId)
         {
             var methodResult = await _mediator.Send(new GetProgramByIdQuery { ProgramId = programId }).ConfigureAwait(false);
@@ -246,6 +256,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("program")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CategoryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
         public async Task<IActionResult> GetProgram([FromQuery] GetProgramQuery query)
         {
             var methodResult = await _mediator.Send(query).ConfigureAwait(false);

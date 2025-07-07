@@ -26,6 +26,8 @@ namespace Fsel.Course.Application.Commands.CategoryCmd
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
+        private static readonly Regex s_regexCode = new Regex("^[a-zA-Z0-9]+$", RegexOptions.Compiled);
+        private static readonly Regex s_regexName = new Regex("^[a-zA-Z0-9_]{1,199}$", RegexOptions.Compiled);
 
         public CreateCategoryCommandHandler(ICategoryRepository categoryRepository,
                                             IMapper mapper)
@@ -38,8 +40,6 @@ namespace Fsel.Course.Application.Commands.CategoryCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CategoryModel> methodResult = new MethodResult<CategoryModel>();
-            Regex regexName = new Regex("^[A-Za-z0-9_]$");
-            Regex regexCode = new Regex("^[A-Z0-9]$");
 
             #region Validate
             if (request.ParentId.HasValue && !await _categoryRepository.Queryable.AnyAsync(x => x.Id == request.ParentId, cancellationToken))
@@ -48,13 +48,13 @@ namespace Fsel.Course.Application.Commands.CategoryCmd
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(request.Name) || (!string.IsNullOrEmpty(request.Name) && regexName.IsMatch(request.Name)))
+            if (string.IsNullOrEmpty(request.Name) || (!string.IsNullOrEmpty(request.Name) && !s_regexName.IsMatch(request.Name)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NameNotValid), nameof(request.Name), request.Name);
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(request.Code) || (!string.IsNullOrEmpty(request.Code) && regexCode.IsMatch(request.Code)))
+            if (string.IsNullOrEmpty(request.Code) || (!string.IsNullOrEmpty(request.Code) && !s_regexCode.IsMatch(request.Code)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.CodeNotValid), nameof(request.Code), request.Code);
                 return methodResult;

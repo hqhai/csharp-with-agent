@@ -38,5 +38,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             MethodResult<IList<LevelModel>> queryResult = await _mediator.Send(new GetLevelByProgramIdQuery { ProgramId = programId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Level By Category
+        /// </summary>
+        [HttpGet("category/{categoryId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<LevelModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLevelByCategory([FromRoute] Guid categoryId)
+        {
+            MethodResult<IList<LevelModel>> queryResult = await _mediator.Send(new GetLevelByCategoryIdQuery { CategoryId = categoryId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

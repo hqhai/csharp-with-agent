@@ -128,6 +128,8 @@ builder.Services.AddScoped<ILessonModuleRepository, LessonModuleRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.AddScoped<ITestConfigRepository, TestConfigRepository>();
 builder.Services.AddScoped<ITestConfigSectionRepository, TestConfigSectionRepository>();
+builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionRepository>();
+builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
@@ -157,6 +159,7 @@ builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
 builder.Services.AddScoped<ChangeCourseHelper>();
 builder.Services.AddScoped<ManagerProgressHelper>();
+builder.Services.AddScoped<SubjectConditionHelper>();
 
 // Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
