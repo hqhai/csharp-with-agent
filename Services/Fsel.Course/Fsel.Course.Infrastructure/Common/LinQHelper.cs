@@ -1,4 +1,4 @@
-// Copyright (c) Atlantic. All rights reserved.
+﻿// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Infrastructure.Common
 {
@@ -18,6 +18,27 @@ namespace Fsel.Course.Infrastructure.Common
                 return highestStreak > 0 ? highestStreak : default;
             }
             return default;
+        }
+
+        public static bool IsValidSkillCode(this string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return false;
+
+            // Regex: chỉ chấp nhận ký tự Latin (A-Z, a-z), số, ký tự đặc biệt ASCII, KHÔNG chứa khoảng trắng, KHÔNG unicode
+            var regex = new Regex("^[\\x21-\\x7E]+$");
+
+            return regex.IsMatch(input);
+        }
+
+        public static bool IsValidCode(this string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return false;
+            }
+            var regex = new Regex(@"^[^<>]*$");
+            return regex.IsMatch(input);
         }
     }
 }

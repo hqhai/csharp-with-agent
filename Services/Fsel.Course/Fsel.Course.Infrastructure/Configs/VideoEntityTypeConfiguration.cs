@@ -18,11 +18,33 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseLevel>());
+
             builder.Property(e => e.Type)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumVideoType>());
+
+            builder.Property(e => e.VersionStatus)
+                .HasMaxLength(20)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumVersionStatus>());
+
+            builder.HasOne(a => a.OriginalVideo)
+                   .WithMany(b => b.Videos)
+                   .HasForeignKey(p => p.OriginalId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Program)
+                   .WithMany(b => b.Videos)
+                   .HasForeignKey(p => p.ProgramId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Level)
+                   .WithMany(b => b.Videos)
+                   .HasForeignKey(p => p.LevelId)
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }
