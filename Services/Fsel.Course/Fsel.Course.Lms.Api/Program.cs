@@ -151,6 +151,7 @@ builder.Services.AddScoped<DateTimeConverter>();
 builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<ProgramConverter>();
 builder.Services.AddScoped<LessonConverter>();
+builder.Services.AddScoped<TestHelper>();
 
 // Helper
 builder.Services.AddScoped<LinQAnswerHelper>();

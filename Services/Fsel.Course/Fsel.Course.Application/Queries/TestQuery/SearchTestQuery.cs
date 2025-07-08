@@ -52,7 +52,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                 }
                 else
                 {
-                    query = query.Where(m => m.Name != null && m.Name.Contains(request.Keyword) || m.Code != null && m.Code.Contains(request.Keyword));
+                    query = query.Where(m => (m.Name != null && m.Name.Contains(request.Keyword)) || (m.Code != null && m.Code.Contains(request.Keyword)));
                 }
             }
 

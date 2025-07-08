@@ -85,12 +85,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 return methodResult;
             }
 
-            if (!request.Name.IsValidCode())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.InvalidKeywordCharacter), nameof(request.Name), request.Name);
-                return methodResult;
-            }
-
             #endregion Validate New
 
             #region Validation

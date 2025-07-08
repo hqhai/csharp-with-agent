@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Application.Commands.TestCmd
 {
+    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -21,24 +22,15 @@ namespace Fsel.Course.Application.Commands.TestCmd
     {
         private readonly IMapper _mapper;
         private readonly ITestRepository _testRepository;
-        private readonly ITestSectionRepository _testSectionRepository;
-        private readonly ITestSectionQuestionRepository _testSectionQuestionRepository;
-        private readonly IQuestionRepository _questionRepository;
-        private readonly QuestionConverter _questionConverter;
+        private readonly TestHelper _testHelper;
 
         public UpdateTestConfigCommandHandler(IMapper mapper
             , ITestRepository testRepository
-            , ITestSectionRepository testSectionRepository
-            , ITestSectionQuestionRepository testSectionQuestionRepository
-            , IQuestionRepository questionRepository
-            , QuestionConverter questionConverter)
+            , TestHelper testHelper)
         {
             _mapper = mapper;
             _testRepository = testRepository;
-            _testSectionRepository = testSectionRepository;
-            _testSectionQuestionRepository = testSectionQuestionRepository;
-            _questionRepository = questionRepository;
-            _questionConverter = questionConverter;
+            _testHelper = testHelper;
         }
 
         public async Task<MethodResult<TestModel>> Handle(UpdateTestCommand request, CancellationToken cancellationToken)
@@ -46,7 +38,7 @@ namespace Fsel.Course.Application.Commands.TestCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<TestModel>();
 
-            var test = await _testRepository.GetIncludeByIdAsync(request.Id);
+            var test = await _testRepository.GetByIdAsync(request.Id);
             if (test == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
@@ -66,7 +58,8 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
             }
-
+            await _testHelper.UpdateSectionRecursive(request.TestSections, test: test);
+            await _testHelper.DeleteDataAsync(test);
             // Bắt đầu transaction
             await _testRepository.ExecuteTransactionAsync(async () =>
             {
@@ -80,18 +73,5 @@ namespace Fsel.Course.Application.Commands.TestCmd
             });
             return methodResult;
         }
-
-        //private async Task<IList<TestSection>> GetTestSections(IList<TestSection> testSections, Test? test = null)
-        //{
-        //    if (test != null)
-        //    {
-        //        var listTestSection = await _testSectionRepository.Queryable.Include(x => x.TestSections).Where(x => x.TestId == test.Id).ToListAsync();
-        //        foreach (var testSection in listTestSection)
-        //        {
-        //            if(testSection.t)
-
-        //        }
-        //    }
-        //}
     }
 }

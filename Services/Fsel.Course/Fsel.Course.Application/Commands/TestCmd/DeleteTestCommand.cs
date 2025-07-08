@@ -18,98 +18,70 @@ namespace Fsel.Course.Application.Commands.TestCmd
         public Guid Id { get; set; }
     }
 
-    public class DeleteTestConfigSectionCommandHandler : IRequestHandler<DeleteTestCommand, MethodResult<bool>>
+    public class DeleteTestCommandHandler : IRequestHandler<DeleteTestCommand, MethodResult<bool>>
     {
-        private readonly ITestSectionRepository _testConfigSectionRepository;
-        private readonly ITestSectionQuestionRepository _testConfigSectionQuestionRepository;
+        private readonly ITestRepository _testRepository;
+        private readonly ITestSectionRepository _testSectionRepository;
+        private readonly ITestSectionQuestionRepository _testSectionQuestionRepository;
         private readonly IQuestionRepository _questionRepository;
+        private readonly ITestAISettingRepository _testAISettingRepository;
 
-        public DeleteTestConfigSectionCommandHandler(ITestSectionRepository testConfigSectionRepository
-            , ITestSectionQuestionRepository testConfigSectionQuestionRepository
-            , IQuestionRepository questionRepository)
+        public DeleteTestCommandHandler(ITestRepository testRepository,
+            ITestSectionRepository testSectionRepository,
+            ITestSectionQuestionRepository testSectionQuestionRepository,
+            IQuestionRepository questionRepository,
+            ITestAISettingRepository testAISettingRepository)
         {
-            _testConfigSectionRepository = testConfigSectionRepository;
-            _testConfigSectionQuestionRepository = testConfigSectionQuestionRepository;
+            _testRepository = testRepository;
+            _testSectionRepository = testSectionRepository;
+            _testSectionQuestionRepository = testSectionQuestionRepository;
             _questionRepository = questionRepository;
+            _testAISettingRepository = testAISettingRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteTestCommand request, CancellationToken cancellationToken)
         {
-            try
+            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var test = await _testRepository.Queryable.FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+            if (test == null)
             {
-                ArgumentNullException.ThrowIfNull(request);
-                var methodResult = new MethodResult<bool>();
-
-                var rootSection = await _testConfigSectionRepository.GetIncludeByIdAsync(request.Id);
-                if (rootSection == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
-                    return methodResult;
-                }
-
-                await _testConfigSectionRepository.ExecuteTransactionAsync(async () =>
-                {
-                    // 1. Lấy toàn bộ section con theo cây
-                    var allSections = await _testConfigSectionRepository
-                        .Queryable
-                        .Where(x => x.TestId == rootSection.TestId)
-                        .ToListAsync(cancellationToken);
-
-                    var sectionIdsToDelete = GetDescendantSectionIds(rootSection.Id, allSections);
-                    sectionIdsToDelete.Add(rootSection.Id);
-
-                    // 2. Lấy và xóa tất cả Question thuộc các Section này
-                    var sectionQuestionsToDelete = await _testConfigSectionQuestionRepository
-                        .Queryable
-                        .Where(q => sectionIdsToDelete.Contains(q.TestSectionId))
-                        .ToListAsync(cancellationToken);
-                    if (sectionQuestionsToDelete.Any())
-                    {
-                        await _testConfigSectionQuestionRepository.DeleteListAsync(sectionQuestionsToDelete);
-
-                        //3.Lấy và xóa tất cả Question thuộc các Section này
-                        var questionsToDelete = await _questionRepository
-                            .Queryable
-                            .Where(q => sectionQuestionsToDelete.Select(z => z.QuestionId).Contains(q.Id))
-                            .ToListAsync(cancellationToken);
-
-                        if (questionsToDelete.Any())
-                        {
-                            await _questionRepository.DeleteListAsync(questionsToDelete);
-                        }
-                    }
-                    // 3. Xóa các TestConfigSection
-                    var sectionsToDelete = allSections.Where(s => sectionIdsToDelete.Contains(s.Id)).ToList();
-                    await _testConfigSectionRepository.DeleteListAsync(sectionsToDelete);
-
-                    // 4. Lưu thay đổi
-                    await _testConfigSectionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
-
-                    methodResult.StatusCode = StatusCodes.Status200OK;
-                    methodResult.Result = true;
-                    return methodResult;
-                });
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(test));
                 return methodResult;
             }
-            catch (Exception e)
+            await DeleteDataAsync(test);
+
+            await _testRepository.ExecuteTransactionAsync(async () =>
             {
-                throw;
-            }
+                var result = await _testRepository.DeleteAsync(test);
+                await _testRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = result;
+                return methodResult;
+            });
+            return methodResult;
         }
 
-        /// <summary>
-        /// Đệ quy tìm tất cả section con từ 1 node gốc
-        /// </summary>
-        private List<Guid> GetDescendantSectionIds(Guid parentId, List<TestSection> allSections)
+        private async Task DeleteDataAsync(Test test)
         {
-            var result = new List<Guid>();
-            var children = allSections.Where(s => s.ParentId == parentId).ToList();
-            foreach (var child in children)
+            var allSectionChilrens = await _testSectionRepository.Queryable.Where(x => x.TestId == test.Id).ToListAsync();
+            if (allSectionChilrens.Any())
             {
-                result.Add(child.Id);
-                result.AddRange(GetDescendantSectionIds(child.Id, allSections)); // recursive
+                await _testSectionRepository.DeleteListAsync(allSectionChilrens);
+                await _testSectionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
             }
-            return result;
+            var questions = await _testSectionQuestionRepository.Queryable.WhereBulkContains(allSectionChilrens.Select(x => x.Id), x => x.TestSectionId).Select(x => x.Question).ToListAsync();
+            if (questions.Any())
+            {
+                await _questionRepository.DeleteListAsync(questions);
+                await _questionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
+            var testAISettings = await _testAISettingRepository.Queryable.Include(x => x.TestAICriteriaSettings).WhereBulkContains(allSectionChilrens.Select(x => x.Id), x => x.TestSectionId).ToListAsync();
+            if (testAISettings.Any())
+            {
+                await _testAISettingRepository.DeleteListAsync(testAISettings).ConfigureAwait(false);
+                await _testAISettingRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            }
         }
     }
 }

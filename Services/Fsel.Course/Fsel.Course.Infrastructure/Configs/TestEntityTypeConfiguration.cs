@@ -12,6 +12,16 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<Test> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
+            builder.HasOne(a => a.Program)
+                   .WithMany(b => b.Tests)
+                   .HasForeignKey(p => p.ProgramId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Level)
+                   .WithMany(b => b.Tests)
+                   .HasForeignKey(p => p.LevelId)
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

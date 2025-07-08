@@ -11,13 +11,15 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Course.Application.Queries.TestQuery;
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
-    [Route(Settings.APIDefaultRoute + "/test-config")]
+    [Route(Settings.APIDefaultRoute + "/test")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class TestController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -1,10 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Attributes;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
@@ -16,6 +18,7 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumVideoErrorCode.InvalidKeywordCharacter))]
         public string? Name { get; set; }
 
         /// <summary>

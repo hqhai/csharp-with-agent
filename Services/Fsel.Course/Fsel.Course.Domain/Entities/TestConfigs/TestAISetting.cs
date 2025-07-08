@@ -14,23 +14,25 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SettingModel { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 2, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingTemperature { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 4095, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingWordMaxLength { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingTopP { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 2, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingFrequecy { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 2, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingPresence { get; set; }
 
         public string? SystemRoleAlConfig { get; set; }
         public string? UserAlConfig { get; set; }
+
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Task { get; set; }
 
         public string? PromptStr { get; set; }

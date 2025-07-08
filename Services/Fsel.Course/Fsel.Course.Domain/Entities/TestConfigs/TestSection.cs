@@ -55,15 +55,22 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public TestSection? Parent { get; set; }
         public Guid? ParentId { get; set; }
         public ICollection<TestSection> TestSections { get; set; } = new List<TestSection>();
+        public ICollection<TestAISetting> TestAISettings { get; set; } = new List<TestAISetting>();
         public ICollection<TestSectionQuestion> TestSectionQuestions { get; set; } = new List<TestSectionQuestion>();
     }
 
     public class TestSectionConfig
     {
         public double? TotalScore { get; set; }
+
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
+
         public double? ExecutionTime { get; set; }
+
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Instruction { get; set; }
+
         public int TargetWord { get; set; }
         public string? VideoFilePath { get; set; }
         public string? SubFilePath { get; set; }

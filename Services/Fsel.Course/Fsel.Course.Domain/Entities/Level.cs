@@ -2,10 +2,11 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities.FlowConfigs;
+    using Fsel.Course.Domain.Entities.TestConfigs;
 
     public class Level : Entity
     {
@@ -29,5 +30,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<PlacementTest> PlacementTests { get; set; } = new List<PlacementTest>();
         public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
         public ICollection<Video> Videos { get; set; } = new List<Video>();
+        public ICollection<Test> Tests { get; set; } = new List<Test>();
     }
 }

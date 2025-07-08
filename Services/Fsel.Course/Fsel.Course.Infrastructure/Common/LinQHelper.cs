@@ -1,7 +1,9 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Infrastructure.Common
 {
+    using System.Text.RegularExpressions;
+
     public static class LinQHelper
     {
         public static int GetHighestStreak(this IList<bool>? data)
@@ -18,17 +20,6 @@ namespace Fsel.Course.Infrastructure.Common
                 return highestStreak > 0 ? highestStreak : default;
             }
             return default;
-        }
-
-        public static bool IsValidSkillCode(this string input)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-                return false;
-
-            // Regex: chỉ chấp nhận ký tự Latin (A-Z, a-z), số, ký tự đặc biệt ASCII, KHÔNG chứa khoảng trắng, KHÔNG unicode
-            var regex = new Regex("^[\\x21-\\x7E]+$");
-
-            return regex.IsMatch(input);
         }
 
         public static bool IsValidCode(this string? input)
