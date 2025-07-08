@@ -94,7 +94,8 @@ builder.Services.AddScoped<ITestSectionRepository, TestSectionRepository>();
 builder.Services.AddScoped<ITestSectionQuestionRepository, TestConfigSectionQuestionRepository>();
 builder.Services.AddScoped<ITestAISettingRepository, TestAISettingRepository>();
 builder.Services.AddScoped<ITestAICriteriaSettingRepository, TestAICriteriaSettingRepository>();
-
+builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionRepository>();
+builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
@@ -111,6 +112,7 @@ builder.Services.AddScoped<TestHelper>();
 
 // Helper
 builder.Services.AddScoped<LinQAnswerHelper>();
+builder.Services.AddScoped<SubjectConditionHelper>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);

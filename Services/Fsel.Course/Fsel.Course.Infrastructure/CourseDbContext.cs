@@ -103,6 +103,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<CategoryTestBank> CategoryTestBanks { get; set; }
         public DbSet<LessonModule> LessonModules { get; set; }
         public DbSet<Document> Documents { get; set; }
+        public DbSet<SubjectCondition> SubjectConditions { get; set; }
+        public DbSet<SubjectConditionRule> SubjectConditionRules { get; set; }
 
         #region Report
 
@@ -232,6 +234,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new TestEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TestSectionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TestSectionQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SubjectConditionTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SubjectConditionRuleTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
