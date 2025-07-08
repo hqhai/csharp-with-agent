@@ -37,5 +37,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<ClassForum> ClassForums { get; set; } = new List<ClassForum>();
         public ICollection<Lesson> Lessons { get; set; } = new List<Lesson>();
         public ICollection<Video> Videos { get; set; } = new List<Video>();
+        public ICollection<SubjectCondition> SubjectConditions { get; set; } = new List<SubjectCondition>();
     }
 }

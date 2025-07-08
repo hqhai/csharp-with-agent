@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250704093701_Create_Table_SubjectCondition_And_SubjectConditionRule")]
+    partial class Create_Table_SubjectCondition_And_SubjectConditionRule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -6393,19 +6396,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid?>("LevelId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid?>("OriginalId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ProgramId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("SubFilePath")
                         .HasMaxLength(250)
@@ -6432,25 +6426,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.Property<string>("VersionStatus")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<string>("VideoFilePath")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("LevelId");
-
-                    b.HasIndex("OriginalId");
-
-                    b.HasIndex("ProgramId");
 
                     b.ToTable("Videos");
                 });
@@ -8312,30 +8292,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("Video");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.Video", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.Level", "Level")
-                        .WithMany("Videos")
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Fsel.Course.Domain.Entities.Video", "OriginalVideo")
-                        .WithMany("Videos")
-                        .HasForeignKey("OriginalId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Fsel.Course.Domain.Entities.Category", "Program")
-                        .WithMany("Videos")
-                        .HasForeignKey("ProgramId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Level");
-
-                    b.Navigation("OriginalVideo");
-
-                    b.Navigation("Program");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.VideoResult", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.LessonResult", "LessonResult")
@@ -8441,8 +8397,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("Levels");
 
                     b.Navigation("PlacementTests");
-
-                    b.Navigation("Videos");
 
                     b.Navigation("SubjectConditions");
                 });
@@ -8646,8 +8600,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("SkillLevels");
 
                     b.Navigation("StepFlows");
-
-                    b.Navigation("Videos");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.MockTest", b =>
@@ -8837,8 +8789,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("VideoResults");
 
                     b.Navigation("VideoTimeCodes");
-
-                    b.Navigation("Videos");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.VideoResult", b =>
