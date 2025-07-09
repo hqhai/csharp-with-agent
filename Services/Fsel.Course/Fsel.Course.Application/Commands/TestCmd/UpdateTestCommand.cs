@@ -59,11 +59,12 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 return methodResult;
             }
             await _testHelper.UpdateSectionRecursive(request.TestSections, test: test);
-            await _testHelper.DeleteDataAsync(test);
             // Bắt đầu transaction
             await _testRepository.ExecuteTransactionAsync(async () =>
             {
                 // Cập nhật Test
+                await _testHelper.DeleteDataAsync(test);
+
                 _testRepository.Update(test);
                 await _testRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

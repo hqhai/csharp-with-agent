@@ -11,6 +11,7 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.CommandModels.TestAiSettings;
     using Fsel.Course.Domain.Models.CommandModels.TestSections;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
@@ -22,17 +23,21 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly ITestSectionQuestionRepository _testSectionQuestionRepository;
         private readonly IMapper _mapper;
         private readonly QuestionConverter _questionConverter;
+        private readonly ITestAICriteriaSettingRepository _testAICriteriaSettingRepository;
         private List<Question> DeleteQuestions = new List<Question>();
         private List<TestSection> DeleteTestSections = new List<TestSection>();
         private List<TestAISetting> DeleteTestAISettings = new List<TestAISetting>();
         private List<TestAICriteriaSetting> DeleteTestAICriteriaSettings = new List<TestAICriteriaSetting>();
+        private VoidMethodResult VoidMethodResult = new VoidMethodResult();
+        private int NumberQuestion = 0;
 
         public TestHelper(ITestAISettingRepository testAISettingRepository,
             IQuestionRepository questionRepository,
             ITestSectionRepository testSectionRepository,
             ITestSectionQuestionRepository testSectionQuestionRepository,
             IMapper mapper,
-            QuestionConverter questionConverter)
+            QuestionConverter questionConverter,
+            ITestAICriteriaSettingRepository testAICriteriaSettingRepository)
         {
             _testAISettingRepository = testAISettingRepository;
             _questionRepository = questionRepository;
@@ -40,479 +45,625 @@ namespace Fsel.Course.Infrastructure.Common
             _testSectionQuestionRepository = testSectionQuestionRepository;
             _mapper = mapper;
             _questionConverter = questionConverter;
+            _testAICriteriaSettingRepository = testAICriteriaSettingRepository;
         }
 
-        #region Insert
+        #region Validate
 
-        public VoidMethodResult InsertSectionRecursive(IList<CreateTestSectionCommandModel>? testSectionRequests, TestSection? testSection = null, Test? test = null)
+        private void ValidateTestLayout(CreateTestSectionCommandModel testSectionRequest)
         {
-            VoidMethodResult methodResult = new VoidMethodResult();
+            if (testSectionRequest.LayoutType.HasValue)
+            {
+                var isLayOutBasicError = testSectionRequest.LayoutType == EnumTestLayoutType.Basic && testSectionRequest.TestAISettings.Any();
+                var isLayOutError = testSectionRequest.LayoutType != EnumTestLayoutType.Basic && testSectionRequest.Questions.Any();
+                if (isLayOutError || isLayOutBasicError)
+                {
+                    VoidMethodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(testSectionRequest), testSectionRequest.Name);
+                }
+            }
+        }
+
+        private void ValidateTestLayout(UpdateTestSectionCommandModel testSectionRequest)
+        {
+            if (testSectionRequest.LayoutType.HasValue)
+            {
+                var isLayOutBasicError = testSectionRequest.LayoutType == EnumTestLayoutType.Basic && testSectionRequest.TestAISettings.Any();
+                var isLayOutError = testSectionRequest.LayoutType != EnumTestLayoutType.Basic && testSectionRequest.Questions.Any();
+                if (isLayOutError || isLayOutBasicError)
+                {
+                    VoidMethodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(testSectionRequest), testSectionRequest.Name);
+                }
+            }
+        }
+
+        private void ValidateObjectExistence(TestSection? testSection)
+        {
+            if (testSection == null)
+            {
+                VoidMethodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testSection));
+            }
+        }
+
+        private void ValidateObjectExistence(TestAISetting? testAISetting)
+        {
+            if (testAISetting == null)
+            {
+                VoidMethodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testAISetting));
+            }
+        }
+
+        private void ValidateObjectExistence(TestAICriteriaSetting? testAICriteriaSetting)
+        {
+            if (testAICriteriaSetting == null)
+            {
+                VoidMethodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testAICriteriaSetting));
+            }
+        }
+
+        private void ValidateObjectExistence(Question? question)
+        {
+            if (question == null)
+            {
+                VoidMethodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
+            }
+        }
+
+        private void ValidateIsValid(TestAICriteriaSetting testAICriteriaSetting)
+        {
+            if (!testAICriteriaSetting.IsValid())
+            {
+                VoidMethodResult.AddErrorBadRequest(testAICriteriaSetting.ErrorMessages);
+            }
+        }
+
+        private void ValidateIsValid(TestAISetting testAISetting)
+        {
+            if (!testAISetting.IsValid())
+            {
+                VoidMethodResult.AddErrorBadRequest(testAISetting.ErrorMessages);
+            }
+        }
+
+        private void ValidateIsValid(TestSection testSection)
+        {
+            if (!testSection.IsValid())
+            {
+                VoidMethodResult.AddErrorBadRequest(testSection.ErrorMessages);
+            }
+        }
+
+        private void ValidateIsValid(Question question)
+        {
+            if (!question.IsValid())
+            {
+                VoidMethodResult.AddErrorBadRequest(question.ErrorMessages);
+            }
+        }
+
+        #endregion Validate
+
+        #region Insert Test
+
+        public VoidMethodResult InsertSectionRecursive(IList<CreateTestSectionCommandModel>? testSectionRequests, TestSection? testSectionParent = null, Test? test = null)
+        {
+            VoidMethodResult voidMethodResult = new VoidMethodResult();
             if (testSectionRequests == null || !testSectionRequests.Any())
             {
-                return methodResult;
+                return voidMethodResult;
             }
 
             foreach (var testSectionRequest in testSectionRequests)
             {
-                if (testSectionRequest.LayoutType.HasValue)
-                {
-                    var isLayOutBasicError = testSectionRequest.LayoutType == EnumTestLayoutType.Basic && testSectionRequest.TestAISettings.Any();
-                    var isLayOutError = testSectionRequest.LayoutType != EnumTestLayoutType.Basic && testSectionRequest.Questions.Any();
-                    if (isLayOutError || isLayOutBasicError)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(testSectionRequest), testSectionRequest.Name);
-                        return methodResult;
-                    }
-                }
-
-                var testSectionCreated = _mapper.Map<TestSection>(testSectionRequest);
-                if (!testSectionCreated.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(testSectionCreated.ErrorMessages);
-                    return methodResult;
-                }
-                testSectionCreated.DisplayOrder = testSectionRequests.IndexOf(testSectionRequest);
+                ValidateTestLayout(testSectionRequest);
+                var testSection = ResolveTestSectionFromRequest(testSectionRequest, testSectionRequests.IndexOf(testSectionRequest));
                 if (testSection != null)
                 {
-                    testSectionCreated.Test = testSection.Test;
-                    testSection.TestSections.Add(testSectionCreated);
+                    AssignTestReferenceIfNeeded(testSection, testSectionParent, test);
+                    HandleSectionChildrenAndConfigs(testSectionRequest, testSection);
                 }
-                if (test != null)
+                else
                 {
-                    testSectionCreated.Test = test;
-                    test.TestSections.Add(testSectionCreated);
-                }
-                if (testSectionRequest.Childrens.Any())
-                {
-                    var methodResultCreated = InsertSectionRecursive(testSectionRequest.Childrens, testSectionCreated);
-                    if (!methodResultCreated.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(methodResultCreated.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-                if (testSectionRequest.TestAISettings.Any())
-                {
-                    var methodResultCreated = InsertTestAISettings(testSectionRequest.TestAISettings, testSectionCreated);
-                    if (!methodResultCreated.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(methodResultCreated.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-
-                if (testSectionRequest.Questions.Any())
-                {
-                    var methodResultCreated = InsertQuestions(testSectionRequest.Questions, testSectionCreated);
-                    if (!methodResultCreated.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(methodResultCreated.ErrorMessages);
-                        return methodResult;
-                    }
+                    ValidateObjectExistence(testSection);
                 }
             }
-            return methodResult;
+            if (!VoidMethodResult.IsOK)
+            {
+                voidMethodResult.AddErrorBadRequest(VoidMethodResult.ErrorMessages);
+            }
+            return voidMethodResult;
         }
 
-        private VoidMethodResult InsertQuestions(IList<CreateQuestionCommandModel>? questionRequests, TestSection testSection)
+        private TestSection? ResolveTestSectionFromRequest(CreateTestSectionCommandModel? request, int displayOrder)
         {
-            VoidMethodResult methodResult = new VoidMethodResult();
+            var testSection = _mapper.Map<TestSection>(request);
+            if (testSection != null)
+            {
+                testSection.DisplayOrder = displayOrder;
+                ValidateIsValid(testSection);
+            }
+            else
+            {
+                ValidateObjectExistence(testSection);
+            }
+            return testSection;
+        }
+
+        private void HandleSectionChildrenAndConfigs(CreateTestSectionCommandModel testSectionRequest, TestSection testSection)
+        {
+            if (testSectionRequest.Childrens.Any())
+            {
+                InsertSectionRecursive(testSectionRequest.Childrens, testSection);
+            }
+            if (testSectionRequest.TestAISettings.Any())
+            {
+                InsertTestAISettings(testSectionRequest.TestAISettings, testSection);
+            }
+            if (testSectionRequest.Questions.Any())
+            {
+                InsertQuestions(testSectionRequest.Questions, testSection);
+            }
+        }
+
+        #region Insert Question
+
+        private void InsertQuestions(IList<CreateQuestionCommandModel>? questionRequests, TestSection testSection)
+        {
             if (questionRequests == null || !questionRequests.Any())
             {
-                return methodResult;
+                return;
             }
-
             foreach (var questionRequest in questionRequests)
             {
-                if (questionRequest == null)
+                HandleSingleQuestionInsert(questionRequest, testSection);
+            }
+        }
+
+        private void HandleSingleQuestionInsert(CreateQuestionCommandModel? request, TestSection testSection)
+        {
+            var question = _mapper.Map<Question>(request);
+            if (question != null)
+            {
+                ValidateIsValid(question);
+                var convertResult = _questionConverter.HandleQuestion(question);
+                if (!convertResult.IsOK)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionRequest));
-                    return methodResult;
+                    VoidMethodResult.AddErrorBadRequest(convertResult.ErrorMessages);
                 }
-                var question = _mapper.Map<Question>(questionRequest);
-                var method = _questionConverter.HandleQuestion(question);
-                if (!method.IsOK)
+                if (convertResult.Result != null)
                 {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    return methodResult;
+                    var data = Enumerable.Range(NumberQuestion + 1, convertResult.Result.CorrectTotal).ToList();
+                    convertResult.Result.SubQuestionIndexs = data;
+                    NumberQuestion += convertResult.Result.CorrectTotal;
                 }
                 testSection.TestSectionQuestions.Add(new TestSectionQuestion
                 {
-                    Question = method.Result ?? question,
+                    Question = convertResult.Result ?? question
+                });
+            }
+            else
+            {
+                ValidateObjectExistence(question);
+            }
+        }
+
+        #endregion Insert Question
+
+        #region Insert TestAISetting
+
+        private void InsertTestAISettings(IList<CreateTestAISettingCommandModel>? testAISettingRequests, TestSection testSection)
+        {
+            if (testAISettingRequests == null || !testAISettingRequests.Any())
+            {
+                return;
+            }
+            foreach (var testAISettingRequest in testAISettingRequests)
+            {
+                var testAISetting = _mapper.Map<TestAISetting>(testAISettingRequest);
+                ValidateObjectExistence(testAISetting);
+                if (testAISetting != null)
+                {
+                    ValidateIsValid(testAISetting);
+                    InsertTestAISettings(testAISetting);
+                    testSection.TestAISettings.Add(testAISetting);
+                }
+            }
+        }
+
+        private void InsertTestAISettings(TestAISetting testAISetting)
+        {
+            if (!testAISetting.TestAICriteriaSettings.Any())
+            {
+                return;
+            }
+            foreach (var testAICriteriaSetting in testAISetting.TestAICriteriaSettings)
+            {
+                ValidateObjectExistence(testAICriteriaSetting);
+                if (testAICriteriaSetting != null)
+                {
+                    ValidateIsValid(testAICriteriaSetting);
+                }
+            }
+        }
+
+        #endregion Insert TestAISetting
+
+        #endregion Insert Test
+
+        #region Update Test
+
+        #region Add Remove Data
+
+        private void RemoveObsoleteTestSections(IList<TestSection> oldSections, IList<UpdateTestSectionCommandModel> newRequests)
+        {
+            var toDelete = oldSections
+                .Where(x => x != null && x.Id != Guid.Empty && !newRequests.Any(y => y.Id.HasValue && y.Id == x.Id))
+                .ToList();
+            if (toDelete.Any())
+            {
+                DeleteTestSections.AddRange(toDelete);
+            }
+        }
+
+        private void HandleDeletedQuestions(List<Question> existingQuestions, IList<UpdateQuestionCommandModel> requests, TestSection testSection)
+        {
+            var toDelete = existingQuestions
+                .Where(q => q != null && q.Id != Guid.Empty && !requests.Any(r => r.Id.HasValue && r.Id == q.Id))
+                .ToList();
+            if (toDelete.Any())
+            {
+                DeleteQuestions.AddRange(toDelete);
+            }
+        }
+
+        private void RemoveObsoleteAISettings(List<TestAISetting> existingSettings, IList<UpdateTestAISettingCommandModel> requests)
+        {
+            var toDelete = existingSettings
+                .Where(x => x.Id != Guid.Empty && !requests.Any(r => r.Id == x.Id))
+                .ToList();
+
+            if (toDelete.Any())
+            {
+                DeleteTestAISettings.AddRange(toDelete);
+            }
+        }
+
+        private void RemoveObsoleteAICriteriaSettings(List<TestAICriteriaSetting> existingAICriteriaSettings, IList<UpdateTestAICriteriaSettingCommandModel> requests)
+        {
+            var toDeleteCriteria = existingAICriteriaSettings.Where(x => x.Id != Guid.Empty && !requests.Any(r => r.Id == x.Id))
+                                                                       .ToList();
+            if (toDeleteCriteria.Any())
+            {
+                DeleteTestAICriteriaSettings.AddRange(toDeleteCriteria);
+            }
+        }
+
+        #endregion Add Remove Data
+
+        #region Delete Update
+
+        private async Task<VoidMethodResult> DeleteQuestionsAsync(IList<Question> questions)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+            if (questions.Any())
+            {
+                await _questionRepository.ExecuteTransactionAsync(async () =>
+                {
+                    await _questionRepository.DeleteListAsync(questions);
+                    await _questionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    return methodResult;
                 });
             }
             return methodResult;
         }
 
-        private VoidMethodResult InsertTestAISettings(IList<CreateTestAISettingCommandModel>? testAISettingRequests, TestSection testSection)
+        private async Task<VoidMethodResult> DeleteTestSectionsAsync(IList<TestSection> testSections)
         {
             VoidMethodResult methodResult = new VoidMethodResult();
-            if (testAISettingRequests == null || !testAISettingRequests.Any())
+            if (testSections.Any())
             {
-                return methodResult;
-            }
-
-            foreach (var testAISettingRequest in testAISettingRequests)
-            {
-                if (testAISettingRequest == null)
+                await _testSectionRepository.ExecuteTransactionAsync(async () =>
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testAISettingRequest));
+                    await _testSectionRepository.DeleteListAsync(testSections);
+                    await _testSectionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
                     return methodResult;
-                }
-                var testAISetting = _mapper.Map<TestAISetting>(testAISettingRequest);
-                if (!testAISetting.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(testAISetting.ErrorMessages);
-                    return methodResult;
-                }
-                foreach (var testAICriteriaSetting in testAISetting.TestAICriteriaSettings)
-                {
-                    if (!testAICriteriaSetting.IsValid())
-                    {
-                        methodResult.AddErrorBadRequest(testAICriteriaSetting.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-                testSection.TestAISettings.Add(testAISetting);
+                });
             }
             return methodResult;
         }
 
-        #endregion Insert
-
-        #region Update
-
-        public async Task DeleteDataAsync(Test test)
+        private async Task<VoidMethodResult> DeleteTestAISettingsAsync(IList<TestAISetting> testAISettings)
         {
-            await _testAISettingRepository.DeleteListAsync(DeleteTestAISettings);
-            await _testAISettingRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            VoidMethodResult methodResult = new VoidMethodResult();
+            if (testAISettings.Any())
+            {
+                await _testAISettingRepository.ExecuteTransactionAsync(async () =>
+                {
+                    await _testAISettingRepository.DeleteListAsync(testAISettings);
+                    await _testAISettingRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    return methodResult;
+                });
+            }
+            return methodResult;
+        }
 
-            await _questionRepository.DeleteListAsync(DeleteQuestions);
-            await _questionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+        private async Task<VoidMethodResult> DeleteTestAICriteriaSettingsAsync(IList<TestAICriteriaSetting> testAICriteriaSettings)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+            if (testAICriteriaSettings.Any())
+            {
+                await _testAICriteriaSettingRepository.ExecuteTransactionAsync(async () =>
+                {
+                    await _testAICriteriaSettingRepository.DeleteListAsync(testAICriteriaSettings);
+                    await _testAICriteriaSettingRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    return methodResult;
+                });
+            }
+            return methodResult;
+        }
 
+        public async Task<VoidMethodResult> DeleteDataAsync(Test test)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+            await DeleteTestAISettingsAsync(DeleteTestAISettings);
+            await DeleteQuestionsAsync(DeleteQuestions);
+            await DeleteTestAICriteriaSettingsAsync(DeleteTestAICriteriaSettings);
             if (DeleteTestSections.Any())
             {
                 var allSectionChilrens = await _testSectionRepository.Queryable.Where(x => x.ParentId.HasValue && x.TestId == test.Id)
                                                                      .WhereBulkContains(DeleteTestSections.Select(x => x.Id), x => x.ParentId).ToListAsync();
-                if (allSectionChilrens.Any())
-                {
-                    await _testSectionRepository.DeleteListAsync(allSectionChilrens);
-                    await _testSectionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                }
                 var questions = await _testSectionQuestionRepository.Queryable.WhereBulkContains(allSectionChilrens.Select(x => x.Id), x => x.TestSectionId).Select(x => x.Question).ToListAsync();
-                if (questions.Any())
-                {
-                    await _questionRepository.DeleteListAsync(questions);
-                    await _questionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                }
                 var testAISettings = await _testAISettingRepository.Queryable.Include(x => x.TestAICriteriaSettings).WhereBulkContains(allSectionChilrens.Select(x => x.Id), x => x.TestSectionId).ToListAsync();
-                if (testAISettings.Any())
-                {
-                    await _testAISettingRepository.DeleteListAsync(testAISettings);
-                    await _testAISettingRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                }
 
-                await _testSectionRepository.DeleteListAsync(DeleteTestSections);
-                await _testSectionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await DeleteQuestionsAsync(questions);
+                await DeleteTestAISettingsAsync(testAISettings);
+                await DeleteTestSectionsAsync(allSectionChilrens);
+                await DeleteTestSectionsAsync(DeleteTestSections);
             }
+            return methodResult;
+        }
+
+        #endregion Delete Update
+
+        #region Get
+
+        private async Task<IList<TestSection>> GetTestSectionAsync(TestSection? testSectionParent = null, Test? test = null)
+        {
+            if (test != null)
+            {
+                return await _testSectionRepository.Queryable
+                    .Where(x => x.TestId == test.Id && x.ParentId == null)
+                    .ToListAsync();
+            }
+
+            if (testSectionParent != null)
+            {
+                return await _testSectionRepository.Queryable
+                    .Where(x => x.ParentId == testSectionParent.Id)
+                    .ToListAsync();
+            }
+
+            return new List<TestSection>();
+        }
+
+        private async Task<List<Question>> GetExistingQuestionsAsync(Guid sectionId)
+        {
+            return await _testSectionQuestionRepository.Queryable
+                .Where(x => x.TestSectionId == sectionId)
+                .Select(x => x.Question)
+                .ToListAsync();
+        }
+
+        private async Task<List<TestAISetting>> GetExistingAISettingsAsync(Guid sectionId)
+        {
+            return await _testAISettingRepository.Queryable
+                .Include(x => x.TestAICriteriaSettings)
+                .Where(x => x.TestSectionId == sectionId)
+                .ToListAsync();
+        }
+
+        #endregion Get
+
+        #region Update TestSection
+
+        private static void AssignTestReferenceIfNeeded(TestSection section, TestSection? parent, Test? test)
+        {
+            if (section.Id != Guid.Empty)
+            {
+                return;
+            }
+            if (parent != null)
+            {
+                section.Test = parent.Test;
+                parent.TestSections.Add(section);
+            }
+            else if (test != null)
+            {
+                section.Test = test;
+                test.TestSections.Add(section);
+            }
+        }
+
+        private TestSection? ResolveTestSectionFromRequest(UpdateTestSectionCommandModel request, IList<TestSection> existingSections, int displayOrder)
+        {
+            TestSection? testSection = null;
+            if (request.Id.HasValue)
+            {
+                testSection = existingSections.FirstOrDefault(x => x.Id == request.Id);
+                _mapper.Map(request, testSection);
+            }
+            else
+            {
+                testSection = _mapper.Map<TestSection>(request);
+            }
+
+            if (testSection != null)
+            {
+                testSection.DisplayOrder = displayOrder;
+                ValidateIsValid(testSection);
+            }
+            else
+            {
+                ValidateObjectExistence(testSection);
+            }
+            return testSection;
+        }
+
+        private async Task HandleSectionChildrenAndConfigsAsync(UpdateTestSectionCommandModel testSectionRequest, TestSection testSection)
+        {
+            await UpdateSectionRecursive(testSectionRequest.Childrens, testSection);
+            await UpdateTestAISettings(testSectionRequest.TestAISettings, testSection);
+            await UpdateQuestions(testSectionRequest.Questions, testSection);
         }
 
         public async Task<MethodResult<Test>> UpdateSectionRecursive(IList<UpdateTestSectionCommandModel>? testSectionRequests, TestSection? testSectionParent = null, Test? test = null)
         {
             MethodResult<Test> methodResult = new MethodResult<Test>();
-            if (testSectionRequests == null || !testSectionRequests.Any())
-            {
-                return methodResult;
-            }
-            var testSections = new List<TestSection>();
-            if (test != null)
-            {
-                testSections = await _testSectionRepository.Queryable.Where(x => x.TestId == test.Id && !x.ParentId.HasValue).ToListAsync();
-            }
-            else if (testSectionParent != null)
-            {
-                testSections = await _testSectionRepository.Queryable.Where(x => x.ParentId == testSectionParent.Id).ToListAsync();
-            }
-
+            testSectionRequests ??= new List<UpdateTestSectionCommandModel>();
+            var testSections = await GetTestSectionAsync(testSectionParent, test);
             foreach (var testSectionRequest in testSectionRequests)
             {
-                if (testSectionRequest.LayoutType.HasValue)
+                ValidateTestLayout(testSectionRequest);
+                var testSection = ResolveTestSectionFromRequest(testSectionRequest, testSections, testSectionRequests.IndexOf(testSectionRequest));
+                if (testSection != null)
                 {
-                    var isLayOutBasicError = testSectionRequest.LayoutType == EnumTestLayoutType.Basic && testSectionRequest.TestAISettings.Any();
-                    var isLayOutError = testSectionRequest.LayoutType != EnumTestLayoutType.Basic && testSectionRequest.Questions.Any();
-                    if (isLayOutError || isLayOutBasicError)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(testSectionRequest), testSectionRequest.Name);
-                        return methodResult;
-                    }
-                }
-
-                if (testSectionRequest == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testSectionRequest));
-                    return methodResult;
-                }
-
-                TestSection? testSection = null;
-                if (testSectionRequest.Id.HasValue)
-                {
-                    testSection = testSections.FirstOrDefault(x => x.Id == testSectionRequest.Id);
-                    if (testSection == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testSection), testSectionRequest.Id);
-                        return methodResult;
-                    }
-                    _mapper.Map(testSectionRequest, testSection);
-                }
-                else
-                {
-                    testSection = _mapper.Map<TestSection>(testSectionRequest);
-                }
-
-                if (!testSection.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(testSection.ErrorMessages);
-                    return methodResult;
-                }
-                testSection.DisplayOrder = testSectionRequests.IndexOf(testSectionRequest);
-                if (testSection.Id == Guid.Empty)
-                {
-                    if (testSectionParent != null)
-                    {
-                        testSection.Test = testSectionParent.Test;
-                        testSectionParent.TestSections.Add(testSection);
-                    }
-                    if (test != null)
-                    {
-                        testSection.Test = test;
-                        test.TestSections.Add(testSection);
-                    }
-                }
-                if (testSectionRequest.Childrens.Any())
-                {
-                    var methodResultCreated = await UpdateSectionRecursive(testSectionRequest.Childrens, testSection);
-                    if (!methodResultCreated.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(methodResultCreated.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-                if (testSectionRequest.TestAISettings.Any())
-                {
-                    var methodResultCreated = await UpdateTestAISettings(testSectionRequest.TestAISettings, testSection);
-                    if (!methodResultCreated.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(methodResultCreated.ErrorMessages);
-                        return methodResult;
-                    }
-                }
-
-                if (testSectionRequest.Questions.Any())
-                {
-                    var methodResultCreated = await UpdateQuestions(testSectionRequest.Questions, testSection);
-                    if (!methodResultCreated.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(methodResultCreated.ErrorMessages);
-                        return methodResult;
-                    }
+                    ValidateIsValid(testSection);
+                    AssignTestReferenceIfNeeded(testSection, testSectionParent, test);
+                    await HandleSectionChildrenAndConfigsAsync(testSectionRequest, testSection);
                 }
             }
-            var testSectionToDelete = testSections.Where(x => x != null && x.Id != Guid.Empty && !testSectionRequests.Any(y => y.Id.HasValue && y.Id == x.Id)).ToList();
-            if (testSectionToDelete.Any())
+            RemoveObsoleteTestSections(testSections, testSectionRequests);
+            if (!VoidMethodResult.IsOK)
             {
-                DeleteTestSections.AddRange(testSectionToDelete);
+                methodResult.AddErrorBadRequest(VoidMethodResult.ErrorMessages);
+                return methodResult;
             }
             methodResult.Result = test;
             return methodResult;
         }
 
-        private async Task<VoidMethodResult> UpdateQuestions(IList<UpdateQuestionCommandModel>? questionRequests, TestSection testSection)
+        #endregion Update TestSection
+
+        #region Update Question
+
+        private void HandleSingleQuestionUpdate(UpdateQuestionCommandModel request, List<Question> existingQuestions, TestSection testSection)
         {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            if (questionRequests == null || !questionRequests.Any())
+            Question? question = null;
+            if (request.Id.HasValue)
             {
-                return methodResult;
+                question = existingQuestions.FirstOrDefault(q => q.Id == request.Id);
+                _mapper.Map(request, question);
             }
-            var questions = await _testSectionQuestionRepository.Queryable.Where(x => x.TestSectionId == testSection.Id).Select(x => x.Question).ToListAsync();
-
-            foreach (var questionRequest in questionRequests)
+            else
             {
-                if (questionRequest == null)
+                question = _mapper.Map<Question>(request);
+            }
+            if (question != null)
+            {
+                var convertResult = _questionConverter.HandleQuestion(question);
+                if (!convertResult.IsOK)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questionRequest));
-                    return methodResult;
+                    VoidMethodResult.AddErrorBadRequest(convertResult.ErrorMessages);
                 }
-
-                Question? question = null;
-                if (questionRequest.Id.HasValue)
+                if (convertResult.Result != null)
                 {
-                    question = questions.FirstOrDefault(x => x.Id == questionRequest.Id);
-                    if (question == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), questionRequest.Id);
-                        return methodResult;
-                    }
-
-                    _mapper.Map(questionRequest, question);
-                }
-                else
-                {
-                    question = _mapper.Map<Question>(questionRequest);
-                }
-                var method = _questionConverter.HandleQuestion(question);
-                if (!method.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
-                    return methodResult;
+                    var data = Enumerable.Range(NumberQuestion + 1, convertResult.Result.CorrectTotal).ToList();
+                    convertResult.Result.SubQuestionIndexs = data;
+                    NumberQuestion += convertResult.Result.CorrectTotal;
                 }
                 if (question.Id == Guid.Empty)
                 {
                     testSection.TestSectionQuestions.Add(new TestSectionQuestion
                     {
-                        Question = method.Result ?? question,
+                        Question = convertResult.Result ?? question
                     });
                 }
+                ValidateIsValid(question);
             }
-            var questionsToDelete = questions.Where(x => x != null && x.Id != Guid.Empty && !questionRequests.Any(y => y.Id.HasValue && y.Id == x.Id)).ToList();
-            if (questionsToDelete.Any())
+            else
             {
-                DeleteQuestions.AddRange(questionsToDelete);
+                ValidateObjectExistence(question);
             }
-
-            return methodResult;
         }
 
-        private async Task<VoidMethodResult> UpdateTestAISettings(IList<UpdateTestAISettingCommandModel>? requests, TestSection testSection)
+        private async Task UpdateQuestions(IList<UpdateQuestionCommandModel>? questionRequests, TestSection testSection)
         {
-            var methodResult = new VoidMethodResult();
-            if (requests == null || !requests.Any())
+            questionRequests ??= new List<UpdateQuestionCommandModel>();
+            var existingQuestions = await GetExistingQuestionsAsync(testSection.Id);
+            foreach (var questionRequest in questionRequests)
             {
-                return methodResult;
+                HandleSingleQuestionUpdate(questionRequest, existingQuestions, testSection);
             }
-            var existingSettings = await _testAISettingRepository.Queryable
-                .Include(x => x.TestAICriteriaSettings)
-                .Where(x => x.TestSectionId == testSection.Id)
-                .ToListAsync();
+            HandleDeletedQuestions(existingQuestions, questionRequests, testSection);
+        }
 
+        #endregion Update Question
+
+        #region Update TestAISetting
+
+        private async Task UpdateTestAISettings(IList<UpdateTestAISettingCommandModel>? requests, TestSection testSection)
+        {
+            requests ??= new List<UpdateTestAISettingCommandModel>();
+            var existingSettings = await GetExistingAISettingsAsync(testSection.Id);
             foreach (var request in requests)
             {
-                var result = HandleTestAISettingUpdate(request, testSection, existingSettings);
-                if (!result.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(result.ErrorMessages);
-                    return methodResult;
-                }
+                HandleTestAISettingUpdate(request, testSection, existingSettings);
             }
-
-            var toDeleteSettings = existingSettings
-                .Where(x => x.Id != Guid.Empty && !requests.Any(r => r.Id == x.Id))
-                .ToList();
-
-            if (toDeleteSettings.Any())
-            {
-                DeleteTestAISettings.AddRange(toDeleteSettings);
-            }
-
-            return methodResult;
+            RemoveObsoleteAISettings(existingSettings, requests);
         }
 
-        private VoidMethodResult HandleTestAISettingUpdate(UpdateTestAISettingCommandModel? request, TestSection testSection, List<TestAISetting> existingSettings)
+        private void HandleTestAISettingUpdate(UpdateTestAISettingCommandModel request, TestSection section, List<TestAISetting> existingSettings)
         {
-            var methodResult = new VoidMethodResult();
-            if (request == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request));
-                return methodResult;
-            }
-
-            TestAISetting? testAISetting;
+            TestAISetting? testAISetting = null;
             if (request.Id.HasValue)
             {
                 testAISetting = existingSettings.FirstOrDefault(x => x.Id == request.Id);
-                if (testAISetting == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(TestAISetting), request.Id);
-                    return methodResult;
-                }
                 _mapper.Map(request, testAISetting);
             }
             else
             {
                 testAISetting = _mapper.Map<TestAISetting>(request);
+                section.TestAISettings.Add(testAISetting);
             }
-
-            if (!testAISetting.IsValid())
+            if (testAISetting != null)
             {
-                methodResult.AddErrorBadRequest(testAISetting.ErrorMessages);
-                return methodResult;
-            }
-
-            foreach (var criteriaRequest in request.TestAICriteriaSettings)
-            {
-                var result = HandleTestAICriteriaSettingUpdate(criteriaRequest, testAISetting);
-                if (!result.IsOK)
+                ValidateIsValid(testAISetting);
+                foreach (var criteriaRequest in request.TestAICriteriaSettings)
                 {
-                    methodResult.AddErrorBadRequest(result.ErrorMessages);
-                    return methodResult;
+                    HandleTestAICriteriaSettingUpdate(criteriaRequest, testAISetting);
                 }
+                RemoveObsoleteAICriteriaSettings(testAISetting.TestAICriteriaSettings.ToList(), request.TestAICriteriaSettings);
             }
-
-            if (testAISetting.Id == Guid.Empty)
+            else
             {
-                testSection.TestAISettings.Add(testAISetting);
+                ValidateObjectExistence(testAISetting);
             }
-
-            var toDeleteCriteria = testAISetting.TestAICriteriaSettings
-                .Where(x => x.Id != Guid.Empty && !request.TestAICriteriaSettings.Any(r => r.Id == x.Id))
-                .ToList();
-
-            if (toDeleteCriteria.Any())
-            {
-                DeleteTestAICriteriaSettings.AddRange(toDeleteCriteria);
-            }
-
-            return methodResult;
         }
 
-        private VoidMethodResult HandleTestAICriteriaSettingUpdate(UpdateTestAICriteriaSettingCommandModel? request, TestAISetting setting)
+        private void HandleTestAICriteriaSettingUpdate(UpdateTestAICriteriaSettingCommandModel request, TestAISetting setting)
         {
-            var methodResult = new VoidMethodResult();
-            if (request == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request));
-                return methodResult;
-            }
-
             TestAICriteriaSetting? criteria;
             if (request.Id.HasValue)
             {
                 criteria = setting.TestAICriteriaSettings.FirstOrDefault(x => x.Id == request.Id);
-                if (criteria == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(criteria), request.Id);
-                    return methodResult;
-                }
                 _mapper.Map(request, criteria);
             }
             else
             {
                 criteria = _mapper.Map<TestAICriteriaSetting>(request);
-            }
-
-            if (!criteria.IsValid())
-            {
-                methodResult.AddErrorBadRequest(criteria.ErrorMessages);
-                return methodResult;
-            }
-
-            if (criteria.Id == Guid.Empty)
-            {
                 setting.TestAICriteriaSettings.Add(criteria);
             }
-
-            return methodResult;
+            if (criteria != null)
+            {
+                ValidateIsValid(criteria);
+            }
+            else
+            {
+                ValidateObjectExistence(criteria);
+            }
         }
 
-        #endregion Update
+        #endregion Update TestAISetting
+
+        #endregion Update Test
     }
 }

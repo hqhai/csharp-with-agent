@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestModels
         public Guid Id { get; set; }
         public string? Name { get; set; }
         public int DisplayOrder { get; set; }
-        public EnumTestLayoutType LayoutType { get; set; }
+        public EnumTestLayoutType? LayoutType { get; set; }
         public TestSectionConfig? Config { get; set; }
         public SkillModel? Skill { get; set; }
         public IList<TestAISettingModel> TestAISettings { get; set; } = new List<TestAISettingModel>();

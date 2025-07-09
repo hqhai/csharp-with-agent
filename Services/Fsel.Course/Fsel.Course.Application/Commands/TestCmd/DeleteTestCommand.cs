@@ -48,10 +48,10 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(test));
                 return methodResult;
             }
-            await DeleteDataAsync(test);
 
             await _testRepository.ExecuteTransactionAsync(async () =>
             {
+                await DeleteDataAsync(test);
                 var result = await _testRepository.DeleteAsync(test);
                 await _testRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -62,26 +62,40 @@ namespace Fsel.Course.Application.Commands.TestCmd
             return methodResult;
         }
 
-        private async Task DeleteDataAsync(Test test)
+        private async Task<VoidMethodResult> DeleteDataAsync(Test test)
         {
+            VoidMethodResult methodResult = new VoidMethodResult();
             var allSectionChilrens = await _testSectionRepository.Queryable.Where(x => x.TestId == test.Id).ToListAsync();
             if (allSectionChilrens.Any())
             {
-                await _testSectionRepository.DeleteListAsync(allSectionChilrens);
-                await _testSectionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _testRepository.ExecuteTransactionAsync(async () =>
+                {
+                    await _testSectionRepository.DeleteListAsync(allSectionChilrens);
+                    await _testSectionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    return methodResult;
+                });
             }
             var questions = await _testSectionQuestionRepository.Queryable.WhereBulkContains(allSectionChilrens.Select(x => x.Id), x => x.TestSectionId).Select(x => x.Question).ToListAsync();
             if (questions.Any())
             {
-                await _questionRepository.DeleteListAsync(questions);
-                await _questionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _testRepository.ExecuteTransactionAsync(async () =>
+                {
+                    await _questionRepository.DeleteListAsync(questions);
+                    await _questionRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    return methodResult;
+                });
             }
             var testAISettings = await _testAISettingRepository.Queryable.Include(x => x.TestAICriteriaSettings).WhereBulkContains(allSectionChilrens.Select(x => x.Id), x => x.TestSectionId).ToListAsync();
             if (testAISettings.Any())
             {
-                await _testAISettingRepository.DeleteListAsync(testAISettings).ConfigureAwait(false);
-                await _testAISettingRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _testRepository.ExecuteTransactionAsync(async () =>
+                {
+                    await _testAISettingRepository.DeleteListAsync(testAISettings).ConfigureAwait(false);
+                    await _testAISettingRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    return methodResult;
+                });
             }
+            return methodResult;
         }
     }
 }
