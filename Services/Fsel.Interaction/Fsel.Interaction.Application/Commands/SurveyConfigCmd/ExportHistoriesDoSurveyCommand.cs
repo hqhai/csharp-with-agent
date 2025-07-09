@@ -52,14 +52,14 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
 
             var surveyQuestionIds = surveyConfig.SurveyQuestions.Select(p => p.Id).ToList();
 
-            var customerSurveys = from cs in _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId)
-                                  join csg in _customerSurveyGroupRepository.Queryable on cs.CustomerSurveyGroupId equals csg.Id
-                                  where csg.Status == EnumSurveyGroupStatus.Done
-                                  select new
-                                  {
-                                      CustomerSurvey = cs,
-                                      CustomerSurveyGroup = csg
-                                  };
+            var customerSurveys = await (from cs in _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId)
+                                         join csg in _customerSurveyGroupRepository.Queryable on cs.CustomerSurveyGroupId equals csg.Id
+                                         where csg.Status == EnumSurveyGroupStatus.Done
+                                         select new
+                                         {
+                                             CustomerSurvey = cs,
+                                             CustomerSurveyGroup = csg
+                                         }).ToListAsync(cancellationToken);
 
             var users = customerSurveys.GroupBy(p => p.CustomerSurvey.UserId);
             var userIds = users.Select(p => p.Key).ToList();
@@ -72,7 +72,8 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
                 return methodResult;
             }
 
-            MemoryStream memoryStream = new MemoryStream();
+            using var memoryStream = new MemoryStream();
+
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
@@ -91,37 +92,50 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
 
             var dataBag = new ConcurrentBag<(int row, List<string> values)>();
 
-            Parallel.ForEach(students, (item, state, index) =>
+            var tasks = students.Select(async (item, index) =>
             {
                 if (item.Human != null)
                 {
-                    var answers = customerSurveys.Where(p => p.CustomerSurvey.UserId == item.Human.UserId).ToList();
+                    var answers = customerSurveys
+                        .Where(p => p.CustomerSurvey.UserId == item.Human.UserId)
+                        .ToList();
 
                     List<string> rowValues = new List<string>()
                     {
-                        answers.Last().CustomerSurvey.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("yyyy-MM-dd HH:mm", cultureInfo) ?? string.Empty,
+                        answers.LastOrDefault()?.CustomerSurvey.CreatedDate
+                            .ConvertTimeFromUtc(EnumCountryKey.Vietnam)
+                            .ToString("yyyy-MM-dd HH:mm", cultureInfo) ?? string.Empty,
+
                         item.Human.FullName ?? string.Empty,
                         item.Human.Email ?? string.Empty,
                         item.Human.FullName ?? string.Empty,
                         item.Human.User?.UserName ?? string.Empty
                     };
 
-                    surveyConfig.SurveyQuestions.ForEach(p =>
+                    foreach (var question in surveyConfig.SurveyQuestions)
                     {
-                        var answer = answers.FirstOrDefault(x => x.CustomerSurvey.SurveyQuestionId == p.Id)?.CustomerSurvey.Answer ?? string.Empty;
-                        using var document = JsonDocument.Parse(answer.ToString() ?? string.Empty);
+                        var answer = answers.FirstOrDefault(x => x.CustomerSurvey.SurveyQuestionId == question.Id)?.CustomerSurvey.Answer ?? string.Empty;
 
-                        var root = document.RootElement;
-                        var firstItem = root[0];
+                        try
+                        {
+                            using var document = JsonDocument.Parse(answer.ToString() ?? string.Empty);
+                            var content = document.RootElement[0].GetProperty("content").GetString() ?? string.Empty;
+                            rowValues.Add(content);
+                        }
+                        catch
+                        {
+                            rowValues.Add(string.Empty);
+                        }
+                    }
 
-                        string content = firstItem.GetProperty("content").GetString() ?? string.Empty;
-
-                        rowValues.Add(content ?? string.Empty);
-                    });
-
-                    dataBag.Add((startRow + (int)index, rowValues));
+                    lock (dataBag)
+                    {
+                        dataBag.Add((startRow + index, rowValues));
+                    }
                 }
-            });
+            }).ToArray();
+
+            await Task.WhenAll(tasks);
 
             var sortedData = dataBag.OrderBy(x => x.row);
 

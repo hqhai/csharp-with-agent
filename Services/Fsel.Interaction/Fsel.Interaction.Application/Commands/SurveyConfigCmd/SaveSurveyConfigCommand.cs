@@ -79,7 +79,9 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
                 var surveyQuestions = await _surveyQuestionRepository.Queryable.Where(p => p.SurveyConfigId == request.Id).ToListAsync(cancellationToken);
                 var surveyQuestionIds = surveyQuestions.Select(p => p.Id).ToList();
 
-                if (await _customerSurveyRepository.Queryable.AnyAsync(p => surveyQuestionIds.Contains(p.SurveyQuestionId), cancellationToken))
+                var checkUsed = await _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId).AnyAsync(cancellationToken);
+
+                if (checkUsed)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(surveyQuestions));
                     return methodResult;

@@ -41,13 +41,8 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
 
             var surveyConfigs = await _surveyConfigRepository.Queryable.ToListAsync(cancellationToken);
 
-            if (request.StartDate.HasValue && request.EndDate.HasValue)
+            if (request.StartDate.HasValue && request.EndDate.HasValue && request.StartDate < request.EndDate)
             {
-                if (request.StartDate >= request.EndDate)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.StartDate));
-                    return methodResult;
-                }
                 surveyConfigs = surveyConfigs.Where(p => p.StartDate >= request.StartDate && request.EndDate >= p.EndDate).ToList();
             }
 
@@ -80,14 +75,14 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
             var surveyConfigIds = lists.Select(p => p.Id);
             var surveyQuestions = await _surveyQuestionRepository.Queryable.WhereBulkContains(surveyConfigIds, p => p.SurveyConfigId).ToListAsync(cancellationToken);
             var surveyQuestionIds = surveyQuestions.Select(p => p.Id);
-            var customerSurveys = from cs in _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId)
-                                  join csg in _customerSurveyGroupRepository.Queryable on cs.CustomerSurveyGroupId equals csg.Id
-                                  where csg.Status == EnumSurveyGroupStatus.Done
-                                  select new
-                                  {
-                                      CustomerSurvey = cs,
-                                      CustomerSurveyGroup = csg
-                                  };
+            var customerSurveys = await (from cs in _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId)
+                                         join csg in _customerSurveyGroupRepository.Queryable on cs.CustomerSurveyGroupId equals csg.Id
+                                         where csg.Status == EnumSurveyGroupStatus.Done
+                                         select new
+                                         {
+                                             CustomerSurvey = cs,
+                                             CustomerSurveyGroup = csg
+                                         }).ToListAsync(cancellationToken);
 
             lists.ForEach(p =>
             {
