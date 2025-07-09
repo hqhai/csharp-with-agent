@@ -107,6 +107,10 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             {
                 return false;
             }
+            if (string.IsNullOrEmpty(examPractice.Name))
+            {
+                return false;
+            }
             if (!examPractice.StartDate.HasValue || !examPractice.EndDate.HasValue)
             {
                 return false;
