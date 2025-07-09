@@ -2,9 +2,11 @@
 
 namespace Fsel.Course.Domain.Enums
 {
-    public enum EnumVersionStatus
+    public enum EnumSyllableMarked
     {
-        OldVersion,
-        LastVersion
+        Green,
+        Yellow,
+        Orange,
+        Red
     }
 }

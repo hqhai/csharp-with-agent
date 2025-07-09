@@ -250,5 +250,11 @@ namespace Fsel.Shared.Constants
             public const int Section0 = 0;
             public const int Section1 = 1;
         }
+
+        public static class HighlightRangeConstants
+        {
+            public const int MinValue = 0;
+            public const int MaxValue = 100;
+        }
     }
 }

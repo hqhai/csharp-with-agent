@@ -68,5 +68,11 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
                 .AnyAsync(x => x.Id == id && x.CourseUnitMockTests.Count > 0);
         }
+
+        public async Task<bool> IsUsingByClient(Guid id)
+        {
+            return await DbContext.Set<UnitResult>().AsQueryable()
+                  .AnyAsync(x => x.UnitId == id);
+        }
     }
 }

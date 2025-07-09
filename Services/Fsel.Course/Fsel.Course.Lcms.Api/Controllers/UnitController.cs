@@ -15,7 +15,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/unit")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
@@ -36,7 +37,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchUnitQuery query)
         {
-            MethodResult<PagingItemsModel<UnitSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -53,6 +54,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
+        /// Get Unit Histories
+        /// </summary>
+        [HttpGet("histories")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UnitModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitHistory([FromQuery] GetUnitHistoryQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Create a Unit
         /// </summary>
         [HttpPost]
@@ -60,7 +73,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateUnitCommand command)
         {
-            MethodResult<UnitModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

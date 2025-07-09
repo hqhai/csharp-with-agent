@@ -2,10 +2,10 @@
 
 using System.Globalization;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
-using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;

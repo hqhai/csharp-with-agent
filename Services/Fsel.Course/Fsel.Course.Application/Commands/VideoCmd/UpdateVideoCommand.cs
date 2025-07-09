@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
