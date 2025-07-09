@@ -146,7 +146,6 @@ builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
 builder.Services.AddScoped<VideoConverter>();
 builder.Services.AddScoped<CourseHelper>();
-builder.Services.AddScoped<UnitHelper>();
 builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
