@@ -12,12 +12,6 @@ namespace Fsel.Interaction.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Property(e => e.ApplicableProgram)
-              .HasMaxLength(100)
-              .HasConversion(
-                  v => v.ToString(),
-                  v => v.EnumParse<EnumSurveyFormType>());
-
             builder.Property(e => e.Status)
            .HasMaxLength(100)
            .HasConversion(

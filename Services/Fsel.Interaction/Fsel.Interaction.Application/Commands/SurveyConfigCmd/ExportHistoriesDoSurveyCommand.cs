@@ -10,9 +10,7 @@ using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Index.HPRtree;
 using OfficeOpenXml;
-using static OfficeOpenXml.ExcelErrorValue;
 
 namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
 {

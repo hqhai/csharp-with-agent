@@ -20,7 +20,14 @@ namespace Fsel.Interaction.Domain.Entities
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public int Tokens { get; set; }
 
-        public EnumSurveyFormType ApplicableProgram { get; set; }
+        public string? ApplicableProgramStr { get; set; }
+
+        [NotMapped]
+        public IList<EnumSurveyFormType>? ApplicablePrograms
+        {
+            get { return ConvertHelper.Deserialize<IList<EnumSurveyFormType>>(ApplicableProgramStr); }
+            set { ApplicableProgramStr = ConvertHelper.Serialize(value); }
+        }
 
         public string? CompetitionEventIdsStr { get; set; }
 

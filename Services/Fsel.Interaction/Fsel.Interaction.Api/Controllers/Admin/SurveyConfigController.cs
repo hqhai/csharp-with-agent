@@ -39,7 +39,7 @@ namespace Fsel.Interaction.Api.Controllers.Admin
         /// <summary>
         /// Create
         /// </summary>
-        [HttpPost("create")]
+        [HttpPost("save")]
         [ProducesResponseType(typeof(MethodResult<SurveyConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> Create([FromBody] SaveSurveyConfigCommand command)

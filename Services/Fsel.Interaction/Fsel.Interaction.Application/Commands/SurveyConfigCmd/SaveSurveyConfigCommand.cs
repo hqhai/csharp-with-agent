@@ -43,7 +43,7 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.EndDate));
                 return methodResult;
             }
-            if (request.ApplicableProgram == EnumSurveyFormType.Event && (request.CompetitionEventIds == null || !request.CompetitionEventIds.Any()))
+            if (request.ApplicablePrograms != null && request.ApplicablePrograms.Any(p => p == EnumSurveyFormType.Event) && (request.CompetitionEventIds == null || !request.CompetitionEventIds.Any()))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.CompetitionEventIds));
                 return methodResult;

@@ -10,10 +10,9 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public DateTime EndDate { get; set; }
         public int Tokens { get; set; }
         public int CompletedUserCount { get; set; }
-        public EnumSurveyFormType ApplicableProgram { get; set; }
+        public IList<EnumSurveyFormType>? ApplicablePrograms { get; set; }
         public IList<Guid>? CompetitionEventIds { get; set; }
         public EnumSurveyConfigStatus Status { get; set; }
-
         public IList<SurveyConfigApplicableSubjectModel>? ApplicableSubjects { get; set; }
         public IList<SurveyConfigProgressRequirementModel>? ProgressRequirements { get; set; }
         public IList<SurveyQuestionModel>? SurveyQuestions { get; set; }

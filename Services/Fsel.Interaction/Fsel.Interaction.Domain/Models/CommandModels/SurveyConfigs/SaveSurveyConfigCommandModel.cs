@@ -11,7 +11,7 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.SurveyConfigs
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public int Tokens { get; set; }
-        public EnumSurveyFormType ApplicableProgram { get; set; }
+        public IList<EnumSurveyFormType>? ApplicablePrograms { get; set; }
         public IList<Guid>? CompetitionEventIds { get; set; }
         public IList<SurveyConfigApplicableSubjectModel>? ApplicableSubjects { get; set; }
         public IList<SurveyConfigProgressRequirementModel>? ProgressRequirements { get; set; }
