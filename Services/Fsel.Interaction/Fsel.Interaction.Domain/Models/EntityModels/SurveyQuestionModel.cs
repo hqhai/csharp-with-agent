@@ -13,6 +13,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public string? Icon { get; set; }
         public float DisplayOrder { get; set; }
         public int DisplayLevel { get; set; }
+        public bool? IsRequired { get; set; }
         public EnumSurveyQuestion Type { get; set; }
         public object? Answers { get; set; }
         public IList<CustomerSurveyModel>? CustomerSurveys { get; set; }

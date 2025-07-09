@@ -30,6 +30,8 @@ namespace Fsel.Interaction.Domain.Entities
 
         public bool? IsPilot { get; set; }
 
+        public bool? IsRequired { get; set; }
+
         public EnumSurveyQuestion Type { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -43,6 +45,9 @@ namespace Fsel.Interaction.Domain.Entities
         }
 
         public Guid? CompetitionEventId { get; set; }
+
+        public Guid? SurveyConfigId { get; set; }
+        public SurveyConfig? SurveyConfig { get; set; }
 
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
 

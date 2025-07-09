@@ -24,6 +24,11 @@ namespace Fsel.Interaction.Infrastructure.Configs
                    .HasConversion(
                        v => v.ToString(),
                        v => v.EnumParse<EnumSurveyFormType>());
+
+            builder.HasOne(a => a.SurveyConfig)
+               .WithMany(b => b.SurveyQuestions)
+               .HasForeignKey(b => b.SurveyConfigId)
+               .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

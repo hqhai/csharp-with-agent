@@ -41,6 +41,8 @@ builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
 builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
 builder.Services.AddScoped<IFlagRepository, FlagRepository>();
 builder.Services.AddScoped<ICustomerSurveyGroupRepository, CustomerSurveyGroupRepository>();
+builder.Services.AddScoped<ISurveyConfigRepository, SurveyConfigRepository>();
+
 builder.Services.AddScoped<DiscussionBoardCommentPublisher>();
 builder.Services.AddScoped<DiscussionBoardLikePublisher>();
 builder.Services.AddScoped<InterationActionPublisher>();
