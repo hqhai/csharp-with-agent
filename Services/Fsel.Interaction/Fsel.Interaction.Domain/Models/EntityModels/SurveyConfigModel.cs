@@ -17,6 +17,14 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public EnumSurveyConfigStatus Status { get; set; }
         public IList<SurveyConfigApplicableSubjectModel>? ApplicableSubjects { get; set; }
         public IList<SurveyConfigProgressRequirementModel>? ProgressRequirements { get; set; }
+        public IList<SurveyGroupQuestionModel>? SurveyGroupQuestions { get; set; }
+    }
+
+    public class SurveyGroupQuestionModel
+    {
+        public string? Description { get; set; }
+        public string? Title { get; set; }
+        public int DisplayLevel { get; set; }
         public IList<SurveyQuestionModel>? SurveyQuestions { get; set; }
     }
 }

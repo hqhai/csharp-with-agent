@@ -38,7 +38,26 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<SurveyConfigModel>(surveyConfig);
+            var surveyConfigModel = _mapper.Map<SurveyConfigModel>(surveyConfig);
+            var listLevel = surveyConfig.SurveyQuestions.Select(p => p.DisplayLevel).OrderBy(p => p).Distinct();
+
+            var questionGroups = new List<SurveyGroupQuestionModel>();
+
+            foreach (var item in listLevel)
+            {
+                var questions = surveyConfig.SurveyQuestions.Where(p => p.DisplayLevel == item).OrderBy(p => p.DisplayOrder).ToList();
+                questionGroups.Add(new SurveyGroupQuestionModel()
+                {
+                    DisplayLevel = item,
+                    Title = questions.FirstOrDefault()?.Title,
+                    Description = questions.FirstOrDefault()?.Description,
+                    SurveyQuestions = _mapper.Map<List<SurveyQuestionModel>>(questions)
+                });
+            }
+
+            surveyConfigModel.SurveyGroupQuestions = questionGroups;
+
+            methodResult.Result = surveyConfigModel;
             return methodResult;
         }
     }
