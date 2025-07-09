@@ -10,6 +10,8 @@ namespace Fsel.Interaction.Domain.Models.CommandModels.SurveyQuestions
 
         public string? Description { get; set; }
 
+        public string? Title { get; set; }
+
         public string? Icon { get; set; }
 
         public float DisplayOrder { get; set; }

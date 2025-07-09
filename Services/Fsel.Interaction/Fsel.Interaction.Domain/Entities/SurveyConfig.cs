@@ -14,7 +14,14 @@ namespace Fsel.Interaction.Domain.Entities
         [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Title { get; set; }
+
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
+
         public DateTime StartDate { get; set; }
+
         public DateTime EndDate { get; set; }
 
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

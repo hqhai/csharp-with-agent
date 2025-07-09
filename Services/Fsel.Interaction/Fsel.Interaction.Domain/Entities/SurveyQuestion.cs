@@ -17,6 +17,9 @@ namespace Fsel.Interaction.Domain.Entities
         public string? Question { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Title { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

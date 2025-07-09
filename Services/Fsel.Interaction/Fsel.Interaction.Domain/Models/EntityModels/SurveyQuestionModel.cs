@@ -9,6 +9,7 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
     public class SurveyQuestionModel : BaseModel
     {
         public string? Question { get; set; }
+        public string? Title { get; set; }
         public string? Description { get; set; }
         public string? Icon { get; set; }
         public float DisplayOrder { get; set; }
