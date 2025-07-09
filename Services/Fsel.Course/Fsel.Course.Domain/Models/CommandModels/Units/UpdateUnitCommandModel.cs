@@ -4,8 +4,8 @@ using Fsel.Core.Base.BaseModels;
 
 namespace Fsel.Course.Domain.Models.CommandModels.Units
 {
+    using Entities;
     using Enums;
-
     public class UpdateUnitCommandModel : BaseCommandModel
     {
         public string? Name { get; set; }
@@ -31,14 +31,5 @@ namespace Fsel.Course.Domain.Models.CommandModels.Units
         public double Percent { get; set; }
 
         public int OpenOrder { get; set; }
-    }
-
-    public class HighlightRange
-    {
-        public int From { get; set; }
-
-        public int To { get; set; }
-
-        public EnumSyllableMarked SyllableMarked { get; set; }
     }
 }

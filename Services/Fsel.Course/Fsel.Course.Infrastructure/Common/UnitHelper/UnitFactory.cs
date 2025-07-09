@@ -5,12 +5,12 @@ namespace Fsel.Course.Infrastructure.Common.UnitHelper
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.CommandModels.Units;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
     public class UnitFactory

@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Units;
@@ -18,30 +17,26 @@ namespace Fsel.Course.Application.Commands.UnitCmd
     public class CreateUnitCommandHandler : IRequestHandler<CreateUnitCommand, MethodResult<UnitModel>>
     {
         private readonly IUnitRepository _unitRepository;
-        private readonly IMapper _mapper;
+        private readonly IServiceProvider _serviceProvider;
 
-        public CreateUnitCommandHandler(IUnitRepository unitRepository, IMapper mapper)
+        public CreateUnitCommandHandler(IUnitRepository unitRepository, IServiceProvider serviceProvider)
         {
             _unitRepository = unitRepository;
-            _mapper = mapper;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(CreateUnitCommand request, CancellationToken cancellationToken)
         {
             var methodResult = new MethodResult<UnitModel>();
-            var validation = await UnitCreateValidation.Create(request)
-                                    .ValidateRequestData()
-                                    .ValidateDuplicateUnit(_unitRepository);
 
-            var validationResult = validation.GetResult();
-            if (validationResult.ErrorMessages.Any())
+            var unit = UnitFactory.Create(request).Build(version: 0, originalId: Guid.NewGuid());
+            if (!await unit.IsValid(_serviceProvider))
             {
-                methodResult.AddErrorBadRequest(validationResult.ErrorMessages);
+                methodResult.AddErrorBadRequest(unit.ErrorMessages);
                 return methodResult;
             }
 
-            var unit = UnitFactory.Create(request).Build();
-            if (!unit.IsValid())
+            if (await unit.ValidateDuplicateUnit(_unitRepository).ConfigureAwait(false))
             {
                 methodResult.AddErrorBadRequest(unit.ErrorMessages);
                 return methodResult;
@@ -51,9 +46,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
             {
                 unit = _unitRepository.Add(unit);
                 await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<UnitModel>(unit);
                 return methodResult;
             });
 

@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
@@ -46,7 +47,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
-            if (video.VersionStatus == Domain.Enums.EnumVersionStatus.OldVersion)
+            if (video.VersionStatus == EnumVersionStatus.OldVersion)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.NotDelete), nameof(video.VersionStatus), video.VersionStatus);
                 return methodResult;

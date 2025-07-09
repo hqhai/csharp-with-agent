@@ -14,6 +14,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public bool IsActive { get; set; }
 
+        public Guid OriginalId { get; set; }
+
         public IList<Guid>? TeacherIds { get; set; }
 
         public IList<string>? TeacherNames { get; set; }

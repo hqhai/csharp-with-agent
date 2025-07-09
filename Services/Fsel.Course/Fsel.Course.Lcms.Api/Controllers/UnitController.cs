@@ -54,6 +54,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
+        /// Get Unit Histories
+        /// </summary>
+        [HttpGet("histories")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UnitModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitHistory([FromQuery] GetUnitHistoryQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Create a Unit
         /// </summary>
         [HttpPost]
