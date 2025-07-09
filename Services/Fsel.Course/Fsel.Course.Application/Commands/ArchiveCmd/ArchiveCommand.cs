@@ -6,12 +6,13 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.IRepositories;
-    using MediatR;
-    using Microsoft.EntityFrameworkCore;
     using Fsel.Course.Domain.Entities;
-    using Microsoft.AspNetCore.Http;
+    using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Enums;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class ArchiveCommand : IRequest<MethodResult<bool>>
     {
@@ -30,8 +31,18 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
         private readonly IFinalTestRepository _finalTestRepository;
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IVideoRepository _videoRepository;
+        private readonly ITestRepository _testRepository;
 
-        public ArchiveCommandHandler(ICourseRepository courseRepository, ILessonRepository lessonRepository, IUnitRepository unitRepository, IHomeWorkRepository homeWorkRepository, IExtraPracticeRepository extraPracticeRepository, IMockTestRepository mockTestRepository, IFinalTestRepository finalTestRepository, IPlacementTestRepository placementTestRepository, IVideoRepository videoRepository)
+        public ArchiveCommandHandler(ICourseRepository courseRepository,
+            ILessonRepository lessonRepository,
+            IUnitRepository unitRepository,
+            IHomeWorkRepository homeWorkRepository,
+            IExtraPracticeRepository extraPracticeRepository,
+            IMockTestRepository mockTestRepository,
+            IFinalTestRepository finalTestRepository,
+            IPlacementTestRepository placementTestRepository,
+            IVideoRepository videoRepository,
+            ITestRepository testRepository)
         {
             _courseRepository = courseRepository;
             _lessonRepository = lessonRepository;
@@ -42,162 +53,242 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
             _finalTestRepository = finalTestRepository;
             _placementTestRepository = placementTestRepository;
             _videoRepository = videoRepository;
+            _testRepository = testRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ArchiveCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-
-            if (string.IsNullOrEmpty(request.ObjectName) || request.Ids == null)
+            if (string.IsNullOrEmpty(request.ObjectName) || (request.Ids == null || !request.Ids.Any()))
             {
                 return methodResult;
             }
-            else if (request.ObjectName == nameof(Course))
+            switch (request.ObjectName)
             {
-                await ArchiveCourses(request.Ids, cancellationToken);
-            }
-            else if (request.ObjectName == nameof(Domain.Entities.Unit))
-            {
-                await ArchiveUnits(request.Ids, cancellationToken);
-            }
-            else if (request.ObjectName == nameof(Lesson))
-            {
-                await ArchiveLessons(request.Ids, cancellationToken);
-            }
-            else if (request.ObjectName == nameof(HomeWork))
-            {
-                await ArchiveHomeWorks(request.Ids, cancellationToken);
-            }
-            else if (request.ObjectName == nameof(Video))
-            {
-                await ArchiveVideos(request.Ids, cancellationToken);
-            }
-            else if (request.ObjectName == nameof(ExtraPractice))
-            {
-                await ArchiveExtraPractices(request.Ids, cancellationToken);
-            }
-            else if (request.ObjectName == nameof(MockTest))
-            {
-                await ArchiveMockTests(request.Ids, cancellationToken);
-            }
-            else if (request.ObjectName == nameof(FinalTest))
-            {
-                await ArchiveFinalTests(request.Ids, cancellationToken);
-            }
-            else if (request.ObjectName == nameof(PlacementTest))
-            {
-                await ArchivePlacementTests(request.Ids, cancellationToken);
+                case nameof(Course):
+                    await ArchiveCourses(request.Ids, cancellationToken);
+                    break;
+
+                case nameof(Domain.Entities.Unit):
+                    await ArchiveUnits(request.Ids, cancellationToken);
+                    break;
+
+                case nameof(Lesson):
+                    await ArchiveLessons(request.Ids, cancellationToken);
+                    break;
+
+                case nameof(HomeWork):
+                    await ArchiveHomeWorks(request.Ids, cancellationToken);
+                    break;
+
+                case nameof(Video):
+                    await ArchiveVideos(request.Ids, cancellationToken);
+                    break;
+
+                case nameof(ExtraPractice):
+                    await ArchiveExtraPractices(request.Ids, cancellationToken);
+                    break;
+
+                case nameof(MockTest):
+                    await ArchiveMockTests(request.Ids, cancellationToken);
+                    break;
+
+                case nameof(FinalTest):
+                    await ArchiveFinalTests(request.Ids, cancellationToken);
+                    break;
+
+                case nameof(PlacementTest):
+                    await ArchivePlacementTests(request.Ids, cancellationToken);
+                    break;
+
+                case nameof(Test):
+                    await ArchiveTests(request.Ids, cancellationToken);
+                    break;
+
+                default:
+                    break;
             }
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task ArchiveCourses(IList<Guid> ids, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> ArchiveCourses(IList<Guid> ids, CancellationToken cancellationToken)
         {
-            var courses = await _courseRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (courses != null)
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var courses = await _courseRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (courses == null || !courses.Any())
             {
-                courses.ForEach(p =>
+                return methodResult;
+            }
+            courses.ForEach(p =>
+            {
+                if (!p.IsArchive && p.Status == EnumCourseStatus.Active)
                 {
-                    if (!p.IsArchive && p.Status == EnumCourseStatus.Active)
-                    {
-                        p.Status = EnumCourseStatus.InActive;
-                    }
-                    p.IsArchive = !p.IsArchive;
-                });
-                _courseRepository.UpdateList(courses);
-                await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            }
+                    p.Status = EnumCourseStatus.InActive;
+                }
+                p.IsArchive = !p.IsArchive;
+            });
+            await _courseRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _courseRepository.BulkUpdateList(courses);
+                return methodResult;
+            });
+            return methodResult;
         }
 
-        private async Task ArchiveUnits(IList<Guid> ids, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> ArchiveUnits(IList<Guid> ids, CancellationToken cancellationToken)
         {
-            var units = await _unitRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (units != null)
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var units = await _unitRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (units == null || !units.Any())
             {
-                units.ForEach(p => { p.IsArchive = !p.IsArchive; });
-                _unitRepository.UpdateList(units);
-                await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
             }
+            units.ForEach(p => { p.IsArchive = !p.IsArchive; });
+            await _unitRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _unitRepository.BulkUpdateList(units);
+                return methodResult;
+            });
+            return methodResult;
         }
 
-        private async Task ArchiveLessons(IList<Guid> ids, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> ArchiveLessons(IList<Guid> ids, CancellationToken cancellationToken)
         {
-            var lessons = await _lessonRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (lessons != null)
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var lessons = await _lessonRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (lessons == null || !lessons.Any())
             {
-                lessons.ForEach(p => { p.IsArchive = !p.IsArchive; });
-                _lessonRepository.UpdateList(lessons);
-                await _lessonRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
             }
+            lessons.ForEach(p => { p.IsArchive = !p.IsArchive; });
+            await _lessonRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _lessonRepository.BulkUpdateList(lessons);
+                return methodResult;
+            });
+            return methodResult;
         }
 
-        private async Task ArchiveVideos(IList<Guid> ids, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> ArchiveVideos(IList<Guid> ids, CancellationToken cancellationToken)
         {
-            var videos = await _videoRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (videos != null)
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var videos = await _videoRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (videos == null || !videos.Any())
             {
-                videos.ForEach(p => { p.IsArchive = !p.IsArchive; });
-                _videoRepository.UpdateList(videos);
-                await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
             }
+            videos.ForEach(p => { p.IsArchive = !p.IsArchive; });
+            await _videoRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _videoRepository.BulkUpdateList(videos);
+                return methodResult;
+            });
+            return methodResult;
         }
 
-        private async Task ArchiveHomeWorks(IList<Guid> ids, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> ArchiveHomeWorks(IList<Guid> ids, CancellationToken cancellationToken)
         {
-            var homeWorks = await _homeWorkRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (homeWorks != null)
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var homeWorks = await _homeWorkRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (homeWorks == null || !homeWorks.Any())
             {
-                homeWorks.ForEach(p => { p.IsArchive = !p.IsArchive; });
-                _homeWorkRepository.UpdateList(homeWorks);
-                await _homeWorkRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
             }
+            homeWorks.ForEach(p => { p.IsArchive = !p.IsArchive; });
+            await _homeWorkRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _homeWorkRepository.BulkUpdateList(homeWorks);
+                return methodResult;
+            });
+            return methodResult;
         }
 
-        private async Task ArchiveExtraPractices(IList<Guid> ids, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> ArchiveExtraPractices(IList<Guid> ids, CancellationToken cancellationToken)
         {
-            var extraPractices = await _extraPracticeRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (extraPractices != null)
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var extraPractices = await _extraPracticeRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (extraPractices == null || !extraPractices.Any())
             {
-                extraPractices.ForEach(p => { p.IsArchive = !p.IsArchive; });
-                _extraPracticeRepository.UpdateList(extraPractices);
-                await _extraPracticeRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
             }
+            extraPractices.ForEach(p => { p.IsArchive = !p.IsArchive; });
+            await _extraPracticeRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _extraPracticeRepository.BulkUpdateList(extraPractices);
+                return methodResult;
+            });
+            return methodResult;
         }
 
-        private async Task ArchiveMockTests(IList<Guid> ids, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> ArchiveMockTests(IList<Guid> ids, CancellationToken cancellationToken)
         {
-            var mockTests = await _mockTestRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (mockTests != null)
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var mockTests = await _mockTestRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (mockTests == null || !mockTests.Any())
             {
-                mockTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
-                _mockTestRepository.UpdateList(mockTests);
-                await _mockTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
             }
+            mockTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
+            await _mockTestRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _mockTestRepository.BulkUpdateList(mockTests);
+                return methodResult;
+            });
+            return methodResult;
         }
 
-        private async Task ArchiveFinalTests(IList<Guid> ids, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> ArchiveFinalTests(IList<Guid> ids, CancellationToken cancellationToken)
         {
-            var finalTests = await _finalTestRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (finalTests != null)
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var finalTests = await _finalTestRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (finalTests == null || !finalTests.Any())
             {
-                finalTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
-                _finalTestRepository.UpdateList(finalTests);
-                await _finalTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
             }
+            finalTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
+            await _finalTestRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _finalTestRepository.BulkUpdateList(finalTests);
+                return methodResult;
+            });
+            return methodResult;
         }
 
-        private async Task ArchivePlacementTests(IList<Guid> ids, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> ArchivePlacementTests(IList<Guid> ids, CancellationToken cancellationToken)
         {
-            var placementTests = await _placementTestRepository.Queryable.Where(p => ids.Contains(p.Id)).ToListAsync(cancellationToken);
-            if (placementTests != null)
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var placementTests = await _placementTestRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (placementTests == null || !placementTests.Any())
             {
-                placementTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
-                _placementTestRepository.UpdateList(placementTests);
-                await _placementTestRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                return methodResult;
             }
+            placementTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
+            await _placementTestRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _placementTestRepository.BulkUpdateList(placementTests);
+                return methodResult;
+            });
+            return methodResult;
+        }
+
+        private async Task<VoidMethodResult> ArchiveTests(IList<Guid> ids, CancellationToken cancellationToken)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+            var tests = await _testRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
+            if (tests == null || !tests.Any())
+            {
+                return methodResult;
+            }
+            tests.ForEach(p => { p.IsArchive = !p.IsArchive; });
+            await _testRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _testRepository.BulkUpdateList(tests);
+                return methodResult;
+            });
+            return methodResult;
         }
     }
 }

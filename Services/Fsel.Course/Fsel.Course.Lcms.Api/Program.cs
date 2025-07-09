@@ -89,12 +89,13 @@ builder.Services.AddScoped<IStepFlowRepository, StepFlowRepository>();
 builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
 builder.Services.AddScoped<ILessonModuleRepository, LessonModuleRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
-builder.Services.AddScoped<ITestConfigRepository, TestConfigRepository>();
-builder.Services.AddScoped<ITestConfigSectionRepository, TestConfigSectionRepository>();
-builder.Services.AddScoped<ITestConfigSectionQuestionRepository, TestConfigSectionQuestionRepository>();
+builder.Services.AddScoped<ITestRepository, TestRepository>();
+builder.Services.AddScoped<ITestSectionRepository, TestSectionRepository>();
+builder.Services.AddScoped<ITestSectionQuestionRepository, TestConfigSectionQuestionRepository>();
+builder.Services.AddScoped<ITestAISettingRepository, TestAISettingRepository>();
+builder.Services.AddScoped<ITestAICriteriaSettingRepository, TestAICriteriaSettingRepository>();
 builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionRepository>();
 builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
-
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
@@ -106,6 +107,7 @@ builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<ProgramConverter>();
 builder.Services.AddScoped<LessonConverter>();
+builder.Services.AddScoped<TestHelper>();
 
 // Helper
 builder.Services.AddScoped<LinQAnswerHelper>();

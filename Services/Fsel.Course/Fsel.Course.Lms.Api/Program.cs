@@ -126,8 +126,8 @@ builder.Services.AddScoped<IStepFlowRepository, StepFlowRepository>();
 builder.Services.AddScoped<IActionFlowRepository, ActionFlowRepository>();
 builder.Services.AddScoped<ILessonModuleRepository, LessonModuleRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
-builder.Services.AddScoped<ITestConfigRepository, TestConfigRepository>();
-builder.Services.AddScoped<ITestConfigSectionRepository, TestConfigSectionRepository>();
+builder.Services.AddScoped<ITestRepository, TestRepository>();
+builder.Services.AddScoped<ITestSectionRepository, TestSectionRepository>();
 builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionRepository>();
 builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
 
@@ -152,6 +152,7 @@ builder.Services.AddScoped<DateTimeConverter>();
 builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<ProgramConverter>();
 builder.Services.AddScoped<LessonConverter>();
+builder.Services.AddScoped<TestHelper>();
 
 // Helper
 builder.Services.AddScoped<LinQAnswerHelper>();

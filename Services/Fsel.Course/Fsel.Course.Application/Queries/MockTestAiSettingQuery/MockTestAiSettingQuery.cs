@@ -32,7 +32,7 @@ namespace Fsel.Course.Application.Queries.MockTestAiSettingQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<MockTestAISettingModel>> methodResult = new MethodResult<IList<MockTestAISettingModel>>();
 
-            var mockTestAiSettings = await _mockTestAISettingRepository.Queryable.Include(x=>x.MockTestAICriteriaSettings).Where(x => x.SectionId == request.Id).ToListAsync(cancellationToken);
+            var mockTestAiSettings = await _mockTestAISettingRepository.Queryable.Include(x => x.MockTestAICriteriaSettings).Where(x => x.SectionId == request.Id).ToListAsync(cancellationToken);
 
             if (mockTestAiSettings == null)
             {

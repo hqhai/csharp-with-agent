@@ -4,7 +4,7 @@ using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Entities.FlowConfigs;
-using Fsel.Course.Domain.Entities.TestConfig;
+using Fsel.Course.Domain.Entities.TestConfigs;
 using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
@@ -108,6 +108,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SubjectConditionRule> SubjectConditionRules { get; set; }
 
         #region Report
+
         public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
         public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
         public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
@@ -135,12 +136,15 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
         public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
         public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
+
         #endregion Report
 
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
-        public DbSet<TestConfig> TestConfigs { get; set; }
-        public DbSet<TestConfigSection> TestConfigSections { get; set; }
-        public DbSet<TestConfigSectionQuestion> TestConfigSectionQuestions { get; set; }
+        public DbSet<Test> Tests { get; set; }
+        public DbSet<TestSection> TestSections { get; set; }
+        public DbSet<TestSectionQuestion> TestSectionQuestions { get; set; }
+        public DbSet<TestAICriteriaSetting> TestAICriteriaSettings { get; set; }
+        public DbSet<TestAISetting> TestAISettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -226,6 +230,11 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new CategoryTestBankEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonModuleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new DocumentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestAICriteriaSettingEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestAISettingEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestSectionQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new UnitModuleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SubjectConditionTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SubjectConditionRuleTypeConfiguration());
@@ -252,6 +261,9 @@ namespace Fsel.Course.Infrastructure
             //modelBuilder.Ignore<ReportLearningProcessModel>();
             //modelBuilder.Ignore<ReportLearningResultModel>();
             //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
+            //modelBuilder.Ignore<ExportStudentEventModel>();
+            //modelBuilder.Ignore<ExportDistrictEventModel>();
+            //modelBuilder.Ignore<ExportSchoolEventModel>();
 
             base.OnModelCreating(modelBuilder);
         }

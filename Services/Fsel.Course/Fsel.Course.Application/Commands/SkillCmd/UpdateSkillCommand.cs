@@ -5,11 +5,9 @@ namespace Fsel.Course.Application.Commands.SkillCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Skills;
     using Fsel.Course.Domain.Models.EntityModels.SkillModels;
-    using Fsel.Course.Infrastructure.Common;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -40,21 +38,7 @@ namespace Fsel.Course.Application.Commands.SkillCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
-            if (string.IsNullOrEmpty(request.Code))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code), request.Code);
-                return methodResult;
-            }
-            if (string.IsNullOrEmpty(request.Name))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Name), request.Name);
-                return methodResult;
-            }
-            if (!LinQHelper.IsValidSkillCode(request.Code))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSkillErrorCode.SkillCodeInvalid), nameof(request.Code), request.Code);
-                return methodResult;
-            }
+
             var isDuplicateCode = await _skillRepository.IsDuplicateFieldValueAsync(skill.Id, nameof(request.Code), request.Code);
             var isDuplicateName = await _skillRepository.IsDuplicateFieldValueAsync(skill.Id, nameof(request.Name), request.Name);
 

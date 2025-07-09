@@ -22,17 +22,6 @@ namespace Fsel.Course.Infrastructure.Common
             return default;
         }
 
-        public static bool IsValidSkillCode(this string input)
-        {
-            if (string.IsNullOrWhiteSpace(input))
-                return false;
-
-            // Regex: chỉ chấp nhận ký tự Latin (A-Z, a-z), số, ký tự đặc biệt ASCII, KHÔNG chứa khoảng trắng, KHÔNG unicode
-            var regex = new Regex("^[\\x21-\\x7E]+$");
-
-            return regex.IsMatch(input);
-        }
-
         public static bool IsValidCode(this string? input)
         {
             if (string.IsNullOrWhiteSpace(input))

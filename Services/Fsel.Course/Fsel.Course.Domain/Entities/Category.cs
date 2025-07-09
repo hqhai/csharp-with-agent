@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities.FlowConfigs;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
@@ -39,5 +40,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<Video> Videos { get; set; } = new List<Video>();
         public ICollection<Unit> Units { get; set; } = new List<Unit>();
         public ICollection<SubjectCondition> SubjectConditions { get; set; } = new List<SubjectCondition>();
+        public ICollection<Test> Tests { get; set; } = new List<Test>();
     }
 }

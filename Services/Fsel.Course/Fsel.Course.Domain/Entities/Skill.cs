@@ -5,16 +5,21 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Entities;
+    using Fsel.Common.Attributes;
 
     public class Skill : Entity
     {
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FilePath { get; set; }
 
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[\\x21-\\x7E]+$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Name { get; set; }
 
+        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[\\x21-\\x7E]+$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Code { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
