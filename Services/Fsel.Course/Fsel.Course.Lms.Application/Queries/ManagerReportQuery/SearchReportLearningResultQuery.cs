@@ -70,10 +70,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
                 CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
@@ -86,10 +88,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
                 PageSize = request.PageSize,
                 Filters = request.Filters,
@@ -169,12 +173,13 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                                               StudentId = ftr.StudentId,
                                           }).ToListAsync(cancellationToken);
 
-            var countUnit = request.CourseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca :
-                            request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS : ValueDefault;
-
             var datas = new List<LearningResultModel>();
             foreach (var item in students)
             {
+                var countUnit = request.CourseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca :
+                                request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS :
+                                request.CourseType == EnumCourseType.EnglishFoundation ? CourseProgressValue.CountUnitRFIA2 : default;
+
                 var unitResultGroup = unitResultGroups.FirstOrDefault(x => x.StudentId == item.Id);
                 var courseUnitResults = unitResultGroup?.UnitResults.OrderBy(x => x.CreatedDate).Select((y, index) => new
                 {
@@ -196,7 +201,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                         Type = nameof(Domain.Entities.Unit)
                     });
                 }
-                if (request.CourseType == EnumCourseType.Academic)
+                if (request.CourseType == EnumCourseType.Academic || request.CourseType == EnumCourseType.EnglishFoundation)
                 {
                     var finalTestResult = finalTestResults.FirstOrDefault(x => x.StudentId == item.Id);
                     int displayOrder = overallModuleReports.Count + 1;
@@ -228,6 +233,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     StudentId = item.Id,
                     Email = item.Email,
                     FullName = item.FullName,
+                    PhoneNumber = item.PhoneNumber,
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,

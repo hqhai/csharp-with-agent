@@ -32,7 +32,7 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumClassForumResultStatus>());
 
-            builder.HasIndex(c => new { c.ClassForumResultId, c.SubmissionCount }).IsUnique();
+            builder.HasIndex(c => new { c.ClassForumResultId, c.SubmissionCount }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.IsDeleted, c.ClassForumResultId });
             builder.HasIndex(c => new { c.IsDeleted, c.Status, c.ClassForumResultId });
         }

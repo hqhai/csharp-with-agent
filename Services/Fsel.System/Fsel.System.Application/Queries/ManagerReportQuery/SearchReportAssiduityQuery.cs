@@ -44,18 +44,20 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
             }
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
+                ListDistrict = request.ListDistrict,
+                ListProvince = request.ListProvince,
+                ListSchool = request.ListSchool,
+                ListCourseLevel = request.ListCourseLevel,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
+
                 PageSize = request.PageSize,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
                 Page = request.Page,
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 LearningStatus = request.LearningStatus,
@@ -110,6 +112,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 {
                     StudentId = student.Id,
                     FullName = student.FullName,
+                    PhoneNumber = student.PhoneNumber,
                     Email = student.Email,
                     SchoolName = student.School,
                     SchoolClass = student.SchoolClass,
