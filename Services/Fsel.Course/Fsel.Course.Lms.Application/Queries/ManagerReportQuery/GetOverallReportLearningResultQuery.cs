@@ -107,20 +107,21 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
             var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                                          join ur in _unitResultRepository.Queryable on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
+                                          join ur in _unitResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done)
+                                          .Where(x => (!request.EndDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= request.EndDate.Value.Date))
+                                          on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
                                           from ur in unitGroup.DefaultIfEmpty()
-                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active &&
-                                          (!request.EndDate.HasValue || (ur.UpdatedDate ?? ur.CreatedDate).Date <= request.EndDate.Value.Date) && ur.Status == EnumResultStatus.Done
+                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active
                                           group new { baseQ, ur }
                                           by new { baseQ.CourseId, baseQ.StudentId } into g
                                           select new
                                           {
                                               StudentId = g.Key.StudentId,
-                                              OverallPercent = g.Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default,
-                                              UnitResults = g.Select(x => x.ur).ToList()
+                                              OverallPercent = g.Where(x => x.ur != null).Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default,
+                                              UnitResults = g.Where(x => x.ur != null).Select(x => x.ur).ToList()
                                           })
-                                          .Where(x => !request.OverallScore.HasValue || (request.OverallScore == EnumOverallScore.Accuracy75OrMore ? x.OverallPercent >= (int)EnumOverallScore.Accuracy75OrMore : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore))
                                           .ToListAsync();
+            unitResultGroups = unitResultGroups.Where(x => !request.OverallScore.HasValue || (request.OverallScore == EnumOverallScore.Accuracy75OrMore ? x.OverallPercent >= (int)EnumOverallScore.Accuracy75OrMore : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore)).ToList();
 
             var unitResults = unitResultGroups.Where(x => x.UnitResults != null && x.UnitResults.Any()).SelectMany(x => x.UnitResults).ToList();
             students = students.Where(x => !request.OverallScore.HasValue || unitResultGroups.Select(x => x.StudentId).Distinct().Contains(x.Id)).ToList();
