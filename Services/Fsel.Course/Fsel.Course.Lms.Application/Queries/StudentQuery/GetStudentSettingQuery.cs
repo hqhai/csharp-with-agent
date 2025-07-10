@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Microsoft.IO.RecyclableMemoryStreamManager;
 
     public class GetStudentSettingQuery : IRequest<MethodResult<StudentSettingModel>>
     {
@@ -89,6 +90,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
             await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
             var @eventResults = await _userService.GetEventByUserId(request.UserId ?? _authContext.CurrentUserId);
+
+            var requestCheckSurvey = new CheckSurveyBySurveyFormTypeModel()
+            {
+                SurveyFormType = EnumSurveyFormType.Default
+            };
+
             if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null)
             {
                 var @events = @eventResults.Content?.Result;
@@ -98,11 +105,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.ActionConfigs = actionConfigs;
                 settingStudentModel.IsActivedAccount = DateTime.UtcNow >= (@events?.FirstOrDefault()?.EventContent?.StartDate ?? default);
 
-                var surveyEvent = await _interactionService.CheckSurveyBySurveyFormType(new CheckSurveyBySurveyFormTypeModel { SurveyFormType = EnumSurveyFormType.Event, CompetitionEventId = events?.FirstOrDefault()?.Id });
-                if (surveyEvent.IsSuccessStatusCode)
-                {
-                    settingStudentModel.IsSurveyEvent = surveyEvent.Content?.Result ?? false;
-                }
+                requestCheckSurvey.SurveyFormType = EnumSurveyFormType.Event;
+                requestCheckSurvey.CompetitionEventId = events?.FirstOrDefault()?.Id;
+            }
+
+            var surveyEvent = await _interactionService.CheckSurveyBySurveyFormType(requestCheckSurvey);
+            if (surveyEvent.IsSuccessStatusCode)
+            {
+                settingStudentModel.IsSurveyEvent = surveyEvent.Content?.Result ?? false;
             }
 
             var status = await _orderService.GetCurrentStatusAsync(request.UserId ?? _authContext.CurrentUserId);

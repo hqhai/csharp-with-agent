@@ -5,8 +5,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Common.Helpers;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -21,20 +20,11 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
     public class CheckSurveyBySurveyFormTypeQueryHandler : IRequestHandler<CheckSurveyBySurveyFormTypeQuery, MethodResult<bool>>
     {
-        private readonly ICustomerSurveyGroupRepository _customerSurveyGroupRepository;
-        private readonly ISurveyQuestionRepository _surveyQuestionRepository;
-        private readonly IUserService _userService;
-        private readonly AuthContext _authContext;
+        private readonly ISurveyConfigRepository _surveyConfigRepository;
 
-        public CheckSurveyBySurveyFormTypeQueryHandler(ICustomerSurveyGroupRepository customerSurveyGroupRepository,
-                                                       ISurveyQuestionRepository surveyQuestionRepository,
-                                                       AuthContext authContext,
-                                                       IUserService userService)
+        public CheckSurveyBySurveyFormTypeQueryHandler(ISurveyConfigRepository surveyConfigRepository)
         {
-            _customerSurveyGroupRepository = customerSurveyGroupRepository;
-            _surveyQuestionRepository = surveyQuestionRepository;
-            _authContext = authContext;
-            _userService = userService;
+            _surveyConfigRepository = surveyConfigRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CheckSurveyBySurveyFormTypeQuery request, CancellationToken cancellationToken)
@@ -42,50 +32,27 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            var parentEventResult = await _userService.GetParentEventId(request.CompetitionEventId);
-            var eventId = parentEventResult?.Content?.Result;
+            var surveyConfigs = await _surveyConfigRepository.Queryable.Where(p => p.StartDate <= currentDate && p.EndDate >= currentDate).ToListAsync(cancellationToken);
 
-            var surveyQuestions = await _surveyQuestionRepository.Queryable.Where(x => x.IsPilot == false && x.SurveyFormType == request.SurveyFormType).ToListAsync(cancellationToken);
-            if (request.SurveyFormType == EnumSurveyFormType.Event && eventId.HasValue)
+            surveyConfigs = surveyConfigs.Where(p => p.ApplicablePrograms != null && p.ApplicablePrograms.Contains(request.SurveyFormType)).ToList();
+
+            if (request.CompetitionEventId.HasValue)
             {
-                surveyQuestions = surveyQuestions.Where(x => x.CompetitionEventId == eventId).ToList();
+                surveyConfigs = surveyConfigs.Where(p => p.CompetitionEventIds != null && p.CompetitionEventIds.Contains(request.CompetitionEventId.Value)).ToList();
             }
 
-            if (!surveyQuestions.Any())
-            {
-                methodResult.Result = false;
-                return methodResult;
-            }
-
-            if (request.SurveyFormType == EnumSurveyFormType.Event && !eventId.HasValue)
+            if (!surveyConfigs.Any())
             {
                 methodResult.Result = false;
                 return methodResult;
             }
-
-            var customerSurveyGroups = await _customerSurveyGroupRepository.Queryable
-                                                                           .Where(x => x.SurveyFormType == request.SurveyFormType && x.UserId == _authContext.CurrentUserId)
-                                                                           .ToListAsync(cancellationToken);
-
-            if (request.SurveyFormType == EnumSurveyFormType.Event && eventId.HasValue)
-            {
-                customerSurveyGroups = customerSurveyGroups.Where(x => x.CompetitionEventId == eventId).ToList();
-            }
-
-            if (customerSurveyGroups == null || !customerSurveyGroups.Any() || customerSurveyGroups.Any(x => x.Status == EnumSurveyGroupStatus.Process))
+            else
             {
                 methodResult.Result = true;
                 return methodResult;
             }
-
-            return methodResult;
         }
-
-        public async Task<Guid> CheckParent(Guid? competitionEventId)
-        {
-            return Guid.Empty;
-        }
-
     }
 }
