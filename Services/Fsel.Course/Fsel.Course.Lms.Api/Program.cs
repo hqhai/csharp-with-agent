@@ -128,6 +128,9 @@ builder.Services.AddScoped<ILessonModuleRepository, LessonModuleRepository>();
 builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
 builder.Services.AddScoped<ITestRepository, TestRepository>();
 builder.Services.AddScoped<ITestSectionRepository, TestSectionRepository>();
+builder.Services.AddScoped<ITestSectionQuestionRepository, TestConfigSectionQuestionRepository>();
+builder.Services.AddScoped<ITestAISettingRepository, TestAISettingRepository>();
+builder.Services.AddScoped<ITestAICriteriaSettingRepository, TestAICriteriaSettingRepository>();
 builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionRepository>();
 builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
 

@@ -12,15 +12,6 @@ namespace Fsel.Course.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ExportDistrictEvents");
-
-            migrationBuilder.DropTable(
-                name: "ExportSchoolEvents");
-
-            migrationBuilder.DropTable(
-                name: "ExportStudentEvents");
-
-            migrationBuilder.DropTable(
                 name: "TestConfigSectionQuestions");
 
             migrationBuilder.DropTable(
@@ -364,76 +355,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                 oldType: "nvarchar(2000)",
                 oldMaxLength: 2000,
                 oldNullable: true);
-
-            migrationBuilder.CreateTable(
-                name: "ExportDistrictEvents",
-                columns: table => new
-                {
-                    AchievedScore = table.Column<double>(type: "float", nullable: false),
-                    AssignmentClassForum = table.Column<double>(type: "float", nullable: false),
-                    LevelCompletionRate = table.Column<double>(type: "float", nullable: false),
-                    LocationId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    LocationName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NumberOfCompletedLessons = table.Column<double>(type: "float", nullable: false),
-                    NumberofCommentsonPosts = table.Column<double>(type: "float", nullable: false),
-                    ScoreLevelClassForum = table.Column<double>(type: "float", nullable: false),
-                    ScoreLevelComment = table.Column<double>(type: "float", nullable: false),
-                    ScoreLevelLesson = table.Column<double>(type: "float", nullable: false),
-                    TargetLessonCompletionRate = table.Column<double>(type: "float", nullable: false),
-                    TotalScore = table.Column<double>(type: "float", nullable: false)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ExportSchoolEvents",
-                columns: table => new
-                {
-                    AchievedScore = table.Column<double>(type: "float", nullable: true),
-                    AssignmentClassForum = table.Column<double>(type: "float", nullable: true),
-                    LevelCompletionRate = table.Column<double>(type: "float", nullable: true),
-                    NumberOfCompletedLessons = table.Column<double>(type: "float", nullable: false),
-                    NumberofCommentsonPosts = table.Column<double>(type: "float", nullable: true),
-                    School = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ScoreLevelClassForum = table.Column<double>(type: "float", nullable: true),
-                    ScoreLevelComment = table.Column<double>(type: "float", nullable: true),
-                    ScoreLevelLesson = table.Column<double>(type: "float", nullable: false),
-                    TargetLessonCompletionRate = table.Column<double>(type: "float", nullable: false),
-                    TotalScore = table.Column<double>(type: "float", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ExportStudentEvents",
-                columns: table => new
-                {
-                    AchievedScore = table.Column<double>(type: "float", nullable: true),
-                    AssignmentClassForum = table.Column<double>(type: "float", nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EventCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    GlobalId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    LevelCompletionRate = table.Column<double>(type: "float", nullable: true),
-                    LocalId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NumberOfCompletedLessons = table.Column<double>(type: "float", nullable: false),
-                    NumberofCommentsonPosts = table.Column<double>(type: "float", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    School = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SchoolClass = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SchoolGrade = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ScoreLevelClassForum = table.Column<double>(type: "float", nullable: true),
-                    ScoreLevelComment = table.Column<double>(type: "float", nullable: true),
-                    ScoreLevelLesson = table.Column<double>(type: "float", nullable: false),
-                    TargetLessonCompletionRate = table.Column<double>(type: "float", nullable: false),
-                    TotalScore = table.Column<double>(type: "float", nullable: true),
-                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                });
 
             migrationBuilder.CreateTable(
                 name: "TestConfigs",

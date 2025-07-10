@@ -6,6 +6,8 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.IRepositories;
@@ -67,43 +69,100 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
             switch (request.ObjectName)
             {
                 case nameof(Course):
-                    await ArchiveCourses(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                        repository: _courseRepository,
+                        ids: request.Ids,
+                        toggleArchiveAction: p =>
+                        {
+                            if (!p.IsArchive && p.Status == EnumCourseStatus.Active)
+                            {
+                                p.Status = EnumCourseStatus.InActive;
+                            }
+                            p.IsArchive = !p.IsArchive;
+                        },
+                        cancellationToken: cancellationToken
+                    );
                     break;
 
                 case nameof(Domain.Entities.Unit):
-                    await ArchiveUnits(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                        repository: _unitRepository,
+                        ids: request.Ids,
+                        toggleArchiveAction: p => p.IsArchive = !p.IsArchive,
+                        cancellationToken: cancellationToken
+                    );
                     break;
 
                 case nameof(Lesson):
-                    await ArchiveLessons(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                         repository: _lessonRepository,
+                         ids: request.Ids,
+                         toggleArchiveAction: p => p.IsArchive = !p.IsArchive,
+                         cancellationToken: cancellationToken
+                    );
                     break;
 
                 case nameof(HomeWork):
-                    await ArchiveHomeWorks(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                        repository: _homeWorkRepository,
+                        ids: request.Ids,
+                        toggleArchiveAction: p => p.IsArchive = !p.IsArchive,
+                        cancellationToken: cancellationToken
+                    );
                     break;
 
                 case nameof(Video):
-                    await ArchiveVideos(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                        repository: _videoRepository,
+                        ids: request.Ids,
+                        toggleArchiveAction: p => p.IsArchive = !p.IsArchive,
+                        cancellationToken: cancellationToken
+                    );
                     break;
 
                 case nameof(ExtraPractice):
-                    await ArchiveExtraPractices(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                        repository: _extraPracticeRepository,
+                        ids: request.Ids,
+                        toggleArchiveAction: p => p.IsArchive = !p.IsArchive,
+                        cancellationToken: cancellationToken
+                    );
                     break;
 
                 case nameof(MockTest):
-                    await ArchiveMockTests(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                        repository: _mockTestRepository,
+                        ids: request.Ids,
+                        toggleArchiveAction: p => p.IsArchive = !p.IsArchive,
+                        cancellationToken: cancellationToken
+                    );
                     break;
 
                 case nameof(FinalTest):
-                    await ArchiveFinalTests(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                        repository: _finalTestRepository,
+                        ids: request.Ids,
+                        toggleArchiveAction: p => p.IsArchive = !p.IsArchive,
+                        cancellationToken: cancellationToken
+                    );
                     break;
 
                 case nameof(PlacementTest):
-                    await ArchivePlacementTests(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                        repository: _placementTestRepository,
+                        ids: request.Ids,
+                        toggleArchiveAction: p => p.IsArchive = !p.IsArchive,
+                        cancellationToken: cancellationToken
+                    );
                     break;
 
                 case nameof(Test):
-                    await ArchiveTests(request.Ids, cancellationToken);
+                    await ArchiveEntitiesAsync(
+                        repository: _testRepository,
+                        ids: request.Ids,
+                        toggleArchiveAction: p => p.IsArchive = !p.IsArchive,
+                        cancellationToken: cancellationToken
+                    );
                     break;
 
                 default:
@@ -114,180 +173,44 @@ namespace Fsel.Course.Application.Commands.ArchiveCmd
             return methodResult;
         }
 
-        private async Task<VoidMethodResult> ArchiveCourses(IList<Guid> ids, CancellationToken cancellationToken)
+        private static async Task<VoidMethodResult> ArchiveEntitiesAsync<T>(IRepository<T> repository,
+                                                                    IList<Guid> ids,
+                                                                    List<Func<T, bool>>? additionalConditions = null,
+                                                                    Func<T, bool>? toggleArchiveCondition = null,
+                                                                    Action<T>? toggleArchiveAction = null,
+                                                                    CancellationToken cancellationToken = default
+                                                                ) where T : Entity
         {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var courses = await _courseRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (courses == null || !courses.Any())
+            var methodResult = new VoidMethodResult();
+            var query = repository.Queryable.WhereBulkContains(ids, x => x.Id);
+            // Áp dụng thêm điều kiện nếu có
+            if (additionalConditions != null)
             {
-                return methodResult;
-            }
-            courses.ForEach(p =>
-            {
-                if (!p.IsArchive && p.Status == EnumCourseStatus.Active)
+                foreach (var condition in additionalConditions)
                 {
-                    p.Status = EnumCourseStatus.InActive;
+                    query = query.Where(condition).AsQueryable();
                 }
-                p.IsArchive = !p.IsArchive;
-            });
-            await _courseRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _courseRepository.BulkUpdateList(courses);
-                return methodResult;
-            });
-            return methodResult;
-        }
-
-        private async Task<VoidMethodResult> ArchiveUnits(IList<Guid> ids, CancellationToken cancellationToken)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var units = await _unitRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (units == null || !units.Any())
+            }
+            var entities = await query.ToListAsync(cancellationToken);
+            if (!entities.Any())
             {
                 return methodResult;
             }
-            units.ForEach(p => { p.IsArchive = !p.IsArchive; });
-            await _unitRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _unitRepository.BulkUpdateList(units);
-                return methodResult;
-            });
-            return methodResult;
-        }
 
-        private async Task<VoidMethodResult> ArchiveLessons(IList<Guid> ids, CancellationToken cancellationToken)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var lessons = await _lessonRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (lessons == null || !lessons.Any())
+            // Thực hiện toggle archive
+            foreach (var entity in entities)
             {
-                return methodResult;
+                if (toggleArchiveCondition == null || toggleArchiveCondition(entity))
+                {
+                    toggleArchiveAction?.Invoke(entity);
+                }
             }
-            lessons.ForEach(p => { p.IsArchive = !p.IsArchive; });
-            await _lessonRepository.ExecuteTransactionAsync(async () =>
+            await repository.ExecuteTransactionAsync(async () =>
             {
-                await _lessonRepository.BulkUpdateList(lessons);
+                await repository.BulkUpdateList(entities);
                 return methodResult;
             });
-            return methodResult;
-        }
 
-        private async Task<VoidMethodResult> ArchiveVideos(IList<Guid> ids, CancellationToken cancellationToken)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var videos = await _videoRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (videos == null || !videos.Any())
-            {
-                return methodResult;
-            }
-            videos.ForEach(p => { p.IsArchive = !p.IsArchive; });
-            await _videoRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _videoRepository.BulkUpdateList(videos);
-                return methodResult;
-            });
-            return methodResult;
-        }
-
-        private async Task<VoidMethodResult> ArchiveHomeWorks(IList<Guid> ids, CancellationToken cancellationToken)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var homeWorks = await _homeWorkRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (homeWorks == null || !homeWorks.Any())
-            {
-                return methodResult;
-            }
-            homeWorks.ForEach(p => { p.IsArchive = !p.IsArchive; });
-            await _homeWorkRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _homeWorkRepository.BulkUpdateList(homeWorks);
-                return methodResult;
-            });
-            return methodResult;
-        }
-
-        private async Task<VoidMethodResult> ArchiveExtraPractices(IList<Guid> ids, CancellationToken cancellationToken)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var extraPractices = await _extraPracticeRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (extraPractices == null || !extraPractices.Any())
-            {
-                return methodResult;
-            }
-            extraPractices.ForEach(p => { p.IsArchive = !p.IsArchive; });
-            await _extraPracticeRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _extraPracticeRepository.BulkUpdateList(extraPractices);
-                return methodResult;
-            });
-            return methodResult;
-        }
-
-        private async Task<VoidMethodResult> ArchiveMockTests(IList<Guid> ids, CancellationToken cancellationToken)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var mockTests = await _mockTestRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (mockTests == null || !mockTests.Any())
-            {
-                return methodResult;
-            }
-            mockTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
-            await _mockTestRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _mockTestRepository.BulkUpdateList(mockTests);
-                return methodResult;
-            });
-            return methodResult;
-        }
-
-        private async Task<VoidMethodResult> ArchiveFinalTests(IList<Guid> ids, CancellationToken cancellationToken)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var finalTests = await _finalTestRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (finalTests == null || !finalTests.Any())
-            {
-                return methodResult;
-            }
-            finalTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
-            await _finalTestRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _finalTestRepository.BulkUpdateList(finalTests);
-                return methodResult;
-            });
-            return methodResult;
-        }
-
-        private async Task<VoidMethodResult> ArchivePlacementTests(IList<Guid> ids, CancellationToken cancellationToken)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var placementTests = await _placementTestRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (placementTests == null || !placementTests.Any())
-            {
-                return methodResult;
-            }
-            placementTests.ForEach(p => { p.IsArchive = !p.IsArchive; });
-            await _placementTestRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _placementTestRepository.BulkUpdateList(placementTests);
-                return methodResult;
-            });
-            return methodResult;
-        }
-
-        private async Task<VoidMethodResult> ArchiveTests(IList<Guid> ids, CancellationToken cancellationToken)
-        {
-            VoidMethodResult methodResult = new VoidMethodResult();
-            var tests = await _testRepository.Queryable.WhereBulkContains(ids, x => x.Id).ToListAsync(cancellationToken);
-            if (tests == null || !tests.Any())
-            {
-                return methodResult;
-            }
-            tests.ForEach(p => { p.IsArchive = !p.IsArchive; });
-            await _testRepository.ExecuteTransactionAsync(async () =>
-            {
-                await _testRepository.BulkUpdateList(tests);
-                return methodResult;
-            });
             return methodResult;
         }
     }
