@@ -35,10 +35,11 @@ using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Common.Caching;
 using Fsel.Identity.Application.Commands.UserReferrals;
 using static IdentityServer4.IdentityServerConstants;
-using System.Text;
 using Fsel.Identity.Infrastructure.Repositories;
-using System.Threading;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Core.Base.Interfaces;
+using Fsel.Core.Entities;
+using Fsel.Identity.Infrastructure;
 
 namespace Fsel.Identity.Authentication.Quickstart.Account
 {
@@ -58,20 +59,21 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
+        private SignInManager<User> _signInManager;
+        private UserManager<User> _userManager;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
         private readonly ILogger<AccountController> _logger;
-        private readonly IParentRepository _parentRepository;
-        private readonly IStudentRepository _studentRepository;
-        private readonly IUserOtpCodeRepository _userOtpRepository;
-        private readonly IPlatformRepository _platformRepository;
-        private readonly IUserRepository _userRepository;
+        private IParentRepository _parentRepository;
+        private IStudentRepository _studentRepository;
+        private IUserOtpCodeRepository _userOtpRepository;
+        private IPlatformRepository _platformRepository;
+        private IUserRepository _userRepository;
         private readonly Core.Base.AuthContext _languageContext;
         private readonly IStringLocalizer _localizer;
         private readonly ICacheService<UserOtpCodeModel> _userOtpCache;
+        private readonly ITenantProvider _tenantProvider;
 
         public AccountController(
             IUserSession userSession,
@@ -92,7 +94,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             Core.Base.AuthContext languageContext,
             IStringLocalizer localizer,
             ICacheService<UserOtpCodeModel> userOtpCache,
-            IPlatformRepository platformRepository)
+            IPlatformRepository platformRepository,
+            ITenantProvider tenantProvider)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -117,6 +120,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             _localizer = localizer;
             _userOtpCache = userOtpCache;
             _platformRepository = platformRepository;
+            _tenantProvider = tenantProvider;
         }
 
         /// <summary>
@@ -131,6 +135,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
 
             var email = userRegisterModel?.Email ?? forgotModel?.Email;
+
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(email) ?? _userManager;
             var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
 
             var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user?.Id}");
@@ -160,6 +166,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
                 var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
 
                 var email = userRegisterModel?.Email ?? forgotModel?.Email;
+
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(email) ?? _userManager;
+                _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>(email) ?? _studentRepository;
+                _parentRepository = await _tenantProvider.CreateRepositoryAsync<IParentRepository, UserDbContext>(email) ?? _parentRepository;
+                _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(email) ?? _platformRepository;
+                var dbContext = await _tenantProvider.CreateDbContextAsync<UserDbContext>(email);
+                _userRepository = new UserRepository(_userManager, _studentRepository, _parentRepository, dbContext!, _platformRepository);
                 var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
 
                 var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user?.Id}");
@@ -289,6 +302,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             if (request.Type == nameof(Register))
             {
                 var userRegister = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(userRegister?.Email ?? string.Empty) ?? _userManager;
+
                 user = await _userManager.FindByEmailAsync(userRegister?.Email ?? string.Empty);
                 if (user == null)
                 {
@@ -298,6 +313,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             else
             {
                 var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(forgotModel?.Email ?? string.Empty) ?? _userManager;
+
                 user = await _userManager.FindByEmailAsync(forgotModel?.Email ?? string.Empty);
                 if (user == null || !user.EmailConfirmed)
                 {
@@ -341,6 +358,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
             if (ModelState.IsValid)
             {
                 var forgotPasswordModel = GetFromTempData(nameof(ForgotPasswordModel))?.ToString().Deserialize<ForgotPasswordModel>();
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.Email ?? string.Empty) ?? _userManager;
+
                 if (forgotPasswordModel == null)
                 {
                     ModelState.AddModelError(string.Empty, _localizer["i18n_Data_does_not_exist"]);
@@ -390,6 +409,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public async Task<IActionResult> Forgot(ForgotModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.Email ?? string.Empty) ?? _userManager;
 
             TempData[nameof(ForgotModel)] = request.Serialize();
 
@@ -436,6 +456,12 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public async Task<IActionResult> Register(UserRegisterModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.Email) ?? _userManager;
+            _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>(request.Email) ?? _studentRepository;
+            _parentRepository = await _tenantProvider.CreateRepositoryAsync<IParentRepository, UserDbContext>(request.Email) ?? _parentRepository;
+            _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(request.Email) ?? _platformRepository;
+            var dbContext = await _tenantProvider.CreateDbContextAsync<UserDbContext>(request.Email);
+            _userRepository = new UserRepository(_userManager, _studentRepository, _parentRepository, dbContext!, _platformRepository);
 
             var type = GetFromTempData(nameof(VerifyOtp))?.ToString();
             if (!string.IsNullOrEmpty(type))
@@ -572,8 +598,6 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
         private async Task<MethodResult<bool>> VerifyOtpAsync(User user, string? otp)
         {
-            //var verify = await _userManager.VerifyUserTokenAsync(user, DataProtectionTokenProvider.TotpProviderName, DataProtectionTokenProvider.TotpProviderName, otp ?? string.Empty);
-
             return await _mediator.Send(new ConfirmUserOtpCommand { UserId = user.Id, Otp = otp }).ConfigureAwait(false);
         }
 
@@ -584,11 +608,13 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public async Task<IActionResult> Impersonation(string? returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            var clientSecret = context?.Parameters[RequestHeaderSetting.ImpersonationClientSecret]?.ToString();
+            var clientSecret = context?.Parameters[RequestHeaderSetting.ImpersonationClientSecret]?.ToString(CultureInfo.InvariantCulture);
             if (context != null && !string.IsNullOrEmpty(clientSecret) && context.Client.ClientSecrets.Any(x => x.Value == clientSecret.ToSha256()))
             {
-                var userId = context.Parameters[RequestHeaderSetting.UserId]?.ToString();
-                var user = await _userManager.FindByIdAsync(userId ?? string.Empty);
+                var userId = Guid.TryParse(context.Parameters[RequestHeaderSetting.UserId]?.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture, out var userIdParsed) ? userIdParsed : default(Guid?);
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(userId: userId) ?? _userManager;
+
+                var user = await _userManager.FindByIdAsync(userId?.ToString() ?? string.Empty);
                 return await LoginWithoutPassword(user, returnUrl);
             }
             return RedirectToAction(nameof(Login), new { returnUrl });
@@ -628,6 +654,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public async Task<IActionResult> Login(LoginInputModel model)
         {
             ArgumentNullException.ThrowIfNull(model);
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(model.Username ?? string.Empty) ?? _signInManager;
 
             var vm = await BuildLoginViewModelAsync(model);
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
@@ -715,6 +742,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
         private async Task<IActionResult> LoginWithoutPassword(User? user, string? returnUrl)
         {
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(user?.UserName ?? string.Empty) ?? _signInManager;
+
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (user is not null && await ValidateLogin(user))
             {
@@ -780,6 +809,7 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
             ArgumentNullException.ThrowIfNull(model);
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _signInManager;
 
             // build a model so the logged out page knows what to display
             var vm = await BuildLoggedOutViewModelAsync(model.LogoutId ?? string.Empty);
@@ -827,8 +857,10 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
         //[HttpPost]
         //[ValidateAntiForgeryToken]
-        public IActionResult ExternalLogin(string provider, string? returnUrl = null)
+        public async Task<IActionResult> ExternalLogin(string provider, string? returnUrl = null)
         {
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _signInManager;
+
             var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), new { returnUrl });
 
             AuthenticationProperties properties;
@@ -848,6 +880,9 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         [HttpGet]
         public async Task<IActionResult> ExternalLoginConfirmation(string? returnUrl = null)
         {
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _signInManager;
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _userManager;
+
             returnUrl ??= string.Empty;
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -901,6 +936,14 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
         public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginModel request, string? returnUrl = null)
         {
             ArgumentNullException.ThrowIfNull(request);
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _signInManager;
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _userManager;
+            _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>() ?? _studentRepository;
+            _parentRepository = await _tenantProvider.CreateRepositoryAsync<IParentRepository, UserDbContext>() ?? _parentRepository;
+            _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>() ?? _platformRepository;
+            var dbContext = await _tenantProvider.CreateDbContextAsync<UserDbContext>();
+            _userRepository = new UserRepository(_userManager, _studentRepository, _parentRepository, dbContext!, _platformRepository);
+
             var externalLogin = GetFromTempData(nameof(ExternalLoginModel))?.ToString().Deserialize<ExternalLoginModel>();
 
             var info = await _signInManager.GetExternalLoginInfoAsync();
@@ -989,6 +1032,8 @@ namespace Fsel.Identity.Authentication.Quickstart.Account
 
         private async Task<bool> ValidateLogin(User? user)
         {
+            _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(user?.UserName) ?? _platformRepository;
+
             if (user != null)
             {
                 var platformCodes = await _platformRepository.Queryable
