@@ -10,5 +10,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.Courses
         public Guid? TeacherId { get; set; }
 
         public EnumCourseLevel? CourseLevel { get; set; }
+
+        public Guid? LevelId { get; set; }
     }
 }

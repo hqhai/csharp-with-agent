@@ -112,6 +112,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// CourseRequest Not Active
         /// </summary>
-        CourseRequestNotActive
+        CourseRequestNotActive,
+
+        /// <summary>
+        /// Course Not InActive
+        /// </summary>
+        CourseNotInActive
     }
 }
