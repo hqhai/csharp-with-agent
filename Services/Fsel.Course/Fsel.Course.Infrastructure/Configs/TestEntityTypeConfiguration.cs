@@ -3,6 +3,9 @@
 namespace Fsel.Course.Infrastructure.Configs
 {
     using System;
+    using Amazon.S3;
+    using Fsel.Common.Enums;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -22,6 +25,12 @@ namespace Fsel.Course.Infrastructure.Configs
                    .WithMany(b => b.Tests)
                    .HasForeignKey(p => p.LevelId)
                    .OnDelete(DeleteBehavior.NoAction);
+
+            builder.Property(e => e.VersionStatus)
+                .HasMaxLength(20)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumVersionStatus>());
         }
     }
 }

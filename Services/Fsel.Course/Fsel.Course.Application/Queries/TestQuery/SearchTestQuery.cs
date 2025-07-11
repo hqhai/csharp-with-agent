@@ -6,6 +6,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
@@ -36,13 +37,13 @@ namespace Fsel.Course.Application.Queries.TestQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<TestSearchModel>> methodResult = new MethodResult<PagingItemsModel<TestSearchModel>>();
 
-            var queryTestSection = _testSectionRepository.Queryable.Where(x => x.TestId.HasValue);
+            var queryTestSection = _testSectionRepository.Queryable.Where(x => !x.ParentId.HasValue);
             if (request.LayoutType.HasValue)
             {
                 queryTestSection = queryTestSection.Where(m => m.LayoutType == request.LayoutType);
             }
 
-            var query = _testRepository.Queryable;
+            var query = _testRepository.Queryable.Where(x => x.VersionStatus == EnumVersionStatus.LastVersion);
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -91,7 +92,11 @@ namespace Fsel.Course.Application.Queries.TestQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
-
+            var originalIds = await _testRepository.GetUsedOriginalIdsAsync(list.Select(x => x.Id).ToList());
+            foreach (var item in list)
+            {
+                item.IsActive = originalIds.Any(x => x == item.OriginalId);
+            }
             methodResult.Result = new PagingItemsModel<TestSearchModel>(list, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

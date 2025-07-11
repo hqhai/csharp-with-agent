@@ -7,6 +7,7 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -28,17 +29,17 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
         private readonly ProgramConverter _programConverter;
-        private readonly IPlacementTestRepository _placementTestRepository;
+        private readonly ITestRepository _testRepository;
 
         public UpdateProgramCommandHandler(ICategoryRepository categoryRepository,
                                            IMapper mapper,
                                            ProgramConverter programConverter,
-                                           IPlacementTestRepository placementTestRepository)
+                                           ITestRepository testRepository)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
             _programConverter = programConverter;
-            _placementTestRepository = placementTestRepository;
+            _testRepository = testRepository;
         }
 
         public async Task<MethodResult<ProgramModel>> Handle(UpdateProgramCommand request, CancellationToken cancellationToken)
@@ -86,12 +87,12 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.TestMode), programs.Any(x => x.IsTestDefault));
                 return methodResult;
             }
-            if (request.PlacementTestIds != null && request.PlacementTestIds.Any())
+            if (request.TestOriginalIds != null && request.TestOriginalIds.Any())
             {
-                var placementTests = await _placementTestRepository.Queryable.WhereBulkContains(request.PlacementTestIds, x => x.Id).ToListAsync(cancellationToken);
-                if (placementTests.Count != request.PlacementTestIds.Count)
+                var tests = await _testRepository.Queryable.WhereBulkContains(request.TestOriginalIds, x => x.Id).Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).ToListAsync(cancellationToken);
+                if (tests.Count != request.TestOriginalIds.Count)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NotEnoughPlacementTests));
+                    methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NotEnoughTests));
                     return methodResult;
                 }
             }
@@ -121,11 +122,11 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 methodResult.AddErrorBadRequest(category.ErrorMessages);
                 return methodResult;
             }
-            var incomingIds = request.PlacementTestIds?.Distinct().ToList() ?? new List<Guid>();
+            var incomingIds = request.TestOriginalIds?.Distinct().ToList() ?? new List<Guid>();
             var toRemoves = new List<CategoryTestBank>();
             foreach (var oldBank in category.CategoryTestBanks)
             {
-                if (!incomingIds.Contains(oldBank.TestId))
+                if (!incomingIds.Contains(oldBank.TestOriginalId))
                 {
                     toRemoves.Add(oldBank);
                 }
@@ -135,14 +136,14 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 category.CategoryTestBanks.Remove(item);
             }
 
-            var existingIds = category.CategoryTestBanks.Select(x => x.TestId).ToHashSet();
+            var existingIds = category.CategoryTestBanks.Select(x => x.TestOriginalId).ToHashSet();
             foreach (var id in incomingIds)
             {
                 if (!existingIds.Contains(id))
                 {
                     category.CategoryTestBanks.Add(new CategoryTestBank
                     {
-                        TestId = id,
+                        TestOriginalId = id,
                         TestType = EnumTestType.PlacementTest
                     });
                 }

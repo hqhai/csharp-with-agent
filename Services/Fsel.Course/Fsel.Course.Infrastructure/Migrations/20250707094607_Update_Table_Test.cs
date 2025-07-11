@@ -11,15 +11,6 @@ namespace Fsel.Course.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "TestConfigSectionQuestions");
-
-            migrationBuilder.DropTable(
-                name: "TestConfigSections");
-
-            migrationBuilder.DropTable(
-                name: "TestConfigs");
-
             migrationBuilder.AlterColumn<string>(
                 name: "Name",
                 table: "Skills",

@@ -106,6 +106,11 @@ namespace Fsel.Course.Infrastructure
         public DbSet<UnitModule> UnitModules { get; set; }
         public DbSet<SubjectCondition> SubjectConditions { get; set; }
         public DbSet<SubjectConditionRule> SubjectConditionRules { get; set; }
+        public DbSet<Test> Tests { get; set; }
+        public DbSet<TestSection> TestSections { get; set; }
+        public DbSet<TestSectionQuestion> TestSectionQuestions { get; set; }
+        public DbSet<TestAICriteriaSetting> TestAICriteriaSettings { get; set; }
+        public DbSet<TestAISetting> TestAISettings { get; set; }
 
         #region Report
 
@@ -140,11 +145,6 @@ namespace Fsel.Course.Infrastructure
         #endregion Report
 
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
-        public DbSet<Test> Tests { get; set; }
-        public DbSet<TestSection> TestSections { get; set; }
-        public DbSet<TestSectionQuestion> TestSectionQuestions { get; set; }
-        public DbSet<TestAICriteriaSetting> TestAICriteriaSettings { get; set; }
-        public DbSet<TestAISetting> TestAISettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
