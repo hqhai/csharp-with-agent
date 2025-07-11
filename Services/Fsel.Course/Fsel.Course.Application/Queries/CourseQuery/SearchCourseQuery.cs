@@ -59,7 +59,8 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                                                    UpdatedFullName = course.UpdatedFullName,
                                                    TeacherIds = course.CourseTeachers.Where(n => !n.IsDeleted).Select(x => x.TeacherId).Distinct().ToList(),
                                                    LevelId = course.LevelId,
-                                                   OriginalId = course.OriginalId
+                                                   OriginalId = course.OriginalId,
+                                                   ProgramId = course.ProgramId
                                                });
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -72,9 +73,14 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 courseQuery = courseQuery.Where(m => m.LevelId == request.LevelId);
             }
 
-            if (request.TeacherId != null)
+            if (request.TeacherId.HasValue)
             {
                 courseQuery = courseQuery.Where(m => m.TeacherIds!.Any(x => x == request.TeacherId));
+            }
+
+            if (request.ProgramId.HasValue)
+            {
+                courseQuery = courseQuery.Where(m => m.ProgramId == request.ProgramId);
             }
 
             int totalItem = await courseQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

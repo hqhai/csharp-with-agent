@@ -35,5 +35,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid OriginalId { get; set; }
 
         public int Version { get; set; }
+
+        public Guid? ProgramId { get; set; }
     }
 }

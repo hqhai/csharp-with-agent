@@ -6,6 +6,8 @@ using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
+using Fsel.Course.Domain.Enums.ErrorCodes;
+using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Courses.V1i1;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -165,6 +167,12 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         private async Task<VoidMethodResult> Validate(UpdateCourseCommandModel request, Guid originId, CancellationToken cancellationToken)
         {
             VoidMethodResult methodResult = new VoidMethodResult();
+
+            if (request.Modules == null || !request.Modules.Any(x => x.CourseConfigType == EnumCourseConfigType.Test) || !request.Modules.Any(x => x.CourseConfigType == EnumCourseConfigType.Unit))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseModulesNotNull), nameof(request.Modules), request.Modules);
+                return methodResult;
+            }
 
             var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = request.CourseTeachers?.Select(x => x.TeacherId).ToList() });
             if (!teachers.IsSuccessStatusCode)
