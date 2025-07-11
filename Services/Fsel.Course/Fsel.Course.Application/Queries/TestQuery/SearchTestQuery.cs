@@ -11,7 +11,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
-    using Fsel.Course.Domain.Models.QueryModels.MockTests;
+    using Fsel.Course.Domain.Models.QueryModels.Test;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -43,7 +43,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                 queryTestSection = queryTestSection.Where(m => m.LayoutType == request.LayoutType);
             }
 
-            var query = _testRepository.Queryable.Where(x => x.VersionStatus == EnumVersionStatus.LastVersion);
+            var query = _testRepository.Queryable.Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).Where(p => !p.IsArchive);
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {

@@ -59,7 +59,7 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
-            var isUsingByClient = false;// await _testRepository.IsUsingByClient(test.OriginalId);
+            var isUsingByClient = await _testRepository.IsUsingByClient(test.OriginalId);
 
             var newVersionTest = TestFactory.Create(request, _mapper, _questionConverter).Build(test.OriginalId, true);
             if (await newVersionTest.ValidateDuplicateTest(_testRepository).ConfigureAwait(false))
