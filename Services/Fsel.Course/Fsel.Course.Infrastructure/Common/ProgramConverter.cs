@@ -8,6 +8,7 @@ namespace Fsel.Course.Infrastructure.Common
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.FlowConfigs;
     using Fsel.Course.Domain.Enums;
@@ -181,8 +182,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 var childentWithEventParents = childentCategories.Where(x => x.ParentId == parentCategory.Data).ToList();
                 var parentCategoryChildents = _mapper.Map<IList<CategoryTreeModel>>(childentWithEventParents);
-                parentCategory.Children = parentCategoryChildents;
-
+                parentCategory.Children = parentCategoryChildents.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).ToList();
                 competitionEvents.PushRange(parentCategoryChildents.ToArray());
             });
 

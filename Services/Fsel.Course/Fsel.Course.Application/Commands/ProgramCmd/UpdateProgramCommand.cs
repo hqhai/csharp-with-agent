@@ -29,6 +29,7 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
         private readonly IMapper _mapper;
         private readonly ProgramConverter _programConverter;
         private readonly IPlacementTestRepository _placementTestRepository;
+        private static readonly Regex s_regexCode = new Regex("^[a-zA-Z0-9]+$", RegexOptions.Compiled);
 
         public UpdateProgramCommandHandler(ICategoryRepository categoryRepository,
                                            IMapper mapper,
@@ -46,18 +47,15 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ProgramModel>();
 
-            Regex regexName = new Regex("^[A-Za-z0-9 ]$");
-            Regex regexCode = new Regex("^[A-Z0-9_]$");
-
             #region Validate
 
-            if (string.IsNullOrEmpty(request.Name) || (!string.IsNullOrEmpty(request.Name) && regexName.IsMatch(request.Name)))
+            if (string.IsNullOrEmpty(request.Name))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NameNotValid), nameof(request.Name), request.Name);
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(request.Code) || (!string.IsNullOrEmpty(request.Code) && regexCode.IsMatch(request.Code)))
+            if (string.IsNullOrEmpty(request.Code) || (!string.IsNullOrEmpty(request.Code) && !s_regexCode.IsMatch(request.Code)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.CodeNotValid), nameof(request.Code), request.Code);
                 return methodResult;

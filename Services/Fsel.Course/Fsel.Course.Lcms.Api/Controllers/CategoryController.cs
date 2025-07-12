@@ -199,6 +199,19 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
+        /// get subject tree
+        /// </summary>
+        [HttpGet("subject-tree")]
+        [ProducesResponseType(typeof(MethodResult<IList<CategoryTreeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
+        public async Task<IActionResult> GetSubjectTree()
+        {
+            var methodResult = await _mediator.Send(new GetSubjectTreeQuery()).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
         /// search category tree
         /// </summary>
         [HttpGet("search-category")]
