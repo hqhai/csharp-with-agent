@@ -44,12 +44,10 @@ using static IdentityServer4.IdentityServerConstants;
 
 var builder = WebApplication.CreateBuilder(args);
 var assembly = typeof(UserDbContext).Assembly.GetName().Name;
-var defaultConnString = builder.Configuration.GetConnectionString(Settings.DefaultConnection);
+var tenantMasterConnection = builder.Configuration.GetConnectionString(Settings.TenantMasterConnection);
 var appSetting = builder.AddAppSettings<AppSetting>();
 
 builder.AddServices(appSetting);
-//builder.AddSwaggerGens(appSetting);
-//builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddConfigureIdentityOptions();
 builder.AddDbContexts<UserDbContext>();
 builder.Services.AddDataProtection().PersistKeysToDbContext<UserDbContext>();
@@ -68,11 +66,11 @@ builder.Services.AddIdentityServer(options =>
 .AddInMemoryApiResources(Config.ApiResources)
 .AddInMemoryClients(Config.Clients)
 .AddAspNetIdentity<User>()
-.AddConfigurationStore(options => options.ConfigureDbContext = b => b.UseSqlServer(defaultConnString, opt => opt.MigrationsAssembly(assembly)))
+.AddConfigurationStore(options => options.ConfigureDbContext = b => b.UseSqlServer(tenantMasterConnection, opt => opt.MigrationsAssembly(assembly)))
 .AddConfigurationStoreCache()
 .AddOperationalStore(options =>
 {
-    options.ConfigureDbContext = b => b.UseSqlServer(defaultConnString, opt => opt.MigrationsAssembly(assembly));
+    options.ConfigureDbContext = b => b.UseSqlServer(tenantMasterConnection, opt => opt.MigrationsAssembly(assembly));
     options.EnableTokenCleanup = true;
     options.TokenCleanupInterval = 3600;
 })
