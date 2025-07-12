@@ -3,16 +3,17 @@
 namespace Fsel.Interaction.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Interaction.Application.Commands.CustomerSurveyCmd;
+    using Fsel.Interaction.Application.Commands.SurveyConfigCmd;
     using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
+    using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -39,7 +40,6 @@ namespace Fsel.Interaction.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-
         /// <summary>
         /// Check Student by id
         /// </summary>
@@ -65,14 +65,26 @@ namespace Fsel.Interaction.Api.Controllers
         }
 
         /// <summary>
-        /// Check Student by id
+        /// Check survey pt
         /// </summary>
-        [HttpGet("check-survey")]
+        [HttpGet("check-survey-pt")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckSurveyBySurveyFormType([FromQuery] CheckSurveyBySurveyFormTypeQuery query)
+        public async Task<IActionResult> CheckSurveyBySurveyFormType([FromQuery] CheckSurveyPTQuery query)
         {
             MethodResult<bool> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Save User Survey Assignment
+        /// </summary>
+        [HttpPost("save-user-survey-assignment")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SaveUserSurveyAssignment([FromBody] SaveUserSurveyAssignmentCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

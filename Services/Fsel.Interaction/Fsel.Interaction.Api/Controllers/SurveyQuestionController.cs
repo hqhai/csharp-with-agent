@@ -3,16 +3,18 @@
 namespace Fsel.Interaction.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Interaction.Application.Commands.SurveyConfigCmd;
     using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/surveyQuestion")]
     [ApiController]
     public class SurveyQuestionController : ControllerBase
@@ -63,12 +65,12 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Get list Survey Question by ids
         /// </summary>
-        [HttpGet("get-question-by-surveytype")]
-        [ProducesResponseType(typeof(MethodResult<IList<SurveyQuestionModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-questions-survey-pt")]
+        [ProducesResponseType(typeof(MethodResult<SurveyConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSurveyQuestionBySurveyFormType([FromQuery] GetSurveyQuestionBySurveyFormType query)
+        public async Task<IActionResult> GetSurveyQuestionBySurveyFormType([FromQuery] GetSurveyPTQuery query)
         {
-            MethodResult<IList<SurveyQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

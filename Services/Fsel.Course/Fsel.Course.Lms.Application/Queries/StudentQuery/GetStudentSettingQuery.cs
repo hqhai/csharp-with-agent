@@ -22,7 +22,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using static Microsoft.IO.RecyclableMemoryStreamManager;
 
     public class GetStudentSettingQuery : IRequest<MethodResult<StudentSettingModel>>
     {
@@ -107,9 +106,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
                 requestCheckSurvey.SurveyFormType = EnumSurveyFormType.Event;
                 requestCheckSurvey.CompetitionEventId = events?.FirstOrDefault()?.Id;
+                settingStudentModel.CompetitionEventId = events?.FirstOrDefault()?.Id;
             }
 
-            var surveyEvent = await _interactionService.CheckSurveyBySurveyFormType(requestCheckSurvey);
+            var surveyEvent = await _interactionService.CheckSurveyPT(requestCheckSurvey);
             if (surveyEvent.IsSuccessStatusCode)
             {
                 settingStudentModel.IsSurveyEvent = surveyEvent.Content?.Result ?? false;

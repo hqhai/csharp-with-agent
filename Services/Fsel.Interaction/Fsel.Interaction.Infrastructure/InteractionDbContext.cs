@@ -56,6 +56,7 @@ namespace Fsel.Interaction.Infrastructure
         public DbSet<Flag> Flags { get; set; }
         public DbSet<CustomerSurveyGroup> CustomerSurveyGroups { get; set; }
         public DbSet<SurveyConfig> SurveyConfigs { get; set; }
+        public DbSet<UserSurveyAssignment> UserSurveyAssignments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

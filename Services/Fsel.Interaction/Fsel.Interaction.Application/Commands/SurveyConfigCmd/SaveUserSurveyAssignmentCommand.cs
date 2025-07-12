@@ -1,0 +1,58 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
+{
+    using System.Threading;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
+    using Fsel.Interaction.Domain.Entities;
+    using Fsel.Interaction.Domain.IRepositories;
+    using Fsel.Shared.Models.ShareModels;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
+
+    public class SaveUserSurveyAssignmentCommand : SaveUserSurveyAssignmentCommandModel, IRequest<MethodResult<bool>>
+    {
+    }
+
+    public class SaveUserSurveyAssignmentCommandHandler : IRequestHandler<SaveUserSurveyAssignmentCommand, MethodResult<bool>>
+    {
+        private readonly IUserSurveyAssignmentRepository _userSurveyAssignmentRepository;
+        private readonly AuthContext _authContext;
+        private readonly IMapper _mapper;
+
+        public SaveUserSurveyAssignmentCommandHandler(IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, IMapper mapper)
+        {
+            _userSurveyAssignmentRepository = userSurveyAssignmentRepository;
+            _authContext = authContext;
+            _mapper = mapper;
+        }
+
+        public async Task<MethodResult<bool>> Handle(SaveUserSurveyAssignmentCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<bool>();
+
+            if (await _userSurveyAssignmentRepository.Queryable.AnyAsync(p => p.CreatedUserId == _authContext.CurrentUserId && p.CourseLevel == request.CourseLevel && p.CourseType == request.CourseType && p.ProgressRequirement == request.ProgressRequirement, cancellationToken))
+            {
+                return methodResult;
+            }
+
+            var userSurveyAssignment = _mapper.Map<UserSurveyAssignment>(request);
+
+            await _userSurveyAssignmentRepository.ExecuteTransactionAsync(async () =>
+            {
+                userSurveyAssignment = _userSurveyAssignmentRepository.Add(userSurveyAssignment);
+                await _userSurveyAssignmentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = true;
+                return methodResult;
+            });
+
+            return methodResult;
+        }
+    }
+}
