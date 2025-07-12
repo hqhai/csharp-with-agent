@@ -47,7 +47,7 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
 
             #region Validate
 
-            if (string.IsNullOrEmpty(request.Name) || (!string.IsNullOrEmpty(request.Name)))
+            if (string.IsNullOrEmpty(request.Name))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NameNotValid), nameof(request.Name), request.Name);
                 return methodResult;
