@@ -157,7 +157,18 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("get-feature-access-time-by-user-ids")]
         [ProducesResponseType(typeof(MethodResult<List<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> GetFeatureAccessTimeByUserIds([FromBody] GetFeatureAccessTimesByUserIdsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPost("get-last-feature-access-by-user-ids")]
+        [ProducesResponseType(typeof(MethodResult<List<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> GetLastFeatureAccessByUserIds([FromBody] GetUserLastAccessByUserIdsQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

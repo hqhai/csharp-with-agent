@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Services.OrderServices
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
@@ -27,5 +28,8 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
 
         [Post("/v1/order")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrder([Body] CreateOrderCommandModel command);
+
+        [Get("/v1.2/order/get-order-revenue")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<SearchOrderModel>>>> GetOrderRevenuesAsync();
     }
 }

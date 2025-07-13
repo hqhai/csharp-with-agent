@@ -4,7 +4,6 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Text;
     using System.Threading;
@@ -286,6 +285,7 @@ namespace Fsel.Course.Infrastructure.Common
                     CourseId = courseResult.CourseId,
                 };
                 var courseCompleteTotalModule = courseCompleteTotalModules.FirstOrDefault(x => x.CourseId == courseResult.CourseId);
+                courseCompleteModule.CourseName = courseCompleteTotalModule?.CourseName;
                 courseCompleteModule.TotalComplete = courseCompleteTotalModule?.Count ?? default;
                 courseCompleteModule.UnitDisplayOrder = courseCompleteModule.UnitDisplayOrder != 0 ? courseCompleteModule.UnitDisplayOrder : ModuleDefault;
                 courseCompleteModule.LessonDisplayOrder = courseCompleteModule.LessonDisplayOrder != 0 ? courseCompleteModule.LessonDisplayOrder : ModuleDefault;
@@ -544,7 +544,6 @@ namespace Fsel.Course.Infrastructure.Common
                             };
                 courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
             }
-            ;
             return courseCompletes;
         }
 
@@ -577,6 +576,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                       .Select(x => new
                                                                       {
                                                                           CourseId = x.Key,
+                                                                          CourseName = x.Select(x => x.Course!.Name).FirstOrDefault(),
                                                                           CountLesson = x.Where(x => x.UnitId.HasValue).Select(x => x.Unit).SelectMany(x => x.UnitLessons).Count(),
                                                                           CountSkillMockTest = x.Where(x => x.UnitId.HasValue).Select(x => x.Unit).SelectMany(x => x.UnitSkillMockTests).Count(),
                                                                           CountMockTest = x.Where(x => x.MockTestId.HasValue).Count(),
@@ -588,6 +588,7 @@ namespace Fsel.Course.Infrastructure.Common
                                       (courseResult, course) => course).Select(x => new OverallModuleLearnModel
                                       {
                                           CourseId = x.CourseId,
+                                          CourseName = x.CourseName,
                                           Count = x.CountLesson * NumberModuleLesson + x.CountMockTest + x.CountSkillMockTest + x.CountFinalTest
                                       }).ToList();
         }

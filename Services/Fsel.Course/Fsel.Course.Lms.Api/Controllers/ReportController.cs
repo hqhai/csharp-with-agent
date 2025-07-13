@@ -266,5 +266,22 @@ namespace Fsel.Course.Lms.Api.Controllers
             }
             return File(queryResult.Result, Settings.Excels.ContentType, $"{query.FileName}_{query.EducationLevel.GetDescription()}.xlsx");
         }
+
+        /// <summary>
+        /// aggregate data students in event
+        /// </summary>
+        [HttpGet("export-file-report-sale-progress")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ExportReportSaleProgress()
+        {
+            var queryResult = await _mediator.Send(new ExportCustomerSupportSummaryQuery()).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, $"ExportReportSaleProgress_{DateTime.Now.Ticks}.xlsx");
+        }
     }
 }

@@ -50,6 +50,9 @@
     <None Update="Resources\ExportExcelTemplates\ReportPTEventSchool.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\ExportExcelTemplates\ReportSaleStudentProgress.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\ExportExcelTemplates\Report_District_School.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

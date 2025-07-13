@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }
+        public string? CourseName { get; set; }
         public int CountComplete { get; set; }
         public int TotalComplete { get; set; }
         public UnitResultModel? UnitResult { get; set; }
