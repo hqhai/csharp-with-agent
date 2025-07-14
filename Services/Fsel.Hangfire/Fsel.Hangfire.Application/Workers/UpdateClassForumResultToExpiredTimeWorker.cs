@@ -3,19 +3,20 @@
 namespace Fsel.Hangfire.Application.Workers
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
+    using Microsoft.AspNetCore.Http;
 
-    public class UpdateClassForumResultToExpiredTimeWorker : IWorker<BaseQueueModel>
+    public class UpdateClassForumResultToExpiredTimeWorker : BaseWorker<BaseQueueModel>
     {
         private readonly UpdateClassForumResultToExpiredTimePublisher _updateClassForumResultToExpiredTimePublisher;
 
-        public UpdateClassForumResultToExpiredTimeWorker(UpdateClassForumResultToExpiredTimePublisher updateClassForumResultToExpiredTimePublisher)
+        public UpdateClassForumResultToExpiredTimeWorker(UpdateClassForumResultToExpiredTimePublisher updateClassForumResultToExpiredTimePublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _updateClassForumResultToExpiredTimePublisher = updateClassForumResultToExpiredTimePublisher;
         }
 
-        public async Task RunAsync(BaseQueueModel? data = null)
+        public override async Task RunAsync(BaseQueueModel? data = null)
         {
             if (data != null)
             {

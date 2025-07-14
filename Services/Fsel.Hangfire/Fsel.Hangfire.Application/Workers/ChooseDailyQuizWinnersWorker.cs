@@ -1,18 +1,19 @@
 namespace Fsel.Hangfire.Application.Workers
 {
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
+    using Microsoft.AspNetCore.Http;
 
-    public class ChooseDailyQuizWinnersWorker : IWorker
+    public class ChooseDailyQuizWinnersWorker : BaseWorker
     {
         private readonly ChooseDailyQuizWinnersPublisher _chooseDailyQuizWinnersPublisher;
 
-        public ChooseDailyQuizWinnersWorker(ChooseDailyQuizWinnersPublisher chooseDailyQuizWinnersPublisher)
+        public ChooseDailyQuizWinnersWorker(ChooseDailyQuizWinnersPublisher chooseDailyQuizWinnersPublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _chooseDailyQuizWinnersPublisher = chooseDailyQuizWinnersPublisher;
         }
 
-        public async Task RunAsync()
+        public override async Task RunAsync()
         {
             await _chooseDailyQuizWinnersPublisher.Publish(CancellationToken.None);
         }

@@ -3,20 +3,21 @@
 namespace Fsel.Hangfire.Application.Workers
 {
     using System.Threading.Tasks;
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
     using Fsel.Shared.Models.ShareModels;
+    using Microsoft.AspNetCore.Http;
 
-    public class RetryMockTestWhenNotReturnScoreWorker : IWorker<SetTimeRetryMockTestModel>
+    public class RetryMockTestWhenNotReturnScoreWorker : BaseWorker<SetTimeRetryMockTestModel>
     {
         private readonly RetryMockTestPublisher _retryMockTestPublisher;
 
-        public RetryMockTestWhenNotReturnScoreWorker(RetryMockTestPublisher retryMockTestPublisher)
+        public RetryMockTestWhenNotReturnScoreWorker(RetryMockTestPublisher retryMockTestPublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _retryMockTestPublisher = retryMockTestPublisher;
         }
 
-        public async Task RunAsync(SetTimeRetryMockTestModel? data)
+        public override async Task RunAsync(SetTimeRetryMockTestModel? data)
         {
             if (data != null)
             {

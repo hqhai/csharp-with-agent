@@ -3,21 +3,22 @@
 namespace Fsel.Hangfire.Application.Workers
 {
     using System.Threading.Tasks;
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Microsoft.AspNetCore.Http;
 
-    public class EnergyOfPlanetWorker : IWorker
+    public class EnergyOfPlanetWorker : BaseWorker
     {
         private readonly WeeklyNoticePublisher _weeklyNoticePublisher;
 
-        public EnergyOfPlanetWorker(WeeklyNoticePublisher weeklyNoticePublisher)
+        public EnergyOfPlanetWorker(WeeklyNoticePublisher weeklyNoticePublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _weeklyNoticePublisher = weeklyNoticePublisher;
         }
 
-        public async Task RunAsync()
+        public override async Task RunAsync()
         {
             await _weeklyNoticePublisher.Publish(new WeeklyNoticeQueueModel { WeeklyNoticeType = EnumWeeklyNoticeType.EnergyOfPlanet }, CancellationToken.None);
         }
