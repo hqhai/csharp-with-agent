@@ -23,19 +23,13 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 
         public int OpenOrder { get; set; }
 
-        public Guid? VideoId { get; set; }
+        public Guid OriginalId { get; set; }
 
         public VideoModel? Video { get; set; }
 
-        public Guid? ClassForumId { get; set; }
-
         public ClassForumModel? ClassForum { get; set; }
 
-        public Guid? HomeWorkId { get; set; }
-
         public HomeWorkModel? HomeWork { get; set; }
-
-        public Guid? DocumentId { get; set; }
 
         public DocumentModel? Document { get; set; }
     }

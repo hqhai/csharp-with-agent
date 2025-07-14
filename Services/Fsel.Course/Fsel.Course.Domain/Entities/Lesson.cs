@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Entities.V1i1;
@@ -8,7 +9,7 @@ using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class Lesson : Entity
+    public class Lesson : Entity, IVersionEntity
     {
         /// <summary>
         /// Tên bài test
@@ -62,6 +63,12 @@ namespace Fsel.Course.Domain.Entities
         public Guid? ProgramId { get; set; }
 
         public Category? Category { get; set; }
+
+        public Guid OriginalId { get; set; }
+
+        public int Version { get; set; }
+
+        public EnumVersionStatus VersionStatus { get; set; }
 
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ClassForum? ClassForum { get; set; }

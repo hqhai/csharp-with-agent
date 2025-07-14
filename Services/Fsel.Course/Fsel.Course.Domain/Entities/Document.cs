@@ -3,10 +3,10 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums;
     using Fsel.Core.Entities;
-    using Fsel.Course.Domain.Entities.V1i1;
 
-    public class Document : Entity
+    public class Document : Entity, IVersionEntity
     {
         public string? FilesStr { get; set; }
 
@@ -20,6 +20,10 @@ namespace Fsel.Course.Domain.Entities
             set { FilesStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
 
-        public ICollection<LessonModule> LessonModules { get; set; } = new List<LessonModule>();
+        public Guid OriginalId { get; set; }
+
+        public int Version { get; set; }
+
+        public EnumVersionStatus VersionStatus { get; set; }
     }
 }

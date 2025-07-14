@@ -15,7 +15,6 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<Document, DocumentModel>().IgnoreAllNonExisting();
             CreateMap<DocumentFile, DocumentFileModel>().IgnoreAllNonExisting();
             CreateMap<CreateDocumentCommandModel, Document>().IgnoreAllNonExisting();
-            CreateMap<CreateDocumentFileModel, DocumentFile>().IgnoreAllNonExisting();
         }
     }
 }

@@ -3,7 +3,6 @@
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
@@ -51,7 +50,5 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
 
         public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
-
-        public ICollection<LessonModule> LessonModules { get; set; } = new List<LessonModule>();
     }
 }

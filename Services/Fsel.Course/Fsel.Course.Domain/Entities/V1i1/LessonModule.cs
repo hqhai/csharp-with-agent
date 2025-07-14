@@ -10,7 +10,6 @@ namespace Fsel.Course.Domain.Entities.V1i1
 
     public class LessonModule : Entity, IDisplayInfo
     {
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
@@ -34,19 +33,6 @@ namespace Fsel.Course.Domain.Entities.V1i1
 
         public Lesson? Lesson { get; set; }
 
-        public Guid? VideoId { get; set; }
-
-        public Video? Video { get; set; }
-
-        public Guid? ClassForumId { get; set; }
-
-        public ClassForum? ClassForum { get; set; }
-
-        public Guid? HomeWorkId { get; set; }
-
-        public HomeWork? HomeWork { get; set; }
-
-        public Guid? DocumentId { get; set; }
-        public Document? Document { get; set; }
+        public Guid OriginalId { get; set; }
     }
 }

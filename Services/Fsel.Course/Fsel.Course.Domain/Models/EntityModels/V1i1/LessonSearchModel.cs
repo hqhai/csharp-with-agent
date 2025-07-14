@@ -21,6 +21,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public string? NameProgram { get; set; }
 
         public IList<VideoSearchModel>? Videos { get; set; }
+
+        public Guid OriginalId { get; set; }
     }
 
     public class VideoSearchModel

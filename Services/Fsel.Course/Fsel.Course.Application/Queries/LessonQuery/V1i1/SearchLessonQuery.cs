@@ -4,10 +4,12 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
 {
     using System.Globalization;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Application.Services.UserServices;
     using Fsel.Course.Application.Services.UserServices.Models;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Course.Domain.Models.QueryModels.Lessons.V1i1;
@@ -54,13 +56,13 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
             }
 
             var lessonQuery = from a in _lessonRepository.Queryable
-                              where a.Status != Shared.Enums.EnumStatus.Archive
+                              where a.Status != Shared.Enums.EnumStatus.Archive && a.VersionStatus == EnumVersionStatus.LastVersion
                               select new
                               {
                                   Lesson = a,
                                   Videos = (from b in _lessonModuleRepository.Queryable
-                                            join v in _videoRepository.Queryable on b.VideoId equals v.Id
-                                            where b.LessonId == a.Id
+                                            join v in _videoRepository.Queryable on b.OriginalId equals v.Id
+                                            where b.LessonId == a.Id && b.LessonConfigType == EnumLessonConfigType.Video
                                             select v).ToList()
                               };
 
@@ -107,7 +109,8 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                 {
                     TeacherId = v.TeacherId,
                     TimeCodeTypes = v.VideoTimeCodes.Select(t => t.TimeCodeType).Distinct().ToList(),
-                }).ToList()
+                }).ToList(),
+                OriginalId = x.Lesson.OriginalId
             });
 
             int totalItem = await lesson.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
