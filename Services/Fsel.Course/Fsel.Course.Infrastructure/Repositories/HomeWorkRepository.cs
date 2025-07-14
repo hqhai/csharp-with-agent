@@ -88,5 +88,11 @@ namespace Fsel.Course.Infrastructure.Repositories
                 throw;
             }
         }
+
+        public async Task<bool> IsUsingByClient(Guid id)
+        {
+            return await DbContext.Set<HomeWorkResult>().AsQueryable()
+                  .AnyAsync(x => x.HomeWorkId == id);
+        }
     }
 }
