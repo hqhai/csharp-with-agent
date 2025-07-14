@@ -24,7 +24,7 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.Lesson)
                    .WithMany(b => b.LessonModules)
                    .HasForeignKey(p => p.LessonId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

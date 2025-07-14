@@ -29,7 +29,7 @@ namespace Fsel.Course.Domain.Entities.V1i1
 
         public int OpenOrder { get; set; }
 
-        public Guid? LessonId { get; set; }
+        public Guid LessonId { get; set; }
 
         public Lesson? Lesson { get; set; }
 
