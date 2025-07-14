@@ -21,10 +21,21 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseType CourseType { get; set; }
 
         public IList<Guid>? TeacherIds { get; set; }
+
+        public IList<string>? TeacherNames { get; set; }
+
         public int? DurationMonth { get; set; }
 
         public int? EnrollmentWeek { get; set; }
 
-        public IList<string>? TeacherNames { get; set; }
+        public Guid? LevelId { get; set; }
+
+        public string? LevelName { get; set; }
+
+        public Guid OriginalId { get; set; }
+
+        public int Version { get; set; }
+
+        public Guid? ProgramId { get; set; }
     }
 }

@@ -1,12 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Entities.V1i1
+namespace Fsel.Course.Domain.Models.EntityModels
 {
-    using Fsel.Core.Entities;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
 
-    public class CourseModule : Entity, IDisplayInfo
+    public class CourseModuleModel : BaseModel, IDisplayInfo
     {
         public EnumCourseConfigType CourseConfigType { get; set; }
 
@@ -18,10 +18,10 @@ namespace Fsel.Course.Domain.Entities.V1i1
 
         public int OpenOrder { get; set; }
 
-        public Course? Course { get; set; }
-
-        public Guid CourseId { get; set; }
-
         public Guid OriginalId { get; set; }
+
+        public string? UnitName { get; set; }
+
+        public string? TestName { get; set; }
     }
 }

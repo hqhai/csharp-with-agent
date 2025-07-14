@@ -66,7 +66,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
             }
             var queryTest = from baseQ in query
                             join testSection in queryTestSection on baseQ.Id equals testSection.TestId into testSections
-                            where testSections.Any()
+                            where !request.LayoutType.HasValue || testSections.Any()
                             select new TestSearchModel
                             {
                                 Id = baseQ.Id,

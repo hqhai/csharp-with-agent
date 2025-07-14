@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250711112053_Create_Table_CourseModule")]
+    partial class Create_Table_CourseModule
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2451,8 +2454,8 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<string>("CourseLevel")
                         .IsRequired()
@@ -2498,22 +2501,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<Guid?>("LevelId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("MediaPost")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid>("OriginalId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("ProgramId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
 
                     b.Property<Guid?>("SkillId")
                         .HasColumnType("uniqueidentifier");
@@ -2531,19 +2525,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<int>("Version")
-                        .HasColumnType("int");
-
-                    b.Property<string>("VersionStatus")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("LevelId");
-
-                    b.HasIndex("ProgramId");
 
                     b.HasIndex("SkillId");
 
@@ -7819,24 +7801,10 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWork", b =>
                 {
-                    b.HasOne("Fsel.Course.Domain.Entities.Level", "Level")
-                        .WithMany("HomeWorks")
-                        .HasForeignKey("LevelId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Fsel.Course.Domain.Entities.Category", "Program")
-                        .WithMany("HomeWorks")
-                        .HasForeignKey("ProgramId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("Fsel.Course.Domain.Entities.Skill", "Skill")
                         .WithMany("HomeWorks")
                         .HasForeignKey("SkillId")
                         .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Level");
-
-                    b.Navigation("Program");
 
                     b.Navigation("Skill");
                 });
@@ -8814,8 +8782,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Navigation("Flows");
 
-                    b.Navigation("HomeWorks");
-
                     b.Navigation("Lessons");
 
                     b.Navigation("Levels");
@@ -9026,8 +8992,6 @@ namespace Fsel.Course.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Level", b =>
                 {
                     b.Navigation("Courses");
-
-                    b.Navigation("HomeWorks");
 
                     b.Navigation("Lessons");
 
