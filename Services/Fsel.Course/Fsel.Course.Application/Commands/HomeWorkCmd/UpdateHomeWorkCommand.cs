@@ -164,10 +164,6 @@ IHomeWorkQuestionRepository homeWorkQuestionRepository)
                                 existing.Question.SubQuestionIndexsStr = item.Question.SubQuestionIndexsStr;
                                 existing.Question.Description = item.Question.Description;
                             }
-                            else
-                            {
-                                homeWork.HomeWorkQuestions.Add(item);
-                            }
                         }
                         else
                         {
