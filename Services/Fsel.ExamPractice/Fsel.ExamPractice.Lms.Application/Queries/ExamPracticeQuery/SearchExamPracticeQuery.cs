@@ -2,16 +2,20 @@
 
 namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 {
+    using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Extensions;
+    using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
+    using Fsel.ExamPractice.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -23,6 +27,16 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         public EnumExamPracticeType Type { get; set; }
         public EnumExamPracticeSubType? SubType { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
+        public string? ProgressStatusStr { get; set; }
+
+        [JsonIgnore]
+        public IList<EnumPracticeProgressStatus>? ProgressStatuses
+        {
+            get
+            {
+                return ProgressStatusStr.ToList<EnumPracticeProgressStatus>();
+            }
+        }
     }
 
     public class SearchExamPracticeQueryHandler : IRequestHandler<SearchExamPracticeQuery, MethodResult<IList<ExamPracticeGroupTypeModel>>>
@@ -46,21 +60,13 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<ExamPracticeGroupTypeModel>>();
 
-            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
+            var student = await GetStudentAsync(methodResult);
             if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
                 return methodResult;
             }
-
             var query = _examPracticeRepository.Queryable.Where(x => x.Type == request.Type)
-                .Where(x => x.Status == EnumExamPracticeStatus.Active || x.ExamPracticeResults.Any(y => y.StudentId == student.Id));
+                    .Where(x => x.Status == EnumExamPracticeStatus.Active || x.ExamPracticeResults.Any(y => y.StudentId == student.Id));
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 query = query.Where(x => x.Name != null && x.Name.Contains(request.Keyword));
@@ -83,13 +89,19 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 ExamPracticeResult = x.ExamPracticeResults.FirstOrDefault(y => y.StudentId == student.Id && y.ExamPracticeId == x.Id && y.WorkingStatus == EnumWorkingStatus.Active),
             }).ToListAsync(cancellationToken);
 
-            var list = data
+            var inactiveStatuses = new List<EnumExamPracticeStatus> { EnumExamPracticeStatus.Cloned, EnumExamPracticeStatus.Inactive };
+            if (request.ProgressStatuses != null && request.ProgressStatuses.Any())
+            {
+                data = data.Where(x => MatchProgressStatus(x, request.ProgressStatuses)).ToList();
+            }
+
+            var list = data.Where(x => !inactiveStatuses.Contains(x.ExamPractice.Status))
             .GroupBy(x => new
             {
                 x.ExamPractice.SubType,
                 CourseSkillsKey = string.Join(",", x.ExamPracticeSections
                                                      .Where(s => s.CourseSkill.HasValue)
-                                                     .Select(s => s.CourseSkill.Value)
+                                                     .Select(s => s.CourseSkill!.Value)
                                                      .OrderBy(s => s)) // Quan trọng: sắp xếp để key nhất quán
             })
             .Select(g => new ExamPracticeGroupTypeModel
@@ -97,36 +109,80 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 SubType = g.Key.SubType,
                 CourseSkills = g.SelectMany(x => x.ExamPracticeSections)
                                 .Where(x => x.CourseSkill.HasValue)
-                                .Select(x => x.CourseSkill.Value)
+                                .Select(x => x.CourseSkill!.Value)
                                 .Distinct()
                                 .ToList(),
-                ExamPracticeGroupModels = g.Select(x => new ExamPracticeGroupModel
-                {
-                    Id = x.ExamPractice.Id,
-                    CreatedDate = x.ExamPractice.CreatedDate,
-                    Code = x.ExamPractice.Code,
-                    Type = x.ExamPractice.Type,
-                    ExamPracticeStatus = x.ExamPractice.Status,
-                    ExecutionTime = x.ExamPractice.ExecutionTime,
-                    Name = x.ExamPractice.Name,
-                    IsNew = x.ExamPractice.ActivatedAt.HasValue && DateTime.UtcNow <= x.ExamPractice.ActivatedAt.Value.AddDays(7),
-                    ParticipantCount = x.ParticipantCount,
-                    TotalSections = x.ExamPracticeSections.Count,
-                    TotalQuestions = x.ExamPracticeSections.Select(s => s.Config?.TotalQuestion).Sum() ?? 0,
-                    Status = x.ExamPracticeResult?.Status,
-                    ExamPracticeResultId = x.ExamPracticeResult?.Id,
-                    Config = x.ExamPracticeResult?.Config,
-                    ExamPracticeScore = x.ExamPracticeResult?.ExamPracticeScore,
-                    CorrectCount = x.ExamPracticeResult?.CorrectCount ?? default,
-                    CorrectTotal = x.ExamPracticeResult?.CorrectTotal ?? default,
-                    PracticeMode = x.ExamPracticeResult?.PracticeMode,
-                    Score = x.ExamPracticeResult?.SkillScores != null && x.ExamPracticeResult.SkillScores.Any() ? NumberHelper.RoundNumberDouble(x.ExamPracticeResult.SkillScores.Average(x => x.Scores)) : default,
-                    TotalRetry = (x.ExamPracticeRetry?.RetryCount ?? TotalRetry),
-                }).OrderByDescending(x => x.CreatedDate).ToList()
+                ExamPracticeGroupModels = g.Select(x => BuildExamPracticeGroupModel(x, x.ExamPractice, x.ExamPracticeSections, x.ExamPracticeResult))
+                                           .ApplySort(request).ToList()
             }).ToList();
+
+            var dataClone = data.Where(x => inactiveStatuses.Contains(x.ExamPractice.Status)).GroupBy(_ => string.Empty)
+            .Select(g => new ExamPracticeGroupTypeModel
+            {
+                ExamPracticeGroupModels = g.Select(x => BuildExamPracticeGroupModel(x, x.ExamPractice, x.ExamPracticeSections, x.ExamPracticeResult))
+                                           .ApplySort(request).ToList()
+            }).ToList();
+            list.AddRange(dataClone);
 
             methodResult.Result = list;
             return methodResult;
+        }
+
+        private async Task<StudentModel?> GetStudentAsync(MethodResult<IList<ExamPracticeGroupTypeModel>> result)
+        {
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
+            if (!studentResult.IsSuccessStatusCode)
+            {
+                result.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                return null;
+            }
+
+            var student = studentResult?.Content?.Result;
+            if (student == null)
+            {
+                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
+                return null;
+            }
+            return student;
+        }
+
+        private static bool MatchProgressStatus(dynamic x, IList<EnumPracticeProgressStatus> selectedStatuses)
+        {
+            var result = x.ExamPracticeResult;
+            return
+                (selectedStatuses.Contains(EnumPracticeProgressStatus.NotStarted) && result == null) ||
+                (selectedStatuses.Contains(EnumPracticeProgressStatus.InProgress) && result != null && result.Status != EnumResultStatus.Done) ||
+                (selectedStatuses.Contains(EnumPracticeProgressStatus.Completed) && result != null && result.Status == EnumResultStatus.Done);
+        }
+
+        private static ExamPracticeGroupModel BuildExamPracticeGroupModel(dynamic x, ExamPractice examPractice, IList<ExamPracticeSection>? examPracticeSections, ExamPracticeResult? examPracticeResult)
+        {
+            return new ExamPracticeGroupModel
+            {
+                Id = examPractice.Id,
+                CreatedDate = examPractice.CreatedDate,
+                UpdatedDate = examPractice.UpdatedDate,
+                Code = examPractice.Code,
+                Type = examPractice.Type,
+                ExamPracticeStatus = examPractice.Status,
+                ExecutionTime = examPractice.ExecutionTime,
+                Name = examPractice.Name,
+                IsNew = examPractice.ActivatedAt.HasValue && DateTime.UtcNow <= examPractice.ActivatedAt.Value.AddDays(7),
+                ParticipantCount = x.ParticipantCount,
+                Status = examPracticeResult?.Status,
+                ExamPracticeResultId = examPracticeResult?.Id,
+                Config = examPracticeResult?.Config,
+                ExamPracticeScore = examPracticeResult?.ExamPracticeScore,
+                CorrectCount = examPracticeResult?.CorrectCount ?? default,
+                CorrectTotal = examPracticeResult?.CorrectTotal ?? default,
+                PracticeMode = examPracticeResult?.PracticeMode,
+                TotalSections = examPracticeSections?.Count ?? default,
+                TotalQuestions = examPracticeSections?.Select(s => s.Config?.TotalQuestion).Sum() ?? default,
+                TotalRetry = x.ExamPracticeRetry?.RetryCount ?? TotalRetry,
+                Score = examPracticeResult?.SkillScores?.Any() == true
+                                    ? NumberHelper.RoundNumberDouble(examPracticeResult.SkillScores.Average(s => s.Scores))
+                                    : default,
+            };
         }
     }
 }

@@ -8,14 +8,14 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
 
     public class ExamPracticeGroupTypeModel
     {
-        public EnumExamPracticeSubType SubType { get; set; }
+        public EnumExamPracticeSubType? SubType { get; set; }
         public IList<EnumCourseSkill> CourseSkills { get; set; } = new List<EnumCourseSkill>();
 
         public string? SubTypeDescription
         {
             get
             {
-                return SubType.GetDescription();
+                return SubType?.GetDescription();
             }
         }
 

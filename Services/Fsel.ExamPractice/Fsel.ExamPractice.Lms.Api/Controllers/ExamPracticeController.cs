@@ -5,6 +5,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     using System.Net;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd;
     using Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery;
@@ -14,12 +15,13 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
     [Route(Settings.APIDefaultRoute + "/exam-practice")]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
-    public class ExamPracticeController : ControllerBase
+    public class ExamPracticeController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -60,6 +62,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchExamPracticeQuery query)
         {
+            SetQuery(query);
             MethodResult<IList<ExamPracticeGroupTypeModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
