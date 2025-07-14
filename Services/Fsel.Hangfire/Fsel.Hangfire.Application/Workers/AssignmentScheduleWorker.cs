@@ -2,19 +2,20 @@
 
 namespace Fsel.Hangfire.Application.Workers
 {
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
+    using Microsoft.AspNetCore.Http;
 
-    public class AssignmentScheduleWorker : IWorker
+    public class AssignmentScheduleWorker : BaseWorker
     {
         private readonly UpdateClassLiveAssignmentPublisher _updateClassLiveAssignmentPublisher;
 
-        public AssignmentScheduleWorker(UpdateClassLiveAssignmentPublisher updateClassLiveAssignmentPublisher)
+        public AssignmentScheduleWorker(UpdateClassLiveAssignmentPublisher updateClassLiveAssignmentPublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _updateClassLiveAssignmentPublisher = updateClassLiveAssignmentPublisher;
         }
 
-        public async Task RunAsync()
+        public override async Task RunAsync()
         {
             await _updateClassLiveAssignmentPublisher.Publish(CancellationToken.None);
         }
