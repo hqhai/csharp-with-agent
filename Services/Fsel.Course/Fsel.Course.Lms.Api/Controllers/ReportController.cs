@@ -270,7 +270,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// aggregate data students in event
         /// </summary>
-        [HttpGet("export-file-report-sale-progress")]
+        [HttpPost("export-file-report-sale-progress")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]

@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using System.Drawing;
     using System.Globalization;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -133,8 +134,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     PaymentDate = order?.UpdatedDate ?? order?.CreatedDate,
                     FirstStudyDate = courseResult?.ProcessDate,
                     ExpiredDate = item.ExpiredDate,
-                    ProgressModule = item.CourseId.HasValue && courseComplete != null ? $"{courseComplete.CountComplete} / {courseComplete.TotalComplete}" : null,
-                    ProgressPercent = item.CourseId.HasValue && courseComplete != null ? NumberHelper.GetPercent(courseComplete.CountComplete, courseComplete.TotalComplete) : null,
+                    ProgressModule = (item.CourseId.HasValue || courseResult != null) && courseComplete != null ? $"{courseComplete.CountComplete} / {courseComplete.TotalComplete}" : null,
+                    ProgressPercent = (item.CourseId.HasValue || courseResult != null) && courseComplete != null ? NumberHelper.GetPercent(courseComplete.CountComplete, courseComplete.TotalComplete) : null,
                     DaysSinceLastAccess = daysSinceLast
                 };
                 var processDate = unitResult?.ProcessDate ?? courseResult?.ProcessDate ?? (courseResult != null && courseResult.Status != EnumResultStatus.New ? courseResult.CreatedDate.AddDays(1) : null);
@@ -193,13 +194,19 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         {
             MemoryStream memoryStream = new MemoryStream();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportSaleStudentProgress)))
+            using (var stream = File.OpenRead(ResourceSettings.ReportSaleStudentProgress))
+            using (var package = new ExcelPackage(stream))
             {
                 var maxWeek = studentEventLearnProcesses?.Max(x => x.WeeklyResults?.Count) ?? default;
-                ExportTemplateForSheetOne(excelPackage.Workbook.Worksheets[0], studentEventLearnProcesses, maxWeek);
-                ExportTemplateForSheetTwo(excelPackage.Workbook.Worksheets[1], studentEventLearnProcesses, maxWeek);
-                ExportTemplateForSheetThree(excelPackage.Workbook.Worksheets[2], studentEventLearnProcesses, maxWeek);
-                excelPackage.SaveAs(memoryStream);
+                ExportTemplateForSheetOne(package.Workbook.Worksheets[0], studentEventLearnProcesses, maxWeek);
+                GC.Collect();
+
+                ExportTemplateForSheetTwo(package.Workbook.Worksheets[1], studentEventLearnProcesses, maxWeek);
+                GC.Collect();
+
+                ExportTemplateForSheetThree(package.Workbook.Worksheets[2], studentEventLearnProcesses, maxWeek);
+                GC.Collect();
+                package.SaveAs(memoryStream);
             }
 
             memoryStream.Position = 0L;
@@ -233,6 +240,12 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             }
         }
 
+        private static void SetXCentered(ExcelRange cell)
+        {
+            cell.Value = "X";
+            cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+        }
+
         private static void ExportTemplateForSheetOne(ExcelWorksheet excelWorksheet, IList<StudentLearningReportModel>? studentEventLearnProcesses, int maxWeek)
         {
             WriteCellsHorizontalByCountWithRowMerge(excelWorksheet, startRow: 1, startColumn: 17, count: maxWeek, getValueFunc: i => $"Tuần {i + 1}", backgroundColor: Color.LightGray);
@@ -240,50 +253,52 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             if (studentEventLearnProcesses != null && studentEventLearnProcesses.Any())
             {
                 var startRow = 3;
-                foreach (var (item, index) in studentEventLearnProcesses.Select((value, idx) => (value, idx)))
+                foreach (var batch in studentEventLearnProcesses.Chunk(500))
                 {
-                    excelWorksheet.Cells[startRow, 1].Value = index + 1;
-                    excelWorksheet.Cells[startRow, 2].Value = item.FullName;
-                    excelWorksheet.Cells[startRow, 3].Value = item.Email;
-                    excelWorksheet.Cells[startRow, 4].Value = item.SchoolClass;
-                    if (item.NotLoggedIn)
+                    foreach (var (item, index) in batch.Select((value, idx) => (value, idx)))
                     {
-                        excelWorksheet.Cells[startRow, 5].Value = "X";
-                        excelWorksheet.Cells[startRow, 5].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                    }
-                    if (item.LoggedInButNoPT)
-                    {
-                        excelWorksheet.Cells[startRow, 6].Value = "X";
-                        excelWorksheet.Cells[startRow, 6].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                    }
-                    if (item.PTButNotStudied)
-                    {
-                        excelWorksheet.Cells[startRow, 7].Value = "X";
-                        excelWorksheet.Cells[startRow, 7].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                    }
-                    if (item.SelectedLessonButNotStudied)
-                    {
-                        excelWorksheet.Cells[startRow, 8].Value = "X";
-                        excelWorksheet.Cells[startRow, 8].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                    }
-                    excelWorksheet.Cells[startRow, 9].Value = item.CurrentLevel;
-                    excelWorksheet.Cells[startRow, 10].Value = item.SuggetLevel;
-                    excelWorksheet.Cells[startRow, 11].Value = item.CourseName;
-                    excelWorksheet.Cells[startRow, 13].Value = item.PaymentDate.HasValue ? item.PaymentDate.Value.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) : null;
-                    excelWorksheet.Cells[startRow, 14].Value = item.FirstStudyDate.HasValue ? item.FirstStudyDate.Value.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) : null;
-                    excelWorksheet.Cells[startRow, 15].Value = item.ProgressModule;
-                    excelWorksheet.Cells[startRow, 16].Value = item.ProgressPercent + " %";
-                    if (item.WeeklyResults.Any())
-                    {
-                        var dem = 17;
-                        foreach (var weekly in item.WeeklyResults)
+                        excelWorksheet.Cells[startRow, 1].Value = index + 1;
+                        excelWorksheet.Cells[startRow, 2].Value = item.FullName;
+                        excelWorksheet.Cells[startRow, 3].Value = item.Email;
+                        excelWorksheet.Cells[startRow, 4].Value = item.SchoolClass;
+                        if (item.NotLoggedIn)
                         {
-                            excelWorksheet.Cells[startRow, dem].Value = weekly.Status;
-                            excelWorksheet.Cells[startRow, dem].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            dem++;
+                            SetXCentered(excelWorksheet.Cells[startRow, 5]);
                         }
+                        if (item.LoggedInButNoPT)
+                        {
+                            SetXCentered(excelWorksheet.Cells[startRow, 6]);
+                        }
+                        if (item.PTButNotStudied)
+                        {
+                            SetXCentered(excelWorksheet.Cells[startRow, 7]);
+                        }
+                        if (item.SelectedLessonButNotStudied)
+                        {
+                            SetXCentered(excelWorksheet.Cells[startRow, 8]);
+                        }
+                        excelWorksheet.Cells[startRow, 9].Value = item.CurrentLevel;
+                        excelWorksheet.Cells[startRow, 10].Value = item.SuggetLevel;
+                        excelWorksheet.Cells[startRow, 11].Value = item.CourseName;
+                        excelWorksheet.Cells[startRow, 13].Value = item.PaymentDate.HasValue ? item.PaymentDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) : null;
+                        excelWorksheet.Cells[startRow, 14].Value = item.FirstStudyDate.HasValue ? item.FirstStudyDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) : null;
+                        excelWorksheet.Cells[startRow, 15].Value = item.ProgressModule;
+                        excelWorksheet.Cells[startRow, 16].Value = item.ProgressPercent.HasValue ? item.ProgressPercent.Value + " %" : null;
+                        if (item.WeeklyResults.Any())
+                        {
+                            var dem = 17;
+                            foreach (var weekly in item.WeeklyResults)
+                            {
+                                var cell = excelWorksheet.Cells[startRow, dem];
+                                cell.Value = weekly.Status;
+                                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                dem++;
+                            }
+                        }
+                        startRow++;
                     }
-                    startRow++;
+
+                    GC.Collect();
                 }
             }
         }
@@ -294,29 +309,35 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             if (studentEventLearnProcesses != null && studentEventLearnProcesses.Any())
             {
                 var startRow = 3;
-                foreach (var (item, index) in studentEventLearnProcesses.Select((value, idx) => (value, idx)))
+                foreach (var batch in studentEventLearnProcesses.Chunk(500)) // .NET 6+
                 {
-                    excelWorksheet.Cells[startRow, 1].Value = index + 1;
-                    excelWorksheet.Cells[startRow, 2].Value = item.FullName;
-                    excelWorksheet.Cells[startRow, 3].Value = item.Email;
-                    excelWorksheet.Cells[startRow, 4].Value = item.SchoolClass;
-                    excelWorksheet.Cells[startRow, 5].Value = item.DaysSinceLastAccess;
-                    excelWorksheet.Cells[startRow, 6].Value = item.CurrentLevel;
-                    excelWorksheet.Cells[startRow, 7].Value = item.SuggetLevel;
-                    excelWorksheet.Cells[startRow, 8].Value = item.CourseName;
-                    excelWorksheet.Cells[startRow, 10].Value = item.ProgressModule;
-                    excelWorksheet.Cells[startRow, 11].Value = item.ProgressPercent + " %";
-                    if (item.WeeklyResults.Any())
+                    foreach (var (item, index) in batch.Select((value, idx) => (value, idx)))
                     {
-                        var dem = 12;
-                        foreach (var weekly in item.WeeklyResults)
+                        excelWorksheet.Cells[startRow, 1].Value = index + 1;
+                        excelWorksheet.Cells[startRow, 2].Value = item.FullName;
+                        excelWorksheet.Cells[startRow, 3].Value = item.Email;
+                        excelWorksheet.Cells[startRow, 4].Value = item.SchoolClass;
+                        excelWorksheet.Cells[startRow, 5].Value = item.DaysSinceLastAccess;
+                        excelWorksheet.Cells[startRow, 6].Value = item.CurrentLevel;
+                        excelWorksheet.Cells[startRow, 7].Value = item.SuggetLevel;
+                        excelWorksheet.Cells[startRow, 8].Value = item.CourseName;
+                        excelWorksheet.Cells[startRow, 10].Value = item.ProgressModule;
+                        excelWorksheet.Cells[startRow, 11].Value = item.ProgressPercent.HasValue ? item.ProgressPercent.Value + " %" : null;
+                        if (item.WeeklyResults.Any())
                         {
-                            excelWorksheet.Cells[startRow, dem].Value = weekly.Status;
-                            excelWorksheet.Cells[startRow, dem].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            dem++;
+                            var dem = 12;
+                            foreach (var weekly in item.WeeklyResults)
+                            {
+                                var cell = excelWorksheet.Cells[startRow, dem];
+                                cell.Value = weekly.Status;
+                                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                dem++;
+                            }
                         }
+                        startRow++;
                     }
-                    startRow++;
+
+                    GC.Collect();
                 }
             }
         }
@@ -327,29 +348,35 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             if (studentEventLearnProcesses != null && studentEventLearnProcesses.Any())
             {
                 var startRow = 3;
-                foreach (var (item, index) in studentEventLearnProcesses.Select((value, idx) => (value, idx)))
+                foreach (var batch in studentEventLearnProcesses.Chunk(500)) // .NET 6+
                 {
-                    excelWorksheet.Cells[startRow, 1].Value = index + 1;
-                    excelWorksheet.Cells[startRow, 2].Value = item.FullName;
-                    excelWorksheet.Cells[startRow, 3].Value = item.Email;
-                    excelWorksheet.Cells[startRow, 4].Value = item.SchoolClass;
-                    excelWorksheet.Cells[startRow, 5].Value = item.ExpiredDate.HasValue ? item.ExpiredDate.Value.ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) : null;
-                    excelWorksheet.Cells[startRow, 6].Value = item.CurrentLevel;
-                    excelWorksheet.Cells[startRow, 7].Value = item.SuggetLevel;
-                    excelWorksheet.Cells[startRow, 8].Value = item.CourseName;
-                    excelWorksheet.Cells[startRow, 10].Value = item.ProgressModule;
-                    excelWorksheet.Cells[startRow, 11].Value = item.ProgressPercent + " %";
-                    if (item.WeeklyResults.Any())
+                    foreach (var (item, index) in batch.Select((value, idx) => (value, idx)))
                     {
-                        var dem = 12;
-                        foreach (var weekly in item.WeeklyResults)
+                        excelWorksheet.Cells[startRow, 1].Value = index + 1;
+                        excelWorksheet.Cells[startRow, 2].Value = item.FullName;
+                        excelWorksheet.Cells[startRow, 3].Value = item.Email;
+                        excelWorksheet.Cells[startRow, 4].Value = item.SchoolClass;
+                        excelWorksheet.Cells[startRow, 5].Value = item.ExpiredDate.HasValue ? item.ExpiredDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy HH:mm:ss", CultureInfo.InvariantCulture) : null;
+                        excelWorksheet.Cells[startRow, 6].Value = item.CurrentLevel;
+                        excelWorksheet.Cells[startRow, 7].Value = item.SuggetLevel;
+                        excelWorksheet.Cells[startRow, 8].Value = item.CourseName;
+                        excelWorksheet.Cells[startRow, 10].Value = item.ProgressModule;
+                        excelWorksheet.Cells[startRow, 11].Value = item.ProgressPercent.HasValue ? item.ProgressPercent.Value + " %" : null;
+                        if (item.WeeklyResults.Any())
                         {
-                            excelWorksheet.Cells[startRow, dem].Value = weekly.Status;
-                            excelWorksheet.Cells[startRow, dem].Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                            dem++;
+                            var dem = 12;
+                            foreach (var weekly in item.WeeklyResults)
+                            {
+                                var cell = excelWorksheet.Cells[startRow, dem];
+                                cell.Value = weekly.Status;
+                                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                                dem++;
+                            }
                         }
+                        startRow++;
                     }
-                    startRow++;
+
+                    GC.Collect();
                 }
             }
         }
