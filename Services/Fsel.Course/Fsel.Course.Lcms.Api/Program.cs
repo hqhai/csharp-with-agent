@@ -6,6 +6,7 @@ using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
+using Fsel.Course.Infrastructure.Common.LessonHelpers;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
 

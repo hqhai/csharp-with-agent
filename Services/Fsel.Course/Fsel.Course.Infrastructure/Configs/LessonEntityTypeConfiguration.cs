@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Course.Domain.Entities;
 using Fsel.Shared.Enums;
@@ -19,6 +20,12 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseLevel>());
+
+            builder.Property(e => e.VersionStatus)
+                   .HasMaxLength(100)
+                   .HasConversion(
+                       v => v.ToString(),
+                       v => v.EnumParse<EnumVersionStatus>());
 
             builder.Property(e => e.Status)
                    .HasMaxLength(100)

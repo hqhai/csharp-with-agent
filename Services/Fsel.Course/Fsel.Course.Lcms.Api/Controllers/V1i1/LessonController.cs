@@ -9,6 +9,7 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Application.Commands.LessonCmd.V1i1;
+    using Fsel.Course.Application.Queries.CourseQuery;
     using Fsel.Course.Application.Queries.LessonQuery.V1i1;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Shared.Constants;
@@ -101,6 +102,18 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<LessonModel> queryResult = await _mediator.Send(new GetLessonQuery { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Lesson History
+        /// </summary>
+        [HttpGet("lesson-history")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<Domain.Models.EntityModels.LessonHistoryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLessonHistory([FromQuery] GetHistoryLessonQuery query)
+        {
+            MethodResult<PagingItemsModel<Domain.Models.EntityModels.LessonHistoryModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
