@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -42,7 +42,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 table: "HomeWorks",
                 type: "uniqueidentifier",
                 nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                defaultValue: "NEWID()");
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ProgramId",
