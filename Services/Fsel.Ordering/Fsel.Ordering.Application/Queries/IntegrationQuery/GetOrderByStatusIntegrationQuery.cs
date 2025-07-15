@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -92,7 +93,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
 
             if (request.Status)
             {
-                orders = orders.Where(x => orderClients.Contains(x.UserId)).ToList();
+                orders = orders.Where(x => orderClients.Contains(x.UserId) && x.RevenueType == EnumPaymentRevenueType.Revenue).ToList();
             }
             else
             {

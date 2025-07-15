@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -66,6 +65,9 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListCourseType = request.ListCourseType,
+                ListCourseLevel = request.ListCourseLevel,
+
                 Keyword = request.Keyword,
                 LearningStatus = request.LearningStatus,
                 CourseLevel = request.CourseLevel,
@@ -92,7 +94,24 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                             studentIds = await _placementTestResultRepository.GetStudentPtIdsAsync(request.StartDate, request.EndDate, studentIds);
                         }
                         var studentPtGroups = await _placementTestGroupResultRepository.GetStudentIdsAsync(request.Status, studentIds, request.CurrentLevel, request.CourseLevel);
+
                         var studentPTIds = studentPtGroups.ToHashSet();
+                        if (request.Status.HasValue && request.Status == EnumCompletionStatus.InProgress && studentIds.Any())
+                        {
+                            var studentHasLearned = await _placementTestGroupResultRepository.Queryable
+                                                    .WhereBulkContains(studentIds, x => x.StudentId)
+                                                    .Select(x => x.StudentId)
+                                                    .ToListAsync(cancellationToken);
+                            var studentNotLearned = studentIds.Except(studentHasLearned).ToList();
+                            if (studentPTIds != null && studentPTIds.Any())
+                            {
+                                studentPTIds.UnionWith(studentNotLearned);
+                            }
+                            else
+                            {
+                                studentPTIds = studentNotLearned.ToHashSet();
+                            }
+                        }
                         students = students.Where(x => studentPTIds.Contains(x.Id)).ToList();
                     }
                     break;

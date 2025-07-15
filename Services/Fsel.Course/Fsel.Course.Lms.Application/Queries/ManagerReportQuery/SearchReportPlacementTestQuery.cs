@@ -52,10 +52,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
                 Keyword = request.Keyword,
                 Status = request.Status,
                 StartDate = request.StartDate,
@@ -70,10 +72,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
@@ -131,6 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
+                    UserName = item.UserName,
                     ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
                     Status = groupResult != null && groupResult.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.InProgress
                 };

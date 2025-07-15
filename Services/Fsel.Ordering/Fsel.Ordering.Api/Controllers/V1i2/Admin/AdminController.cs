@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
     using Fsel.Core.Base.BaseModels;
     using Fsel.Ordering.Application.Commands.OrderCmds.V1i2;
     using Fsel.Ordering.Application.Queries.OrderQuery.V1i2;
+    using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2;
     using Fsel.Shared.Attributes;
@@ -145,6 +146,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> GetOrderByUserIds([FromBody] GetOrdersByUserIdsQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get users has order revenue
+        /// </summary>
+        [HttpPost("get-users-has-order-revenue")]
+        [ProducesResponseType(typeof(MethodResult<IList<OrderModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersHasOrderRevenue([FromBody] GetUsersHasOrderRevenueByUserIdsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

@@ -205,11 +205,19 @@ namespace Fsel.System.Application.Commands.DailyQuiz
             }
 
             var dailyQuizHistories = _mapper.Map<IList<DailyQuizHistory>>(request.DailyQuizzes);
+            int index = 1;
+            foreach (var item in dailyQuizHistories)
+            {
+                item.Index = index;
+                index++;
+            }
 
             await _dailyQuizHistoryRepository.ExecuteTransactionAsync(async () =>
             {
                 if (!string.IsNullOrEmpty(code))
                 {
+                    var dailyQuizWinners = new List<DailyQuizWinner>();
+
                     var dailyQuizWinner = new DailyQuizWinner()
                     {
                         Code = code,
@@ -217,10 +225,35 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                         CompetitionEventId = @event.Id,
                         IsWin = false
                     };
-                    _dailyQuizWinnerRepository.Add(dailyQuizWinner);
+
+                    if (!dailyQuizWinner.IsValid())
+                    {
+                        methodResult.AddError(dailyQuizWinner.ErrorMessages);
+                        return methodResult;
+                    }
+
+                    dailyQuizWinners.Add(dailyQuizWinner);
+
+                    await _dailyQuizWinnerRepository.BulkMergeAsync(dailyQuizWinners, x =>
+                    {
+                        x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.CreatedDateLocal };
+                    });
+                }
+                else
+                {
+                    var deleteWinners = await _dailyQuizWinnerRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
+                    deleteWinners = deleteWinners.Where(p => p.CreatedDateLocal.HasValue && p.CreatedDateLocal.Value.Date == currentDate.Date).ToList();
+                    if (deleteWinners.Any())
+                    {
+                        await _dailyQuizWinnerRepository.DeleteListAsync(deleteWinners);
+                    }
                 }
 
-                await _dailyQuizHistoryRepository.AddList(dailyQuizHistories);
+                await _dailyQuizHistoryRepository.BulkMergeAsync(dailyQuizHistories, x =>
+                {
+                    x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.Index, c.CreatedDateLocal };
+                });
+
                 await _dailyQuizHistoryRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 return methodResult;

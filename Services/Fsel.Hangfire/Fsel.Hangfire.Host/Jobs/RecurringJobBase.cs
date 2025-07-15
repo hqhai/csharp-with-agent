@@ -32,6 +32,7 @@ namespace Fsel.Hangfire.Host.Jobs
             JobExtensions.SetRecurringJob<CheckUserDeletionWorker>(WorkerSettings.JobName.CheckUserDeletionJob, Cron.Daily());
             //JobExtensions.SetRecurringJob<TestWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.Daily);
             JobExtensions.SetRecurringJob<ChooseDailyQuizWinnersWorker>(WorkerSettings.JobName.ChooseDailyQuizWinners, Cron.Daily(13, 59));
+            JobExtensions.SetRecurringJob<AggregateDataStudentsInEventWorker>(WorkerSettings.JobName.AggregateDataStudentsInEvent, Cron.Daily(17, 1));
         }
     }
 }

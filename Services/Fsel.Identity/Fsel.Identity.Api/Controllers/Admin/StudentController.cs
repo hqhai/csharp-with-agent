@@ -42,6 +42,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("search-students")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         [Permission(StudentManagement.View)]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsByAdminQuery query)
         {
@@ -83,6 +84,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("profile/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         [Permission(StudentManagement.View)]
         public async Task<IActionResult> GetProfileStudent([FromRoute] Guid studentId)
         {
@@ -135,6 +137,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("management")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsQuery query)
         {
@@ -373,6 +376,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Tool Synchronous Parent Info
+        /// </summary>
+        [HttpPost("tool-synchronous-parent-info")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ToolSynchronousParentInfo()
+        {
+            var queryResult = await _mediator.Send(new ToolSynchronousParentInfoCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

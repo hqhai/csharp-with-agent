@@ -62,6 +62,7 @@ builder.Services.AddScoped<IPermissionGroupRepository, PermissionGroupRepository
 builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
 builder.Services.AddScoped<IRoleClaimRepository, RoleClaimRepository>();
 builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
+builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
@@ -101,7 +102,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.UserQueue.NameQueue.WeeklyNotice, typeof(WeeklyNoticeConsumer) },
     { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) },
-    { QueueSettings.UserQueue.NameQueue.CreateStudentsFromFile, typeof(CreateStudentsFromFileConsumer) }
+    { QueueSettings.UserQueue.NameQueue.CreateStudentsFromFile, typeof(CreateStudentsFromFileConsumer) },
+    { QueueSettings.UserQueue.NameQueue.AggregateDataStudentsInEvent, typeof(AggregateDataStudentsInEventConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

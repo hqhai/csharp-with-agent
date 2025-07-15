@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -34,6 +35,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         public async Task<IActionResult> Search([FromQuery] SearchStudentProgressQuery query)
         {
             MethodResult<PagingItemsModel<StudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);

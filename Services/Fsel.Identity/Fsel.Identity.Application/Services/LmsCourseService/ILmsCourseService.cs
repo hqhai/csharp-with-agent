@@ -76,5 +76,11 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/admin/student/aggregate-data-students")]
         Task<IApiResponse<MethodResult<AggregateDataStudentsByAdminModels>>> AggregateDataStudents([FromBody] AggregateDataStudentsByAdminQueryModels students);
+
+        [Post("/v1/report/aggregate-data-students-in-event")]
+        Task<IApiResponse<MethodResult<IList<AggregateDataLearnStudentsInEventModel>>>> AggregateDataStudentsInEvent([Body] AggregateDataLearnStudentsInEventQueryModel students);
+
+        [Delete("/v1/admin/other/{studentId}/pt-and-course")]
+        Task<IApiResponse<MethodResult<bool>>> DeletePTAndCourseAsync([FromRoute] Guid studentId);
     }
 }

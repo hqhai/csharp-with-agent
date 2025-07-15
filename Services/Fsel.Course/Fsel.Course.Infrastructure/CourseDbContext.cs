@@ -3,6 +3,7 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
 using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
 using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
@@ -110,6 +111,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
         public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
         public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
+        public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
 
         #endregion Report
 
@@ -117,6 +119,10 @@ namespace Fsel.Course.Infrastructure
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
         public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
         public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
+
+        public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
+        public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
+        public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -212,6 +218,12 @@ namespace Fsel.Course.Infrastructure
             //modelBuilder.Ignore<CourseCompleteReportModel>();
             //modelBuilder.Ignore<SchoolInfoFilterModel>();
             //modelBuilder.Ignore<DistrictInfoModel>();
+            //modelBuilder.Ignore<ReportLearningProcessModel>();
+            //modelBuilder.Ignore<ReportLearningResultModel>();
+            //modelBuilder.Ignore<ExportSchoolEventModel>();
+            //modelBuilder.Ignore<ExportStudentEventModel>();
+            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
+            //modelBuilder.Ignore<ExportDistrictEventModel>();
 
             base.OnModelCreating(modelBuilder);
         }

@@ -81,6 +81,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("search-user")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         [Permission(UserManagement.View)]
         public async Task<IActionResult> SearchUser([FromQuery] SearchUserQuery query)
         {

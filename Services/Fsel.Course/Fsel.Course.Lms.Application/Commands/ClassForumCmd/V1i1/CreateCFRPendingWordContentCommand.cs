@@ -27,6 +27,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Hosting;
     using Refit;
+    using Microsoft.Extensions.Logging;
+    using Fsel.Course.Infrastructure.Repositories;
 
     public class CreateCFRPendingWordContentCommand : CreateCFRPendingWordContentCommandModel, IRequest<MethodResult<bool>>
     {
@@ -44,6 +46,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         private readonly ISystemService _systemService;
         private readonly SpeechToTextPendingAiPublisher _speechToTextPendingAiPublisher;
         private readonly IStorageService _storageService;
+        private readonly IMediator _mediator;
+        private readonly ILogger<CreateCFRPendingWordContentCommand> _logger;
+        private readonly IClassForumResultFileRepository _classForumResultFileRepository;
         private const int MaxClassForumDetailResultRecord = 2;
         private const int MaxPendingSpeechToText = 2;
         private const int TimeStartJobTest = 10;
@@ -58,7 +63,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                                                          AuthContext authContext,
                                                          ISystemService systemService,
                                                          SpeechToTextPendingAiPublisher speechToTextPendingAiPublisher,
-                                                         IStorageService storageService)
+                                                         IStorageService storageService,
+                                                         IMediator mediator,
+                                                        ILogger<CreateCFRPendingWordContentCommand> logger,
+                                                        IClassForumResultFileRepository classForumResultFileRepository)
         {
             _userService = userService;
             _classForumResultRepository = classForumResultRepository;
@@ -70,6 +78,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             _systemService = systemService;
             _speechToTextPendingAiPublisher = speechToTextPendingAiPublisher;
             _storageService = storageService;
+            _mediator = mediator;
+            _logger = logger;
+            _classForumResultFileRepository = classForumResultFileRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateCFRPendingWordContentCommand request, CancellationToken cancellationToken)
@@ -176,7 +187,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 else
                 {
                     classForumDetailResult = await CreateClassForumDetailResultAsync(classForumResult.Id, EnumSubmissionCount.SecondSubmit, request.Content ?? string.Empty, request.FormFile, cancellationToken);
-                    await UpdateClassForumResult(classForumResult, cancellationToken);
+                    await UpdateClassForumResult(classForumResult);
                 }
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -186,15 +197,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
             // bắn publish sang xử lý speech to text
             using var memoryStream = new MemoryStream();
-            await request.FormFile.CopyToAsync(memoryStream);
+            await request.FormFile.CopyToAsync(memoryStream, cancellationToken);
 
             await _speechToTextPendingAiPublisher.Publish(new SpeechToTextPendingAiConsumerModel
             {
+                UserId = _authContext.CurrentUserId,
                 ClassForumDetailResultId = classForumDetailResult.Id,
                 FileName = request.FormFile.FileName,
                 ContentType = request.FormFile.ContentType,
                 FileData = memoryStream.ToArray()
             }, cancellationToken);
+
+            _logger.LogError($"LogParamPendingSTT: userId: {_authContext.CurrentUserId} classForumDetailResult: {classForumDetailResult.Id} value: {request.FormFile.FileName} - {request.FormFile.ContentType} - {memoryStream.ToArray()}");
 
             return methodResult;
         }
@@ -210,16 +224,32 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 IsPendingSpeechToText = true
             };
 
-            classForumResult = _classForumResultRepository.Add(classForumResult);
+            await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.ClassForumId, c.StudentId, c.IsDeleted };
+            });
             await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             return classForumResult;
         }
 
         private async Task<ClassForumDetailResult> CreateClassForumDetailResultAsync(Guid classForumResultId, EnumSubmissionCount submissionCount, string content, IFormFile formFile, CancellationToken cancellationToken)
         {
+            string? filePath = null;
             using var stream = formFile.OpenReadStream();
             var streamPart = new StreamPart(stream, formFile.FileName, formFile.ContentType);
+
             var filePart = await _storageService.ConvertWav(streamPart);
+            if (!filePart.IsSuccessStatusCode)
+            {
+                using var streamS3 = formFile.OpenReadStream();
+                var streamPartS3 = new StreamPart(streamS3, formFile.FileName, formFile.ContentType);
+                var filePartS3 = await _storageService.UpLoadFile(EnumFolderType.Files, EnumBucketType.FselPublic, streamPartS3);
+                filePath = filePartS3.Content?.Result;
+            }
+            else
+            {
+                filePath = filePart.Content?.Result;
+            }
 
             var classForumDetailResult = new ClassForumDetailResult
             {
@@ -227,19 +257,31 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 Status = EnumClassForumResultStatus.PendingSpeechToText,
                 SubmissionCount = submissionCount,
                 ClassForumResultId = classForumResultId,
-                ClassForumResultFiles = new List<ClassForumResultFile> { new ClassForumResultFile { FilePath = filePart.Content?.Result } }
+                ClassForumResultFiles = new List<ClassForumResultFile> { new ClassForumResultFile { FilePath = filePath } }
             };
 
-            _classForumDetailResultRepository.Add(classForumDetailResult);
-            await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _classForumDetailResultRepository.BulkMergeAsync(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.SubmissionCount, c.ClassForumResultId, c.IsDeleted };
+            });
+            if (classForumDetailResult.ClassForumResultFiles.Any())
+            {
+                foreach (var file in classForumDetailResult.ClassForumResultFiles)
+                {
+                    file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
+                }
+                await _classForumResultFileRepository.BulkMergeAsync(classForumDetailResult.ClassForumResultFiles);
+            }
             return classForumDetailResult;
         }
 
-        private async Task UpdateClassForumResult(ClassForumResult classForumResult, CancellationToken cancellationToken)
+        private async Task UpdateClassForumResult(ClassForumResult classForumResult)
         {
             classForumResult.IsPendingSpeechToText = true;
-            _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = entity => new { entity.ClassForumId, entity.LessonResultId, entity.StudentId };
+            });
         }
     }
 }

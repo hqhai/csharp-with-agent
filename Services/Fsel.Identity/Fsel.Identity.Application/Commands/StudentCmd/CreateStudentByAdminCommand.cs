@@ -105,6 +105,22 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                    new UserSetting(true)
                 }
             };
+            if (!user.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
+                return methodResult;
+            }
+            if (user.Human != null && !user.Human.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.Human.ErrorMessages);
+                return methodResult;
+            }
+
+            if (user.Human?.Student != null && !user.Human.Student.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.Human.Student.ErrorMessages);
+                return methodResult;
+            }
 
             identityStudentResult = await _userManager.CreateAsync(user, DefaultPassword);
             if (!identityStudentResult.Succeeded)
