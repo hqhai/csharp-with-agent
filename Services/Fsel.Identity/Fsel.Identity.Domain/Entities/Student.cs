@@ -22,14 +22,20 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? School { get; set; }
 
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolGrade { get; set; }
 
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolClass { get; set; }
 
-        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SchoolFaculty { get; set; }
+
+        [MaxLength(20, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ParentPhoneNumber { get; set; }
+
+        [MaxLength(70, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? ParentEmail { get; set; }
 
         public EnumCourseLevel? CourseLevel { get; set; }
         public EnumCourseLevel? BaseCourseLevel { get; set; }

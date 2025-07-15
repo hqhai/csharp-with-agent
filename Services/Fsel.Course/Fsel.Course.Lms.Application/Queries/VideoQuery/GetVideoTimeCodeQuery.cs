@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
@@ -75,15 +75,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
             var video = await _videoRepository.Queryable.Include(i => i.VideoTimeCodes)
-                                    .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                    .ThenInclude(x => x.Exercise)
-                                    .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                    .ThenInclude(x => x.Question)
-                                .Include(i => i.VideoTimeCodes)
-                                .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
-                                .Where(x => x.Id == request.VideoId)
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+                                                        .Where(x => x.Id == request.VideoId)
+                                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (video == null)
             {
@@ -91,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
             var videoModel = _mapper.Map<VideoModel>(video);
-            videoModel.VideoTimeCodes = _videoConverter.GetTimeCodes(video, videoResult);
+            videoModel.VideoTimeCodes = await _videoConverter.GetTimeCodes(video, videoResult);
             videoModel.VideoResult = _mapper.Map<VideoResultModel>(videoResult);
             methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

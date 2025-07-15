@@ -27,5 +27,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public string? Role { get; set; }
         public Guid? UserId { get; set; }
+
+        public UserInformationModel? User { get; set; }
     }
 }

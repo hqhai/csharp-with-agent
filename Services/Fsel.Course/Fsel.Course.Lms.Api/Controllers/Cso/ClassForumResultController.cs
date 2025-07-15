@@ -4,19 +4,23 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/cso/class-forum-result")]
     [ApiController]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class ClassForumResultController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -97,6 +101,15 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         public async Task<IActionResult> GetClassForumResultByLessonResultId([FromQuery] GetClassForumResultByLessonResultIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPut("ai-approval-class-forum/{classForumId}")]
+        [ProducesResponseType(typeof(MethodResult<ClassForumResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AutoApproval([FromRoute] Guid classForumId)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new AutoApprovalClassForumCommand { ClassForumResulId = classForumId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

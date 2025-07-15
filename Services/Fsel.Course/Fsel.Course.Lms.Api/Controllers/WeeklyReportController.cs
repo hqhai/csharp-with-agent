@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
@@ -31,10 +30,22 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// weekly report
         /// </summary>
-        [HttpPost("weekly-report")]
+        [HttpPost("send-weekly-report")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> WeeklyReport([FromBody] WeeklyReportCommand command)
+        public async Task<IActionResult> AggregateDataWeeklyReport()
+        {
+            var queryResult = await _mediator.Send(new SendWeeklyReportCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// weekly report
+        /// </summary>
+        [HttpPost("aggregate-data-weekly-report")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> WeeklyReport([FromBody] AggregateDataWeeklyReportCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();

@@ -39,13 +39,15 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         private readonly IMediator _mediator;
         private readonly VideoConverter _videoConverter;
         private readonly IUserService _userService;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
 
         public GetTimeCodeDetailQueryHandler(IVideoTimeCodeRepository videoTimeCodeRepository,
             IVideoResultRepository videoResultRepository,
             AuthContext authContext,
             IMediator mediator,
             VideoConverter videoConverter,
-            IUserService userService)
+            IUserService userService,
+            IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
         {
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoResultRepository = videoResultRepository;
@@ -53,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             _mediator = mediator;
             _videoConverter = videoConverter;
             _userService = userService;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
         }
 
         public async Task<MethodResult<VideoTimeCodeModel>> Handle(GetTimeCodeDetailQuery request, CancellationToken cancellationToken)
@@ -60,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeModel> methodResult = new MethodResult<VideoTimeCodeModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
@@ -83,35 +86,21 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            var videoTimeCode = await _videoTimeCodeRepository.Queryable
-                                    .Include(x => x.VideoTimeCodeAnswers.Where(x => x.VideoResultId == videoResult.Id))
-                                    .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                        .ThenInclude(x => x.Exercise)
-                                        .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                        .ThenInclude(x => x.Question)
-                                        .ThenInclude(x => x.QuestionExplanationErrors.Where(x => x.VideoResultId == videoResult.Id))
-                                    .Include(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                        .ThenInclude(x => x.Exercise)
-                                        .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                        .ThenInclude(x => x.Question)
-                                        .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => videoResult != null && x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == request.VideoTimeCodeId))
-                                .Where(x => x.Id == request.VideoTimeCodeId && x.VideoId == request.VideoId)
-                                .AsNoTracking()
-                                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-
+            var videoTimeCode = await _videoTimeCodeRepository.GetByIdAsync(request.VideoTimeCodeId);
             if (videoTimeCode == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCode));
                 return methodResult;
             }
+
             var method = await _mediator.Send(new CreateVideoTimeCodeResultCommand { VideoResultId = videoResult.Id, StudentId = studentId, VideoTimeCodeId = request.VideoTimeCodeId, IsActive = !request.IsCreateAnswer }, cancellationToken);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            var videoTimeCodeModel = _videoConverter.GetVideoTimeCode(videoTimeCode, method.Result, request.IsShowSubStatus);
-            methodResult.Result = videoTimeCodeModel;
+
+            methodResult.Result = await _videoConverter.GetVideoTimeCodeDetailAsync(videoTimeCode, method.Result ?? new VideoTimeCodeResultModel(), request.IsShowSubStatus);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -120,8 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         {
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id)).Where(x => x.VideoId == request.VideoId).OrderBy(x => x.DisplayTime).ToListAsync(cancellationToken);
-
+            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Where(x => x.VideoId == videoResult.VideoId).OrderBy(x => x.DisplayTime).ToListAsync(cancellationToken);
             var videoTimeCodeRequest = videoTimeCodes.FirstOrDefault(x => x.Id == request.VideoTimeCodeId);
             if (videoTimeCodeRequest == null)
             {
@@ -129,46 +117,46 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            var (isErrorCode, displayTimeCodes) = GetVideoTimeCode(videoTimeCodes, videoTimeCodeRequest);
+            var (isErrorCode, displayTimeCodes) = await GetVideoTimeCodeAsync(videoTimeCodes, videoTimeCodeRequest, videoResult);
             if (isErrorCode)
             {
                 methodResult.AddErrorBadRequest(new List<ErrorResult>
-                    {
-                        new ErrorResult
-                          {
-                            ErrorCode = nameof(EnumVideoResultErrorCode.VideoTimeCodeNotCompleted),
-                            Errors = new List<Error>
+                {
+                    new ErrorResult
+                      {
+                        ErrorCode = nameof(EnumVideoResultErrorCode.VideoTimeCodeNotCompleted),
+                        Errors = new List<Error>
+                        {
+                            new Error
                             {
-                                new Error
+                                FieldName = nameof(videoTimeCodes),
+                                ErrorValues = displayTimeCodes.Select(x=> new
                                 {
-                                    FieldName = nameof(videoTimeCodes),
-                                    ErrorValues = displayTimeCodes.Select(x=> new
-                                    {
-                                        DisplayOrder = x.Item1,
-                                        VideoTimeCodeId = x.Item2
-                                    }).Deserialize<IList<object>>()
-                                }
+                                    DisplayOrder = x.Item1,
+                                    VideoTimeCodeId = x.Item2
+                                }).Deserialize<IList<object>>()
                             }
-                          }
-                    });
+                        }
+                      }
+                });
                 return methodResult;
             }
 
             return methodResult;
         }
 
-        private static (bool, IList<(int, Guid)>) GetVideoTimeCode(IList<VideoTimeCode>? videoTimeCodes, VideoTimeCode videoTimeCodeRequest)
+        private async Task<(bool, IList<(int, Guid)>)> GetVideoTimeCodeAsync(IList<VideoTimeCode>? videoTimeCodes, VideoTimeCode videoTimeCodeRequest, VideoResult videoResult)
         {
             var displayTimeCodes = new List<(int, Guid)>();
             if (videoTimeCodes != null)
             {
                 var videoTimeCodePrevios = videoTimeCodes.Where(x => videoTimeCodes.IndexOf(x) < videoTimeCodes.IndexOf(videoTimeCodeRequest)).ToList();
-
+                var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id).ToListAsync();
                 if (videoTimeCodePrevios != null && videoTimeCodePrevios.Any())
                 {
                     foreach (var videoTimeCode in videoTimeCodePrevios)
                     {
-                        var videoTimeCodeResult = videoTimeCode.VideoTimeCodeResults.FirstOrDefault();
+                        var videoTimeCodeResult = videoTimeCodeResults.FirstOrDefault(x => x.VideoTimeCodeId == videoTimeCode.Id);
                         if (videoTimeCodeResult == null || videoTimeCodeResult.Status != EnumResultStatus.Done)
                         {
                             displayTimeCodes.Add((videoTimeCodes.IndexOf(videoTimeCode) + 1, videoTimeCode.Id));

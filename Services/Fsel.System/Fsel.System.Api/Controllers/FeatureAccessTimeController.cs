@@ -45,6 +45,15 @@ namespace Fsel.System.Api.Controllers
             return commandResult.GetActionResult();
         }
 
+        [HttpPost("get-feature-accesstime")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetFeatureAccessTime([FromBody] GetAccessTimeByUserAndFeatureCommand cmd)
+        {
+            var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
         /// <summary>
         /// Get Feature Access Time Detail
         /// </summary>
@@ -143,6 +152,15 @@ namespace Fsel.System.Api.Controllers
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        [HttpPost("get-feature-access-time-by-user-ids")]
+        [ProducesResponseType(typeof(MethodResult<List<FeatureAccessTimeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetFeatureAccessTimeByUserIds([FromBody] GetFeatureAccessTimesByUserIdsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

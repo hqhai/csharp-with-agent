@@ -5,13 +5,12 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Infrastructure.Repositories;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -25,6 +24,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
         private readonly IUserReferralRepository _userReferralRepository;
         private readonly UserManager<User> _userManager;
         private readonly AuthContext _authContext;
+        private const int MaxUserCoinRewarded = 10;
 
         public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager, AuthContext authContext)
         {
@@ -40,24 +40,35 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
 
             var receiverId = request.ReceiverId ?? _authContext.CurrentUserId;
 
-            var sender = await _userManager.Users.Include(p => p.Human).FirstOrDefaultAsync(p => p.Human != null && !string.IsNullOrEmpty(p.Human.Code) && p.Human.Code.Trim().ToLower() == request.ReferralCode.Trim().ToLower(), cancellationToken);
+            request.ReferralCode = request.ReferralCode?.Trim() ?? string.Empty;
+            var sender = await _userManager.Users.FirstOrDefaultAsync(p => p.Human != null && p.Human.Code != null && p.Human.Code == request.ReferralCode, cancellationToken);
             if (sender == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.FriendCodeDoesNotExist));
                 return methodResult;
             }
 
-            if (sender.Id == request.ReceiverId)
+            if (sender.Id == receiverId)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.CannotEnterOwnCode));
                 return methodResult;
             }
 
-            if (await _userReferralRepository.Queryable.AnyAsync(p => p.ReceiverId == request.ReceiverId, cancellationToken))
+            var userReferral = await _userReferralRepository.Queryable.FirstOrDefaultAsync(p => p.ReceiverId == receiverId, cancellationToken);
+
+            if (userReferral != null && userReferral.SenderId == sender.Id)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+
+            if (userReferral != null && userReferral.SenderId != sender.Id)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.YouHaveEnteredAFriendCodeBefore));
+                return methodResult;
+            }
+
+            var contuseReferral = await _userReferralRepository.Queryable.Where(p => p.SenderId == sender.Id).CountAsync(cancellationToken);
 
             await _userReferralRepository.ExecuteTransactionAsync(async () =>
             {
@@ -65,7 +76,8 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                 {
                     SenderId = sender.Id,
                     ReceiverId = receiverId,
-                    Type = request.UserReferralType
+                    Type = request.UserReferralType,
+                    IsCoinRewarded = contuseReferral < MaxUserCoinRewarded
                 });
                 await _userReferralRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.StatusCode = StatusCodes.Status201Created;

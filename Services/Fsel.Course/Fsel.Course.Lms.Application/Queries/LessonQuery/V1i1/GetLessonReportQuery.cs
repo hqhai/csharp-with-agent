@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -86,8 +87,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             if (videoResult.Status == EnumResultStatus.Done && !videoResult.IsShowToken && videoResult.TotalToken == 0)
             {
                 videoResult.IsShowToken = true;
-                videoResult = _videoResultRepository.Update(videoResult);
-                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.LessonResultId, c.StudentId, c.VideoId };
+                });
             }
             return videoResult;
         }

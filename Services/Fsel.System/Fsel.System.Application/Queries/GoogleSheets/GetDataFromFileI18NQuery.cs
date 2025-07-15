@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Queries.GoogleSheets
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Caching;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Services.GoogleSheetServices;
     using Fsel.System.Application.Services.GoogleSheetServices.Models;
@@ -18,11 +19,13 @@ namespace Fsel.System.Application.Queries.GoogleSheets
     {
         private readonly IGoogleSheetService _googleSheetService;
         private readonly AppSetting _appSetting;
+        private readonly ICacheService<IList<IList<object>>> _cacheService;
 
-        public GetDataFromFileI18NQueryHandler(AppSetting appSetting)
+        public GetDataFromFileI18NQueryHandler(AppSetting appSetting, ICacheService<IList<IList<object>>> cacheService)
         {
             _googleSheetService = new GoogleSheetService(ResourceSettings.I18NCredentialsFilePath);
             _appSetting = appSetting;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<I18NModel>> Handle(GetDataFromFileI18NQuery request, CancellationToken cancellationToken)
@@ -40,7 +43,12 @@ namespace Fsel.System.Application.Queries.GoogleSheets
             var i18n = new I18NModel();
             try
             {
-                IList<IList<object>> dataVN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, _appSetting.GoogleSheetConfig?.I18NSheetVN ?? string.Empty);
+                var dataVN = await _cacheService.GetAsync(_appSetting.GoogleSheetConfig?.I18NSheetVN ?? string.Empty);
+                if (dataVN == null)
+                {
+                    dataVN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, _appSetting.GoogleSheetConfig?.I18NSheetVN ?? string.Empty);
+                    await _cacheService.SetAsync(_appSetting.GoogleSheetConfig?.I18NSheetVN ?? string.Empty, dataVN, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
+                }
 
                 foreach (var dataItem in dataVN)
                 {
@@ -60,7 +68,12 @@ namespace Fsel.System.Application.Queries.GoogleSheets
 
             try
             {
-                IList<IList<object>> dataEN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, _appSetting.GoogleSheetConfig?.I18NSheetEN ?? string.Empty);
+                var dataEN = await _cacheService.GetAsync(_appSetting.GoogleSheetConfig?.I18NSheetEN ?? string.Empty);
+                if (dataEN == null)
+                {
+                    dataEN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, _appSetting.GoogleSheetConfig?.I18NSheetEN ?? string.Empty);
+                    await _cacheService.SetAsync(_appSetting.GoogleSheetConfig?.I18NSheetEN ?? string.Empty, dataEN, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
+                }
 
                 foreach (var dataItem in dataEN)
                 {
@@ -80,9 +93,15 @@ namespace Fsel.System.Application.Queries.GoogleSheets
 
             try
             {
-                IList<IList<object>> dataEN = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, _appSetting.GoogleSheetConfig?.I18NSheetFR ?? string.Empty);
+                var dataFR = await _cacheService.GetAsync(_appSetting.GoogleSheetConfig?.I18NSheetFR ?? string.Empty);
+                if (dataFR == null)
+                {
+                    dataFR = _googleSheetService.ReadDataFromSheet(i18nSpreadSheetId, _appSetting.GoogleSheetConfig?.I18NSheetFR ?? string.Empty);
+                    await _cacheService.SetAsync(_appSetting.GoogleSheetConfig?.I18NSheetFR ?? string.Empty, dataFR, TimeSpan.FromSeconds(CacheSettings.TimeCache.OneHour));
+                }
 
-                foreach (var dataItem in dataEN)
+
+                foreach (var dataItem in dataFR)
                 {
                     var firstValue = dataItem.FirstOrDefault()?.ToString();
                     var lastValue = dataItem.LastOrDefault()?.ToString();

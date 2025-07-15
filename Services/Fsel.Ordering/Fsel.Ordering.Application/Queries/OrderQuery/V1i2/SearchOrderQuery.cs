@@ -10,6 +10,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels.V1i2;
     using Fsel.Ordering.Domain.Models.QueryModels.Oders.V1i2;
@@ -17,6 +18,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class SearchOrderQuery : SearchOrderQueryModel, IRequest<MethodResult<PagingItemsModel<SearchOrderModel>>>
     {
@@ -27,12 +29,15 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
         private readonly IOrderRepository _orderRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
+        private readonly ILogger<SearchOrderQuery> _logger;
+        private const int BatchSize = 10000;
 
-        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IUserService userService)
+        public SearchOrderQueryHandler(IOrderRepository orderRepository, AuthContext authContext, IUserService userService, ILogger<SearchOrderQuery> logger)
         {
             _orderRepository = orderRepository;
             _authContext = authContext;
             _userService = userService;
+            _logger = logger;
         }
 
         public async Task<MethodResult<PagingItemsModel<SearchOrderModel>>> Handle(SearchOrderQuery request, CancellationToken cancellationToken)
@@ -40,10 +45,13 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<SearchOrderModel>>();
 
-            var query = _orderRepository.Queryable.Include(p => p.Package).Where(p => !p.IsTrial).Select(x => new SearchOrderModel
+            var query = _orderRepository.Queryable.Where(p => !p.IsTrial).Select(x => new SearchOrderModel
             {
                 Id = x.Id,
                 Code = x.Code,
+                Email = x.Email,
+                FullName = x.FullName,
+                PhoneNumber = x.PhoneNumber,
                 UserId = x.UserId,
                 CreatedDate = x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
@@ -54,78 +62,123 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
                 RevenueType = x.RevenueType,
                 TotalPrice = x.TotalPrice,
-            }).ToList();
-
-            var userIds = query.Select(l => l.UserId).Distinct().ToList();
-            if (userIds.Any())
-            {
-                var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
-                var students = studentResults.Content?.Result;
-                query.ForEach(p =>
-                {
-                    var student = students?.FirstOrDefault(x => x.Human != null && x.Human.UserId == p.UserId);
-                    p.Email = student?.Human?.Email;
-                    p.FullName = student?.Human?.FullName;
-                });
-            }
+                Price = x.Price,
+                DiscountPrice = x.DiscountPrice,
+                DistrictId = x.DistrictId,
+                ProvinceId = x.ProvinceId
+            });
 
             if (request.IsNew.HasValue && request.IsNew == true)
             {
-                query = query.Where(p => p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card)).ToList();
+                query = query.Where(p => p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.BankTransfer || p.PaymentMethod == EnumPaymentMethodStatus.Card));
             }
             else if (request.IsNew.HasValue && request.IsNew == false)
             {
-                query = query.Where(p => p.Status != EnumOrderStatus.New || (p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.Payoo || p.PaymentMethod == EnumPaymentMethodStatus.AppStore || p.PaymentMethod == EnumPaymentMethodStatus.CHPlay))).ToList();
+                query = query.Where(p => p.Status != EnumOrderStatus.New || (p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.Payoo || p.PaymentMethod == EnumPaymentMethodStatus.AppStore || p.PaymentMethod == EnumPaymentMethodStatus.CHPlay)));
             }
 
             if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
             {
-                query = query.Where(p => p.UserId == _authContext.CurrentUserId).ToList();
+                query = query.Where(p => p.UserId == _authContext.CurrentUserId);
             }
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.Contains(request.Keyword));
                 }
                 else
                 {
-                    query = query.Where(p => (!string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)) || (!string.IsNullOrEmpty(p.FullName) && p.FullName.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase))).ToList();
+                    var codeQuery = query.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    var fullNameQuery = query.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
+                    query = codeQuery.Union(fullNameQuery);
                 }
             }
 
             if (request.PackageIds != null && request.PackageIds.Count > 0)
             {
-                query = query.Where(p => p.PackageId.HasValue && request.PackageIds.Contains(p.PackageId.Value)).ToList();
+                request.PackageIds = request.PackageIds.Distinct().ToList();
+                query = query.Where(p => p.PackageId.HasValue && request.PackageIds.Contains(p.PackageId.Value));
             }
 
             if (request.StartDate.HasValue && request.EndDate.HasValue)
             {
-                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date && request.EndDate.Value.Date >= p.CreatedDate.Value.Date).ToList();
+                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
             }
             else if (request.StartDate.HasValue)
             {
-                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date).ToList();
+                query = query.Where(p => p.CreatedDate.HasValue && request.StartDate.Value.Date <= p.CreatedDate.Value.Date);
             }
             else if (request.EndDate.HasValue)
             {
-                query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date).ToList();
+                query = query.Where(p => p.CreatedDate.HasValue && request.EndDate.Value.Date >= p.CreatedDate.Value.Date);
             }
 
             if (request.RevenueType.HasValue)
             {
-                query = query.Where(p => p.RevenueType == request.RevenueType).ToList();
+                query = query.Where(p => p.RevenueType == request.RevenueType);
             }
 
-            int totalItem = query.Count;
-            var lists = query
+            int totalItem = await query.CountAsync(cancellationToken);
+            var lists = await query
                     .ApplySortAndPaging(request)
-                    .ToList();
+                    .ToListAsync(cancellationToken);
+
+            var userIds = lists.Select(l => l.UserId).Distinct().ToList();
+            if (userIds.Any())
+            {
+                var batches = SplitList(userIds, BatchSize);
+
+                var students = new List<StudentModel>();
+                foreach (var batch in batches)
+                {
+                    var studentResults = await _userService.GetStudentsByIdsAsync(batch);
+                    if (!studentResults.IsSuccessStatusCode)
+                    {
+                        methodResult.AddError(studentResults.Error);
+                        return methodResult;
+                    }
+                    else
+                    {
+                        if (studentResults.Content?.Result != null && studentResults.Content.Result.Count > 0)
+                        {
+                            students.AddRange(studentResults.Content.Result.ToList());
+                        }
+                    }
+                }
+
+                var studentDict = students
+                    .Where(x => x.Human != null && x.Human.UserId.HasValue)
+                    .ToDictionary(x => x.Human?.UserId ?? default, x => x);
+
+                if (studentDict != null)
+                {
+                    lists.ForEach(p =>
+                    {
+                        if (studentDict.TryGetValue(p.UserId, out var student))
+                        {
+                            p.StudentCode = student.Human?.Code;
+                            p.StudentPhoneNumber = student.Human?.PhoneNumber;
+                            p.StudentEmail = student.Human?.Email;
+                            p.StudentFullName = student.Human?.FullName;
+                            p.ExpiredDate = student.ExpiredDate;
+                        }
+                    });
+                }
+            }
 
             methodResult.Result = new PagingItemsModel<SearchOrderModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static List<List<Guid>> SplitList(List<Guid> userIds, int batchSize)
+        {
+            return userIds.Select((x, i) => new { Index = i, Value = x })
+                         .GroupBy(x => x.Index / batchSize)
+                         .Select(g => g.Select(x => x.Value).ToList())
+                         .ToList();
         }
     }
 }

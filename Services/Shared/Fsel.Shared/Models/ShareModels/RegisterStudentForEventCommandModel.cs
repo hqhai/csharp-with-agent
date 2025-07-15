@@ -3,8 +3,6 @@
 namespace Fsel.Shared.Models.ShareModels
 {
     using System;
-    using Fsel.Common.Enums.ErrorCodes;
-    using System.ComponentModel.DataAnnotations;
 
     public class RegisterStudentForEventCommandModel
     {
@@ -22,6 +20,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? School { get; set; }
         public Guid? SchoolId { get; set; }
         public string? SchoolGrade { get; set; }
+        public string? SchoolFaculty { get; set; }
         public string? SchoolClass { get; set; }
         public string? SchoolStudentCode { get; set; }
         public string? TeacherPhoneNumber { get; set; }

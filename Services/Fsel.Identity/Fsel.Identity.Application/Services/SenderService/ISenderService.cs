@@ -2,6 +2,7 @@
 
 using Fsel.Common.ActionResults;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Models.ShareModels;
 using Refit;
 
 namespace Fsel.Identity.Application.Services
@@ -13,6 +14,12 @@ namespace Fsel.Identity.Application.Services
 
         [Post("/v1/send-email/send-by-template")]
         Task<IApiResponse<MethodResult<bool>>> SendEmailAsync([Body] SendEmailByTemplateCommandModel command);
+
+        [Post("/v1/send-sms")]
+        Task<IApiResponse<MethodResult<bool>>> SendSMSAsync([Body] SendSMSCommandModel command);
+
+        [Post("/v1/zalo/send-sms")]
+        Task<IApiResponse<MethodResult<bool>>> SendSMSWithZaloAsync([Body] SendSMSByZaloCommandModel command);
     }
 
     public class SendEmailCommandModel

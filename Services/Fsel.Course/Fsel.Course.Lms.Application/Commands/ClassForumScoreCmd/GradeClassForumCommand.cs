@@ -120,7 +120,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
             {
                 classForumResult.Status = EnumClassForumResultStatus.Graded;
                 classForumResult.ClassForumScores = classForumScores;
-                _classForumResultRepository.Update(classForumResult);
+                await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                });
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

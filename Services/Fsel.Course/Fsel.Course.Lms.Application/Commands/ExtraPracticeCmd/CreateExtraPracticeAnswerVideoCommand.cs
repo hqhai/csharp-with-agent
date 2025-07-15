@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -61,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
 
             #region Validate
 
-            var student = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!student.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), _authContext.CurrentUserId);
@@ -156,16 +157,23 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 if (extraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.AddList(extraPracticeAnswers);
-                    await _extraPracticeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId, entity.IsDeleted };
+                    });
                 }
                 else if (updateExtraPracticeAnswers.Count > 0)
                 {
-                    _extraPracticeAnswerRepository.UpdateList(updateExtraPracticeAnswers);
-                    await _extraPracticeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _extraPracticeAnswerRepository.BulkUpdateList(updateExtraPracticeAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId };
+                    });
                 }
 
-                _extraPracticeResultRepository.Update(extraPracticeResult);
+                await _extraPracticeResultRepository.BulkUpdateList(new List<ExtraPracticeResult> { extraPracticeResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeId, c.StudentId };
+                });
                 await _extraPracticeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeResult);
                 methodResult.StatusCode = StatusCodes.Status200OK;

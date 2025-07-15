@@ -9,6 +9,7 @@ using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Storage.Application.Command.ChatbotCmd;
+using Fsel.Storage.Application.Command.SpeechToTextCmd;
 using Fsel.Storage.Application.Services.AmazonS3Services;
 using Fsel.Storage.Domain.Models.CommandModels;
 using Fsel.Storage.Domain.Models.EntityModels;
@@ -17,8 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Storage.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/transcript")]
     [ApiController]
     public class TranscriptController : ControllerBase
@@ -98,8 +98,52 @@ namespace Fsel.Storage.Api.Controllers
         public async Task<IActionResult> PostSpeech([FromBody] UrlRequestModel request)
         {
             MethodResult<string> result = new MethodResult<string>();
-            result.Result = await _cognitiveProvider.GetTranscriptionAsync(request?.Url ?? string.Empty);
+            result.Result = await _deepgramProvider.GetTranscriptionAsync(request?.Url ?? string.Empty, "nova-2");
             return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// convert speech to text
+        /// </summary>
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+        [HttpPost("speech-to-text")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ConvertSpeechToText([FromQuery] ConvertSpeechToTextCommand request)
+        {
+            var methodResult = await _mediator.Send(request);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// convert wav
+        /// </summary>
+        [DisableFormValueModelBinding]
+        [DisableRequestSizeLimit]
+        [RequestFormLimits(ValueLengthLimit = int.MaxValue, MultipartBodyLengthLimit = long.MaxValue)]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [HttpPost("convert-wav")]
+        public async Task<IActionResult> ConvertFileToWav(IFormFile file)
+        {
+            var methodResult = await _mediator.Send(new ConvertFileToWAVCommand { FormFile = file });
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Speech To Text Set Language
+        /// </summary>
+        [HttpPost("speech-to-text-language")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ConvertSpeechToTextSetLanguage([FromBody] ConvertSpeechToTextSetLanguageCommand request)
+        {
+            var methodResult = await _mediator.Send(request);
+            return methodResult.GetActionResult();
         }
     }
 }

@@ -65,5 +65,17 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<StudentSettingModel> queryResult = await _mediator.Send(new GetStudentSettingQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Student Setting
+        /// </summary>
+        [HttpGet("student-setting/{userId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentSettingModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> StudentSettingByUserId([FromRoute] Guid? userId)
+        {
+            MethodResult<StudentSettingModel> queryResult = await _mediator.Send(new GetStudentSettingQuery { UserId = userId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

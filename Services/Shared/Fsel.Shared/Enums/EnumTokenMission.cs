@@ -70,6 +70,11 @@ namespace Fsel.Shared.Enums
         PhaseIV,
         PhaseV,
         PhaseVI,
+        SurveyEvent,
+        RecallCoinsSurveyEvent,
+        ReclaimGiftCoins,
+        SurveyReward,
+        FselEventReward,
 
         #region QuestBoard
 
@@ -85,7 +90,7 @@ namespace Fsel.Shared.Enums
         [Description("Hoàn thành Bài tập về nhà đầu tiên")]
         CompleteHomeworkFirst,
 
-        [Description("Hoàn thành Focus Mode đầu tiên")]
+        [Description("Hoàn thành Mục tiêu học tập ngày đầu tiên")]
         CompleteFocusModeFirst,
 
         [Description("Hoàn thành Unit đầu tiên")]
@@ -139,7 +144,7 @@ namespace Fsel.Shared.Enums
         [Description("Xem phản hồi của AI cho bài đăng Class Forum của bạn")]
         MessagesFromAI,
 
-        [Description("Hoàn thành 7 lần Focus Mode")]
+        [Description("Hoàn thành 7 lần Mục tiêu học tập ngày")]
         InfinityFocusMode,
 
         [Description("Hoàn thành 10 bài tập về nhà")]
@@ -160,7 +165,34 @@ namespace Fsel.Shared.Enums
 
         #region
         FselStore,
-        UrBox
+        UrBox,
         #endregion
+
+        #region Blind Box
+
+        [Description("Mở rương mảnh ghép số 1")]
+        PurchaseChestFirst,
+
+        [Description("Mở rương mảnh ghép số 2")]
+        PurchaseChestSecond,
+
+        [Description("Mở rương mảnh ghép số 3")]
+        PurchaseChestThird,
+
+        [Description("Mở rương mảnh ghép số 4")]
+        PurchaseChestFourth,
+
+        [Description("Mở rương mảnh ghép số 5")]
+        PurchaseChestFifth,
+
+        [Description("Mở rương mảnh ghép số 6")]
+        PurchaseChestSixth,
+
+        [Description("Mở rương nhận Fsel coins")]
+        OpenChestCoins,
+
+        #endregion
+
+        MarketPlacePremium
     }
 }

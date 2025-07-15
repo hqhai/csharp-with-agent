@@ -3,17 +3,14 @@
 namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 {
     using AutoMapper;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
 
     public class SetTimeModuleCommand : SetTimeModuleModel, IRequest<bool>
     {
@@ -22,16 +19,12 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     public class SetTimeModuleCommandHandler : IRequestHandler<SetTimeModuleCommand, bool>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
-        private readonly IMapper _mapper;
-        private readonly ILogger<SetTimeModuleCommand> _logger;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
 
-        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, ILogger<SetTimeModuleCommand> logger, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
+        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
-            _mapper = mapper;
-            _logger = logger;
             _dateTimeConverter = dateTimeConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
         }
@@ -67,83 +60,70 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            var requestInfo = new
+            if (videoTimeCodeResult.Status == EnumResultStatus.Done && videoTimeCodeResult.UpdatedDate.HasValue && videoTimeCodeResult.UpdatedDate.Value.AddMinutes(3) < DateTime.UtcNow)
             {
-                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
-                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync : {requestInfo}");
-
+                return;
+            }
             if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoTimeCodeResult.WorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
+                var workingTime = (DateTime.UtcNow - videoTimeCodeResult.CreatedDate).TotalMilliseconds;
+                if (videoTimeCodeResult.WorkingTime > workingTime)
+                {
+                    videoTimeCodeResult.WorkingTime = workingTime;
+                }
             }
             else
             {
                 if (request.SubmissionCount == EnumSubmissionCount.FirstSubmit || videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
                     videoTimeCodeResult.WorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
+                    var workingTime = (DateTime.UtcNow - videoTimeCodeResult.CreatedDate).TotalMilliseconds;
+                    if (videoTimeCodeResult.WorkingTime > workingTime)
+                    {
+                        videoTimeCodeResult.WorkingTime = workingTime;
+                    }
                 }
                 else if (request.SubmissionCount == EnumSubmissionCount.SecondSubmit || videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
+                    var accessTime = (DateTime.UtcNow - (videoTimeCodeResult.UpdatedDate ?? videoTimeCodeResult.CreatedDate)).TotalMilliseconds;
+                    if (request.AccessTime > accessTime)
+                    {
+                        request.AccessTime = accessTime;
+                    }
                     videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
             }
-            var requestInfoUpdate = new
-            {
-                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
-                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_1 : {requestInfoUpdate}");
 
-            _videoTimeCodeResultRepository.Update(videoTimeCodeResult, false
-                , x => x.SkillScoresStr, x => x.SkillScoreUngradedStr
-                , x => x.CorrectCount, x => x.CorrectTotal
-                , x => x.CorrectCountUngraded, x => x.CorrectTotalUngraded
-                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
-                , x => x.Percent, x => x.IsWorking);
-            await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-
-            var requestInfoUpdate2 = new
+            await _videoTimeCodeResultRepository.BulkUpdateList(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
             {
-                VideoTimeCodeResult = _mapper.Map<VideoTimeCodeResultModel>(videoTimeCodeResult),
-                VideoTimeCode = _mapper.Map<VideoTimeCodeModel>(videoTimeCode)
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateVideoTimeCodeAsync_2 : {requestInfoUpdate2}");
+                bulk.ColumnInputExpression = entity => new { entity.WorkingTime, entity.RetryWorkingTime, entity.UpdatedDate };
+            });
         }
 
         private async Task UpdateSectionGroupResultAsync(SetTimeModuleCommand request)
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
 
-            var requestInfo = new
+            if (sectionGroupResult == null || sectionGroupResult.SectionGroup == null)
             {
-                sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
-            }.Serialize();
-            _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync: {requestInfo}");
-
-            if (sectionGroupResult != null && sectionGroupResult.SectionGroup != null)
-            {
-                sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
-
-                var requestInfoUpdate = new
-                {
-                    sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
-                }.Serialize();
-                _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_1 : {requestInfoUpdate}");
-
-                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.CurrentSectionTimeCodeId
-                , x => x.CorrectCount, x => x.CorrectTotal, x => x.SkillScoresStr
-                , x => x.TokenFirstTime, x => x.TokenLastTime, x => x.Status, x => x.HighestStreak
-                , x => x.Percent);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-
-                var requestInfoUpdate2 = new
-                {
-                    sectionGroupResult = _mapper.Map<SectionGroupResultModel>(sectionGroupResult),
-                }.Serialize();
-                _logger.LogInformation($"Log_SetTimeModuleCommand_Handle_UpdateSectionGroupResultAsync_2 : {requestInfoUpdate2}");
+                return;
             }
+            if (sectionGroupResult.Status == EnumResultStatus.Done && sectionGroupResult.UpdatedDate.HasValue && sectionGroupResult.UpdatedDate.Value.AddMinutes(3) < DateTime.UtcNow)
+            {
+                return;
+            }
+
+            sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
+            var workingTime = (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalMilliseconds;
+            if (sectionGroupResult.WorkingTime > workingTime)
+            {
+                sectionGroupResult.WorkingTime = workingTime;
+            }
+            await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+            {
+                bulk.ColumnInputExpression = entity => new { entity.WorkingTime, entity.UpdatedDate };
+            });
         }
     }
 }

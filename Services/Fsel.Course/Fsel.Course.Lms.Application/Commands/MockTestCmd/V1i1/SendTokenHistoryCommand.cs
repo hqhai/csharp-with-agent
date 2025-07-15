@@ -5,12 +5,14 @@ using Microsoft.EntityFrameworkCore;
 namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 {
     using System;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
@@ -41,8 +43,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ISystemService _systemService;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
+        private readonly ISectionGroupRepository _sectionGroupRepository;
 
-        public SendTokenHistoryCommandHandler(IMockTestAnswerRepository mockTestAnswerRepository, ICourseResultRepository courseResultRepository, IMockTestResultRepository mockTestResultRepository, ISectionGroupResultRepository sectionGroupResultRepository, IUserService userService, ICourseRepository courseRepository, ISystemService systemService, CreateTokenHistoryPublisher createTokenHistoryPublisher)
+        public SendTokenHistoryCommandHandler(IMockTestAnswerRepository mockTestAnswerRepository,
+            ICourseResultRepository courseResultRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            ISectionGroupResultRepository sectionGroupResultRepository,
+            IUserService userService,
+            ICourseRepository courseRepository,
+            ISystemService systemService,
+            CreateTokenHistoryPublisher createTokenHistoryPublisher,
+            ISectionGroupRepository sectionGroupRepository)
         {
             _mockTestAnswerRepository = mockTestAnswerRepository;
             _mockTestResultRepository = mockTestResultRepository;
@@ -52,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _courseRepository = courseRepository;
             _systemService = systemService;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
+            _sectionGroupRepository = sectionGroupRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(SendTokenHistoryCommand request, CancellationToken cancellationToken)
@@ -88,9 +100,25 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
+            var sectionGroupCourseSkills = await _sectionGroupRepository.Queryable.Where(x => x.MockTestSections.Any(y => y.MockTestId == mockTestResult.MockTestId))
+                                                                             .Select(x => x.CourseSkill)
+                                                                             .ToListAsync(cancellationToken);
 
             var isSkillMockTest = mockTestResult.MockTest.MockTestType == EnumMockTestType.SkillMockTest;
-            if (mockTestResult.Status == EnumResultStatus.Done && (isSkillMockTest || mockTestResult.GradingTeacherId.HasValue))
+            var isSendToken = true;
+            if (sectionGroupCourseSkills.Any())
+            {
+                if (isSkillMockTest && sectionGroupCourseSkills.Any(x => x == EnumCourseSkill.Writing || x == EnumCourseSkill.Speaking))
+                {
+                    isSendToken = mockTestResult.SkillScores?.Any(x => x.Skill == EnumCourseSkill.Writing || x.Skill == EnumCourseSkill.Speaking) ?? default;
+                }
+                if (!isSkillMockTest)
+                {
+                    isSendToken = new[] { EnumCourseSkill.Writing, EnumCourseSkill.Speaking }.All((mockTestResult.SkillScores ?? new List<SkillScores>()).Select(x => x.Skill).Contains);
+                }
+            }
+
+            if (mockTestResult.Status == EnumResultStatus.Done && isSendToken)
             {
                 await GetTokenHistoryAsync(mockTestResult, course, student, isSkillMockTest, cancellationToken);
             }
@@ -127,8 +155,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, IList<SectionGroupResult> sectionGroupResults, CancellationToken cancellationToken)
         {
             mockTestResult.TokenFirstTime = sectionGroupResults.Sum(x => (x.TokenFirstTime ?? default));
-            _mockTestResultRepository.Update(mockTestResult);
-            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.MockTestId, c.UnitId };
+            });
         }
 
         private async Task<IList<TokenHistoryQueueModel>> UpdateSectionGroupResultsAsync(MockTestResult mockTestResult, SectionGroupResult? sectionGroupResult, Course course, Guid userId, bool isSkillMockTest, CancellationToken cancellationToken)
@@ -188,8 +218,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private async Task UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
-            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
-            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.WorkingTime, c.StudentId, c.SectionGroupId, c.PlacementTestResultId, c.MockTestResultId, c.FinalTestResultId };
+            });
         }
 
         #region Skill Reading And Listening
@@ -217,9 +249,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, courseResultId, userId, tokenMission.Value, isSkillTest));
                     }
                 }
-
-                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
-                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await UpdateSectionGroupResultAsync(sectionGroupResult, cancellationToken);
             }
             return tokenHistorys;
         }
@@ -439,8 +469,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         break;
                 }
             }
-            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
-            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+            await UpdateSectionGroupResultAsync(sectionGroupResult, cancellationToken);
             return tokenHistorys;
         }
 

@@ -13,6 +13,7 @@ namespace Fsel.Shared.Constants
             public const int TenMinutes = 600;
             public const int ThirtyMinutes = 1800;
             public const int OneHour = 3600;
+            public const int ThreeHour = 10800;
         }
     }
 }

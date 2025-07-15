@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public UnitModel? Unit { get; set; }
         public MockTestModel? MockTest { get; set; }
         public FinalTestModel? FinalTest { get; set; }
+
         public string? Type
         {
             get
@@ -21,7 +22,5 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? FinalTestId { get; set; }
         public Guid? MockTestId { get; set; }
         public bool? IsUsed { get; set; }
-
-
-}
+    }
 }

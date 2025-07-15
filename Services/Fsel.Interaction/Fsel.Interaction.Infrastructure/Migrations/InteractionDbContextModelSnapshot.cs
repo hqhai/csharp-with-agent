@@ -33,6 +33,9 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("nvarchar(2000)");
 
+                    b.Property<Guid?>("CourseId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -66,6 +69,11 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
                     b.Property<Guid>("ObjectId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -118,6 +126,9 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
+                    b.Property<Guid?>("CustomerSurveyGroupId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(109);
@@ -154,14 +165,97 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
-                    b.Property<Guid?>("UserId")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CustomerSurveyGroupId");
+
                     b.HasIndex("SurveyQuestionId");
 
+                    b.HasIndex("IsDeleted", "UserId");
+
+                    b.HasIndex("IsDeleted", "UserId", "SurveyQuestionId");
+
                     b.ToTable("CustomerSurveys");
+                });
+
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurveyGroup", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<double?>("Coin")
+                        .HasColumnType("float");
+
+                    b.Property<Guid?>("CompetitionEventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("SurveyFormType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsDeleted", "UserId", "SurveyFormType");
+
+                    b.ToTable("CustomerSurveyGroups");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.Flag", b =>
@@ -253,6 +347,9 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("CourseId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -872,6 +969,9 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("CompetitionEventId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
@@ -925,6 +1025,11 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("SurveyFormType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -951,7 +1056,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("03d12e43-250b-49b7-bd08-b12135e47723"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"H\\u1ECDc sinh, sinh vi\\u00EAn\",\"image\":\"student.svg\",\"referenceQuestionId\":\"b223125a-a4e1-4e10-b4dd-cfcd747d74c5\"},{\"id\":2,\"content\":\"Ng\\u01B0\\u1EDDi \\u0111i l\\u00E0m\",\"image\":\"worker.svg\",\"referenceQuestionId\":\"35a71ae7-49c1-4878-a1db-edcd2834f1cd\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Học sinh, sinh viên\",\"image\":\"student.svg\",\"referenceQuestionId\":\"b223125a-a4e1-4e10-b4dd-cfcd747d74c5\"},{\"id\":2,\"content\":\"Người đi làm\",\"image\":\"worker.svg\",\"referenceQuestionId\":\"35a71ae7-49c1-4878-a1db-edcd2834f1cd\"}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -962,12 +1067,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Bạn là?",
+                            SurveyFormType = "QuestBoard",
                             Type = "ChooseMultipleColumn"
                         },
                         new
                         {
                             Id = new Guid("492d8bb9-cdbe-42e7-aa16-35a1915c3621"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/b\\u00E1o ch\\u00ED\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"S\\u1EF1 ki\\u1EC7n/h\\u1ED9i th\\u1EA3o\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Tr\\u01B0\\u1EDDng h\\u1ECDc\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"T\\u1EDD r\\u01A1i\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"Bạn bè/gia đình\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin tức/báo chí\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"Sự kiện/hội thảo\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Trường học\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"Tờ rơi\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Khác....\",\"image\":\"others-icon.svg\"}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -977,12 +1083,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Bạn biết đến Fsel từ đâu?",
+                            SurveyFormType = "Default",
                             Type = "ChooseMultipleColumn"
                         },
                         new
                         {
                             Id = new Guid("f563da40-d609-4922-90b9-44e4290edfef"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/b\\u00E1o ch\\u00ED\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"S\\u1EF1 ki\\u1EC7n/h\\u1ED9i th\\u1EA3o\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Tr\\u01B0\\u1EDDng h\\u1ECDc\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"T\\u1EDD r\\u01A1i\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"Bạn bè/gia đình\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin tức/báo chí\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"Sự kiện/hội thảo\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Trường học\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"Tờ rơi\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Khác....\",\"image\":\"others-icon.svg\"}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -993,12 +1100,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Bạn biết đến Fsel từ đâu?",
+                            SurveyFormType = "QuestBoard",
                             Type = "CheckList"
                         },
                         new
                         {
                             Id = new Guid("14787cbf-cc43-4453-a148-6d11a683f311"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"N\\u00E2ng cao \\u0111i\\u1EC3m s\\u1ED1\",\"image\":\"goal 1.png\"},{\"id\":2,\"content\":\"M\\u1EE5c ti\\u00EAu c\\u00F4ng vi\\u1EC7c\",\"image\":\"work-target-icon.svg\"},{\"id\":3,\"content\":\"C\\u1EA3i thi\\u1EC7n giao ti\\u1EBFp\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Thi ch\\u1EE9ng ch\\u1EC9\",\"image\":\"student.svg\"},{\"id\":5,\"content\":\"Du h\\u1ECDc\",\"image\":\"plane 1.png\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Nâng cao điểm số\",\"image\":\"goal 1.png\"},{\"id\":2,\"content\":\"Mục tiêu công việc\",\"image\":\"work-target-icon.svg\"},{\"id\":3,\"content\":\"Cải thiện giao tiếp\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Thi chứng chỉ\",\"image\":\"student.svg\"},{\"id\":5,\"content\":\"Du học\",\"image\":\"plane 1.png\"}]",
                             CreatedDate = new DateTime(2024, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1009,12 +1117,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Mục tiêu học tập của bạn là gì?",
+                            SurveyFormType = "QuestBoard",
                             Type = "CheckList"
                         },
                         new
                         {
                             Id = new Guid("763d8bb9-cdbe-42e7-aa16-35a1915c3512"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"B\\u1EA1n \\u0111\\u00E3 bi\\u1EBFt m\\u1ED9t ch\\u00FAt Ti\\u1EBFng Anh\"},{\"id\":2,\"content\":\"\\u0110\\u00E2y l\\u00E0 l\\u1EA7n \\u0111\\u1EA7u b\\u1EA1n h\\u1ECDc Ti\\u1EBFng Anh\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Bạn đã biết một chút Tiếng Anh\"},{\"id\":2,\"content\":\"Đây là lần đầu bạn học Tiếng Anh\"}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1024,12 +1133,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "addd",
                             IsDeleted = false,
                             Question = "Chọn hướng đi của bạn",
+                            SurveyFormType = "Default",
                             Type = "YourDirection"
                         },
                         new
                         {
                             Id = new Guid("721d8bb9-cdbe-42e7-aa16-35a1915c1123"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"V\\u0103n h\\u00F3a\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Du l\\u1ECBch\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"K\\u1EBFt b\\u1EA1n\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"H\\u1ECDc t\\u1EADp\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Kh\\u00E1c....\",\"image\":\"goal 1.png\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Văn hóa\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Du lịch\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"Kết bạn\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Học tập\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"Cơ hội nghề nghiệp\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Khác....\",\"image\":\"goal 1.png\"}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1039,12 +1149,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "fluent_target-arrow-16-filled.png",
                             IsDeleted = false,
                             Question = "Tại sao bạn học ngoại ngữ",
+                            SurveyFormType = "Default",
                             Type = "ChooseMultipleColumn"
                         },
                         new
                         {
                             Id = new Guid("713d8bb9-cdbe-42e7-aa16-35a1915c3532"),
-                            AnswerStr = "{\"countryCode\":123,\"countryName\":\"Vi\\u1EC7t Nam\",\"provinceCode\":29,\"provinceName\":\"H\\u00E0 N\\u1ED9i\"}",
+                            AnswerStr = "{\"countryCode\":123,\"countryName\":\"Việt Nam\",\"provinceCode\":29,\"provinceName\":\"Hà Nội\"}",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1054,6 +1165,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "wideword.png",
                             IsDeleted = false,
                             Question = "Thông tin cá nhân",
+                            SurveyFormType = "Default",
                             Type = "YourPlace"
                         },
                         new
@@ -1070,6 +1182,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Thông tin cá nhân và Trường học",
+                            SurveyFormType = "QuestBoard",
                             Type = "Location"
                         },
                         new
@@ -1086,6 +1199,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = false,
                             Question = "Vị trí của bạn?",
+                            SurveyFormType = "QuestBoard",
                             Type = "Location"
                         },
                         new
@@ -1101,6 +1215,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Icon = "time.png",
                             IsDeleted = false,
                             Question = "Giới tính của bạn",
+                            SurveyFormType = "Default",
                             Type = "AgeGender"
                         },
                         new
@@ -1116,12 +1231,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Họ tên",
+                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
                         },
                         new
                         {
                             Id = new Guid("f959d3d1-cab3-4fc6-8341-cb44bcbd3e30"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Ba \\u0110\\u00ECnh\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Ho\\u00E0n Ki\\u1EBFm\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"T\\u00E2y H\\u1ED3\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"Long Bi\\u00EAn\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"C\\u1EA7u Gi\\u1EA5y\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"\\u0110\\u1ED1ng \\u0110a\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"Hai B\\u00E0 Tr\\u01B0ng\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"Ho\\u00E0ng Mai\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"Thanh Xu\\u00E2n\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"H\\u00E0 \\u0110\\u00F4ng\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"B\\u1EAFc T\\u1EEB Li\\u00EAm\",\"referenceQuestionId\":null},{\"id\":12,\"content\":\"Nam T\\u1EEB Li\\u00EAm\",\"referenceQuestionId\":null},{\"id\":13,\"content\":\"Ba V\\u00EC\",\"referenceQuestionId\":null},{\"id\":14,\"content\":\"Ch\\u01B0\\u01A1ng M\\u1EF9\",\"referenceQuestionId\":null},{\"id\":15,\"content\":\"\\u0110an Ph\\u01B0\\u1EE3ng\",\"referenceQuestionId\":null},{\"id\":16,\"content\":\"\\u0110\\u00F4ng Anh\",\"referenceQuestionId\":null},{\"id\":17,\"content\":\"Gia L\\u00E2m\",\"referenceQuestionId\":null},{\"id\":18,\"content\":\"Ho\\u00E0i \\u0110\\u1EE9c\",\"referenceQuestionId\":null},{\"id\":19,\"content\":\"M\\u00EA Linh\",\"referenceQuestionId\":null},{\"id\":20,\"content\":\"Ph\\u00FA Xuy\\u00EAn\",\"referenceQuestionId\":null},{\"id\":21,\"content\":\"Ph\\u00FAc Th\\u1ECD\",\"referenceQuestionId\":null},{\"id\":22,\"content\":\"Qu\\u1ED1c Oai\",\"referenceQuestionId\":null},{\"id\":23,\"content\":\"Th\\u1EA1ch Th\\u1EA5t\",\"referenceQuestionId\":null},{\"id\":24,\"content\":\"Thanh Oai\",\"referenceQuestionId\":null},{\"id\":25,\"content\":\"Thanh Tr\\u00EC\",\"referenceQuestionId\":null},{\"id\":26,\"content\":\"Th\\u01B0\\u1EDDng T\\u00EDn\",\"referenceQuestionId\":null},{\"id\":27,\"content\":\" \\u1EE8ng H\\u00F2a\",\"referenceQuestionId\":null},{\"id\":28,\"content\":\"kh\\u00E1c\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Ba Đình\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Hoàn Kiếm\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"Tây Hồ\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"Long Biên\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"Cầu Giấy\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"Đống Đa\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"Hai Bà Trưng\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"Hoàng Mai\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"Thanh Xuân\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"Hà Đông\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"Bắc Từ Liêm\",\"referenceQuestionId\":null},{\"id\":12,\"content\":\"Nam Từ Liêm\",\"referenceQuestionId\":null},{\"id\":13,\"content\":\"Ba Vì\",\"referenceQuestionId\":null},{\"id\":14,\"content\":\"Chương Mỹ\",\"referenceQuestionId\":null},{\"id\":15,\"content\":\"Đan Phượng\",\"referenceQuestionId\":null},{\"id\":16,\"content\":\"Đông Anh\",\"referenceQuestionId\":null},{\"id\":17,\"content\":\"Gia Lâm\",\"referenceQuestionId\":null},{\"id\":18,\"content\":\"Hoài Đức\",\"referenceQuestionId\":null},{\"id\":19,\"content\":\"Mê Linh\",\"referenceQuestionId\":null},{\"id\":20,\"content\":\"Phú Xuyên\",\"referenceQuestionId\":null},{\"id\":21,\"content\":\"Phúc Thọ\",\"referenceQuestionId\":null},{\"id\":22,\"content\":\"Quốc Oai\",\"referenceQuestionId\":null},{\"id\":23,\"content\":\"Thạch Thất\",\"referenceQuestionId\":null},{\"id\":24,\"content\":\"Thanh Oai\",\"referenceQuestionId\":null},{\"id\":25,\"content\":\"Thanh Trì\",\"referenceQuestionId\":null},{\"id\":26,\"content\":\"Thường Tín\",\"referenceQuestionId\":null},{\"id\":27,\"content\":\" Ứng Hòa\",\"referenceQuestionId\":null},{\"id\":28,\"content\":\"khác\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1131,6 +1247,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn sống ở đâu",
+                            SurveyFormType = "Default",
                             Type = "DropDown"
                         },
                         new
@@ -1146,6 +1263,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Số điện thoại của bạn là gì",
+                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1161,6 +1279,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Họ tên đầy đủ của trẻ là gì",
+                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1176,12 +1295,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Năm sinh của trẻ",
+                            SurveyFormType = "Default",
                             Type = "YearInput"
                         },
                         new
                         {
                             Id = new Guid("52548bc5-3536-478c-978b-05f98815bf31"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Nam\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"N\\u1EEF\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"Kh\\u00E1c\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Nam\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Nữ\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"Khác\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1191,12 +1311,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Giới Tính của trẻ",
+                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
                             Id = new Guid("73ab87b1-c0ae-40c6-ba37-1cdce350563a"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00F3\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Kh\\u00F4ng\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Có\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Không\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1206,12 +1327,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn nhà có thể cam kết hoàn thành khóa học 6 tháng với tốc độ 3 buổi học mỗi tuần (7,5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 4 năm 2024 không?",
+                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
                             Id = new Guid("a6f6b5dc-c72a-496c-859c-2fdc9d97f147"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00F3\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Kh\\u00F4ng\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Có\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Không\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1221,12 +1343,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn nhà có thể cam kết hoàn thành khóa học 4 tháng với tốc độ 2 buổi học mỗi tuần (5 giờ mỗi tuần) từ tháng 11 năm 2023 đến tháng 2 năm 2024 không?",
+                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
                             Id = new Guid("06b1a0df-eaef-4be9-a9da-9c2633e3a12a"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"M\\u00E1y t\\u00EDnh x\\u00E1ch tay\",\"referenceQuestionId\":\"83a5b867-c3a1-47b9-91e3-a6fd6086501e\"},{\"id\":2,\"content\":\"M\\u00E1y t\\u00EDnh \\u0111\\u1EC3 b\\u00E0n\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"C\\u1EA3 2\",\"referenceQuestionId\":\"83a5b867-c3a1-47b9-91e3-a6fd6086501e\"},{\"id\":4,\"content\":\"No\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Máy tính xách tay\",\"referenceQuestionId\":\"83a5b867-c3a1-47b9-91e3-a6fd6086501e\"},{\"id\":2,\"content\":\"Máy tính để bàn\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"Cả 2\",\"referenceQuestionId\":\"83a5b867-c3a1-47b9-91e3-a6fd6086501e\"},{\"id\":4,\"content\":\"No\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1236,12 +1359,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn có máy tính để bàn hoặc máy tính xách tay ở nhà để con bạn có thể sử dụng để truy cập khóa học không?",
+                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
                             Id = new Guid("83a5b867-c3a1-47b9-91e3-a6fd6086501e"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00F3\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Kh\\u00F4ng\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Có\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Không\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1251,12 +1375,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Con bạn có thể mang máy tính xách tay đến các buổi học tại trung tâm chúng tôi để tham gia khóa học không?",
+                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
                             Id = new Guid("56628f4a-0384-426c-b849-81ab1671afa4"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"1 (Kh\\u00F4ng s\\u1EB5n l\\u00F2ng ch\\u00FAt n\\u00E0o)\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"2\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"3\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"4\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"5\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"6\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"7\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"8\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"9\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"10 (R\\u1EA5t s\\u1EB5n s\\u00E0ng)\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"1 (Không sẵn lòng chút nào)\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"2\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"3\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"4\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"5\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"6\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"7\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"8\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"9\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"10 (Rất sẵn sàng)\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1266,12 +1391,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Chúng tôi sẽ tổ chức 2 buổi gặp mặt trực tiếp (2 tiếng/buổi) tại trung tâm (33 Lạc Trung hoặc 125 Hoàng Ngân) để lấy ý kiến phản hồi của các bạn trong giai đoạn thử nghiệm. Bạn sẵn sàng đưa con mình tham dự những buổi học này ở mức độ nào?",
+                            SurveyFormType = "Default",
                             Type = "MultipleChoiceHorizontal"
                         },
                         new
                         {
                             Id = new Guid("f05b02dc-6393-41dd-a479-cc9c05d1da93"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"33 L\\u1EA1c Trung\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"125 Ho\\u00E0ng Ng\\u00E2n\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"T\\u00F4i \\u1ED5n v\\u1EDBi c\\u1EA3 hai\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"33 Lạc Trung\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"125 Hoàng Ngân\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"Tôi ổn với cả hai\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1281,12 +1407,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn mong muốn các buổi họp được tổ chức tại trung tâm nào hơn?",
+                            SurveyFormType = "Default",
                             Type = "MultipleChoiceVertical"
                         },
                         new
                         {
                             Id = new Guid("bb50bb8b-4e72-4a5b-a058-cdbc7837f4dc"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Hai\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Ba\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 T\\u01B0\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 N\\u0103m\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 S\\u00E1u\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Các buổi tối thứ Hai\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Các buổi tối thứ Ba\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"Các buổi tối thứ Tư\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"Các buổi tối thứ Năm\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"Các buổi tối thứ Sáu\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"Các buổi sáng thứ Bảy\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"Các buổi chiều thứ Bảy\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"Các buổi tối thứ Bảy\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"Các buổi sáng chủ nhật\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"Các buổi chiều chủ nhật\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"Các buổi tối chủ nhật\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1296,12 +1423,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Ngày nào sau đây thuận tiện cho con bạn tham dự các buổi học trong giai đoạn thử nghiệm? Lưu ý rằng các buổi học sẽ chỉ được tổ chức khoảng một lần mỗi 2 tháng. (Chọn nhiều phương án)",
+                            SurveyFormType = "Default",
                             Type = "CheckList"
                         },
                         new
                         {
                             Id = new Guid("651414ad-cbcf-462a-84b9-daf83880b25a"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Hai\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Ba\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 T\\u01B0\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 N\\u0103m\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 S\\u00E1u\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Các buổi tối thứ Hai\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Các buổi tối thứ Ba\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"Các buổi tối thứ Tư\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"Các buổi tối thứ Năm\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"Các buổi tối thứ Sáu\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"Các buổi sáng thứ Bảy\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"Các buổi chiều thứ Bảy\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"Các buổi tối thứ Bảy\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"Các buổi sáng chủ nhật\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"Các buổi chiều chủ nhật\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"Các buổi tối chủ nhật\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1311,12 +1439,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Ngày nào sau đây thuận tiện cho con bạn tham dự các buổi học trong giai đoạn thử nghiệm? Lưu ý rằng các buổi học sẽ chỉ được tổ chức khoảng một lần mỗi 3 tháng. (Chọn nhiều phương án)",
+                            SurveyFormType = "Default",
                             Type = "CheckList"
                         },
                         new
                         {
                             Id = new Guid("ef128343-2e29-4735-82f7-9d8d2231dcc2"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"1 (Kh\\u00F4ng s\\u1EB5n s\\u00E0ng)\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"2\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"3\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"4\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"5\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"6\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"7\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"8\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"9\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"10 (R\\u1EA5t s\\u1EB5n s\\u00E0ng)\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"1 (Không sẵn sàng)\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"2\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"3\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"4\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"5\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"6\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"7\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"8\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"9\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"10 (Rất sẵn sàng)\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1326,12 +1455,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn có sẵn sàng tham dự các buổi họp tại trung tâm để tham gia các cuộc phỏng vấn và các buổi họp nhóm tập trung cho phụ huynh không?",
+                            SurveyFormType = "Default",
                             Type = "MultipleChoiceHorizontal"
                         },
                         new
                         {
                             Id = new Guid("20675350-89f2-47e3-8e64-b04f2da6290b"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Hai\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 Ba\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 T\\u01B0\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 N\\u0103m\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 S\\u00E1u\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i th\\u1EE9 B\\u1EA3y\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"C\\u00E1c bu\\u1ED5i s\\u00E1ng ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"C\\u00E1c bu\\u1ED5i chi\\u1EC1u ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"C\\u00E1c bu\\u1ED5i t\\u1ED1i ch\\u1EE7 nh\\u1EADt\",\"referenceQuestionId\":null}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Các buổi tối thứ Hai\",\"referenceQuestionId\":null},{\"id\":2,\"content\":\"Các buổi tối thứ Ba\",\"referenceQuestionId\":null},{\"id\":3,\"content\":\"Các buổi tối thứ Tư\",\"referenceQuestionId\":null},{\"id\":4,\"content\":\"Các buổi tối thứ Năm\",\"referenceQuestionId\":null},{\"id\":5,\"content\":\"Các buổi tối thứ Sáu\",\"referenceQuestionId\":null},{\"id\":6,\"content\":\"Các buổi sáng thứ Bảy\",\"referenceQuestionId\":null},{\"id\":7,\"content\":\"Các buổi chiều thứ Bảy\",\"referenceQuestionId\":null},{\"id\":8,\"content\":\"Các buổi tối thứ Bảy\",\"referenceQuestionId\":null},{\"id\":9,\"content\":\"Các buổi sáng chủ nhật\",\"referenceQuestionId\":null},{\"id\":10,\"content\":\"Các buổi chiều chủ nhật\",\"referenceQuestionId\":null},{\"id\":11,\"content\":\"Các buổi tối chủ nhật\",\"referenceQuestionId\":null}]",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1341,6 +1471,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Ngày nào sau đây thuận tiện cho bạn tham dự các buổi họp tại trung tâm trong giai đoạn thử nghiệm? (Chọn nhiều phương án)",
+                            SurveyFormType = "Default",
                             Type = "CheckList"
                         },
                         new
@@ -1356,6 +1487,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Bạn biết đến chương trình học trải nghiệm của FSEL bằng cách nào?",
+                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
                         },
                         new
@@ -1371,7 +1503,200 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             IsDeleted = false,
                             IsPilot = true,
                             Question = "Tại sao bạn muốn đăng ký chương trình học trải nghiệm của FSEL?",
+                            SurveyFormType = "Default",
                             Type = "ShortAnswer"
+                        },
+                        new
+                        {
+                            Id = new Guid("238cae89-e1d8-408a-bb3c-1a0b27cd0edb"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Cải thiện điểm số ở trường\",\"image\":null},{\"id\":2,\"content\":\"Thi chứng chỉ\",\"image\":null},{\"id\":3,\"content\":\"Sở thích\",\"image\":null},{\"id\":4,\"content\":\"Lý do khác\",\"image\":null}]",
+                            CompetitionEventId = new Guid("ae2aa832-8436-4ca8-87c4-a3b563b7b5f3"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 1,
+                            DisplayOrder = 1f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("68c17fa9-1d90-4eb2-8412-ea5062ad26f0"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CompetitionEventId = new Guid("ae2aa832-8436-4ca8-87c4-a3b563b7b5f3"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 1,
+                            DisplayOrder = 2f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("73a7a0c8-1e07-4351-b3f4-3e843623bbaf"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Trung tâm tiếng Anh\",\"image\":null},{\"id\":2,\"content\":\"Học online\",\"image\":null},{\"id\":3,\"content\":\"Học gia sư\",\"image\":null},{\"id\":4,\"content\":\"Học thêm với giáo viên\",\"image\":null},{\"id\":5,\"content\":\"Không học thêm tiếng Anh\",\"image\":null}]",
+                            CompetitionEventId = new Guid("ae2aa832-8436-4ca8-87c4-a3b563b7b5f3"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 2,
+                            DisplayOrder = 1f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Bạn học thêm Tiếng Anh ở đâu?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("c6bda257-0757-4290-86c1-794d0ba6ae3b"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Giao tiếp tiếng Anh rất pro trong mắt bạn bè\",\"image\":null},{\"id\":2,\"content\":\"Điểm cao được cô giáo khen ngợi trước lớp\",\"image\":null},{\"id\":3,\"content\":\"Thích vì tiếng Anh hay ho\",\"image\":null},{\"id\":4,\"content\":\"Không thích gì cả\",\"image\":null},{\"id\":5,\"content\":\"Ghét tiếng Anh\",\"image\":null}]",
+                            CompetitionEventId = new Guid("ae2aa832-8436-4ca8-87c4-a3b563b7b5f3"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 2,
+                            DisplayOrder = 2f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("482c87c7-b555-4de2-a418-f990960e0ee6"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Cải thiện điểm số ở trường\",\"image\":null},{\"id\":2,\"content\":\"Thi chứng chỉ\",\"image\":null},{\"id\":3,\"content\":\"Sở thích\",\"image\":null},{\"id\":4,\"content\":\"Lý do khác\",\"image\":null}]",
+                            CompetitionEventId = new Guid("b0a2d65c-997c-4b10-afff-d024ae736c27"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 1,
+                            DisplayOrder = 1f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("0aafccb7-e700-4b30-866f-0b667217fa47"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CompetitionEventId = new Guid("b0a2d65c-997c-4b10-afff-d024ae736c27"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 1,
+                            DisplayOrder = 2f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("da618b05-f9b8-4bfd-8bae-7a5adb668d16"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Trung tâm tiếng Anh\",\"image\":null},{\"id\":2,\"content\":\"Học online\",\"image\":null},{\"id\":3,\"content\":\"Học gia sư\",\"image\":null},{\"id\":4,\"content\":\"Học thêm với giáo viên\",\"image\":null},{\"id\":5,\"content\":\"Không học thêm tiếng Anh\",\"image\":null}]",
+                            CompetitionEventId = new Guid("b0a2d65c-997c-4b10-afff-d024ae736c27"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 2,
+                            DisplayOrder = 1f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Bạn học thêm Tiếng Anh ở đâu?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("c88e157b-1496-4aae-b81f-dd0718524e38"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Giao tiếp tiếng Anh rất pro trong mắt bạn bè\",\"image\":null},{\"id\":2,\"content\":\"Điểm cao được cô giáo khen ngợi trước lớp\",\"image\":null},{\"id\":3,\"content\":\"Thích vì tiếng Anh hay ho\",\"image\":null},{\"id\":4,\"content\":\"Không thích gì cả\",\"image\":null},{\"id\":5,\"content\":\"Ghét tiếng Anh\",\"image\":null}]",
+                            CompetitionEventId = new Guid("b0a2d65c-997c-4b10-afff-d024ae736c27"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 2,
+                            DisplayOrder = 2f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("eb9ddecf-15fc-4393-af86-eb2b14f64eb7"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Cải thiện điểm số ở trường\",\"image\":null},{\"id\":2,\"content\":\"Thi chứng chỉ\",\"image\":null},{\"id\":3,\"content\":\"Sở thích\",\"image\":null},{\"id\":4,\"content\":\"Lý do khác\",\"image\":null}]",
+                            CompetitionEventId = new Guid("a0aa2d10-65b3-4df1-b773-3d63d8a03230"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 1,
+                            DisplayOrder = 1f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("92d64860-c647-4359-a326-78a39de366e1"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CompetitionEventId = new Guid("a0aa2d10-65b3-4df1-b773-3d63d8a03230"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 1,
+                            DisplayOrder = 2f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("69b1a8ab-2811-450d-b9bf-12cd91e44193"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Trung tâm tiếng Anh\",\"image\":null},{\"id\":2,\"content\":\"Học online\",\"image\":null},{\"id\":3,\"content\":\"Học gia sư\",\"image\":null},{\"id\":4,\"content\":\"Học thêm với giáo viên\",\"image\":null},{\"id\":5,\"content\":\"Không học thêm tiếng Anh\",\"image\":null}]",
+                            CompetitionEventId = new Guid("a0aa2d10-65b3-4df1-b773-3d63d8a03230"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 2,
+                            DisplayOrder = 1f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Bạn học thêm Tiếng Anh ở đâu?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
+                        },
+                        new
+                        {
+                            Id = new Guid("6fe5a134-6379-4244-96f1-69cc71962368"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Giao tiếp tiếng Anh rất pro trong mắt bạn bè\",\"image\":null},{\"id\":2,\"content\":\"Điểm cao được cô giáo khen ngợi trước lớp\",\"image\":null},{\"id\":3,\"content\":\"Thích vì tiếng Anh hay ho\",\"image\":null},{\"id\":4,\"content\":\"Không thích gì cả\",\"image\":null},{\"id\":5,\"content\":\"Ghét tiếng Anh\",\"image\":null}]",
+                            CompetitionEventId = new Guid("a0aa2d10-65b3-4df1-b773-3d63d8a03230"),
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayLevel = 2,
+                            DisplayOrder = 2f,
+                            IsDeleted = false,
+                            IsPilot = false,
+                            Question = "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+                            SurveyFormType = "Event",
+                            Type = "MultipleChoiceVertical"
                         });
                 });
 
@@ -1455,7 +1780,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("f12f7c70-b9b5-49c5-8122-cc9c788e3354"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"H\\u1ECDc sinh, sinh vi\\u00EAn\",\"image\":\"student.svg\",\"referenceQuestionId\":\"b223125a-a4e1-4e10-b4dd-cfcd747d74c5\"},{\"id\":2,\"content\":\"Ng\\u01B0\\u1EDDi \\u0111i l\\u00E0m\",\"image\":\"worker.svg\",\"referenceQuestionId\":\"35a71ae7-49c1-4878-a1db-edcd2834f1cd\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Học sinh, sinh viên\",\"image\":\"student.svg\",\"referenceQuestionId\":\"b223125a-a4e1-4e10-b4dd-cfcd747d74c5\"},{\"id\":2,\"content\":\"Người đi làm\",\"image\":\"worker.svg\",\"referenceQuestionId\":\"35a71ae7-49c1-4878-a1db-edcd2834f1cd\"}]",
                             CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1481,7 +1806,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("7910a8a2-b89d-4579-a657-de2858ad499c"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/b\\u00E1o ch\\u00ED\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"S\\u1EF1 ki\\u1EC7n/h\\u1ED9i th\\u1EA3o\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Tr\\u01B0\\u1EDDng h\\u1ECDc\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"T\\u1EDD r\\u01A1i\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"Bạn bè/gia đình\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin tức/báo chí\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"Sự kiện/hội thảo\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Trường học\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"Tờ rơi\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Khác....\",\"image\":\"others-icon.svg\"}]",
                             CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1507,7 +1832,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("2b267643-bb4f-4ac4-a14a-33350fa35108"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"B\\u1EA1n b\\u00E8/gia \\u0111\\u00ECnh\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin t\\u1EE9c/b\\u00E1o ch\\u00ED\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"S\\u1EF1 ki\\u1EC7n/h\\u1ED9i th\\u1EA3o\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Tr\\u01B0\\u1EDDng h\\u1ECDc\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"T\\u1EDD r\\u01A1i\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Kh\\u00E1c....\",\"image\":\"others-icon.svg\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Google\",\"image\":\"gmail-icon.svg\"},{\"id\":2,\"content\":\"Facebook\",\"image\":\"facebook-icon.svg\"},{\"id\":3,\"content\":\"YouTube\",\"image\":\"youtube-icon.svg\"},{\"id\":4,\"content\":\"Tiktok\",\"image\":\"tiktok-icon.svg\"},{\"id\":5,\"content\":\"Bạn bè/gia đình\",\"image\":\"friends_family-icon.svg\"},{\"id\":6,\"content\":\"Tin tức/báo chí\",\"image\":\"blog-icon.svg\"},{\"id\":7,\"content\":\"TV\",\"image\":\"tv-icon.svg\"},{\"id\":8,\"content\":\"Sự kiện/hội thảo\",\"image\":\"event.svg\"},{\"id\":9,\"content\":\"Trường học\",\"image\":\"school.svg\"},{\"id\":10,\"content\":\"Tờ rơi\",\"image\":\"leaflets.svg\"},{\"id\":11,\"content\":\"Khác....\",\"image\":\"others-icon.svg\"}]",
                             CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1533,7 +1858,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("d823acb4-62d8-4702-b95c-e6c5a8e49e4e"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"N\\u00E2ng cao \\u0111i\\u1EC3m s\\u1ED1\",\"image\":\"goal 1.png\"},{\"id\":2,\"content\":\"M\\u1EE5c ti\\u00EAu c\\u00F4ng vi\\u1EC7c\",\"image\":\"work-target-icon.svg\"},{\"id\":3,\"content\":\"C\\u1EA3i thi\\u1EC7n giao ti\\u1EBFp\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Thi ch\\u1EE9ng ch\\u1EC9\",\"image\":\"student.svg\"},{\"id\":5,\"content\":\"Du h\\u1ECDc\",\"image\":\"plane 1.png\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Nâng cao điểm số\",\"image\":\"goal 1.png\"},{\"id\":2,\"content\":\"Mục tiêu công việc\",\"image\":\"work-target-icon.svg\"},{\"id\":3,\"content\":\"Cải thiện giao tiếp\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Thi chứng chỉ\",\"image\":\"student.svg\"},{\"id\":5,\"content\":\"Du học\",\"image\":\"plane 1.png\"}]",
                             CreatedDate = new DateTime(2024, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1559,7 +1884,7 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("ba027423-106a-4bc6-a3a6-4b8386a44e51"),
-                            AnswerStr = "[{\"id\":1,\"content\":\"V\\u0103n h\\u00F3a\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Du l\\u1ECBch\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"K\\u1EBFt b\\u1EA1n\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"H\\u1ECDc t\\u1EADp\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"C\\u01A1 h\\u1ED9i ngh\\u1EC1 nghi\\u1EC7p\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Kh\\u00E1c....\",\"image\":\"goal 1.png\"}]",
+                            AnswerStr = "[{\"id\":1,\"content\":\"Văn hóa\",\"image\":\"castle 1.png\"},{\"id\":2,\"content\":\"Du lịch\",\"image\":\"plane 1.png\"},{\"id\":3,\"content\":\"Kết bạn\",\"image\":\"friendship 1.png\"},{\"id\":4,\"content\":\"Học tập\",\"image\":\"mortarboard 1.png\"},{\"id\":5,\"content\":\"Cơ hội nghề nghiệp\",\"image\":\"case 1.png\"},{\"id\":6,\"content\":\"Khác....\",\"image\":\"goal 1.png\"}]",
                             CreatedDate = new DateTime(2023, 10, 17, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
@@ -1659,6 +1984,438 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                             Language = "en-US",
                             Question = "Your Gender",
                             SurveyQuestionId = new Guid("2be9a620-143d-41f6-815b-2038c21a7b23")
+                        },
+                        new
+                        {
+                            Id = new Guid("b3e92765-8b8d-4bec-a5d4-f9a9e213b53f"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Cải thiện điểm số ở trường\",\"image\":null},{\"id\":2,\"content\":\"Thi chứng chỉ\",\"image\":null},{\"id\":3,\"content\":\"Sở thích\",\"image\":null},{\"id\":4,\"content\":\"Lý do khác\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+                            SurveyQuestionId = new Guid("238cae89-e1d8-408a-bb3c-1a0b27cd0edb")
+                        },
+                        new
+                        {
+                            Id = new Guid("41058318-f3c0-4285-81c9-ac847a1d5364"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Improving school grades\",\"image\":null},{\"id\":2,\"content\":\"Taking certification exams\",\"image\":null},{\"id\":3,\"content\":\"Personal interest\",\"image\":null},{\"id\":4,\"content\":\"Other reasons\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "What is your goal in learning English?",
+                            SurveyQuestionId = new Guid("238cae89-e1d8-408a-bb3c-1a0b27cd0edb")
+                        },
+                        new
+                        {
+                            Id = new Guid("8bb2b7f3-8254-4e83-b13f-f43cdb8d3c18"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Améliorer vos notes à l'école\",\"image\":null},{\"id\":2,\"content\":\"Passer une certification\",\"image\":null},{\"id\":3,\"content\":\"Intérêt personnel\",\"image\":null},{\"id\":4,\"content\":\"Autres raisons\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Quels sont vos objectifs pour apprendre l'anglais ?",
+                            SurveyQuestionId = new Guid("238cae89-e1d8-408a-bb3c-1a0b27cd0edb")
+                        },
+                        new
+                        {
+                            Id = new Guid("54d7630b-e27a-4e89-a77b-23384e15dc9b"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+                            SurveyQuestionId = new Guid("68c17fa9-1d90-4eb2-8412-ea5062ad26f0")
+                        },
+                        new
+                        {
+                            Id = new Guid("819f8198-3b77-4243-9dfc-4f5b2ae052a7"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "How would you rate the importance of learning English (on a scale of 1 to 5, from least to most important)?",
+                            SurveyQuestionId = new Guid("68c17fa9-1d90-4eb2-8412-ea5062ad26f0")
+                        },
+                        new
+                        {
+                            Id = new Guid("90267a54-b716-43be-a54d-bae0cec65729"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Comment évaluez-vous l'importance de l'apprentissage de l'anglais ? (échelle de 1 à 5, de faible à élevé)?",
+                            SurveyQuestionId = new Guid("68c17fa9-1d90-4eb2-8412-ea5062ad26f0")
+                        },
+                        new
+                        {
+                            Id = new Guid("d4d2fae7-ae44-4652-883c-68c98a2972de"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Trung tâm tiếng Anh\",\"image\":null},{\"id\":2,\"content\":\"Học online\",\"image\":null},{\"id\":3,\"content\":\"Học gia sư\",\"image\":null},{\"id\":4,\"content\":\"Học thêm với giáo viên\",\"image\":null},{\"id\":5,\"content\":\"Không học thêm tiếng Anh\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Bạn học thêm Tiếng Anh ở đâu?",
+                            SurveyQuestionId = new Guid("73a7a0c8-1e07-4351-b3f4-3e843623bbaf")
+                        },
+                        new
+                        {
+                            Id = new Guid("3353fb66-5d41-4334-9542-510e327359c7"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"English language centers\",\"image\":null},{\"id\":2,\"content\":\"Online learning\",\"image\":null},{\"id\":3,\"content\":\"Private tutoring\",\"image\":null},{\"id\":4,\"content\":\"Extra classes with teachers\",\"image\":null},{\"id\":5,\"content\":\"Do not take additional English lessons\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "Where do you take additional English lessons?",
+                            SurveyQuestionId = new Guid("73a7a0c8-1e07-4351-b3f4-3e843623bbaf")
+                        },
+                        new
+                        {
+                            Id = new Guid("0bced45a-cc34-47d4-a1e5-97735f52791b"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Centres de langue anglaise\",\"image\":null},{\"id\":2,\"content\":\"Apprentissage en ligne\",\"image\":null},{\"id\":3,\"content\":\"Cours particuliers\",\"image\":null},{\"id\":4,\"content\":\"Cours supplémentaires avec des enseignants\",\"image\":null},{\"id\":5,\"content\":\"Je ne prends pas de cours supplémentaires d'anglais\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Où prenez-vous des cours supplémentaires d'anglais ?",
+                            SurveyQuestionId = new Guid("73a7a0c8-1e07-4351-b3f4-3e843623bbaf")
+                        },
+                        new
+                        {
+                            Id = new Guid("70c9d600-a6a2-4d56-a740-3d0151efab1a"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Giao tiếp tiếng Anh rất pro trong mắt bạn bè\",\"image\":null},{\"id\":2,\"content\":\"Điểm cao được cô giáo khen ngợi trước lớp\",\"image\":null},{\"id\":3,\"content\":\"Thích vì tiếng Anh hay ho\",\"image\":null},{\"id\":4,\"content\":\"Không thích gì cả\",\"image\":null},{\"id\":5,\"content\":\"Ghét tiếng Anh\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+                            SurveyQuestionId = new Guid("c6bda257-0757-4290-86c1-794d0ba6ae3b")
+                        },
+                        new
+                        {
+                            Id = new Guid("1e81a3d3-edcb-4401-8a59-870fdbf037e5"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Being seen as a pro at English by friends\",\"image\":null},{\"id\":2,\"content\":\"High grades and being praised by the teacher in class\",\"image\":null},{\"id\":3,\"content\":\"Enjoying English because it is interesting\",\"image\":null},{\"id\":4,\"content\":\"Do not like anything about it\",\"image\":null},{\"id\":5,\"content\":\"Dislike English entirely\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "What do you like most about learning English?",
+                            SurveyQuestionId = new Guid("c6bda257-0757-4290-86c1-794d0ba6ae3b")
+                        },
+                        new
+                        {
+                            Id = new Guid("97064707-b3d8-4fb5-bf4a-12bb6eb3776e"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Être considéré comme un expert en anglais par vos amis\",\"image\":null},{\"id\":2,\"content\":\"Obtenir de bonnes notes et être félicité par le professeur en classe\",\"image\":null},{\"id\":3,\"content\":\"Aimer l'anglais parce que c'est intéressant\",\"image\":null},{\"id\":4,\"content\":\"Ne rien aimer du tout\",\"image\":null},{\"id\":5,\"content\":\"Détester l'anglais complètement\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Qu'aimez-vous le plus dans l'apprentissage de l'anglais ?",
+                            SurveyQuestionId = new Guid("c6bda257-0757-4290-86c1-794d0ba6ae3b")
+                        },
+                        new
+                        {
+                            Id = new Guid("4fabc8f2-fcf1-4756-9e2e-64877d8a00da"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Cải thiện điểm số ở trường\",\"image\":null},{\"id\":2,\"content\":\"Thi chứng chỉ\",\"image\":null},{\"id\":3,\"content\":\"Sở thích\",\"image\":null},{\"id\":4,\"content\":\"Lý do khác\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+                            SurveyQuestionId = new Guid("482c87c7-b555-4de2-a418-f990960e0ee6")
+                        },
+                        new
+                        {
+                            Id = new Guid("75f618e3-7a5e-4713-9e92-8dadbdfb3035"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Improving school grades\",\"image\":null},{\"id\":2,\"content\":\"Taking certification exams\",\"image\":null},{\"id\":3,\"content\":\"Personal interest\",\"image\":null},{\"id\":4,\"content\":\"Other reasons\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "What is your goal in learning English?",
+                            SurveyQuestionId = new Guid("482c87c7-b555-4de2-a418-f990960e0ee6")
+                        },
+                        new
+                        {
+                            Id = new Guid("30adf928-8e15-4efd-9c35-e31798381a26"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Améliorer vos notes à l'école\",\"image\":null},{\"id\":2,\"content\":\"Passer une certification\",\"image\":null},{\"id\":3,\"content\":\"Intérêt personnel\",\"image\":null},{\"id\":4,\"content\":\"Autres raisons\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Quels sont vos objectifs pour apprendre l'anglais ?",
+                            SurveyQuestionId = new Guid("482c87c7-b555-4de2-a418-f990960e0ee6")
+                        },
+                        new
+                        {
+                            Id = new Guid("e7a3a48e-e048-4514-a5a4-f1229dcfdfd0"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+                            SurveyQuestionId = new Guid("0aafccb7-e700-4b30-866f-0b667217fa47")
+                        },
+                        new
+                        {
+                            Id = new Guid("8df0dfba-846e-4510-99f1-0d76ec75f78d"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "How would you rate the importance of learning English (on a scale of 1 to 5, from least to most important)?",
+                            SurveyQuestionId = new Guid("0aafccb7-e700-4b30-866f-0b667217fa47")
+                        },
+                        new
+                        {
+                            Id = new Guid("6afb9363-cf97-4dd2-a0e5-fd29baa6aafd"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Comment évaluez-vous l'importance de l'apprentissage de l'anglais ? (échelle de 1 à 5, de faible à élevé)?",
+                            SurveyQuestionId = new Guid("0aafccb7-e700-4b30-866f-0b667217fa47")
+                        },
+                        new
+                        {
+                            Id = new Guid("80f7d9f6-39b2-4dff-a71e-92cf810c7b73"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Trung tâm tiếng Anh\",\"image\":null},{\"id\":2,\"content\":\"Học online\",\"image\":null},{\"id\":3,\"content\":\"Học gia sư\",\"image\":null},{\"id\":4,\"content\":\"Học thêm với giáo viên\",\"image\":null},{\"id\":5,\"content\":\"Không học thêm tiếng Anh\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Bạn học thêm Tiếng Anh ở đâu?",
+                            SurveyQuestionId = new Guid("da618b05-f9b8-4bfd-8bae-7a5adb668d16")
+                        },
+                        new
+                        {
+                            Id = new Guid("10f84b12-becb-4981-b2f9-6a24d2b2a7b7"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"English language centers\",\"image\":null},{\"id\":2,\"content\":\"Online learning\",\"image\":null},{\"id\":3,\"content\":\"Private tutoring\",\"image\":null},{\"id\":4,\"content\":\"Extra classes with teachers\",\"image\":null},{\"id\":5,\"content\":\"Do not take additional English lessons\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "Where do you take additional English lessons?",
+                            SurveyQuestionId = new Guid("da618b05-f9b8-4bfd-8bae-7a5adb668d16")
+                        },
+                        new
+                        {
+                            Id = new Guid("66f876c3-716a-4b81-b790-e13e37fceedc"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Centres de langue anglaise\",\"image\":null},{\"id\":2,\"content\":\"Apprentissage en ligne\",\"image\":null},{\"id\":3,\"content\":\"Cours particuliers\",\"image\":null},{\"id\":4,\"content\":\"Cours supplémentaires avec des enseignants\",\"image\":null},{\"id\":5,\"content\":\"Je ne prends pas de cours supplémentaires d'anglais\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Où prenez-vous des cours supplémentaires d'anglais ?",
+                            SurveyQuestionId = new Guid("da618b05-f9b8-4bfd-8bae-7a5adb668d16")
+                        },
+                        new
+                        {
+                            Id = new Guid("db2b2556-74cf-423e-8620-2ac1246baf1e"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Giao tiếp tiếng Anh rất pro trong mắt bạn bè\",\"image\":null},{\"id\":2,\"content\":\"Điểm cao được cô giáo khen ngợi trước lớp\",\"image\":null},{\"id\":3,\"content\":\"Thích vì tiếng Anh hay ho\",\"image\":null},{\"id\":4,\"content\":\"Không thích gì cả\",\"image\":null},{\"id\":5,\"content\":\"Ghét tiếng Anh\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+                            SurveyQuestionId = new Guid("c88e157b-1496-4aae-b81f-dd0718524e38")
+                        },
+                        new
+                        {
+                            Id = new Guid("37edc69a-d243-4e19-a002-6e090bfb6871"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Being seen as a pro at English by friends\",\"image\":null},{\"id\":2,\"content\":\"High grades and being praised by the teacher in class\",\"image\":null},{\"id\":3,\"content\":\"Enjoying English because it is interesting\",\"image\":null},{\"id\":4,\"content\":\"Do not like anything about it\",\"image\":null},{\"id\":5,\"content\":\"Dislike English entirely\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "What do you like most about learning English?",
+                            SurveyQuestionId = new Guid("c88e157b-1496-4aae-b81f-dd0718524e38")
+                        },
+                        new
+                        {
+                            Id = new Guid("fb59b7d2-ed36-4c5e-9fc5-4f176c9a5873"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Être considéré comme un expert en anglais par vos amis\",\"image\":null},{\"id\":2,\"content\":\"Obtenir de bonnes notes et être félicité par le professeur en classe\",\"image\":null},{\"id\":3,\"content\":\"Aimer l'anglais parce que c'est intéressant\",\"image\":null},{\"id\":4,\"content\":\"Ne rien aimer du tout\",\"image\":null},{\"id\":5,\"content\":\"Détester l'anglais complètement\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Qu'aimez-vous le plus dans l'apprentissage de l'anglais ?",
+                            SurveyQuestionId = new Guid("c88e157b-1496-4aae-b81f-dd0718524e38")
+                        },
+                        new
+                        {
+                            Id = new Guid("52248d53-305e-49b6-8260-bf78f1c91889"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Cải thiện điểm số ở trường\",\"image\":null},{\"id\":2,\"content\":\"Thi chứng chỉ\",\"image\":null},{\"id\":3,\"content\":\"Sở thích\",\"image\":null},{\"id\":4,\"content\":\"Lý do khác\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Mục tiêu của bạn khi học Tiếng Anh là gì?",
+                            SurveyQuestionId = new Guid("eb9ddecf-15fc-4393-af86-eb2b14f64eb7")
+                        },
+                        new
+                        {
+                            Id = new Guid("1092914c-2706-4226-8f97-579c7ae9c500"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Improving school grades\",\"image\":null},{\"id\":2,\"content\":\"Taking certification exams\",\"image\":null},{\"id\":3,\"content\":\"Personal interest\",\"image\":null},{\"id\":4,\"content\":\"Other reasons\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "What is your goal in learning English?",
+                            SurveyQuestionId = new Guid("eb9ddecf-15fc-4393-af86-eb2b14f64eb7")
+                        },
+                        new
+                        {
+                            Id = new Guid("36c3bef7-7fef-4999-a553-49fa53eed5c1"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Améliorer vos notes à l'école\",\"image\":null},{\"id\":2,\"content\":\"Passer une certification\",\"image\":null},{\"id\":3,\"content\":\"Intérêt personnel\",\"image\":null},{\"id\":4,\"content\":\"Autres raisons\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Quels sont vos objectifs pour apprendre l'anglais ?",
+                            SurveyQuestionId = new Guid("eb9ddecf-15fc-4393-af86-eb2b14f64eb7")
+                        },
+                        new
+                        {
+                            Id = new Guid("3eae31f3-4e19-4e76-8c89-a571558f5ece"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Bạn đánh giá mức độ quan trọng của việc học tiếng Anh như thế nào (thang điểm 5 từ thấp đến cao)?",
+                            SurveyQuestionId = new Guid("92d64860-c647-4359-a326-78a39de366e1")
+                        },
+                        new
+                        {
+                            Id = new Guid("9edf0f4f-e12c-4e3f-aa24-31a97b3e2d80"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "How would you rate the importance of learning English (on a scale of 1 to 5, from least to most important)?",
+                            SurveyQuestionId = new Guid("92d64860-c647-4359-a326-78a39de366e1")
+                        },
+                        new
+                        {
+                            Id = new Guid("8b3ceaa3-64d0-4070-b26e-56633396ca0d"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"1\",\"image\":null},{\"id\":2,\"content\":\"2\",\"image\":null},{\"id\":3,\"content\":\"3\",\"image\":null},{\"id\":4,\"content\":\"4\",\"image\":null},{\"id\":5,\"content\":\"5\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Comment évaluez-vous l'importance de l'apprentissage de l'anglais ? (échelle de 1 à 5, de faible à élevé)?",
+                            SurveyQuestionId = new Guid("92d64860-c647-4359-a326-78a39de366e1")
+                        },
+                        new
+                        {
+                            Id = new Guid("93f2689e-d1fb-4ef8-ab4a-c4cc52795ee8"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Trung tâm tiếng Anh\",\"image\":null},{\"id\":2,\"content\":\"Học online\",\"image\":null},{\"id\":3,\"content\":\"Học gia sư\",\"image\":null},{\"id\":4,\"content\":\"Học thêm với giáo viên\",\"image\":null},{\"id\":5,\"content\":\"Không học thêm tiếng Anh\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Bạn học thêm Tiếng Anh ở đâu?",
+                            SurveyQuestionId = new Guid("69b1a8ab-2811-450d-b9bf-12cd91e44193")
+                        },
+                        new
+                        {
+                            Id = new Guid("337a1505-8221-4967-93a9-285a31ad5da2"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"English language centers\",\"image\":null},{\"id\":2,\"content\":\"Online learning\",\"image\":null},{\"id\":3,\"content\":\"Private tutoring\",\"image\":null},{\"id\":4,\"content\":\"Extra classes with teachers\",\"image\":null},{\"id\":5,\"content\":\"Do not take additional English lessons\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "Where do you take additional English lessons?",
+                            SurveyQuestionId = new Guid("69b1a8ab-2811-450d-b9bf-12cd91e44193")
+                        },
+                        new
+                        {
+                            Id = new Guid("1ad583b8-ee62-4bdb-ba56-e228062929b4"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Centres de langue anglaise\",\"image\":null},{\"id\":2,\"content\":\"Apprentissage en ligne\",\"image\":null},{\"id\":3,\"content\":\"Cours particuliers\",\"image\":null},{\"id\":4,\"content\":\"Cours supplémentaires avec des enseignants\",\"image\":null},{\"id\":5,\"content\":\"Je ne prends pas de cours supplémentaires d'anglais\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Où prenez-vous des cours supplémentaires d'anglais ?",
+                            SurveyQuestionId = new Guid("69b1a8ab-2811-450d-b9bf-12cd91e44193")
+                        },
+                        new
+                        {
+                            Id = new Guid("5c29c250-58cd-4675-ac3c-41a13d6c6055"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Giao tiếp tiếng Anh rất pro trong mắt bạn bè\",\"image\":null},{\"id\":2,\"content\":\"Điểm cao được cô giáo khen ngợi trước lớp\",\"image\":null},{\"id\":3,\"content\":\"Thích vì tiếng Anh hay ho\",\"image\":null},{\"id\":4,\"content\":\"Không thích gì cả\",\"image\":null},{\"id\":5,\"content\":\"Ghét tiếng Anh\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            Question = "Điều bạn thích nhất ở việc học tiếng Anh là gì?",
+                            SurveyQuestionId = new Guid("6fe5a134-6379-4244-96f1-69cc71962368")
+                        },
+                        new
+                        {
+                            Id = new Guid("836f815f-955b-4e08-a1ee-c7685ccec230"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Being seen as a pro at English by friends\",\"image\":null},{\"id\":2,\"content\":\"High grades and being praised by the teacher in class\",\"image\":null},{\"id\":3,\"content\":\"Enjoying English because it is interesting\",\"image\":null},{\"id\":4,\"content\":\"Do not like anything about it\",\"image\":null},{\"id\":5,\"content\":\"Dislike English entirely\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            Question = "What do you like most about learning English?",
+                            SurveyQuestionId = new Guid("6fe5a134-6379-4244-96f1-69cc71962368")
+                        },
+                        new
+                        {
+                            Id = new Guid("2ca57663-8c08-43ef-b9f3-1f044e724fca"),
+                            AnswerStr = "[{\"id\":1,\"content\":\"Être considéré comme un expert en anglais par vos amis\",\"image\":null},{\"id\":2,\"content\":\"Obtenir de bonnes notes et être félicité par le professeur en classe\",\"image\":null},{\"id\":3,\"content\":\"Aimer l'anglais parce que c'est intéressant\",\"image\":null},{\"id\":4,\"content\":\"Ne rien aimer du tout\",\"image\":null},{\"id\":5,\"content\":\"Détester l'anglais complètement\",\"image\":null}]",
+                            CreatedDate = new DateTime(2025, 1, 16, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            Question = "Qu'aimez-vous le plus dans l'apprentissage de l'anglais ?",
+                            SurveyQuestionId = new Guid("6fe5a134-6379-4244-96f1-69cc71962368")
                         });
                 });
 
@@ -1729,11 +2486,18 @@ namespace Fsel.Interaction.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurvey", b =>
                 {
+                    b.HasOne("Fsel.Interaction.Domain.Entities.CustomerSurveyGroup", "CustomerSurveyGroup")
+                        .WithMany("CustomerSurveys")
+                        .HasForeignKey("CustomerSurveyGroupId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.HasOne("Fsel.Interaction.Domain.Entities.SurveyQuestion", "SurveyQuestion")
                         .WithMany("CustomerSurveys")
                         .HasForeignKey("SurveyQuestionId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("CustomerSurveyGroup");
 
                     b.Navigation("SurveyQuestion");
                 });
@@ -1803,6 +2567,11 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("SurveyQuestion");
+                });
+
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurveyGroup", b =>
+                {
+                    b.Navigation("CustomerSurveys");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.Post", b =>

@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -72,7 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LessonMockTestResultModel>>();
             var userId = request.UserId ?? _authContext.CurrentUserId;
-            var studentsResult = await _userService.GetStudentByUserIdAsync(userId);
+            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(userId);
             if (studentsResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentsResult));
@@ -154,10 +155,12 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 
         private async Task CreateLessonResultAsync(LessonResult lessonResult, CancellationToken cancellationToken)
         {
-            _lessonResultRepository.Add(lessonResult);
             try
             {
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId, c.IsDeleted };
+                });
             }
             catch (Exception ex)
             {

@@ -33,7 +33,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             MethodResult<EnumTrialRegistrationStatus?> methodResult = new MethodResult<EnumTrialRegistrationStatus?>();
             var currentStatus = EnumTrialRegistrationStatus.New;
 
-            var query = _orderRepository.Queryable.Where(x => x.UserId == request.UserId && x.Status == EnumOrderStatus.Payment).OrderByDescending(x => x.CreatedDate).FirstOrDefault();
+            var query = await _orderRepository.Queryable.Where(x => x.UserId == request.UserId && x.Status == EnumOrderStatus.Payment).OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
 
             if (query == null)
             {

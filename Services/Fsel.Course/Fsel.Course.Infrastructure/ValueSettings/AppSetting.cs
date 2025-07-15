@@ -17,6 +17,10 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public CustomerSupportConfig? CustomerSupportConfig { get; set; }
 
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
+
+        public CacheConfig? CacheConfig { get; set; }
+
+        public TouchpointConfig? TouchpointConfig { get; set; }
     }
 
     public class ConstantUrl
@@ -45,7 +49,10 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     public class OpenAiConfig
     {
         public string? Uri { get; set; }
-        public string? ApiKey { get; set; }
+        public IList<string>? ApiKeys { get; set; }
+
+        public string? ApprovalAIModel { get; set; }
+        public string? CheckForbiddenAIModel { get; set; }
     }
 
     public class AzureAiConfig
@@ -62,6 +69,8 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public string? SystemApiUrl { get; set; }
         public string? OrderApiUrl { get; set; }
         public string? NotificationApiUrl { get; set; }
+        public string? StorageApiUrl { get; set; }
+        public string? FFmpegApiUrl { get; set; }
     }
 
     public class Otp
@@ -77,5 +86,16 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class CacheConfig
+    {
+        public bool TurnOnCaching { get; set; }
+        public int CachingDuration { get; set; }
+    }
+
+    public class TouchpointConfig
+    {
+        public bool TurnOnTouchpoint { get; set; }
     }
 }

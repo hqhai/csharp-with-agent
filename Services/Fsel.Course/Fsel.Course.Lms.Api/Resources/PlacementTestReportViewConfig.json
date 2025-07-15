@@ -1,0 +1,218 @@
+[
+  {
+    "Id": "0e45c13b-614b-4ce7-a8f5-cdef58d3f3d0",
+    "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>Pre-A1</strong>, so we recommend that you continue your learning journey with the level <strong>A1</strong> course. Students in Vietnam are expected to reach level <strong>A1</strong> by the end of primary school (Grade 5).<br><br>With focus and determination, you can reach level <strong>A1</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!",
+    "SuggestedLevel": "A1",
+    "AgeStart": 0,
+    "AgeEnd": null,
+    "Translations": [
+      {
+        "Id": "f8543e6a-14be-48ac-ba7d-e5ab1705fa87",
+        "Language": "vi-VN",
+        "Text": "<strong style=\"font-size: 24px !important;\">Chào {0}</strong>,<br><br>Chào mừng đến với FSEL và chúc mừng bạn đã hoàn thành bài kiểm tra đầu vào! Dựa trên kết quả, hiện tại bạn đang ở trình độ <strong>Tiền A1</strong>. Vì thế, chúng tôi gợi ý bạn bắt đầu với khóa học <strong>A1</strong>. Thông thường, học sinh tại Việt Nam sẽ đạt trình độ <strong>A1</strong> vào cuối tiểu học (lớp 5).<br><br>Chỉ cần tập trung và quyết tâm, bạn có thể đạt trình độ <strong>A1</strong> trong vòng 6 đến 9 tháng học đều đặn trên nền tảng FSEL. Đảm bảo lộ trình này, bạn đã có thể nhận được những giải thưởng vô cùng hấp dẫn từ tháng tự học thông qua việc đổi FSEL Coin (xu) lấy quà ngay bên trong hệ thống. Hãy cố gắng duy trì động lực học tập của mình để đạt kết quả cao trong tháng tự học cũng như các bài kiểm tra tiếng Anh ở trên lớp nhé. Nhấn vào nút bên dưới để chọn khóa học và bắt đầu học cùng FSEL ngay nhé!"
+      },
+      {
+        "Id": "e40a8c0e-dd7e-4494-8a3a-3b6b8f6d0cbc",
+        "Language": "en-US",
+        "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>Pre-A1</strong>, so we recommend that you continue your learning journey with the level <strong>A1</strong> course. Students in Vietnam are expected to reach level <strong>A1</strong> by the end of primary school (Grade 5).<br><br>With focus and determination, you can reach level <strong>A1</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!"
+      },
+      {
+        "Id": "822c563a-9d2f-4f46-973a-6cc087f999c0",
+        "Language": "fr-FR",
+        "Text": "<strong style=\"font-size: 24px !important;\">Bonjour {0}</strong>,<br><br>Bienvenue chez FSEL et félicitations pour avoir complété le test d'entrée ! Selon les résultats, vous êtes actuellement au niveau <strong>A1</strong>. Nous vous conseillons de commencer le cours <strong>A1</strong>. En général, les élèves au Vietnam atteignent le niveau <strong>A1</strong> à la fin de l'école primaire (classe 5).<br><br>Avec de la concentration et de la détermination, vous pouvez atteindre le niveau <strong>A1</strong> en 6 à 9 mois d'étude régulière sur FSEL. En suivant ce parcours, vous pourrez obtenir des récompenses intéressantes dès le mois d'apprentissage en échangeant des FSEL Coins contre des cadeaux dans le système. Gardez votre motivation pour obtenir de bons résultats pendant le mois d'apprentissage et les tests d'anglais en classe. Cliquez sur le bouton ci-dessous pour choisir votre cours et commencer avec FSEL !"
+      }
+    ]
+  },
+  {
+    "Id": "34c7e2b4-ef01-43bb-a202-53ba4564955a",
+    "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>A1</strong>, so we recommend that you continue your learning journey with the level <strong>A2</strong> course. Students in Vietnam are expected to reach <strong>A2</strong> by the end of secondary school (Grade 9).<br><br>With focus and determination, you can reach level <strong>A2</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!",
+    "SuggestedLevel": "A2",
+    "AgeStart": 0,
+    "AgeEnd": null,
+    "Translations": [
+      {
+        "Id": "a49045fe-e579-4f04-bd5c-1770b7b9a9d8",
+        "Language": "vi-VN",
+        "Text": "<strong style=\"font-size: 24px !important;\">Chào {0}</strong>,<br><br>Chào mừng đến với FSEL và chúc mừng bạn đã hoàn thành bài kiểm tra đầu vào! Dựa trên kết quả, hiện tại bạn đang ở trình độ <strong>A1</strong>. Vì thế, chúng tôi gợi ý bạn bắt đầu với khóa học <strong>A2</strong>. Thông thường, học sinh tại Việt Nam sẽ đạt trình độ <strong>A2</strong> vào cuối cấp Trung học Cơ sở (lớp 9).<br><br>Chỉ cần tập trung và quyết tâm, bạn có thể đạt trình độ <strong>A2</strong> trong vòng 6 đến 9 tháng học đều đặn trên nền tảng FSEL. Đảm bảo lộ trình này, bạn đã có thể nhận được những giải thưởng vô cùng hấp dẫn từ tháng tự học thông qua việc đổi FSEL Coin (xu) lấy quà ngay bên trong hệ thống. Hãy cố gắng duy trì động lực học tập của mình để đạt kết quả cao trong tháng tự học cũng như các bài kiểm tra tiếng Anh ở trên lớp nhé. Nhấn vào nút bên dưới để chọn khóa học và bắt đầu học cùng FSEL ngay nhé!"
+      },
+      {
+        "Id": "c687b921-d9f6-4625-b82f-a1132d310d72",
+        "Language": "en-US",
+        "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>A1</strong>, so we recommend that you continue your learning journey with the level <strong>A2</strong> course. Students in Vietnam are expected to reach <strong>A2</strong> by the end of secondary school (Grade 9).<br><br>With focus and determination, you can reach level <strong>A2</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!"
+      },
+      {
+        "Id": "ba98bdb2-7d2b-41b3-9109-9cd1cb54ae48",
+        "Language": "fr-FR",
+        "Text": "<strong style=\"font-size: 24px !important;\">Bonjour {0}</strong>,<br><br>Bienvenue chez FSEL et félicitations pour avoir complété le test d'entrée ! Selon les résultats, vous êtes actuellement au niveau <strong>A2</strong>. Nous vous conseillons de commencer le cours <strong>A2</strong>. En général, les élèves au Vietnam atteignent le niveau <strong>A2</strong> à la fin du collège (classe 9).<br><br>Avec de la concentration et de la détermination, vous pouvez atteindre le niveau <strong>A2</strong> en 6 à 9 mois d'étude régulière sur FSEL. En suivant ce parcours, vous pourrez obtenir des récompenses intéressantes dès le mois d'apprentissage en échangeant des FSEL Coins contre des cadeaux dans le système. Gardez votre motivation pour obtenir de bons résultats pendant le mois d'apprentissage et les tests d'anglais en classe. Cliquez sur le bouton ci-dessous pour choisir votre cours et commencer avec FSEL !"
+      }
+    ]
+  },
+  {
+    "Id": "8a4efd00-dbd7-46e9-885b-5d9a8f6db894",
+    "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>A2</strong>, so we recommend that you continue your learning journey with the level <strong>B1</strong> course. Students in Vietnam are expected to reach <strong>B1</strong> by the end of high school (Grade 12). University students in Vietnam are required to reach <strong>B1</strong> in order to graduate.<br><br>With focus and determination, you can reach level <strong>B1</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!",
+    "SuggestedLevel": "B1",
+    "AgeStart": 0,
+    "AgeEnd": null,
+    "Translations": [
+      {
+        "Id": "8e8e2b6c-a5c9-400e-bb30-924ab0f2f7ca",
+        "Language": "vi-VN",
+        "Text": "<strong style=\"font-size: 24px !important;\">Chào {0}</strong>,<br><br>Chào mừng đến với FSEL và chúc mừng bạn đã hoàn thành bài kiểm tra đầu vào! Dựa trên kết quả, hiện tại bạn đang ở trình độ <strong>A2</strong>. Vì thế, chúng tôi gợi ý bạn bắt đầu với khóa học <strong>B1</strong>. Thông thường, học sinh tại Việt Nam sẽ đạt trình độ <strong>B1</strong> vào cuối cấp Trung học Phổ thông (lớp 12). Ngoài ra, sinh viên đại học cần đạt tới trình độ này để tốt nghiệp.<br><br>Chỉ cần tập trung và quyết tâm, bạn có thể đạt trình độ <strong>B1</strong> trong vòng 6 đến 9 tháng học đều đặn trên nền tảng FSEL. Đảm bảo lộ trình này, bạn đã có thể nhận được những giải thưởng vô cùng hấp dẫn từ tháng tự học thông qua việc đổi FSEL Coin (xu) lấy quà ngay bên trong hệ thống. Hãy cố gắng duy trì động lực học tập của mình để đạt kết quả cao trong tháng tự học cũng như các bài kiểm tra tiếng Anh ở trên lớp nhé. Nhấn vào nút bên dưới để chọn khóa học và bắt đầu học cùng FSEL ngay nhé!"
+      },
+      {
+        "Id": "60648e5d-2920-4d31-8c48-c4f3fd373e12",
+        "Language": "en-US",
+        "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>A2</strong>, so we recommend that you continue your learning journey with the level <strong>B1</strong> course. Students in Vietnam are expected to reach <strong>B1</strong> by the end of high school (Grade 12). University students in Vietnam are required to reach <strong>B1</strong> in order to graduate.<br><br>With focus and determination, you can reach level <strong>B1</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!"
+      },
+      {
+        "Id": "7b69159e-fdf0-487c-8bce-5704da6d3b4d",
+        "Language": "fr-FR",
+        "Text": "<strong style=\"font-size: 24px !important;\">Bonjour {0}</strong>,<br><br>Bienvenue chez FSEL et félicitations pour avoir complété le test d'entrée ! Selon les résultats, vous êtes actuellement au niveau <strong>A2</strong>. Nous vous conseillons de commencer le cours <strong>B1</strong>. En général, les élèves au Vietnam atteignent le niveau <strong>B1</strong> à la fin du lycée (classe 12). De plus, les étudiants universitaires doivent atteindre ce niveau pour obtenir leur diplôme.<br><br>Avec de la concentration et de la détermination, vous pouvez atteindre le niveau <strong>B1</strong> en 6 à 9 mois d'étude régulière sur FSEL. En suivant ce parcours, vous pourrez obtenir des récompenses intéressantes dès le mois d'apprentissage en échangeant des FSEL Coins contre des cadeaux dans le système. Gardez votre motivation pour obtenir de bons résultats pendant le mois d'apprentissage et les tests d'anglais en classe. Cliquez sur le bouton ci-dessous pour choisir votre cours et commencer avec FSEL !"
+      }
+    ]
+  },
+  {
+    "Id": "b59f4688-a81b-4f3c-bc13-5411925dd4c7",
+    "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B1</strong>, so we recommend that you continue your learning journey with the level <strong>B1+</strong> course. This level serves as an intermediary step between levels <strong>B1</strong> and <strong>B2</strong>. Advancing from <strong>B1</strong> to <strong>B2</strong> requires mastering increasingly complex language skills, which can be challenging and may slow progress. This level is designed to help learners continue strengthening their understanding of language topics at level <strong>B1</strong> before moving on to courses at level <strong>B2</strong>.<br><br>With focus and determination, you can reach level <strong>B1+</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!",
+    "SuggestedLevel": "B1Plus",
+    "AgeStart": 0,
+    "AgeEnd": 14,
+    "Translations": [
+      {
+        "Id": "338a8624-cd21-4dc0-a003-8df17bfcb5f1",
+        "Language": "vi-VN",
+        "Text": "<strong style=\"font-size: 24px !important;\">Chào {0}</strong>,<br><br>Chào mừng đến với FSEL và chúc mừng bạn đã hoàn thành bài kiểm tra đầu vào! Dựa trên kết quả, hiện tại bạn đang ở trình độ <strong>B1</strong>. Vì thế, chúng tôi gợi ý bạn bắt đầu với khóa học <strong>B1+</strong>. Đây là khóa học trung gian giữa trình độ <strong>B1</strong> và <strong>B2</strong>. Việc chuyển từ <strong>B1</strong> lên <strong>B2</strong> khá khó khăn vì nó yêu cầu bạn phải thành thạo các kỹ năng ngôn ngữ phức tạp. Chính vì vậy, khóa học <strong>B1+</strong> được thiết kế để trang bị cho bạn nền tảng vững chắc, củng cố các kiến thức đã học ở trình độ <strong>B1</strong>, đồng thời chuẩn bị sẵn sàng về kỹ năng để tiếp tục chinh phục trình độ <strong>B2</strong>.<br><br>Chỉ cần tập trung và quyết tâm, bạn có thể đạt trình độ <strong>B1+</strong> trong vòng 6 đến 9 tháng học tập đều đặn trên nền tảng FSEL. Đảm bảo lộ trình này, bạn đã có thể nhận được những giải thưởng vô cùng hấp dẫn từ tháng tự học thông qua việc đổi FSEL Coin (xu) lấy quà. Trên hệ thống FSEL sẽ có bảng xếp hạng cùng trình độ để các bạn học sinh có thể thi đua với nhau và đạt được các mục tiêu học tập cùng phần thưởng giá trị từ FSEL. Hãy cố gắng duy trì động lực học tập của mình để đạt kết quả cao trong tháng tự học cũng như các bài kiểm tra tiếng Anh ở trên lớp. Nhấn vào nút bên dưới để chọn khóa học và bắt đầu học ngay hôm nay nhé!"
+      },
+      {
+        "Id": "5791ba15-ffd3-42bb-a0a0-a79b7fc3731c",
+        "Language": "en-US",
+        "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B1</strong>, so we recommend that you continue your learning journey with the level <strong>B1+</strong> course. This level serves as an intermediary step between levels <strong>B1</strong> and <strong>B2</strong>. Advancing from <strong>B1</strong> to <strong>B2</strong> requires mastering increasingly complex language skills, which can be challenging and may slow progress. This level is designed to help learners continue strengthening their understanding of language topics at level <strong>B1</strong> before moving on to courses at level <strong>B2</strong>.<br><br>With focus and determination, you can reach level <strong>B1+</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!"
+      },
+      {
+        "Id": "8fbdfb13-e51e-404b-a30f-4aa3c7cefd54",
+        "Language": "fr-FR",
+        "Text": "<strong style=\"font-size: 24px !important;\">Bonjour {0}</strong>,<br><br>Bienvenue chez FSEL et félicitations pour avoir complété le test d'entrée ! Vous êtes actuellement au niveau <strong>B1</strong>. Nous vous recommandons de commencer le cours <strong>B1+</strong>. Ce cours est un pont entre <strong>B1</strong> et <strong>B2</strong>, car la transition vers le <strong>B2</strong> peut être difficile en raison des compétences linguistiques complexes qu'il nécessite. Le cours <strong>B1+</strong> vous renforcera et vous préparera à passer au <strong>B2</strong>.<br><br>Avec concentration et détermination, vous atteindrez le niveau <strong>B1+</strong> en 6 à 9 mois d'étude régulière sur FSEL. Ce parcours vous permet aussi de gagner des récompenses intéressantes grâce aux FSEL Coins. Sur FSEL, vous trouverez un classement pour stimuler la compétition et atteindre vos objectifs d'apprentissage. Maintenez votre motivation pour réussir les tests en classe et le mois d'apprentissage. Cliquez ci-dessous pour commencer votre cours avec FSEL dès aujourd'hui !"
+      }
+    ]
+  },
+  {
+    "Id": "3fa2f6b1-341e-4313-9126-ca1707bacfa2",
+    "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B1+</strong>, so we recommend that you continue your learning journey with the level <strong>B2</strong> course. University students in Vietnam who do not major in English are typically only required to achieve level <strong>B1</strong> to graduate. However, some university programs which are taught in English set higher English proficiency standards for their students and require that all students achieve at least level <strong>B2</strong> before graduating.<br><br>With focus and determination, you can reach level <strong>B2</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!",
+    "SuggestedLevel": "B2",
+    "AgeStart": 0,
+    "AgeEnd": 14,
+    "Translations": [
+      {
+        "Id": "d5e31ae6-8d9c-4881-9052-55ab43c7977a",
+        "Language": "vi-VN",
+        "Text": "<strong style=\"font-size: 24px !important;\">Chào {0}</strong>,<br><br>Chào mừng đến với FSEL và chúc mừng bạn đã hoàn thành bài kiểm tra đầu vào! Dựa trên kết quả, hiện tại bạn đang ở trình độ <strong>B1+</strong>. Vì thế, chúng tôi gợi ý bạn bắt đầu với khóa học <strong>B2</strong>. Sinh viên không theo học chuyên ngành tiếng Anh tại Việt Nam thường chỉ cần đạt trình độ <strong>B1</strong> để tốt nghiệp. Tuy nhiên, một số chương trình học bằng tiếng Anh yêu cầu tiêu chuẩn cao hơn, buộc sinh viên phải đạt ít nhất trình độ <strong>B2</strong> trước khi ra trường.<br><br>Chỉ cần tập trung và quyết tâm, bạn có thể đạt trình độ <strong>B2</strong> trong vòng 6 đến 9 tháng học đều đặn trên nền tảng FSEL. Đảm bảo lộ trình này, bạn đã có thể nhận được những giải thưởng vô cùng hấp dẫn từ tháng tự học thông qua việc đổi FSEL Coin (xu) lấy quà. Trên hệ thống FSEL sẽ có bảng xếp hạng cùng trình độ để các bạn học sinh có thể thi đua với nhau và đạt được các mục tiêu học tập cùng phần thưởng giá trị từ FSEL. Hãy cố gắng duy trì động lực học tập của mình để đạt kết quả cao trong tháng tự học cũng như các bài kiểm tra tiếng Anh ở trên lớp. Nhấn vào nút bên dưới để chọn khóa học và bắt đầu học ngay hôm nay nhé!"
+      },
+      {
+        "Id": "b5a3f94e-4e1c-4f11-b9cc-6baab4ffe7aa",
+        "Language": "en-US",
+        "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B1+</strong>, so we recommend that you continue your learning journey with the level <strong>B2</strong> course. University students in Vietnam who do not major in English are typically only required to achieve level <strong>B1</strong> to graduate. However, some university programs which are taught in English set higher English proficiency standards for their students and require that all students achieve at least level <strong>B2</strong> before graduating.<br><br>With focus and determination, you can reach level <strong>B2</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!"
+      },
+      {
+        "Id": "45683a3f-7203-470a-9712-18ac65703d57",
+        "Language": "fr-FR",
+        "Text": "<strong style=\"font-size: 24px !important;\">Bonjour {0}</strong>,<br><br>Bienvenue chez FSEL et félicitations pour avoir complété le test d'entrée ! Vous êtes actuellement au niveau <strong>B1+</strong>. Nous vous conseillons de commencer le cours <strong>B2</strong>. Bien que le niveau <strong>B1</strong> suffise pour la plupart des diplômes en Vietnam, certains programmes en anglais exigent un niveau <strong>B2</strong>.<br><br>Avec concentration et détermination, vous atteindrez le niveau <strong>B2</strong> en 6 à 9 mois sur FSEL. Vous pourrez aussi gagner des récompenses avec les FSEL Coins. Un classement est disponible pour encourager la compétition entre étudiants et vous aider à atteindre vos objectifs. Maintenez votre motivation pour exceller dans vos tests et mois d'apprentissage. Cliquez ci-dessous pour commencer dès aujourd'hui !"
+      }
+    ]
+  },
+  {
+    "Id": "a56e9e98-147f-4175-864a-7e94477e2078",
+    "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B2</strong>, so we recommend that you continue your learning journey with the level <strong>C1</strong> course. Vietnamese university students majoring in English must achieve level <strong>C1</strong> to be eligible for university graduation.<br><br>With focus and determination, you can reach level <strong>C1</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!",
+    "SuggestedLevel": "C1",
+    "AgeStart": 0,
+    "AgeEnd": 14,
+    "Translations": [
+      {
+        "Id": "b691e183-4d09-494f-acaf-02fe9e5f1b00",
+        "Language": "vi-VN",
+        "Text": "<strong style=\"font-size: 24px !important;\">Chào {0}</strong>,<br><br>Chào mừng đến với FSEL và chúc mừng bạn đã hoàn thành bài kiểm tra đầu vào! Dựa trên kết quả, hiện tại bạn đang ở trình độ <strong>B2</strong>. Vì thế, chúng tôi gợi ý bạn bắt đầu với khóa học <strong>C1</strong>. Thông thường, sinh viên đại học chuyên ngành tiếng Anh tại Việt Nam phải đạt trình độ <strong>C1</strong> để đủ điều kiện tốt nghiệp.<br><br>Chỉ cần tập trung và quyết tâm, bạn có thể đạt trình độ <strong>C1</strong> trong vòng 6 đến 9 tháng học đều đặn trên nền tảng FSEL. Đảm bảo lộ trình này, bạn đã có thể nhận được những giải thưởng vô cùng hấp dẫn từ tháng tự học thông qua việc đổi FSEL Coin (xu) lấy quà. Trên hệ thống FSEL sẽ có bảng xếp hạng cùng trình độ để các bạn học sinh có thể thi đua với nhau và đạt được các mục tiêu học tập cùng phần thưởng giá trị từ FSEL. Hãy cố gắng duy trì động lực học tập của mình để đạt kết quả cao trong tháng tự học cũng như các bài kiểm tra tiếng Anh ở trên lớp. Nhấn vào nút bên dưới để chọn khóa học và bắt đầu học ngay hôm nay nhé!"
+      },
+      {
+        "Id": "a2a6f28a-a672-4a35-acf5-bd2dd7001317",
+        "Language": "en-US",
+        "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B2</strong>, so we recommend that you continue your learning journey with the level <strong>C1</strong> course. Vietnamese university students majoring in English must achieve level <strong>C1</strong> to be eligible for university graduation.<br><br>With focus and determination, you can reach level <strong>C1</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!"
+      },
+      {
+        "Id": "df9011ef-9804-4240-9b1c-3206399c13e4",
+        "Language": "fr-FR",
+        "Text": "<strong style=\"font-size: 24px !important;\">Bonjour {0}</strong>,<br><br>Bienvenue chez FSEL et félicitations pour avoir complété le test d'entrée ! Vous êtes actuellement au niveau <strong>B2</strong>. Nous vous recommandons de commencer le cours <strong>C1</strong>. Les étudiants en anglais doivent souvent atteindre le niveau <strong>C1</strong> pour obtenir leur diplôme.<br><br>Avec concentration et détermination, vous atteindrez le niveau <strong>C1</strong> en 6 à 9 mois sur FSEL. Ce parcours vous permet de gagner des récompenses intéressantes avec les FSEL Coins. Le classement sur FSEL favorise la compétition et vous aide à atteindre vos objectifs d'apprentissage. Gardez votre motivation pour réussir dans les tests et mois d'apprentissage. Cliquez ci-dessous pour commencer dès aujourd'hui !"
+      }
+    ]
+  },
+  {
+    "Id": "32e99aa1-4086-438c-8333-93edfaca000b",
+    "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B1</strong>, so we recommend that you continue your learning journey with the level <strong>B1+</strong> course. This level serves as an intermediary step between levels <strong>B1</strong> and <strong>B2</strong>. Advancing from <strong>B1</strong> to <strong>B2</strong> requires mastering increasingly complex language skills, which can be challenging and may slow progress. This level is designed to help learners continue strengthening their understanding of language topics at level <strong>B1</strong> before moving on to courses at level <strong>B2</strong>.<br><br>Alternatively, at your current age and level, you are also eligible for FSEL's <strong>IELTS Target 5.0+</strong> course. Vietnamese students who attain an IELTS overall band score of at least <strong>4.0</strong> are exempt from the foreign language component of the national high school graduation exam. However, many universities and institutions require students to achieve an overall band score of at least <strong>5.0</strong> for admission. An overall bandscore of <strong>5.0</strong> is equivalent to CEFR level <strong>B1+</strong>.<br><br>With focus and determination, you can reach level <strong>B1+</strong> or <strong>IELTS 5.0</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!",
+    "SuggestedLevel": "B1Plus",
+    "AgeStart": 14,
+    "AgeEnd": null,
+    "Translations": [
+      {
+        "Id": "7cf54fe1-3bbf-44a3-9d9b-d0ac5ea65848",
+        "Language": "vi-VN",
+        "Text": "<strong style=\"font-size: 24px !important;\">Chào {0}</strong>,<br><br>Chào mừng đến với FSEL và chúc mừng bạn đã hoàn thành bài kiểm tra đầu vào! Dựa trên kết quả, hiện tại bạn đang ở trình độ <strong>B1</strong>. Vì thế, chúng tôi gợi ý bạn bắt đầu với khóa học <strong>B1+</strong>. Đây là khóa học trung gian giữa trình độ <strong>B1</strong> và <strong>B2</strong>. Việc chuyển từ <strong>B1</strong> lên <strong>B2</strong> khá khó khăn vì nó yêu cầu bạn phải thành thạo các kỹ năng ngôn ngữ phức tạp. Chính vì vậy, khóa học <strong>B1+</strong> được thiết kế để trang bị cho bạn nền tảng vững chắc, củng cố các kiến thức đã học ở trình độ <strong>B1</strong>, đồng thời chuẩn bị sẵn sàng về kỹ năng để tiếp tục chinh phục trình độ <strong>B2</strong>.<br><br>Ngoài ra, với độ tuổi và trình độ hiện tại, bạn cũng đủ điều kiện tham gia khóa học <strong>IELTS Target 5.0+</strong> của FSEL. Tại Việt Nam, học sinh đạt IELTS <strong>4.0</strong> trở lên được miễn thi ngoại ngữ trong kỳ thi tốt nghiệp THPT. Tuy nhiên, nhiều trường đại học yêu cầu <strong>IELTS 5.0</strong> trở lên để xét tuyển, tương đương trình độ <strong>B1+</strong> theo CEFR.<br><br>Chỉ cần tập trung và quyết tâm, bạn có thể đạt trình độ <strong>B1+</strong> hoặc <strong>IELTS 5.0</strong> trong vòng 6 đến 9 tháng học tập đều đặn trên nền tảng FSEL. Nhấn vào nút bên dưới để chọn khóa học và bắt đầu học ngay hôm nay nhé!"
+      },
+      {
+        "Id": "4c420539-c537-4524-8235-54ae02dd0fc0",
+        "Language": "en-US",
+        "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B1</strong>, so we recommend that you continue your learning journey with the level <strong>B1+</strong> course. This level serves as an intermediary step between levels <strong>B1</strong> and <strong>B2</strong>. Advancing from <strong>B1</strong> to <strong>B2</strong> requires mastering increasingly complex language skills, which can be challenging and may slow progress. This level is designed to help learners continue strengthening their understanding of language topics at level <strong>B1</strong> before moving on to courses at level <strong>B2</strong>.<br><br>Alternatively, at your current age and level, you are also eligible for FSEL's <strong>IELTS Target 5.0+</strong> course. Vietnamese students who attain an IELTS overall band score of at least <strong>4.0</strong> are exempt from the foreign language component of the national high school graduation exam. However, many universities and institutions require students to achieve an overall band score of at least <strong>5.0</strong> for admission. An overall bandscore of <strong>5.0</strong> is equivalent to CEFR level <strong>B1+</strong>.<br><br>With focus and determination, you can reach level <strong>B1+</strong> or <strong>IELTS 5.0</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!"
+      },
+      {
+        "Id": "25729ee6-08d3-421b-889e-a9573effcde7",
+        "Language": "fr-FR",
+        "Text": "<strong style=\"font-size: 24px !important;\">Bonjour {0}</strong>,<br><br>Bienvenue chez FSEL et félicitations pour avoir complété le test d'entrée ! Vous êtes actuellement au niveau <strong>B1</strong>. Nous vous suggérons de commencer par le cours <strong>B1+</strong>, une étape entre <strong>B1</strong> et <strong>B2</strong>. La transition vers le <strong>B2</strong> est difficile car elle exige des compétences plus complexes. Le cours <strong>B1+</strong> renforcera vos connaissances et vous préparera pour le <strong>B2</strong>.<br><br>Vous êtes également éligible pour le cours <strong>IELTS Target 5.0+</strong>. En Vietnam, un IELTS de <strong>4.0</strong> vous permet de passer l'examen de langue du bac, mais un score de <strong>5.0+</strong> est requis pour les universités.<br><br>Avec détermination, vous pouvez atteindre <strong>B1+</strong> ou <strong>IELTS 5.0</strong> en 6 à 9 mois sur FSEL. Cliquez ci-dessous pour commencer votre apprentissage dès aujourd'hui !"
+      }
+    ]
+  },
+  {
+    "Id": "5ae7be29-18d6-4fca-98b3-c2e207c0300f",
+    "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B1+</strong>, so we recommend that you continue your learning journey with the level <strong>B2</strong> course. University students in Vietnam who do not major in English are typically only required to achieve level <strong>B1</strong> to graduate. However, some university programs which are taught in English set higher English proficiency standards for their students and require that all students achieve at least level <strong>B2</strong> before graduating.<br><br>Alternatively, at your current age and level, you are also eligible for FSEL's <strong>IELTS Target 6.0+</strong>  course. Many Vietnamese universities require an IELTS score of <strong>6.0</strong> or higher for admission into undergraduate programs, especially those with degree programs taught in English. An overall bandscore of <strong>6.0</strong> is equivalent to CEFR level <strong>B2</strong>.<br><br>With focus and determination, you can reach level <strong>B2</strong> or <strong>IELTS 6.0</strong>  in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!",
+    "SuggestedLevel": "B2",
+    "AgeStart": 14,
+    "AgeEnd": null,
+    "Translations": [
+      {
+        "Id": "5c370e77-e679-4b14-ad1b-73332890fe34",
+        "Language": "vi-VN",
+        "Text": "<strong style=\"font-size: 24px !important;\">Chào {0}</strong>,<br><br>Chào mừng đến với FSEL và chúc mừng bạn đã hoàn thành bài kiểm tra đầu vào! Dựa trên kết quả, hiện tại bạn đang ở trình độ <strong>B1+</strong>. Vì thế, chúng tôi gợi ý bạn bắt đầu với khóa học <strong>B2</strong>. Sinh viên không theo học chuyên ngành tiếng Anh tại Việt Nam thường chỉ cần đạt trình độ <strong>B1</strong> để tốt nghiệp. Tuy nhiên, một số chương trình học bằng tiếng Anh yêu cầu tiêu chuẩn cao hơn, buộc sinh viên phải đạt ít nhất trình độ <strong>B2</strong> trước khi ra trường.<br><br>Ngoài ra, với độ tuổi và trình độ hiện tại, bạn cũng đủ điều kiện tham gia khóa học <strong>IELTS Target 6.0+</strong>  của FSEL. Nhiều trường đại học tại Việt Nam yêu cầu điểm IELTS từ <strong>6.0</strong> trở lên để xét tuyển vào các chương trình giảng dạy, đặc biệt với các chương trình đào tạo bằng tiếng Anh. Điểm <strong>IELTS 6.0</strong>  tương đương trình độ <strong>B2</strong> theo CEFR.<br><br>Chỉ cần tập trung và quyết tâm, bạn có thể đạt trình độ <strong>B1+</strong> hoặc <strong>IELTS 6.0</strong>  trong vòng 6 đến 9 tháng học đều đặn trên nền tảng FSEL. Nhấn vào nút bên dưới để chọn khóa học và bắt đầu học ngay hôm nay nhé!"
+      },
+      {
+        "Id": "5d0c786d-9e20-42fb-baf3-7be8f3a55bbc",
+        "Language": "en-US",
+        "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B1+</strong>, so we recommend that you continue your learning journey with the level <strong>B2</strong> course. University students in Vietnam who do not major in English are typically only required to achieve level <strong>B1</strong> to graduate. However, some university programs which are taught in English set higher English proficiency standards for their students and require that all students achieve at least level <strong>B2</strong> before graduating.<br><br>Alternatively, at your current age and level, you are also eligible for FSEL's <strong>IELTS Target 6.0+</strong>  course. Many Vietnamese universities require an IELTS score of <strong>6.0</strong> or higher for admission into undergraduate programs, especially those with degree programs taught in English. An overall bandscore of <strong>6.0</strong> is equivalent to CEFR level <strong>B2</strong>.<br><br>With focus and determination, you can reach level <strong>B2</strong> or <strong>IELTS 6.0</strong>  in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!"
+      },
+      {
+        "Id": "6d93bcda-9b2f-4f8c-8f9c-10a49a1b0ccf",
+        "Language": "fr-FR",
+        "Text": "<strong style=\"font-size: 24px !important;\">Bonjour {0}</strong>,<br><br>Bienvenue chez FSEL et félicitations pour avoir complété le test d'entrée ! Vous êtes actuellement au niveau <strong>B1+</strong>. Nous vous recommandons de commencer par le cours <strong>B2</strong>. En Vietnam, un <strong>B1</strong> est suffisant pour l'obtention du diplôme, mais un <strong>B2</strong> est souvent requis pour certains programmes.<br><br>Vous pouvez également rejoindre le cours <strong>IELTS Target 6.0+</strong> . De nombreuses universités demandent un score de <strong>6.0+</strong> pour les programmes en anglais.<br><br>Avec concentration, vous pouvez atteindre <strong>B2</strong> ou <strong>IELTS 6.0</strong>  en 6 à 9 mois sur FSEL. Cliquez ci-dessous pour commencer dès aujourd'hui !"
+      }
+    ]
+  },
+  {
+    "Id": "f4565ef4-1626-46eb-8f39-6fbbd22b5bc4",
+    "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B2</strong>, so we recommend that you continue your learning journey with the level <strong>C1</strong> course. Vietnamese university students majoring in English must achieve level <strong>C1</strong> to be eligible for university graduation.<br><br>Alternatively, at your current age and level, you are also eligible for FSEL's <strong>IELTS Target 7.0+</strong> course. While a <strong>7.0</strong> IELTS score exceeds the minimum requirements for most undergraduate programs in Vietnam, achieving this level of proficiency can enhance a student's competitiveness for admission into top-tier universities and specialized programs. Additionally, higher IELTS scores may qualify students for scholarships and advanced standing in certain courses. An overall bandscore of <strong>7.0</strong> is equivalent to CEFR level <strong>C1</strong>.<br><br>With focus and determination, you can reach level <strong>C1</strong> or <strong>IELTS 7.0</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!",
+    "SuggestedLevel": "C1",
+    "AgeStart": 14,
+    "AgeEnd": null,
+    "Translations": [
+      {
+        "Id": "6933d349-1afa-43b2-957e-0bc7b86f5da4",
+        "Language": "vi-VN",
+        "Text": "<strong style=\"font-size: 24px !important;\">Chào {0}</strong>,<br><br>Chào mừng đến với FSEL và chúc mừng bạn đã hoàn thành bài kiểm tra đầu vào! Dựa trên kết quả, hiện tại bạn đang ở trình độ <strong>B2</strong>. Vì thế, chúng tôi gợi ý bạn bắt đầu với khóa học <strong>C1</strong>. Thông thường, sinh viên đại học chuyên ngành tiếng Anh tại Việt Nam phải đạt trình độ <strong>C1</strong> để đủ điều kiện tốt nghiệp.<br><br>Ngoài ra, với độ tuổi và trình độ hiện tại, bạn cũng đủ điều kiện tham gia khóa học <strong>IELTS Target 7.0+</strong> của FSEL. Mặc dù điểm <strong>IELTS 7.0</strong> vượt qua yêu cầu tối thiểu của hầu hết các chương trình đại học tại Việt Nam, đạt được trình độ này sẽ giúp sinh viên tăng khả năng cạnh tranh khi xét tuyển vào các trường đại học hàng đầu và các chương trình chuyên ngành. Bên cạnh đó, điểm IELTS cao còn có thể giúp sinh viên đủ điều kiện nhận học bổng cho một số chương trình học. Điểm <strong>IELTS 7.0</strong> tương đương trình độ <strong>C1</strong> theo CEFR.<br><br>Chỉ cần tập trung và quyết tâm, bạn có thể đạt trình độ <strong>C1</strong> hoặc <strong>IELTS 7.0</strong> trong vòng 6 đến 9 tháng học đều đặn trên nền tảng FSEL. Nhấn vào nút bên dưới để chọn khóa học và bắt đầu học ngay hôm nay nhé!"
+      },
+      {
+        "Id": "bd8b4926-ac01-42a8-9f9d-9cea7d7d14e0",
+        "Language": "en-US",
+        "Text": "<strong style=\"font-size: 24px !important;\">Hi {0}</strong>,<br><br>Welcome to FSEL and congratulations on completing your placement test! Based on your results, you are currently at level <strong>B2</strong>, so we recommend that you continue your learning journey with the level <strong>C1</strong> course. Vietnamese university students majoring in English must achieve level <strong>C1</strong> to be eligible for university graduation.<br><br>Alternatively, at your current age and level, you are also eligible for FSEL's <strong>IELTS Target 7.0+</strong> course. While a <strong>7.0 IELTS</strong> score exceeds the minimum requirements for most undergraduate programs in Vietnam, achieving this level of proficiency can enhance a student's competitiveness for admission into top-tier universities and specialized programs. Additionally, higher IELTS scores may qualify students for scholarships and advanced standing in certain courses. An overall bandscore of <strong>7.0</strong> is equivalent to CEFR level <strong>C1</strong>.<br><br>With focus and determination, you can reach level <strong>C1</strong> or <strong>IELTS 7.0</strong> in just 6 to 9 months of regular study on the FSEL platform - just click the button below to select your course and start learning with FSEL today!"
+      },
+      {
+        "Id": "81670fdc-673f-44df-bab8-1edcf2ac61ae",
+        "Language": "fr-FR",
+        "Text": "<strong style=\"font-size: 24px !important;\">Bonjour {0}</strong>,<br><br>Bienvenue chez FSEL et félicitations pour avoir complété le test d'entrée ! Vous êtes actuellement au niveau <strong>B2</strong>. Nous vous recommandons de commencer par le cours <strong>C1</strong>. En Vietnam, les étudiants en anglais doivent souvent atteindre le niveau <strong>C1</strong> pour obtenir leur diplôme.<br><br>Vous êtes également éligible pour le cours <strong>IELTS Target 7.0+</strong>. Un score de <strong>7.0</strong> est souvent requis pour les meilleures universités et programmes spécialisés.<br><br>Avec détermination, vous pouvez atteindre <strong>C1</strong> ou <strong>IELTS 7.0</strong> en 6 à 9 mois sur FSEL. Cliquez ci-dessous pour commencer dès aujourd'hui !"
+      }
+    ]
+  }
+]

@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class GetActiveCourseQuery : IRequest<MethodResult<IList<Guid>>>
     {
@@ -43,7 +44,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 return methodResult;
             }
 
-            var result = _courseResultRepository.Queryable.Where(x => request.StudentIds.Contains(x.StudentId) && x.WorkingStatus == EnumWorkingStatus.Active).Select(x => x.Id).ToList();
+            var result = await _courseResultRepository.Queryable
+                                                      .WhereBulkContains(request.StudentIds, x => x.StudentId)
+                                                      .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                                                      .Select(x => x.Id)
+                                                      .ToListAsync(cancellationToken);
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

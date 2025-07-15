@@ -12,6 +12,8 @@ namespace Fsel.Interaction.Domain.Enums.ErrorCodes
         /// <summary>
         /// Contains Forbidden Keywords
         /// </summary>
-        ContainsForbiddenKeywords
+        ContainsForbiddenKeywords,
+
+        ContentNotNull
     }
 }

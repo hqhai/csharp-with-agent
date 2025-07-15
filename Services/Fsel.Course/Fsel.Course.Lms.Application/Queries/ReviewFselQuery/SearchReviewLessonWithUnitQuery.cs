@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                     Id = group.Key.Id,
                     Code = group.Key.Code,
                     CreatedDate = group.Key.CreatedDate,
-                    Stars = group.Average(x => x.Stars),
+                    Stars = group.Any() ? group.Average(x => x.Stars) : default,
                     TeacherIds = group.Select(x => x.TeacherId).Distinct().ToList()
                 });
 

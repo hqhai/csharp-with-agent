@@ -8,8 +8,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Shared.Helpers;
     using MassTransit.Initializers;
@@ -49,12 +51,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> result = new MethodResult<bool>();
 
-
             var lessonId = await _lessonRepository.Queryable.FirstOrDefaultAsync(x => x.Name == request.LessonName, cancellationToken).Select(x => x.Id);
 
-
             var lessonResultId = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonId && x.CreatedUserId == request.UserId, cancellationToken).Select(x => x.Id);
-
 
             var classForumResultNeedUpdate = await _classForumResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResultId, cancellationToken);
 
@@ -65,8 +64,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
 
             var classForumNeedUpdate = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumResultNeedUpdate!.ClassForumId, cancellationToken);
-
-
 
             var userAiConfig = classForumNeedUpdate!.UserAlConfig?.Replace("{0}", classForumResultNeedUpdate.WordContent, StringComparison.CurrentCulture);
             var aIResponse = await _mediator.Send(new SubmitAICommand
@@ -81,27 +78,21 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 UserAIConfig = userAiConfig,
             }, cancellationToken).ConfigureAwait(false);
 
-
             var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse));
 
             await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
             {
                 var classForumDetailResult = await _classForumDetailResultRepository.Queryable.FirstOrDefaultAsync(x => x.ClassForumResultId == classForumResultNeedUpdate.Id, cancellationToken);
-
-
                 if (classForumDetailResult != null)
                 {
                     classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(GetClassForumAIs(classForumAIs)) : default;
-                    _classForumDetailResultRepository.Update(classForumDetailResult, false
-                    , x => x.WordContent, x => x.Content
-                    , x => x.WordCount, x => x.SubmissionCount
-                    , x => x.ProcessDate, x => x.CompletionDate, x => x.Status);
-                    await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.WordContent, c.Content, c.WordCount, c.SubmissionCount, c.ProcessDate, c.CompletionDate, c.Status, c.ClassForumResultId };
+                    });
                 }
-
                 return result;
             });
-
 
             return result;
         }

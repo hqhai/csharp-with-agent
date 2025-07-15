@@ -10,17 +10,10 @@ namespace Fsel.Shared.Helpers
 
     public static class NumberHelper
     {
-        //public static double RoundNumberDouble(double number, bool roundUp = false)
-        //{
-        //    if (roundUp)
-        //    {
-        //        return Math.Ceiling(number * 2) / 2;
-        //    }
-        //    else
-        //    {
-        //        return Math.Floor(number * 2) / 2;
-        //    }
-        //}
+        public static double RoundReduceNumber(double number)
+        {
+            return Math.Floor(number * 2) / 2;
+        }
 
         public static double RoundNumberDouble(double number)
         {
@@ -82,20 +75,20 @@ namespace Fsel.Shared.Helpers
             return convertedValue;
         }
 
-        public static double ConvertPercentDouble(double value)
+        public static double ConvertPercentDouble(double value, int digits = 0)
         {
-            double convertedValue = Math.Round(value * 100, 0, MidpointRounding.AwayFromZero);
+            double convertedValue = Math.Round(value * 100, digits, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 
-        public static double GetPercent(this double correctCount, double correctTotal)
+        public static double GetPercent(this double correctCount, double correctTotal, int digits = 0)
         {
-            return correctTotal > 0 ? ConvertPercentDouble(correctCount / correctTotal) : default;
+            return correctTotal > 0 ? ConvertPercentDouble(correctCount / correctTotal, digits) : default;
         }
 
-        public static double GetPercent(this int correctCount, int correctTotal)
+        public static double GetPercent(this int correctCount, int correctTotal, int digits = 0)
         {
-            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal) : default;
+            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal, digits) : default;
         }
 
         public static long CalculateAverage(ICollection<long> secondsList)

@@ -53,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private readonly ILogger<CreateFinalTestAnswerBySectionGroupCommand> _logger;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
+        private readonly ICourseRepository _courseRepository;
 
         public CreateFinalTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
             ICourseResultRepository courseResultRepository,
@@ -69,7 +70,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             IMapper mapper,
             RankedStudentPublisher rankedStudentPublisher,
             ILogger<CreateFinalTestAnswerBySectionGroupCommand> logger,
-            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
+            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
+            ICourseRepository courseRepository)
         {
             _questionRepository = questionRepository;
             _courseResultRepository = courseResultRepository;
@@ -87,6 +89,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             _logger = logger;
             _rankedStudentPublisher = rankedStudentPublisher;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
+            _courseRepository = courseRepository;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateFinalTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -111,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             }
             else
             {
-                var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
                 if (!studentResult.IsSuccessStatusCode)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -157,6 +160,12 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(sectionGroupResult.Status));
                 return methodResult;
             }
+            var course = await _courseRepository.GetByIdAsync(finalTestResult.CourseId);
+            if (course == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
+                return methodResult;
+            }
 
             #endregion Validate
 
@@ -184,7 +193,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 return methodResult;
             });
 
-            await UpdateFinalTestResultAsync(finalTestResult, student, cancellationToken);
+            await UpdateFinalTestResultAsync(finalTestResult, student, course.CourseType, cancellationToken);
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = finalTestResult.Status == EnumResultStatus.Done;
 
@@ -198,13 +207,13 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             return methodResult;
         }
 
-        private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, StudentModel student, CancellationToken cancellationToken)
+        private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, StudentModel student, EnumCourseType courseType, CancellationToken cancellationToken)
         {
             var numberOfDone = 3;
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.FinalTestResultId == finalTestResult.Id).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                finalTestResult = await SetFinalTestResultAsync(sectionGroupResults, finalTestResult);
+                finalTestResult = await SetFinalTestResultAsync(sectionGroupResults, finalTestResult, courseType);
                 var token = finalTestResult.TokenFirstTime ?? default;
                 if (token > 0)
                 {
@@ -224,18 +233,21 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
                 }
 
-                _finalTestResultRepository.Update(finalTestResult);
+                await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult> { finalTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId };
+                });
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private async Task<long> GetTokenConfig()
+        private async Task<long> GetTokenConfig(EnumCourseType courseType)
         {
             var getTokenQuery = new GetTokenQueryModel
             {
                 Feature = EnumTokenFeature.Test,
                 Mission = EnumTokenMission.FinalTest,
-                CourseType = EnumCourseType.Academic
+                CourseType = courseType
             };
             var tokenConfigResults = await _systemService.GetTokenConfigAsync(getTokenQuery);
             if (!tokenConfigResults.IsSuccessStatusCode)
@@ -246,10 +258,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
         }
 
-        private async Task<FinalTestResult> SetFinalTestResultAsync(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult)
+        private async Task<FinalTestResult> SetFinalTestResultAsync(IList<SectionGroupResult> sectionGroupResults, FinalTestResult finalTestResult, EnumCourseType courseType)
         {
             var skillScores = sectionGroupResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
-            var token = await GetTokenConfig();
+            var token = await GetTokenConfig(courseType);
 
             finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
             finalTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
@@ -279,18 +291,23 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 return methodResult;
             }
             var (createFinalTestAnswers, updateFinalTestAnswers) = anwserResult.Result;
-            if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
-            {
-                await _finalTestAnswerRepository.AddList(createFinalTestAnswers);
-            }
-            if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
-            {
-                _finalTestAnswerRepository.UpdateList(updateFinalTestAnswers);
-            }
 
             try
             {
-                await _finalTestAnswerRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
+                {
+                    await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionQuestionId, entity.FinalTestResultId, entity.SectionGroupResultId, entity.IsDeleted };
+                    });
+                }
+                if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
+                {
+                    await _finalTestAnswerRepository.BulkUpdateList(updateFinalTestAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.FinalTestResultId, entity.SectionGroupResultId, entity.SectionQuestionId };
+                    });
+                }
             }
             catch (Exception ex)
             {
@@ -340,6 +357,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     finalTestAnswer.CorrectCount = correctCount;
                     finalTestAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
                     finalTestAnswer.Status = questionItem.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
+                    if (!finalTestAnswer.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(finalTestAnswer.ErrorMessages);
+                        return methodResult;
+                    }
                 }
             }
             methodResult.Result = (createFinalTestAnswers, updateFinalTestAnswers);

@@ -11,5 +11,7 @@ namespace Fsel.Ordering.Infrastructure.Repositories
         public VoucherRepository(OrderingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
+
+        public override IQueryable<Voucher> Queryable => _dbSet.AsQueryable();
     }
 }

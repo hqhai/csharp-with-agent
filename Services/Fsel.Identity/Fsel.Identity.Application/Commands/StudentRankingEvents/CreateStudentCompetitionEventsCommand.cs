@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateStudentCompetitionEventsCommand : IRequest<MethodResult<IList<StudentCompetitionEventsModel>>>
     {
@@ -24,6 +25,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
+
         public CreateStudentCompetitionEventsCommandHandler(IMapper mapper, IStudentCompetitionEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository, ICompetitionEventsRepository competitionEventsRepository)
         {
             _mapper = mapper;
@@ -36,44 +38,35 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<StudentCompetitionEventsModel>> methodResult = new MethodResult<IList<StudentCompetitionEventsModel>>();
+            request.Emails = request.Emails ?? new List<string>();
 
-            var studentResultIds = _studentRepository.Queryable.Where(x => x.Human != null && x.Human!.Email != null && request.Emails!.Contains(x.Human.Email)).Select(x => x.Id).ToList();
+            var studentResultIds = await _studentRepository.Queryable.Where(x => x.Human != null && x.Human!.Email != null && request.Emails!.Contains(x.Human.Email)).Select(x => x.Id).ToListAsync(cancellationToken);
+            var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
 
-            var competitionEvents = _competitionEventsRepository.Queryable.FirstOrDefault(x => x.EventCode == request.EventCode);
-
-            if (competitionEvents == null)
+            if (competitionEvent == null)
             {
-                methodResult.AddError(nameof(EnumSystemErrorCode.DataNotExist), nameof(competitionEvents));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.EventCode), request.EventCode);
                 return methodResult;
             }
 
             IList<StudentCompetitionEvent> studentRankingEvents = new List<StudentCompetitionEvent>();
-
             studentResultIds.ForEach(item =>
             {
                 StudentCompetitionEvent studentRankingEvent = new StudentCompetitionEvent
                 {
                     StudentId = item,
-                    CompetitionEventId = competitionEvents.Id
+                    CompetitionEventId = competitionEvent.Id
                 };
                 studentRankingEvents.Add(studentRankingEvent);
             });
 
-
-            await _studentCompetitionEventsRepository.ExecuteTransactionAsync(async () =>
+            await _studentCompetitionEventsRepository.BulkMergeAsync(studentRankingEvents, bulk =>
             {
-                await _studentCompetitionEventsRepository.AddList(studentRankingEvents);
-                await _studentCompetitionEventsRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
-
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<List<StudentCompetitionEventsModel>>(studentRankingEvents);
-                return methodResult;
+                bulk.ColumnPrimaryKeyExpression = entity => new { entity.CompetitionEventId, entity.StudentId };
             });
-
-
+            methodResult.StatusCode = StatusCodes.Status201Created;
+            methodResult.Result = _mapper.Map<List<StudentCompetitionEventsModel>>(studentRankingEvents);
             return methodResult;
         }
-
-
     }
 }

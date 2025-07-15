@@ -15,14 +15,18 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     {
         public Guid? Id { get; set; }
     }
+
     public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, MethodResult<HumanModel>>
     {
         private readonly IHumanRepository _humanRepository;
         private readonly IMapper _mapper;
-        public GetUserByIdQueryHandler(IHumanRepository humanRepository, IMapper mapper)
+        private readonly IStudentRepository _studentRepository;
+
+        public GetUserByIdQueryHandler(IHumanRepository humanRepository, IMapper mapper, IStudentRepository studentRepository)
         {
             _humanRepository = humanRepository;
             _mapper = mapper;
+            _studentRepository = studentRepository;
         }
 
         public async Task<MethodResult<HumanModel>> Handle(GetUserByIdQuery request, CancellationToken cancellationToken)
@@ -35,7 +39,15 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 return methodResult;
             }
-            methodResult.Result = _mapper.Map<HumanModel>(human);
+
+            var result = _mapper.Map<HumanModel>(human);
+
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(p => p.HumanId == human.Id, cancellationToken);
+            if (student != null)
+            {
+                result.CourseId = student.CourseId;
+            }
+            methodResult.Result = result;
             return methodResult;
         }
     }

@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                 {
                     unfinishedPT.Add(student);
                 }
-                else
+                else if (isLock && request.IsDonePT)
                 {
                     completePT.Add(student);
                 }
@@ -144,7 +144,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                     Email = student.Human?.Email,
                     School = student.School,
                     Code = student.Human?.Code,
-                    PhoneNumber = student.Human?.PhoneNumber
+                    PhoneNumber = student.Human?.PhoneNumber,
+                    UserName = student.Human?.User?.UserName
                 };
 
                 var @params = ObjectHelper.GetDictionary(studentInfo);

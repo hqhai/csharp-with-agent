@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class StudentSettingModel
     {
+        public Guid StudentId { get; set; }
         public bool IsPlacementTest { get; set; }
         public Guid? ClassId { get; set; }
         public EnumCourseLevel? Level { get; set; }
@@ -22,5 +23,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
         public double NumberOfToken { get; set; }
         public CourseModel? Course { get; set; }
+        public bool IsSurveyEvent { get; set; }
+        public bool EmailConfirmed { get; set; }
+        public bool IsActivedAccount { get; set; } = true;
+        public bool TurnOnTouchpoint { get; set; }
+        public EnumUserStatus? UserStatus { get; set; }
     }
 }

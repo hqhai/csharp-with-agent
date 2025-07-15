@@ -32,20 +32,30 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
         private readonly IUserService _userService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public SaveFeatureAccessTimeCommandHandler(IMapper mapper, IFeatureAccessTimeRepository featureAccessTimeRepository, AuthContext authContext, IMediator mediator, IUserService userService)
+
+        public SaveFeatureAccessTimeCommandHandler(IMapper mapper, IFeatureAccessTimeRepository featureAccessTimeRepository, AuthContext authContext, IMediator mediator, IUserService userService, IHttpContextAccessor httpContextAccessor)
         {
             _mapper = mapper;
             _featureAccessTimeRepository = featureAccessTimeRepository;
             _authContext = authContext;
             _mediator = mediator;
             _userService = userService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<MethodResult<FeatureAccessTimeModel>> Handle(SaveFeatureAccessTimeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FeatureAccessTimeModel> methodResult = new MethodResult<FeatureAccessTimeModel>();
+
+            var headers = _httpContextAccessor.HttpContext?.Request?.Headers;
+            if (headers != null && headers.ContainsKey("User-Agent"))
+            {
+                var headerValue = headers["User-Agent"].ToString();
+            }
+
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
@@ -94,7 +104,6 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
 
                 foreach (var (time, seconds) in accessTimes)
                 {
-
                     if (featureAccessTimeCheck == null || !IsSameRangeHour(featureAccessTimeCheck))
                     {
                         AddNewFeatureAccessTime(request, seconds, time);
@@ -120,7 +129,7 @@ namespace Fsel.System.Application.Commands.FeatureAccessTimeCmd
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 //methodResult.Result = _mapper.Map<FeatureAccessTimeModel>(featureAccessTime);
 
-                if ((request.Type == EnumFeature.VideoLesson.ToString() || request.Type == EnumFeature.HomeWork.ToString() || request.Type == EnumFeature.MockTest.ToString() || request.Type == EnumFeature.FinalTest.ToString()) && request.AccessTime.HasValue)
+                if ((request.Type == EnumFeature.VideoLesson.ToString() || request.Type == EnumFeature.HomeWork.ToString() || request.Type == EnumFeature.MockTest.ToString() || request.Type == EnumFeature.FinalTest.ToString() || request.Type == EnumFeature.ClassForum.ToString() || request.Type == EnumFeature.ChatBot.ToString()) && request.AccessTime.HasValue)
                 {
                     int minute = DateTimeHelper.ConvertSecondsToMinutes(request.AccessTime.Value);
                     await DoQuestBoard(student!.Id, EnumQuestBoardCategory.ExploreTheLearningGalaxy, minute, cancellationToken);

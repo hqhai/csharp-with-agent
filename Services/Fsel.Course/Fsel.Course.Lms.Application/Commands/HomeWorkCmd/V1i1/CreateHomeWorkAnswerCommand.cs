@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -54,7 +53,23 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
 
-        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository, ICourseResultRepository courseResultRepository, QuestionConverter questionConverter, IHomeWorkAnswerRepository homeWorkAnswerRepository, IHomeWorkRepository homeWorkRepository, IMediator mediator, IUserService userService, AuthContext authContext, ICourseRepository courseRepository, ILessonResultRepository lessonResultRepository, ISystemService systemService, FinishOneHomeWorkPublisher finishOneHomeWorkPublisher, IQuestionRepository questionRepository, CreateTokenHistoryPublisher createTokenHistoryPublisher, ILogger<CreateHomeWorkAnswerCommand> logger, QuestBoardPublisher questionBoardPublisher, RankedStudentPublisher rankedStudentPublisher)
+        public CreateHomeWorkAnswerCommandHandler(IHomeWorkResultRepository homeWorkResultRepository,
+            ICourseResultRepository courseResultRepository,
+            QuestionConverter questionConverter,
+            IHomeWorkAnswerRepository homeWorkAnswerRepository,
+            IHomeWorkRepository homeWorkRepository,
+            IMediator mediator,
+            IUserService userService,
+            AuthContext authContext,
+            ICourseRepository courseRepository,
+            ILessonResultRepository lessonResultRepository,
+            ISystemService systemService,
+            FinishOneHomeWorkPublisher finishOneHomeWorkPublisher,
+            IQuestionRepository questionRepository,
+            CreateTokenHistoryPublisher createTokenHistoryPublisher,
+            ILogger<CreateHomeWorkAnswerCommand> logger,
+            QuestBoardPublisher questionBoardPublisher,
+            RankedStudentPublisher rankedStudentPublisher)
         {
             _homeWorkResultRepository = homeWorkResultRepository;
             _courseResultRepository = courseResultRepository;
@@ -93,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 return methodResult;
             }
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -160,30 +175,48 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 if (homeWorkAnswer == null)
                 {
                     homeWorkAnswer = new HomeWorkAnswer { HomeWorkQuestionId = homeWorkQuestion.Id, HomeWorkResultId = homeWorkResult.Id };
-                    createHomeWorkAnswers.Add(GetHomeWorkAnswer(homeWorkAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal));
+                    homeWorkAnswer = GetHomeWorkAnswer(homeWorkAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal);
+                    if (!homeWorkAnswer.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(homeWorkAnswer.ErrorMessages);
+                        return methodResult;
+                    }
+                    createHomeWorkAnswers.Add(homeWorkAnswer);
                 }
                 else if (homeWorkAnswer.Status != EnumAnswerStatus.Done)
                 {
-                    updateHomeWorkAnswers.Add(GetHomeWorkAnswer(homeWorkAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal));
+                    homeWorkAnswer = GetHomeWorkAnswer(homeWorkAnswer, answerConfig, isAnswered, correctCount, questionItem.CorrectTotal);
+                    if (!homeWorkAnswer.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(homeWorkAnswer.ErrorMessages);
+                        return methodResult;
+                    }
+
+                    updateHomeWorkAnswers.Add(homeWorkAnswer);
                 }
             }
-            if (createHomeWorkAnswers.Any())
-            {
-                await _homeWorkAnswerRepository.AddList(createHomeWorkAnswers);
-            }
-            if (updateHomeWorkAnswers.Any())
-            {
-                _homeWorkAnswerRepository.UpdateList(updateHomeWorkAnswers);
-            }
+
             try
             {
-                await _homeWorkAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                if (createHomeWorkAnswers.Any())
+                {
+                    await _homeWorkAnswerRepository.BulkMergeAsync(createHomeWorkAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId, entity.IsDeleted };
+                    });
+                }
+                if (updateHomeWorkAnswers.Any())
+                {
+                    await _homeWorkAnswerRepository.BulkUpdateList(updateHomeWorkAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
+                    });
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogWarning($"Log Duplicate HomeWorkAnswer : {ex.Message}");
             }
-
             methodResult.Result = true;
             return methodResult;
         }
@@ -204,12 +237,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             return tokenConfig.GetTokenConfig<TokenCoinConfigs>()?.BaseValue ?? default;
         }
 
-        private static HomeWorkAnswer GetHomeWorkAnswer(HomeWorkAnswer homeWorkAnswer, object? answerConfig, bool isAnswered, int correctCount, int correctCTotal)
+        private static HomeWorkAnswer GetHomeWorkAnswer(HomeWorkAnswer homeWorkAnswer, object? answerConfig, bool isAnswered, short correctCount, int correctTotal)
         {
             homeWorkAnswer.Status = EnumAnswerStatus.Process;
             homeWorkAnswer.Answer = answerConfig;
             homeWorkAnswer.CorrectCount = correctCount;
-            homeWorkAnswer.IsCorrect = isAnswered ? correctCount == correctCTotal : null;
+            homeWorkAnswer.IsCorrect = isAnswered ? correctCount == correctTotal : null;
             return homeWorkAnswer;
         }
 
@@ -285,9 +318,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
             }
-            _homeWorkResultRepository.Update(homeWorkResult);
+
+            await _homeWorkResultRepository.BulkUpdateList(new List<HomeWorkResult> { homeWorkResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId };
+            });
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken);
+
+            await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken).ConfigureAwait(false);
             methodResult.Result = true;
             return methodResult;
         }
@@ -395,6 +433,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
+            var homeWorkIds = questions.SelectMany(x => x.HomeWorkQuestions).Select(x => x.HomeWorkId).Distinct().ToList();
+            if (!homeWorkIds.Any(x => x == homeWork.Id))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(questions), nameof(homeWork));
+                return methodResult;
+            }
+
             methodResult.Result = (questions, homeWorkResult);
             return methodResult;
         }
@@ -411,8 +456,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     x.Status = (x.CorrectCount == correctTotal || isDone) ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
                     x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == correctTotal : null;
                 });
-                _homeWorkAnswerRepository.UpdateList(homeWorkAnswers);
-                await _homeWorkAnswerRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+                await _homeWorkAnswerRepository.BulkUpdateList(homeWorkAnswers, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
+                });
                 return homeWorkAnswers.Where(x => x.Status == EnumAnswerStatus.Done).Sum(x => x.CorrectCount);
             }
             return homeWorkAnswers?.Sum(x => x.CorrectCount) ?? default;
