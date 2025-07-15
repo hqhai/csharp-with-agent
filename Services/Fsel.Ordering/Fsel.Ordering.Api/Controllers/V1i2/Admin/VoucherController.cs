@@ -2,24 +2,22 @@
 
 namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Queries.VoucherQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Ordering.Application.Commands.VoucherCmds;
-    using Fsel.Common.Attributes;
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/admin/voucher")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class VoucherController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -601,5 +601,113 @@
     "status": true,
     "permissionGroupId": "6f12e0d0-774c-4868-a062-e94b0b6ecf2d",
     "createdDate": "2025-04-09"
+  },
+  {
+    "id": "79e900b5-cb1a-49bb-a8ad-33925b97e095",
+    "claimValue": "SchoolStudentManagement.View",
+    "name": "Xem và tìm kiếm danh sách, thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "ce8b975b-6f31-454e-b21f-18a35061e266",
+    "claimValue": "SchoolStudentManagement.Add",
+    "name": "Thêm mới học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "1e938573-3317-449a-b322-76225eb87039",
+    "claimValue": "SchoolStudentManagement.Update",
+    "name": "Chỉnh sửa thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "90897566-3edf-4aae-969a-9acb31c80c0b",
+    "claimValue": "SchoolStudentManagement.Delete",
+    "name": "Xóa học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "6df0f361-0d99-4a38-b5be-706225b7f22b",
+    "claimValue": "ReportManagementByAdminSchool.ViewPTResultsReport",
+    "name": "Xem báo cáo kết quả đánh giá đầu vào",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "a092a54c-1306-4600-af02-8cae97875977",
+    "claimValue": "ReportManagementByAdminSchool.ViewLearningProgressReport",
+    "name": "Xem báo cáo tiến độ học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "27b1c0ae-d63a-4553-a130-e008183940c7",
+    "claimValue": "ReportManagementByAdminSchool.ViewLearningResultsReport",
+    "name": "Xem báo cáo kết quả học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "09748430-9ce7-4f22-a777-2516fc98d16c",
+    "claimValue": "ReportManagementByAdminSchool.ViewAttendanceReport",
+    "name": "Xem báo cáo chuyên cần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "e5e6f8f3-aaa3-480f-bd6e-f005aec41167",
+    "claimValue": "DashboardManagementByAdminSchool.ViewPTResultsReport",
+    "name": "Xem báo cáo kết quả đánh giá đầu vào",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "18f69e03-68d9-4be2-8d86-126f3fd87022",
+    "claimValue": "DashboardManagementByAdminSchool.ViewLearningProgressReport",
+    "name": "Xem báo cáo tiến độ học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "1aacc9b4-8abb-4e18-9583-acaab2a302aa",
+    "claimValue": "DashboardManagementByAdminSchool.ViewLearningResultsReport",
+    "name": "Xem báo cáo kết quả học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "29799ab5-71de-444e-b68e-9c00f9160346",
+    "claimValue": "DashboardManagementByAdminSchool.ViewAttendanceReport",
+    "name": "Xem báo cáo chuyên cần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
   }
 ]

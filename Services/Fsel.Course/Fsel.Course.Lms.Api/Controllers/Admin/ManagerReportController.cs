@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
@@ -11,14 +12,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Lms.Application.Queries.ManagerReportQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/manager-report/admin")]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     [ApiController]
     public class ManagerReportController : BaseController
     {
@@ -35,6 +34,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("search-report-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<SearchReportLearningProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewLearningProgressReport)]
         public async Task<IActionResult> Get([FromQuery] SearchReportLearningProgressQuery query)
         {
             SetQuery(query);
@@ -48,6 +48,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("search-report-learning-result")]
         [ProducesResponseType(typeof(MethodResult<SearchReportLearningResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewLearningResultsReport)]
         public async Task<IActionResult> Get([FromQuery] SearchReportLearningResultQuery query)
         {
             SetQuery(query);
@@ -61,6 +62,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("search-report-placement-test")]
         [ProducesResponseType(typeof(MethodResult<SearchReportPlacementTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewPTResultsReport)]
         public async Task<IActionResult> Get([FromQuery] SearchReportPlacementTestQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -73,6 +75,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("export-report-placement-test")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewPTResultsReport)]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportPlacementTestCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -89,6 +92,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("export-report-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewLearningProgressReport)]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportLearningProgressCommand command)
         {
             SetQuery(command);
@@ -106,6 +110,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("export-report-learning-result")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewLearningResultsReport)]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportLearningResultCommand command)
         {
             SetQuery(command);

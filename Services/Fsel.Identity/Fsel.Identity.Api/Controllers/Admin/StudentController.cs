@@ -139,8 +139,8 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("management")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(SchoolStudentManagement.View)]
         [EncryptResponse]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsQuery query)
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
