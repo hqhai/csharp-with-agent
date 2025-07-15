@@ -8,11 +8,11 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace Fsel.Realtime.Application.Queues.Consumers
 {
-    public class ExamPracticeAISpeakingConsumer : BaseConsumer<SubmitAiSpeakingResponseModel>
+    public class MockTestAISpeakingConsumer : BaseConsumer<SubmitAiSpeakingResponseModel>
     {
         private readonly IHubContext<MockTestSpeakingHub> _aISpeakingHub;
 
-        public ExamPracticeAISpeakingConsumer(IHubContext<MockTestSpeakingHub> aISpeakingHub, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        public MockTestAISpeakingConsumer(IHubContext<MockTestSpeakingHub> aISpeakingHub, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _aISpeakingHub = aISpeakingHub;
         }
@@ -21,7 +21,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (message != null)
             {
-                var mockTestResultId = message?.MockTestResultId.ToString();
+                var mockTestResultId = message.MockTestResultId.ToString();
                 await _aISpeakingHub.GetGroup(mockTestResultId!).SendAsync(RealtimeSettings.MockTestSpeakingAIFeedBackHub.Methods.MockTestSpeakingAIFeedBack, message);
             }
         }

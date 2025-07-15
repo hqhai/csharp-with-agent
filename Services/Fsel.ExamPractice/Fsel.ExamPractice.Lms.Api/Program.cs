@@ -65,7 +65,7 @@ queues: new Dictionary<string, Type>
 {
        { QueueSettings.RealtimeQueue.NameQueue.GetTimeExamPractice, typeof(GetTimeExamPracticeConsumer) },
        { QueueSettings.ExamPracticeQueue.NameQueue.ExamPracticeAnwserResponse, typeof(AiFeedBackResponseConsumer) },
-       { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
+       { QueueSettings.ExamPracticeQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
        { QueueSettings.ExamPracticeQueue.NameQueue.SetTimeExamPractice, typeof(SetTimeExamPracticeConsumer) },
 });
 var app = builder.Build();
