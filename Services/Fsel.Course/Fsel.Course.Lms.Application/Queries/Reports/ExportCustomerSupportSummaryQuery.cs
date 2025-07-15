@@ -154,17 +154,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         private async Task<Dictionary<Guid, SearchOrderModel?>> GetLatestOrdersByUserAsync()
         {
             var orderResults = await _orderService.GetOrderRevenuesAsync();
-            var listEmail = new List<string>
-            {
-                "G180@g.com",
-                "TestPT11@gmail.com",
-                "TestPT10@gmail.com",
-                "huyentrung1975hs11@gmail.com",
-                "kexoco3138@hosintoy.com"
-            };
-
             return (orderResults.Content?.Result?.Items ?? new List<SearchOrderModel>())
-                    .Where(x => listEmail.Contains(x.Email))
                     .GroupBy(x => x.UserId)
                     .Select(x => new { UserId = x.Key, Order = x.OrderByDescending(x => x.ExpiredDate).FirstOrDefault() })
                     .ToDictionary(x => x.UserId, x => x.Order);
