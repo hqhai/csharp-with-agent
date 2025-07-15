@@ -3,8 +3,8 @@
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
     using System.Collections.Generic;
-    using System.Diagnostics;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
@@ -37,15 +37,18 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var methodResult = new MethodResult<OverallReportLearningProgressModel>();
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
+                Keyword = request.Keyword,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListCourseType = request.ListCourseType,
+                ListCourseLevel = request.ListCourseLevel,
+
                 SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
                 EndDate = request.EndDate,
-                Keyword = request.Keyword,
                 LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
                 CourseLevel = request.CourseLevel,
@@ -64,7 +67,17 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 {
                     CourseLevel = item,
                     TotalStudent = students?.Where(x => x.CourseLevel == item).Count() ?? default
-                }).ToList()
+                }).ToList(),
+                CourseTypeStudents = ConvertHelper.EnumToList<EnumCourseType>()
+                .Select(courseType =>
+                {
+                    var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(courseType).ToHashSet();
+                    return new CourseTypeStudentModel
+                    {
+                        CourseType = courseType,
+                        TotalStudent = students?.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value)).Count() ?? default,
+                    };
+                }).ToList(),
             };
 
             await SetAverageProgress(overallReport, request, students);

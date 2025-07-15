@@ -21,18 +21,18 @@ namespace Fsel.Course.Infrastructure.Configs
                  .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(e => e.SubmissionCount)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumSubmissionCount>());
 
             builder.Property(e => e.Status)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumClassForumResultStatus>());
 
-            builder.HasIndex(c => new { c.ClassForumResultId, c.SubmissionCount }).IsUnique();
+            builder.HasIndex(c => new { c.ClassForumResultId, c.SubmissionCount }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.IsDeleted, c.ClassForumResultId });
             builder.HasIndex(c => new { c.IsDeleted, c.Status, c.ClassForumResultId });
         }

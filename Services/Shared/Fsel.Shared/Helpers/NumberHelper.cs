@@ -88,14 +88,14 @@ namespace Fsel.Shared.Helpers
             return convertedValue;
         }
 
-        public static double GetPercent(this double correctCount, double correctTotal)
+        public static double GetPercent(this double correctCount, double correctTotal, int digits = 0)
         {
-            return correctTotal > 0 ? ConvertPercentDouble(correctCount / correctTotal) : default;
+            return correctTotal > 0 ? ConvertPercentDouble(correctCount / correctTotal, digits) : default;
         }
 
-        public static double GetPercent(this int correctCount, int correctTotal)
+        public static double GetPercent(this int correctCount, int correctTotal, int digits = 0)
         {
-            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal) : default;
+            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal, digits) : default;
         }
 
         public static double GetScore(this int correctCount, int correctTotal)

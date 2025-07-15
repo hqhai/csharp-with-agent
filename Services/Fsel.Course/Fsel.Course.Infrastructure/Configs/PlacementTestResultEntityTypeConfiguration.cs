@@ -15,14 +15,14 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Level)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumPlacementTestLevel>());
 
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Status)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
@@ -37,7 +37,7 @@ namespace Fsel.Course.Infrastructure.Configs
                   .HasForeignKey(b => b.PlacementTestGroupResultId)
                   .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(c => new { c.PlacementTestId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.PlacementTestId, c.StudentId }).IsUnique().HasFilter("PlacementTestId IS NOT NULL AND [IsDeleted] = 0");
             builder.HasIndex(c => new { c.Status, c.StudentId });
             builder.HasIndex(c => new { c.Level, c.StudentId });
             builder.HasIndex(c => new { c.StudentId });

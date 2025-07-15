@@ -6,9 +6,6 @@ namespace Fsel.Course.Domain.Entities
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
@@ -28,6 +25,7 @@ namespace Fsel.Course.Domain.Entities
         public string? FeedBackNote { get; set; }
 
         public string? FeedBackPositivesStr { get; set; }
+
         [NotMapped]
         public IList<EnumFeedBackPositive>? FeedBackPositives
         {

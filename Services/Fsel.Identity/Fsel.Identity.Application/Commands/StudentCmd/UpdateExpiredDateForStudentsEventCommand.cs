@@ -25,12 +25,19 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-
+            if (request.StudentIds == null || !request.StudentIds.Any())
+            {
+                methodResult.Result = true;
+                return methodResult;
+            }
             var students = await _studentRepository.Queryable.WhereBulkContains(request.StudentIds, n => n.Id).ToListAsync(cancellationToken);
 
             students.ForEach(p => p.ExpiredDate = request.ExpiredDate);
 
-            await _studentRepository.BulkMergeAsync(students);
+            await _studentRepository.BulkUpdateList(students, bulk =>
+            {
+                bulk.ColumnInputExpression = entity => new { entity.ExpiredDate };
+            });
 
             methodResult.Result = true;
             return methodResult;

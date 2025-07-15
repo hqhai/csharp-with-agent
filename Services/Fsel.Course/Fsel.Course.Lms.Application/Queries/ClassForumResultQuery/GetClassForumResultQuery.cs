@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -92,8 +93,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     }
                 }
             }
-            classForumResult = _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumId, c.StudentId, c.LessonResultId };
+            });
 
             classForumResult = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumDetailResults)

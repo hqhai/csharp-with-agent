@@ -137,13 +137,12 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                         return true;
                     }
 
-                    var fileInfomation = await UpLoadFileAsync(formFile);
-
                     if (string.IsNullOrEmpty(contentText))
                     {
                         return false;
                     }
 
+                    var fileInfomation = await UpLoadFileAsync(formFile);
                     await PublishTextToSocket(request, contentText, fileInfomation.Result);
                 }
                 catch (Exception ex)
@@ -171,7 +170,8 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
         public async Task<MethodResult<string?>> UpLoadFileAsync(IFormFile formFile)
         {
-            return await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+            var a = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+            return a;
         }
 
         private async Task PublishTextToSocket(SpeechToTextAiConsumerModel message, string? convertContent, string? filePath)

@@ -30,12 +30,12 @@ namespace Fsel.Course.Infrastructure.Configs
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.Property(e => e.Status)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
 
-            builder.HasIndex(c => new { c.CourseId, c.UnitId, c.LessonId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.CourseId, c.UnitId, c.LessonId, c.StudentId }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.CreatedUserId, c.Status, c.UnitId });
             builder.HasIndexIncludeAllProperties(c => new { c.CreatedUserId });
             builder.HasIndex(c => new { c.CourseId, c.StudentId, c.Status });

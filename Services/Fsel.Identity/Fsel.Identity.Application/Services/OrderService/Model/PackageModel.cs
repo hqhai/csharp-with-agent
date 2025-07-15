@@ -7,5 +7,6 @@ namespace Fsel.Identity.Application.Services.OrderService.Model
         public Guid Id { get; set; }
         public string? Code { get; set; }
         public double Price { get; set; }
+        public int MonthNumber { get; set; }
     }
 }
