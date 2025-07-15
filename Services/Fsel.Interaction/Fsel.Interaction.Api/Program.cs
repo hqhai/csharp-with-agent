@@ -8,6 +8,7 @@ using Fsel.Interaction.Application.Services.AIService;
 using Fsel.Interaction.Application.Services.CourseServices;
 using Fsel.Interaction.Application.Services.HarmfulContentService;
 using Fsel.Interaction.Application.Services.NotificationService;
+using Fsel.Interaction.Application.Services.OrderService;
 using Fsel.Interaction.Application.Services.SenderServices;
 using Fsel.Interaction.Application.Services.SystemService;
 using Fsel.Interaction.Application.Services.TrainingServices;
@@ -59,6 +60,7 @@ builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseA
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {

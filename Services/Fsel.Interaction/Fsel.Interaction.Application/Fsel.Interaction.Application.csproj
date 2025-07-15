@@ -9,6 +9,7 @@
   <ItemGroup>
     <Folder Include="Commands\SurveyQuestionCmd\" />
     <Folder Include="Queues\Consumers\" />
+    <Folder Include="Services\OrderService\Models\" />
   </ItemGroup>
 
   <ItemGroup>
