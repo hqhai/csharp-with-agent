@@ -62,8 +62,8 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            var surveyConfigEntities = await _surveyConfigRepository.Queryable.Where(p => p.StartDate <= currentDate && p.EndDate >= currentDate).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
-            var userSurveyAssignments = await _userSurveyAssignmentRepository.Queryable.OrderByDescending(p => p.CreatedDate).Select(p => new UserSurveyAssignmentModel()
+            var surveyConfigEntities = await _surveyConfigRepository.Queryable.Where(p => p.StartDate <= currentDate && p.EndDate >= currentDate && p.Status == EnumSurveyConfigStatus.Active).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
+            var userSurveyAssignments = await _userSurveyAssignmentRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).OrderByDescending(p => p.CreatedDate).Select(p => new UserSurveyAssignmentModel()
             {
                 Id = p.Id,
                 CourseLevel = p.CourseLevel,

@@ -37,6 +37,7 @@ namespace Fsel.Interaction.Infrastructure
             modelBuilder.ApplyConfiguration(new SurveyQuestionTranslationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CustomerSurveyGroupEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SurveyConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserSurveyAssignmentEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 

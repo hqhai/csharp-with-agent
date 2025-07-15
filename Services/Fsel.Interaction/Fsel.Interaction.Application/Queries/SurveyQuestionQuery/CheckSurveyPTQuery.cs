@@ -71,7 +71,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
             }
             else
             {
-                var surveyConfigs = await _surveyConfigRepository.Queryable.Include(p => p.SurveyQuestions).Where(p => p.StartDate <= currentDate && p.EndDate >= currentDate).ToListAsync(cancellationToken);
+                var surveyConfigs = await _surveyConfigRepository.Queryable.Include(p => p.SurveyQuestions).Where(p => p.StartDate <= currentDate && p.EndDate >= currentDate && p.Status == EnumSurveyConfigStatus.Active).ToListAsync(cancellationToken);
 
                 surveyConfigs = surveyConfigs.Where(p => p.ApplicableSubjects != null && p.ApplicableSubjects.Any(x => x.CourseLevel == request.CourseLevel)).ToList();
 
