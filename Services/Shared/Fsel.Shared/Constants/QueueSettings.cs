@@ -137,6 +137,7 @@ namespace Fsel.Shared.Constants
                 public const string ErrorExplainGgSheet = $"{KeyQueue}_ErrorEplainGgSheet";
                 public const string ExportExcelSchoolLearningProcess = $"{KeyQueue}_ExportExcelSchoolLearningProcess";
                 public const string SpeechToTextPendingAi = $"{KeyQueue}_SpeechToTextPendingAi";
+                public const string PushNotice = $"{KeyQueue}_PushNotice";
             }
         }
 

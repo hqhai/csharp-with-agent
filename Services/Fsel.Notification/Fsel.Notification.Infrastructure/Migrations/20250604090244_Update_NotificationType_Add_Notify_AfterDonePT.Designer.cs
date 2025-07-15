@@ -4,6 +4,7 @@ using Fsel.Notification.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Notification.Infrastructure.Migrations
 {
     [DbContext(typeof(NotificationsDBContext))]
-    partial class NotificationsDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250604090244_Update_NotificationType_Add_Notify_AfterDonePT")]
+    partial class Update_NotificationType_Add_Notify_AfterDonePT
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1047,7 +1050,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/marketplace",
                             TemplateMessage = "🚨 Cảnh báo từ trung tâm FSEL Store: Có người vừa đổi quà trước bạn 1 bước! Coin bạn vẫn còn... nhưng quà thì không chắc 😬",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1061,7 +1064,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "👨‍🚀 Trung tâm chỉ huy đang chờ bạn phản hồi! 🤖 Techie đã định vị lộ trình. Hãy vào học bài đầu để khởi động chuyến bay!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1075,7 +1078,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "🤖 Techie: \"Chắc bạn bị bắt cóc khỏi vũ trụ học mất rồi?\" Nếu bạn còn nhớ mật khẩu… vào học bài đầu tiên để nhận lại quyền truy cập vũ trụ nhé!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1089,7 +1092,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "🤪 Techie tẻn tẻn khắp vũ trụ đi tìm bạn học tiếp đây nè! Không thấy bạn đâu hết trơn, vào học lẹ đi để tớ còn phát xu!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1103,7 +1106,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "🌼 Cô nàng, anh chàng thư giãn giờ này chắc đang nằm lướt TikTok? Lướt xong thì học nhẹ 1 bài cùng Techie rồi chill tiếp nhé!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1117,7 +1120,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "🌌 Techie: “Hôm nay bạn muốn khám phá hành tinh nào?” Mỗi bài học là một hành tinh mới. Vào chọn bài và khởi động tàu nhé!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1131,7 +1134,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/marketplace",
                             TemplateMessage = "⚠️ Đội bạn đã đến sao Thưởng Quà! Techie nhắc: Hãy vào học để kịp lấy coin và ghé FSEL Store trước khi kho báu đóng lại!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1143,9 +1146,9 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Icon = "",
                             IsDeleted = false,
                             Priority = 1,
-                            TemplateLink = "/marketplace",
+                            TemplateLink = "/learn",
                             TemplateMessage = "👀 Techie đang check VAR: bạn hôm nay chưa học bài nào luôn á! VAR xác nhận: coin đang bị bỏ lỡ, cơ hội bóc Túi Mù đang chờ bạn đó!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1159,7 +1162,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "✨ 8386 là phát tài phát lộc, còn học là phát xu phát quà! Mỗi bài học hôm nay sẽ giúp bạn tiến gần hơn tới phần thưởng khủng từ FSEL Store!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1173,7 +1176,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "😅 Cả nhóm học tới bài 4 rồi đó, còn bạn thì… Techie giữ chỗ cho bạn học cùng nè. Vào lẹ kẻo tụt mood học nhóm!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1187,7 +1190,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "⏳ Đừng để hôm nay trôi qua mà chưa chọn khóa học! Học sớm hơn = nhận coin sớm hơn! Bắt đầu từ bài đầu tiên ngay nhé!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1201,7 +1204,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "Cơm thì ăn đều, mà bài thì bỏ đó? 😅 Techie thấy bạn có tiềm năng đổi iPhone nếu học đều đó. Vào học lẹ đi người đẹp!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1215,7 +1218,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "🌞 Dậy chưa đó? Techie nhắc nhẹ nè! Nhớ dành chút thời gian hôm nay để vào học cùng Techie nha – xu vẫn đang rơi đều, quà vẫn đang chờ bạn gom!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1229,7 +1232,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/marketplace",
                             TemplateMessage = "👀 Techie đang check VAR: bạn hôm nay chưa học bài nào luôn á! VAR xác nhận: coin đang bị bỏ lỡ, cơ hội bóc Túi Mù đang chờ bạn đó!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1243,7 +1246,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/learn",
                             TemplateMessage = "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1256,8 +1259,8 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Priority = 1,
                             TemplateLink = "/learn",
-                            TemplateMessage = "😳 Hôm nay bạn đang… vượt mức pickleball về độ lười học! Techie cảnh báo: Không học bài hôm nay là trượt bảng vàng thật đó nhaaa!",
-                            Type = "LinkPage"
+                            TemplateMessage = "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞",
+                            Type = "Text"
                         },
                         new
                         {
@@ -1271,7 +1274,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "👉 Nhận ngay 160 FSEL Coin thôi nào! 🎯 Bạn đã hoàn thành bài kiểm tra! Lộ trình học cá nhân đã sẵn sàng. Nhấn để bắt đầu săn FSEL Coin ngay 💪",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1285,7 +1288,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "🎁 Chọn khóa học – nhận ngay phần quà khởi động! Mỗi khóa học là một cơ hội nhận coin, leo bảng thi đua và đổi quà Túi Mù FSEL!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1299,7 +1302,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "🚀 Bắt đầu hành trình học tiếng Anh của bạn ngay hôm nay! Đừng để tài khoản nằm yên – chọn khóa học đầu tiên và khám phá FSEL Store!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1313,7 +1316,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "⏰ Còn vài giờ để nhận thưởng! Bài học đầu tiên giúp bạn mở khóa coin và cơ hội bóc Túi Mù FSEL – đừng bỏ lỡ ⏳",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1327,7 +1330,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "😱 U là trời! Bạn bỏ lỡ 2 ngày học rồi đó… Coin không học là mất, quà không tích là bay. Techie cảnh báo bạn đang trôi khỏi bảng vàng!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1341,7 +1344,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "🌱 Mọi hành trình đều bắt đầu từ bước đầu tiên Chọn khóa học đầu tiên để FSEL đồng hành cùng bạn mỗi ngày!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1355,7 +1358,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "⚠️ Techie cảnh báo: Bạn đang bị tụt lại phía sau! Mỗi ngày học = coin + cơ hội trúng Túi Mù FSEL! Không học = không quà 😢",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1369,7 +1372,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "📚 Lộ trình học của bạn đang chờ! FSEL đã gợi ý khóa học phù hợp – vào chọn ngay để không lỡ nhịp cùng bạn bè!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1383,7 +1386,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "👨‍🚀 Trung tâm chỉ huy đang chờ bạn phản hồi! 🤖 Techie đã định vị lộ trình. Hãy vào học bài đầu để khởi động chuyến bay!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1397,7 +1400,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "⏱️ Cảnh báo từ Techie: Kho quà sắp... tan biến! Quà tại FSEL Store chỉ còn trong vài vòng quay nữa. Vào học để gom coin liền tay!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1411,7 +1414,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "💰 Techie: “Nhiệm vụ hôm nay – tích thêm 100 coin!” Học bài mới = coin mới. Gom xu mỗi ngày để đổi quà cực chất trong Tháng Tự Học!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1425,7 +1428,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "Cơm thì ăn đều, mà bài thì bỏ đó? 😅 Techie thấy bạn có tiềm năng đổi iPhone nếu học đều đó. Vào học lẹ đi người đẹp!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1439,7 +1442,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "😮 Lớp bạn đã có 12 người học rồi, còn bạn thì sao? 🤖 Techie nhắc bạn: càng học sớm, càng dễ gom coin và lên bảng vàng!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1453,7 +1456,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1467,7 +1470,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "🍚 Cơm nước chưa người đẹp? Nếu ăn xong rồi thì… học 1 bài thôi nè. Coin đang đợi để được gom về túi bạn đó!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1481,7 +1484,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "⏳ Còn 2 ngày để nhận quà khởi động! Nếu bạn chưa chọn khóa học, coin thưởng sẽ hết hạn. Tối nay vào học ngay nhé!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1495,7 +1498,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "💅 Học xong rồi lên Store đổi quà là slay hết nước chấm luôn á! Học 1 bài thôi, đổi tai nghe, loa, sách vở đủ cả. Vào học đi bạn slay!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1509,7 +1512,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "⏳ Đừng để hôm nay trôi qua mà chưa chọn khóa học! Học sớm hơn = nhận coin sớm hơn! Bắt đầu từ bài đầu tiên ngay nhé!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         },
                         new
                         {
@@ -1523,7 +1526,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Priority = 1,
                             TemplateLink = "/change-level",
                             TemplateMessage = "😢 Techie: “Tớ có nói gì đâu, bạn đã học đâu mà bỏ rồi?” Bài học đầu đang đợi bạn. Không vào là coin mất, Techie buồn!",
-                            Type = "LinkPage"
+                            Type = "Text"
                         });
                 });
 
@@ -3320,7 +3323,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("23990ecc-834f-44b7-a7a5-a03baa703b32"),
-                            TemplateMessage = "😳 Hôm nay bạn đang… vượt mức pickleball về độ lười học! Techie cảnh báo: Không học bài hôm nay là trượt bảng vàng thật đó nhaaa!"
+                            TemplateMessage = "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞"
                         },
                         new
                         {
@@ -3331,7 +3334,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "en-US",
                             NotificationTypeId = new Guid("23990ecc-834f-44b7-a7a5-a03baa703b32"),
-                            TemplateMessage = "😳 Today, you're... surpassing pickleball in laziness! Techie warns: If you don’t study today, you’ll truly fall off the leaderboard!"
+                            TemplateMessage = "📊 AI predicts you'll study today… If correct, Techie will reward you with 160 coins. If wrong… Techie will be sad again 😞"
                         },
                         new
                         {
@@ -3342,7 +3345,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("23990ecc-834f-44b7-a7a5-a03baa703b32"),
-                            TemplateMessage = "😳 Aujourd'hui, tu surpasses même le pickleball en paresse ! Techie avertit : Si tu n'étudies pas aujourd'hui, tu vas vraiment tomber du classement !"
+                            TemplateMessage = "📊 L'IA prévoit que tu vas étudier aujourd'hui… Si c'est vrai, Techie te récompensera avec 160 pièces. Si c'est faux... Techie sera encore triste 😞"
                         },
                         new
                         {
