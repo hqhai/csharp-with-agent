@@ -2,12 +2,11 @@
 
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Application.Commands.UserGroupCmd
 {
@@ -17,22 +16,21 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
 
         public class Handler : IRequestHandler<DeleteUserGroupCommand, MethodResult<bool>>
         {
-            private readonly IUserGroupRepository _userGroupRepository;
-            private readonly IUserGroupMemberShipRepository _userGroupMemberShipRepository;
+            private readonly IUserRoleRepository _userRoleRepository;
+            private readonly RoleManager<Role> _roleManager;
 
-            public Handler(IUserGroupRepository userGroupRepository, IUserGroupMemberShipRepository userGroupMemberShipRepository)
+            public Handler(RoleManager<Role> roleManager, IUserRoleRepository userRoleRepository)
             {
-                _userGroupRepository = userGroupRepository;
-                _userGroupMemberShipRepository = userGroupMemberShipRepository;
+                _roleManager = roleManager;
+                _userRoleRepository = userRoleRepository;
             }
 
             public async Task<MethodResult<bool>> Handle(DeleteUserGroupCommand request, CancellationToken cancellationToken)
             {
-                ArgumentNullException.ThrowIfNull(request);
                 var methodResult = new MethodResult<bool>();
 
                 // Lấy nhóm cần xóa
-                var userGroup = await _userGroupRepository.GetByIdAsync(request.Id);
+                var userGroup = await _roleManager.FindByIdAsync(request.Id.ToString());
                 if (userGroup == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(UserGroup));
@@ -41,19 +39,20 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
 
                 if (userGroup.IsDefault)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserGroupErrorCode.DoNotDeleteTheDefaultUserGroup), nameof(userGroup));
+                    methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumUserGroupErrorCode.DoNotDeleteTheDefaultUserGroup), nameof(userGroup));
                     return methodResult;
                 }
 
                 // Lấy tất cả thành viên trong nhóm
-                var memberships = await _userGroupMemberShipRepository.Queryable
-                    .Where(x => x.GroupId == request.Id)
-                    .ToListAsync(cancellationToken);
+                var memberships = _userRoleRepository.GetQuery()
+                    .Where(x => x.RoleId == request.Id)
+                    .ToList();
 
-                if (memberships.Any())
+                // Xóa nhóm và tất cả thành viên trong transaction
+                // Xóa tất cả thành viên trong nhóm
+                foreach (var membership in memberships)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserGroupErrorCode.SomeoneIsInTheUserGroup), nameof(userGroup));
-                    return methodResult;
+                    await _userRoleRepository.DeleteAsync(membership);
                 }
 
                 // Xóa nhóm
