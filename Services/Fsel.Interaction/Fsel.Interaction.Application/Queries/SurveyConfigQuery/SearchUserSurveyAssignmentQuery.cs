@@ -70,6 +70,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                 CourseType = p.CourseType,
                 IsView = p.IsView,
                 ProgressRequirement = p.ProgressRequirement,
+                CreatedDate = p.CreatedDate,
             }).ToListAsync(cancellationToken);
 
             var deleteSurveyAssignment = new List<UserSurveyAssignmentModel>();

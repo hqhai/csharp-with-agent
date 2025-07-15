@@ -109,12 +109,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.CompetitionEventId = events?.FirstOrDefault()?.Id;
             }
 
-            var surveyEvent = await _interactionService.CheckSurveyPT(requestCheckSurvey);
-            if (surveyEvent.IsSuccessStatusCode)
-            {
-                settingStudentModel.IsSurveyEvent = surveyEvent.Content?.Result ?? false;
-            }
-
             var status = await _orderService.GetCurrentStatusAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!status.IsSuccessStatusCode)
             {
@@ -127,6 +121,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             {
                 var course = await _courseRepository.GetByIdAsync(student.CourseId.Value);
                 settingStudentModel.Course = _mapper.Map<CourseModel>(course);
+
+                if (course != null)
+                {
+                    requestCheckSurvey.CourseLevel = course.CourseLevel;
+                    requestCheckSurvey.CourseType = course.CourseType;
+
+                    var surveyEvent = await _interactionService.CheckSurveyPT(requestCheckSurvey);
+                    if (surveyEvent.IsSuccessStatusCode)
+                    {
+                        settingStudentModel.IsSurveyEvent = surveyEvent.Content?.Result ?? false;
+                    }
+                }
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = settingStudentModel;

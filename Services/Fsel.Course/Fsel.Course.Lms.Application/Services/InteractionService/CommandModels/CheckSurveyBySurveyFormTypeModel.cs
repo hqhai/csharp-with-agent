@@ -10,5 +10,7 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService.CommandModels
         public EnumSurveyFormType SurveyFormType { get; set; }
 
         public Guid? CompetitionEventId { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
+        public EnumCourseType CourseType { get; set; }
     }
 }

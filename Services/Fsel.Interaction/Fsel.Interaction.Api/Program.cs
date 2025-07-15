@@ -3,6 +3,7 @@
 using Fsel.Common.Constants;
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
+using Fsel.Interaction.Application.Queues.Consumers;
 using Fsel.Interaction.Application.Queues.Publishers;
 using Fsel.Interaction.Application.Services.AIService;
 using Fsel.Interaction.Application.Services.CourseServices;
@@ -17,6 +18,7 @@ using Fsel.Interaction.Domain.IRepositories;
 using Fsel.Interaction.Infrastructure;
 using Fsel.Interaction.Infrastructure.Repositories;
 using Fsel.Interaction.Infrastructure.ValueSettings;
+using Fsel.Shared.Constants;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,7 +91,11 @@ builder.Services.AddRefitClient<IHarmfulContentImageService>().ConfigureHttpClie
     }
 });
 
-builder.AddMassTransit(appSetting);
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+    { QueueSettings.InteractionQueue.NameQueue.SaveUserSurveyAssignment, typeof(SaveUserSurveyAssignmentConsumer) },
+});
 
 var app = builder.Build();
 app.UseServices();
