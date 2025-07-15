@@ -4,10 +4,10 @@ namespace Fsel.System.Api.Controllers.Admins
 {
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.BannerCmd;
     using Fsel.System.Application.Commands.BannerSettingCmd;
     using Fsel.System.Application.Queries.BannerQuery;
@@ -21,7 +21,6 @@ namespace Fsel.System.Api.Controllers.Admins
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/banner")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class BannerController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -37,6 +36,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<BannerModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.View)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<BannerModel> commandResult = await _mediator.Send(new GetBannerQuery { Id = id }).ConfigureAwait(false);
@@ -49,6 +49,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<BannerModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.View)]
         public async Task<IActionResult> Get([FromQuery] SearchBannerQuery query)
         {
             MethodResult<PagingItemsModel<BannerModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -61,6 +62,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<BannerModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.Add)]
         public async Task<IActionResult> Create([FromBody] CreateBannerCommand command)
         {
             MethodResult<BannerModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -73,6 +75,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpPut]
         [ProducesResponseType(typeof(MethodResult<BannerModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.Update)]
         public async Task<IActionResult> Update([FromBody] UpdateBannerCommand command)
         {
             MethodResult<BannerModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -85,6 +88,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.Update)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteBannerCommand { Id = id }).ConfigureAwait(false);
@@ -97,6 +101,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpPost("banner-setting")]
         [ProducesResponseType(typeof(MethodResult<BannerSettingModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.Add)]
         public async Task<IActionResult> Create([FromBody] CreateBannerSettingCommand command)
         {
             MethodResult<BannerSettingModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -109,6 +114,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpGet("banner-setting")]
         [ProducesResponseType(typeof(MethodResult<BannerSettingModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.View)]
         public async Task<IActionResult> GetBannerSetting()
         {
             MethodResult<BannerSettingModel> commandResult = await _mediator.Send(new GetBannerSettingQuery()).ConfigureAwait(false);
@@ -121,6 +127,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpPost("check-priority")]
         [ProducesResponseType(typeof(MethodResult<BannerPriorityExistenceModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.View)]
         public async Task<IActionResult> CheckBannerPriorityExistence([FromBody] CheckBannerPriorityExistenceCommand command)
         {
             MethodResult<BannerPriorityExistenceModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -133,6 +140,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpGet("preview")]
         [ProducesResponseType(typeof(MethodResult<IList<BannerModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.Preview)]
         public async Task<IActionResult> PreviewBannerByDate([FromQuery] PreviewBannerByDateQuery query)
         {
             MethodResult<IList<BannerModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -145,6 +153,7 @@ namespace Fsel.System.Api.Controllers.Admins
         [HttpGet("banner-in-day")]
         [ProducesResponseType(typeof(MethodResult<IList<BannerModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(BannerManagement.View)]
         public async Task<IActionResult> GetBannerInDateQuery([FromQuery] GetBannerInDateQuery query)
         {
             MethodResult<IList<BannerInDayModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);

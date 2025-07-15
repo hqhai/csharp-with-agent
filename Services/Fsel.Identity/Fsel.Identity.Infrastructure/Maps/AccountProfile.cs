@@ -4,6 +4,7 @@ using System.Globalization;
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Models.CommandModels.Admins;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.CommandModels.Parents;
 using Fsel.Identity.Domain.Models.CommandModels.Students;
@@ -50,6 +51,9 @@ namespace Fsel.Identity.Infrastructure.Maps
 
             CreateMap<UpdateStudentProfileCommandModel, User>().IgnoreAllNonExisting();
             CreateMap<UpdateProfileStudentCommandModel, User>().IgnoreAllNonExisting();
+            CreateMap<GetAccountDashboardQueryModel, ExportAccountDashboardCommandModel>().IgnoreAllNonExisting();
+            CreateMap<CreateUserToLmsAdminPlatCommandModel, User>().IgnoreAllNonExisting();
+            CreateMap<UpdateUserInLmsAdminPlatCommandModel, User>().IgnoreAllNonExisting();
         }
     }
 }

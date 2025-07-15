@@ -237,5 +237,17 @@ namespace Fsel.Identity.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get studentIds in event by studentIds
+        /// </summary>
+        [HttpPost("get-student-ids-in-event-by-student-ids")]
+        [ProducesResponseType(typeof(MethodResult<List<Guid>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentsInEventByStudentIds([FromBody] GetStudentIdsInEventByStudentIdsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

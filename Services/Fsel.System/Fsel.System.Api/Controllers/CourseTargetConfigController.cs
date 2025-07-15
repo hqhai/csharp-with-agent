@@ -4,6 +4,7 @@ namespace Fsel.System.Api.Controllers
 {
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
@@ -32,6 +33,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<CourseTargetConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CourseGoalManagement.Add)]
         public async Task<IActionResult> CreateCourseTargetConfig([FromBody] CreateCourseTargetConfigCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -44,6 +46,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPut]
         [ProducesResponseType(typeof(MethodResult<CourseTargetConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CourseGoalManagement.Update)]
         public async Task<IActionResult> UpdateCourseTargetConfig([FromBody] UpdateCourseTargetConfigCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -56,6 +59,7 @@ namespace Fsel.System.Api.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseTargetConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CourseGoalManagement.Update)]
         public async Task<IActionResult> DeleteCourseTargetConfig([FromRoute] Guid id)
         {
             var commandResult = await _mediator.Send(new DeleteCourseTargetConfigCommand { Id = id }).ConfigureAwait(false);
@@ -68,6 +72,7 @@ namespace Fsel.System.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<IList<CourseTargetConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CourseGoalManagement.View)]
         public async Task<IActionResult> GetCourseTargetConfig([FromQuery] GetCourseTargetConfigQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -80,6 +85,7 @@ namespace Fsel.System.Api.Controllers
         [HttpGet("course-target-course-level")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseTargetConfigModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CourseGoalManagement.View)]
         public async Task<IActionResult> GetCourseTargetConfigByCourseLevel([FromQuery] GetCourseTargetConfigByCourseLevelQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
