@@ -50,13 +50,6 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
-
-            if (string.IsNullOrEmpty(request.Name))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Name), request.Name);
-                return methodResult;
-            }
-
             var existCode = await _examPracticeRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken);
             if (existCode)
             {
@@ -80,49 +73,37 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(examPractice.ErrorMessages);
                 return methodResult;
             }
-
+            if (request.ProvinceId.HasValue)
+            {
+                var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { IdsStr = request.ProvinceId.Value.ToString() });
+                if (!locationResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError));
+                    return methodResult;
+                }
+                var locations = locationResults.Content?.Result;
+                if (locations == null || !locations.Any())
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(locations), request.ProvinceId);
+                    return methodResult;
+                }
+                examPractice.Province = locations.FirstOrDefault()?.Name;
+            }
             if (request.Type == EnumExamPracticeType.ExamPractice)
             {
-                if (!request.StartDate.HasValue)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.StartDate), request.StartDate);
-                    return methodResult;
-                }
-                if (!request.EndDate.HasValue)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.EndDate), request.EndDate);
-                    return methodResult;
-                }
-
-                if (request.StartDate >= request.EndDate)
+                if (request.StartDate.HasValue && request.EndDate.HasValue && request.StartDate >= request.EndDate)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.StartDate), nameof(request.EndDate));
                     return methodResult;
                 }
 
-                if (new[] { EnumExamPracticeSubType.Practice, EnumExamPracticeSubType.HighschoolEntrance }.Any(x => x == request.SubType) && !request.ProvinceId.HasValue)
+                if (request.ProvinceId.HasValue && !new[] { EnumExamPracticeSubType.Practice, EnumExamPracticeSubType.HighschoolEntrance }.Any(x => x == request.SubType))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ProvinceId), request.SubType);
                     return methodResult;
                 }
-                if (request.ProvinceId.HasValue)
-                {
-                    var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { IdsStr = request.ProvinceId.Value.ToString() });
-                    if (!locationResults.IsSuccessStatusCode)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallSystemServiceError));
-                        return methodResult;
-                    }
-                    var locations = locationResults.Content?.Result;
-                    if (locations == null || !locations.Any())
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(locations), request.ProvinceId);
-                        return methodResult;
-                    }
-                    examPractice.Province = locations.FirstOrDefault()?.Name;
-                }
 
-                if (request.SubType == EnumExamPracticeSubType.Practice && string.IsNullOrEmpty(request.SchoolGrade))
+                if (request.SubType != EnumExamPracticeSubType.Practice && !string.IsNullOrEmpty(request.SchoolGrade))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.SchoolGrade), request.SubType);
                     return methodResult;
@@ -161,7 +142,6 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
                 return methodResult;
             });
             await _examPracticeHelper.UpdateExamPracticeSectionScoreAsync(examPractice).ConfigureAwait(false);
-
             return methodResult;
         }
     }

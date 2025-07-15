@@ -54,7 +54,7 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
 
             if (examPractice.Type == EnumExamPracticeType.ExamPractice)
             {
-                if (examPractice.Status == EnumExamPracticeStatus.Draft && request.IsActive)
+                if (examPractice.Status != EnumExamPracticeStatus.Active && request.IsActive)
                 {
                     if (!await _examPracticeHelper.IsValidateActiveStatus(examPractice))
                     {
@@ -68,14 +68,14 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
                         examPractice.ActivatedAt = DateTime.UtcNow;
                     }
                 }
-                else if (examPractice.Status == EnumExamPracticeStatus.Active || examPractice.Status == EnumExamPracticeStatus.Inactive)
+                else if (examPractice.Status == EnumExamPracticeStatus.Active)
                 {
                     examPractice.Status = request.IsActive ? EnumExamPracticeStatus.Active : EnumExamPracticeStatus.Inactive;
                 }
             }
             else
             {
-                if (examPractice.Status == EnumExamPracticeStatus.Draft && request.IsActive)
+                if (examPractice.Status != EnumExamPracticeStatus.Active && request.IsActive)
                 {
                     examPractice.Status = EnumExamPracticeStatus.Active;
                     if (!examPractice.ActivatedAt.HasValue)
@@ -83,7 +83,7 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd
                         examPractice.ActivatedAt = DateTime.UtcNow;
                     }
                 }
-                else if (examPractice.Status == EnumExamPracticeStatus.Active || examPractice.Status == EnumExamPracticeStatus.Inactive)
+                else if (examPractice.Status == EnumExamPracticeStatus.Active)
                 {
                     examPractice.Status = request.IsActive ? EnumExamPracticeStatus.Active : EnumExamPracticeStatus.Inactive;
                 }
