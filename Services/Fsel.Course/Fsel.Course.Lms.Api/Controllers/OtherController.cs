@@ -18,7 +18,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/other")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class OtherController : ControllerBase
     {
         private readonly IMediator _mediator;
