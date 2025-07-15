@@ -34,19 +34,19 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
 
                 // Xử lý trong transaction để đảm bảo tính nhất quán
 
-                foreach (var userId in request.UserIds)
-                {
-                    // Kiểm tra xem user có thuộc nhóm không
+                    foreach (var userId in request.UserIds)
+                    {
+                        // Kiểm tra xem user có thuộc nhóm không
                     var membership = await _userRoleRepository.GetQuery()
                         .FirstOrDefaultAsync(x => x.UserId == userId && x.RoleId == request.GroupId, cancellationToken);
 
-                    if (membership == null)
-                    {
-                        // Skip nếu không tìm thấy thành viên
-                        continue;
-                    }
+                        if (membership == null)
+                        {
+                            // Skip nếu không tìm thấy thành viên
+                            continue;
+                        }
                     await _userRoleRepository.DeleteAsync(membership);
-                }
+                    }
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;

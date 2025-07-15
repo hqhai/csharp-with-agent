@@ -6,7 +6,7 @@ namespace Fsel.Identity.Application.Queries.ReportEventHaNoiQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
-    using Fsel.Core.Caching;
+    using Fsel.Common.Caching;
     using Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Identity.Infrastructure;
     using Fsel.Identity.Infrastructure.ValueSettings;

@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
     using Fsel.Course.Lms.Application.Services.TrainingServices.Models;
     using Fsel.Course.Lms.Application.Services.TrainingServices.QueryModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -43,5 +44,8 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 
         [Get("/v1/class/get-class-to-student/{studentId}")]
         Task<IApiResponse<MethodResult<ClassModel>>> GetClassToStudentIdAsync([FromRoute] Guid studentId);
+
+        [Get("/v1/class/get-students-in-7-day-choose-level")]
+        Task<IApiResponse<MethodResult<IList<StudentsIn7DayChooseLevelModel>>>> GetStudentsIn7DayChooseLevel();
     }
 }

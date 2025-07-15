@@ -1,0 +1,1078 @@
+[
+  {
+    "id": "fc29bd59-2220-4bf3-b003-5f0ca116a634",
+    "code": "CardViettel10000",
+    "name": "[UrBox Voucher] Thẻ nạp Viettel 10.000đ",
+    "quantity": 400,
+    "showPriority": true,
+    "price": 1000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3704",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/07/640/1620371136_6094e6c0d04b4.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Viettel",
+      "brandImage": "https://images.urbox.vn/_img_server/2021/07/16/160/1626425459_60f14873d5d12.png"
+    },
+    "translations": [
+      {
+        "id": "d346e51b-a2be-4ce2-873b-d5eec47ff149",
+        "name": "[UrBox Voucher] Thẻ nạp Viettel 10.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "fc29bd59-2220-4bf3-b003-5f0ca116a634",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "4600d437-0574-46b5-a79d-1264a6fb69a1",
+        "name": "[UrBox Voucher] Viettel Mobile Card 10,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "fc29bd59-2220-4bf3-b003-5f0ca116a634",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "42cb4a24-6bfb-4eb3-b454-8a583024cb06",
+    "code": "CardViettel20000",
+    "name": "[UrBox Voucher] Thẻ nạp Viettel 20.000đ",
+    "quantity": 188,
+    "showPriority": true,
+    "price": 2000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3705",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/07/640/1620371151_6094e6cf53c22.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Viettel",
+      "brandImage": "https://images.urbox.vn/_img_server/2021/07/16/160/1626425459_60f14873d5d12.png"
+    },
+    "translations": [
+      {
+        "id": "32bf6033-3b09-4253-9b5a-cbe0983861a9",
+        "name": "[UrBox Voucher] Thẻ nạp Viettel 20.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "42cb4a24-6bfb-4eb3-b454-8a583024cb06",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "94cabc9f-31a1-4397-8d64-67481016851d",
+        "name": "[UrBox Voucher] Viettel Mobile Card 20,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "42cb4a24-6bfb-4eb3-b454-8a583024cb06",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "3c641e97-1a87-4f63-b94c-08693d3d66a7",
+    "code": "CardViettel50000",
+    "name": "[UrBox Voucher] Thẻ nạp Viettel 50.000đ",
+    "quantity": 88,
+    "showPriority": true,
+    "price": 5000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3707",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/07/640/1620371187_6094e6f42048b.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Viettel",
+      "brandImage": "https://images.urbox.vn/_img_server/2021/07/16/160/1626425459_60f14873d5d12.png"
+    },
+    "translations": [
+      {
+        "id": "b6f818dc-ef5a-4b7b-b5a9-8dd8a4f3ea87",
+        "name": "[UrBox Voucher] Thẻ nạp Viettel 50.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "3c641e97-1a87-4f63-b94c-08693d3d66a7",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "5cbd05d7-1afc-4830-a404-56cde2528534",
+        "name": "[UrBox Voucher] Viettel Mobile Card 50,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "3c641e97-1a87-4f63-b94c-08693d3d66a7",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "3114a892-4cef-49ec-8cd6-94785c83386f",
+    "code": "CardVinaphone10000",
+    "name": "[UrBox Voucher] Thẻ nạp Vinaphone 10.000đ",
+    "quantity": 300,
+    "showPriority": true,
+    "price": 1000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3713",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/07/640/1620372055_6094ea5788d2f.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Vinaphone",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585721341_5e842ffdee2fc.png"
+    },
+    "translations": [
+      {
+        "id": "b107c1ad-cb2e-4e6c-9e2d-e2c885dd8eac",
+        "name": "[UrBox Voucher] Thẻ nạp Vinaphone 10.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "3114a892-4cef-49ec-8cd6-94785c83386f",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "0dac99b5-4c11-44d7-98a5-2fd5fcff06e8",
+        "name": "[UrBox Voucher] Vinaphone Mobile Card 10,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "3114a892-4cef-49ec-8cd6-94785c83386f",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "da1ff94d-14dc-4b4a-bb81-2ff5420049a3",
+    "code": "CardVinaphone20000",
+    "name": "[UrBox Voucher] Thẻ nạp Vinaphone 20.000đ",
+    "quantity": 188,
+    "showPriority": true,
+    "price": 2000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3714",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/07/640/1620372074_6094ea6a75828.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Vinaphone",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585721341_5e842ffdee2fc.png"
+    },
+    "translations": [
+      {
+        "id": "335b32b1-f1dd-4cc4-90eb-ec479437857b",
+        "name": "[UrBox Voucher] Thẻ nạp Vinaphone 20.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "da1ff94d-14dc-4b4a-bb81-2ff5420049a3",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "6ecb1be3-9d59-4973-8a90-ed207dbc05c1",
+        "name": "[UrBox Voucher] Vinaphone Mobile Card 20,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "da1ff94d-14dc-4b4a-bb81-2ff5420049a3",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "0defe395-1de1-4371-b163-c99484ed66a4",
+    "code": "CardVinaphone50000",
+    "name": "[UrBox Voucher] Thẻ nạp Vinaphone 50.000đ",
+    "quantity": 88,
+    "showPriority": true,
+    "price": 5000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3716",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/07/640/1620372109_6094ea8da37a4.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Vinaphone",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585721341_5e842ffdee2fc.png"
+    },
+    "translations": [
+      {
+        "id": "70ca7ed8-b26b-4f6e-a8ed-70435369fffc",
+        "name": "[UrBox Voucher] Thẻ nạp Vinaphone 50.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "0defe395-1de1-4371-b163-c99484ed66a4",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "d275c7c1-7cd0-4ad9-8f7d-076be5602bb2",
+        "name": "[UrBox Voucher] Vinaphone Mobile Card 50,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "0defe395-1de1-4371-b163-c99484ed66a4",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "9d449591-6cc6-4e2f-b75c-521a7c68edb9",
+    "code": "CardMobifone10000",
+    "name": "[UrBox Voucher] Thẻ nạp Mobifone 10.000đ",
+    "quantity": 300,
+    "showPriority": true,
+    "price": 1000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3722",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/07/640/1620369223_6094df47d677d.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Mobifone",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585718650_5e84257b025ac.png"
+    },
+    "translations": [
+      {
+        "id": "22fd9daa-d9ec-48c9-b009-de390cc7efd3",
+        "name": "[UrBox Voucher] Thẻ nạp Mobifone 10.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "9d449591-6cc6-4e2f-b75c-521a7c68edb9",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "001ec6cc-b059-403f-be40-da89a476732b",
+        "name": "[UrBox Voucher] Mobifone Mobile Card 10,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "9d449591-6cc6-4e2f-b75c-521a7c68edb9",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "2b28eb9a-432d-436e-9968-42b47c89a12f",
+    "code": "CardMobifone20000",
+    "name": "[UrBox Voucher] Thẻ nạp Mobifone 20.000đ",
+    "quantity": 187,
+    "showPriority": true,
+    "price": 2000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3723",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/07/640/1620369744_6094e15089073.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Mobifone",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585718650_5e84257b025ac.png"
+    },
+    "translations": [
+      {
+        "id": "ab2edcef-8b16-4518-a943-65a49775b724",
+        "name": "[UrBox Voucher] Thẻ nạp Mobifone 20.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "2b28eb9a-432d-436e-9968-42b47c89a12f",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "6d76a7da-0a8b-47ae-bd40-05e50712ec32",
+        "name": "[UrBox Voucher] Mobifone Mobile Card 20,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "2b28eb9a-432d-436e-9968-42b47c89a12f",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "50781c44-617a-49e2-a7a3-a239178495bc",
+    "code": "CardMobifone50000",
+    "name": "[UrBox Voucher] Thẻ nạp Mobifone 50.000đ",
+    "quantity": 87,
+    "showPriority": true,
+    "price": 5000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3725",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/07/640/1620369780_6094e174274c6.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Mobifone",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585718650_5e84257b025ac.png"
+    },
+    "translations": [
+      {
+        "id": "7a6c4210-ce8a-4b7e-8d86-d61e775f562a",
+        "name": "[UrBox Voucher] Thẻ nạp Mobifone 50.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "50781c44-617a-49e2-a7a3-a239178495bc",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "ddc57211-e5fe-47ca-887f-c9c5293100e5",
+        "name": "[UrBox Voucher] Mobifone Mobile Card 50,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "50781c44-617a-49e2-a7a3-a239178495bc",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "27885469-9843-49f6-92ad-c5ae0d84ae71",
+    "code": "CardVietnamobile20000",
+    "name": "[UrBox Voucher] Thẻ nạp Vietnamobile 20.000đ",
+    "quantity": 187,
+    "showPriority": true,
+    "price": 2000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3741",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/10/640/1620633130_6098e62b11e0f.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Vietnamobile",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585721231_5e842f8f7bde0.png"
+    },
+    "translations": [
+      {
+        "id": "29e66472-b20e-4b1f-aa7d-c2bd2b2c0f74",
+        "name": "[UrBox Voucher] Thẻ nạp Vietnamobile 20.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "27885469-9843-49f6-92ad-c5ae0d84ae71",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "b1a875fb-276a-4c7a-b448-b01604392d0f",
+        "name": "[UrBox Voucher] Vietnamobile Mobile Card 20,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "27885469-9843-49f6-92ad-c5ae0d84ae71",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "ab2e9d9b-dfc1-47fa-8f7a-1e039478a20b",
+    "code": "CardVietnamobile50000",
+    "name": "[UrBox Voucher] Thẻ nạp Vietnamobile 50.000đ",
+    "quantity": 87,
+    "showPriority": true,
+    "price": 5000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "3743",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2021/05/10/640/1620633619_6098e813aac42.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Vietnamobile",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585721231_5e842f8f7bde0.png"
+    },
+    "translations": [
+      {
+        "id": "4c1e37cf-537d-4703-8ddc-b023deb45d6a",
+        "name": "[UrBox Voucher] Thẻ nạp Vietnamobile 50.000đ",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "ab2e9d9b-dfc1-47fa-8f7a-1e039478a20b",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "7a56c473-7093-4aeb-8be9-67a0e0044ad1",
+        "name": "[UrBox Voucher] Vietnamobile Mobile Card 50,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "ab2e9d9b-dfc1-47fa-8f7a-1e039478a20b",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "1dd2462c-22a6-4319-95b0-a1bf9f719e0d",
+    "code": "VoucherCircleK20000",
+    "name": "[UrBox Voucher] Circle K 20.000đ",
+    "quantity": 750,
+    "showPriority": true,
+    "price": 2000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "12555",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2024/08/22/640/1724320850_66c70c52eb0a1.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Circle K",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585713650_5e8411f295a7b.png"
+    },
+    "translations": [
+      {
+        "id": "ebf3dd3e-9f3d-4a48-b639-3c90434c91fc",
+        "name": "[UrBox Voucher] Circle K 20,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "1dd2462c-22a6-4319-95b0-a1bf9f719e0d",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "ae7f98fd-8c63-4d01-894f-7df9a496eacc",
+        "name": "[UrBox Voucher] - Circle K 20,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "1dd2462c-22a6-4319-95b0-a1bf9f719e0d",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "c21b61be-ce79-4c02-9fb8-54fc6d482a40",
+    "code": "VoucherCircleK50000",
+    "name": "[UrBox Voucher] Circle K 50.000đ",
+    "quantity": 350,
+    "showPriority": true,
+    "price": 5000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "UrBox",
+    "productType": "Voucher",
+    "GlobalId": "12558",
+    "IsPremium": true,
+    "description": {
+      "howToUses": [
+      ],
+      "conditions": [
+      ],
+      "contacts": [
+      ]
+    },
+    "images": [
+      "https://images.urbox.vn/_img_server/2024/08/22/640/1724320916_66c70c9489e1f.png"
+    ],
+    "productGlobalConfig": {
+      "brandName": "Circle K",
+      "brandImage": "https://images.urbox.vn/_img_server/2020/04/01/160/1585713650_5e8411f295a7b.png"
+    },
+    "translations": [
+      {
+        "id": "e8560c0b-8e91-4676-a936-f9a24b9c9052",
+        "name": "[UrBox Voucher] Circle K 50,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "c21b61be-ce79-4c02-9fb8-54fc6d482a40",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "a12c0535-aad9-47d2-8be6-44bbef8909f8",
+        "name": "[UrBox Voucher] - Circle K 50,000 VND",
+        "description": {
+          "howToUses": [
+          ],
+          "conditions": [
+          ],
+          "contacts": [
+          ]
+        },
+        "productId": "c21b61be-ce79-4c02-9fb8-54fc6d482a40",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "48f395b0-441a-4c24-aa28-de7a654c8a80",
+    "code": "EVMuaHeTuHocMacbookAirM2",
+    "name": "Laptop Apple MacBook Air 13 inch M2 8CPU/8GPU/16GB/256GB - Space Grey MC7U4SA/A - Chính Hãng Apple Việt Nam",
+    "quantity": 1,
+    "showPriority": true,
+    "price": 150000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "FSEL",
+    "productType": "Physical",
+    "isPremium": true,
+    "images": [
+      "https://genk.mediacdn.vn/139269124445442048/2022/7/16/macbook-air-m2-chip-purple-feature-1657942675923-1657942676585833475599.jpg"
+    ],
+    "description": {
+      "howToUses": [
+        "Học viên đổi số Xu FSEL (FSEL Coin) tương ứng trên Marketplace sẽ nhận được 01 mã đổi quà. Sau khi đổi thành công vui lòng lưu lại mã quà tặng để đối chiếu khi được yêu cầu.",
+        "Thời gian nhận quà: Sau ngay nhận mã đổi thưởng, vui lòng liên hệ hotline 0906259442 để xác thực thông tin và nhận quà",
+        "Hình thức nhận quà: FSEL chuyển quà tới học viên qua địa chỉ học sinh cung cấp"
+      ],
+      "conditions": [
+        "Quà không có giá trị quy đổi thành tiền mặt",
+        "Mỗi mã đổi quà tương ứng với 01 sản phẩm",
+        "Số lượng quà tự động giảm dần theo số lượng học sinh đã đổi quà",
+        "Chỉ những học sinh mua khóa học trong khoảng thời gian từ ngày 01/06/2025 đến hết ngày 30/06/2025 mới đủ điều kiện nhận quà.",
+        "Các tài khoản được tặng khóa học miễn phí, bao gồm tài khoản được tặng thêm tháng học hoặc sử dụng voucher giảm giá 100%, sẽ không đủ điều kiện để đổi quà."
+      ],
+      "contacts": [
+        "Mọi thắc mắc liên hệ hotline: 0906 259 442",
+        "Email: support_fsel@atlantic.edu.vn"
+      ]
+    },
+    "translations": [
+      {
+        "id": "c3695183-1337-420d-87df-00ad9a8ac71e",
+        "name": "Laptop Apple MacBook Air 13 inch M2 8CPU/8GPU/16GB/256GB - Space Grey MC7U4SA/A - Chính Hãng Apple Việt Nam",
+        "description": {
+          "howToUses": [
+            "Học viên đổi số Xu FSEL (FSEL Coin) tương ứng trên Marketplace sẽ nhận được 01 mã đổi quà.",
+            "Sau khi đổi thành công vui lòng lưu lại mã quà tặng để đối chiếu khi được yêu cầu.",
+            "Thời gian nhận quà: Sau ngay nhận mã đổi thưởng, vui lòng liên hệ hotline 0906259442 để xác thực thông tin và nhận quà",
+            "Hình thức nhận quà: FSEL chuyển quà tới học viên qua địa chỉ học sinh cung cấp"
+          ],
+          "conditions": [
+            "Quà không có giá trị quy đổi thành tiền mặt",
+            "Mỗi mã đổi quà tương ứng với 01 sản phẩm",
+            "Số lượng quà tự động giảm dần theo số lượng học sinh đã đổi quà",
+            "Chỉ những học sinh mua khóa học trong khoảng thời gian từ ngày 01/06/2025 đến hết ngày 30/06/2025 mới đủ điều kiện nhận quà.",
+            "Các tài khoản được tặng khóa học miễn phí, bao gồm tài khoản được tặng thêm tháng học hoặc sử dụng voucher giảm giá 100%, sẽ không đủ điều kiện để đổi quà."
+          ],
+          "contacts": [
+            "Mọi thắc mắc liên hệ hotline: 0906 259 442",
+            "Email: support_fsel@atlantic.edu.vn"
+          ]
+        },
+        "productId": "48f395b0-441a-4c24-aa28-de7a654c8a80",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "84e87182-e2db-499a-a6ae-c0d7f17f8bb2",
+        "name": "Laptop Apple MacBook Air 13 inch M2 8CPU/8GPU/16GB/256GB - Space Grey MC7U4SA/A - Genuine Apple Vietnam",
+        "description": {
+          "howToUses": [
+            "Learners who exchange FSEL Coins on the Marketplace will receive one (01) gift redemption code.",
+            "Upon successful redemption, please save the code for verification purposes when requested.",
+            "Gift collection timeline: Immediately after receiving the redemption code, please contact the hotline at 0906 259 442 to verify your information and claim your gift.",
+            "Gift delivery method: FSEL will deliver the gift to the address provided by the learner."
+          ],
+          "conditions": [
+            "The gift has no cash value",
+            "Each gift redemption code corresponds to a product quantity of 1",
+            "The number of gifts is limited according to the document \"Self-study month\" announced by the D0ET of NgheAn",
+            "The number of gifts automatically decreases according to the number of students who have redeemed the gift",
+            "Only students who purchase a course between June 1, 2025 and June 30, 2025 are eligible to receive gifts.",
+            "Accounts that received a free course—such as those granted additional study time or using a 100% discount voucher—are not eligible for gift redemption."
+          ],
+          "contacts": [
+            "For any questions, please contact hotline: 0906 259 442",
+            "Email: support_fsel@atlantic.edu.vn"
+          ]
+        },
+        "productId": "48f395b0-441a-4c24-aa28-de7a654c8a80",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "4f13c2f5-d2f7-4395-b2c7-c97e9ff9ef89",
+    "code": "EVMuaHeTuHocAirPod",
+    "name": "Tai nghe Apple Airpods 4 (Chống ồn chủ động)",
+    "quantity": 1,
+    "showPriority": true,
+    "price": 25000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "FSEL",
+    "productType": "Physical",
+    "IsPremium": true,
+    "images": [
+      "https://m-cdn.phonearena.com/images/reviews/263078-image/BK6A7427.jpg?w=1"
+    ],
+    "description": {
+      "howToUses": [
+        "Học viên đổi số Xu FSEL (FSEL Coin) tương ứng trên Marketplace sẽ nhận được 01 mã đổi quà. Sau khi đổi thành công vui lòng lưu lại mã quà tặng để đối chiếu khi được yêu cầu.",
+        "Thời gian nhận quà: Sau ngay nhận mã đổi thưởng, vui lòng liên hệ hotline 0906259442 để xác thực thông tin và nhận quà",
+        "Hình thức nhận quà: FSEL chuyển quà tới học viên qua địa chỉ học sinh cung cấp"
+      ],
+      "conditions": [
+        "Quà không có giá trị quy đổi thành tiền mặt",
+        "Mỗi mã đổi quà tương ứng với 01 sản phẩm",
+        "Số lượng quà tự động giảm dần theo số lượng học sinh đã đổi quà",
+        "Chỉ những học sinh mua khóa học trong khoảng thời gian từ ngày 01/06/2025 đến hết ngày 30/06/2025 mới đủ điều kiện nhận quà.",
+        "Các tài khoản được tặng khóa học miễn phí, bao gồm tài khoản được tặng thêm tháng học hoặc sử dụng voucher giảm giá 100%, sẽ không đủ điều kiện để đổi quà."
+      ],
+      "contacts": [
+        "Mọi thắc mắc liên hệ hotline: 0906 259 442",
+        "Email: support_fsel@atlantic.edu.vn"
+      ]
+    },
+    "translations": [
+      {
+        "id": "d2adf735-ebff-4613-a703-b8655f855d96",
+        "name": "Tai nghe Apple Airpods 4 (Chống ồn chủ động)",
+        "description": {
+          "howToUses": [
+            "Học viên đổi số Xu FSEL (FSEL Coin) tương ứng trên Marketplace sẽ nhận được 01 mã đổi quà.",
+            "Sau khi đổi thành công vui lòng lưu lại mã quà tặng để đối chiếu khi được yêu cầu.",
+            "Thời gian nhận quà: Sau ngay nhận mã đổi thưởng, vui lòng liên hệ hotline 0906259442 để xác thực thông tin và nhận quà",
+            "Hình thức nhận quà: FSEL chuyển quà tới học viên qua địa chỉ học sinh cung cấp"
+          ],
+          "conditions": [
+            "Quà không có giá trị quy đổi thành tiền mặt",
+            "Mỗi mã đổi quà tương ứng với 01 sản phẩm",
+            "Số lượng quà tự động giảm dần theo số lượng học sinh đã đổi quà",
+            "Chỉ những học sinh mua khóa học trong khoảng thời gian từ ngày 01/06/2025 đến hết ngày 30/06/2025 mới đủ điều kiện nhận quà.",
+            "Các tài khoản được tặng khóa học miễn phí, bao gồm tài khoản được tặng thêm tháng học hoặc sử dụng voucher giảm giá 100%, sẽ không đủ điều kiện để đổi quà."
+          ],
+          "contacts": [
+            "Mọi thắc mắc liên hệ hotline: 0906 259 442",
+            "Email: support_fsel@atlantic.edu.vn"
+          ]
+        },
+        "productId": "4f13c2f5-d2f7-4395-b2c7-c97e9ff9ef89",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "c0dacf7a-906c-4c5b-8c3b-dc4e97905fe3",
+        "name": "Apple Airpods 4 Headphones (Active Noise Cancellation)",
+        "description": {
+          "howToUses": [
+            "Learners who exchange FSEL Coins on the Marketplace will receive one (01) gift redemption code.",
+            "Upon successful redemption, please save the code for verification purposes when requested.",
+            "Gift collection timeline: Immediately after receiving the redemption code, please contact the hotline at 0906 259 442 to verify your information and claim your gift.",
+            "Gift delivery method: FSEL will deliver the gift to the address provided by the learner."
+          ],
+          "conditions": [
+            "The gift has no cash value",
+            "Each gift redemption code corresponds to a product quantity of 1",
+            "The number of gifts is limited according to the document \"Self-study month\" announced by the D0ET of NgheAn",
+            "The number of gifts automatically decreases according to the number of students who have redeemed the gift",
+            "Only students who purchase a course between June 1, 2025 and June 30, 2025 are eligible to receive gifts.",
+            "Accounts that received a free course—such as those granted additional study time or using a 100% discount voucher—are not eligible for gift redemption."
+          ],
+          "contacts": [
+            "For any questions, please contact hotline: 0906 259 442",
+            "Email: support_fsel@atlantic.edu.vn"
+          ]
+        },
+        "productId": "4f13c2f5-d2f7-4395-b2c7-c97e9ff9ef89",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  },
+  {
+    "id": "6d756ac2-33d8-4c21-8f31-3f4c67f50a14",
+    "code": "EVMuaHeTuHocIphone",
+    "name": "Iphone 15 Pro 128Gb Titan xanh",
+    "quantity": 1,
+    "showPriority": true,
+    "price": 100000,
+    "expireDate": "2025-08-15",
+    "status": "Active",
+    "marketPlaceType": "FSEL",
+    "productType": "Physical",
+    "IsPremium": true,
+    "images": [
+      "https://cdn-media.sforum.vn/storage/app/media/wp-content/uploads/2023/10/iPhone-15-pro-max-titan-xanh-6.jpg"
+    ],
+    "description": {
+      "howToUses": [
+        "Học viên đổi số Xu FSEL (FSEL Coin) tương ứng trên Marketplace sẽ nhận được 01 mã đổi quà. Sau khi đổi thành công vui lòng lưu lại mã quà tặng để đối chiếu khi được yêu cầu.",
+        "Thời gian nhận quà: Sau ngay nhận mã đổi thưởng, vui lòng liên hệ hotline 0906259442 để xác thực thông tin và nhận quà",
+        "Hình thức nhận quà: FSEL chuyển quà tới học viên qua địa chỉ học sinh cung cấp"
+      ],
+      "conditions": [
+        "Quà không có giá trị quy đổi thành tiền mặt",
+        "Mỗi mã đổi quà tương ứng với 01 sản phẩm",
+        "Số lượng quà tự động giảm dần theo số lượng học sinh đã đổi quà",
+        "Chỉ những học sinh mua khóa học trong khoảng thời gian từ ngày 01/06/2025 đến hết ngày 30/06/2025 mới đủ điều kiện nhận quà.",
+        "Các tài khoản được tặng khóa học miễn phí, bao gồm tài khoản được tặng thêm tháng học hoặc sử dụng voucher giảm giá 100%, sẽ không đủ điều kiện để đổi quà."
+      ],
+      "contacts": [
+        "Mọi thắc mắc liên hệ hotline: 0906 259 442",
+        "Email: support_fsel@atlantic.edu.vn"
+      ]
+    },
+    "translations": [
+      {
+        "id": "2d19bc52-35ef-44a7-b6bc-6fa45b99c0cc",
+        "name": "Iphone 15 Pro 128Gb Titan xanh",
+        "description": {
+          "howToUses": [
+            "Học viên đổi số Xu FSEL (FSEL Coin) tương ứng trên Marketplace sẽ nhận được 01 mã đổi quà.",
+            "Sau khi đổi thành công vui lòng lưu lại mã quà tặng để đối chiếu khi được yêu cầu.",
+            "Thời gian nhận quà: Sau ngay nhận mã đổi thưởng, vui lòng liên hệ hotline 0906259442 để xác thực thông tin và nhận quà",
+            "Hình thức nhận quà: FSEL chuyển quà tới học viên qua địa chỉ học sinh cung cấp"
+          ],
+          "conditions": [
+            "Quà không có giá trị quy đổi thành tiền mặt",
+            "Mỗi mã đổi quà tương ứng với 01 sản phẩm",
+            "Số lượng quà tự động giảm dần theo số lượng học sinh đã đổi quà",
+            "Chỉ những học sinh mua khóa học trong khoảng thời gian từ ngày 01/06/2025 đến hết ngày 30/06/2025 mới đủ điều kiện nhận quà.",
+            "Các tài khoản được tặng khóa học miễn phí, bao gồm tài khoản được tặng thêm tháng học hoặc sử dụng voucher giảm giá 100%, sẽ không đủ điều kiện để đổi quà."
+          ],
+          "contacts": [
+            "Mọi thắc mắc liên hệ hotline: 0906 259 442",
+            "Email: support_fsel@atlantic.edu.vn"
+          ]
+        },
+        "productId": "6d756ac2-33d8-4c21-8f31-3f4c67f50a14",
+        "language": "vi-VN",
+        "createdDate": "2025-06-10"
+      },
+      {
+        "id": "2ed60c84-7245-4e62-a328-ca6055085a70",
+        "name": "Iphone 15 Pro 128Gb Blue Titantium",
+        "description": {
+          "howToUses": [
+            "Learners who exchange FSEL Coins on the Marketplace will receive one (01) gift redemption code.",
+            "Upon successful redemption, please save the code for verification purposes when requested.",
+            "Gift collection timeline: Immediately after receiving the redemption code, please contact the hotline at 0906 259 442 to verify your information and claim your gift.",
+            "Gift delivery method: FSEL will deliver the gift to the address provided by the learner."
+          ],
+          "conditions": [
+            "The gift has no cash value",
+            "Each gift redemption code corresponds to a product quantity of 1",
+            "The number of gifts is limited according to the document \"Self-study month\" announced by the D0ET of NgheAn",
+            "The number of gifts automatically decreases according to the number of students who have redeemed the gift",
+            "Only students who purchase a course between June 1, 2025 and June 30, 2025 are eligible to receive gifts.",
+            "Accounts that received a free course—such as those granted additional study time or using a 100% discount voucher—are not eligible for gift redemption."
+          ],
+          "contacts": [
+            "For any questions, please contact hotline: 0906 259 442",
+            "Email: support_fsel@atlantic.edu.vn"
+          ]
+        },
+        "productId": "6d756ac2-33d8-4c21-8f31-3f4c67f50a14",
+        "language": "en-US",
+        "createdDate": "2025-06-10"
+      }
+    ],
+    "createdDate": "2025-06-10"
+  }
+]

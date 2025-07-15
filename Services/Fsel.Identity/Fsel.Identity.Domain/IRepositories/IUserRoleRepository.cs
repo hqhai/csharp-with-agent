@@ -2,6 +2,10 @@
 
 namespace Fsel.Identity.Domain.IRepositories
 {
+    using Fsel.Core.Entities;
+    using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
+    using Microsoft.AspNetCore.Identity;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Identity.Domain.Entities;
@@ -20,5 +24,8 @@ namespace Fsel.Identity.Domain.IRepositories
         Task<bool> UpdateRangeAsync(IEnumerable<UserRole> userRoles);
 
         Task<bool> DeleteAsync(UserRole userRole);
+        IQueryable<UserRoleEntity> Queryable { get; }
+
+        IQueryable<GetAccountDashboardQueryModel> GetUsersByRoles(IList<EnumRole> roles);
     }
 }

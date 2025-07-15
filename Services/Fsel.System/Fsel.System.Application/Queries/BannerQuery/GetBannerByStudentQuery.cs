@@ -69,6 +69,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
             var timeOfDay = dateVietNam.ConvertDateTimeToSeconds();
 
             var bannerScopes = _bannerScopeRepository.Queryable;
+            var bannerQueries = _bannerRepository.Queryable;
 
             // lấy student
             var studentSettingResult = await _courseService.GetStudentSetting(request.UserId);
@@ -85,14 +86,14 @@ namespace Fsel.System.Application.Queries.BannerQuery
             }
 
             // lấy banner đã hiện trong ngày
-            var bannerUsedTodays = await _bannerStudentRepository.Queryable.Where(x => x.CreatedDate.Date == date.Date && x.StudentId == studentSetting.StudentId).ToListAsync(cancellationToken);
+            var bannerUsedTodays = await _bannerStudentRepository.Queryable.Where(x => x.Banner != null && x.Banner.Type == EnumBannerType.Popup && x.CreatedDate.Date == date.Date && x.StudentId == studentSetting.StudentId).ToListAsync(cancellationToken);
             var bannerIds = bannerUsedTodays.Select(x => x.BannerId).ToList();
 
             // lấy setting banner
             var bannerSetting = await _bannerSettingRepository.Queryable.FirstOrDefaultAsync(cancellationToken);
 
             // check số banner đã hiện trong ngày
-            if (bannerSetting != null && bannerIds?.Count >= bannerSetting.MaximumPerDay)
+            if (bannerSetting != null && bannerUsedTodays.Count >= bannerSetting.MaximumPerDay)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.MaximumBannerPerDay), nameof(bannerSetting.MaximumPerDay), bannerSetting.MaximumPerDay);
                 return methodResult;
@@ -100,10 +101,9 @@ namespace Fsel.System.Application.Queries.BannerQuery
 
             // check khoảng cách xuất hiện giữa các banner
             var lastBannerToday = bannerUsedTodays.OrderByDescending(x => x.CreatedDate).FirstOrDefault();
-            if (bannerSetting != null && lastBannerToday?.CreatedDate.AddMinutes(bannerSetting.DisplayIntervalTime) > DateTime.UtcNow)
+            if (lastBannerToday != null && bannerSetting != null && lastBannerToday.CreatedDate.AddMinutes(bannerSetting.DisplayIntervalTime) > DateTime.UtcNow)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.NotTimeDisplayBanner), nameof(bannerSetting.DisplayIntervalTime), bannerSetting.DisplayIntervalTime);
-                return methodResult;
+                bannerQueries = bannerQueries.Where(x => x.Type != EnumBannerType.Popup);
             }
 
             // lấy event của user
@@ -129,7 +129,7 @@ namespace Fsel.System.Application.Queries.BannerQuery
             bannerScopes = bannerScopes.Where(x => x.CourseLevel == studentSetting.Level);
 
             var banners = await (from a in bannerScopes
-                                 join b in _bannerRepository.Queryable on a.BannerId equals b.Id
+                                 join b in bannerQueries on a.BannerId equals b.Id
                                  where (b.StartDate <= date && b.EndDate >= date) && (b.Status) &&
                                        ((b.DisplayStartTime.HasValue && b.DisplayEndTime.HasValue) ? (b.DisplayStartTime <= timeOfDay && b.DisplayEndTime >= timeOfDay) : (!b.DisplayStartTime.HasValue && !b.DisplayEndTime.HasValue) &&
                                        // bỏ các banner đã hiện thị trong ngày

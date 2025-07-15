@@ -23,4 +23,4 @@ namespace Fsel.Identity.Infrastructure.Maps
                 .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
         }
     }
-}
+} 

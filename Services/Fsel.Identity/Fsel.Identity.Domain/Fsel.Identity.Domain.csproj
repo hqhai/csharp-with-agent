@@ -13,8 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="Entities\RoleClaim.cs" />
-    <Compile Remove="Entities\UserClaim.cs" />
   </ItemGroup>
 
   <ItemGroup>

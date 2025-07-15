@@ -49,8 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<MockTestModel> methodResult = new MethodResult<MockTestModel>();
 
-
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId,cancellationToken);
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId, cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
@@ -75,8 +74,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
                 mockTestResult.GradingTeacherId = teacherId;
                 mockTestResult.GradingStartDate = DateTime.UtcNow;
             }
-            mockTestResult = _mockTestResultRepository.Update(mockTestResult);
-            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };
+            });
             methodResult.Result = GetMockTestDto(mockTest, mockTestResult, displayOrder, code);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

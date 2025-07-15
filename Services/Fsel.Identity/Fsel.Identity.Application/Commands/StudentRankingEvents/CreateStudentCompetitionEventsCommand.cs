@@ -60,7 +60,10 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
                 studentRankingEvents.Add(studentRankingEvent);
             });
 
-            await _studentCompetitionEventsRepository.BulkMergeAsync(studentRankingEvents);
+            await _studentCompetitionEventsRepository.BulkMergeAsync(studentRankingEvents, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = entity => new { entity.CompetitionEventId, entity.StudentId };
+            });
             methodResult.StatusCode = StatusCodes.Status201Created;
             methodResult.Result = _mapper.Map<List<StudentCompetitionEventsModel>>(studentRankingEvents);
             return methodResult;

@@ -24,6 +24,16 @@ namespace Fsel.Identity.Infrastructure.Repositories
         }
 
         public virtual IQueryable<UserRole> GetQuery()
+        public IQueryable<UserRoleEntity> Queryable
+        {
+            get
+            {
+                IQueryable<UserRoleEntity> queryable = _userDbContext.UserRoles.AsQueryable();
+                return queryable;
+            }
+        }
+
+        public virtual IQueryable<IdentityUserRole<Guid>> GetQuery()
         {
             try
             {
@@ -203,6 +213,44 @@ namespace Fsel.Identity.Infrastructure.Repositories
                     }
                 }
             });
+        }
+
+        public virtual IQueryable<GetAccountDashboardQueryModel> GetUsersByRoles(IList<EnumRole> roles)
+        {
+            try
+            {
+                var roleNames = roles.Select(r => r.ToString()).ToList();
+
+                return (from a in _userDbContext.Users
+                        join b in _userDbContext.UserRoles on a.Id equals b.UserId
+                        join c in _userDbContext.Roles on b.RoleId equals c.Id
+                        let em = _userDbContext.EventManagers
+                           .Where(x => x.UserId == a.Id && x.CompetitionEvent != null &&
+                                       (c.Name != EnumRole.EducationDivision.ToString()
+                                           ? !x.CompetitionEvent.ParentEventId.HasValue
+                                           : x.CompetitionEvent.Category == EnumCompetitionEventCategory.Student))
+                           .Select(x => new
+                           {
+                               x.CompetitionEvent!.EventCode
+                           })
+                           .FirstOrDefault()
+                        where !string.IsNullOrEmpty(c.Name) && roleNames.Contains(c.Name!)
+                        select new GetAccountDashboardQueryModel
+                        {
+                            Id = a.Id,
+                            CreatedDate = a.CreatedDate,
+                            FullName = a.FullName,
+                            UserName = a.UserName,
+                            Status = a.Status,
+                            Role = c.Name,
+                            DefaultPassword = a.DefaultPassword,
+                            EventCode = em != null ? em.EventCode : null
+                        }).OrderByDescending(x => x.CreatedDate).AsQueryable();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

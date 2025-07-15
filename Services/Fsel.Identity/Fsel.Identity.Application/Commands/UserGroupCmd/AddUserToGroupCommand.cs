@@ -61,51 +61,51 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 var resultList = new List<UserGroupMemberShipModel>();
 
 
-                foreach (var userId in request.UserIds)
-                {
-                    // Kiểm tra user tồn tại
-                    var user = await _userManager.FindByIdAsync(userId.ToString());
-                    if (user == null)
+                    foreach (var userId in request.UserIds)
                     {
-                        // Skip nếu user không tồn tại
-                        continue;
-                    }
+                        // Kiểm tra user tồn tại
+                        var user = await _userManager.FindByIdAsync(userId.ToString());
+                        if (user == null)
+                        {
+                            // Skip nếu user không tồn tại
+                            continue;
+                        }
 
                     // Kiểm tra xem user đã thuộc nhóm chưa
                     var existingMembership = await _userRoleRepository.GetQuery()
                         .FirstOrDefaultAsync(x => x.UserId == userId && x.RoleId == request.GroupId, cancellationToken);
 
-                    if (existingMembership != null)
-                    {
-                        // Nếu tài khoản đã bị vô hiệu hóa trước đó, kích hoạt lại
-                        if (!existingMembership.IsActive)
+                        if (existingMembership != null)
                         {
-                            existingMembership.IsActive = true;
+                            // Nếu tài khoản đã bị vô hiệu hóa trước đó, kích hoạt lại
+                            if (!existingMembership.IsActive)
+                            {
+                                existingMembership.IsActive = true;
                             await _userRoleRepository.UpdateAsync(existingMembership);
 
-                            // Thêm vào danh sách kết quả
-                            resultList.Add(_mapper.Map<UserGroupMemberShipModel>(existingMembership));
+                                // Thêm vào danh sách kết quả
+                                resultList.Add(_mapper.Map<UserGroupMemberShipModel>(existingMembership));
+                            }
+                            // Không thêm vào kết quả nếu đã là thành viên active
+                            continue;
                         }
-                        // Không thêm vào kết quả nếu đã là thành viên active
-                        continue;
-                    }
 
-                    // Tạo membership mới cho mỗi user
+                        // Tạo membership mới cho mỗi user
                     var membership = new UserRole
-                    {
+                        {
                         RoleId = request.GroupId,
-                        UserId = userId,
-                    };
+                            UserId = userId,
+                        };
 
                     await _userRoleRepository.AddAsync(membership);
 
-                    // Thêm vào danh sách kết quả
-                    resultList.Add(_mapper.Map<UserGroupMemberShipModel>(membership));
-                }
+                        // Thêm vào danh sách kết quả
+                        resultList.Add(_mapper.Map<UserGroupMemberShipModel>(membership));
+                    }
 
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = resultList;
-                return methodResult;
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = resultList;
+                    return methodResult;
             }
         }
     }

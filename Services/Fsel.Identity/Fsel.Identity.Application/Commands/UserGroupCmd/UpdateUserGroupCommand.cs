@@ -112,42 +112,42 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 // Cập nhật thông tin nhóm với AutoMapper
                 _mapper.Map(request, userGroup);
 
-                // Nếu có sự thay đổi DisplayOrder, cập nhật các nhóm bị ảnh hưởng
-                if (newDisplayOrder != oldDisplayOrder)
-                {
-                    if (newDisplayOrder < oldDisplayOrder)
+                    // Nếu có sự thay đổi DisplayOrder, cập nhật các nhóm bị ảnh hưởng
+                    if (newDisplayOrder != oldDisplayOrder)
                     {
-                        var groupsToUpdate = allGroups.Where(x => x.DisplayOrder >= newDisplayOrder && x.DisplayOrder < oldDisplayOrder).ToList();
-                        if (groupsToUpdate.Any())
+                        if (newDisplayOrder < oldDisplayOrder)
                         {
+                            var groupsToUpdate = allGroups.Where(x => x.DisplayOrder >= newDisplayOrder && x.DisplayOrder < oldDisplayOrder).ToList();
+                            if (groupsToUpdate.Any())
+                            {
                             foreach (var group in groupsToUpdate)
                             {
                                 await _roleManager.UpdateAsync(group);
 
                             }
+                            }
                         }
-                    }
-                    else if (newDisplayOrder > oldDisplayOrder)
-                    {
-                        var groupsToUpdate = allGroups.Where(x => x.DisplayOrder > oldDisplayOrder && x.DisplayOrder <= newDisplayOrder).ToList();
+                        else if (newDisplayOrder > oldDisplayOrder)
+                        {
+                            var groupsToUpdate = allGroups.Where(x => x.DisplayOrder > oldDisplayOrder && x.DisplayOrder <= newDisplayOrder).ToList();
 
                         foreach (var group in groupsToUpdate)
-                        {
+                            {
                             await _roleManager.UpdateAsync(group);
 
+                            }
                         }
                     }
-                }
 
-                // Cập nhật nhóm hiện tại
+                    // Cập nhật nhóm hiện tại
                 await _roleManager.UpdateAsync(userGroup);
 
-                // Map trở lại model
-                var resultModel = _mapper.Map<UserGroupModel>(userGroup);
+                    // Map trở lại model
+                    var resultModel = _mapper.Map<UserGroupModel>(userGroup);
 
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = resultModel;
-                return methodResult;
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = resultModel;
+                    return methodResult;
             }
         }
     }

@@ -66,26 +66,26 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                 // Tạo nhóm mới sử dụng AutoMapper
                 var userGroup = _mapper.Map<Role>(request);
 
-                // Cập nhật DisplayOrder của các nhóm khác trước khi thêm nhóm mới
-                var groupsToUpdate = allGroups.Where(x => x.DisplayOrder >= request.DisplayOrder).ToList();
+                    // Cập nhật DisplayOrder của các nhóm khác trước khi thêm nhóm mới
+                    var groupsToUpdate = allGroups.Where(x => x.DisplayOrder >= request.DisplayOrder).ToList();
 
-                if (groupsToUpdate.Any())
-                {
+                    if (groupsToUpdate.Any())
+                    {
                     foreach (var item in groupsToUpdate)
                     {
                         await _roleManager.UpdateAsync(item);
                     }
-                }
+                    }
 
-                // Thêm nhóm mới
+                    // Thêm nhóm mới
                 await _roleManager.CreateAsync(userGroup);
 
-                // Map trở lại model
-                var resultModel = _mapper.Map<UserGroupModel>(userGroup);
+                    // Map trở lại model
+                    var resultModel = _mapper.Map<UserGroupModel>(userGroup);
 
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = resultModel;
-                return methodResult;
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = resultModel;
+                    return methodResult;
             }
         }
     }

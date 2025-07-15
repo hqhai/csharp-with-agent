@@ -9,7 +9,7 @@ namespace Fsel.Sender.Application.Commands.SendSMSCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Caching;
+    using Fsel.Common.Caching;
     using Fsel.Sender.Application.Services.SMSServices.IRIS;
     using Fsel.Sender.Application.Services.SMSServices.IRIS.Models;
     using Fsel.Sender.Domain.Entities;

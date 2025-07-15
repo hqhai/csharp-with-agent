@@ -37,6 +37,12 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                     return methodResult;
                 }
 
+                if (userGroup.IsDefault)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumUserGroupErrorCode.DoNotDeleteTheDefaultUserGroup), nameof(userGroup));
+                    return methodResult;
+                }
+
                 // Lấy tất cả thành viên trong nhóm
                 var memberships = _userRoleRepository.GetQuery()
                     .Where(x => x.RoleId == request.Id)

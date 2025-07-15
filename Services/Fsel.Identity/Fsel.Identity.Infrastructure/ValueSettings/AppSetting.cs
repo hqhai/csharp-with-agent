@@ -15,6 +15,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public UserReferralConfig? UserReferralConfig { get; set; }
         public UserDeletionConfig? UserDeletionConfig { get; set; }
         public CacheConfig? CacheConfig { get; set; }
+        public CRMConfig? CRMConfig { get; set; }
     }
 
     public class UserReferralConfig
@@ -70,6 +71,9 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? CreateUsersAndOrders { get; set; }
         public string? AddCoinSpreadSheetId { get; set; }
         public string? AddCoinBuyCourseSpreadSheetId { get; set; }
+        public string? AddCoinFselEventSpreadSheetId { get; set; }
+        public string? SummerSelfLearningSpreadSheetId { get; set; }
+        public string? SummerSelfLearningSheet { get; set; }
     }
 
     public class UserDeletionConfig
@@ -82,5 +86,10 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public bool TurnOnCaching { get; set; }
         public int CachingDuration { get; set; }
+    }
+
+    public class CRMConfig
+    {
+        public string? SecretKey { get; set; }
     }
 }

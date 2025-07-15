@@ -15,7 +15,8 @@ namespace Fsel.Identity.Domain.Entities
 
         public bool IsActive { get; set; }
 
-        public string? LocationIdStr { get; set; }
+        public bool IsDefault { get; set; }
 
+        public string? LocationIdStr { get; set; }
     }
 }
