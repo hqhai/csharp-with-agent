@@ -7,9 +7,12 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -28,13 +31,15 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly ICustomerSurveyGroupRepository _customerSurveyGroupRepository;
         private readonly IUserSurveyAssignmentRepository _userSurveyAssignmentRepository;
         private readonly AuthContext _authContext;
+        private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
 
-        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext)
+        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher)
         {
             _surveyConfigRepository = surveyConfigRepository;
             _customerSurveyGroupRepository = customerSurveyGroupRepository;
             _userSurveyAssignmentRepository = userSurveyAssignmentRepository;
             _authContext = authContext;
+            _createTokenHistoryPublisher = createTokenHistoryPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(StudentDoSurveyCommand request, CancellationToken cancellationToken)
@@ -79,7 +84,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             var customerSurveyGroup = new CustomerSurveyGroup()
             {
-                Status = Shared.Enums.EnumSurveyGroupStatus.Done,
+                Status = EnumSurveyGroupStatus.Done,
                 UserId = _authContext.CurrentUserId,
                 Coin = surveyConfig.Tokens,
                 CustomerSurveys = customerSurveys,
@@ -104,14 +109,34 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 {
                     await _userSurveyAssignmentRepository.DeleteAsync(assignment);
                 }
-                _customerSurveyGroupRepository.Add(customerSurveyGroup);
+                customerSurveyGroup = _customerSurveyGroupRepository.Add(customerSurveyGroup);
                 await _surveyConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await CreateToken(customerSurveyGroup.Id, surveyConfig.Tokens);
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;
             });
 
             return methodResult;
+        }
+
+        private async Task CreateToken(Guid customerSurveyGroupId, int tokens)
+        {
+            var tokenHistories = new List<TokenHistoryQueueModel>
+                {
+                    new TokenHistoryQueueModel
+                    {
+                        VolatileToken = tokens,
+                        UserId = _authContext.CurrentUserId,
+                        ObjectId = customerSurveyGroupId,
+                        Feature = EnumTokenFeature.FselEvent,
+                        Mission = EnumTokenMission.SurveyEvent,
+                        Type = EnumTokenHistoryType.Recevived,
+                    }
+                };
+            await _createTokenHistoryPublisher.Publish(tokenHistories, CancellationToken.None);
         }
     }
 }
