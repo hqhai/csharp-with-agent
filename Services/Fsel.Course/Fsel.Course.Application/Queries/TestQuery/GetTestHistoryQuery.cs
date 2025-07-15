@@ -8,7 +8,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -46,7 +46,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                         .AsNoTracking()
                         .ToListAsync(cancellationToken: cancellationToken)
                         .ConfigureAwait(false);
-            methodResult.Result = new PagingItemsModel<TestModel>(_mapper.Map<IList<TestModel>>(lists), request, totalItem);
+            methodResult.Result = new PagingItemsModel<TestModel>(_mapper.Map<List<TestModel>>(lists), request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
