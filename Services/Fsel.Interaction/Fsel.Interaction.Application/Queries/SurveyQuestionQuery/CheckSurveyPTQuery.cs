@@ -27,15 +27,17 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
         private readonly ISurveyQuestionRepository _surveyQuestionRepository;
         private readonly ICustomerSurveyRepository _customerSurveyRepository;
         private readonly ICustomerSurveyGroupRepository _customerSurveyGroupRepository;
+        private readonly IUserSurveyAssignmentRepository _userSurveyAssignmentRepository;
         private readonly AuthContext _authContext;
 
-        public CheckSurveyPTQueryHandler(ISurveyConfigRepository surveyConfigRepository, ISurveyQuestionRepository surveyQuestionRepository, ICustomerSurveyRepository customerSurveyRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, AuthContext authContext)
+        public CheckSurveyPTQueryHandler(ISurveyConfigRepository surveyConfigRepository, ISurveyQuestionRepository surveyQuestionRepository, ICustomerSurveyRepository customerSurveyRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, AuthContext authContext, IUserSurveyAssignmentRepository userSurveyAssignmentRepository)
         {
             _surveyConfigRepository = surveyConfigRepository;
             _surveyQuestionRepository = surveyQuestionRepository;
             _customerSurveyRepository = customerSurveyRepository;
             _customerSurveyGroupRepository = customerSurveyGroupRepository;
             _authContext = authContext;
+            _userSurveyAssignmentRepository = userSurveyAssignmentRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CheckSurveyPTQuery request, CancellationToken cancellationToken)
@@ -44,6 +46,12 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            if (await _userSurveyAssignmentRepository.Queryable.AnyAsync(p => p.CreatedUserId == _authContext.CurrentUserId && p.ProgressRequirement == EnumProgressRequirement.DonePT, cancellationToken))
+            {
+                methodResult.Result = false;
+                return methodResult;
+            }
 
             var query = await (from cs in _customerSurveyRepository.Queryable
                                join csg in _customerSurveyGroupRepository.Queryable on cs.CustomerSurveyGroupId equals csg.Id
