@@ -4,6 +4,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -11,6 +12,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
+    using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -32,14 +34,16 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly IUserSurveyAssignmentRepository _userSurveyAssignmentRepository;
         private readonly AuthContext _authContext;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
+        private readonly IMapper _mapper;
 
-        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher)
+        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper)
         {
             _surveyConfigRepository = surveyConfigRepository;
             _customerSurveyGroupRepository = customerSurveyGroupRepository;
             _userSurveyAssignmentRepository = userSurveyAssignmentRepository;
             _authContext = authContext;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<bool>> Handle(StudentDoSurveyCommand request, CancellationToken cancellationToken)
@@ -67,6 +71,14 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 var surveyQuestion = request.Answers?.FirstOrDefault(p => p.Id == item.Id);
                 if (surveyQuestion != null)
                 {
+                    var answers = _mapper.Map<IList<AnswerSurveyModel>>(surveyQuestion.Answer);
+
+                    if (item.IsRequired.HasValue && item.IsRequired.Value && !answers.Any())
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(answers));
+                        return methodResult;
+                    }
+
                     customerSurveys.Add(new CustomerSurvey()
                     {
                         UserId = _authContext.CurrentUserId,
