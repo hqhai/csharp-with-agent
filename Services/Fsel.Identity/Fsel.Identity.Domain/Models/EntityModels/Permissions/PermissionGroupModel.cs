@@ -8,6 +8,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels.Permissions
         public string? Name { get; set; }
         public bool Status { get; set; }
         public string? Description { get; set; }
+        public Guid? MenuId { get; set; }
         public IList<PermissionModel>? Permissions { get; set; }
     }
 }

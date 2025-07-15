@@ -34,6 +34,7 @@ namespace Fsel.Identity.Infrastructure
             builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
             builder.HasSequence<int>(SqlSettings.Sequence.UserSequence).StartsAt(100000).IncrementsBy(1);
 
+            SeedMenus(builder);
             SeedPlatforms(builder);
             SeedRoles(builder);
             SeedPermissions(builder);
@@ -68,6 +69,8 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
             builder.ApplyConfiguration(new PermissionEntityTypeConfiguration());
             builder.ApplyConfiguration(new RoleClaimEntityTypeConfiguration());
+            builder.ApplyConfiguration(new MenuEntityTypeConfiguration());
+            builder.ApplyConfiguration(new PermissionGroupEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserGroupMemberShipEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentEditHistoryEntityTypeConfiguration());
         }
@@ -106,6 +109,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserGroup> UserGroups { get; set; }
         public DbSet<UserGroupMemberShip> UserGroupMemberShips { get; set; }
         public DbSet<StudentEditHistory> StudentEditHistories { get; set; }
+        public DbSet<Menu> Menus { get; set; }
 
         #endregion Db Set
 
@@ -123,7 +127,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<PermissionGroup> PermissionGroups { get; set; }
         public DbSet<Permission> Permissions { get; set; }
 
-        #endregion Db Set
+#endregion report
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -182,6 +186,17 @@ namespace Fsel.Identity.Infrastructure
 
             ArgumentNullException.ThrowIfNull(roleClaims);
             builder.Entity<RoleClaim>().HasData(roleClaims);
+        }
+
+        private static void SeedMenus(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.MenuName);
+            var menus = ConvertHelper.DeserializeFromFilePath<IList<Menu>>(path);
+            ArgumentNullException.ThrowIfNull(menus);
+            if (menus != null)
+            {
+                builder.Entity<Menu>().HasData(menus);
+            }
         }
     }
 }
