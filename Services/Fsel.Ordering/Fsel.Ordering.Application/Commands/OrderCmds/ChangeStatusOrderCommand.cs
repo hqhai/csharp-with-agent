@@ -270,17 +270,17 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
                     }
                     await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
 
-                    //var blindBoxPackages = _appSetting.BlindBoxConfigs;
+                    var blindBoxPackages = _appSetting.BlindBoxConfigs;
 
-                    //if (order.RevenueType == EnumPaymentRevenueType.Revenue && blindBoxPackages != null && blindBoxPackages.Packages != null && blindBoxPackages.Packages.Contains(package.MonthNumber))
-                    //{
-                    //    await _systemService.AddUserIntoBlindBoxEvent(new AddUserIntoBlindBoxCommandModel()
-                    //    {
-                    //        UserId = order.UserId,
-                    //        IsWin = false,
-                    //        NumberOpen = 0
-                    //    });
-                    //}
+                    if (order.RevenueType == EnumPaymentRevenueType.Revenue)
+                    {
+                        await _systemService.AddUserIntoBlindBoxEvent(new AddUserIntoBlindBoxCommandModel()
+                        {
+                            UserId = order.UserId,
+                            IsWin = false,
+                            NumberOpen = 0
+                        });
+                    }
 
                     if (order.RevenueType == EnumPaymentRevenueType.Revenue && package.BonusCoins > 0)
                     {

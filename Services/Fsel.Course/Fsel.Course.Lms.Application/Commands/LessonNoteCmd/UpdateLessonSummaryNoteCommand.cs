@@ -6,7 +6,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -41,8 +43,12 @@ namespace Fsel.Course.Lms.Application.Commands.LessonNoteCmd
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>
             {
                 lessonResult.SummaryNote = request.SummaryNote;
-                lessonResult = _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.UnitId, x => x.LessonId, x => x.StudentId);
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId };
+                });
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;

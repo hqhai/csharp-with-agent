@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -79,7 +80,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Report_PlacementTests.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_PlacementTests_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
         }
 
         /// <summary>
@@ -96,7 +97,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Report_LearningProgress.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_LearningProgress_{command.CourseType}_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
         }
 
         /// <summary>
@@ -113,7 +114,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Report_LearningResult.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_LearningResult_{command.CourseType}_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
         }
     }
 }

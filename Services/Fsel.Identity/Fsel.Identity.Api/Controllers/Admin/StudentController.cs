@@ -83,6 +83,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("profile/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         public async Task<IActionResult> GetProfileStudent([FromRoute] Guid studentId)
         {
             MethodResult<StudentModel> queryResult = await _mediator.Send(new GetStudentProfileQuery { StudentId = studentId }).ConfigureAwait(false);
@@ -131,6 +132,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("management")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsQuery query)
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
