@@ -62,6 +62,8 @@ builder.Services.AddScoped<IUserGroupRepository, UserGroupRepository>();
 builder.Services.AddScoped<IUserGroupMemberShipRepository, UserGroupMemberShipRepository>();
 builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
 builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
+builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
+
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<QuestBoardPublisher>();

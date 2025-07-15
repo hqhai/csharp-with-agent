@@ -14,6 +14,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Queries.AdminQuery;
     using Fsel.Identity.Application.Queries.ManagerReportQuery;
     using Fsel.Identity.Application.Queries.ParentQuery;
+    using Fsel.Identity.Application.Queries.StudentEditHistoryQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
     using Fsel.Identity.Application.Queries.UserQuery;
     using Fsel.Identity.Application.Queries.UserOtpCodeQuery;
@@ -343,7 +344,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// cập nhật expired date cho students
         /// </summary>
-        [HttpPut("update-expired-date-for-students")]
+        [HttpPut("update-expired-date-for-student")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
@@ -425,6 +426,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> ToolSynchronousParentInfo()
         {
             var queryResult = await _mediator.Send(new ToolSynchronousParentInfoCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student edit histories
+        /// </summary>
+        [HttpGet("get-student-edit-histories")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentEditHistoryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentEditHistories([FromQuery] GetStudentEditHistoriesByStudentIdQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

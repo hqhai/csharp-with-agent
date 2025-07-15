@@ -69,6 +69,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new PermissionEntityTypeConfiguration());
             builder.ApplyConfiguration(new RoleClaimEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserGroupMemberShipEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentEditHistoryEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -104,15 +105,19 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<StudentEventLearningRecord> StudentEventLearningRecords { get; set; }
         public DbSet<UserGroup> UserGroups { get; set; }
         public DbSet<UserGroupMemberShip> UserGroupMemberShips { get; set; }
+        public DbSet<StudentEditHistory> StudentEditHistories { get; set; }
 
         #endregion Db Set
 
         #region report
+
         public DbSet<OverallStudentModel> OverallStudentResults { get; set; }
 
         public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
 
         public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
+
+        #endregion report
 
         public DbSet<RoleClaim> RoleClaims { get; set; }
         public DbSet<PermissionGroup> PermissionGroups { get; set; }
