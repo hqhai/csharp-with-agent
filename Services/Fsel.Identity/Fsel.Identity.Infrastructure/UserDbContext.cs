@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserToken>
+    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaim, UserToken>
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -36,6 +36,7 @@ namespace Fsel.Identity.Infrastructure
 
             SeedPlatforms(builder);
             SeedRoles(builder);
+            SeedPermissions(builder);
 
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
@@ -65,6 +66,9 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
+            builder.ApplyConfiguration(new PermissionEntityTypeConfiguration());
+            builder.ApplyConfiguration(new RoleClaimEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserGroupMemberShipEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentEditHistoryEntityTypeConfiguration());
         }
 
@@ -99,6 +103,8 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserSchool> UserSchools { get; set; }
         public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
         public DbSet<StudentEventLearningRecord> StudentEventLearningRecords { get; set; }
+        public DbSet<UserGroup> UserGroups { get; set; }
+        public DbSet<UserGroupMemberShip> UserGroupMemberShips { get; set; }
         public DbSet<StudentEditHistory> StudentEditHistories { get; set; }
 
         #endregion Db Set
@@ -112,6 +118,12 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
 
         #endregion report
+
+        public DbSet<RoleClaim> RoleClaims { get; set; }
+        public DbSet<PermissionGroup> PermissionGroups { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
+
+        #endregion Db Set
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -149,6 +161,27 @@ namespace Fsel.Identity.Infrastructure
                 ArgumentNullException.ThrowIfNull(roles);
                 builder.Entity<Role>().HasData(roles);
             }
+        }
+
+        private static void SeedPermissions(ModelBuilder builder)
+        {
+            var pathPermissionGroup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PermissionGroupName);
+            var permissionGroups = ConvertHelper.DeserializeFromFilePath<IList<PermissionGroup>>(pathPermissionGroup);
+
+            ArgumentNullException.ThrowIfNull(permissionGroups);
+            builder.Entity<PermissionGroup>().HasData(permissionGroups);
+
+            var pathPermission = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PermissionName);
+            var permissions = ConvertHelper.DeserializeFromFilePath<IList<Permission>>(pathPermission);
+
+            ArgumentNullException.ThrowIfNull(permissions);
+            builder.Entity<Permission>().HasData(permissions);
+
+            var pathRoleClaim = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.RoleClaimName);
+            var roleClaims = ConvertHelper.DeserializeFromFilePath<IList<RoleClaim>>(pathRoleClaim);
+
+            ArgumentNullException.ThrowIfNull(roleClaims);
+            builder.Entity<RoleClaim>().HasData(roleClaims);
         }
     }
 }

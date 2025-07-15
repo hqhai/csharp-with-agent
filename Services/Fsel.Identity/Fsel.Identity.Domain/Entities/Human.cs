@@ -36,6 +36,11 @@ namespace Fsel.Identity.Domain.Entities
 
         public EnumGender? Gender { get; set; }
 
+        public Guid? ManageUserId { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Position { get; set; }
+
         public virtual User? User { get; set; }
         public Guid? UserId { get; set; }
 
