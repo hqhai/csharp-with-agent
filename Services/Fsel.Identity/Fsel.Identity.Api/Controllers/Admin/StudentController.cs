@@ -15,6 +15,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Identity.Application.Queries.ManagerReportQuery;
     using Fsel.Identity.Application.Queries.ParentQuery;
     using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Application.Queries.UserQuery;
     using Fsel.Identity.Application.Queries.UserOtpCodeQuery;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
@@ -380,6 +381,43 @@ namespace Fsel.Identity.Api.Controllers.Admin
 
         /// <summary>
         /// Tool Synchronous Parent Info
+        /// Update Profile User
+        /// </summary>
+        [HttpPut("update-profile-user")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateProfileUser([FromBody] UpdateProfileUserCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Profile User Manage
+        /// </summary>
+        [HttpGet("get-user-manage")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserManageModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateProfileUser([FromQuery] GetUserManagesByRoleQuery query)
+        {
+            MethodResult<PagingItemsModel<UserManageModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Profile User Manage
+        /// </summary>
+        [HttpGet("users-by-roles")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersByRoles([FromQuery] GetUsersByRolesQuery query)
+        {
+            MethodResult<PagingItemsModel<UserModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search school grades classes
         /// </summary>
         [HttpPost("tool-synchronous-parent-info")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]

@@ -68,6 +68,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
             builder.ApplyConfiguration(new PermissionEntityTypeConfiguration());
             builder.ApplyConfiguration(new RoleClaimEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserGroupMemberShipEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -101,6 +102,8 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserSchool> UserSchools { get; set; }
         public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
         public DbSet<StudentEventLearningRecord> StudentEventLearningRecords { get; set; }
+        public DbSet<UserGroup> UserGroups { get; set; }
+        public DbSet<UserGroupMemberShip> UserGroupMemberShips { get; set; }
 
         #endregion Db Set
 
