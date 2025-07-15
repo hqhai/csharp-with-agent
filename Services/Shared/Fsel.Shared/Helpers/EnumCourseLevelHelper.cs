@@ -135,7 +135,7 @@ namespace Fsel.Shared.Helpers
             return default;
         }
 
-        public static IList<EnumCourseLevel> GetCourseLevels(this IList<EnumCourseType>? courseTypes, IList<EnumCourseLevel>? courseLevels)
+        public static IList<EnumCourseLevel> GetCourseLevels(this IList<EnumCourseType>? courseTypes, IList<EnumCourseLevel>? courseLevels = null)
         {
             var listCourseLevels = courseTypes?.SelectMany(x => GetEnumCourseLevels(x)).ToList() ?? new List<EnumCourseLevel>();
             if (courseLevels != null && courseLevels.Any())
@@ -179,6 +179,11 @@ namespace Fsel.Shared.Helpers
             }
 
             return courseLevels;
+        }
+
+        public static IList<EnumCourseLevel> GetEnumCourseLevels(this EnumCourseType courseType)
+        {
+            return s_courseTypeLevel.Where(x => x.Key == courseType).Select(x => x.Value).ToList();
         }
 
         public static string? GetCodeByEnumCourseLevel(this EnumCourseLevel? enumCourseLevel)

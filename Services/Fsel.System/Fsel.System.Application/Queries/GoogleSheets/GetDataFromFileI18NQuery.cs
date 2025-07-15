@@ -4,7 +4,7 @@ namespace Fsel.System.Application.Queries.GoogleSheets
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Caching;
+    using Fsel.Common.Caching;
     using Fsel.Shared.Constants;
     using Fsel.System.Application.Services.GoogleSheetServices;
     using Fsel.System.Application.Services.GoogleSheetServices.Models;

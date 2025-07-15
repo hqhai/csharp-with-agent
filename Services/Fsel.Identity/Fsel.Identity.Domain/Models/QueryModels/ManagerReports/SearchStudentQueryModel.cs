@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
 {
+    using System.Text.Json.Serialization;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -10,6 +11,20 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
     {
         public string? ListSchoolGrade { get; set; }
         public string? ListSchoolClass { get; set; }
+        public string? ListDistrict { get; set; }
+        public string? SchoolIdsStr { get; set; }
+        public string? ListProvince { get; set; }
+        public string? ListStudentId { get; set; }
+        public string? ListCourseType { get; set; }
+        public string? ListCourseLevel { get; set; }
+
+        public IList<EnumCourseLevel>? CourseLevels
+        {
+            get
+            {
+                return ListCourseLevel.ToList<EnumCourseLevel>();
+            }
+        }
 
         public IList<string>? SchoolClasses
         {
@@ -27,10 +42,6 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
-        public string? SchoolGrade { get; set; }
-        public string? SchoolClass { get; set; }
-        public string? SchoolIdsStr { get; set; }
-
         public IList<Guid>? SchoolIds
         {
             get
@@ -38,8 +49,6 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
                 return SchoolIdsStr.ToList<Guid>();
             }
         }
-
-        public string? ListDistrict { get; set; }
 
         public IList<Guid>? DistrictIds
         {
@@ -49,8 +58,6 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
-        public string? ListProvince { get; set; }
-
         public IList<Guid>? ProvinceIds
         {
             get
@@ -59,8 +66,6 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
-        public string? ListStudentId { get; set; }
-
         public IList<Guid>? StudentIds
         {
             get
@@ -68,6 +73,18 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
                 return ListStudentId.ToList<Guid>();
             }
         }
+
+        [JsonIgnore]
+        public IList<EnumCourseType>? CourseTypes
+        {
+            get
+            {
+                return ListCourseType.ToList<EnumCourseType>();
+            }
+        }
+
+        public string? SchoolGrade { get; set; }
+        public string? SchoolClass { get; set; }
 
         public bool? IsLearning { get; set; }
         public EnumCourseType? CourseType { get; set; }

@@ -6,7 +6,7 @@ namespace Fsel.Identity.Application.Services.SystemService.QueryModels
     {
         public IList<Guid>? UserIds { get; set; }
 
-        public double Coin { get; set; }
+        public double Coins { get; set; }
 
         public int Month { get; set; }
     }
