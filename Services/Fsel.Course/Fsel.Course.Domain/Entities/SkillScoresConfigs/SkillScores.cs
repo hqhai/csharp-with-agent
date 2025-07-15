@@ -37,5 +37,7 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
             }
             set { _percent = TotalCount > 0 ? NumberHelper.GetPercent(CorrectCount, TotalCount) : value; }
         }
+
+        public double TokenReceived { get; set; }
     }
 }
