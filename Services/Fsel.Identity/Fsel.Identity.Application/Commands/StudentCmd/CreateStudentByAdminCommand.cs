@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.UserCmd
+namespace Fsel.Identity.Application.Commands.StudentCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -8,34 +8,35 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Commands.UserReferrals;
     using Fsel.Identity.Application.Queries.UserReferrals;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.CommandModels.Users;
+    using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Enums;
     using MediatR;
 
-    public class CreateUserByAdminCommand : CreateUserByAdminCommandModel, IRequest<MethodResult<User>>
+    public class CreateStudentByAdminCommand : CreateStudentByAdminCommandModel, IRequest<MethodResult<User>>
     {
     }
 
-    public class CreateUserByAdminCommandHandler : IRequestHandler<CreateUserByAdminCommand, MethodResult<User>>
+    public class CreateStudentByAdminCommandHandler : IRequestHandler<CreateStudentByAdminCommand, MethodResult<User>>
     {
         private readonly UserManager<User> _userManager;
         private readonly IPlatformRepository _platformRepository;
         private const string DefaultPassword = "Fsel@2024";
         private readonly IMediator _mediator;
 
-        public CreateUserByAdminCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IMediator mediator)
+        public CreateStudentByAdminCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IMediator mediator)
         {
             _userManager = userManager;
             _platformRepository = platformRepository;
             _mediator = mediator;
         }
 
-        public async Task<MethodResult<User>> Handle(CreateUserByAdminCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<User>> Handle(CreateStudentByAdminCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<User>();

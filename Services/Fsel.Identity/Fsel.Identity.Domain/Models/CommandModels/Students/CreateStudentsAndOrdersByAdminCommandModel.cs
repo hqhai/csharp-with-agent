@@ -1,15 +1,15 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Domain.Models.CommandModels.Users
+namespace Fsel.Identity.Domain.Models.CommandModels.Students
 {
     using System.Collections.Generic;
 
-    public class CreateUsersAndOrdersByAdminCommandModel
+    public class CreateStudentsAndOrdersByAdminCommandModel
     {
-        public IList<CreateUserAndOrderByAdminCommandModel>? Users { get; set; }
+        public IList<CreateStudentAndOrderByAdminCommandModel>? Users { get; set; }
     }
 
-    public class CreateUserAndOrderByAdminCommandModel
+    public class CreateStudentAndOrderByAdminCommandModel
     {
         public string? FullName { get; set; }
         public string? Email { get; set; }
