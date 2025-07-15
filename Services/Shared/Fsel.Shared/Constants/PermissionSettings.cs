@@ -42,9 +42,9 @@ namespace Fsel.Shared.Constants
         public const string EditFrequencyOfAppearance = $"{ClaimType}.EditFrequencyOfAppearance";
     }
 
-    public static class ReportManagement
+    public static class ReportManagementByAdminSchool
     {
-        public const string ClaimType = nameof(ReportManagement);
+        public const string ClaimType = nameof(ReportManagementByAdminSchool);
         public const string ViewPTResultsReport = $"{ClaimType}.ViewPTResultsReport";
         public const string ViewLearningProgressReport = $"{ClaimType}.ViewLearningProgressReport";
         public const string ViewLearningResultsReport = $"{ClaimType}.ViewLearningResultsReport";
@@ -177,5 +177,23 @@ namespace Fsel.Shared.Constants
     {
         public const string ClaimType = nameof(AddStudentToBlindBox);
         public const string Add = $"{ClaimType}.Add";
+    }
+
+    public static class DashboardManagementByAdminSchool
+    {
+        public const string ClaimType = nameof(DashboardManagementByAdminSchool);
+        public const string ViewPTResultsReport = $"{ClaimType}.ViewPTResultsReport";
+        public const string ViewLearningProgressReport = $"{ClaimType}.ViewLearningProgressReport";
+        public const string ViewLearningResultsReport = $"{ClaimType}.ViewLearningResultsReport";
+        public const string ViewAttendanceReport = $"{ClaimType}.ViewAttendanceReport";
+    }
+
+    public static class SchoolStudentManagement
+    {
+        public const string ClaimType = nameof(SchoolStudentManagement);
+        public const string Add = $"{ClaimType}.Add";
+        public const string View = $"{ClaimType}.View";
+        public const string Update = $"{ClaimType}.Update";
+        public const string Export = $"{ClaimType}.Export";
     }
 }

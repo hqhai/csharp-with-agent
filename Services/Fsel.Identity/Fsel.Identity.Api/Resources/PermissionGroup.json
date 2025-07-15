@@ -46,8 +46,8 @@
   },
   {
     "id": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
-    "claimType": "ReportManagement",
-    "name": "Quản lý báo cáo",
+    "claimType": "ReportManagementByAdminSchool",
+    "name": "Quản lý báo cáo của Admin School",
     "description": null,
     "status": true,
     "menuId": "18e09c83-8f23-4509-a39c-7d3d32c4d81b",
@@ -211,5 +211,14 @@
     "status": true,
     "menuId": "06641b23-3857-4b6d-b1d7-096fc98fa8b9",
     "createdDate": "2025-06-15"
+  },
+  {
+    "id": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "claimType": "DashboardManagementByAdminSchool",
+    "name": "Quản lý Dashboard của AdminSchool",
+    "description": null,
+    "status": true,
+    "menuId": "68365a87-73fa-4926-acb6-24f1403f77ad",
+    "createdDate": "2025-07-01"
   }
 ]

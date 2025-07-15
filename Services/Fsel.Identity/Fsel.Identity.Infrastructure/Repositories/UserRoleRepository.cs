@@ -5,6 +5,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using Fsel.Core.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -17,6 +18,15 @@ namespace Fsel.Identity.Infrastructure.Repositories
         public UserRoleRepository(UserDbContext userDbContext)
         {
             _userDbContext = userDbContext;
+        }
+
+        public IQueryable<UserRoleEntity> Queryable
+        {
+            get
+            {
+                IQueryable<UserRoleEntity> queryable = _userDbContext.UserRoles.AsQueryable();
+                return queryable;
+            }
         }
 
         public virtual IQueryable<IdentityUserRole<Guid>> GetQuery()

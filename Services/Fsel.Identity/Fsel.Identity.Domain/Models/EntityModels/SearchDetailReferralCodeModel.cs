@@ -12,6 +12,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public DateTime CreatedDate { get; set; }
         public EnumUserReferralType Type { get; set; }
         public int Token { get; set; }
-        public EnumFeatureUserReferral UserReferral { get; set; }
+        public EnumFeatureUserReferral? UserReferral { get; set; }
     }
 }

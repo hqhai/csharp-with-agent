@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Domain.IRepositories
 {
+    using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Identity;
@@ -9,6 +10,7 @@ namespace Fsel.Identity.Domain.IRepositories
     public interface IUserRoleRepository
     {
         IQueryable<IdentityUserRole<Guid>> GetQuery();
+        IQueryable<UserRoleEntity> Queryable { get; }
 
         IQueryable<GetAccountDashboardQueryModel> GetUsersByRoles(IList<EnumRole> roles);
     }

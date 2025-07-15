@@ -640,7 +640,7 @@
   },
   {
     "id": "6df0f361-0d99-4a38-b5be-706225b7f22b",
-    "claimValue": "ReportManagement.ViewPT",
+    "claimValue": "ReportManagementByAdminSchool.ViewPTResultsReport",
     "name": "Xem báo cáo kết quả đánh giá đầu vào",
     "description": null,
     "status": true,
@@ -649,7 +649,7 @@
   },
   {
     "id": "a092a54c-1306-4600-af02-8cae97875977",
-    "claimValue": "ReportManagement.ViewLearningProgress",
+    "claimValue": "ReportManagementByAdminSchool.ViewLearningProgressReport",
     "name": "Xem báo cáo tiến độ học tập",
     "description": null,
     "status": true,
@@ -658,7 +658,7 @@
   },
   {
     "id": "27b1c0ae-d63a-4553-a130-e008183940c7",
-    "claimValue": "ReportManagement.ViewLearningResults",
+    "claimValue": "ReportManagementByAdminSchool.ViewLearningResultsReport",
     "name": "Xem báo cáo kết quả học tập",
     "description": null,
     "status": true,
@@ -667,11 +667,47 @@
   },
   {
     "id": "09748430-9ce7-4f22-a777-2516fc98d16c",
-    "claimValue": "ReportManagement.ViewDiligence",
+    "claimValue": "ReportManagementByAdminSchool.ViewAttendanceReport",
     "name": "Xem báo cáo chuyên cần",
     "description": null,
     "status": true,
     "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
     "createdDate": "2025-06-19"
+  },
+  {
+    "id": "e5e6f8f3-aaa3-480f-bd6e-f005aec41167",
+    "claimValue": "DashboardManagementByAdminSchool.ViewPTResultsReport",
+    "name": "Xem báo cáo kết quả đánh giá đầu vào",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "18f69e03-68d9-4be2-8d86-126f3fd87022",
+    "claimValue": "DashboardManagementByAdminSchool.ViewLearningProgressReport",
+    "name": "Xem báo cáo tiến độ học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "1aacc9b4-8abb-4e18-9583-acaab2a302aa",
+    "claimValue": "DashboardManagementByAdminSchool.ViewLearningResultsReport",
+    "name": "Xem báo cáo kết quả học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "29799ab5-71de-444e-b68e-9c00f9160346",
+    "claimValue": "DashboardManagementByAdminSchool.ViewAttendanceReport",
+    "name": "Xem báo cáo chuyên cần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
   }
 ]

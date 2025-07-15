@@ -72,6 +72,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new MenuEntityTypeConfiguration());
             builder.ApplyConfiguration(new PermissionGroupEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserGroupMemberShipEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentEditHistoryEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -107,6 +108,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<StudentEventLearningRecord> StudentEventLearningRecords { get; set; }
         public DbSet<UserGroup> UserGroups { get; set; }
         public DbSet<UserGroupMemberShip> UserGroupMemberShips { get; set; }
+        public DbSet<StudentEditHistory> StudentEditHistories { get; set; }
         public DbSet<Menu> Menus { get; set; }
 
         #endregion Db Set
@@ -119,11 +121,13 @@ namespace Fsel.Identity.Infrastructure
 
         public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
 
+        #endregion report
+
         public DbSet<RoleClaim> RoleClaims { get; set; }
         public DbSet<PermissionGroup> PermissionGroups { get; set; }
         public DbSet<Permission> Permissions { get; set; }
 
-        #endregion report
+#endregion report
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

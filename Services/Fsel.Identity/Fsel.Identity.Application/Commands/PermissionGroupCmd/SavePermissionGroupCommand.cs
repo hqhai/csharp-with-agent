@@ -67,6 +67,14 @@ namespace Fsel.Identity.Application.Commands.PermissionGroupCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
                 return;
             }
+            //if (request.MenuId.HasValue)
+            //{
+            //    if (await _permissionGroupRepository.Queryable.AnyAsync(p => p.MenuId == request.MenuId, cancellationToken))
+            //    {
+            //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+            //        return;
+            //    }
+            //}
 
             var permissionGroup = _mapper.Map<PermissionGroup>(request);
             if (!permissionGroup.IsValid())
@@ -92,6 +100,14 @@ namespace Fsel.Identity.Application.Commands.PermissionGroupCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
                 return;
             }
+            //if (request.MenuId.HasValue)
+            //{
+            //    if (await _permissionGroupRepository.Queryable.AnyAsync(p => p.MenuId == request.MenuId && p.Id != request.Id, cancellationToken))
+            //    {
+            //        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+            //        return;
+            //    }
+            //}
 
             var permissionGroup = await _permissionGroupRepository.GetByIdAsync(request.Id!.Value);
             if (permissionGroup == null)

@@ -11,8 +11,10 @@ using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.UserCmd;
 using Fsel.Identity.Application.Queries.AdminQuery;
 using Fsel.Identity.Application.Commands.StudentCmd;
+using Fsel.Identity.Application.Queries.AdminQuery;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Application.Queries.UserReferrals;
+using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -369,43 +371,44 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
-        /// Import Account Dashboard
+        /// Import Account Admin School
         /// </summary>
-        [HttpPost("import-account-dashboard")]
-        [ProducesResponseType(typeof(MethodResult<ImportAccountDashboardModel>), (int)HttpStatusCode.OK)]
+        [HttpPost("import-account-admin-school")]
+        [ProducesResponseType(typeof(MethodResult<ImportAccountAdminSchoolModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> ImportAccountDashboard([FromForm] ImportAccountDashboardCommand command)
+        public async Task<IActionResult> ImportAccountDashboard([FromForm] ImportAccountAdminSchoolCommand command)
         {
-            MethodResult<ImportAccountDashboardModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<ImportAccountAdminSchoolModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null || commandResult.Result.Stream == null)
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result.Stream, Settings.Excels.ContentType, "Template_ErrorTaikhoan_Dashboard.xlsx");
+            return File(commandResult.Result.Stream, Settings.Excels.ContentType, "Template_ErrorTaikhoan_AdminSchool.xlsx");
         }
 
+
         /// <summary>
-        /// Import Account Dashboard
+        /// Get Account Admin School
         /// </summary>
-        [HttpGet("get-account-dashboard")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GetAccountDashboardQueryModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-account-admin-school")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<AccountAdminSchoolModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> GetAccountDashboard([FromQuery] GetAccountDashboardQuery query)
+        public async Task<IActionResult> GetAccountDashboard([FromQuery] GetAccountAdminSchoolCommand query)
         {
-            MethodResult<PagingItemsModel<GetAccountDashboardQueryModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<PagingItemsModel<AccountAdminSchoolModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
-        /// Export Account Dashboard
+        /// Export Account Admin School
         /// </summary>
-        [HttpPost("export-account-dashboard")]
+        [HttpPost("export-account-admin-school")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
-        public async Task<IActionResult> ExportAccountDashboard([FromQuery] ExportAccountDashboardCommand command)
+        public async Task<IActionResult> ExportAccountDashboard([FromQuery] ExportAcountAdminSchoolCommand command)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
@@ -413,6 +416,20 @@ namespace Fsel.Identity.Api.Controllers.Admin
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Template_Taikhoan_ExportAccount.xlsx");
+        }
+
+
+        /// <summary>
+        /// Active users
+        /// </summary>
+        [HttpPost("active-users")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ActiveUsers([FromBody] UpdateStatusUsersCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
