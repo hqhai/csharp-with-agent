@@ -52,6 +52,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
         private const string WorkingPT = "Đang làm PT";
         private const string ConfirmOTP = "Confirm OTP";
         private const string NotConfirmOTP = "Chưa confirm OTP";
+        private const string CutoffData = "Cutoff dữ liệu";
         private const int NumberOfMinutes = 10080;
         private readonly UserDbContext _userDbContext;
         private readonly IUserRoleRepository _userRoleRepository;
@@ -163,6 +164,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 CourseId = p.Student.CourseId,
                 ProvinceId = p.Student.ProvinceId,
                 DistrictId = p.Student.DistrictId,
+                Status = p.User.Status.ToString(),
             });
 
             int totalItem = await users.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -219,7 +221,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             var orders = ordersByUserIds?.Users?.FirstOrDefault(p => p.UserId == user.Id)?.Orders;
 
             var dataStudent = aggregateDataStudents?.Students?.FirstOrDefault(p => p.StudentId == user.StudentId);
-
+            user.IsLearnStudent = dataStudent?.IsLearnStudent ?? default;
             user.TotalLesson = dataStudent?.TotalLesson == 0 ? null : dataStudent?.TotalLesson;
             user.TotalLessonDone = user.TotalLesson == null ? null : dataStudent?.TotalLessonDone;
 
@@ -234,6 +236,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            if (user.Status == EnumUserStatus.Disable.ToString())
+            {
+                user.Status = CutoffData;
+                return;
+            }
 
             if (orders != null && orders.Any(p => p.Status == EnumOrderStatus.Payment && p.RevenueType == EnumPaymentRevenueType.Revenue) && user.ExpiredDate.HasValue && user.CourseId.HasValue)
             {

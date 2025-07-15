@@ -1,0 +1,255 @@
+[
+  {
+    "scores": 0,
+    "courseSkill": "Reading",
+    "correctAnswers": "0",
+    "skillLevel": "Did not attempt test",
+    "description": "No assessable information provided."
+  },
+  {
+    "scores": 1,
+    "courseSkill": "Reading",
+    "correctAnswers": "1",
+    "skillLevel": "Non-user",
+    "description": "Essentially has no ability to use the language beyond possibly a few isolated words."
+  },
+
+  {
+    "scores": 1.5,
+    "courseSkill": "Reading",
+    "correctAnswers": "2",
+    "skillLevel": "Non-user",
+    "description": "Essentially has no ability to use the language beyond possibly a few isolated words."
+  },
+  {
+    "scores": 2,
+    "courseSkill": "Reading",
+    "correctAnswers": "3",
+    "skillLevel": "Intermittent user",
+    "description": "No real communication is possible except for the most basic information using isolated words or short formulae in familiar situations and to meet immediate needs. Has great difficulty understanding spoken and written English."
+  },
+  {
+    "scores": 2.5,
+    "courseSkill": "Reading",
+    "correctAnswers": "4 - 5",
+    "skillLevel": "Intermittent user",
+    "description": "No real communication is possible except for the most basic information using isolated words or short formulae in familiar situations and to meet immediate needs. Has great difficulty understanding spoken and written English."
+  },
+  {
+    "scores": 3,
+    "courseSkill": "Reading",
+    "correctAnswers": "6 - 7",
+    "skillLevel": "Extremely limited user",
+    "description": "Conveys and understands only general meaning in very familiar situations. Frequent breakdowns in communication occur."
+  },
+  {
+    "scores": 3.5,
+    "courseSkill": "Reading",
+    "correctAnswers": "8 - 9",
+    "skillLevel": "Extremely limited user",
+    "description": "Conveys and understands only general meaning in very familiar situations. Frequent breakdowns in communication occur."
+  },
+  {
+    "scores": 4,
+    "courseSkill": "Reading",
+    "correctAnswers": "10 - 12",
+    "skillLevel": "Limited user",
+    "description": "Basic competence is limited to familiar situations. Has frequent problems in understanding and expression. Is not able to use complex language."
+  },
+  {
+    "scores": 4.5,
+    "courseSkill": "Reading",
+    "correctAnswers": "13 - 14",
+    "skillLevel": "Limited user",
+    "description": "Basic competence is limited to familiar situations. Has frequent problems in understanding and expression. Is not able to use complex language."
+  },
+  {
+    "scores": 5,
+    "courseSkill": "Reading",
+    "correctAnswers": "15 - 18",
+    "skillLevel": "Modest user",
+    "description": "Has partial command of the language, coping with overall meaning in most situations, though is likely to make many mistakes. Should be able to handle basic communication in own field."
+  },
+  {
+    "scores": 5.5,
+    "courseSkill": "Reading",
+    "correctAnswers": "19 - 22",
+    "skillLevel": "Modest user",
+    "description": "Has partial command of the language, coping with overall meaning in most situations, though is likely to make many mistakes. Should be able to handle basic communication in own field."
+  },
+  {
+    "scores": 6,
+    "courseSkill": "Reading",
+    "correctAnswers": "23 - 26",
+    "skillLevel": "Competent user",
+    "description": "Has generally effective command of the language despite some inaccuracies, inappropriacies and misunderstandings. Can use and understand fairly complex language, particularly in familiar situations."
+  },
+  {
+    "scores": 6.5,
+    "courseSkill": "Reading",
+    "correctAnswers": "27 - 29",
+    "skillLevel": "Competent user",
+    "description": "Has generally effective command of the language despite some inaccuracies, inappropriacies and misunderstandings. Can use and understand fairly complex language, particularly in familiar situations."
+  },
+  {
+    "scores": 7,
+    "courseSkill": "Reading",
+    "correctAnswers": "30 - 32",
+    "skillLevel": "Good user",
+    "description": "Has operational command of the language, though with occasional inaccuracies, inappropriacies and misunderstandings in some situations. Generally handles complex language well and understands detailed reasoning."
+  },
+  {
+    "scores": 7.5,
+    "courseSkill": "Reading",
+    "correctAnswers": "33 - 34",
+    "skillLevel": "Good user",
+    "description": "Has operational command of the language, though with occasional inaccuracies, inappropriacies and misunderstandings in some situations. Generally handles complex language well and understands detailed reasoning."
+  },
+  {
+    "scores": 8,
+    "courseSkill": "Reading",
+    "correctAnswers": "35 - 36",
+    "skillLevel": "Very good user",
+    "description": "Has fully operational command of the language with only occasional unsystematic inaccuracies and inappropriacies. Misunderstandings may occur in unfamiliar situations. Handles complex detailed argumentation well."
+  },
+  {
+    "scores": 8.5,
+    "courseSkill": "Reading",
+    "correctAnswers": "37 - 38",
+    "skillLevel": "Very good user",
+    "description": "Has fully operational command of the language with only occasional unsystematic inaccuracies and inappropriacies. Misunderstandings may occur in unfamiliar situations. Handles complex detailed argumentation well."
+  },
+  {
+    "scores": 9,
+    "courseSkill": "Reading",
+    "correctAnswers": "39 - 40",
+    "skillLevel": "Expert user",
+    "description": "Has fully operational command of the language: appropriate, accurate and fluent with complete understanding."
+  },
+  {
+    "scores": 0,
+    "courseSkill": "Listening",
+    "correctAnswers": "0",
+    "skillLevel": "Did not attempt test",
+    "description": "No assessable information provided."
+  },
+  {
+    "scores": 1,
+    "courseSkill": "Listening",
+    "correctAnswers": "1",
+    "skillLevel": "Non-user",
+    "description": "Essentially has no ability to use the language beyond possibly a few isolated words."
+  },
+  {
+    "scores": 1.5,
+    "courseSkill": "Listening",
+    "correctAnswers": "2",
+    "skillLevel": "Non-user",
+    "description": "Essentially has no ability to use the language beyond possibly a few isolated words."
+  },
+  {
+    "scores": 2,
+    "courseSkill": "Listening",
+    "correctAnswers": "3 - 4",
+    "skillLevel": "Intermittent user",
+    "description": "No real communication is possible except for the most basic information using isolated words or short formulae in familiar situations and to meet immediate needs. Has great difficulty understanding spoken and written English."
+  },
+  {
+    "scores": 2.5,
+    "courseSkill": "Listening",
+    "correctAnswers": "5 - 6",
+    "skillLevel": "Intermittent user",
+    "description": "No real communication is possible except for the most basic information using isolated words or short formulae in familiar situations and to meet immediate needs. Has great difficulty understanding spoken and written English."
+  },
+  {
+    "scores": 3,
+    "courseSkill": "Listening",
+    "correctAnswers": "7 - 8",
+    "skillLevel": "Extremely limited user",
+    "description": "Conveys and understands only general meaning in very familiar situations. Frequent breakdowns in communication occur."
+  },
+  {
+    "scores": 3.5,
+    "courseSkill": "Listening",
+    "correctAnswers": "9 - 10",
+    "skillLevel": "Extremely limited user",
+    "description": "Conveys and understands only general meaning in very familiar situations. Frequent breakdowns in communication occur."
+  },
+  {
+    "scores": 4,
+    "courseSkill": "Listening",
+    "correctAnswers": "11 - 12",
+    "skillLevel": "Limited user",
+    "description": "Basic competence is limited to familiar situations. Has frequent problems in understanding and expression. Is not able to use complex language."
+  },
+  {
+    "scores": 4.5,
+    "courseSkill": "Listening",
+    "correctAnswers": "13 - 15",
+    "skillLevel": "Limited user",
+    "description": "Basic competence is limited to familiar situations. Has frequent problems in understanding and expression. Is not able to use complex language."
+  },
+  {
+    "scores": 5,
+    "courseSkill": "Listening",
+    "correctAnswers": "16 - 17",
+    "skillLevel": "Modest user",
+    "description": "Has partial command of the language, coping with overall meaning in most situations, though is likely to make many mistakes. Should be able to handle basic communication in own field."
+  },
+  {
+    "scores": 5.5,
+    "courseSkill": "Listening",
+    "correctAnswers": "18 - 22",
+    "skillLevel": "Modest user",
+    "description": "Has partial command of the language, coping with overall meaning in most situations, though is likely to make many mistakes. Should be able to handle basic communication in own field."
+  },
+  {
+    "scores": 6,
+    "courseSkill": "Listening",
+    "correctAnswers": "23 - 25",
+    "skillLevel": "Competent user",
+    "description": "Has generally effective command of the language despite some inaccuracies, inappropriacies and misunderstandings. Can use and understand fairly complex language, particularly in familiar situations."
+  },
+  {
+    "scores": 6.5,
+    "courseSkill": "Listening",
+    "correctAnswers": "26 - 29",
+    "skillLevel": "Competent user",
+    "description": "Has generally effective command of the language despite some inaccuracies, inappropriacies and misunderstandings. Can use and understand fairly complex language, particularly in familiar situations."
+  },
+  {
+    "scores": 7,
+    "courseSkill": "Listening",
+    "correctAnswers": "30 - 31",
+    "skillLevel": "Good user",
+    "description": "Has operational command of the language, though with occasional inaccuracies, inappropriacies and misunderstandings in some situations. Generally handles complex language well and understands detailed reasoning."
+  },
+  {
+    "scores": 7.5,
+    "courseSkill": "Listening",
+    "correctAnswers": "32 - 34",
+    "skillLevel": "Good user",
+    "description": "Has operational command of the language, though with occasional inaccuracies, inappropriacies and misunderstandings in some situations. Generally handles complex language well and understands detailed reasoning."
+  },
+  {
+    "scores": 8,
+    "courseSkill": "Listening",
+    "correctAnswers": "35 - 36",
+    "skillLevel": "Very good user",
+    "description": "Has fully operational command of the language with only occasional unsystematic inaccuracies and inappropriacies. Misunderstandings may occur in unfamiliar situations. Handles complex detailed argumentation well."
+  },
+  {
+    "scores": 8.5,
+    "courseSkill": "Listening",
+    "correctAnswers": "37 - 38",
+    "skillLevel": "Very good user",
+    "description": "Has fully operational command of the language with only occasional unsystematic inaccuracies and inappropriacies. Misunderstandings may occur in unfamiliar situations. Handles complex detailed argumentation well."
+  },
+  {
+    "scores": 9,
+    "courseSkill": "Listening",
+    "correctAnswers": "39 - 40",
+    "skillLevel": "Expert user",
+    "description": "Has fully operational command of the language: appropriate, accurate and fluent with complete understanding."
+  }
+]

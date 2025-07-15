@@ -257,8 +257,10 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
         private async Task SaveSectionGroupResultToDatabase(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
-            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
-            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.SectionGroupId, c.StudentId, c.PlacementTestResultId, c.FinalTestResultId, c.MockTestResultId, c.WorkingTime };
+            });
 
             //await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
             //{
@@ -271,7 +273,10 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         {
             try
             {
-                _mockTestResultRepository.Update(mockTestResult);
+                await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };
+                });
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
             }

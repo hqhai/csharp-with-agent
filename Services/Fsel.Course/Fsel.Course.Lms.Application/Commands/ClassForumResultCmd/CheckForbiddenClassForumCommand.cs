@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 {
+    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -40,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private const int Max_Time_Retry = 3;
         private const int IntervalRetryTime = 30;
+        private const string NameSchema = "determination_schema";
 
         public CheckForbiddenClassForumCommandHandler(ISystemService systemService,
                                                       AppSetting appSetting,
@@ -83,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 classForumDetailResult.IsForbiddenWork = true;
                 await SaveClassForumDetailResult(classForumDetailResult, cancellationToken);
                 var paramsMessage = new List<object> { classForumDetailResult.ClassForumResult?.ClassForum?.Lesson?.Name ?? string.Empty };
-                await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
+                //await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
                 return methodResult;
             }
             else
@@ -102,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     if (checkWordContent.Result)
                     {
                         // thông báo lỗi language
-                        await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.LanguageNotEnglish, EnumNotificationType.LinkPage, null, cancellationToken);
+                        //await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.LanguageNotEnglish, EnumNotificationType.LinkPage, null, cancellationToken);
                         methodResult.Result = true;
                     }
                 }
@@ -111,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 if (classForumDetailResult.IsForbiddenImage || classForumDetailResult.IsForbiddenWork)
                 {
                     var paramsMessage = new List<object> { classForumDetailResult.ClassForumResult?.ClassForum?.Lesson?.Name ?? string.Empty };
-                    await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
+                    //await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
                 }
             }
 
@@ -127,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             if (retryResult == null)
             {
                 // gửi thông báo null
-                await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.NullForbiddenClassForum, EnumNotificationType.LinkPage, null, cancellationToken);
+                //await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.NullForbiddenClassForum, EnumNotificationType.LinkPage, null, cancellationToken);
                 return methodResult;
             }
 
@@ -182,6 +184,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             string systemConfig = File.ReadAllText(ResourceSettings.AICheckForbiddenWordInstruction);
             var userAiConfig = role!.Replace("{0}", wordContent ?? string.Empty, StringComparison.CurrentCulture);
             var aiApprovalModel = _appSetting.OpenAiConfig?.CheckForbiddenAIModel;
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ForbiddenClassForumSchema);
+            var forbiddenClassForumSchema = ConvertHelper.DeserializeFromFilePath<object>(path);
             int countRetry = 0;
 
             var retryAI = Policy.HandleResult<AIApprovalModel?>(result => result == null)
@@ -192,7 +196,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             var retryResult = await retryAI.ExecuteAsync(async () =>
             {
-                var aIResponse = await _mediator.Send(new AiCmd.SubmitAICommand
+                var aIResponse = await _mediator.Send(new AiCmd.V1i1.SubmitAICommand
                 {
                     SettingModel = aiApprovalModel,
                     SettingTemperature = 1,
@@ -202,6 +206,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     SettingTopP = 1,
                     SystemRoleAlConfig = userAiConfig,
                     UserAIConfig = systemConfig,
+                    Text = forbiddenClassForumSchema,
+                    NameSchema = NameSchema
                 }, cancellationToken).ConfigureAwait(false);
 
                 if (aIResponse == null)
@@ -209,14 +215,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     return null;
                 }
 
-                var aiApprovalAndComment = ConvertHelper.Deserialize<AIApprovalModel>(Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse));
+                aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
+                var doc = JsonDocument.Parse(aIResponse);
+                var items = doc.RootElement.GetProperty("parameters");
+
+                var aiApprovalAndComment = ConvertHelper.Deserialize<List<AIApprovalModel>>(items);
                 if (aiApprovalAndComment == null)
                 {
                     return null;
                 }
 
                 classForumDetailResult.GradingAiForbidden = aIResponse;
-                return aiApprovalAndComment;
+                return aiApprovalAndComment.FirstOrDefault();
             });
 
             methodResult.Result = retryResult;
@@ -264,8 +274,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _classForumDetailResultRepository.Update(classForumDetailResult);
-                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                });
                 return methodResult;
             });
 
