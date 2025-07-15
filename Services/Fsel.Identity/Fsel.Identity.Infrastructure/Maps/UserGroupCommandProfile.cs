@@ -11,14 +11,18 @@ namespace Fsel.Identity.Infrastructure.Maps
     {
         public UserGroupCommandProfile()
         {
-            // Mapping cho CreateUserGroup và UpdateUserGroup
-            CreateMap<CreateUserGroupCommandModel, UserGroup>().IgnoreAllNonExisting();
+            // Mapping cho CreateUserGroup
+            CreateMap<CreateUserGroupCommandModel, Role>()
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.GroupName))
+                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description));
 
             // Mapping cho AddUserToGroup
-            CreateMap<AddUserToGroupCommandModel, UserGroupMemberShip>().IgnoreAllNonExisting();
+            CreateMap<AddUserToGroupCommandModel, UserRole>()
+                .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => src.GroupId));
 
             // Mapping cho RemoveUserFromGroup
-            CreateMap<RemoveUserFromGroupCommandModel, UserGroupMemberShip>().IgnoreAllNonExisting();
+            CreateMap<RemoveUserFromGroupCommandModel, UserRole>()
+                .ForMember(dest => dest.RoleId, opt => opt.MapFrom(src => src.GroupId));
         }
     }
 }

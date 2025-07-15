@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -23,11 +24,16 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     {
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
+        private readonly IUserRoleRepository _userRoleRepository;
+        private readonly RoleManager<Role> _roleManager;
 
-        public GetUserInPlatformByUserIdQueryHandler(UserManager<User> userManager, IMapper mapper)
+
+        public GetUserInPlatformByUserIdQueryHandler(UserManager<User> userManager, IMapper mapper, IUserRoleRepository userRoleRepository, RoleManager<Role> roleManager)
         {
             _userManager = userManager;
             _mapper = mapper;
+            _userRoleRepository = userRoleRepository;
+            _roleManager = roleManager;
         }
 
         public async Task<MethodResult<UserModel>> Handle(GetUserInPlatformByUserIdQuery request, CancellationToken cancellationToken)
@@ -37,9 +43,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
 
             var user = await _userManager.Users
                     .Include(u => u.Human)
-                    .Include(u => u.UserGroups)
-                    .ThenInclude(ug => ug.Group)
                     .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
+
+            var userRole = await _userRoleRepository.GetRoleIdsAndNamesByUserIdAsync(request.Id, cancellationToken);
+
 
             if (user == null)
             {
@@ -48,8 +55,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
 
             var userModel = _mapper.Map<UserModel>(user);
-            userModel.UserGroupId = user.UserGroups?.FirstOrDefault()?.GroupId;
-            userModel.UserGroupName = user.UserGroups?.FirstOrDefault()?.Group?.GroupName;
+            userModel.UserGroupId = userRole.RoleId;
+            userModel.UserGroupName = userRole.RoleName;
             methodResult.Result = userModel;
 
             // Nếu Human null thì không cần lấy thông tin của Người quản lý

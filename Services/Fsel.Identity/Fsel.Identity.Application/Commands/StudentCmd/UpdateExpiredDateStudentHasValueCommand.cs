@@ -40,12 +40,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            if (request.StudentIds == null || !request.StudentIds.Any())
-            {
-                methodResult.Result = true;
-                return methodResult;
-            }
-
             var student = await _studentRepository.GetByIdAsync(request.StudentId);
             if (student == null)
             {

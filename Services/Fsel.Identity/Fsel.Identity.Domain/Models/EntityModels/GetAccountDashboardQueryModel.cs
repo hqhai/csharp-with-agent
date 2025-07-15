@@ -22,4 +22,11 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public string? DefaultPassword { get; set; }
     }
+
+    public class GetUserRoleQueryModel
+    {
+        public Guid RoleId { get; set; }
+        public string? RoleName { get; set; }
+    }
+
 }

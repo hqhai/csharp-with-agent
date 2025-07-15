@@ -4,6 +4,7 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Models;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Core.Base.Managers;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
@@ -23,11 +24,13 @@ namespace Fsel.Identity.Application.Queries.UserGroupQuery
     {
         private readonly IUserGroupRepository _userGroupRepository;
         private readonly IMapper _mapper;
+        private readonly RoleManager<Role> _roleManager;
 
-        public GetUserGroupsQueryHandler(IUserGroupRepository userGroupRepository, IMapper mapper)
+        public GetUserGroupsQueryHandler(IUserGroupRepository userGroupRepository, IMapper mapper, RoleManager<Role> roleManager)
         {
             _userGroupRepository = userGroupRepository;
             _mapper = mapper;
+            _roleManager = roleManager;
         }
 
         public async Task<MethodResult<PagingItemsModel<UserGroupModel>>> Handle(GetUserGroupsQuery request, CancellationToken cancellationToken)
@@ -42,14 +45,14 @@ namespace Fsel.Identity.Application.Queries.UserGroupQuery
             }
 
             // Build query based on search parameters
-            var query = _userGroupRepository.Queryable;
+            var query = _roleManager.Roles;
 
             // Apply filters
             if (!string.IsNullOrWhiteSpace(request.Keyword))
             {
                 string keyword = request.Keyword.ToLower();
                 query = query.Where(x =>
-                    (x.GroupName != null && x.GroupName.ToLower().Contains(keyword)) ||
+                    (x.Name != null && x.Name.ToLower().Contains(keyword)) ||
                     (x.Description != null && x.Description.ToLower().Contains(keyword))
                 );
             }
