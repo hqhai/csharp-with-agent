@@ -11,5 +11,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string ContentType { get; set; } = string.Empty;
 
         public byte[] FileData { get; set; } = Array.Empty<byte>();
+
+        public string? CurrentDate { get; set; }
     }
 }

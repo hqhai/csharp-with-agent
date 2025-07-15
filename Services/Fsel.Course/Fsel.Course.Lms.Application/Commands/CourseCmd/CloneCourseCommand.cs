@@ -80,10 +80,12 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             courseClone.Priority = priority;
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                courseClone = _courseRepository.Add(courseClone);
                 try
                 {
-                    await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseRepository.BulkMergeAsync(new List<Course> { courseClone }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ParentCourseId, entity.Priority, entity.IsDeleted };
+                    });
                 }
                 catch (Exception ex)
                 {

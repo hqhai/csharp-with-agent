@@ -13,8 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -36,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ILogger<GetSectionBySectionGroupIdQuery> _logger;
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
+        private readonly IPlacementTestSectionRepository _placementTestSectionRepository;
 
         public GetSectionBySectionGroupIdQueryHandler(IPlacementTestResultRepository placementTestResultRepository,
             SectionGroupConverter sectionGroupConverter,
@@ -44,7 +43,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             IUserService userService,
             ISectionGroupRepository sectionGroupRepository,
             ILogger<GetSectionBySectionGroupIdQuery> logger,
-            IPlacementTestGroupResultRepository placementTestGroupResultRepository)
+            IPlacementTestGroupResultRepository placementTestGroupResultRepository,
+            IPlacementTestSectionRepository placementTestSectionRepository)
         {
             _placementTestResultRepository = placementTestResultRepository;
             _sectionGroupConverter = sectionGroupConverter;
@@ -54,20 +54,21 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             _sectionGroupRepository = sectionGroupRepository;
             _logger = logger;
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
+            _placementTestSectionRepository = placementTestSectionRepository;
         }
 
         public async Task<MethodResult<SectionGroupDtoModel>> Handle(GetSectionBySectionGroupIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SectionGroupDtoModel>();
-            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
-            var studentId = student?.Id ?? default;
+            //var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
+            //if (!studentResult.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+            //    return methodResult;
+            //}
+            //var student = studentResult?.Content?.Result;
+            //var studentId = student?.Id ?? default;
 
             var placementTestResult = await _placementTestResultRepository.GetByIdAsync(request.PlacementTestResultId);
             if (placementTestResult == null)
@@ -75,18 +76,30 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTestResult));
                 return methodResult;
             }
-            if (placementTestResult.Status == EnumResultStatus.New)
-            {
-                await UpdatePlacementTestResult(placementTestResult);
-                await SavePlacementGroupResultAsync(studentId);
-            }
             var sectionGroup = await _sectionGroupRepository.GetByIdAsync(request.SectionGroupId);
             if (sectionGroup == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-            var sectionGroupResult = await GetAndAddSectionGroupResult(request, studentId);
+
+            var isNotInModule = !await (from baseQ in _sectionGroupRepository.Queryable
+                                        join psg in _placementTestSectionRepository.Queryable on baseQ.Id equals psg.SectionGroupId
+                                        where baseQ.Id == request.SectionGroupId && psg.PlacementTestId == placementTestResult.PlacementTestId
+                                        select baseQ).AnyAsync(cancellationToken);
+            if (isNotInModule)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isNotInModule), request.SectionGroupId);
+                return methodResult;
+            }
+
+            if (placementTestResult.Status == EnumResultStatus.New)
+            {
+                await UpdatePlacementTestResult(placementTestResult);
+                await SavePlacementGroupResultAsync(placementTestResult.StudentId);
+            }
+
+            var sectionGroupResult = await GetAndAddSectionGroupResult(request, placementTestResult.StudentId);
             methodResult.Result = await _sectionGroupConverter.GetSectionGroupDto(sectionGroup, sectionGroupResult);
 
             if (sectionGroupResult.Status == EnumResultStatus.Done)
@@ -100,8 +113,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private async Task UpdatePlacementTestResult(PlacementTestResult placementTestResult)
         {
             placementTestResult.Status = EnumResultStatus.Process;
-            _placementTestResultRepository.Update(placementTestResult);
-            await _placementTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestResultRepository.BulkUpdateList(new List<PlacementTestResult> { placementTestResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.PlacementTestId };
+            });
         }
 
         private async Task<PlacementTestGroupResult> SavePlacementGroupResultAsync(Guid studentId)
@@ -113,8 +128,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             }
             placementTestGroupResult.Status = EnumResultStatus.Process;
             placementTestGroupResult.ProcessDate = DateTime.UtcNow;
-            _placementTestGroupResultRepository.Update(placementTestGroupResult);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestGroupResultRepository.BulkUpdateList(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId };
+            });
             return placementTestGroupResult;
         }
 
@@ -123,12 +140,21 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == request.PlacementTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                _logger.LoggerRequest(request);
-                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, PlacementTestResultId = request.PlacementTestResultId, Status = EnumResultStatus.New });
+                sectionGroupResult = new SectionGroupResult
+                {
+                    StudentId = studentId,
+                    SectionGroupId = request.SectionGroupId,
+                    PlacementTestResultId = request.PlacementTestResultId,
+                    Status = EnumResultStatus.New
+                };
 
                 try
                 {
-                    await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestResultId, c.SectionGroupId, c.IsDeleted };
+                    });
+                    sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == sectionGroupResult.Id) ?? sectionGroupResult;
                 }
                 catch (Exception ex)
                 {
@@ -138,8 +164,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
                 sectionGroupResult.Status = EnumResultStatus.Process;
-                sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.PlacementTestResultId, c.SectionGroupId, c.WorkingTime };
+                });
             }
             return sectionGroupResult;
         }

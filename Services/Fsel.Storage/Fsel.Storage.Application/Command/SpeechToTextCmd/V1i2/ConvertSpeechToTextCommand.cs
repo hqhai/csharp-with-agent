@@ -14,6 +14,8 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
     public class ConvertSpeechToTextCommand : IRequest<MethodResult<bool>>
     {
         public IFormFile? FormFile { get; set; }
+
+        public string? CurrentDate { get; set; }
     }
 
     public class ConvertSpeechToTextCommandHandler : IRequestHandler<ConvertSpeechToTextCommand, MethodResult<bool>>
@@ -30,17 +32,19 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         public async Task<MethodResult<bool>> Handle(ConvertSpeechToTextCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.FormFile);
             var methodResult = new MethodResult<bool>();
 
             using var memoryStream = new MemoryStream();
-            await request.FormFile.CopyToAsync(memoryStream);
+            await request.FormFile.CopyToAsync(memoryStream, cancellationToken);
 
             var speechToTextAi = new SpeechToTextAiConsumerModel
             {
                 UserId = _authContext.CurrentUserId,
                 FileName = request.FormFile.FileName,
                 ContentType = request.FormFile.ContentType,
-                FileData = memoryStream.ToArray()
+                FileData = memoryStream.ToArray(),
+                CurrentDate = request.CurrentDate
             };
 
             await _speechToTextAiPublisher.Publish(speechToTextAi, cancellationToken);

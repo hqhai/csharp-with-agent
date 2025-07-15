@@ -200,11 +200,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 if (createHomeWorkAnswers.Any())
                 {
-                    await _homeWorkAnswerRepository.BulkMergeAsync(createHomeWorkAnswers);
+                    await _homeWorkAnswerRepository.BulkMergeAsync(createHomeWorkAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId, entity.IsDeleted };
+                    });
                 }
                 if (updateHomeWorkAnswers.Any())
                 {
-                    await _homeWorkAnswerRepository.BulkMergeAsync(updateHomeWorkAnswers, bulk =>
+                    await _homeWorkAnswerRepository.BulkUpdateList(updateHomeWorkAnswers, bulk =>
                     {
                         bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
                     });
@@ -316,8 +319,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
             }
 
-            _homeWorkResultRepository.Update(homeWorkResult, false, x => x.HomeWorkId, x => x.LessonResultId, x => x.StudentId);
-            homeWorkResult.HomeWorkAnswers.ForEach(answer => _homeWorkResultRepository.DbContext.Entry(answer).State = EntityState.Unchanged);
+            await _homeWorkResultRepository.BulkUpdateList(new List<HomeWorkResult> { homeWorkResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId };
+            });
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
             await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken).ConfigureAwait(false);
@@ -451,7 +456,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     x.Status = (x.CorrectCount == correctTotal || isDone) ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
                     x.IsCorrect = x.IsCorrect.HasValue ? x.CorrectCount == correctTotal : null;
                 });
-                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers, bulk =>
+                await _homeWorkAnswerRepository.BulkUpdateList(homeWorkAnswers, bulk =>
                 {
                     bulk.IgnoreOnUpdateExpression = entity => new { entity.HomeWorkResultId, entity.HomeWorkQuestionId };
                 });

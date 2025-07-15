@@ -7,7 +7,7 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Android
 
     public interface IGooglePlayBillingService
     {
-        Task<SubscriptionPurchase> VerifySubscriptionAsync(string packageName, string subscriptionId, string token);
+        Task<SubscriptionPurchaseV2?> VerifySubscriptionAsync(string packageName, string token);
 
         Task<ProductPurchase> VerifyProductAsync(string packageName, string productId, string token);
     }

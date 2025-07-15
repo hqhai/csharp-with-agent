@@ -56,6 +56,10 @@ namespace Fsel.Shared.Enums
         FriendPaymentSuccessfully,
         RecallCoinSurvey,
         SurveyReward,
-        IllegalCoinRecall
+        IllegalCoinRecall,
+        AddCoinBuyCourse,
+        NullForbiddenClassForum,
+        ForbiddenClassForum,
+        LanguageNotEnglish
     }
 }

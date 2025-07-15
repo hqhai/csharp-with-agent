@@ -31,6 +31,11 @@ namespace Fsel.Identity.Infrastructure.Configs
                     .HasForeignKey<Student>(b => b.HumanId)
                     .OnDelete(DeleteBehavior.Cascade);
 
+            builder.ToTable(tb =>
+            {
+                tb.HasCheckConstraint("CK_Student_NumberOfToken_NonNegative", "[NumberOfToken] >= 0");
+            });
+
             builder.HasIndex(x => x.HumanId).IsUnique(false);
 
             builder.HasIndex(x => new { x.IsDeleted, x.SchoolId });

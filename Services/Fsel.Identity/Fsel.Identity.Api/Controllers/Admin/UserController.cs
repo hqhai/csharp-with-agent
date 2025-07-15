@@ -136,6 +136,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Admin))]
+        [EncryptResponse]
         public async Task<IActionResult> SearchUser([FromQuery] SearchUserQuery query)
         {
             MethodResult<PagingItemsModel<UserSearchModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -385,6 +386,53 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             MethodResult<UserOtpCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Import Account Dashboard
+        /// </summary>
+        [HttpPost("import-account-dashboard")]
+        [ProducesResponseType(typeof(MethodResult<ImportAccountDashboardModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ImportAccountDashboard([FromForm] ImportAccountDashboardCommand command)
+        {
+            MethodResult<ImportAccountDashboardModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null || commandResult.Result.Stream == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result.Stream, Settings.Excels.ContentType, "Template_ErrorTaikhoan_Dashboard.xlsx");
+        }
+
+        /// <summary>
+        /// Import Account Dashboard
+        /// </summary>
+        [HttpGet("get-account-dashboard")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<GetAccountDashboardQueryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> GetAccountDashboard([FromQuery] GetAccountDashboardQuery query)
+        {
+            MethodResult<PagingItemsModel<GetAccountDashboardQueryModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Export Account Dashboard
+        /// </summary>
+        [HttpPost("export-account-dashboard")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ExportAccountDashboard([FromQuery] ExportAccountDashboardCommand command)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Taikhoan_ExportAccount.xlsx");
         }
     }
 }

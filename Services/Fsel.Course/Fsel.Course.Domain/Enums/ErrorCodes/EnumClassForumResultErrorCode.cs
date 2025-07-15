@@ -72,6 +72,31 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Base64 In Text
         /// </summary>
-        Base64InText
+        Base64InText,
+
+        /// <summary>
+        /// Tối đa số lần được phép pending speech to text
+        /// </summary>
+        MaxPendingSpeechToText,
+
+        /// <summary>
+        /// bài 1 AI chưa phản hồi thì ko được tạo bài 2
+        /// </summary>
+        AIPendingRecord1Record2CreationBlocked,
+
+        /// <summary>
+        /// class forum detail result not Status PendingSpeechToText
+        /// </summary>
+        RecordNotStatusPendingSpeechToText,
+
+        /// <summary>
+        /// đã quá 2 lần chỉnh sửa
+        /// </summary>
+        MaximumEditTwoClassForumDetail,
+
+        /// <summary>
+        /// word content null
+        /// </summary>
+        WordContentNull,
     }
 }

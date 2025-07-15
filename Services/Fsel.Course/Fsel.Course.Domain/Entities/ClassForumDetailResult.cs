@@ -19,10 +19,12 @@ namespace Fsel.Course.Domain.Entities
         private const int MaxScore = 2;
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
 
         private string? _wordContent;
 
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? WordContent
         {
             get { return _wordContent; }
@@ -94,6 +96,15 @@ namespace Fsel.Course.Domain.Entities
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
 
+        public ICollection<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; } = new List<ClassForumDetailResultHistory>();
+
         public int RetryTime { get; set; }
+
+        public bool IsForbiddenWork { get; set; }
+
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? GradingAiForbidden { get; set; }
+
+        public bool IsForbiddenImage { get; set; }
     }
 }

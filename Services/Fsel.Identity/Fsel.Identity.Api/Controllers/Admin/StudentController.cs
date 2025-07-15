@@ -5,6 +5,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.AdminCmd;
@@ -26,7 +27,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/student")]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+    [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     [ApiController]
     public class StudentController : ControllerBase
     {
@@ -43,6 +44,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("search-students")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsByAdminQuery query)
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -81,6 +83,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("profile/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         public async Task<IActionResult> GetProfileStudent([FromRoute] Guid studentId)
         {
             MethodResult<StudentModel> queryResult = await _mediator.Send(new GetStudentProfileQuery { StudentId = studentId }).ConfigureAwait(false);
@@ -129,6 +132,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("management")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsQuery query)
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -249,46 +253,9 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPut("update-event-content")]
         [ProducesResponseType(typeof(MethodResult<StudentSearchAdminModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        //[Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin) })]
         public async Task<IActionResult> UpdateEventContentTime([FromBody] UpdateEventExportTimeCommand cmd)
         {
             var queryResult = await _mediator.Send(cmd).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Get parent by student id
-        /// </summary>
-        [HttpGet("get-parent-by-student-id/{studentId}")]
-        [ProducesResponseType(typeof(MethodResult<ParentProfileModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetParentByStudentId([FromRoute] Guid studentId)
-        {
-            var queryResult = await _mediator.Send(new GetParentByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Restore deleted account
-        /// </summary>
-        [HttpPost("restore-deleted-account")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RestoreDeletedAccount([FromBody] RestoreDeleteAccountCommand command)
-        {
-            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// get otp for student
-        /// </summary>
-        [HttpGet("get-otp-for-student")]
-        [ProducesResponseType(typeof(MethodResult<OTPModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetOTPForStudent([FromQuery] GetOTPForStudentQuery query)
-        {
-            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -305,6 +272,67 @@ namespace Fsel.Identity.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// Get parent by student id
+        /// </summary>
+        [HttpGet("get-parent-by-student-id/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<ParentProfileModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetParentByStudentId([FromRoute] Guid studentId)
+        {
+            var queryResult = await _mediator.Send(new GetParentByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get otp for student
+        /// </summary>
+        [HttpGet("get-otp-for-student")]
+        [ProducesResponseType(typeof(MethodResult<OTPModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetOTPForStudent([FromQuery] GetOTPForStudentQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search school grades classes
+        /// </summary>
+        [HttpPost("add-student-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddStudentToEvent([FromBody] AddStudentToEventCommand command)
+        {
+            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Restore deleted account
+        /// </summary>
+        [HttpPost("restore-deleted-account")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RestoreDeletedAccount([FromBody] RestoreDeleteAccountCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// cập nhật expired date cho students
+        /// </summary>
+        [HttpPut("update-expired-date-for-students")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateExpiredDateStudentHasValueCommand cmd)
+        {
+            var commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Tool Synchronous Parent Info
         /// Update Profile User
         /// </summary>
         [HttpPut("update-profile-user")]
@@ -343,13 +371,13 @@ namespace Fsel.Identity.Api.Controllers.Admin
         /// <summary>
         /// Search school grades classes
         /// </summary>
-        [HttpPost("add-student-event")]
+        [HttpPost("tool-synchronous-parent-info")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> AddStudentToEvent([FromBody] AddStudentToEventCommand command)
+        public async Task<IActionResult> ToolSynchronousParentInfo()
         {
-            var methodResult = await _mediator.Send(command).ConfigureAwait(false);
-            return methodResult.GetActionResult();
+            var queryResult = await _mediator.Send(new ToolSynchronousParentInfoCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

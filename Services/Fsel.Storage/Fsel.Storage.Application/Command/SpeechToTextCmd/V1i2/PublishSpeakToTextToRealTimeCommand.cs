@@ -5,20 +5,20 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using Fsel.Storage.Application.Queues.Publisher;
+    using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Application.Services.OpenAIServices;
+    using Fsel.Storage.Domain.Models.EntityModels;
+    using Fsel.Storage.Infrastructure.ValueSettings;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Fsel.Storage.Infrastructure.ValueSettings;
     using Microsoft.Extensions.Logging;
-    using Fsel.Core.Base.Interfaces;
-    using Fsel.Storage.Application.Services.AmazonS3Services;
+    using Newtonsoft.Json;
     using Polly;
     using Refit;
-    using Newtonsoft.Json;
-    using Fsel.Storage.Domain.Models.EntityModels;
 
     public class PublishSpeakToTextToRealTimeCommand : SpeechToTextAiConsumerModel, INotification
     {
@@ -35,11 +35,19 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         private const int Retry_GPT_Time = 2;
         private readonly IDeepgramProvider _deepgramProvider;
         private readonly ICognitiveProvider _cognitiveProvider;
+        private readonly IMediator _mediator;
         private int _countRetry;
         private int _intervalRetryTime = 5;
         private DateTime _startDate, _endDate;
 
-        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, SpeechToTextPublisher speechToTextPublisher, AppSetting appSetting, ILogger<PublishSpeakToTextToRealTimeCommand> logger, IDeepgramProvider deepgramProvider, ICognitiveProvider cognitiveProvider)
+        public PublishSpeakToTextToRealTimeCommandHandler(IOpenAIService openAIService,
+                                                          IAmazonS3Service amazonS3Service,
+                                                          SpeechToTextPublisher speechToTextPublisher,
+                                                          AppSetting appSetting,
+                                                          ILogger<PublishSpeakToTextToRealTimeCommand> logger,
+                                                          IDeepgramProvider deepgramProvider,
+                                                          ICognitiveProvider cognitiveProvider,
+                                                          IMediator mediator)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
@@ -48,16 +56,32 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
             _logger = logger;
             _deepgramProvider = deepgramProvider;
             _cognitiveProvider = cognitiveProvider;
+            _mediator = mediator;
         }
 
         public async Task Handle(PublishSpeakToTextToRealTimeCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            IFormFile formFile = ConvertToIFormFile(request.FileData, request.FileName, request.ContentType);
+
+            #region Convert file ffmpeg
+            IFormFile formFileDefault = ConvertToIFormFile(request.FileData, request.FileName, request.ContentType);
+            if (formFileDefault == null)
+            {
+                return;
+            }
+
+            var convertFile = await _mediator.Send(new CheckFileAndConvertCommand { FormFile = formFileDefault }, cancellationToken);
+            if (!convertFile.IsOK || convertFile.Result == null)
+            {
+                return;
+            }
+
+            IFormFile formFile = convertFile.Result;
             if (formFile == null)
             {
                 return;
             }
+            #endregion
 
             var pollyRetry = Policy.HandleResult<bool>(result => !result)
                                 .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromSeconds(_intervalRetryTime));
@@ -113,13 +137,12 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                         return true;
                     }
 
-                    var fileInfomation = await UpLoadFileAsync(formFile);
-
                     if (string.IsNullOrEmpty(contentText))
                     {
                         return false;
                     }
 
+                    var fileInfomation = await UpLoadFileAsync(formFile);
                     await PublishTextToSocket(request, contentText, fileInfomation.Result);
                 }
                 catch (Exception ex)
@@ -147,12 +170,13 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
         public async Task<MethodResult<string?>> UpLoadFileAsync(IFormFile formFile)
         {
-            return await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+            var a = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
+            return a;
         }
 
         private async Task PublishTextToSocket(SpeechToTextAiConsumerModel message, string? convertContent, string? filePath)
         {
-            await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = filePath } }, CancellationToken.None);
+            await _speechToTextPublisher.Publish(new SpeechToTextConsumerModel { UserId = message.UserId, TranscriptFile = new Shared.Models.ShareModels.TranscriptFileModel { Content = convertContent, FilePath = filePath, DateTime = message.CurrentDate } }, CancellationToken.None);
         }
     }
 }

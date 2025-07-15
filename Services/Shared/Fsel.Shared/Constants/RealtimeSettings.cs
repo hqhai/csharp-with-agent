@@ -4,6 +4,16 @@ namespace Fsel.Shared.Constants
 {
     public static class RealtimeSettings
     {
+        public static class SendDictionaryHub
+        {
+            public const string Pattern = $"/get-dictionary";
+
+            public static class Methods
+            {
+                public const string GetDictionary = $"GetDictionary";
+            }
+        }
+
         public static class SendNotifyBuyBlindBoxHub
         {
             public const string Pattern = $"/buy-blind-box";
@@ -151,6 +161,26 @@ namespace Fsel.Shared.Constants
             public static class Methods
             {
                 public const string Transcript = $"Transcript";
+            }
+        }
+
+        public static class ExamPracticeSpeakingAIFeedBackHub
+        {
+            public const string Pattern = $"/exam-practice-speaking";
+
+            public static class Methods
+            {
+                public const string ExamPracticeSpeakingAIFeedBack = $"ExamPracticeSpeakingAIFeedBack";
+            }
+        }
+
+        public static class SetTimeExamPracticeHub
+        {
+            public const string Pattern = $"/set-time-exam-practice";
+
+            public static class Methods
+            {
+                public const string SetTimeExamPracticeHub = $"SetTimeExamPracticeHub";
             }
         }
     }

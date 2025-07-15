@@ -1183,7 +1183,7 @@
     "content": "SurveyReward",
     "icon": "",
     "priority": 1,
-    "templateMessage": "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
+    "templateMessage": "Cảm ơn bạn đã đánh giá FSEL 5 sao! FSEL đã gửi tặng {0} xu vào tài khoản của bạn. Tiếp tục học tập chăm chỉ nhé!",
     "templateLink": "",
     "createdDate": "2025-02-26",
     "translations": [
@@ -1191,21 +1191,21 @@
         "id": "788C4DE6-030B-4866-8E91-3FB0E913F670",
         "createdDate": "2024-08-28",
         "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
-        "templateMessage": "Cảm ơn bạn đã tham gia khảo sát! Chúng tôi trân trọng cảm ơn bạn đã hoàn thành khảo sát Tháng Tự Học Ngoại Ngữ - Hà Nội! Để bày tỏ sự tri ân, bạn đã nhận được {0} FSEL COINS. Chúng tôi sẽ xem xét và đánh giá ý kiến của bạn để không ngừng cải thiện trải nghiệm học tập. Cảm ơn bạn đã đồng hành cùng FSEL!",
+        "templateMessage": "Cảm ơn bạn đã đánh giá FSEL 5 sao! FSEL đã gửi tặng {0} xu vào tài khoản của bạn. Tiếp tục học tập chăm chỉ nhé!",
         "language": "vi-VN"
       },
       {
         "id": "13DD85C7-014C-4A32-9392-92A46440C481",
         "createdDate": "2025-02-26",
         "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
-        "templateMessage": "Thank you for participating in the survey! We sincerely appreciate your completion of the Self-Study Language Month - Hanoi survey! As a token of our gratitude, you have received {0} FSEL COINS. Your feedback will be carefully reviewed and evaluated to continuously improve the learning experience. Thank you for your support and for being part of FSEL!  ",
+        "templateMessage": "Thank you for rating FSEL 5 stars! FSEL has credited {0} coins to your account. Keep up the hard work! ",
         "language": "en-US"
       },
       {
         "id": "8592527A-E771-4E37-A2E0-E5E5AA5FF667",
         "createdDate": "2025-02-26",
         "notificationTypeId": "3C7F9946-3F95-4A84-B2DF-7CFFBF36A41C",
-        "templateMessage": "Merci d'avoir participé à l'enquête ! Nous vous remercions sincèrement d'avoir complété l'enquête sur le Mois de l'Auto-apprentissage des Langues - Hanoï ! En signe de notre gratitude, vous avez reçu {0} FSEL COINS. Vos retours seront attentivement examinés et évalués afin d'améliorer continuellement l'expérience d'apprentissage. Merci pour votre soutien et votre engagement avec FSEL ! ",
+        "templateMessage": "Merci d'avoir attribué 5 étoiles à FSEL ! FSEL a crédité {0} pièces sur votre compte. Continuez à travailler dur !",
         "language": "fr-FR"
       }
     ]
@@ -1240,6 +1240,142 @@
         "createdDate": "2025-02-26",
         "notificationTypeId": "50947E80-1900-4FA5-89D2-F8BD309660DA",
         "templateMessage": "Nous avons détecté que certains comptes ont abusé de la fonction de parrainage pour obtenir des pièces de manière non conforme aux règles. Les pièces et les objets échangés seront récupérés. Veuillez respecter les règles pour éviter l'interdiction de votre compte !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+    "type": "Text",
+    "content": "AddCoinBuyCourse",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Chúc mừng! Bạn vừa bỏ túi {0} xu nhờ đăng ký thành công khóa học FSEL {1} tháng. Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {1} tháng tới nhé",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "BC54C2ED-5127-491F-AD88-E5BEB78BF2DB",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+        "templateMessage": "Chúc mừng! Bạn vừa bỏ túi {0} xu nhờ đăng ký thành công khóa học FSEL {1} tháng. Hãy chuẩn bị sẵn sàng cho hành trình học tập trong vòng {1} tháng tới nhé",
+        "language": "vi-VN"
+      },
+      {
+        "id": "F77772C8-9361-49D3-9325-36E8F03476ED",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+        "templateMessage": "Congratulations! You’ve just earned {0} coins by successfully enrolling in the FSEL {1}-month course. Get ready for an exciting learning journey over the next {1} months!",
+        "language": "en-US"
+      },
+      {
+        "id": "1072C194-D441-49A2-8126-684ABE00BCB5",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "AC71E737-CA8D-4A05-9C0B-0A83EDF53483",
+        "templateMessage": "Félicitations ! Vous venez de gagner {0} pièces en vous inscrivant avec succès au cours FSEL de {1} mois. Préparez-vous pour un voyage d'apprentissage passionnant durant les {1} prochains mois !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "898EB157-9C97-4298-BC26-D913ACE71AC6",
+    "type": "LinkPage",
+    "content": "NullForbiddenClassForum",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Hmm… có vẻ nội dung này hơi đặc biệt 😄! Tạm thời chúng tôi chưa thể hiển thị kết quả kiểm duyệt. Cảm ơn bạn đã kiên nhẫn.",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "EEC1FDCE-C276-48CE-98B7-0E43FFAB666D",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "898EB157-9C97-4298-BC26-D913ACE71AC6",
+        "templateMessage": "Hmm… có vẻ nội dung này hơi đặc biệt 😄! Tạm thời chúng tôi chưa thể hiển thị kết quả kiểm duyệt. Cảm ơn bạn đã kiên nhẫn.",
+        "language": "vi-VN"
+      },
+      {
+        "id": "EE2DEF86-F2DF-4461-BA84-54E3619432C1",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "898EB157-9C97-4298-BC26-D913ACE71AC6",
+        "templateMessage": "Hmm… it seems this content is a bit special 😄! We're temporarily unable to display the moderation result. Thank you for your patience.",
+        "language": "en-US"
+      },
+      {
+        "id": "A9639C2E-2C0A-49AC-8FA4-99024385C887",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "898EB157-9C97-4298-BC26-D913ACE71AC6",
+        "templateMessage": "Hmm… il semble que ce contenu soit un peu particulier 😄 ! Nous ne pouvons pas afficher le résultat de la modération pour le moment. Merci pour votre patience.",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "02A9A4A2-C266-494C-8144-6DA4F1270FB8",
+    "type": "LinkPage",
+    "content": "ForbiddenClassForum",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Bài làm của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL!",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "B390F7CA-2927-4B01-BB6D-3FA4D27586A2",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "02A9A4A2-C266-494C-8144-6DA4F1270FB8",
+        "templateMessage": "Bài làm của bạn trong {0} đã bị từ chối phê duyệt do vi phạm tiêu chuẩn cộng đồng của FSEL!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "B5A18145-74D7-4B53-B12C-F381F42F0D19",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "02A9A4A2-C266-494C-8144-6DA4F1270FB8",
+        "templateMessage": "Your post in {0} has been denied approval due to violating FSEL's community standards!",
+        "language": "en-US"
+      },
+      {
+        "id": "375B09B2-872C-4307-B880-3C0451ED96D8",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "02A9A4A2-C266-494C-8144-6DA4F1270FB8",
+        "templateMessage": "Votre publication dans {0} a été refusée en raison de la violation des normes de la communauté FSEL!",
+        "language": "fr-FR"
+      }
+    ]
+  },
+
+  {
+    "id": "41BCD8B6-A17B-4C15-BA75-F3B86301A780",
+    "type": "LinkPage",
+    "content": "LanguageNotEnglish",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Oops! Có vẻ như bài làm của bạn chưa đúng ngôn ngữ yêu cầu, do đó không thể đăng lên diễn đàn!",
+    "templateLink": "",
+    "createdDate": "2025-02-26",
+    "translations": [
+      {
+        "id": "095E36A3-DC40-4687-81B3-2581D72E4CDC",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "41BCD8B6-A17B-4C15-BA75-F3B86301A780",
+        "templateMessage": "Oops! Có vẻ như bài làm của bạn chưa đúng ngôn ngữ yêu cầu, do đó không thể đăng lên diễn đàn!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "B1679656-3DE9-4D02-AF1D-98FB32AF3163",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "41BCD8B6-A17B-4C15-BA75-F3B86301A780",
+        "templateMessage": "Oops! It looks like your post is not in the required language, so it cannot be published on the Class forum!",
+        "language": "en-US"
+      },
+      {
+        "id": "88EAC705-F68C-49F4-B55B-759DBE8000A3",
+        "createdDate": "2025-02-26",
+        "notificationTypeId": "41BCD8B6-A17B-4C15-BA75-F3B86301A780",
+        "templateMessage": "Oups ! Il semble que votre publication ne soit pas dans la langue requise, elle ne peut donc pas être publiée sur le forum !",
         "language": "fr-FR"
       }
     ]

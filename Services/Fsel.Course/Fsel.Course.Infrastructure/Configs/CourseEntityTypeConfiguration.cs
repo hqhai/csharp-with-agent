@@ -25,7 +25,7 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseStatus>());
 
-            builder.HasIndex(c => new { c.ParentCourseId, c.Priority }).IsUnique();
+            builder.HasIndex(c => new { c.ParentCourseId, c.Priority }).IsUnique().HasFilter("ParentCourseId IS NOT NULL AND [IsDeleted] = 0");
         }
     }
 }

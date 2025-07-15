@@ -39,6 +39,8 @@ builder.Services.AddScoped<JobActiveEventPublisher>();
 builder.Services.AddScoped<JobRunEventsPublisher>();
 builder.Services.AddScoped<CheckUserDeletionPublisher>();
 builder.Services.AddScoped<WeeklyNoticePublisher>();
+builder.Services.AddScoped<ChooseDailyQuizWinnersPublisher>();
+builder.Services.AddScoped<AggregateDataStudentsInEventPublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {

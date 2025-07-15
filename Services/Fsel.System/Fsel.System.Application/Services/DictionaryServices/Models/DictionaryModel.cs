@@ -2,6 +2,8 @@
 
 namespace Fsel.System.Application.Services.DictionaryServices.Models
 {
+    using Fsel.Common.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using global::System.Text.Json.Serialization;
     using Refit;
 

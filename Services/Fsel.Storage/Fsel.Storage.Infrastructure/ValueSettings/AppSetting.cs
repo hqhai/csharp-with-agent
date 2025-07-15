@@ -13,6 +13,7 @@ namespace Fsel.Storage.Infrastructure.ValueSettings
 
     public class Services : BaseServices
     {
+        public string? FFmpegApiUrl { get; set; }
     }
 
     public class OpenAiConfig
@@ -20,6 +21,7 @@ namespace Fsel.Storage.Infrastructure.ValueSettings
         public string? Uri { get; set; }
         public IList<string>? ApiKeys { get; set; }
         public string? ApprovalAIModel { get; set; }
+        public string? Language { get; set; }
     }
 
     public class StorageFolder

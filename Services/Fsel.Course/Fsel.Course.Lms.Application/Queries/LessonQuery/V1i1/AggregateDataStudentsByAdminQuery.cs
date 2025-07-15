@@ -77,10 +77,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                                                     CourseId = cr.CourseId,
                                                     LessonResultId = lr.Id
                                                 }).ToListAsync(cancellationToken);
-
+                var studentLearnIds = await _courseResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Select(x => x.StudentId).Distinct().ToListAsync(cancellationToken);
                 students.ForEach(p =>
                 {
                     p.TotalLesson = lessonModels.Where(x => x.CourseId == p.CourseId).Count();
+                    p.IsLearnStudent = studentLearnIds.Any(x => x == p.StudentId);
                     p.TotalLessonDone = lessonResultModels.Where(x => x.CourseId == p.CourseId && x.StudentId == p.StudentId).Count();
                 });
             }

@@ -31,7 +31,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     public class ChangeCourseLevelCommand : IRequest<MethodResult<CourseResultModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
-
         public Guid? UserId { get; set; }
     }
 
@@ -146,8 +145,10 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     {
                         item.WorkingStatus = EnumWorkingStatus.InActive;
                     }
-                    _courseResultRepository.UpdateList(courseResultActives, false, x => x.CourseId, x => x.StudentId);
-                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseResultRepository.BulkUpdateList(courseResultActives, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                    });
                 }
 
                 if (courseResult == null)
@@ -159,28 +160,37 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                         Status = EnumResultStatus.New,
                         WorkingStatus = EnumWorkingStatus.Active
                     };
-                    _courseResultRepository.Add(courseResult);
+                    if (!courseResult.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
+                        return methodResult;
+                    }
+                    try
+                    {
+                        await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"Log Duplicate CourseResult : {ex.Message}");
+                        courseResult = await _courseResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id)
+                                                                              .FirstOrDefaultAsync(cancellationToken) ?? new CourseResult();
+                    }
                 }
                 else
                 {
                     courseResult.WorkingStatus = EnumWorkingStatus.Active;
-                    _courseResultRepository.Update(courseResult, false, x => x.CourseId, x => x.StudentId);
-                }
-                if (!courseResult.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
-                    return methodResult;
-                }
-
-                try
-                {
-                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning($"Log Duplicate CourseResult : {ex.Message}");
-                    courseResult = await _courseResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id)
-                                                                          .FirstOrDefaultAsync(cancellationToken);
+                    if (!courseResult.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
+                        return methodResult;
+                    }
+                    await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                    });
                 }
 
                 methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
@@ -211,7 +221,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 
             if (updateResult.IsSuccessStatusCode)
             {
-                await SendNotification(course, courseResult, cancellationToken);
+                await SendNotification(course, courseResult, request.UserId ?? _authContext.CurrentUserId, cancellationToken);
             }
 
             methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);
@@ -219,7 +229,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             return methodResult;
         }
 
-        private async Task SendNotification(Course course, CourseResult? courseResult, CancellationToken cancellationToken)
+        private async Task SendNotification(Course course, CourseResult? courseResult, Guid userId, CancellationToken cancellationToken)
         {
             if (courseResult == null)
             {
@@ -228,7 +238,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
 
             NotificationSendingQueueModel notificationModel = new NotificationSendingQueueModel()
             {
-                UserIds = new List<Guid>() { courseResult.CreatedUserId },
+                UserIds = new List<Guid>() { userId },
                 ParamsMessage = new List<object> { course.Name ?? string.Empty, },
                 Type = EnumNotificationType.LinkPage,
                 Content = EnumNotificationContent.CourseChange,

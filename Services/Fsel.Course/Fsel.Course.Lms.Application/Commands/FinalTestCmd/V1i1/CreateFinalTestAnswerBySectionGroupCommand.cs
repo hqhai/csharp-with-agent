@@ -233,7 +233,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);
                 }
 
-                _finalTestResultRepository.Update(finalTestResult, false, x => x.CourseId, x => x.FinalTestId, x => x.StudentId);
+                await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult> { finalTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId };
+                });
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
@@ -293,11 +296,14 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             {
                 if (createFinalTestAnswers != null && createFinalTestAnswers.Any())
                 {
-                    await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers);
+                    await _finalTestAnswerRepository.BulkMergeAsync(createFinalTestAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionQuestionId, entity.FinalTestResultId, entity.SectionGroupResultId, entity.IsDeleted };
+                    });
                 }
                 if (updateFinalTestAnswers != null && updateFinalTestAnswers.Any())
                 {
-                    await _finalTestAnswerRepository.BulkMergeAsync(updateFinalTestAnswers, bulk =>
+                    await _finalTestAnswerRepository.BulkUpdateList(updateFinalTestAnswers, bulk =>
                     {
                         bulk.IgnoreOnUpdateExpression = entity => new { entity.FinalTestResultId, entity.SectionGroupResultId, entity.SectionQuestionId };
                     });

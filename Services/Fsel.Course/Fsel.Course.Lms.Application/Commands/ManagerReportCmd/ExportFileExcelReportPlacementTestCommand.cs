@@ -41,6 +41,10 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
                 SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
@@ -56,6 +60,10 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
                 SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
@@ -105,10 +113,10 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
         {
             excelWorksheet.Cells["K1"].Value = GetData(excelWorksheet.Cells["K1"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
             excelWorksheet.Cells["E3"].Value = GetData(excelWorksheet.Cells["E3"].Value, request.Status?.GetDescription());
-            excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.SchoolGrade);
-            excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.SchoolClass);
+            excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.ListSchoolGrade ?? request.SchoolGrade);
+            excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.ListSchoolClass ?? request.SchoolClass);
             excelWorksheet.Cells["H3"].Value = GetData(excelWorksheet.Cells["H3"].Value, request.CurrentLevel);
-            excelWorksheet.Cells["I3"].Value = GetData(excelWorksheet.Cells["I3"].Value, request.CourseLevel);
+            excelWorksheet.Cells["I3"].Value = GetData(excelWorksheet.Cells["I3"].Value, request.CourseLevel?.GetDescription() ?? request.ListCourseLevel);
             excelWorksheet.Cells["J3"].Value = GetData(excelWorksheet.Cells["J3"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
             excelWorksheet.Cells["K3"].Value = GetData(excelWorksheet.Cells["K3"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
         }
@@ -130,10 +138,10 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             foreach (var item in placementTestReports)
             {
                 excelWorksheet.Cells[startRow, 1].Value = item.FullName;
-                excelWorksheet.Cells[startRow, 2].Value = item.Email;
+                excelWorksheet.Cells[startRow, 2].Value = item.UserName;
                 excelWorksheet.Cells[startRow, 3].Value = item.PhoneNumber;
-                excelWorksheet.Cells[startRow, 4].Value = item.Birthday?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-                excelWorksheet.Cells[startRow, 5].Value = item.SchoolName;
+                excelWorksheet.Cells[startRow, 4].Value = item.Email;
+                excelWorksheet.Cells[startRow, 5].Value = item.Birthday?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
                 excelWorksheet.Cells[startRow, 6].Value = item.SchoolGrade;
                 excelWorksheet.Cells[startRow, 7].Value = item.SchoolClass;
                 excelWorksheet.Cells[startRow, 8].Value = item.ChooseLevelStr;

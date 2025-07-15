@@ -175,18 +175,22 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
 
         private async Task UpdateVideoTimeCodeResultAsync(UpdateModuleProcessCommand request, LessonResult lessonResult, CancellationToken cancellationToken)
         {
-            if (request.ObjectId.HasValue)
+            if (!request.ObjectId.HasValue)
             {
-                var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id, cancellationToken);
-                var videoTimeCode = await _videoTimeCodeRepository.GetByIdAsync(request.ObjectId.Value);
-
-                if (videoResult != null && videoTimeCode != null)
-                {
-                    videoResult.CurrentVideoTimeCodeId = videoTimeCode.Id;
-                    _videoResultRepository.Update(videoResult);
-                    await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
+                return;
             }
+            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == lessonResult.Id, cancellationToken);
+            var videoTimeCode = await _videoTimeCodeRepository.GetByIdAsync(request.ObjectId.Value);
+
+            if (videoResult == null || videoTimeCode == null)
+            {
+                return;
+            }
+            videoResult.CurrentVideoTimeCodeId = videoTimeCode.Id;
+            await _videoResultRepository.BulkUpdateList(new List<VideoResult>() { videoResult }, bulk =>
+            {
+                bulk.ColumnInputExpression = entity => new { entity.CurrentVideoTimeCodeId };
+            });
         }
 
         private async Task UpdateVideoDoneAsync(LessonResult lessonResult, CancellationToken cancellationToken)
@@ -195,8 +199,10 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (videoResult != null)
             {
                 videoResult.Status = EnumResultStatus.Done;
-                _videoResultRepository.Update(videoResult);
-                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _videoResultRepository.BulkUpdateList(new List<VideoResult>() { videoResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.Status };
+                });
             }
         }
 
@@ -228,8 +234,10 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (lessonResult != null && lessonResult.Status == EnumResultStatus.Unfinished)
             {
                 lessonResult.Status = EnumResultStatus.New;
-                _lessonResultRepository.Update(lessonResult);
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.BulkUpdateList(new List<LessonResult>() { lessonResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.Status };
+                });
             }
             return lessonResult;
         }
@@ -240,8 +248,10 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (unitResult != null && unitResult.Status == EnumResultStatus.Unfinished)
             {
                 unitResult.Status = EnumResultStatus.New;
-                _unitResultRepository.Update(unitResult);
-                await _unitResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _unitResultRepository.BulkUpdateList(new List<UnitResult>() { unitResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.Status };
+                });
             }
         }
 
@@ -251,8 +261,10 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (finalTestResult != null && finalTestResult.Status == EnumResultStatus.Unfinished)
             {
                 finalTestResult.Status = EnumResultStatus.New;
-                _finalTestResultRepository.Update(finalTestResult);
-                await _finalTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult>() { finalTestResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.Status };
+                });
             }
         }
 
@@ -267,8 +279,10 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (mockTestResult != null && mockTestResult.Status == EnumResultStatus.Unfinished)
             {
                 mockTestResult.Status = EnumResultStatus.New;
-                _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult>() { mockTestResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.Status };
+                });
             }
         }
     }
