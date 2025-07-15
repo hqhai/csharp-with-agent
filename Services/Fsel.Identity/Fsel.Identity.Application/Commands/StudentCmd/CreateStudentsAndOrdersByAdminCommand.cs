@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.UserCmd
+namespace Fsel.Identity.Application.Commands.StudentCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -10,37 +10,37 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Models.CommandModels.Users;
+    using Fsel.Identity.Domain.Models.CommandModels.Students;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateUsersAndOrdersByAdminCommandResultModel
+    public class CreateStudentsAndOrdersByAdminCommandResultModel
     {
         public IList<string> CreateUserError { get; set; } = new List<string>();
         public IList<string> CreateOrderError { get; set; } = new List<string>();
     }
 
-    public class CreateUsersAndOrdersByAdminCommand : CreateUsersAndOrdersByAdminCommandModel, IRequest<MethodResult<CreateUsersAndOrdersByAdminCommandResultModel>>
+    public class CreateStudentsAndOrdersByAdminCommand : CreateStudentsAndOrdersByAdminCommandModel, IRequest<MethodResult<CreateStudentsAndOrdersByAdminCommandResultModel>>
     {
     }
 
-    public class CreateUsersAndOrdersByAdminCommandHandler : IRequestHandler<CreateUsersAndOrdersByAdminCommand, MethodResult<CreateUsersAndOrdersByAdminCommandResultModel>>
+    public class CreateStudentsAndOrdersByAdminCommandHandler : IRequestHandler<CreateStudentsAndOrdersByAdminCommand, MethodResult<CreateStudentsAndOrdersByAdminCommandResultModel>>
     {
         private readonly IMediator _mediator;
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
 
-        public CreateUsersAndOrdersByAdminCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService)
+        public CreateStudentsAndOrdersByAdminCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService)
         {
             _mediator = mediator;
             _userManager = userManager;
             _orderService = orderService;
         }
 
-        public async Task<MethodResult<CreateUsersAndOrdersByAdminCommandResultModel>> Handle(CreateUsersAndOrdersByAdminCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CreateStudentsAndOrdersByAdminCommandResultModel>> Handle(CreateStudentsAndOrdersByAdminCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<CreateUsersAndOrdersByAdminCommandResultModel>();
+            var methodResult = new MethodResult<CreateStudentsAndOrdersByAdminCommandResultModel>();
 
             if (request.Users == null || request.Users.Count == 0)
             {
@@ -48,7 +48,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 return methodResult;
             }
 
-            var result = new CreateUsersAndOrdersByAdminCommandResultModel();
+            var result = new CreateStudentsAndOrdersByAdminCommandResultModel();
 
             foreach (var item in request.Users)
             {
@@ -62,7 +62,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
                 if (user == null)
                 {
-                    var createUserResult = await _mediator.Send(new CreateUserByAdminCommand()
+                    var createUserResult = await _mediator.Send(new CreateStudentByAdminCommand()
                     {
                         FullName = item.FullName,
                         PhoneNumber = item.PhoneNumber,

@@ -1,37 +1,38 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.UserCmd
+namespace Fsel.Identity.Application.Commands.StudentCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Models.CommandModels.Users;
+    using Fsel.Identity.Domain.Models.CommandModels.Students;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateUserAndOrderByAdminCommand : CreateUserAndOrderByAdminCommandModel, IRequest<MethodResult<bool>>
+    public class CreateStudentAndOrderByAdminCommand : CreateStudentAndOrderByAdminCommandModel, IRequest<MethodResult<bool>>
     {
     }
 
-    public class CreateUserAndOrderByAdminCommandHandler : IRequestHandler<CreateUserAndOrderByAdminCommand, MethodResult<bool>>
+    public class CreateStudentAndOrderByAdminCommandHandler : IRequestHandler<CreateStudentAndOrderByAdminCommand, MethodResult<bool>>
     {
         private readonly IMediator _mediator;
         private readonly UserManager<User> _userManager;
         private readonly IOrderService _orderService;
 
-        public CreateUserAndOrderByAdminCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService)
+        public CreateStudentAndOrderByAdminCommandHandler(IMediator mediator, UserManager<User> userManager, IOrderService orderService)
         {
             _mediator = mediator;
             _userManager = userManager;
             _orderService = orderService;
         }
 
-        public async Task<MethodResult<bool>> Handle(CreateUserAndOrderByAdminCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(CreateStudentAndOrderByAdminCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
@@ -46,7 +47,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             if (user == null)
             {
-                var result = await _mediator.Send(new CreateUserByAdminCommand()
+                var result = await _mediator.Send(new CreateStudentByAdminCommand()
                 {
                     FullName = request.FullName,
                     PhoneNumber = request.PhoneNumber,
