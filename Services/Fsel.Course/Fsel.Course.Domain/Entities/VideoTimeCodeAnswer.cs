@@ -28,5 +28,7 @@ namespace Fsel.Course.Domain.Entities
 
         public VideoTimeCodeResult? VideoTimeCodeResult { get; set; }
         public Guid? VideoTimeCodeResultId { get; set; }
+
+        public int TokenReceived { get; set; }
     }
 }

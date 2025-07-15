@@ -2,6 +2,8 @@
 
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
+    using Fsel.Shared.Enums;
+
     public class TokenModel
     {
         public string? AccessToken { get; set; }
@@ -16,5 +18,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public bool? IsOrder { get; set; } = true;
         public Guid? SchoolId { get; set; }
         public bool? IsPlacementTest { get; set; } = true;
+        public EnumUserStatus? Status { get; set; }
     }
 }
