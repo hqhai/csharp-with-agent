@@ -11,7 +11,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-
     public class UpdateStatusUserCommand : IRequest<MethodResult<UserModel>>
     {
         public Guid Id { get; set; }

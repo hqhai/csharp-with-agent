@@ -15,6 +15,13 @@ namespace Fsel.Shared.Helpers
             return Math.Floor(number * 2) / 2;
         }
 
+        public static double RoundToQuarter(double number)
+        {
+            double multiplied = number * 4;
+            double rounded = Math.Round(multiplied);
+            return rounded / 4;
+        }
+
         public static double RoundNumberDouble(double number)
         {
             double fractionalPart = number - Math.Floor(number);
@@ -89,6 +96,11 @@ namespace Fsel.Shared.Helpers
         public static double GetPercent(this int correctCount, int correctTotal, int digits = 0)
         {
             return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal, digits) : default;
+        }
+
+        public static double GetScore(this int correctCount, int correctTotal)
+        {
+            return correctTotal > 0 ? ((double)correctCount / correctTotal) * 10 : default;
         }
 
         public static long CalculateAverage(ICollection<long> secondsList)

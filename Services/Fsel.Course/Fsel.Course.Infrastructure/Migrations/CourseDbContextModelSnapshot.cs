@@ -245,6 +245,75 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.ToTable("ClassForumDetailResults");
                 });
 
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumDetailResultHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("ClassForumDetailResultId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(10000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("WordContent")
+                        .HasMaxLength(10000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassForumDetailResultId");
+
+                    b.ToTable("ClassForumDetailResultHistories");
+                });
+
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumFile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -453,6 +522,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<Guid?>("ClassForumDetailResultHistoryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("ClassForumDetailResultId")
                         .HasColumnType("uniqueidentifier");
 
@@ -511,6 +583,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClassForumDetailResultHistoryId");
 
                     b.HasIndex("ClassForumDetailResultId");
 
@@ -5657,6 +5731,17 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("ClassForumResult");
                 });
 
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumDetailResultHistory", b =>
+                {
+                    b.HasOne("Fsel.Course.Domain.Entities.ClassForumDetailResult", "ClassForumDetailResult")
+                        .WithMany("ClassForumDetailResultHistories")
+                        .HasForeignKey("ClassForumDetailResultId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassForumDetailResult");
+                });
+
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumFile", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.ClassForum", "ClassForum")
@@ -5688,6 +5773,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumResultFile", b =>
                 {
+                    b.HasOne("Fsel.Course.Domain.Entities.ClassForumDetailResultHistory", "ClassForumDetailResultHistory")
+                        .WithMany("ClassForumResultFiles")
+                        .HasForeignKey("ClassForumDetailResultHistoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Fsel.Course.Domain.Entities.ClassForumDetailResult", "ClassForumDetailResult")
                         .WithMany("ClassForumResultFiles")
                         .HasForeignKey("ClassForumDetailResultId")
@@ -5699,6 +5789,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ClassForumDetailResult");
+
+                    b.Navigation("ClassForumDetailResultHistory");
 
                     b.Navigation("ClassForumResult");
                 });
@@ -6671,6 +6763,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumDetailResult", b =>
+                {
+                    b.Navigation("ClassForumDetailResultHistories");
+
+                    b.Navigation("ClassForumResultFiles");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumDetailResultHistory", b =>
                 {
                     b.Navigation("ClassForumResultFiles");
                 });
