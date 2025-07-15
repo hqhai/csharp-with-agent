@@ -128,8 +128,6 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<PermissionGroup> PermissionGroups { get; set; }
         public DbSet<Permission> Permissions { get; set; }
 
-#endregion report
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             ArgumentNullException.ThrowIfNull(optionsBuilder);

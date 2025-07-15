@@ -39,7 +39,7 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
 
                 if (userGroup.IsDefault)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumUserGroupErrorCode.DoNotDeleteTheDefaultUserGroup), nameof(userGroup));
+                    methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumUserGroupErrorCode.DoNotDeleteTheDefaultUserGroup), nameof(userGroup));
                     return methodResult;
                 }
 

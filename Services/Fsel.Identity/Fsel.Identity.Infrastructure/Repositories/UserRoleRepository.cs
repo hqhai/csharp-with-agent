@@ -11,8 +11,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Microsoft.EntityFrameworkCore;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums;
-    using Microsoft.AspNetCore.Identity;
+    using Fsel.Core.Entities;
 
     public class UserRoleRepository : IUserRoleRepository
     {
@@ -23,7 +22,6 @@ namespace Fsel.Identity.Infrastructure.Repositories
             _userDbContext = userDbContext;
         }
 
-        public virtual IQueryable<UserRole> GetQuery()
         public IQueryable<UserRoleEntity> Queryable
         {
             get
@@ -33,7 +31,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
         }
 
-        public virtual IQueryable<IdentityUserRole<Guid>> GetQuery()
+        public virtual IQueryable<UserRole> GetQuery()
         {
             try
             {
@@ -44,6 +42,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
                 throw;
             }
         }
+
 
         public virtual async Task<bool> DeleteAsync(UserRole userRole)
         {
@@ -252,5 +251,29 @@ namespace Fsel.Identity.Infrastructure.Repositories
                 throw;
             }
         }
+
+
+        public virtual async Task<GetUserRoleQueryModel> GetRoleIdsAndNamesByUserIdAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var result = await (from ur in _userDbContext.UserRoles
+                                    join r in _userDbContext.Roles on ur.RoleId equals r.Id
+                                    where ur.UserId == userId
+                                    select new GetUserRoleQueryModel
+                                    {
+                                        RoleId = ur.RoleId,
+                                        RoleName = r.Name
+                                    })
+                                  .FirstOrDefaultAsync(cancellationToken);
+
+                return result;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
     }
 }
