@@ -6,8 +6,6 @@ namespace Fsel.Identity.Domain.Entities
 
     public class UserRole : UserRoleEntity
     {
-        public virtual User? User { get; set; }
-        public virtual Role? Role { get; set; }
         public bool IsActive { get; set; } = true;
     }
 }
