@@ -149,7 +149,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                             UpdatedUserId = baseQ.UpdatedUserId,
                             VideoFilePath = baseQ.VideoFilePath,
                             LevelName = level.Name,
-                            IsUseStudent = videoResults.Any()
+                            IsActive = videoResults.Any()
                         };
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -160,18 +160,6 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                     .ConfigureAwait(false);
 
             var videoIds = lists.Select(x => x.Id).ToList();
-
-            var linkedVideoIds = await (from video in _videoRepository.Queryable.WhereBulkContains(videoIds, x => x.Id)
-
-                                        join lm in _lessonModuleRepository.Queryable on video.Id equals lm.Id into lmGroup
-                                        from lessonModule in lmGroup.DefaultIfEmpty()
-
-                                        join lv in _lessonVideoRepository.Queryable on video.Id equals lv.VideoId into lvGroup
-                                        from lessonVideo in lvGroup.DefaultIfEmpty()
-
-                                        where lessonModule != null || lessonVideo != null
-                                        select video.Id
-                                      ).Distinct().ToListAsync(cancellationToken);
 
             var videoSkills = await (
                               from vtc in _videoTimeCodeRepository.Queryable.WhereBulkContains(videoIds, x => x.VideoId)
@@ -196,7 +184,6 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                     CourseSkill = x.Key,
                     Count = x.Select(x => x.ExerciseId).Distinct().Count(),
                 }).ToList();
-                item.IsActive = linkedVideoIds.Any(x => x == item.Id);
                 item.Skills = skills.Where(x => !string.IsNullOrEmpty(x.SkillName)).Select(x => x.SkillName).Distinct().ToList();
             }
             methodResult.Result = new PagingItemsModel<VideoSearchModel>(lists, request, totalItem);
