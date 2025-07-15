@@ -13,6 +13,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public int DisplayOrder { get; set; }
         public string? Description { get; set; }
         public bool IsActive { get; set; }
+        public bool IsDefault { get; set; }
 
         [JsonIgnore]
         public string? LocationIdStr { get; set; }
