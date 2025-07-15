@@ -69,8 +69,10 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeResultCmd
             if (videoTimeCodeResult == null)
             {
                 videoResult.CurrentVideoTimeCodeId = request.VideoTimeCodeId;
-                videoResult = _videoResultRepository.Update(videoResult, false, x => x.StudentId, x => x.VideoId, x => x.LessonResultId);
-                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.VideoId, c.StudentId, c.LessonResultId };
+                });
             }
             methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
             methodResult.StatusCode = StatusCodes.Status200OK;

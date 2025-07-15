@@ -45,8 +45,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResult.CorrectTotal = videoResult.CorrectTotal;
                 lessonResult.Percent = NumberHelper.ConvertDoublePercent(videoResult.Percent * 40);
                 lessonResult.SkillScores = skillScores;
-                _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.StudentId, x => x.UnitId, x => x.LessonId);
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.LessonId, c.UnitId };
+                });
             }
             catch (Exception ex)
             {

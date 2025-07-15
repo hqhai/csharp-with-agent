@@ -46,7 +46,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 .WhereBulkContains(request.UserIds, i => i.UserId)
                 .Select(x => new StudentModel
                 {
-                    Id = x.Id,
+                    Id = x.Student!.Id,
                     ClassId = x.Student!.ClassId,
                     Occupation = x.Student.Occupation,
                     CourseLevel = x.Student.CourseLevel,

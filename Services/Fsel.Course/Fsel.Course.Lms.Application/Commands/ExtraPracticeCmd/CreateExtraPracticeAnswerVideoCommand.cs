@@ -157,14 +157,23 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 if (extraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.BulkMergeAsync(extraPracticeAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId, entity.IsDeleted };
+                    });
                 }
                 else if (updateExtraPracticeAnswers.Count > 0)
                 {
-                    await _extraPracticeAnswerRepository.BulkUpdateList(updateExtraPracticeAnswers);
+                    await _extraPracticeAnswerRepository.BulkUpdateList(updateExtraPracticeAnswers, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = entity => new { entity.ExtraPracticeResultId, entity.ExtraPracticeExerciseResultId, entity.QuestionId };
+                    });
                 }
 
-                _extraPracticeResultRepository.Update(extraPracticeResult);
+                await _extraPracticeResultRepository.BulkUpdateList(new List<ExtraPracticeResult> { extraPracticeResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeId, c.StudentId };
+                });
                 await _extraPracticeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeResult);
                 methodResult.StatusCode = StatusCodes.Status200OK;
