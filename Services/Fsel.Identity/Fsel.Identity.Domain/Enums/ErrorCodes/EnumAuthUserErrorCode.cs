@@ -153,5 +153,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Account has been cut off
         /// </summary>
         AccountHasBeenCutOff,
+
+        /// <summary>
+        /// Role ko thuộc trang báo cáo
+        /// </summary>
+        RoleNotInDashboard
     }
 }
