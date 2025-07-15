@@ -41,5 +41,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<Unit> Units { get; set; } = new List<Unit>();
         public ICollection<SubjectCondition> SubjectConditions { get; set; } = new List<SubjectCondition>();
         public ICollection<Test> Tests { get; set; } = new List<Test>();
+        public ICollection<Course> Courses { get; set; } = new List<Course>();
+        public ICollection<HomeWork> HomeWorks { get; set; } = new List<HomeWork>();
     }
 }

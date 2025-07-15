@@ -106,6 +106,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<UnitModule> UnitModules { get; set; }
         public DbSet<SubjectCondition> SubjectConditions { get; set; }
         public DbSet<SubjectConditionRule> SubjectConditionRules { get; set; }
+        public DbSet<CourseModule> CourseModules { get; set; }
         public DbSet<Test> Tests { get; set; }
         public DbSet<TestSection> TestSections { get; set; }
         public DbSet<TestSectionQuestion> TestSectionQuestions { get; set; }
@@ -238,6 +239,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new UnitModuleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SubjectConditionTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SubjectConditionRuleTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseModuleEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

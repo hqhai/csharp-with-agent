@@ -5,13 +5,15 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
+using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
-using Fsel.Course.Domain.Models.CommandModels.Courses;
+using Fsel.Course.Domain.Models.CommandModels.Courses.V1i1;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Course.Infrastructure.Common;
+using Fsel.Course.Infrastructure.Common.CourseHelpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
-using EntityCourse = Fsel.Course.Domain.Entities.Course;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.CourseCmd
 {
@@ -22,20 +24,22 @@ namespace Fsel.Course.Application.Commands.CourseCmd
     public class CreateCourseCommandHandler : IRequestHandler<CreateCourseCommand, MethodResult<CourseModel>>
     {
         private readonly ICourseRepository _courseRepository;
-        private readonly CourseHelper _courseHelper;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private readonly ILevelRepository _levelRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public CreateCourseCommandHandler(ICourseRepository courseRepository
-            , CourseHelper courseHelper
-            , IMapper mapper
-            , IUserService userService
-            )
+        public CreateCourseCommandHandler(ICourseRepository courseRepository,
+                                          IMapper mapper,
+                                          IUserService userService,
+                                          ILevelRepository levelRepository,
+                                          ICategoryRepository categoryRepository)
         {
             _courseRepository = courseRepository;
-            _courseHelper = courseHelper;
             _mapper = mapper;
             _userService = userService;
+            _levelRepository = levelRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(CreateCourseCommand request, CancellationToken cancellationToken)
@@ -43,37 +47,19 @@ namespace Fsel.Course.Application.Commands.CourseCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseModel> methodResult = new MethodResult<CourseModel>();
 
-            #region Validation
-
-            EntityCourse course = _mapper.Map<EntityCourse>(request);
-
-            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = course.CourseTeachers.Select(x => x.TeacherId).ToList() });
-            if (!teachers.IsSuccessStatusCode)
+            var validate = await Validate(request, cancellationToken);
+            if (!validate.IsOK)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teachers), course.CourseTeachers.Select(x => x.TeacherId).ToList());
-                return methodResult;
-            }
-            var method = await _courseHelper.Validate(course, request);
-            if (!method.IsOK)
-            {
-                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(validate.ErrorMessages);
                 return methodResult;
             }
 
-            #endregion Validation
-
-            course.CourseUnitMockTests.ForEach(x =>
+            var course = CourseFactory.Create(request).Build(version: 0, originalId: Guid.NewGuid());
+            if (!course.IsValid())
             {
-                var query = course.CourseUnitMockTests.OrderBy(n => n.DisplayOrder);
-                if (x.UnitId != null)
-                {
-                    x.Number = query.Where(n => n.UnitId != null).ToList().IndexOf(x) + 1;
-                }
-                else if (x.MockTestId != null)
-                {
-                    x.Number = query.Where(n => n.MockTestId != null).ToList().IndexOf(x) + 1;
-                }
-            });
+                methodResult.AddErrorBadRequest(course.ErrorMessages);
+                return methodResult;
+            }
 
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
@@ -84,6 +70,47 @@ namespace Fsel.Course.Application.Commands.CourseCmd
                 methodResult.Result = _mapper.Map<CourseModel>(course);
                 return methodResult;
             });
+
+            return methodResult;
+        }
+
+        private async Task<VoidMethodResult> Validate(UpdateCourseCommandModel request, CancellationToken cancellationToken)
+        {
+            VoidMethodResult methodResult = new VoidMethodResult();
+
+            if (request.Modules == null || !request.Modules.Any(x => x.CourseConfigType == EnumCourseConfigType.Test) || !request.Modules.Any(x => x.CourseConfigType == EnumCourseConfigType.Unit))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseModulesNotNull), nameof(request.Modules), request.Modules);
+                return methodResult;
+            }
+
+            var teachers = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = request.CourseTeachers?.Select(x => x.TeacherId).ToList() });
+            if (!teachers.IsSuccessStatusCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(teachers), request.CourseTeachers?.Select(x => x.TeacherId).ToList());
+                return methodResult;
+            }
+
+            var checkCode = await _courseRepository.Queryable.AsNoTracking().AnyAsync(x => !string.IsNullOrEmpty(request.Code) && !string.IsNullOrEmpty(x.Code) && x.Code.Trim() == request.Code.Trim(), cancellationToken).ConfigureAwait(false);
+            if (checkCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(checkCode), request.Code);
+                return methodResult;
+            }
+
+            var checkLevel = await _levelRepository.Queryable.AsNoTracking().AnyAsync(x => x.Id == request.LevelId, cancellationToken);
+            if (!checkLevel)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(checkLevel), request.LevelId);
+                return methodResult;
+            }
+
+            var checkProgram = await _categoryRepository.Queryable.AsNoTracking().AnyAsync(x => x.Id == request.ProgramId, cancellationToken);
+            if (!checkProgram)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(checkProgram), request.ProgramId);
+                return methodResult;
+            }
 
             return methodResult;
         }

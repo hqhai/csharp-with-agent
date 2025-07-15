@@ -24,26 +24,6 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.Lesson)
                    .WithMany(b => b.LessonModules)
                    .HasForeignKey(p => p.LessonId)
-                   .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasOne(a => a.Video)
-                   .WithMany(b => b.LessonModules)
-                   .HasForeignKey(p => p.VideoId)
-                   .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(a => a.ClassForum)
-                   .WithMany(b => b.LessonModules)
-                   .HasForeignKey(p => p.ClassForumId)
-                   .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(a => a.HomeWork)
-                   .WithMany(b => b.LessonModules)
-                   .HasForeignKey(p => p.HomeWorkId)
-                   .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(a => a.Document)
-                   .WithMany(b => b.LessonModules)
-                   .HasForeignKey(p => p.DocumentId)
                    .OnDelete(DeleteBehavior.Cascade);
         }
     }

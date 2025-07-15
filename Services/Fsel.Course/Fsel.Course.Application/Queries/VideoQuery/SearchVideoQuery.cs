@@ -163,7 +163,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
 
             var linkedVideoIds = await (from video in _videoRepository.Queryable.WhereBulkContains(videoIds, x => x.Id)
 
-                                        join lm in _lessonModuleRepository.Queryable on video.Id equals lm.VideoId into lmGroup
+                                        join lm in _lessonModuleRepository.Queryable on video.Id equals lm.Id into lmGroup
                                         from lessonModule in lmGroup.DefaultIfEmpty()
 
                                         join lv in _lessonVideoRepository.Queryable on video.Id equals lv.VideoId into lvGroup

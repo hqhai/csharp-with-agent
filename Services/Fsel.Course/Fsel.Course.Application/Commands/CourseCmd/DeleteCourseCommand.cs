@@ -32,18 +32,16 @@ namespace Fsel.Course.Application.Commands.CourseCmd
 
             #region Validation
 
-            var course = await _courseRepository.Queryable.Include(e => e.CourseUnitMockTests)
-                                                            .Include(e => e.CourseTeachers)
-                                                            .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
+            var course = await _courseRepository.Queryable.FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
 
-            if (course.Status != EnumCourseStatus.New)
+            if (course.Status != EnumCourseStatus.InActive)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInNewState), nameof(course.Status), course.Status);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotInActive), nameof(course.Status), course.Status);
                 return methodResult;
             }
 

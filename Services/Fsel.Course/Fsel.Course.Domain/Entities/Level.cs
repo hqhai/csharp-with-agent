@@ -32,5 +32,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<Video> Videos { get; set; } = new List<Video>();
         public ICollection<Unit> Units { get; set; } = new List<Unit>();
         public ICollection<Test> Tests { get; set; } = new List<Test>();
+        public ICollection<Course> Courses { get; set; } = new List<Course>();
+        public ICollection<HomeWork> HomeWorks { get; set; } = new List<HomeWork>();
     }
 }
