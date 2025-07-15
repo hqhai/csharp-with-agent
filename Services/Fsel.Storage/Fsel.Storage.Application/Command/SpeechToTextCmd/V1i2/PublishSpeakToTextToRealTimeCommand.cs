@@ -137,13 +137,12 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                         return true;
                     }
 
-                    var fileInfomation = await UpLoadFileAsync(formFile);
-
                     if (string.IsNullOrEmpty(contentText))
                     {
                         return false;
                     }
 
+                    var fileInfomation = await UpLoadFileAsync(formFile);
                     await PublishTextToSocket(request, contentText, fileInfomation.Result);
                 }
                 catch (Exception ex)

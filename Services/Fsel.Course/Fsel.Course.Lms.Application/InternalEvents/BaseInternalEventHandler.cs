@@ -289,7 +289,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
                 return skillScores;
-            };
+            }
+            ;
             return skillScores;
         }
 
@@ -452,8 +453,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (unitResultNext.Status == EnumResultStatus.Unfinished && currentAccountStatus == EnumTrialRegistrationStatus.Payment)
                     {
                         unitResultNext.Status = EnumResultStatus.New;
-                        _unitResultRepository.Update(unitResultNext, false, x => x.UnitId, x => x.StudentId, x => x.CourseId);
-                        await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResultNext }, bulk =>
+                        {
+                            bulk.IgnoreOnUpdateExpression = c => new { c.UnitId, c.StudentId, c.CourseId };
+                        });
                     }
                     break;
 
@@ -462,8 +465,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (finalTestResultNext != null && finalTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
                         finalTestResultNext.Status = EnumResultStatus.New;
-                        _finalTestResultRepository.Update(finalTestResultNext, false, x => x.FinalTestId, x => x.StudentId, x => x.CourseId);
-                        await _finalTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult> { finalTestResultNext }, bulk =>
+                        {
+                            bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId };
+                        });
                     }
                     break;
 
@@ -472,8 +477,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     if (mockTestResultNext != null && mockTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
                         mockTestResultNext.Status = EnumResultStatus.New;
-                        _mockTestResultRepository.Update(mockTestResultNext, false, x => x.MockTestId, x => x.UnitId, x => x.StudentId, x => x.CourseId);
-                        await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResultNext }, bulk =>
+                        {
+                            bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };
+                        });
                     }
                     break;
 
@@ -500,8 +507,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     courseResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                     courseResult.Percent = NumberHelper.ConvertRound(percent);
                     courseResult.SkillScores = skillScores;
-                    _courseResultRepository.Update(courseResult, false, x => x.StudentId, x => x.CourseId);
-                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                    });
                 }
             }
             catch (Exception ex)
@@ -558,8 +567,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
 
                 courseResult.Status = EnumResultStatus.Done;
-                _courseResultRepository.Update(courseResult, false, x => x.StudentId, x => x.CourseId);
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                });
+
                 await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
             }
             catch (Exception ex)

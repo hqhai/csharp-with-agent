@@ -206,7 +206,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
             {
                 await UpdateCoursesStatusNotWorkingAsync(course, student, cancellationToken);
                 courseResultNew.CourseId = course.Id;
-                _courseResultRepository.Add(courseResultNew);
             }
             else
             {
@@ -226,11 +225,18 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
                 {
                     courseResultNew.CourseId = courseClone.Id;
                 }
-                _courseResultRepository.Add(courseResultNew);
+            }
+            if (!courseResultNew.IsValid())
+            {
+                methodResult.AddErrorBadRequest(courseResultNew.ErrorMessages);
+                return methodResult;
             }
             try
             {
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResultNew }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
+                });
             }
             catch (Exception ex)
             {
@@ -249,8 +255,10 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
             if (courseResultActive != null)
             {
                 courseResultActive.WorkingStatus = EnumWorkingStatus.InActive;
-                _courseResultRepository.Update(courseResultActive, false, x => x.CourseId, x => x.StudentId);
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResultActive }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                });
             }
         }
 
@@ -266,12 +274,14 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
         private async Task<IList<Guid>> UpdateCoursesStatusNotWorkingAsync(Course course, StudentModel student, CancellationToken cancellationToken)
         {
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => x.Course != null && x.Course.CourseLevel == course.CourseLevel && x.StudentId == student.Id).ToListAsync(cancellationToken);
-            _courseResultRepository.UpdateList(courseResults.Select(x =>
+            await _courseResultRepository.BulkUpdateList(courseResults.Select(x =>
             {
                 x.WorkingStatus = EnumWorkingStatus.NotWorking;
                 return x;
-            }).ToList(), false, x => x.CourseId, x => x.StudentId);
-            await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }).ToList(), bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+            });
             return courseResults.Select(x => x.CourseId).ToList();
         }
     }

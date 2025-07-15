@@ -7,6 +7,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Identity.Application.Commands.AdminCmd;
     using Fsel.Identity.Application.Commands.OtherCmd;
     using Fsel.Identity.Application.Commands.UserCmd;
     using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
@@ -125,6 +126,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         public async Task<IActionResult> AddCoinFselEventRewardBySheet()
         {
             var commandResult = await _mediator.Send(new AddCoinFselEventRewardBySheetCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update or delete test data for a student
+        /// </summary>
+        [HttpPut("{studentId}/delete-test")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateOrDeleteTest(Guid studentId)
+        {
+            var commandResult = await _mediator.Send(new UpdateDeleteTestCommand { StudentId = studentId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
