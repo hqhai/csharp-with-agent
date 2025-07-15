@@ -18,39 +18,31 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<bool> IsUsingByClient(Guid originalId)
         {
-            var categoryCheck = DbContext.Set<CategoryTestBank>().AsQueryable().AnyAsync(x => x.TestOriginalId == originalId);
-            var unitCheck = DbContext.Set<UnitModule>().AsQueryable().AnyAsync(x => x.OriginalId == originalId);
-            var courseCheck = DbContext.Set<CourseModule>().AsQueryable().AnyAsync(x => x.OriginalId == originalId);
-
-            await Task.WhenAll(categoryCheck, unitCheck, courseCheck);
-            return categoryCheck.Result || unitCheck.Result || courseCheck.Result;
+            var categoryCheck = await DbContext.Set<CategoryTestBank>().AsQueryable().AnyAsync(x => x.TestOriginalId == originalId);
+            var unitCheck = await DbContext.Set<UnitModule>().AsQueryable().AnyAsync(x => x.OriginalId == originalId);
+            var courseCheck = await DbContext.Set<CourseModule>().AsQueryable().AnyAsync(x => x.OriginalId == originalId);
+            return categoryCheck || unitCheck || courseCheck;
         }
 
         public async Task<List<Guid>> GetUsedOriginalIdsAsync(IList<Guid> originalIds)
         {
-            var categoryTask = DbContext.Set<CategoryTestBank>().AsQueryable().WhereBulkContains(originalIds, x => x.TestOriginalId)
+            var categoryResults = await DbContext.Set<CategoryTestBank>().AsQueryable().WhereBulkContains(originalIds, x => x.TestOriginalId)
                 .Select(x => x.TestOriginalId)
                 .ToListAsync();
 
-            var unitTask = DbContext.Set<UnitModule>().AsQueryable().WhereBulkContains(originalIds, x => x.OriginalId)
+            var unitResults = await DbContext.Set<UnitModule>().AsQueryable().WhereBulkContains(originalIds, x => x.OriginalId)
                 .Select(x => x.OriginalId)
                 .ToListAsync();
 
-            var courseTask = DbContext.Set<CourseModule>().AsQueryable().WhereBulkContains(originalIds, x => x.OriginalId)
+            var courseResults = await DbContext.Set<CourseModule>().AsQueryable().WhereBulkContains(originalIds, x => x.OriginalId)
                 .Select(x => x.OriginalId)
                 .ToListAsync();
-
-            await Task.WhenAll(categoryTask, unitTask, courseTask);
-
-            var categoryResults = await categoryTask;
-            var unitResults = await unitTask;
-            var courseResults = await courseTask;
 
             var originalUsedIds = categoryResults
-                .Concat(unitResults)
-                .Concat(courseResults)
-                .Distinct()
-                .ToList();
+                                .Concat(unitResults)
+                                .Concat(courseResults)
+                                .Distinct()
+                                .ToList();
             return originalUsedIds;
         }
 
