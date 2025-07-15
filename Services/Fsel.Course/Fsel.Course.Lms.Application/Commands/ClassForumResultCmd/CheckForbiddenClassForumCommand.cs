@@ -196,7 +196,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             var retryResult = await retryAI.ExecuteAsync(async () =>
             {
-
                 var aIResponse = await _mediator.Send(new AiCmd.V1i1.SubmitAICommand
                 {
                     SettingModel = aiApprovalModel,
@@ -275,8 +274,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _classForumDetailResultRepository.Update(classForumDetailResult);
-                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                });
                 return methodResult;
             });
 

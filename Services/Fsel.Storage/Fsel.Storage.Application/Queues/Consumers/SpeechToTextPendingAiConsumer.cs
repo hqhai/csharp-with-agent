@@ -8,14 +8,15 @@ namespace Fsel.Storage.Application.Queues.Consumers
     using Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.DependencyInjection;
 
     public class SpeechToTextPendingAiConsumer : BaseConsumer<SpeechToTextPendingAiConsumerModel>
     {
-        private readonly IMediator _mediator;
+        private readonly IServiceScopeFactory _serviceScopeFactory;
 
-        public SpeechToTextPendingAiConsumer(AuthContext authContext, IHttpContextAccessor httpContextAccessor, IMediator mediator) : base(authContext, httpContextAccessor)
+        public SpeechToTextPendingAiConsumer(AuthContext authContext, IHttpContextAccessor httpContextAccessor, IServiceScopeFactory serviceScopeFactory) : base(authContext, httpContextAccessor)
         {
-            _mediator = mediator;
+            _serviceScopeFactory = serviceScopeFactory;
         }
 
         public async override Task ConsumeQueue(SpeechToTextPendingAiConsumerModel? message)
@@ -25,12 +26,19 @@ namespace Fsel.Storage.Application.Queues.Consumers
                 return;
             }
 
-            await _mediator.Send(new ConvertSpeechToTextPendingCommand
+            _ = Task.Run(async () =>
             {
-                ClassForumDetailResultId = message.ClassForumDetailResultId,
-                ContentType = message.ContentType,
-                FileData = message.FileData,
-                FileName = message.FileName
+                using var scope = _serviceScopeFactory.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
+
+                await mediator.Send(new ConvertSpeechToTextPendingCommand
+                {
+                    UserId = message.UserId,
+                    ClassForumDetailResultId = message.ClassForumDetailResultId,
+                    ContentType = message.ContentType,
+                    FileData = message.FileData,
+                    FileName = message.FileName
+                });
             });
         }
     }

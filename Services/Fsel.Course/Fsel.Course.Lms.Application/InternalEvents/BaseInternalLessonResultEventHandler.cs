@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
@@ -74,8 +75,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
                 else
                 {
-                    _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.StudentId, x => x.UnitId, x => x.LessonId);
-                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId };
+                    });
                 }
             }
             catch (Exception ex)
@@ -94,7 +97,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 lessonResult.CorrectTotal = (int)baseScoreResult.CorrectTotal;
                 lessonResult.Percent = baseScoreResult.Percent;
                 lessonResult.SkillScores = baseScoreResult.SkillScores;
-                _lessonResultRepository.Update(lessonResult, false, x => x.CourseId, x => x.StudentId, x => x.UnitId, x => x.LessonId);
+                await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId };
+                });
                 await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)

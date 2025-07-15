@@ -30,7 +30,7 @@ namespace Fsel.Course.Infrastructure.Configs
             //        v => v.ToString(),
             //        v => v.EnumParse<EnumResultStatus>());
 
-            builder.HasIndex(c => new { c.CourseId, c.UnitId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.CourseId, c.UnitId, c.StudentId }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.StudentId, c.Status });
             builder.HasIndexIncludeAllProperties(c => new { c.CreatedUserId });
         }
