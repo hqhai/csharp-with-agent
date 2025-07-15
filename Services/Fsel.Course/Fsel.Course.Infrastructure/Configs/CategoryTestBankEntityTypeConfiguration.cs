@@ -24,11 +24,6 @@ namespace Fsel.Course.Infrastructure.Configs
                    .WithMany(b => b.CategoryTestBanks)
                    .HasForeignKey(p => p.ProgramId)
                    .OnDelete(DeleteBehavior.Cascade);
-
-            builder.HasOne(a => a.Test)
-                   .WithMany(b => b.CategoryTestBanks)
-                   .HasForeignKey(p => p.TestId)
-                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

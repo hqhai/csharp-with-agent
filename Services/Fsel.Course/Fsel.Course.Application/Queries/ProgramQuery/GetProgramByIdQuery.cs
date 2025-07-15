@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Application.Queries.ProgramQuery
 {
+    using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -28,8 +29,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
         private readonly IFlowRepository _flowRepository;
         private readonly IStepFlowRepository _stepFlowRepository;
         private readonly IMapper _mapper;
-        private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
-        private readonly IPlacementTestRepository _placementTestRepository;
+        private readonly ITestRepository _testRepository;
         private readonly ICategoryTestBankRepository _categoryTestBankRepository;
 
         public GetProgramByIdQueryHandler(ICategoryRepository categoryRepository,
@@ -38,8 +38,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                           IFlowRepository flowRepository,
                                           IStepFlowRepository stepFlowRepository,
                                           IMapper mapper,
-                                          IPlacementTestGroupResultRepository placementTestGroupResultRepository,
-                                          IPlacementTestRepository placementTestRepository,
+                                          ITestRepository testRepository,
                                           ICategoryTestBankRepository categoryTestBankRepository)
         {
             _categoryRepository = categoryRepository;
@@ -48,8 +47,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
             _flowRepository = flowRepository;
             _stepFlowRepository = stepFlowRepository;
             _mapper = mapper;
-            _placementTestGroupResultRepository = placementTestGroupResultRepository;
-            _placementTestRepository = placementTestRepository;
+            _testRepository = testRepository;
             _categoryTestBankRepository = categoryTestBankRepository;
         }
 
@@ -95,18 +93,18 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                                                           Name = sl.Skill != null ? sl.Skill.Name : string.Empty
                                                                       }).ToList()
                                      }).ToList(),
-                                     TestIds = _categoryTestBankRepository.Queryable.Where(y => y.ProgramId == g.Key.Id).OrderBy(x => x.CreatedDate).Select(x => x.TestId).ToList(),
+                                     TestOriginalIds = _categoryTestBankRepository.Queryable.Where(y => y.ProgramId == g.Key.Id).OrderBy(x => x.CreatedDate).Select(x => x.TestOriginalId).ToList(),
                                  }).FirstOrDefaultAsync(cancellationToken);
             if (program != null)
             {
-                if (program.TestIds != null && program.TestIds.Any())
+                if (program.TestOriginalIds != null && program.TestOriginalIds.Any())
                 {
-                    var tests = await _placementTestRepository.Queryable.WhereBulkContains(program.TestIds, x => x.Id).Select(x => new TestModel
+                    var tests = await _testRepository.Queryable.WhereBulkContains(program.TestOriginalIds, x => x.Id).Select(x => new TestModel
                     {
                         Id = x.Id,
                         Name = x.Name,
                     }).ToListAsync(cancellationToken);
-                    program.Tests = tests.OrderBy(x => program.TestIds.IndexOf(x.Id)).ToList();
+                    program.Tests = tests.OrderBy(x => program.TestOriginalIds.IndexOf(x.Id)).ToList();
                 }
 
                 program.Flows = await GetFlowsAsync(program.Id, cancellationToken);
@@ -129,13 +127,14 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                            .ToListAsync(cancellationToken);
             foreach (var flow in flows.OrderBy(x => x.CreatedDate))
             {
-                var isPT = await _placementTestGroupResultRepository.Queryable.AnyAsync(x => x.FlowId == flow.Id, cancellationToken);
+                //var isPT = await _placementTestGroupResultRepository.Queryable.AnyAsync(x => x.FlowId == flow.Id, cancellationToken);
+                //flowModel.IsUsedInPlacementTest = isPT;
+
                 foreach (var stepFlow in flow.StepFlows)
                 {
                     await LoadStepFlowRecursively(stepFlow, cancellationToken);
                 }
                 var flowModel = _mapper.Map<FlowModel>(flow);
-                flowModel.IsUsedInPlacementTest = isPT;
                 flowModels.Add(flowModel);
             }
             return flowModels;

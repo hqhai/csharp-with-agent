@@ -7,5 +7,10 @@ namespace Fsel.Course.Domain.IRepositories
 
     public interface ITestRepository : IRepository<Test>
     {
+        Task<Test> GetTestAsync(Test test);
+
+        Task<List<Guid>> GetUsedOriginalIdsAsync(IList<Guid> originalIds);
+
+        Task<bool> IsUsingByClient(Guid originalId);
     }
 }

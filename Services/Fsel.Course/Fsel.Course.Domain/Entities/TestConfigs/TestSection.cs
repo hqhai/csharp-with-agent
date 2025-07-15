@@ -17,7 +17,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
-        public EnumTestLayoutType LayoutType { get; set; }
+        public EnumTestLayoutType? LayoutType { get; set; }
 
         public int DisplayOrder { get; set; }
 

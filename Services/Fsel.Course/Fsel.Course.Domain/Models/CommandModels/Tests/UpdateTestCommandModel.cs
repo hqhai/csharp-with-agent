@@ -9,6 +9,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.Tests
     {
         public string? Name { get; set; }
         public string? Code { get; set; }
+        public Guid LevelId { get; set; }
+        public Guid ProgramId { get; set; }
         public IList<UpdateTestSectionCommandModel> TestSections { get; set; } = new List<UpdateTestSectionCommandModel>();
     }
 }

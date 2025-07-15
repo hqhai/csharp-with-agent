@@ -109,7 +109,7 @@ builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<ProgramConverter>();
 builder.Services.AddScoped<LessonConverter>();
-builder.Services.AddScoped<TestHelper>();
+builder.Services.AddScoped<TestConverter>();
 
 // Helper
 builder.Services.AddScoped<LinQAnswerHelper>();
