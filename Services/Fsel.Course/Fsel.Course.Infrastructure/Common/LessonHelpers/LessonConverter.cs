@@ -132,9 +132,9 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
                 return methodResult;
             }
 
-            if (request.Modules == null || !request.Modules.Any())
+            if (request.LessonModules == null || !request.LessonModules.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonModuleNotNull), nameof(request.Modules));
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonModuleNotNull), nameof(request.LessonModules));
                 return methodResult;
             }
 
@@ -144,21 +144,21 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
                 return methodResult;
             }
 
-            double sumPercent = request.Modules.Sum(x => x.Percent);
+            double sumPercent = request.LessonModules.Sum(x => x.Percent);
             if (sumPercent < MinPercent || sumPercent > MaxPercent)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.PercentNotValid), nameof(sumPercent), sumPercent);
                 return methodResult;
             }
 
-            var openOrders = request.Modules.Select(x => x.OpenOrder).Distinct().ToList();
+            var openOrders = request.LessonModules.Select(x => x.OpenOrder).Distinct().ToList();
             if (!IsValidNumber(openOrders))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.OpenOrderOutOfSequence), nameof(openOrders), openOrders);
                 return methodResult;
             }
 
-            var videoIds = request.Modules.Where(x => x.LessonConfigType == EnumLessonConfigType.Video && x.OriginalId.HasValue).Select(x => x.OriginalId!.Value).ToList() ?? new List<Guid>();
+            var videoIds = request.LessonModules.Where(x => x.LessonConfigType == EnumLessonConfigType.Video && x.OriginalId.HasValue).Select(x => x.OriginalId!.Value).ToList() ?? new List<Guid>();
             var checkVideo = await _videoRepository.Queryable.WhereBulkContains(videoIds, x => x.Id).CountAsync(cancellationToken: cancellationToken);
             if (videoIds.Any() && checkVideo != videoIds.Count)
             {
@@ -166,7 +166,7 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
                 return methodResult;
             }
 
-            var homeWorkIds = request.Modules.Where(x => x.LessonConfigType == EnumLessonConfigType.HomeWork && x.OriginalId.HasValue).Select(x => x.OriginalId!.Value).ToList() ?? new List<Guid>();
+            var homeWorkIds = request.LessonModules.Where(x => x.LessonConfigType == EnumLessonConfigType.HomeWork && x.OriginalId.HasValue).Select(x => x.OriginalId!.Value).ToList() ?? new List<Guid>();
             var checkHomeWork = await _homeWorkRepository.Queryable.WhereBulkContains(homeWorkIds, x => x.Id).CountAsync(cancellationToken: cancellationToken);
             if (homeWorkIds.Any() && checkHomeWork != homeWorkIds.Count)
             {

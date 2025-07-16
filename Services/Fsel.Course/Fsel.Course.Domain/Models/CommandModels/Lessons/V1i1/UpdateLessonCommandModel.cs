@@ -23,7 +23,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons.V1i1
 
         public IList<CreateLessonInstructionCommandModel>? LessonInstructions { get; set; }
 
-        public IList<UpdateLessonModuleModel>? Modules { get; set; }
+        public IList<UpdateLessonModuleModel>? LessonModules { get; set; }
 
     }
 

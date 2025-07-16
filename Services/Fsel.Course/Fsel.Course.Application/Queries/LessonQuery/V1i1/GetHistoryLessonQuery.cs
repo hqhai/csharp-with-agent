@@ -36,7 +36,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
             var methodResult = new MethodResult<PagingItemsModel<LessonHistoryModel>>();
 
             var lessons = _lessonRepository.Queryable
-                                           .Where(x => x.OriginalId == request.OriginalId)
+                                           .Where(x => x.OriginalId == request.OriginalId && !x.IsArchive)
                                            .OrderByDescending(x => x.Version)
                                            .AsNoTracking();
             if (lessons == null)

@@ -66,7 +66,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
             bool isCheckUnit = await _unitRepository.Queryable
                                                     .AnyAsync(x => x.UnitModules.Any(c => c.UnitConfigType == EnumUnitConfigType.Lesson && c.OriginalId == lesson.OriginalId), cancellationToken);
 
-            var lessonConverter = await _lessonConverter.LessonModuleHandler(request.Modules!, true, isCheckUnit, cancellationToken);
+            var lessonConverter = await _lessonConverter.LessonModuleHandler(request.LessonModules!, true, isCheckUnit, cancellationToken);
             if (!lessonConverter.IsOK)
             {
                 methodResult.AddErrorBadRequest(lessonConverter.ErrorMessages);

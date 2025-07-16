@@ -8,8 +8,8 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Application.Commands.CourseCmd;
     using Fsel.Course.Application.Commands.LessonCmd.V1i1;
-    using Fsel.Course.Application.Queries.CourseQuery;
     using Fsel.Course.Application.Queries.LessonQuery.V1i1;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Shared.Constants;
@@ -115,6 +115,18 @@ namespace Fsel.Course.Lcms.Api.Controllers.V1i1
         {
             MethodResult<PagingItemsModel<Domain.Models.EntityModels.LessonHistoryModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Archive lesson
+        /// </summary>
+        [HttpPut("archive/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Active([FromRoute] Guid id)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(new ArchiveLessonCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
