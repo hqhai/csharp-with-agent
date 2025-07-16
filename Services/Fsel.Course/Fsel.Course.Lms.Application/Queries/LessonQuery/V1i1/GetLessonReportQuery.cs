@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             var videoTimeCodes = video.VideoTimeCodes.Where(x => x.TimeCodeType == EnumTimeCodeType.Standalone);
             var questions = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question);
             var videoTimeLenght = GetMediaDurationAsync(video.VideoFilePath);
-            lessonReport.AnswerTime = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.WorkingTime + x.RetryWorkingTime) + videoTimeLenght ?? 0;
+            lessonReport.AnswerTime = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.WorkingTime + x.RetryWorkingTime) + (videoTimeLenght ?? 0);
             lessonReport.CorrectCount = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.CorrectCount);
             lessonReport.CorrectTotal = questions.Where(x => !x!.Ungraded).Sum(x => x!.CorrectTotal);
             lessonReport.Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal);
