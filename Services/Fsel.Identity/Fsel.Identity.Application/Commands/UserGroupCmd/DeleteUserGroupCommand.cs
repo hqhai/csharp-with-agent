@@ -4,6 +4,7 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -39,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
 
                 if (userGroup.IsDefault)
                 {
-                    methodResult.AddErrorBadRequest(nameof(Domain.Enums.ErrorCodes.EnumUserGroupErrorCode.DoNotDeleteTheDefaultUserGroup), nameof(userGroup));
+                    methodResult.AddErrorBadRequest(nameof(EnumUserGroupErrorCode.DoNotDeleteTheDefaultUserGroup), nameof(userGroup));
                     return methodResult;
                 }
 
@@ -48,11 +49,10 @@ namespace Fsel.Identity.Application.Commands.UserGroupCmd
                     .Where(x => x.RoleId == request.Id)
                     .ToList();
 
-                // Xóa nhóm và tất cả thành viên trong transaction
-                // Xóa tất cả thành viên trong nhóm
-                foreach (var membership in memberships)
+                if (memberships.Any())
                 {
-                    await _userRoleRepository.DeleteAsync(membership);
+                    methodResult.AddErrorBadRequest(nameof(EnumUserGroupErrorCode.SomeoneIsInTheUserGroup), nameof(userGroup));
+                    return methodResult;
                 }
 
                 // Xóa nhóm
