@@ -9,6 +9,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Interaction.Application.Commands.CustomerSurveyCmd;
     using Fsel.Interaction.Application.Commands.SurveyConfigCmd;
     using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
+    using Fsel.Interaction.Application.Queries.SurveyConfigQuery;
     using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
@@ -109,6 +110,18 @@ namespace Fsel.Interaction.Api.Controllers
         public async Task<IActionResult> ChangeStatusViewSurvey([FromBody] ChangeStatusViewSurveyCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Do survey
+        /// </summary>
+        [HttpPost("get-user-surveys-assignment")]
+        [ProducesResponseType(typeof(MethodResult<IList<UserSurveyAssignmentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUserSurveysAssignment()
+        {
+            var queryResult = await _mediator.Send(new SearchUserSurveyAssignmentQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

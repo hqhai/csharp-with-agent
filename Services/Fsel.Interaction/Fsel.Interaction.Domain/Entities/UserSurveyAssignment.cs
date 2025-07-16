@@ -11,5 +11,6 @@ namespace Fsel.Interaction.Domain.Entities
         public EnumCourseType CourseType { get; set; }
         public EnumProgressRequirement ProgressRequirement { get; set; }
         public bool IsView { get; set; }
+        public bool IsDone { get; set; }
     }
 }

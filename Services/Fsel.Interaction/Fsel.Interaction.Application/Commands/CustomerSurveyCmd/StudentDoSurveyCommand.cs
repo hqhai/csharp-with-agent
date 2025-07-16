@@ -12,7 +12,6 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
-    using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -35,8 +34,9 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly AuthContext _authContext;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly IMapper _mapper;
+        private readonly ICustomerSurveyRepository _customerSurveyRepository;
 
-        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper)
+        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ICustomerSurveyRepository customerSurveyRepository)
         {
             _surveyConfigRepository = surveyConfigRepository;
             _customerSurveyGroupRepository = customerSurveyGroupRepository;
@@ -44,12 +44,26 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             _authContext = authContext;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _mapper = mapper;
+            _customerSurveyRepository = customerSurveyRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(StudentDoSurveyCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+
+            if (request.Answers == null || !request.Answers.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                return methodResult;
+            }
+
+            var isDuplicate = request.Answers.GroupBy(p => p.Id).Any(p => p.Count() > 1);
+            if (isDuplicate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                return methodResult;
+            }
 
             if (request.IsSurveyPT && !request.UserSurveyAssignmentId.HasValue)
             {
@@ -64,44 +78,58 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 return methodResult;
             }
 
-            var customerSurveys = new List<CustomerSurvey>();
+            var surveyQuestionIds = surveyConfig.SurveyQuestions.Select(p => p.Id).ToList();
 
-            foreach (var item in surveyConfig.SurveyQuestions)
+            var customerSurveyEntities = await _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId).Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
+
+            var newCustomerSurveys = new List<CustomerSurvey>();
+            var updateCustomerSurveys = new List<CustomerSurvey>();
+
+            foreach (var answer in request.Answers)
             {
-                var surveyQuestion = request.Answers?.FirstOrDefault(p => p.Id == item.Id);
-                if (surveyQuestion != null)
-                {
-                    var answers = _mapper.Map<IList<AnswerSurveyModel>>(surveyQuestion.Answer);
-
-                    if (item.IsRequired.HasValue && item.IsRequired.Value && !answers.Any())
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(answers));
-                        return methodResult;
-                    }
-
-                    customerSurveys.Add(new CustomerSurvey()
-                    {
-                        UserId = _authContext.CurrentUserId,
-                        Answer = surveyQuestion.Answer,
-                        IsCompleted = surveyQuestion.IsCompleted,
-                        SurveyQuestionId = item.Id,
-                    });
-                }
-                else
+                var surveyQuestion = surveyConfig.SurveyQuestions?.FirstOrDefault(p => p.Id == answer.Id);
+                if (surveyQuestion == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(surveyQuestion));
                     return methodResult;
                 }
+
+                if (surveyQuestion.IsRequired.HasValue && surveyQuestion.IsRequired.Value && answer.Answer == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(answer));
+                    return methodResult;
+                }
+
+                var existAnswer = customerSurveyEntities.FirstOrDefault(p => p.SurveyQuestionId == answer.Id);
+                if (existAnswer != null)
+                {
+                    existAnswer.Answer = answer.Answer;
+                    updateCustomerSurveys.Add(existAnswer);
+                }
+                else
+                {
+                    newCustomerSurveys.Add(new CustomerSurvey()
+                    {
+                        Answer = answer.Answer,
+                        UserId = _authContext.CurrentUserId,
+                        IsCompleted = true,
+                        SurveyQuestionId = answer.Id,
+                    });
+                }
             }
 
-            var customerSurveyGroup = new CustomerSurveyGroup()
+            CustomerSurveyGroup? customerSurveyGroup = null;
+
+            if (newCustomerSurveys.Count + updateCustomerSurveys.Count == surveyConfig.SurveyQuestions?.Count)
             {
-                Status = EnumSurveyGroupStatus.Done,
-                UserId = _authContext.CurrentUserId,
-                Coin = surveyConfig.Tokens,
-                CustomerSurveys = customerSurveys,
-                SurveyFormType = surveyConfig.ApplicablePrograms?.LastOrDefault() ?? default,
-            };
+                customerSurveyGroup = new CustomerSurveyGroup()
+                {
+                    Status = EnumSurveyGroupStatus.Done,
+                    UserId = _authContext.CurrentUserId,
+                    Coin = surveyConfig.Tokens,
+                    SurveyFormType = surveyConfig.ApplicablePrograms?.LastOrDefault() ?? default,
+                };
+            }
 
             UserSurveyAssignment? assignment = new UserSurveyAssignment();
 
@@ -117,14 +145,28 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             await _surveyConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                if (assignment != null)
+                if (customerSurveyGroup != null)
                 {
-                    await _userSurveyAssignmentRepository.DeleteAsync(assignment);
+                    if (assignment != null)
+                    {
+                        assignment.IsDone = true;
+                        _userSurveyAssignmentRepository.Update(assignment);
+                    }
+                    customerSurveyGroup = _customerSurveyGroupRepository.Add(customerSurveyGroup);
                 }
-                customerSurveyGroup = _customerSurveyGroupRepository.Add(customerSurveyGroup);
-                await _surveyConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                await CreateToken(customerSurveyGroup.Id, surveyConfig.Tokens);
+                updateCustomerSurveys.ForEach(p => { p.CustomerSurveyGroupId = customerSurveyGroup?.Id; });
+                newCustomerSurveys.ForEach(p => { p.CustomerSurveyGroupId = customerSurveyGroup?.Id; });
+
+                _customerSurveyRepository.UpdateList(updateCustomerSurveys);
+                await _customerSurveyRepository.AddList(newCustomerSurveys);
+
+                await _customerSurveyRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                if (customerSurveyGroup != null && customerSurveyGroup.Status == EnumSurveyGroupStatus.Done)
+                {
+                    await CreateToken(customerSurveyGroup.Id, surveyConfig.Tokens);
+                }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
