@@ -114,9 +114,9 @@ namespace Fsel.Interaction.Api.Controllers
         }
 
         /// <summary>
-        /// Do survey
+        ///getuser surveys assignment
         /// </summary>
-        [HttpPost("get-user-surveys-assignment")]
+        [HttpGet("get-user-surveys-assignment")]
         [ProducesResponseType(typeof(MethodResult<IList<UserSurveyAssignmentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUserSurveysAssignment()
