@@ -71,5 +71,33 @@ namespace Fsel.Interaction.Api.Controllers.Admin
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Export students do survey
+        /// </summary>
+        [HttpPost("export-students-do-survey")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportHistoriesDoSurveyCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "export_histories_do_survey.xlsx");
+        }
+
+        /// <summary>
+        /// search student survey record
+        /// </summary>
+        [HttpGet("search-student-survey-record")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSurveyRecordModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> SearchStudentSurveyRecord([FromQuery] SearchStudentSurveyRecordQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

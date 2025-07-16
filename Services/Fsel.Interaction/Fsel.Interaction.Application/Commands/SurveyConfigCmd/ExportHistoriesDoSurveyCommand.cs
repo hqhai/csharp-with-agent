@@ -1,11 +1,12 @@
 using System.Collections.Concurrent;
 using System.Globalization;
-using System.Text.Json;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Interaction.Application.Services.UserServices;
 using Fsel.Interaction.Domain.IRepositories;
+using Fsel.Interaction.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
@@ -26,14 +27,16 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
         private readonly ICustomerSurveyRepository _customerSurveyRepository;
         private readonly ICustomerSurveyGroupRepository _customerSurveyGroupRepository;
         private readonly IUserService _userService;
+        private readonly IMapper _mapper;
 
-        public ExportHistoriesDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ISurveyQuestionRepository surveyQuestionRepository, ICustomerSurveyRepository customerSurveyRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserService userService)
+        public ExportHistoriesDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ISurveyQuestionRepository surveyQuestionRepository, ICustomerSurveyRepository customerSurveyRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserService userService, IMapper mapper)
         {
             _surveyConfigRepository = surveyConfigRepository;
             _surveyQuestionRepository = surveyQuestionRepository;
             _customerSurveyRepository = customerSurveyRepository;
             _customerSurveyGroupRepository = customerSurveyGroupRepository;
             _userService = userService;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportHistoriesDoSurveyCommand request, CancellationToken cancellationToken)
@@ -70,22 +73,28 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
                 return methodResult;
             }
 
-            using var memoryStream = new MemoryStream();
-
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-
             CultureInfo cultureInfo = CultureInfo.InvariantCulture;
-            using var excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.RevenueReport));
+
+            var templateFile = new FileInfo(ResourceSettings.HistoriesSurveyReport);
+            var fileBytes = File.ReadAllBytes(templateFile.FullName);
+            using var templateStream = new MemoryStream(fileBytes);
+
+            var memoryStream = new MemoryStream();
+            using var excelPackage = new ExcelPackage(templateStream);
 
             var excelWorksheet = excelPackage.Workbook.Worksheets[0];
             int startRow = 1;
-            int startColumn = 5;
+            int startColumn = 6;
 
-            surveyConfig.SurveyQuestions = surveyConfig.SurveyQuestions.OrderBy(p => p.DisplayLevel).ThenBy(p => p.DisplayOrder).ToList();
+            surveyConfig.SurveyQuestions = surveyConfig.SurveyQuestions
+                .OrderBy(p => p.DisplayLevel)
+                .ThenBy(p => p.DisplayOrder)
+                .ToList();
 
             foreach (var item in surveyConfig.SurveyQuestions)
             {
-                excelWorksheet.Cells[0, startColumn].Value = item.Question;
+                excelWorksheet.Cells[1, startColumn++].Value = item.Question;
             }
 
             var dataBag = new ConcurrentBag<(int row, List<string> values)>();
@@ -106,19 +115,20 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
 
                         item.Human.FullName ?? string.Empty,
                         item.Human.Email ?? string.Empty,
-                        item.Human.FullName ?? string.Empty,
+                        item.Human.User?.PhoneNumber ?? string.Empty,
                         item.Human.User?.UserName ?? string.Empty
                     };
 
                     foreach (var question in surveyConfig.SurveyQuestions)
                     {
-                        var answer = answers.FirstOrDefault(x => x.CustomerSurvey.SurveyQuestionId == question.Id)?.CustomerSurvey.Answer ?? string.Empty;
+                        var answerStr = answers
+                            .FirstOrDefault(x => x.CustomerSurvey.SurveyQuestionId == question.Id)
+                            ?.CustomerSurvey.Answer ?? string.Empty;
 
                         try
                         {
-                            using var document = JsonDocument.Parse(answer.ToString() ?? string.Empty);
-                            var content = document.RootElement[0].GetProperty("content").GetString() ?? string.Empty;
-                            rowValues.Add(content);
+                            var answer = ConvertHelper.Deserialize<List<AnswerSurveyModel>>(answerStr);
+                            rowValues.Add(JoinAnswersWithDot(answer));
                         }
                         catch
                         {
@@ -126,17 +136,14 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
                         }
                     }
 
-                    lock (dataBag)
-                    {
-                        dataBag.Add((startRow + index, rowValues));
-                    }
+                    dataBag.Add((startRow + index + 1, rowValues));
                 }
             }).ToArray();
 
             await Task.WhenAll(tasks);
 
+            // Ghi dữ liệu
             var sortedData = dataBag.OrderBy(x => x.row);
-
             foreach (var (row, values) in sortedData)
             {
                 for (int col = 1; col <= values.Count; col++)
@@ -145,7 +152,22 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
                 }
             }
 
+            // Save vào memoryStream
+            excelPackage.SaveAs(memoryStream);
+            memoryStream.Position = 0;
+
+            methodResult.Result = memoryStream;
             return methodResult;
+        }
+
+        public static string JoinAnswersWithDot(List<AnswerSurveyModel>? answers)
+        {
+            if (answers == null || answers.Count == 0)
+                return string.Empty;
+
+            return string.Join(", ", answers
+                .Where(a => !string.IsNullOrWhiteSpace(a.Content))
+                .Select(a => $"{a.Id}. {a.Content}"));
         }
     }
 }
