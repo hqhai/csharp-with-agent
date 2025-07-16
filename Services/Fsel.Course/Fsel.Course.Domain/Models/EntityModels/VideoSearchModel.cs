@@ -27,13 +27,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
             get { return _subFilePath.AddS3BaseUrl(); }
         }
 
+        public Guid? OriginalId { get; set; }
         public bool IsActive { get; set; }
-        public bool IsUseStudent { get; set; }
         public string? LevelName { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public IList<string>? Skills { get; set; }
         public IList<VideoExerciseSearchModel>? Exercises { get; set; }
-
-        public Guid? OriginalId { get; set; }
     }
 }

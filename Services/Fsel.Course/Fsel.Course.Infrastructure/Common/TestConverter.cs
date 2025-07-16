@@ -11,11 +11,10 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Models.CommandModels.Questions;
     using Fsel.Course.Domain.Models.CommandModels.TestAiSettings;
     using Fsel.Course.Domain.Models.CommandModels.TestSections;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
-    public class TestHelper
+    public class TestConverter
     {
         private readonly ITestAISettingRepository _testAISettingRepository;
         private readonly IQuestionRepository _questionRepository;
@@ -31,7 +30,7 @@ namespace Fsel.Course.Infrastructure.Common
         private VoidMethodResult VoidMethodResult = new VoidMethodResult();
         private int NumberQuestion = 0;
 
-        public TestHelper(ITestAISettingRepository testAISettingRepository,
+        public TestConverter(ITestAISettingRepository testAISettingRepository,
             IQuestionRepository questionRepository,
             ITestSectionRepository testSectionRepository,
             ITestSectionQuestionRepository testSectionQuestionRepository,
@@ -49,6 +48,45 @@ namespace Fsel.Course.Infrastructure.Common
         }
 
         #region Validate
+
+        public VoidMethodResult IsValidateQuestion(IEnumerable<TestSection> testSections)
+        {
+            var methodResult = new VoidMethodResult();
+            if (testSections == null || !testSections.Any())
+            {
+                return methodResult;
+            }
+
+            foreach (var testSection in testSections)
+            {
+                if (testSection.TestSectionQuestions != null && testSection.TestSectionQuestions.Any())
+                {
+                    foreach (var question in testSection.TestSectionQuestions.Select(x => x.Question))
+                    {
+                        if (!question.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(question.ErrorMessages);
+                        }
+                        var method = _questionConverter.HandleQuestion(question);
+                        if (!method.IsOK)
+                        {
+                            methodResult.AddErrorBadRequest(method.ErrorMessages);
+                        }
+                    }
+                }
+
+                if (testSection.TestSections != null && testSection.TestSections.Any())
+                {
+                    var childResult = IsValidateQuestion(testSection.TestSections);
+                    if (!childResult.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(childResult.ErrorMessages);
+                    }
+                }
+            }
+
+            return methodResult;
+        }
 
         private void ValidateTestLayout(CreateTestSectionCommandModel testSectionRequest)
         {
@@ -416,8 +454,9 @@ namespace Fsel.Course.Infrastructure.Common
 
                 await DeleteQuestionsAsync(questions);
                 await DeleteTestAISettingsAsync(testAISettings);
+
+                allSectionChilrens.AddRange(DeleteTestSections);
                 await DeleteTestSectionsAsync(allSectionChilrens);
-                await DeleteTestSectionsAsync(DeleteTestSections);
             }
             return methodResult;
         }

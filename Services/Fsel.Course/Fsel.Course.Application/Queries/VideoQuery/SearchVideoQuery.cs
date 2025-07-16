@@ -30,8 +30,6 @@ namespace Fsel.Course.Application.Queries.VideoQuery
         private readonly ISkillRepository _skillRepository;
         private readonly ILevelRepository _levelRepository;
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly ILessonVideoRepository _lessonVideoRepository;
-        private readonly ILessonModuleRepository _lessonModuleRepository;
         private const int LengthKeyword = 300;
 
         public SearchVideoQueryHandler(IVideoRepository videoRepository,
@@ -40,9 +38,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             IExerciseRepository exerciseRepository,
             ISkillRepository skillRepository,
             ILevelRepository levelRepository,
-            IVideoResultRepository videoResultRepository,
-            ILessonVideoRepository lessonVideoRepository,
-            ILessonModuleRepository lessonModuleRepository)
+            IVideoResultRepository videoResultRepository)
         {
             _videoRepository = videoRepository;
             _videoTimeCodeRepository = videoTimeCodeRepository;
@@ -51,8 +47,6 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             _skillRepository = skillRepository;
             _levelRepository = levelRepository;
             _videoResultRepository = videoResultRepository;
-            _lessonVideoRepository = lessonVideoRepository;
-            _lessonModuleRepository = lessonModuleRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<VideoSearchModel>>> Handle(SearchVideoQuery request, CancellationToken cancellationToken)
@@ -82,21 +76,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 queryTimeCode = queryTimeCode.Where(x => x.TimeCodeType == request.TimeCodeType);
             }
 
-            var queryVideo = _videoRepository.Queryable;
-
-            var videoChildQuery = _videoRepository.Queryable.Where(v => v.OriginalId.HasValue && v.VersionStatus == EnumVersionStatus.LastVersion);
-
-            // Query video cha KHÔNG có con
-            var videoParentNoChild = from parent in _videoRepository.Queryable
-                                     where !parent.OriginalId.HasValue
-                                     join child in _videoRepository.Queryable
-                                         on parent.Id equals child.OriginalId into childGroup
-                                     from child in childGroup.DefaultIfEmpty()
-                                     where child == null
-                                     select parent;
-
-            // Hợp nhất cha-không-con + tất cả con
-            queryVideo = videoChildQuery.Union(videoParentNoChild);
+            var queryVideo = _videoRepository.Queryable.Where(x => !x.IsArchive).Where(v => v.VersionStatus == EnumVersionStatus.LastVersion);
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -129,9 +109,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                          join vtc in queryTimeCode on video.Id equals vtc.VideoId
                          select video;
 
-            queryVideo = queryVideo.Distinct();
-
-            var query = from baseQ in queryVideo
+            var query = from baseQ in queryVideo.Distinct()
                         join level in _levelRepository.Queryable on baseQ.LevelId equals level.Id into levelJoin
                         from level in levelJoin.DefaultIfEmpty()
                         join videoResultGroup in _videoResultRepository.Queryable on baseQ.Id equals videoResultGroup.VideoId into videoResults
@@ -149,8 +127,8 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                             UpdatedUserId = baseQ.UpdatedUserId,
                             VideoFilePath = baseQ.VideoFilePath,
                             LevelName = level.Name,
-                            IsUseStudent = videoResults.Any(),
-                            OriginalId = baseQ.OriginalId
+                            OriginalId = baseQ.OriginalId,
+                            IsActive = videoResults.Any()
                         };
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -161,18 +139,6 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                     .ConfigureAwait(false);
 
             var videoIds = lists.Select(x => x.Id).ToList();
-
-            var linkedVideoIds = await (from video in _videoRepository.Queryable.WhereBulkContains(videoIds, x => x.Id)
-
-                                        join lm in _lessonModuleRepository.Queryable on video.Id equals lm.Id into lmGroup
-                                        from lessonModule in lmGroup.DefaultIfEmpty()
-
-                                        join lv in _lessonVideoRepository.Queryable on video.Id equals lv.VideoId into lvGroup
-                                        from lessonVideo in lvGroup.DefaultIfEmpty()
-
-                                        where lessonModule != null || lessonVideo != null
-                                        select video.Id
-                                      ).Distinct().ToListAsync(cancellationToken);
 
             var videoSkills = await (
                               from vtc in _videoTimeCodeRepository.Queryable.WhereBulkContains(videoIds, x => x.VideoId)
@@ -197,7 +163,6 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                     CourseSkill = x.Key,
                     Count = x.Select(x => x.ExerciseId).Distinct().Count(),
                 }).ToList();
-                item.IsActive = linkedVideoIds.Any(x => x == item.Id);
                 item.Skills = skills.Where(x => !string.IsNullOrEmpty(x.SkillName)).Select(x => x.SkillName).Distinct().ToList();
             }
             methodResult.Result = new PagingItemsModel<VideoSearchModel>(lists, request, totalItem);

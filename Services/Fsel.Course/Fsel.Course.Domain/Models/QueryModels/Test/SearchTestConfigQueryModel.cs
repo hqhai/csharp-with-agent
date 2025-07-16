@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.QueryModels.MockTests
+namespace Fsel.Course.Domain.Models.QueryModels.Test
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;

@@ -20,7 +20,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? ParentId { get; set; }
         public IList<LevelModel>? Levels { get; set; }
         public IList<FlowModel>? Flows { get; set; }
-        public IList<Guid>? TestIds { get; set; }
+        public IList<Guid>? TestOriginalIds { get; set; }
         public IList<TestModel>? Tests { get; set; }
     }
 

@@ -4,17 +4,15 @@ namespace Fsel.Course.Application.Commands.TestCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Common.TestHelper;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
-    public class CreateTestCommand : CreateTestCommandModel, IRequest<MethodResult<TestModel>>
+    public class CreateTestCommand : UpdateTestCommandModel, IRequest<MethodResult<TestModel>>
     {
     }
 
@@ -22,15 +20,21 @@ namespace Fsel.Course.Application.Commands.TestCmd
     {
         private readonly IMapper _mapper;
         private readonly ITestRepository _testRepository;
-        private readonly TestHelper _testHelper;
+        private readonly QuestionConverter _questionConverter;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly TestConverter _testConverter;
 
-        public CreateTestConfigCommandHandler(IMapper mapper
-            , ITestRepository testRepository
-            , TestHelper testHelper)
+        public CreateTestConfigCommandHandler(IMapper mapper,
+            ITestRepository testRepository,
+            QuestionConverter questionConverter,
+            IServiceProvider serviceProvider,
+            TestConverter testConverter)
         {
             _mapper = mapper;
             _testRepository = testRepository;
-            _testHelper = testHelper;
+            _questionConverter = questionConverter;
+            _serviceProvider = serviceProvider;
+            _testConverter = testConverter;
         }
 
         public async Task<MethodResult<TestModel>> Handle(CreateTestCommand request, CancellationToken cancellationToken)
@@ -38,33 +42,28 @@ namespace Fsel.Course.Application.Commands.TestCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TestModel> methodResult = new MethodResult<TestModel>();
 
-            var checkCode = await _testRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken);
-            if (checkCode)
+            var test = TestFactory.Create(request, _mapper, _questionConverter).Build();
+            if (await test.ValidateDuplicateTest(_testRepository).ConfigureAwait(false))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
             }
-            var test = _mapper.Map<Test>(request);
-            if (!test.IsValid())
+            var method = _testConverter.IsValidateQuestion(test.TestSections);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            if (!await test.IsValid(_serviceProvider))
             {
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
             }
 
-            if (request.TestSections.Any())
-            {
-                var methodResultCreated = _testHelper.InsertSectionRecursive(request.TestSections, test: test);
-                if (!methodResultCreated.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(methodResultCreated.ErrorMessages);
-                    return methodResult;
-                }
-            }
-
             await _testRepository.ExecuteTransactionAsync(async () =>
             {
                 test = _testRepository.Add(test);
-                await _testRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken);
+                await _testRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<TestModel>(test);
