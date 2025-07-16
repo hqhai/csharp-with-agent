@@ -25,10 +25,10 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
             {
                 Name = _createRequest.Name,
                 InstructionContent = _createRequest.InstructionContent,
-                VideoCount = _createRequest.Modules?.Count(m => m.LessonConfigType == EnumLessonConfigType.Video) ?? default,
-                ClassForumCount = _createRequest.Modules?.Count(m => m.LessonConfigType == EnumLessonConfigType.ClassForum) ?? default,
-                HomeWorkCount = _createRequest.Modules?.Count(m => m.LessonConfigType == EnumLessonConfigType.HomeWork) ?? default,
-                DocumentCount = _createRequest.Modules?.Count(m => m.LessonConfigType == EnumLessonConfigType.Document) ?? default,
+                VideoCount = _createRequest.LessonModules?.Count(m => m.LessonConfigType == EnumLessonConfigType.Video) ?? default,
+                ClassForumCount = _createRequest.LessonModules?.Count(m => m.LessonConfigType == EnumLessonConfigType.ClassForum) ?? default,
+                HomeWorkCount = _createRequest.LessonModules?.Count(m => m.LessonConfigType == EnumLessonConfigType.HomeWork) ?? default,
+                DocumentCount = _createRequest.LessonModules?.Count(m => m.LessonConfigType == EnumLessonConfigType.Document) ?? default,
                 VersionStatus = EnumVersionStatus.LastVersion,
                 Version = version,
                 LevelId = _createRequest.LevelId,
@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
 
             lesson.OriginalId = originalId.HasValue ? originalId.Value : lesson.Id;
 
-            lesson.LessonModules = LessonModuleClassification(_createRequest.Modules).ToList();
+            lesson.LessonModules = LessonModuleClassification(_createRequest.LessonModules).ToList();
             lesson.LessonInstructions = LessonInstructionClassification(_createRequest.LessonInstructions).ToList();
 
             return lesson;

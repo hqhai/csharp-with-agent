@@ -56,7 +56,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
             }
 
             var lessonQuery = from a in _lessonRepository.Queryable
-                              where a.Status != Shared.Enums.EnumStatus.Archive && a.VersionStatus == EnumVersionStatus.LastVersion
+                              where !a.IsArchive && a.VersionStatus == EnumVersionStatus.LastVersion
                               select new
                               {
                                   Lesson = a,
