@@ -65,7 +65,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 return methodResult;
             }
 
-            if (request.IsSurveyPT && !request.UserSurveyAssignmentId.HasValue)
+            if (!request.IsSurveyPT && !request.UserSurveyAssignmentId.HasValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
