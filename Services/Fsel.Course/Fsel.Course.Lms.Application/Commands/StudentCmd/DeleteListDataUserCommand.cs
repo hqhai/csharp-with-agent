@@ -31,6 +31,9 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly IHomeWorkAnswerRepository _homeWorkAnswerRepository;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
+        private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
 
         public DeleteListDataUserCommandHandler(IUserService userService
                                               , ICourseResultRepository courseResultRepository
@@ -43,7 +46,10 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
                                               , IClassForumResultRepository classForumResultRepository
                                               , IHomeWorkResultRepository homeWorkResultRepository
                                               , IVideoResultRepository videoResultRepository
-                                              , ISectionGroupResultRepository sectionGroupResultRepository)
+                                              , ISectionGroupResultRepository sectionGroupResultRepository
+                                              , IHomeWorkAnswerRepository homeWorkAnswerRepository
+                                              , IVideoTimeCodeResultRepository videoTimeCodeResultRepository
+                                              , IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
@@ -57,6 +63,9 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             _homeWorkResultRepository = homeWorkResultRepository;
             _videoResultRepository = videoResultRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _homeWorkAnswerRepository = homeWorkAnswerRepository;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
+            _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteListDataUserCommand request, CancellationToken cancellationToken)
@@ -85,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             }
 
             // delete placement test result va placement test answers
-            var placementTestResult = await _placementTestResultRepository.Queryable
+            var placementTestResult = await _placementTestResultRepository.Queryable.Include(x => x.SectionGroupResults)
                                                                           .Include(x => x.PlacementTestAnswers)
                                                                           .Where(x => x.StudentId == studentId && x.IsDeleted != true)
                                                                           .ToListAsync(cancellationToken);
@@ -96,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             }
 
             // delete final test answers
-            var finalTestResult = await _finalTestResultRepository.Queryable
+            var finalTestResult = await _finalTestResultRepository.Queryable.Include(x => x.SectionGroupResults)
                                                                   .Include(x => x.FinalTestAnswers)
                                                                   .Where(x => x.StudentId == studentId && x.IsDeleted != true)
                                                                   .ToListAsync(cancellationToken);
@@ -116,6 +125,60 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
                 await _unitResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
             }
 
+            // delete ClassForumResult
+            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForumDetailResults).ThenInclude(x => x.ClassForumResultFiles)
+                                                                    .Include(x => x.ClassForumResultFiles)
+                                                                    .Include(x => x.ClassForumScores)
+                                                                    .Include(x => x.ClassForumResultRandoms)
+                                                                    .Where(x => x.StudentId == studentId && x.IsDeleted != true)
+                                                                    .ToListAsync(cancellationToken);
+            if (classForumResult.Count != 0)
+            {
+                await _classForumResultRepository.DeleteListAsync(classForumResult);
+                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
+            }
+
+            // delete HomeworkResult
+            var homeWorkResult = await _homeWorkResultRepository.Queryable.Where(x => x.StudentId == studentId && x.IsDeleted != true)
+                                                                .ToListAsync(cancellationToken);
+
+            if (homeWorkResult.Count != 0)
+            {
+                var homeWorkAnswers = await _homeWorkAnswerRepository.Queryable.Where(x => x.IsDeleted != true).WhereBulkContains(homeWorkResult.Select(x => x.Id), x => x.HomeWorkResultId).ToListAsync(cancellationToken);
+                if (homeWorkAnswers.Any())
+                {
+                    await _homeWorkAnswerRepository.DeleteListAsync(homeWorkAnswers);
+                    await _homeWorkAnswerRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
+                }
+                await _homeWorkResultRepository.DeleteListAsync(homeWorkResult);
+                await _homeWorkResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
+            }
+
+            // delete Video Result
+
+            var videoResult = await _videoResultRepository.Queryable
+                                                          .Where(x => x.StudentId == studentId && x.IsDeleted != true)
+                                                          .ToListAsync(cancellationToken);
+            if (videoResult.Count != 0)
+            {
+                var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => !x.IsDeleted).WhereBulkContains(videoResult.Select(x => x.Id), x => x.VideoResultId).ToListAsync(cancellationToken);
+                if (videoTimeCodeAnswers.Any())
+                {
+                    await _videoTimeCodeAnswerRepository.DeleteListAsync(videoTimeCodeAnswers);
+                    await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
+                }
+
+                var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => !x.IsDeleted).WhereBulkContains(videoResult.Select(x => x.Id), x => x.VideoResultId).ToListAsync(cancellationToken);
+                if (videoTimeCodeResults.Any())
+                {
+                    await _videoTimeCodeResultRepository.DeleteListAsync(videoTimeCodeResults);
+                    await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
+                }
+
+                await _videoResultRepository.DeleteListAsync(videoResult);
+                await _videoResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
+            }
+
             // delete lesson result va lesson note
             var lessonResult = await _lessonResultRepository.Queryable
                                                             .Include(x => x.LessonNotes)
@@ -128,7 +191,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             }
 
             // delete mock test result
-            var mockTestResult = await _mockTestResultRepository.Queryable
+            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.SectionGroupResults)
                                                           .Include(x => x.MockTestAnswers)
                                                           .Include(x => x.MockTestScores)
                                                           .Where(x => x.StudentId == studentId && x.IsDeleted != true)
@@ -149,45 +212,6 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             {
                 await _extraPracticeResultRepository.DeleteListAsync(extraPracticeResult);
                 await _extraPracticeResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
-            }
-
-            // delete ClassForumResult
-            var classForumResult = await _classForumResultRepository.Queryable
-                                                                    .Include(x => x.ClassForumResultFiles)
-                                                                    .Include(x => x.ClassForumScores)
-                                                                    .Include(x => x.ClassForumResultRandoms)
-                                                                    .Where(x => x.StudentId == studentId && x.IsDeleted != true)
-                                                                    .ToListAsync(cancellationToken);
-            if (classForumResult.Count != 0)
-            {
-                await _classForumResultRepository.DeleteListAsync(classForumResult);
-                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
-            }
-
-            // delete HomeworkResult
-            var homeWorkResult = await _homeWorkResultRepository.Queryable
-                                                                .Include(x => x.HomeWorkAnswers)
-                                                                .Where(x => x.StudentId == studentId && x.IsDeleted != true)
-                                                                .ToListAsync(cancellationToken);
-
-            if (homeWorkResult.Count != 0)
-            {
-                await _homeWorkResultRepository.DeleteListAsync(homeWorkResult);
-                await _homeWorkResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
-            }
-
-            // delete Video Result
-
-            var videoResult = await _videoResultRepository.Queryable
-                                                          .Include(x => x.VideoTimeCodeResults)
-                                                          .Include(x => x.VideoTimeCodeAnswers)
-                                                          .Include(x => x.Video)
-                                                          .Where(x => x.StudentId == studentId && x.IsDeleted != true)
-                                                          .ToListAsync(cancellationToken);
-            if (videoResult.Count != 0)
-            {
-                await _videoResultRepository.DeleteListAsync(videoResult);
-                await _videoResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
             }
 
             //delete SectionGroupResult

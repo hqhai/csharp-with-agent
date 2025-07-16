@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.CutOffCmd;
+    using Fsel.Course.Lms.Application.Commands.OtherFeatureCmd;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queries.Reports;
     using Fsel.Shared.Attributes;
@@ -75,6 +76,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
             return methodResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Delete Placement Test And Course
+        /// </summary>
+        [HttpDelete("{studentId}/pt-and-course")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DeletePTAndCourse([FromRoute] Guid studentId)
+        {
+            var queryResult = await _mediator.Send(new DeletePlacementTestCommand { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

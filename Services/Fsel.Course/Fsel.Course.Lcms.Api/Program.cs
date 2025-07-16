@@ -80,6 +80,7 @@ builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository
 builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
 builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
+builder.Services.AddScoped<IClassforumDetailResultHistoryRepository, ClassforumDetailResultHistoryRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ILevelRepository, LevelRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();

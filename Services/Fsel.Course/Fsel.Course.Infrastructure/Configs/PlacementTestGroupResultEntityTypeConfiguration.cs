@@ -55,7 +55,7 @@ namespace Fsel.Course.Infrastructure.Configs
                   .HasForeignKey(b => b.FlowId)
                   .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasIndex(c => c.StudentId).IsUnique();
+            builder.HasIndex(c => c.StudentId).IsUnique().HasFilter("[IsDeleted] = 0");
 
             builder.HasIndex(x => new { x.CreatedDate }).IncludeValueProperties(x => new { x.StudentId });
             builder.HasIndex(x => new { x.IsDeleted, x.Status }).IncludeValueProperties(x => new { x.SuggetLevel, x.StudentId });

@@ -643,16 +643,17 @@ namespace Fsel.Course.Infrastructure.Common
             }).FirstOrDefault();
 
             var skillScores = videoTimeCodeResults.Where(x => x.CorrectTotal > 0 && x.SkillScores != null && x.SkillScores.Any())
-                                                  .GroupBy(x => new { x.VideoTimeCode!.TimeCodeType })
-                                                  .SelectMany(g => g.SelectMany(x => x.SkillScores!).GroupBy(x => new { x.Skill, g.Key.TimeCodeType }).Select(x => new
-                                                  {
-                                                      Type = x.Key.TimeCodeType,
-                                                      Skill = x.Key.Skill,
-                                                      CorrectCount = x.Sum(y => y.CorrectCount),
-                                                      TotalCount = x.Sum(y => y.TotalCount),
-                                                      TotalQuestion = x.Sum(x => x.TotalQuestion),
-                                                      CountQuestion = x.Sum(x => x.CountQuestion)
-                                                  })).ToList();
+                          .GroupBy(x => new { x.VideoTimeCode!.TimeCodeType })
+                          .SelectMany(g => g.SelectMany(x => x.SkillScores!).GroupBy(x => new { x.Skill, g.Key.TimeCodeType }).Select(x => new
+                          {
+                              Type = x.Key.TimeCodeType,
+                              Skill = x.Key.Skill,
+                              CorrectCount = x.Sum(y => y.CorrectCount),
+                              TotalCount = x.Sum(y => y.TotalCount),
+                              TotalQuestion = x.Sum(x => x.TotalQuestion),
+                              CountQuestion = x.Sum(x => x.CountQuestion),
+                              TokenReceived = x.Sum(x => x.TokenReceived)
+                          })).ToList();
 
             var videoSkillScores = (from type in Enum.GetValues(typeof(EnumTimeCodeType)).Cast<EnumTimeCodeType>()
                                     select new VideoSkillScores
@@ -667,6 +668,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                            CorrectCount = answerTimeCodeQ_jointable.Sum(x => x.CorrectCount),
                                                            TotalQuestion = answerTimeCodeQ_jointable.Sum(x => x.TotalQuestion),
                                                            CountQuestion = answerTimeCodeQ_jointable.Sum(x => x.CountQuestion),
+                                                           TokenReceived = answerTimeCodeQ_jointable.Sum(x => x.TokenReceived),
                                                        }).Where(x => x.TotalQuestion != 0).OrderBy(x => x.Skill).ToList()
                                     }).ToList();
             return (videoSkillScores, tokenConfig?.TokenFirst, tokenConfig?.TokenLast);
@@ -686,7 +688,8 @@ namespace Fsel.Course.Infrastructure.Common
                                 Type = x.Key.TimeCodeType,
                                 Skill = x.Key.Skill,
                                 CorrectCount = x.Sum(y => y.CorrectCount),
-                                TotalAnswer = x.Sum(y => y.CountQuestion)
+                                TotalAnswer = x.Sum(y => y.CountQuestion),
+                                TokenReceived = x.Sum(x => x.TokenReceived)
                             })).ToList();
             var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.TimeCodeExercises)
                                     .ThenInclude(x => x.Exercise)
@@ -739,6 +742,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                     CorrectCount = answerTimeCodeQJ != null ? answerTimeCodeQJ.CorrectCount : default,
                                                     TotalQuestion = questionTimeCodeQJ.TotalQuestion,
                                                     CountQuestion = answerTimeCodeQJ != null ? answerTimeCodeQJ.TotalAnswer : default,
+                                                    TokenReceived = answerTimeCodeQJ != null ? answerTimeCodeQJ.TokenReceived : default,
                                                 }).ToList()
                              };
             return (scoreQuery.ToList(), listGroupQuestion.Sum(x => x.TotalQuestion) != answers.Sum(x => x.TotalAnswer));
@@ -1155,7 +1159,10 @@ namespace Fsel.Course.Infrastructure.Common
                     };
                 }).ToList();
 
-                await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers);
+                await _videoTimeCodeAnswerRepository.BulkMergeAsync(videoTimeCodeAnswers, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.VideoResultId, c.VideoTimeCodeResultId, c.VideoTimeCodeId, c.QuestionId, c.IsDeleted };
+                });
             }
             if (updateVideoTimeCodeAnswers != null && updateVideoTimeCodeAnswers.Any())
             {

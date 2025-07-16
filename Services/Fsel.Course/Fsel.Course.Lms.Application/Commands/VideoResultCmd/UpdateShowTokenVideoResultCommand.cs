@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -61,8 +62,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             videoResult.IsShowToken = true;
             await _videoResultRepository.ExecuteTransactionAsync(async () =>
             {
-                videoResult = _videoResultRepository.Update(videoResult, false, x => x.VideoId, x => x.StudentId, x => x.LessonResultId);
-                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.VideoId, c.StudentId, c.LessonResultId };
+                });
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = true;
                 return methodResult;

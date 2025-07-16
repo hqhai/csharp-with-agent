@@ -93,6 +93,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
+        public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
         public DbSet<Level> Levels { get; set; }
         public DbSet<Category> Categorys { get; set; }
         public DbSet<Skill> Skills { get; set; }
@@ -221,6 +222,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumDetailResultHistoryTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LevelEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SkillEntityTypeConfiguration());
@@ -262,10 +264,10 @@ namespace Fsel.Course.Infrastructure
             //modelBuilder.Ignore<DistrictInfoModel>();
             //modelBuilder.Ignore<ReportLearningProcessModel>();
             //modelBuilder.Ignore<ReportLearningResultModel>();
-            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
-            //modelBuilder.Ignore<ExportStudentEventModel>();
-            //modelBuilder.Ignore<ExportDistrictEventModel>();
             //modelBuilder.Ignore<ExportSchoolEventModel>();
+            //modelBuilder.Ignore<ExportStudentEventModel>();
+            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
+            //modelBuilder.Ignore<ExportDistrictEventModel>();
 
             base.OnModelCreating(modelBuilder);
         }
