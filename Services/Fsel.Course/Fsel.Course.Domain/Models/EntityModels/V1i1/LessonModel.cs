@@ -29,6 +29,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 
         public string? NameProgram { get; set; }
 
+        public Guid OriginalId { get; set; }
+
         public IList<LessonInstructionModel>? LessonInstructions { get; set; }
 
         public IList<LessonModuleModel>? LessonModules { get; set; }
