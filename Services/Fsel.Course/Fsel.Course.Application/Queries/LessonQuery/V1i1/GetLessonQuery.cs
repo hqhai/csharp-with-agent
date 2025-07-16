@@ -80,6 +80,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                                     Status = g.Key.Status,
                                     LevelId = g.Key.LevelId,
                                     ProgramId = g.Key.ProgramId,
+                                    OriginalId = g.Key.OriginalId,
                                     LessonInstructions = _lessonInstructionRepository.Queryable.Where(x => x.LessonId == g.Key.Id).Select(x => new Domain.Models.EntityModels.LessonInstructionModel
                                     {
                                         Id = x.Id,
