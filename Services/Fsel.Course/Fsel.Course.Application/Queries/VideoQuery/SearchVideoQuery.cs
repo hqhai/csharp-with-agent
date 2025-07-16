@@ -149,7 +149,8 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                             UpdatedUserId = baseQ.UpdatedUserId,
                             VideoFilePath = baseQ.VideoFilePath,
                             LevelName = level.Name,
-                            IsUseStudent = videoResults.Any()
+                            IsUseStudent = videoResults.Any(),
+                            OriginalId = baseQ.OriginalId
                         };
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
