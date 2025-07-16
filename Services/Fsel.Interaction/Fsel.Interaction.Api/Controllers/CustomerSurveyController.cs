@@ -114,7 +114,7 @@ namespace Fsel.Interaction.Api.Controllers
         }
 
         /// <summary>
-        ///getuser surveys assignment
+        /// get user surveys assignment
         /// </summary>
         [HttpGet("get-user-surveys-assignment")]
         [ProducesResponseType(typeof(MethodResult<IList<UserSurveyAssignmentModel>>), (int)HttpStatusCode.OK)]
