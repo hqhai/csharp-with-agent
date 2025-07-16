@@ -88,7 +88,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
             var courseResults = await _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
                                                              .Where(x => x.WorkingStatus == EnumWorkingStatus.Active).ToListAsync(cancellationToken);
-            var courseResultDict = courseResults.ToDictionary(x => x.StudentId, x => x);
+            var courseResultDict = courseResults.GroupBy(x => x.StudentId)
+                                      .ToDictionary(x => x.Key, x => x.OrderByDescending(x => x.CorrectTotal).OrderByDescending(y => y.UpdatedDate ?? y.CreatedDate).First());
 
             var lists = students.Select(student =>
             {
