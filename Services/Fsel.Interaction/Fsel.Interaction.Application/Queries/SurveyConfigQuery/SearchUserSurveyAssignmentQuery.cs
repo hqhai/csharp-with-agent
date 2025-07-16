@@ -77,10 +77,9 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
 
             userSurveyAssignments.ForEach(userSurveyAssignment =>
             {
-                var surveyConfigs = surveyConfigEntities.Where(p =>
-                p.ApplicableSubjects != null &&
-                p.ApplicableSubjects.Any(x => x.CourseLevel == userSurveyAssignment.CourseLevel && x.ApplicableSubjects != null && x.ApplicableSubjects.Any(n => n.ToString() == studentStatus.ToString()))
-                && p.ProgressRequirements != null && p.ProgressRequirements.Any(x => x.CourseType == userSurveyAssignment.CourseType && x.ProgressRequirement == userSurveyAssignment.ProgressRequirement)).ToList();
+                var surveyConfigs = surveyConfigEntities.Where(p => p.ProgressRequirements != null && p.ProgressRequirements.Any(x => x.CourseType == userSurveyAssignment.CourseType && x.ProgressRequirement == userSurveyAssignment.ProgressRequirement)).ToList();
+
+                surveyConfigs = surveyConfigs.Where(p => p.ApplicableSubjects != null && p.ApplicableSubjects.Any(x => x.CourseLevel == userSurveyAssignment.CourseLevel && x.ApplicableSubjects != null && x.ApplicableSubjects.Any(n => n == GetStatus(studentStatus.Value)))).ToList();
 
                 var surveyConfig = @event != null ? surveyConfigs.Where(p =>
                                                                         p.ApplicablePrograms?.Contains(EnumSurveyFormType.Event) == true &&
@@ -106,8 +105,22 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                     deleteSurveyAssignment.Add(userSurveyAssignment);
                 }
             });
-            methodResult.Result = deleteSurveyAssignment;
+
+            deleteSurveyAssignment.ForEach(surveyAssignment => { userSurveyAssignments.Remove(surveyAssignment); });
+
+            methodResult.Result = userSurveyAssignments;
             return methodResult;
+        }
+
+        private EnumSurveyConfigApplicableSubject? GetStatus(EnumTrialRegistrationStatus status)
+        {
+            return status switch
+            {
+                EnumTrialRegistrationStatus.Trial => EnumSurveyConfigApplicableSubject.Trial,
+                EnumTrialRegistrationStatus.Payment => EnumSurveyConfigApplicableSubject.InProgress,
+                EnumTrialRegistrationStatus.Expired => EnumSurveyConfigApplicableSubject.Expired,
+                _ => null
+            };
         }
     }
 }
