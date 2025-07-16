@@ -81,6 +81,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                                 ProgramName = baseQ.Program != null ? baseQ.Program.Name : string.Empty,
                                 Name = baseQ.Name,
                                 Code = baseQ.Code,
+                                OriginalId = baseQ.OriginalId,
                                 LevelId = baseQ.LevelId,
                                 ProgramId = baseQ.ProgramId,
                                 LayoutTypes = testSections.Select(ts => ts.LayoutType).Distinct().ToList(),
