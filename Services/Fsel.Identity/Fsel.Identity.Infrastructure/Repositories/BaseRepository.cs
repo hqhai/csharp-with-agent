@@ -7,9 +7,9 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Entities;
 
-    public class BaseRepository<T> : BaseIdentityRepository<T, User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRoleEntity, UserLoginEntity, UserToken> where T : Entity
+    public class BaseRepository<T> : BaseIdentityRepository<T, User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRole, UserLoginEntity, UserToken> where T : Entity
     {
-        public BaseRepository(BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRoleEntity, UserLoginEntity, UserToken> dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public BaseRepository(BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRole, UserLoginEntity, UserToken> dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
         {
         }
     }

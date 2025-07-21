@@ -96,11 +96,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenLocked), new Error(nameof(request.Username), request.Username));
                 return methodResult;
             }
-            else if (user.Status.HasValue && user.Status == EnumUserStatus.Disable)
-            {
-                methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Username), request.Username));
-                return methodResult;
-            }
+            //else if (user.Status.HasValue && user.Status == EnumUserStatus.Disable)
+            //{
+            //    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Username), request.Username));
+            //    return methodResult;
+            //}
 
             var isCheckPassword = await _userManager.CheckPasswordAsync(user, request.Password);
             if (!isCheckPassword)
@@ -130,7 +130,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             await _mediator.Send(new UpdateStatusUserDeletionCommand { UserId = user.Id, Status = EnumUserDeletionStatus.Cancel }, cancellationToken).ConfigureAwait(false);
-            var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id, UserName = user.UserName }, cancellationToken).ConfigureAwait(false);
+            var generateToken = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken).ConfigureAwait(false);
+
+            if (generateToken.Result != null)
+            {
+                generateToken.Result.Status = user.Status;
+            }
+
             methodResult = generateToken;
             return methodResult;
         }

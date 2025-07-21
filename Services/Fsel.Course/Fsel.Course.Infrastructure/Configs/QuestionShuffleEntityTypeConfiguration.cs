@@ -18,7 +18,7 @@ namespace Fsel.Course.Infrastructure.Configs
                    .HasForeignKey(b => b.QuestionId)
                    .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(c => new { c.StudentId, c.QuestionId }).IsUnique();
+            builder.HasIndex(c => new { c.StudentId, c.QuestionId }).IsUnique().HasFilter("[IsDeleted] = 0");
         }
     }
 }

@@ -29,7 +29,8 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 CourseType = message.CourseType,
                 DistrictName = message.DistrictName,
                 EventCodeStr = message.EventCodeStr,
-                StudentId = message.StudentId
+                StudentId = message.StudentId,
+                UserNameStr = message.UserNameStr,
             }).ConfigureAwait(false);
         }
     }

@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.Model
         public Guid? CourseId { get; set; }
         public int? TotalLesson { get; set; }
         public int? TotalLessonDone { get; set; }
+        public bool IsLearnStudent { get; set; }
         public string? PTStatus { get; set; }
     }
 }

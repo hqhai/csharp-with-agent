@@ -21,7 +21,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (message != null)
             {
-                var mockTestResultId = message?.MockTestResultId.ToString();
+                var mockTestResultId = message.MockTestResultId.ToString();
                 await _aISpeakingHub.GetGroup(mockTestResultId!).SendAsync(RealtimeSettings.MockTestSpeakingAIFeedBackHub.Methods.MockTestSpeakingAIFeedBack, message);
             }
         }

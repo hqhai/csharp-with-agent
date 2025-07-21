@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var isHasCourseResult = await _courseResultRepository.Queryable.AnyAsync(p => p.StudentId == request.StudentId, cancellationToken);
+            var isHasCourseResult = await _courseResultRepository.Queryable.AnyAsync(p => p.StudentId == request.StudentId && p.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
             methodResult.Result = new CourseForChooseLevelModel()
             {
                 CourseId = course.Id,

@@ -26,10 +26,12 @@ namespace Fsel.Identity.Application.Queues.Consumers
 
             await _mediator.Send(new AddExpiredDateForStudentCommand
             {
+                StudentEditHistoryType = message.StudentEditHistoryType,
                 StudentId = message.StudentId,
                 Day = message.Day,
                 Month = message.Month,
                 ExpiredDate = message.ExpiredDate,
+                Description = message.Description
             }).ConfigureAwait(false);
         }
     }
