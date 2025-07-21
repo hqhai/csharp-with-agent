@@ -55,6 +55,12 @@ namespace Fsel.Identity.Domain.Entities
 
         public EnumUserStatus? Status { get; set; } = EnumUserStatus.Active;
 
+        public Guid? ManageUserId { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Position { get; set; }
+
+
         public virtual ICollection<UserOtpCode> UserOtpCodes { get; set; } = new List<UserOtpCode>();
 
         public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();
@@ -70,6 +76,8 @@ namespace Fsel.Identity.Domain.Entities
         public virtual UserReferral? Receiver { get; set; }
 
         public virtual ICollection<UserDeletion> UserDeletions { get; set; } = new List<UserDeletion>();
+
+        public virtual ICollection<UserGroupMemberShip> UserGroups { get; set; } = new List<UserGroupMemberShip>();
 
         public virtual Parent? Parent { get; set; }
         public virtual CSO? CSO { get; set; }

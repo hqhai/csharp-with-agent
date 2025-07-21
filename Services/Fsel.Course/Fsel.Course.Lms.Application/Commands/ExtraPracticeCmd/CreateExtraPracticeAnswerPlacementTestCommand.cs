@@ -124,7 +124,10 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             }
             await _extraPracticeResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _extraPracticeResultRepository.Update(extraPracticeResult);
+                await _extraPracticeResultRepository.BulkUpdateList(new List<ExtraPracticeResult> { extraPracticeResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeId, c.StudentId };
+                });
                 await _extraPracticeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeResult);
                 methodResult.StatusCode = StatusCodes.Status201Created;

@@ -97,9 +97,19 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType.Value);
                 queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
             }
+            if (request.CourseLevels != null && request.CourseLevels.Any())
+            {
+                queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && request.CourseLevels.Contains(x.CourseLevel.Value));
+            }
+
             if (request.CourseLevel.HasValue)
             {
                 queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && x.CourseLevel == request.CourseLevel.Value);
+            }
+            if (request.CourseTypes != null && request.CourseTypes.Any())
+            {
+                var courseLevels = EnumCourseLevelHelper.GetCourseLevels(request.CourseTypes);
+                queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
             }
 
             var query = from u in _userManager.Users

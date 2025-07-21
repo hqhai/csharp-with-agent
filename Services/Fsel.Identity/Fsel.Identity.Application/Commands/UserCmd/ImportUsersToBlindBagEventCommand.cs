@@ -9,7 +9,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
     using Fsel.Common.Models.Excels;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.OrderService;
-    using Fsel.Identity.Application.Services.OrderService.QueryModels;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.CommandModels;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
@@ -170,12 +169,12 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             var userBlindBoxIds = userBlindBoxResults.Content?.Result;
 
-            var orderResults = await _orderService.GetRecentOrdersAsync(new GetRecentOrdersToUserIdsQueryModel
-            {
-                UserIds = userIds,
-                StartDate = blindBox?.StartDate ?? DateTime.UtcNow,
-            });
-            var orders = orderResults.Content?.Result;
+            //var orderResults = await _orderService.GetRecentOrdersAsync(new GetRecentOrdersToUserIdsQueryModel
+            //{
+            //    UserIds = userIds,
+            //    StartDate = blindBox?.StartDate ?? DateTime.UtcNow,
+            //});
+            //var orders = orderResults.Content?.Result;
 
             var result = request.FormFile.ImportAndValidateExcel(async (ExcelUserBlindBagEventModel x, IList<ExcelUserBlindBagEventModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
@@ -187,7 +186,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 {
                     string humanCode = x.HumanCode.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                     var studentUser = studentUsers.FirstOrDefault(y => y.HumanCode != null && y.HumanCode.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture) == humanCode);
-                    var order = orders?.FirstOrDefault(y => studentUser != null && y.UserId == studentUser.UserId);
+                    //var order = orders?.FirstOrDefault(y => studentUser != null && y.UserId == studentUser.UserId);
 
                     if (models.Count(y => y.HumanCode != null && y.HumanCode.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture) == humanCode) > 1)
                     {
@@ -197,10 +196,10 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                     {
                         errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"User không tồn tại" });
                     }
-                    else if (order == null)
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"User chưa mua gói học 12 tháng hoặc 24 tháng (tính từ thời điểm sự kiện túi mù bắt đầu)" });
-                    }
+                    //else if (order == null)
+                    //{
+                    //    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"User chưa mua gói học 12 tháng hoặc 24 tháng (tính từ thời điểm sự kiện túi mù bắt đầu)" });
+                    //}
                     else if (userBlindBoxIds != null && userBlindBoxIds.Any(y => studentUser != null && y == studentUser.UserId))
                     {
                         errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Status), Message = $"User đã được thêm vào sự kiện túi mù" });

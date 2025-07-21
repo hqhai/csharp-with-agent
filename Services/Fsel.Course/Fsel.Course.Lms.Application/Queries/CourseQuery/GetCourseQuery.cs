@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             if (course == null)
             {
                 course = await _courseRepository.Queryable
-                         .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId))
+                         .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId && x.WorkingStatus == EnumWorkingStatus.Active))
                          .Include(x => x.CourseUnitMockTests)
                          .AsNoTracking()
                          .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
@@ -212,7 +212,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var course = await _courseRepository.Queryable
                           .Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate))
                           .Include(x => x.CourseTeachers)
-                          .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
+                          .Include(x => x.CourseResults.Where(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active))
                           .Where(x => x.Id == id)
                           .AsNoTracking()
                           .FirstOrDefaultAsync();
@@ -338,13 +338,16 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             if (!course.CourseResults.Any())
             {
-                _courseResultRepository.Add(new CourseResult
+                var courseResult = new CourseResult
                 {
                     StudentId = studentId ?? default,
                     Status = EnumResultStatus.New,
                     CourseId = course.Id
+                };
+                await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
                 });
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
             var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ToList();
@@ -385,17 +388,26 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             if (course.UnitResults.Any())
             {
                 var unitResults = course.UnitResults.ToList();
-                await _unitResultRepository.BulkMergeAsync(unitResults);
+                await _unitResultRepository.BulkMergeAsync(unitResults, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.UnitId, entity.CourseId, entity.StudentId, entity.IsDeleted };
+                });
             }
             if (course.FinalTestResults.Any())
             {
                 var finalTestResults = course.FinalTestResults.ToList();
-                await _finalTestResultRepository.BulkMergeAsync(finalTestResults);
+                await _finalTestResultRepository.BulkMergeAsync(finalTestResults, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.FinalTestId, entity.CourseId, entity.StudentId, entity.IsDeleted };
+                });
             }
             if (course.MockTestResults.Any())
             {
                 var mockTestResults = course.MockTestResults.ToList();
-                await _mockTestResultRepository.BulkMergeAsync(mockTestResults);
+                await _mockTestResultRepository.BulkMergeAsync(mockTestResults, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.CourseId, entity.StudentId, entity.MockTestId, entity.IsDeleted };
+                });
             }
         }
 

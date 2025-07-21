@@ -20,6 +20,9 @@ builder.Services.AddScoped<GetTimeModulePublisher>();
 builder.Services.AddScoped<ChatBotPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<DictionaryPublisher>();
+builder.Services.AddScoped<SetTimeExamPracticePublisher>();
+builder.Services.AddScoped<GetTimeExamPracticePublisher>();
+
 builder.Services.AddScoped<SetTimeModuleHub>();
 builder.Services.AddScoped<TechieHub>();
 builder.Services.AddScoped<BannerHub>();
@@ -27,6 +30,7 @@ builder.Services.AddScoped<BannerPublisher>();
 builder.Services.AddScoped<TranscriptHub>();
 builder.Services.AddScoped<BuyBlindBoxHub>();
 builder.Services.AddScoped<DictionaryHub>();
+builder.Services.AddScoped<SetTimeExamPracticeHub>();
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>
@@ -39,6 +43,7 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, typeof(ChatBotConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DisconnectSocketCalculateTime, typeof(DisconnectSocketCalculateTimeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ExamPracticeSpeaking, typeof(MockTestAISpeakingConsumer) },
     { QueueSettings.LmsQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.SystemQueue.NameQueue.Techie, typeof(StudentTechieConsumer) },
     { QueueSettings.OrderingQueue.NameQueue.ChangeStatusOrder, typeof(ChangeStatusOrderConsumer) },
@@ -46,7 +51,8 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.BannerRealTime, typeof(BannerConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SpeechToTextRealTime, typeof(SpeechToTextConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SendNotifyBuyBlindBox, typeof(SendNotifyBuyBlindBoxConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.SendDictionary, typeof(SendDictionaryConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.SendDictionary, typeof(SendDictionaryConsumer) },
+    { QueueSettings.ExamPracticeQueue.NameQueue.GetTimeExamPractice, typeof(GetTimeExamPracticeConsumer) },
 });
 
 var app = builder.Build();
@@ -67,5 +73,7 @@ app.UseHubs<BannerHub>(RealtimeSettings.BannerHub.Pattern);
 app.UseHubs<TranscriptHub>(RealtimeSettings.TranscriptHub.Pattern);
 app.UseHubs<BuyBlindBoxHub>(RealtimeSettings.SendNotifyBuyBlindBoxHub.Pattern);
 app.UseHubs<DictionaryHub>(RealtimeSettings.SendDictionaryHub.Pattern);
+app.UseHubs<ExamPracticeSpeakingHub>(RealtimeSettings.ExamPracticeSpeakingAIFeedBackHub.Pattern);
+app.UseHubs<SetTimeExamPracticeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
 
 app.Run();

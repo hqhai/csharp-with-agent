@@ -89,6 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 EventCodeStr = request.EventCodeStr,
                 DistrictName = request.DistrictName,
                 StudentId = request.StudentId,
+                UserNameStr = request.UserNameStr
             });
 
             var studentEventRegistrations = studentEventRegistrationResults?.Content?.Result;

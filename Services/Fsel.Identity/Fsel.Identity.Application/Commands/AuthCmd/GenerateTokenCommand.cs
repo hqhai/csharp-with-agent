@@ -46,6 +46,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private IOrderService _orderService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AppSetting _appSetting;
+        private readonly IRoleClaimRepository _roleClaimRepository;
+        private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
         private readonly ITenantProvider _tenantProvider;
 
@@ -57,6 +59,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IOrderService orderService,
             AppSetting appSetting,
             IHttpContextAccessor httpContextAccessor,
+            IRoleClaimRepository roleClaimRepository,
+            RoleManager<Role> roleManager,
             IMapper mapper,
             ITenantProvider tenantProvider)
         {
@@ -68,6 +72,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _orderService = orderService;
             _appSetting = appSetting;
             _httpContextAccessor = httpContextAccessor;
+            _roleClaimRepository = roleClaimRepository;
+            _roleManager = roleManager;
             _mapper = mapper;
             _tenantProvider = tenantProvider;
         }
@@ -109,6 +115,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 authClaims.Add(new Claim(JwtClaimNames.Role, userRole));
             }
+
+            var role = await _roleManager.FindByNameAsync(userRoles.FirstOrDefault() ?? string.Empty);
+            if (role == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
+                return methodResult;
+            }
+
+            var roleClaims = await _roleClaimRepository.GetClaimsByRole(role.Id, cancellationToken);
+            authClaims.AddRange(_mapper.Map<IList<Claim>>(roleClaims));
 
             var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
             var signin = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha256);
