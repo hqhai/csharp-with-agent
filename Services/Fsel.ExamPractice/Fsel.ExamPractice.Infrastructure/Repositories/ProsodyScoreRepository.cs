@@ -8,7 +8,7 @@ namespace Fsel.ExamPractice.Infrastructure.Repositories
 
     public class ProsodyScoreRepository : BaseRepository<ProsodyScore>, IProsodyScoreRepository
     {
-        public ProsodyScoreRepository(ExamPracticesDBContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public ProsodyScoreRepository(ExamPracticesDBContext dbContext, ExamPracticesReadDBContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

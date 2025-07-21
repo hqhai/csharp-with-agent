@@ -10,11 +10,38 @@ namespace Fsel.Training.Infrastructure
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
 
-    public class TrainingDbContext : BaseDbContext
+    public class TrainingReadDbContext : TrainingBaseDbContext
     {
-        public TrainingDbContext(DbContextOptions<TrainingDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        protected override string Connection => Settings.ReadOnlyConnection;
+
+        public TrainingReadDbContext(DbContextOptions<TrainingReadDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
         {
         }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+    }
+
+    public class TrainingDbContext : TrainingBaseDbContext
+    {
+        public TrainingDbContext(DbContextOptions<TrainingDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+    }
+
+    public class TrainingBaseDbContext : BaseDbContext
+    {
+        protected virtual string Connection => Settings.DefaultConnection;
+
+        public TrainingBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

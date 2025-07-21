@@ -5,10 +5,12 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
+    using AutoMapper;
 
     public class MockTestSectionRepository : BaseRepository<MockTestSection>, IMockTestSectionRepository
     {
-        public MockTestSectionRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public MockTestSectionRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

@@ -10,9 +10,55 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Notification.Infrastructure
 {
-    public class NotificationsDBContext : BaseDbContext
+    public class NotificationsReadDbContext : NotificationsBaseDBContext
     {
-        public NotificationsDBContext(DbContextOptions<NotificationsDBContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        protected override string Connection => Settings.ReadOnlyConnection;
+
+        public NotificationsReadDbContext(DbContextOptions<NotificationsReadDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+    }
+
+    public class NotificationsDBContext : NotificationsBaseDBContext
+    {
+        public NotificationsDBContext(DbContextOptions<NotificationsDBContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(modelBuilder);
+            base.OnModelCreating(modelBuilder);
+            SeedNotificationType(modelBuilder);
+        }
+
+        private static void SeedNotificationType(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.NotificationType);
+            var notificationType = ConvertHelper.DeserializeFromFilePath<IList<NotificationType>>(path);
+            ArgumentNullException.ThrowIfNull(notificationType);
+
+            var packageTranslations = notificationType.SelectMany(x => x.Translations).ToList();
+            notificationType.ForEach(x => x.Translations.Clear());
+
+            builder.Entity<NotificationType>().HasData(notificationType);
+            builder.Entity<NotificationTypeTranslation>().HasData(packageTranslations);
+        }
+    }
+
+    public class NotificationsBaseDBContext : BaseDbContext
+    {
+        protected virtual string Connection => Settings.DefaultConnection;
+
+        public NotificationsBaseDBContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
             ChangeTracker.LazyLoadingEnabled = true;
         }
@@ -27,7 +73,6 @@ namespace Fsel.Notification.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             base.OnModelCreating(modelBuilder);
-            SeedNotificationType(modelBuilder);
             modelBuilder.ApplyConfiguration(new NotificationMessageEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationTypeEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new NotificationRemindEntityTypeConfiguration());
@@ -49,19 +94,6 @@ namespace Fsel.Notification.Infrastructure
                     configuration.GetConnectionString(Settings.DefaultConnection),
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
-        }
-
-        private static void SeedNotificationType(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.NotificationType);
-            var notificationType = ConvertHelper.DeserializeFromFilePath<IList<NotificationType>>(path);
-            ArgumentNullException.ThrowIfNull(notificationType);
-
-            var packageTranslations = notificationType.SelectMany(x => x.Translations).ToList();
-            notificationType.ForEach(x => x.Translations.Clear());
-
-            builder.Entity<NotificationType>().HasData(notificationType);
-            builder.Entity<NotificationTypeTranslation>().HasData(packageTranslations);
         }
     }
 }

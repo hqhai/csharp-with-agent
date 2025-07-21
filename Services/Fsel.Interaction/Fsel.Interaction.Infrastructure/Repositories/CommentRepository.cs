@@ -8,7 +8,8 @@ namespace Fsel.Interaction.Infrastructure.Repositories
 
     public class CommentRepository : BaseRepository<Comment>, ICommentRepository
     {
-        public CommentRepository(InteractionDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public CommentRepository(InteractionDbContext dbContext, InteractionReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

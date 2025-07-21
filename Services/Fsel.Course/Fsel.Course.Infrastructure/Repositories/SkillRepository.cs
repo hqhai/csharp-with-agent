@@ -9,10 +9,12 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Microsoft.EntityFrameworkCore;
+    using AutoMapper;
 
     public class SkillRepository : BaseRepository<Skill>, ISkillRepository
     {
-        public SkillRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public SkillRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

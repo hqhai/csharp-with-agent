@@ -7,7 +7,7 @@ namespace Fsel.System.Infrastructure.Repositories.DailyQuizs
 {
     public class DailyQuizQuestionRepository : BaseRepository<DailyQuizQuestion>, IDailyQuizQuestionRepository
     {
-        public DailyQuizQuestionRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public DailyQuizQuestionRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

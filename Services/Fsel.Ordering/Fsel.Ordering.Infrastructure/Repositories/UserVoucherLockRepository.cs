@@ -9,7 +9,7 @@ namespace Fsel.Ordering.Infrastructure.Repositories
 
     public class UserVoucherLockRepository : BaseRepository<UserVoucherLock>, IUserVoucherLockRepository
     {
-        public UserVoucherLockRepository(OrderingDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public UserVoucherLockRepository(OrderingDbContext dbContext, OrderingReadDbContext readDbContext, AuthContext authContext, IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

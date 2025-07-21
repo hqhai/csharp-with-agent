@@ -9,7 +9,8 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class StudentTechieRepository : BaseRepository<StudentTechie>, IStudentTechieRepository
     {
-        public StudentTechieRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public StudentTechieRepository(SystemDbContext dbContext, SystemReadDbContext systemReadDb, AuthContext authContext, IMapper mapper)
+            : base(dbContext, systemReadDb, authContext, mapper)
         {
         }
     }

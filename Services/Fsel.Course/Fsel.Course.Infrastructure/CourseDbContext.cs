@@ -16,9 +16,56 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Course.Infrastructure
 {
-    public class CourseDbContext : BaseDbContext
+    /// <summary>
+    /// Represents the read database context for the course service.
+    /// </summary>
+    public class CourseReadDbContext : CourseBaseDbContext
     {
-        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        protected override string Connection => Settings.ReadOnlyConnection;
+
+        public CourseReadDbContext(DbContextOptions<CourseReadDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+    }
+    /// <summary>
+    /// Represents for the master database context for the course service.
+    /// </summary>
+    public class CourseDbContext : CourseBaseDbContext
+    {
+        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            if (!optionsBuilder.IsConfigured)
+            {
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile(Settings.SettingFileName)
+                    .Build();
+                optionsBuilder.UseSqlServer(
+                    configuration.GetConnectionString(Connection),
+                    options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
+            }
+        }
+    }
+
+    public class CourseBaseDbContext : BaseDbContext
+    {
+        protected virtual string Connection => Settings.DefaultConnection;
+
+        public CourseBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
