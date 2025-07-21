@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
 {
     using System;
     using System.Data;
+    using System.Globalization;
     using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Threading.Tasks;
@@ -103,11 +104,12 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                         }
 
                         claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.Code, user.Code ?? string.Empty, ClaimValueTypes.String));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.Status, user.Status?.ToString() ?? string.Empty, ClaimValueTypes.String));
                         claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.ClassId, classId.ToString() ?? string.Empty, ClaimValueTypes.String));
                         claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.ClassCode, classCode ?? string.Empty, ClaimValueTypes.String));
-                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsPlacementTest, isPlacementTest?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
-                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsSurvey, isSurvey?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
-                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsOrder, isOrder.ToString(), ClaimValueTypes.Boolean));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsPlacementTest, isPlacementTest?.ToString(CultureInfo.InvariantCulture) ?? string.Empty, ClaimValueTypes.Boolean));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsSurvey, isSurvey?.ToString(CultureInfo.InvariantCulture) ?? string.Empty, ClaimValueTypes.Boolean));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsOrder, isOrder.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Boolean));
                     }
                     else if (roles.Contains(EnumRole.AdminSchool.ToString()))
                     {
@@ -124,13 +126,13 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Email))
                 {
                     claims.Add(new Claim(JwtClaimTypes.Email, user.Email ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(JwtClaimTypes.EmailVerified, user.EmailConfirmed.ToString(), ClaimValueTypes.Boolean));
+                    claims.Add(new Claim(JwtClaimTypes.EmailVerified, user.EmailConfirmed.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Boolean));
                 }
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Phone))
                 {
                     claims.Add(new Claim(JwtClaimTypes.PhoneNumber, user.PhoneNumber ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(JwtClaimTypes.PhoneNumberVerified, user.PhoneNumberConfirmed.ToString(), ClaimValueTypes.Boolean));
+                    claims.Add(new Claim(JwtClaimTypes.PhoneNumberVerified, user.PhoneNumberConfirmed.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Boolean));
                 }
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.OpenId))
