@@ -159,7 +159,7 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
             }
 
             var videoIds = request.LessonModules.Where(x => x.LessonConfigType == EnumLessonConfigType.Video && x.OriginalId.HasValue).Select(x => x.OriginalId!.Value).ToList() ?? new List<Guid>();
-            var checkVideo = await _videoRepository.Queryable.WhereBulkContains(videoIds, x => x.Id).CountAsync(cancellationToken: cancellationToken);
+            var checkVideo = await _videoRepository.Queryable.WhereBulkContains(videoIds, x => x.OriginalId).CountAsync(cancellationToken: cancellationToken);
             if (videoIds.Any() && checkVideo != videoIds.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(checkVideo));
@@ -167,7 +167,7 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
             }
 
             var homeWorkIds = request.LessonModules.Where(x => x.LessonConfigType == EnumLessonConfigType.HomeWork && x.OriginalId.HasValue).Select(x => x.OriginalId!.Value).ToList() ?? new List<Guid>();
-            var checkHomeWork = await _homeWorkRepository.Queryable.WhereBulkContains(homeWorkIds, x => x.Id).CountAsync(cancellationToken: cancellationToken);
+            var checkHomeWork = await _homeWorkRepository.Queryable.WhereBulkContains(homeWorkIds, x => x.OriginalId).CountAsync(cancellationToken: cancellationToken);
             if (homeWorkIds.Any() && checkHomeWork != homeWorkIds.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(checkHomeWork));
