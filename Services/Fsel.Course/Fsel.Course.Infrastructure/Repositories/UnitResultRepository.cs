@@ -5,12 +5,13 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class UnitResultRepository : BaseRepository<UnitResult>, IUnitResultRepository
     {
-        public UnitResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public UnitResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

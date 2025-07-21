@@ -17,14 +17,33 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.System.Infrastructure
 {
-    public class SystemDbContext : BaseDbContext
+    public class SystemReadDbContext : BaseSystemDbContext
     {
-        public SystemDbContext(DbContextOptions<SystemDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        protected override string Connection => Settings.ReadOnlyConnection;
+
+        public SystemReadDbContext(DbContextOptions<SystemReadDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+    }
+
+    public class SystemDbContext : BaseSystemDbContext
+    {
+        public SystemDbContext(DbContextOptions<SystemDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             ArgumentNullException.ThrowIfNull(modelBuilder);
             SeedQuestBoards(modelBuilder);
             SeedQuestBoardOveralls(modelBuilder);
@@ -35,6 +54,109 @@ namespace Fsel.System.Infrastructure
             SeedTechieActionsConfig(modelBuilder);
             SeedDisplayOrderConfig(modelBuilder);
             SeedBlindBox(modelBuilder);
+        }
+
+        private static void SeedQuestBoards(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardFileName);
+            var questBoards = ConvertHelper.DeserializeFromFilePath<IList<QuestBoard>>(path);
+            ArgumentNullException.ThrowIfNull(questBoards);
+            builder.Entity<QuestBoard>().HasData(questBoards);
+        }
+
+        private static void SeedQuestBoardOveralls(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardOverallFileName);
+            var questBoardOveralls = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardOverall>>(path);
+            ArgumentNullException.ThrowIfNull(questBoardOveralls);
+            builder.Entity<QuestBoardOverall>().HasData(questBoardOveralls);
+        }
+
+        private static void SeedFocusTimeConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.FocusTimeFileName);
+            var focusTimeConfigs = ConvertHelper.DeserializeFromFilePath<IList<FocusTimeConfig>>(path);
+            ArgumentNullException.ThrowIfNull(focusTimeConfigs);
+            builder.Entity<FocusTimeConfig>().HasData(focusTimeConfigs);
+        }
+
+        private static void SeedTokenConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TokenConfig);
+            var tokenConfigs = ConvertHelper.DeserializeFromFilePath<IList<TokenConfig>>(path);
+            Console.WriteLine(path.Serialize());
+            Console.WriteLine(tokenConfigs.Serialize());
+            ArgumentNullException.ThrowIfNull(tokenConfigs);
+            builder.Entity<TokenConfig>().HasData(tokenConfigs);
+        }
+
+        private static void SeedTechieConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieFileName);
+            var techies = ConvertHelper.DeserializeFromFilePath<IList<Techie>>(path);
+            ArgumentNullException.ThrowIfNull(techies);
+            builder.Entity<Techie>().HasData(techies);
+        }
+
+        private static void SeedApprovalTimeConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ApprovalTimeFileName);
+            var approvalTimeConfigs = ConvertHelper.DeserializeFromFilePath<IList<ApprovalTimeConfig>>(path);
+            ArgumentNullException.ThrowIfNull(approvalTimeConfigs);
+            builder.Entity<ApprovalTimeConfig>().HasData(approvalTimeConfigs);
+        }
+
+        private static void SeedTechieActionsConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieActionFileName);
+            var techieActions = ConvertHelper.DeserializeFromFilePath<IList<TechieAction>>(path);
+            ArgumentNullException.ThrowIfNull(techieActions);
+
+            var packageTranslations = techieActions.SelectMany(x => x.Translations).ToList();
+            techieActions.ForEach(x => x.Translations.Clear());
+
+            builder.Entity<TechieAction>().HasData(techieActions);
+            builder.Entity<TechieActionTranslation>().HasData(packageTranslations);
+        }
+
+        private static void SeedDisplayOrderConfig(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.DisplayOrderConfig);
+            var displayOrderConfigs = ConvertHelper.DeserializeFromFilePath<IList<DisplayOrderConfig>>(path);
+            ArgumentNullException.ThrowIfNull(displayOrderConfigs);
+            builder.Entity<DisplayOrderConfig>().HasData(displayOrderConfigs);
+        }
+
+        private static void SeedBlindBox(ModelBuilder builder)
+        {
+            var blindBoxPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBox);
+            var blindBoxChestPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBoxChest);
+            var blindBoxChestConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBoxChestConfig);
+            var blindBoxes = ConvertHelper.DeserializeFromFilePath<IList<BlindBox>>(blindBoxPath);
+            var blindBoxChests = ConvertHelper.DeserializeFromFilePath<IList<BlindBoxChest>>(blindBoxChestPath);
+            var blindBoxChestConfigs = ConvertHelper.DeserializeFromFilePath<IList<BlindBoxChestConfig>>(blindBoxChestConfigPath);
+            ArgumentNullException.ThrowIfNull(blindBoxes);
+            ArgumentNullException.ThrowIfNull(blindBoxChests);
+            ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
+
+            builder.Entity<BlindBox>().HasData(blindBoxes);
+            builder.Entity<BlindBoxChest>().HasData(blindBoxChests);
+            builder.Entity<BlindBoxChestConfig>().HasData(blindBoxChestConfigs);
+        }
+    }
+
+    public class BaseSystemDbContext : BaseDbContext
+    {
+        protected virtual string Connection => Settings.DefaultConnection;
+
+        public BaseSystemDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(modelBuilder);
             modelBuilder.ApplyConfiguration(new TeachingCostEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ReferralDiscountConfigConfiguration());
             modelBuilder.ApplyConfiguration(new QuestBoardConfigConfiguration());
@@ -148,124 +270,5 @@ namespace Fsel.System.Infrastructure
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
         }
-
-        private static void SeedQuestBoards(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardFileName);
-            var questBoards = ConvertHelper.DeserializeFromFilePath<IList<QuestBoard>>(path);
-            ArgumentNullException.ThrowIfNull(questBoards);
-            builder.Entity<QuestBoard>().HasData(questBoards);
-        }
-
-        private static void SeedQuestBoardOveralls(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.QuestBoardOverallFileName);
-            var questBoardOveralls = ConvertHelper.DeserializeFromFilePath<IList<QuestBoardOverall>>(path);
-            ArgumentNullException.ThrowIfNull(questBoardOveralls);
-            builder.Entity<QuestBoardOverall>().HasData(questBoardOveralls);
-        }
-
-        private static void SeedFocusTimeConfig(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.FocusTimeFileName);
-            var focusTimeConfigs = ConvertHelper.DeserializeFromFilePath<IList<FocusTimeConfig>>(path);
-            ArgumentNullException.ThrowIfNull(focusTimeConfigs);
-            builder.Entity<FocusTimeConfig>().HasData(focusTimeConfigs);
-        }
-
-        private static void SeedTokenConfig(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TokenConfig);
-            var tokenConfigs = ConvertHelper.DeserializeFromFilePath<IList<TokenConfig>>(path);
-            Console.WriteLine(path.Serialize());
-            Console.WriteLine(tokenConfigs.Serialize());
-            ArgumentNullException.ThrowIfNull(tokenConfigs);
-            builder.Entity<TokenConfig>().HasData(tokenConfigs);
-        }
-
-        private static void SeedTechieConfig(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieFileName);
-            var techies = ConvertHelper.DeserializeFromFilePath<IList<Techie>>(path);
-            ArgumentNullException.ThrowIfNull(techies);
-            builder.Entity<Techie>().HasData(techies);
-        }
-
-        private static void SeedApprovalTimeConfig(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ApprovalTimeFileName);
-            var approvalTimeConfigs = ConvertHelper.DeserializeFromFilePath<IList<ApprovalTimeConfig>>(path);
-            ArgumentNullException.ThrowIfNull(approvalTimeConfigs);
-            builder.Entity<ApprovalTimeConfig>().HasData(approvalTimeConfigs);
-        }
-
-        private static void SeedTechieActionsConfig(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieActionFileName);
-            var techieActions = ConvertHelper.DeserializeFromFilePath<IList<TechieAction>>(path);
-            ArgumentNullException.ThrowIfNull(techieActions);
-
-            var packageTranslations = techieActions.SelectMany(x => x.Translations).ToList();
-            techieActions.ForEach(x => x.Translations.Clear());
-
-            builder.Entity<TechieAction>().HasData(techieActions);
-            builder.Entity<TechieActionTranslation>().HasData(packageTranslations);
-        }
-
-        private static void SeedDisplayOrderConfig(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.DisplayOrderConfig);
-            var displayOrderConfigs = ConvertHelper.DeserializeFromFilePath<IList<DisplayOrderConfig>>(path);
-            ArgumentNullException.ThrowIfNull(displayOrderConfigs);
-            builder.Entity<DisplayOrderConfig>().HasData(displayOrderConfigs);
-        }
-
-        private static void SeedBlindBox(ModelBuilder builder)
-        {
-            var blindBoxPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBox);
-            var blindBoxChestPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBoxChest);
-            var blindBoxChestConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.BlindBoxChestConfig);
-            var blindBoxes = ConvertHelper.DeserializeFromFilePath<IList<BlindBox>>(blindBoxPath);
-            var blindBoxChests = ConvertHelper.DeserializeFromFilePath<IList<BlindBoxChest>>(blindBoxChestPath);
-            var blindBoxChestConfigs = ConvertHelper.DeserializeFromFilePath<IList<BlindBoxChestConfig>>(blindBoxChestConfigPath);
-            ArgumentNullException.ThrowIfNull(blindBoxes);
-            ArgumentNullException.ThrowIfNull(blindBoxChests);
-            ArgumentNullException.ThrowIfNull(blindBoxChestConfigs);
-
-            builder.Entity<BlindBox>().HasData(blindBoxes);
-            builder.Entity<BlindBoxChest>().HasData(blindBoxChests);
-            builder.Entity<BlindBoxChestConfig>().HasData(blindBoxChestConfigs);
-        }
-
-        //private static void SeedTechieActionsConfig(ModelBuilder builder)
-        //{
-        //    try
-        //    {
-        //        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.TechieActionFileName);
-        //        using StreamReader streamReader = new StreamReader(path);
-        //        var a = streamReader.ReadToEnd();
-        //        var techieActions = JsonSerializer.Deserialize<IList<TechieAction>>(a, new JsonSerializerOptions
-        //        {
-        //            Converters = { (JsonConverter)new JsonStringEnumConverter() },
-        //            PropertyNameCaseInsensitive = true,
-        //            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        //        });
-        //        ArgumentNullException.ThrowIfNull(techieActions);
-
-        //        //Console.WriteLine("Tesst Errro: techieActions" + techieActions.Serialize());
-        //        var techieActionTranslations = techieActions.SelectMany(x => x.Translations).ToList();
-        //        techieActions.ForEach(x => x.Translations.Clear());
-
-        //        builder.Entity<TechieAction>().HasData(techieActions);
-        //        builder.Entity<TechieActionTranslation>().HasData(techieActionTranslations);
-
-        //        var b= techieActionTranslations.GroupBy(x => x.Id).Where(x => x.Count() > 1).Select(x => x.Key).ToList();
-        //        Console.WriteLine("Tesst Errro: b" + b.Serialize());
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine("Tesst Errro: " + (ex).ToString());
-        //    }
-        //}
     }
 }

@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class TestRepository : BaseRepository<Test>, ITestRepository
     {
-        public TestRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public TestRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

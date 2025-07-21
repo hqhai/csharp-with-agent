@@ -12,16 +12,62 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Interaction.Infrastructure
 {
-    public class InteractionDbContext : BaseDbContext
+    public class InteractionReadDbContext : BaseInteractionDbContext
     {
-        public InteractionDbContext(DbContextOptions<InteractionDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        protected override string Connection => Settings.ReadOnlyConnection;
+
+        public InteractionReadDbContext(DbContextOptions<InteractionReadDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+    }
+
+    public class InteractionDbContext : BaseInteractionDbContext
+    {
+        public InteractionDbContext(DbContextOptions<InteractionDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            ArgumentNullException.ThrowIfNull(modelBuilder);
+            SeedSurveyQuestions(modelBuilder);
+        }
+
+        private static void SeedSurveyQuestions(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SurveyQuestionFileName);
+            var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
+            ArgumentNullException.ThrowIfNull(surveyQuestions);
+
+            var surveyQuestionTranslations = surveyQuestions.SelectMany(x => x.Translations).ToList();
+            surveyQuestions.ForEach(x => x.Translations.Clear());
+
+            builder.Entity<SurveyQuestion>().HasData(surveyQuestions);
+            builder.Entity<SurveyQuestionTranslation>().HasData(surveyQuestionTranslations);
+        }
+    }
+
+    public class BaseInteractionDbContext : BaseDbContext
+    {
+        protected virtual string Connection => Settings.DefaultConnection;
+
+        public BaseInteractionDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
-            SeedSurveyQuestions(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new SurveyQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CustomerSurveyEntityTypeConfiguration());
@@ -68,27 +114,6 @@ namespace Fsel.Interaction.Infrastructure
                     configuration.GetConnectionString(Settings.DefaultConnection),
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
             }
-        }
-
-        /*private static void SeedSurveyQuestions(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SurveyQuestionFileName);
-            var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
-            ArgumentNullException.ThrowIfNull(surveyQuestions);
-            builder.Entity<SurveyQuestion>().HasData(surveyQuestions);
-        }*/
-
-        private static void SeedSurveyQuestions(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SurveyQuestionFileName);
-            var surveyQuestions = ConvertHelper.DeserializeFromFilePath<IList<SurveyQuestion>>(path);
-            ArgumentNullException.ThrowIfNull(surveyQuestions);
-
-            var surveyQuestionTranslations = surveyQuestions.SelectMany(x => x.Translations).ToList();
-            surveyQuestions.ForEach(x => x.Translations.Clear());
-
-            builder.Entity<SurveyQuestion>().HasData(surveyQuestions);
-            builder.Entity<SurveyQuestionTranslation>().HasData(surveyQuestionTranslations);
         }
     }
 }

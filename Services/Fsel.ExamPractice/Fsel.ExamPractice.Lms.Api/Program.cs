@@ -24,7 +24,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<ExamPracticesDBContext>();
+builder.AddDbContexts<ExamPracticesDBContext, ExamPracticesReadDBContext>();
 
 builder.Services.AddScoped<IExamPracticeAnswerRepository, ExamPracticeAnswerRepository>();
 builder.Services.AddScoped<IExamPracticeRepository, ExamPracticeRepository>();

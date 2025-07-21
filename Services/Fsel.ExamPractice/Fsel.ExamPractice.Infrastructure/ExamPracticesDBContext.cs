@@ -6,9 +6,33 @@ namespace Fsel.ExamPractice.Infrastructure
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Infrastructure.Configs;
 
-    public class ExamPracticesDBContext : BaseDbContext
+    public class ExamPracticesReadDBContext : BaseExamPracticesDBContext
     {
-        public ExamPracticesDBContext(DbContextOptions<ExamPracticesDBContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        public ExamPracticesReadDBContext(DbContextOptions<ExamPracticesReadDBContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+    }
+
+    public class ExamPracticesDBContext : BaseExamPracticesDBContext
+    {
+        public ExamPracticesDBContext(DbContextOptions<ExamPracticesDBContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+    }
+
+    public class BaseExamPracticesDBContext : BaseDbContext
+    {
+        public BaseExamPracticesDBContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
         {
         }
 

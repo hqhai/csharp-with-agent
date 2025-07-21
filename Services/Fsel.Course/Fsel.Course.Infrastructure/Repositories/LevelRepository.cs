@@ -14,7 +14,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class LevelRepository : BaseRepository<Level>, ILevelRepository
     {
-        public LevelRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public LevelRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

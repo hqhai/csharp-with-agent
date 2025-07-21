@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class StepFlowRepository : BaseRepository<StepFlow>, IStepFlowRepository
     {
-        public StepFlowRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public StepFlowRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

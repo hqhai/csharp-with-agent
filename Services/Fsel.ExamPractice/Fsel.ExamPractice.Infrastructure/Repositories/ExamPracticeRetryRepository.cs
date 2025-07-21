@@ -8,7 +8,7 @@ namespace Fsel.ExamPractice.Infrastructure.Repositories
 
     public class ExamPracticeRetryRepository : BaseRepository<ExamPracticeRetry>, IExamPracticeRetryRepository
     {
-        public ExamPracticeRetryRepository(ExamPracticesDBContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public ExamPracticeRetryRepository(ExamPracticesDBContext dbContext, ExamPracticesReadDBContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

@@ -5,12 +5,13 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Microsoft.EntityFrameworkCore;
-
+using AutoMapper;
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class HomeWorkRepository : BaseRepository<HomeWork>, IHomeWorkRepository
     {
-        public HomeWorkRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public HomeWorkRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

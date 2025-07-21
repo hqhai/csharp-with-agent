@@ -2,11 +2,6 @@
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
@@ -14,7 +9,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class CategoryRepository : BaseRepository<Category>, ICategoryRepository
     {
-        public CategoryRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public CategoryRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

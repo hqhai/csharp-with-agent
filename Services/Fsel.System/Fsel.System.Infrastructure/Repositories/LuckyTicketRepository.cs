@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class LuckyTicketRepository : BaseRepository<LuckyTicket>, ILuckyTicketRepository
     {
-        public LuckyTicketRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public LuckyTicketRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

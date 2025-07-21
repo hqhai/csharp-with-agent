@@ -27,7 +27,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<TrainingDbContext>();
+builder.AddDbContexts<TrainingDbContext, TrainingReadDbContext>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();
 builder.Services.AddScoped<IClassLiveCalendarRepository, ClassLiveCalendarRepository>();

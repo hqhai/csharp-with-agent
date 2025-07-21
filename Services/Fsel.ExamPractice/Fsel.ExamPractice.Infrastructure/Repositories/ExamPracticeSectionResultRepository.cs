@@ -8,7 +8,7 @@ namespace Fsel.ExamPractice.Infrastructure.Repositories
 
     public class ExamPracticeSectionResultRepository : BaseRepository<ExamPracticeSectionResult>, IExamPracticeSectionResultRepository
     {
-        public ExamPracticeSectionResultRepository(ExamPracticesDBContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public ExamPracticeSectionResultRepository(ExamPracticesDBContext dbContext, ExamPracticesReadDBContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }
