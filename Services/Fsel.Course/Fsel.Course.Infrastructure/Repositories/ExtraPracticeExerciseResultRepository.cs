@@ -5,10 +5,11 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
+    using AutoMapper;
 
     public class ExtraPracticeExerciseResultRepository : BaseRepository<ExtraPracticeExerciseResult>, IExtraPracticeExerciseResultRepository
     {
-        public ExtraPracticeExerciseResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public ExtraPracticeExerciseResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

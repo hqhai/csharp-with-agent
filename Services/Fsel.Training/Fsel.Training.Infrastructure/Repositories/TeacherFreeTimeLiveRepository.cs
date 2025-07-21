@@ -9,7 +9,7 @@ namespace Fsel.Training.Infrastructure.Repositories
 
     public class TeacherFreeTimeLiveRepository : BaseRepository<TeacherFreeTimeLive>, ITeacherFreeTimeLiveRepository
     {
-        public TeacherFreeTimeLiveRepository(TrainingDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public TeacherFreeTimeLiveRepository(TrainingDbContext dbContext, TrainingReadDbContext readDbContext, AuthContext authContext, IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

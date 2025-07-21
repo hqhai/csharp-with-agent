@@ -9,7 +9,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class ClassforumDetailResultHistoryRepository : BaseRepository<ClassForumDetailResultHistory>, IClassforumDetailResultHistoryRepository
     {
-        public ClassforumDetailResultHistoryRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public ClassforumDetailResultHistoryRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

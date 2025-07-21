@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Repositories
     {
         private readonly IMapper _mapper;
 
-        public UnitRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public UnitRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
             _mapper = mapper;
         }

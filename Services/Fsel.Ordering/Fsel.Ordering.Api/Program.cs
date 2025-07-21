@@ -30,7 +30,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<OrderingDbContext>();
+builder.AddDbContexts<OrderingDbContext, OrderingReadDbContext>();
 
 builder.Services.AddDataProtection();
 

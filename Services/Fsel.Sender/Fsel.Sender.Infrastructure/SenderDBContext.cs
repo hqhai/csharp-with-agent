@@ -8,9 +8,37 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Sender.Infrastructure
 {
-    public class SenderDBContext : BaseDbContext
+    public class SenderReadDbContext : SenderBaseDBContext
     {
-        public SenderDBContext(DbContextOptions<SenderDBContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        protected override string Connection => Settings.ReadOnlyConnection;
+
+        public SenderReadDbContext(DbContextOptions<SenderReadDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+    }
+
+    public class SenderDBContext : SenderBaseDBContext
+    {
+        public SenderDBContext(DbContextOptions<SenderDBContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+    }
+
+    public class SenderBaseDBContext : BaseDbContext
+    {
+        protected virtual string Connection => Settings.DefaultConnection;
+
+        public SenderBaseDBContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
         {
         }
 

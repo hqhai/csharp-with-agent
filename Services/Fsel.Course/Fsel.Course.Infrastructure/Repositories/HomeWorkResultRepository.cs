@@ -6,10 +6,12 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Microsoft.EntityFrameworkCore;
+    using AutoMapper;
 
     public class HomeWorkResultRepository : BaseRepository<HomeWorkResult>, IHomeWorkResultRepository
     {
-        public HomeWorkResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public HomeWorkResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

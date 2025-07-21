@@ -9,7 +9,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class FlowRepository : BaseRepository<Flow>, IFlowRepository
     {
-        public FlowRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public FlowRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

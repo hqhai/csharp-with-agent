@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class GameTopicRepository : BaseRepository<GameTopic>, IGameTopicRepository
     {
-        public GameTopicRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public GameTopicRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

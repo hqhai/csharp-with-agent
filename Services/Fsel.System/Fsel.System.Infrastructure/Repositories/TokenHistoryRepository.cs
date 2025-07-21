@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class TokenHistoryRepository : BaseRepository<TokenHistory>, ITokenHistoryRepository
     {
-        public TokenHistoryRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public TokenHistoryRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }
