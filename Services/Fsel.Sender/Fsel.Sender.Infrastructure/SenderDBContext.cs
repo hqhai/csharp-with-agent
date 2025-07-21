@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Sender.Infrastructure
 {
-    public class SenderReadDbContext : BaseSenderDBContext
+    public class SenderReadDbContext : SenderBaseDBContext
     {
         protected override string Connection => Settings.ReadOnlyConnection;
 
@@ -25,7 +25,7 @@ namespace Fsel.Sender.Infrastructure
         }
     }
 
-    public class SenderDBContext : BaseSenderDBContext
+    public class SenderDBContext : SenderBaseDBContext
     {
         public SenderDBContext(DbContextOptions<SenderDBContext> options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
@@ -33,11 +33,11 @@ namespace Fsel.Sender.Infrastructure
         }
     }
 
-    public class BaseSenderDBContext : BaseDbContext
+    public class SenderBaseDBContext : BaseDbContext
     {
         protected virtual string Connection => Settings.DefaultConnection;
 
-        public BaseSenderDBContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
+        public SenderBaseDBContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
         {
         }

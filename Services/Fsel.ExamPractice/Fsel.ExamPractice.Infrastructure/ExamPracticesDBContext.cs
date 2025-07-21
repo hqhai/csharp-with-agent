@@ -6,7 +6,7 @@ namespace Fsel.ExamPractice.Infrastructure
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Infrastructure.Configs;
 
-    public class ExamPracticesReadDBContext : BaseExamPracticesDBContext
+    public class ExamPracticesReadDBContext : ExamPracticesBaseDBContext
     {
         public ExamPracticesReadDBContext(DbContextOptions<ExamPracticesReadDBContext> options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
@@ -21,7 +21,7 @@ namespace Fsel.ExamPractice.Infrastructure
         }
     }
 
-    public class ExamPracticesDBContext : BaseExamPracticesDBContext
+    public class ExamPracticesDBContext : ExamPracticesBaseDBContext
     {
         public ExamPracticesDBContext(DbContextOptions<ExamPracticesDBContext> options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
@@ -29,9 +29,9 @@ namespace Fsel.ExamPractice.Infrastructure
         }
     }
 
-    public class BaseExamPracticesDBContext : BaseDbContext
+    public class ExamPracticesBaseDBContext : BaseDbContext
     {
-        public BaseExamPracticesDBContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
+        public ExamPracticesBaseDBContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
         {
         }

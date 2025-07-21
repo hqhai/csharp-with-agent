@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserReadDbContext : BaseUserDbContext
+    public class UserReadDbContext : UserBaseDbContext
     {
         protected override string Connection => Settings.ReadOnlyConnection;
 
@@ -23,7 +23,7 @@ namespace Fsel.Identity.Infrastructure
         }
     }
 
-    public class UserDbContext : BaseUserDbContext
+    public class UserDbContext : UserBaseDbContext
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -94,11 +94,11 @@ namespace Fsel.Identity.Infrastructure
         }
     }
 
-    public class BaseUserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRole, UserLoginEntity, UserToken>
+    public class UserBaseDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRole, UserLoginEntity, UserToken>
     {
         protected virtual string Connection => Settings.DefaultConnection;
 
-        public BaseUserDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        public UserBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 

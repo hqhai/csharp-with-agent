@@ -17,7 +17,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.System.Infrastructure
 {
-    public class SystemReadDbContext : BaseSystemDbContext
+    public class SystemReadDbContext : SystemBaseDbContext
     {
         protected override string Connection => Settings.ReadOnlyConnection;
 
@@ -33,7 +33,7 @@ namespace Fsel.System.Infrastructure
         }
     }
 
-    public class SystemDbContext : BaseSystemDbContext
+    public class SystemDbContext : SystemBaseDbContext
     {
         public SystemDbContext(DbContextOptions<SystemDbContext> options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
@@ -145,11 +145,11 @@ namespace Fsel.System.Infrastructure
         }
     }
 
-    public class BaseSystemDbContext : BaseDbContext
+    public class SystemBaseDbContext : BaseDbContext
     {
         protected virtual string Connection => Settings.DefaultConnection;
 
-        public BaseSystemDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
+        public SystemBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
         {
         }

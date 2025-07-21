@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Notification.Infrastructure
 {
-    public class NotificationsReadDbContext : BaseNotificationsDBContext
+    public class NotificationsReadDbContext : NotificationsBaseDBContext
     {
         protected override string Connection => Settings.ReadOnlyConnection;
 
@@ -26,7 +26,7 @@ namespace Fsel.Notification.Infrastructure
         }
     }
 
-    public class NotificationsDBContext : BaseNotificationsDBContext
+    public class NotificationsDBContext : NotificationsBaseDBContext
     {
         public NotificationsDBContext(DbContextOptions<NotificationsDBContext> options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
@@ -54,11 +54,11 @@ namespace Fsel.Notification.Infrastructure
         }
     }
 
-    public class BaseNotificationsDBContext : BaseDbContext
+    public class NotificationsBaseDBContext : BaseDbContext
     {
         protected virtual string Connection => Settings.DefaultConnection;
 
-        public BaseNotificationsDBContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        public NotificationsBaseDBContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
             ChangeTracker.LazyLoadingEnabled = true;
         }

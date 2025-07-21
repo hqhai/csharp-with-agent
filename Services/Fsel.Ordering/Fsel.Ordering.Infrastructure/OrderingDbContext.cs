@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Ordering.Infrastructure
 {
-    public class OrderingReadDbContext : BaseOrderingDbContext
+    public class OrderingReadDbContext : OrderingBaseDbContext
     {
         protected override string Connection => Settings.ReadOnlyConnection;
 
@@ -29,7 +29,7 @@ namespace Fsel.Ordering.Infrastructure
         }
     }
 
-    public class OrderingDbContext : BaseOrderingDbContext
+    public class OrderingDbContext : OrderingBaseDbContext
     {
         public OrderingDbContext(DbContextOptions<OrderingDbContext> options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
@@ -89,11 +89,11 @@ namespace Fsel.Ordering.Infrastructure
         }
     }
 
-    public class BaseOrderingDbContext : BaseDbContext
+    public class OrderingBaseDbContext : BaseDbContext
     {
         protected virtual string Connection => Settings.DefaultConnection;
 
-        public BaseOrderingDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        public OrderingBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 

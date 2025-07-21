@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Interaction.Infrastructure
 {
-    public class InteractionReadDbContext : BaseInteractionDbContext
+    public class InteractionReadDbContext : InteractionBaseDbContext
     {
         protected override string Connection => Settings.ReadOnlyConnection;
 
@@ -29,7 +29,7 @@ namespace Fsel.Interaction.Infrastructure
         }
     }
 
-    public class InteractionDbContext : BaseInteractionDbContext
+    public class InteractionDbContext : InteractionBaseDbContext
     {
         public InteractionDbContext(DbContextOptions<InteractionDbContext> options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
@@ -57,11 +57,11 @@ namespace Fsel.Interaction.Infrastructure
         }
     }
 
-    public class BaseInteractionDbContext : BaseDbContext
+    public class InteractionBaseDbContext : BaseDbContext
     {
         protected virtual string Connection => Settings.DefaultConnection;
 
-        public BaseInteractionDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        public InteractionBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 

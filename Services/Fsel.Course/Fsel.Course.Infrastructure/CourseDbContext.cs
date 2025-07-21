@@ -19,7 +19,7 @@ namespace Fsel.Course.Infrastructure
     /// <summary>
     /// Represents the read database context for the course service.
     /// </summary>
-    public class CourseReadDbContext : BaseCourseDbContext
+    public class CourseReadDbContext : CourseBaseDbContext
     {
         protected override string Connection => Settings.ReadOnlyConnection;
 
@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure
     /// <summary>
     /// Represents for the master database context for the course service.
     /// </summary>
-    public class CourseDbContext : BaseCourseDbContext
+    public class CourseDbContext : CourseBaseDbContext
     {
         public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext)
             : base(options, mediator, authContext)
@@ -61,11 +61,11 @@ namespace Fsel.Course.Infrastructure
         }
     }
 
-    public class BaseCourseDbContext : BaseDbContext
+    public class CourseBaseDbContext : BaseDbContext
     {
         protected virtual string Connection => Settings.DefaultConnection;
 
-        public BaseCourseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        public CourseBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
