@@ -4,12 +4,13 @@ using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoResultRepository : BaseRepository<VideoResult>, IVideoResultRepository
     {
-        public VideoResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public VideoResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

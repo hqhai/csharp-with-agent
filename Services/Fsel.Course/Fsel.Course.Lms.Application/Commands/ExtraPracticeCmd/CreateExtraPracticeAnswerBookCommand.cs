@@ -16,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Course.Domain.Models.CommandModels.ExtraPracticeAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -104,8 +105,10 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
                     Status = EnumResultStatus.Process,
                     SkillId = extraPracticeExercise.Exercise?.SkillId
                 };
-                extraPracticeExerciseResult = _extraPracticeExerciseResultRepository.Add(extraPracticeExerciseResult);
-                await _extraPracticeExerciseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _extraPracticeExerciseResultRepository.BulkMergeAsync(new List<ExtraPracticeExerciseResult> { extraPracticeExerciseResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.ExtraPracticeResultId, c.ExtraPracticeExerciseId, c.IsDeleted };
+                });
             }
 
             #region xoa cau tra loi
@@ -156,8 +159,10 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 if (extraPracticeExerciseResult != null)
                 {
-                    extraPracticeExerciseResult = _extraPracticeExerciseResultRepository.Update(extraPracticeExerciseResult);
-                    await _extraPracticeExerciseResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _extraPracticeExerciseResultRepository.BulkUpdateList(new List<ExtraPracticeExerciseResult> { extraPracticeExerciseResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.ExtraPracticeResultId, c.ExtraPracticeExerciseId };
+                    });
                 }
 
                 methodResult.Result = _mapper.Map<ExtraPracticeExerciseResultModel>(extraPracticeExerciseResult);

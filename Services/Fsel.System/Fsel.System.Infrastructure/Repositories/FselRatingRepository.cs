@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class FselRatingRepository : BaseRepository<FselRating>, IFselRatingRepository
     {
-        public FselRatingRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public FselRatingRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

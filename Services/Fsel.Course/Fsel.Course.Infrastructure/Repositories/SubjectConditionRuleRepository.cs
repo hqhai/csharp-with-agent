@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class SubjectConditionRuleRepository : BaseRepository<SubjectConditionRule>, ISubjectConditionRuleRepository
     {
-        public SubjectConditionRuleRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public SubjectConditionRuleRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

@@ -17,7 +17,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<CourseDbContext>();
+builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -80,6 +80,7 @@ builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository
 builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
 builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
+builder.Services.AddScoped<IClassforumDetailResultHistoryRepository, ClassforumDetailResultHistoryRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ILevelRepository, LevelRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();

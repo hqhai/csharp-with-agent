@@ -5,14 +5,13 @@ namespace Fsel.Ordering.Infrastructure.Repositories
     using Fsel.Core.Base;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
-    using Fsel.Shared.Enums;
-    using Microsoft.EntityFrameworkCore;
 
     public class PackageRepository : BaseRepository<Package>, IPackageRepository
     {
         private readonly IEventRepository _eventRepository;
 
-        public PackageRepository(OrderingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper, IEventRepository eventRepository) : base(dbContext, authContext, mapper)
+        public PackageRepository(OrderingDbContext dbContext, OrderingReadDbContext orderingReadDb, AuthContext authContext, AutoMapper.IMapper mapper, IEventRepository eventRepository)
+            : base(dbContext, orderingReadDb, authContext, mapper)
         {
             _eventRepository = eventRepository;
         }

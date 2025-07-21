@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class TechieRepository : BaseRepository<Techie>, ITechieRepository
     {
-        public TechieRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public TechieRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

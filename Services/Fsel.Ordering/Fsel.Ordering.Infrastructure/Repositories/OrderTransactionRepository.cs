@@ -9,7 +9,7 @@ namespace Fsel.Ordering.Infrastructure.Repositories
 
     public class OrderTransactionRepository : BaseRepository<OrderTransaction>, IOrderTransactionRepository
     {
-        public OrderTransactionRepository(OrderingDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public OrderTransactionRepository(OrderingDbContext dbContext, OrderingReadDbContext readDbContext, AuthContext authContext, IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

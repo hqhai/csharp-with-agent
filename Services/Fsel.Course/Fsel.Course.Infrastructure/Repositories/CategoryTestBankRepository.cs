@@ -14,7 +14,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class CategoryTestBankRepository : BaseRepository<CategoryTestBank>, ICategoryTestBankRepository
     {
-        public CategoryTestBankRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public CategoryTestBankRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

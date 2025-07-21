@@ -4,13 +4,13 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     using AutoMapper;
     using Fsel.Core.Base;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.FlowConfigs;
     using Fsel.Course.Domain.IRepositories;
 
     public class ActionFlowRepository : BaseRepository<ActionFlow>, IActionFlowRepository
     {
-        public ActionFlowRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public ActionFlowRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

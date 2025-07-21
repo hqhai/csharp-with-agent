@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class ApprovalTimeConfigRepository : BaseRepository<ApprovalTimeConfig>, IApprovalTimeConfigRepository
     {
-        public ApprovalTimeConfigRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public ApprovalTimeConfigRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

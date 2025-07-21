@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
@@ -108,6 +109,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} Start");
 
                 #region Retry
+
                 var retryAI = Policy.HandleResult<UserAiModel>(result => result.ClassForumAIs == null || result.ClassForumAIs.Count == 0 || !result.ConditionRetry)
                                     .WaitAndRetryAsync(Max_Time_Retry, retryAttempt => TimeSpan.FromMinutes(_intervalRetryTime), async (result, timeSpan, retryCount, context) =>
                                     {
@@ -188,11 +190,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 2: {classForumDetailResult.Serialize(options)}");
 
                 classForumDetailResult.GradingAlFeedback = retryResult.ClassForumAIs != null ? ConvertHelper.Serialize(retryResult.ClassForumAIs) : default;
-                _classForumDetailResultRepository.Update(classForumDetailResult, false
-                , x => x.WordContent, x => x.Content
-                , x => x.WordCount, x => x.SubmissionCount
-                , x => x.ProcessDate, x => x.CompletionDate, x => x.Status);
-                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.WordContent, c.Content, c.WordCount, c.SubmissionCount, c.ProcessDate, c.CompletionDate, c.Status, c.ClassForumResultId };
+                });
 
                 _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 3: {classForumDetailResult.Serialize(options)}");
                 _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} End");
