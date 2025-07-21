@@ -4,6 +4,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
