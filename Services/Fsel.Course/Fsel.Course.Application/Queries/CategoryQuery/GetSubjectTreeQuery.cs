@@ -35,11 +35,13 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<CategoryTreeModel>>();
-            var subjects = await _categoryRepository.Queryable.Where(x => !x.ParentId.HasValue && x.Status != EnumStatus.Archive).ToListAsync(cancellationToken);
+            var subjects = await _categoryRepository.Queryable.Where(x => !x.ParentId.HasValue && x.Status == EnumStatus.Active)
+                                                    .ToListAsync(cancellationToken);
+
             var categoryTrees = _mapper.Map<IList<CategoryTreeModel>>(subjects);
             await _programConverter.AddChildentCategory(categoryTrees, cancellationToken);
 
-            methodResult.Result = categoryTrees.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).ToList();
+            methodResult.Result = categoryTrees.Where(x => x.Children != null && x.Children.Any()).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
