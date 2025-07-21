@@ -155,6 +155,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return methodResult;
             });
 
+            var checkForbidden = await _mediator.Send(new CheckForbiddenClassForumCommand { ClassForumDetailResultId = request.ClassForumDetailResultId }, cancellationToken);
+            if (!checkForbidden.IsOK)
+            {
+                methodResult.AddErrorBadRequest(checkForbidden.ErrorMessages);
+                return methodResult;
+            }
+
             await UpdateClassForumResultAsync(classForumDetailResult.ClassForumResult, classForumDetailResult);
 
             return methodResult;
