@@ -9,6 +9,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -36,19 +38,24 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         private readonly IClassForumRepository _classForumRepository;
         private readonly IMediator _mediator;
         private readonly IStorageService _storageService;
+        private readonly IClassForumResultRepository _classForumResultRepository;
         private const int Max_Time_Retry = 4;
         private const int IntervalRetryTime = 30;
         private const string NameSchema = "criteria_schema";
+        private const int MaxTagetScore = 1;
+        private const int MaxScoreClassForum = 2;
 
         public UpdateClassForumDetailResultCommandHandler(IClassForumDetailResultRepository classForumDetailResultRepository,
                                                           IClassForumRepository classForumRepository,
                                                           IMediator mediator,
-                                                          IStorageService storageService)
+                                                          IStorageService storageService,
+                                                          IClassForumResultRepository classForumResultRepository)
         {
             _classForumDetailResultRepository = classForumDetailResultRepository;
             _classForumRepository = classForumRepository;
             _mediator = mediator;
             _storageService = storageService;
+            _classForumResultRepository = classForumResultRepository;
         }
 
         private class UserAiModel
@@ -147,6 +154,15 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             });
+
+            var checkForbidden = await _mediator.Send(new CheckForbiddenClassForumCommand { ClassForumDetailResultId = request.ClassForumDetailResultId }, cancellationToken);
+            if (!checkForbidden.IsOK)
+            {
+                methodResult.AddErrorBadRequest(checkForbidden.ErrorMessages);
+                return methodResult;
+            }
+
+            await UpdateClassForumResultAsync(classForumDetailResult.ClassForumResult, classForumDetailResult);
 
             return methodResult;
         }
@@ -292,6 +308,74 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 return listStr.ToList();
             }
             return new List<string> { data?.ToString() ?? string.Empty };
+        }
+
+        public async Task UpdateClassForumResultAsync(ClassForumResult classForumResult, ClassForumDetailResult classForumDetailResult)
+        {
+            ArgumentNullException.ThrowIfNull(classForumDetailResult);
+            ArgumentNullException.ThrowIfNull(classForumResult);
+
+            var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAIModel>>(classForumDetailResult.GradingAlFeedback);
+
+            bool isForbidden = classForumDetailResult.IsForbiddenWork || classForumDetailResult.IsForbiddenImage;
+
+            classForumResult.Status = !isForbidden ? EnumClassForumResultStatus.Graded : EnumClassForumResultStatus.Denied;
+            classForumResult.WordContent = classForumDetailResult.WordContent;
+            classForumResult.WordCount = classForumDetailResult.WordCount;
+            classForumResult.Content = classForumDetailResult.Content;
+            classForumResult.SubmissionCount = classForumDetailResult.SubmissionCount;
+            classForumResult.GradingAlFeedback = classForumDetailResult.GradingAlFeedback;
+
+            classForumResult.CorrectCount = GetTargetCount(classForumDetailResult, classForumResult);
+            classForumResult.CorrectTotal = MaxTagetScore;
+
+            if (classForumAIs != null && classForumAIs.Any())
+            {
+                classForumResult.CorrectCount += classForumAIs.Sum(x => x.Score);
+                classForumResult.CorrectTotal += classForumAIs.Count * MaxScoreClassForum;
+            }
+
+            if (classForumResult.SkillScores != null && classForumResult.SkillScores.Any())
+            {
+                classForumResult.SkillScores.Single().CorrectCount = classForumResult.CorrectCount;
+                classForumResult.SkillScores.Single().TotalCount = classForumResult.CorrectTotal;
+            }
+            else
+            {
+                classForumResult.SkillScores = new List<SkillScores>
+                {
+                    new SkillScores
+                    {
+                        CorrectCount = classForumResult.CorrectCount,
+                        TotalCount = classForumResult.CorrectTotal,
+                        CountQuestion = 1,
+                        TotalQuestion = 1,
+                        Skill = classForumResult.ClassForum?.CourseSkill ?? default
+                    }
+                };
+            }
+
+            await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+            });
+
+            await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+        }
+
+        private static int GetTargetCount(ClassForumDetailResult classForumDetailResult, ClassForumResult classForumResult)
+        {
+            int targetScore = default;
+            var classForum = classForumResult.ClassForum;
+            if (classForum?.CourseSkill == EnumCourseSkill.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
+            {
+                ++targetScore;
+            }
+            if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
+            {
+                ++targetScore;
+            }
+            return targetScore;
         }
     }
 }
