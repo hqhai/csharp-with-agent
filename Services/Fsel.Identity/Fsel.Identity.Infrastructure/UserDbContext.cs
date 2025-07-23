@@ -35,9 +35,9 @@ namespace Fsel.Identity.Infrastructure
             builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<UserClaimEntity>();
-            builder.Entity<UserRoleEntity>();
+            builder.Entity<UserRole>();
             builder.Entity<UserLoginEntity>();
-            builder.Entity<RoleClaimEntity>();
+            builder.Entity<RoleClaim>();
             builder.HasSequence<int>(SqlSettings.Sequence.UserSequence).StartsAt(100000).IncrementsBy(1);
 
             SeedMenus(builder);
