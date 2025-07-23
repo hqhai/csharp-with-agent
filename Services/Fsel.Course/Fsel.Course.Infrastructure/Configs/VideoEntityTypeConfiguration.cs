@@ -15,13 +15,13 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<Video> builder)
         {
             builder.Property(e => e.CourseLevel)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseLevel>());
 
             builder.Property(e => e.Type)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumVideoType>());
@@ -31,11 +31,6 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumVersionStatus>());
-
-            builder.HasOne(a => a.OriginalVideo)
-                   .WithMany(b => b.Videos)
-                   .HasForeignKey(p => p.OriginalId)
-                   .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(a => a.Program)
                    .WithMany(b => b.Videos)

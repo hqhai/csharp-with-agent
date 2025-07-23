@@ -57,7 +57,6 @@ namespace Fsel.Course.Domain.Entities
         public EnumVersionStatus VersionStatus { get; set; }
         public int Version { get; set; }
         public Guid? OriginalId { get; set; }
-        public Video? OriginalVideo { get; set; }
 
         public Guid? LevelId { get; set; }
         public Level? Level { get; set; }
@@ -66,7 +65,6 @@ namespace Fsel.Course.Domain.Entities
         public Category? Program { get; set; }
 
         public ExtraPractice? ExtraPractice { get; set; }
-        public ICollection<Video> Videos { get; set; } = new List<Video>();
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
         public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
