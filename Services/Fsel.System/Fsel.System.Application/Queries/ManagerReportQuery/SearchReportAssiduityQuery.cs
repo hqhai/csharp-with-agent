@@ -42,6 +42,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
                 ListDistrict = request.ListDistrict,
@@ -50,6 +51,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListCourseLevel = request.ListCourseLevel,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseType = request.ListCourseType,
 
                 PageSize = request.PageSize,
                 Filters = request.Filters,
@@ -92,10 +94,13 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseType = request.ListCourseType,
+                ListCourseLevel = request.ListCourseLevel,
+
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 CourseType = request.CourseType,
