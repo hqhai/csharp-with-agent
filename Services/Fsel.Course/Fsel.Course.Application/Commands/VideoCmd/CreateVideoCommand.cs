@@ -51,7 +51,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             #region Validate New
 
-            request.OriginalId = request.OriginalId ?? Guid.NewGuid();
             if (request.OriginalId.HasValue)
             {
                 var videoOriginal = await _videoRepository.GetByIdAsync(request.OriginalId.Value);
@@ -61,6 +60,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     return methodResult;
                 }
             }
+            request.OriginalId = request.OriginalId ?? Guid.NewGuid();
+
             Category? program = null;
             if (request.ProgramId.HasValue)
             {
