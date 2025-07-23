@@ -13,13 +13,14 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class SearchStudentSurveyRecordQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentSurveyRecordModel>>>
     {
-        public Guid? SurveyConfigId { get; set; }
+        public Guid SurveyConfigId { get; set; }
     }
 
     public class SearchStudentSurveyRecordQueryHandler : IRequestHandler<SearchStudentSurveyRecordQuery, MethodResult<PagingItemsModel<StudentSurveyRecordModel>>>
@@ -55,28 +56,33 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
 
             var surveyQuestionIds = surveyConfig.SurveyQuestions.Select(p => p.Id).ToList();
 
-            var customerSurveys = from cs in _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId)
-                                  join csg in _customerSurveyGroupRepository.Queryable on cs.CustomerSurveyGroupId equals csg.Id
-                                  where csg.Status == EnumSurveyGroupStatus.Done
-                                  select new StudentSurveyRecordModel
-                                  {
-                                      UserId = csg.UserId,
-                                  };
+            var customerSurveys = await (from cs in _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId)
+                                         join csg in _customerSurveyGroupRepository.Queryable on cs.CustomerSurveyGroupId equals csg.Id
+                                         where csg.Status == EnumSurveyGroupStatus.Done
+                                         select new StudentSurveyRecordModel
+                                         {
+                                             UserId = csg.UserId,
+                                             CreatedDate = csg.CreatedDate,
+                                         }).ToListAsync(cancellationToken);
 
-            customerSurveys = customerSurveys.DistinctBy(p => p.UserId);
+            customerSurveys = customerSurveys.DistinctBy(p => p.UserId).ToList();
 
-            int totalItem = await customerSurveys.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-
-            var lists = await customerSurveys
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-
-            var userIds = lists.Select(p => p.UserId).ToList();
-
-            var studentResults = await _userService.GetStudentByUserIdsAsync(userIds);
+            var studentResults = await _userService.SearchStudentsByUserIds(new SearchStudentsByUserIdsQueryModel()
+            {
+                UserIds = customerSurveys.Select(p => p.UserId).ToList(),
+                Keyword = request.Keyword
+            });
             var students = studentResults.Content?.Result;
+
+            var userIds = students?.Where(p => p.Human != null && p.Human.UserId.HasValue).Select(p => p.Human!.UserId ?? default).ToList();
+
+            customerSurveys = customerSurveys.Where(p => userIds != null && userIds.Contains(p.UserId)).ToList();
+
+            int totalItem = customerSurveys.Count;
+
+            var lists = customerSurveys
+                    .ApplySortAndPaging(request)
+                    .ToList();
 
             lists.ForEach(p =>
             {

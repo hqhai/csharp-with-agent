@@ -1,8 +1,6 @@
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
-using Fsel.Interaction.Domain.Entities;
 using Fsel.Interaction.Domain.IRepositories;
 using Fsel.Interaction.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;

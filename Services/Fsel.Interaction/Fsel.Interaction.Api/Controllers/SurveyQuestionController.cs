@@ -6,7 +6,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
-    using Fsel.Interaction.Application.Commands.SurveyConfigCmd;
+    using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
     using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;

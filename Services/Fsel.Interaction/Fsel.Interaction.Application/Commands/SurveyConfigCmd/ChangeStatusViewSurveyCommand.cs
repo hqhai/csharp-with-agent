@@ -7,7 +7,6 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
-    using Fsel.Interaction.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 

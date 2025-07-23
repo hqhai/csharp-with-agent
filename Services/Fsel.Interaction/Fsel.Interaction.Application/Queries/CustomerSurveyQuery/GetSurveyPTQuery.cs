@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
+namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -91,7 +91,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyQuestionQuery
 
                 surveyConfigs = surveyConfigs.Where(p => p.ProgressRequirements != null && p.ProgressRequirements.Any(x => x.CourseType == request.CourseType && x.ProgressRequirement == EnumProgressRequirement.DonePT)).ToList();
 
-                SurveyConfig? surveyConfig = new SurveyConfig();
+                var surveyConfig = new SurveyConfig();
 
                 if (request.SurveyFormType == EnumSurveyFormType.Event)
                 {

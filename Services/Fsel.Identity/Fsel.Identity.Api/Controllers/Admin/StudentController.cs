@@ -341,5 +341,17 @@ namespace Fsel.Identity.Api.Controllers.Admin
             var queryResult = await _mediator.Send(new ToolSynchronousParentInfoCommand()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// search students by user ids
+        /// </summary>
+        [HttpPost("search-students-by-user-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchStudentsByUserIds([FromBody] SearchStudentsByUserIdsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

@@ -10,7 +10,6 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Interaction.Application.Commands.SurveyConfigCmd;
     using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
     using Fsel.Interaction.Application.Queries.SurveyConfigQuery;
-    using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using MediatR;
@@ -122,6 +121,18 @@ namespace Fsel.Interaction.Api.Controllers
         public async Task<IActionResult> GetUserSurveysAssignment()
         {
             var queryResult = await _mediator.Send(new SearchUserSurveyAssignmentQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get history do survey by user id
+        /// </summary>
+        [HttpGet("get-history-do-survey-by-user-id")]
+        [ProducesResponseType(typeof(MethodResult<SurveyConfigModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetHistoryDoSurveyByUserId([FromQuery] GetHistoryDoSurveyByUserIdQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

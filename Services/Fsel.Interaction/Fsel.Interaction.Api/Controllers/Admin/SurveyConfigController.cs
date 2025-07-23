@@ -4,6 +4,7 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Interaction.Application.Commands.SurveyConfigCmd;
+using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
 using Fsel.Interaction.Application.Queries.SurveyConfigQuery;
 using Fsel.Interaction.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
@@ -98,6 +99,30 @@ namespace Fsel.Interaction.Api.Controllers.Admin
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get student survey summary chart
+        /// </summary>
+        [HttpGet("get-student-survey-summary-chart")]
+        [ProducesResponseType(typeof(MethodResult<StudentSurveySummaryChartModels>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> GetStudentSurveySummaryChart([FromQuery] GetStudentSurveySummaryChartQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get history do survey by user id
+        /// </summary>
+        [HttpGet("get-history-do-survey-by-user-id")]
+        [ProducesResponseType(typeof(MethodResult<SurveyConfigModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetHistoryDoSurveyByUserId([FromQuery] GetHistoryDoSurveyByUserIdQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

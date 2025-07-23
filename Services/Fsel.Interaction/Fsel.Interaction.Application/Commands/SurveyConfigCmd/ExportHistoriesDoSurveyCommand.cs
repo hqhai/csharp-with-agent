@@ -99,45 +99,44 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
 
             var dataBag = new ConcurrentBag<(int row, List<string> values)>();
 
-            var tasks = students.Select(async (item, index) =>
+            var tasks = userIds.Select(async (item, index) =>
             {
-                if (item.Human != null)
-                {
-                    var answers = customerSurveys
-                        .Where(p => p.CustomerSurvey.UserId == item.Human.UserId)
-                        .ToList();
+                var student = students.FirstOrDefault(x => x.Human != null && x.Human.UserId == item);
 
-                    List<string> rowValues = new List<string>()
+                var answers = customerSurveys
+                    .Where(p => p.CustomerSurvey.UserId == item)
+                    .ToList();
+
+                List<string> rowValues = new List<string>()
                     {
                         answers.LastOrDefault()?.CustomerSurvey.CreatedDate
                             .ConvertTimeFromUtc(EnumCountryKey.Vietnam)
                             .ToString("yyyy-MM-dd HH:mm", cultureInfo) ?? string.Empty,
 
-                        item.Human.FullName ?? string.Empty,
-                        item.Human.Email ?? string.Empty,
-                        item.Human.User?.PhoneNumber ?? string.Empty,
-                        item.Human.User?.UserName ?? string.Empty
+                        student != null ? (student.Human?.FullName ?? string.Empty) : "Not Found",
+                        student != null ? (student.Human?.Email ?? string.Empty) : string.Empty,
+                        student != null ? (student.Human?.User?.PhoneNumber ?? string.Empty) : string.Empty,
+                        student != null ? (student.Human?.User?.UserName ?? string.Empty) : string.Empty,
                     };
 
-                    foreach (var question in surveyConfig.SurveyQuestions)
+                foreach (var question in surveyConfig.SurveyQuestions)
+                {
+                    var answerStr = answers
+                        .FirstOrDefault(x => x.CustomerSurvey.SurveyQuestionId == question.Id)
+                        ?.CustomerSurvey.Answer ?? string.Empty;
+
+                    try
                     {
-                        var answerStr = answers
-                            .FirstOrDefault(x => x.CustomerSurvey.SurveyQuestionId == question.Id)
-                            ?.CustomerSurvey.Answer ?? string.Empty;
-
-                        try
-                        {
-                            var answer = ConvertHelper.Deserialize<List<AnswerSurveyModel>>(answerStr);
-                            rowValues.Add(JoinAnswersWithDot(answer));
-                        }
-                        catch
-                        {
-                            rowValues.Add(string.Empty);
-                        }
+                        var answer = ConvertHelper.Deserialize<List<AnswerSurveyModel>>(answerStr);
+                        rowValues.Add(JoinAnswersWithDot(answer));
                     }
-
-                    dataBag.Add((startRow + index + 1, rowValues));
+                    catch
+                    {
+                        rowValues.Add(string.Empty);
+                    }
                 }
+
+                dataBag.Add((startRow + index + 1, rowValues));
             }).ToArray();
 
             await Task.WhenAll(tasks);
@@ -160,7 +159,7 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
             return methodResult;
         }
 
-        public static string JoinAnswersWithDot(List<AnswerSurveyModel>? answers)
+        public static string JoinAnswersWithDot(IList<AnswerSurveyModel>? answers)
         {
             if (answers == null || answers.Count == 0)
                 return string.Empty;

@@ -131,7 +131,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var classStudent = await _trainingService.GetClassToStudentId(student?.Id ?? default);
                 var @class = classStudent?.Content?.Result;
                 var isPlacementTest = await _lmsCourseService.IsPlacementTestAsync(student?.Id ?? default);
-                var isSurvey = await _interactionService.IsSurveyCompleted(request.Id ?? default);
+                //var isSurvey = await _interactionService.IsSurveyCompleted(request.Id ?? default);
                 tokenLogin.IsPlacementTest = isPlacementTest?.Content?.Result;
                 if (@class != null)
                 {
@@ -140,10 +140,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     tokenLogin.ClassCode = @class.Code;
                     tokenLogin.IsOrder = order?.Content?.Result == EnumOrderStatus.Payment;
                 }
-                if (isSurvey.IsSuccessStatusCode)
-                {
-                    tokenLogin.IsSurvey = isSurvey?.Content?.Result;
-                }
+                //if (isSurvey.IsSuccessStatusCode)
+                //{
+                //    tokenLogin.IsSurvey = isSurvey?.Content?.Result;
+                //}
             }
             if (userRoles.Contains(EnumRole.AdminSchool.ToString()))
             {
