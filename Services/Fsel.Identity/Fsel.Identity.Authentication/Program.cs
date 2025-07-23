@@ -48,12 +48,12 @@ var defaultConnString = builder.Configuration.GetConnectionString(Settings.Defau
 var appSetting = builder.AddAppSettings<AppSetting>();
 
 builder.AddServices(appSetting);
-//builder.AddSwaggerGens(appSetting);
-//builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddConfigureIdentityOptions();
 builder.AddDbContexts<UserDbContext>();
+
+#region AddOpenIdServices
+
+builder.AddConfigureIdentityOptions();
 builder.Services.AddDataProtection().PersistKeysToDbContext<UserDbContext>();
-//.DisableAutomaticKeyGeneration();
 builder.Services.AddAntiforgery();
 
 builder.AddIdentity<User, Role, UserDbContext>().AddTotpProvider();
@@ -242,19 +242,10 @@ builder.Services.AddSingleton<ICorsPolicyService>((container) =>
     return new DefaultCorsPolicyService(logger)
     {
         AllowAll = true
-        //AllowedOrigins = { "https://localhost:4400", "https://localhost:7088" },
     };
 });
 
 builder.WebHost.UseKestrel();
-//builder.WebHost.UseFacebookAuthentication();
-//builder.WebHost.UseKestrel(options =>
-//{
-//    options.Listen(IPAddress.Loopback, 443, listenOptions =>
-//    {
-//        listenOptions.UseHttps("certificate.pfx", "password");
-//    });
-//});
 
 var fordwardedHeaderOptions = new ForwardedHeadersOptions
 {
@@ -264,6 +255,16 @@ var fordwardedHeaderOptions = new ForwardedHeadersOptions
 fordwardedHeaderOptions.KnownNetworks.Clear();
 fordwardedHeaderOptions.KnownProxies.Clear();
 builder.Services.Configure<ForwardedHeadersOptions>(x => x = fordwardedHeaderOptions);
+
+
+builder.Services.AddMvc();
+builder.Services.AddMvcCore();
+builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
+builder.Services.AddLocalApiAuthentication();
+builder.Services.AddHttpsRedirection(opt => opt.HttpsPort = 443);
+
+#endregion AddOpenIdServices
 
 //Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -321,13 +322,6 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 
 builder.AddMassTransit(appSetting);
 
-builder.Services.AddMvc();
-builder.Services.AddMvcCore();
-builder.Services.AddControllers();
-builder.Services.AddControllersWithViews();
-builder.Services.AddLocalApiAuthentication();
-builder.Services.AddHttpsRedirection(opt => opt.HttpsPort = 443);
-
 //App config
 var app = builder.Build();
 app.UseLanguages();
@@ -341,17 +335,9 @@ app.MapDefaultControllerRoute();
 app.UseHttpsRedirection();
 app.UseCookiePolicy(new CookiePolicyOptions
 {
-    // HttpOnly =  HttpOnlyPolicy.Always,
     MinimumSameSitePolicy = SameSiteMode.None,
     Secure = CookieSecurePolicy.Always
 });
-//app.Use(async (context, next) =>
-//{
-//    //context.SetIdentityServerOrigin("https://fsel-auth-testing.fsel.edu.vn");
-//    //context.Request.Scheme = "https";
-//    //context.Request.IsHttps = true;
-//    await next();
-//});
 
 app.UseCors();
 app.UseCors(Settings.CorsPolicy);
@@ -359,13 +345,10 @@ app.UseCors(Settings.CorsPolicy);
 app.UseForwardedHeaders(fordwardedHeaderOptions);
 app.UseDefaultServices();
 
-//app.UseServices();
-
 #region Initialized Database
 
 using (var serviceScope = app.Services.GetService<IServiceScopeFactory>()!.CreateScope())
 {
-    //serviceScope.ServiceProvider.GetRequiredService<UserDbContext>().Database.Migrate();
     serviceScope.ServiceProvider.GetRequiredService<IdentityServer4.EntityFramework.DbContexts.PersistedGrantDbContext>().Database.Migrate();
 
     var context = serviceScope.ServiceProvider.GetRequiredService<IdentityServer4.EntityFramework.DbContexts.ConfigurationDbContext>();

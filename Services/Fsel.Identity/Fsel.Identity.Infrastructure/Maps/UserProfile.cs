@@ -6,7 +6,7 @@ using Fsel.Core.Extensions;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.CommandModels.Parents;
-using Fsel.Identity.Domain.Models.CommandModels.Quickstarts;
+using Fsel.Identity.Domain.Models.CommandModels.OpenId;
 using Fsel.Identity.Domain.Models.CommandModels.Students;
 using Fsel.Identity.Domain.Models.CommandModels.Users;
 using Fsel.Identity.Domain.Models.EntityModels;
