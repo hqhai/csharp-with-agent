@@ -65,7 +65,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://localhost:4400",
                         "http://localhost:4400",
                         "https://lms-dev.fsel.edu.vn",
-                        "http://lms-dev.fsel.edu.vn"
+                        "http://lms-dev.fsel.edu.vn",
+                        "https://lms-dev-tenant-1.fsel.edu.vn",
+                        "http://lms-dev-tenant-1.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
@@ -76,7 +78,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://localhost:4400/auth/login",
                         "http://localhost:4400/auth/login",
                         "https://lms-dev.fsel.edu.vn/auth/login",
-                        "http://lms-dev.fsel.edu.vn/auth/login"
+                        "http://lms-dev.fsel.edu.vn/auth/login",
+                        "https://lms-dev-tenant-1.fsel.edu.vn/login",
+                        "http://lms-dev-tenant-1.fsel.edu.vn/login"
                     },
 
                     AllowOfflineAccess = true,
