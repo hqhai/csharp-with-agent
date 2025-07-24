@@ -10,6 +10,8 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Queues.Publishers;
+    using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
@@ -37,8 +39,10 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly IMapper _mapper;
         private readonly ICustomerSurveyRepository _customerSurveyRepository;
         private readonly ICacheService<CustomerSurveyGroup> _cacheService;
+        private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly IUserService _userService;
 
-        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ICustomerSurveyRepository customerSurveyRepository, ICacheService<CustomerSurveyGroup> cacheService)
+        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ICustomerSurveyRepository customerSurveyRepository, ICacheService<CustomerSurveyGroup> cacheService, QuestBoardPublisher questBoardPublisher, IUserService userService)
         {
             _surveyConfigRepository = surveyConfigRepository;
             _customerSurveyGroupRepository = customerSurveyGroupRepository;
@@ -48,6 +52,8 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             _mapper = mapper;
             _customerSurveyRepository = customerSurveyRepository;
             _cacheService = cacheService;
+            _questBoardPublisher = questBoardPublisher;
+            _userService = userService;
         }
 
         public async Task<MethodResult<bool>> Handle(StudentDoSurveyCommand request, CancellationToken cancellationToken)
@@ -185,7 +191,21 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                     }
                     await _cacheService.SetAsync(key, customerSurveyGroup, TimeSpan.FromSeconds(5));
 
-                    await CreateToken(customerSurveyGroup.Id, surveyConfig.Tokens);
+                    if (surveyConfig.Tokens > 0)
+                    {
+                        await CreateToken(customerSurveyGroup.Id, surveyConfig.Tokens);
+                    }
+                    if (surveyConfig.ApplicablePrograms != null && surveyConfig.ApplicablePrograms.Any(p => p == EnumSurveyFormType.QuestBoard))
+                    {
+                        var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+                        var student = studentResult.Content?.Result;
+                        if (student == null)
+                        {
+                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                            return methodResult;
+                        }
+                        await DoQuestBoard(student, cancellationToken);
+                    }
                 }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
@@ -194,6 +214,17 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             });
 
             return methodResult;
+        }
+
+        private async Task DoQuestBoard(StudentModel student, CancellationToken cancellationToken)
+        {
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel()
+            {
+                StudentID = student.Id,
+                Type = EnumQuestBoardType.BeginnerQuests,
+                Category = EnumQuestBoardCategory.CompletedSurvey,
+                Value = 1
+            }, cancellationToken);
         }
 
         private async Task CreateToken(Guid customerSurveyGroupId, int tokens)

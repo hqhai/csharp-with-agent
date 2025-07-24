@@ -71,38 +71,58 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                 IsView = p.IsView,
                 ProgressRequirement = p.ProgressRequirement,
                 CreatedDate = p.CreatedDate,
+                IsSurveyQuestBoard = p.IsSurveyQuestBoard,
             }).ToListAsync(cancellationToken);
 
             var deleteSurveyAssignment = new List<UserSurveyAssignmentModel>();
 
             userSurveyAssignments.ForEach(userSurveyAssignment =>
             {
-                var surveyConfigs = surveyConfigEntities.Where(p => p.ProgressRequirements != null && p.ProgressRequirements.Any(x => x.CourseType == userSurveyAssignment.CourseType && x.ProgressRequirement == userSurveyAssignment.ProgressRequirement)).ToList();
-
-                surveyConfigs = surveyConfigs.Where(p => p.ApplicableSubjects != null && p.ApplicableSubjects.Any(x => x.CourseLevel == userSurveyAssignment.CourseLevel && x.ApplicableSubjects != null && x.ApplicableSubjects.Any(n => n == GetStatus(studentStatus.Value)))).ToList();
-
-                var surveyConfig = @event != null ? surveyConfigs.Where(p =>
-                                                                        p.ApplicablePrograms?.Contains(EnumSurveyFormType.Event) == true &&
-                                                                        p.CompetitionEventIds?.Contains(@event.Id) == true)
-                                                                        .OrderByDescending(p => p.CreatedDate)
-                                                                        .FirstOrDefault()
-                                                    : null;
-
-                surveyConfig ??= surveyConfigs
-                    .Where(p => p.ApplicablePrograms?.Contains(EnumSurveyFormType.Default) == true)
-                    .OrderByDescending(p => p.CreatedDate)
-                    .FirstOrDefault();
-
-                if (surveyConfig != null)
+                if (!userSurveyAssignment.IsSurveyQuestBoard)
                 {
-                    userSurveyAssignment.SurveyConfigId = surveyConfig.Id;
-                    userSurveyAssignment.Name = surveyConfig.Name;
-                    userSurveyAssignment.StartDate = surveyConfig.StartDate;
-                    userSurveyAssignment.EndDate = surveyConfig.EndDate;
+                    var surveyConfigs = surveyConfigEntities.Where(p => p.ProgressRequirements != null && p.ProgressRequirements.Any(x => x.CourseType == userSurveyAssignment.CourseType && x.ProgressRequirement == userSurveyAssignment.ProgressRequirement)).ToList();
+
+                    surveyConfigs = surveyConfigs.Where(p => p.ApplicableSubjects != null && p.ApplicableSubjects.Any(x => x.CourseLevel == userSurveyAssignment.CourseLevel && x.ApplicableSubjects != null && x.ApplicableSubjects.Any(n => n == GetStatus(studentStatus.Value)))).ToList();
+
+                    var surveyConfig = @event != null ? surveyConfigs.Where(p =>
+                                                                            p.ApplicablePrograms?.Contains(EnumSurveyFormType.Event) == true &&
+                                                                            p.CompetitionEventIds?.Contains(@event.Id) == true)
+                                                                            .OrderByDescending(p => p.CreatedDate)
+                                                                            .FirstOrDefault()
+                                                        : null;
+
+                    surveyConfig ??= surveyConfigs
+                        .Where(p => p.ApplicablePrograms?.Contains(EnumSurveyFormType.Default) == true)
+                        .OrderByDescending(p => p.CreatedDate)
+                        .FirstOrDefault();
+
+                    if (surveyConfig != null)
+                    {
+                        userSurveyAssignment.SurveyConfigId = surveyConfig.Id;
+                        userSurveyAssignment.Name = surveyConfig.Name;
+                        userSurveyAssignment.StartDate = surveyConfig.StartDate;
+                        userSurveyAssignment.EndDate = surveyConfig.EndDate;
+                    }
+                    else
+                    {
+                        deleteSurveyAssignment.Add(userSurveyAssignment);
+                    }
                 }
                 else
                 {
-                    deleteSurveyAssignment.Add(userSurveyAssignment);
+                    var surveyConfig = surveyConfigEntities.FirstOrDefault(p => p.ApplicablePrograms != null && p.ApplicablePrograms.Any(x => x == EnumSurveyFormType.QuestBoard));
+
+                    if (surveyConfig != null)
+                    {
+                        userSurveyAssignment.SurveyConfigId = surveyConfig.Id;
+                        userSurveyAssignment.Name = surveyConfig.Name;
+                        userSurveyAssignment.StartDate = surveyConfig.StartDate;
+                        userSurveyAssignment.EndDate = surveyConfig.EndDate;
+                    }
+                    else
+                    {
+                        deleteSurveyAssignment.Add(userSurveyAssignment);
+                    }
                 }
             });
 
@@ -112,7 +132,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
             return methodResult;
         }
 
-        private EnumSurveyConfigApplicableSubject? GetStatus(EnumTrialRegistrationStatus status)
+        private static EnumSurveyConfigApplicableSubject? GetStatus(EnumTrialRegistrationStatus status)
         {
             return status switch
             {

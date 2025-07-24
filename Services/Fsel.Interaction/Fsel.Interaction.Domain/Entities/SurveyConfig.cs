@@ -66,5 +66,6 @@ namespace Fsel.Interaction.Domain.Entities
         public EnumSurveyConfigStatus Status { get; set; }
 
         public ICollection<SurveyQuestion> SurveyQuestions { get; set; } = new List<SurveyQuestion>();
+        public ICollection<UserSurveyAssignment> UserSurveyAssignments { get; set; } = new List<UserSurveyAssignment>();
     }
 }

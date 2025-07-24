@@ -14,21 +14,29 @@ namespace Fsel.Interaction.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<UserSurveyAssignment> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
             builder.Property(e => e.CourseType)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumCourseType>());
+             .HasMaxLength(100)
+             .HasConversion(
+                 v => v == null ? null : v.ToString(),
+                 v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumCourseType>());
+
             builder.Property(e => e.CourseLevel)
-               .HasMaxLength(100)
-               .HasConversion(
-                   v => v.ToString(),
-                   v => v.EnumParse<EnumCourseLevel>());
+             .HasMaxLength(100)
+             .HasConversion(
+                 v => v == null ? null : v.ToString(),
+                 v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumCourseLevel>());
+
             builder.Property(e => e.ProgressRequirement)
-               .HasMaxLength(100)
-               .HasConversion(
-                   v => v.ToString(),
-                   v => v.EnumParse<EnumProgressRequirement>());
+             .HasMaxLength(100)
+             .HasConversion(
+                 v => v == null ? null : v.ToString(),
+                 v => string.IsNullOrEmpty(v) ? null : v.EnumParse<EnumProgressRequirement>());
+
+            builder.HasOne(a => a.SurveyConfig)
+                  .WithMany(b => b.UserSurveyAssignments)
+                  .HasForeignKey(p => p.SurveyConfigId)
+                  .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

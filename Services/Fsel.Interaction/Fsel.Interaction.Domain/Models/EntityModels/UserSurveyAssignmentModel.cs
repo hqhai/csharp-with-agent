@@ -7,10 +7,11 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
 
     public class UserSurveyAssignmentModel : BaseModel
     {
-        public EnumCourseLevel CourseLevel { get; set; }
-        public EnumCourseType CourseType { get; set; }
-        public EnumProgressRequirement ProgressRequirement { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public EnumCourseType? CourseType { get; set; }
+        public EnumProgressRequirement? ProgressRequirement { get; set; }
         public bool IsView { get; set; }
+        public bool IsSurveyQuestBoard { get; set; }
         public Guid SurveyConfigId { get; set; }
         public string? Name { get; set; }
         public DateTime StartDate { get; set; }

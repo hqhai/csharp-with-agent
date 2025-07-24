@@ -36,21 +36,49 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            if (await _userSurveyAssignmentRepository.Queryable.AnyAsync(p => p.CreatedUserId == _authContext.CurrentUserId && p.CourseLevel == request.CourseLevel && p.CourseType == request.CourseType && p.ProgressRequirement == request.ProgressRequirement, cancellationToken))
+            UserSurveyAssignment? userSurveyAssignment = null;
+
+            if (!request.IsSurveyQuestBoard)
+            {
+                if (await _userSurveyAssignmentRepository.Queryable.AnyAsync(p => p.CreatedUserId == _authContext.CurrentUserId && p.CourseLevel == request.CourseLevel && p.CourseType == request.CourseType && p.ProgressRequirement == request.ProgressRequirement, cancellationToken))
+                {
+                    return methodResult;
+                }
+
+                userSurveyAssignment = _mapper.Map<UserSurveyAssignment>(request);
+                userSurveyAssignment.IsSurveyQuestBoard = false;
+            }
+            else
+            {
+                if (await _userSurveyAssignmentRepository.Queryable.AnyAsync(p => p.CreatedUserId == _authContext.CurrentUserId && p.IsSurveyQuestBoard == request.IsSurveyQuestBoard, cancellationToken))
+                {
+                    return methodResult;
+                }
+
+                userSurveyAssignment = new UserSurveyAssignment() { IsSurveyQuestBoard = true };
+            }
+
+            if (!userSurveyAssignment.IsValid())
             {
                 return methodResult;
             }
 
-            var userSurveyAssignment = _mapper.Map<UserSurveyAssignment>(request);
-
-            await _userSurveyAssignmentRepository.ExecuteTransactionAsync(async () =>
+            if (userSurveyAssignment != null)
             {
-                userSurveyAssignment = _userSurveyAssignmentRepository.Add(userSurveyAssignment);
-                await _userSurveyAssignmentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = true;
-                return methodResult;
-            });
+                var dailyQuizWinners = new List<UserSurveyAssignment>() { userSurveyAssignment };
+
+                await _userSurveyAssignmentRepository.ExecuteTransactionAsync(async () =>
+                {
+                    await _userSurveyAssignmentRepository.BulkMergeAsync(dailyQuizWinners, x =>
+                    {
+                        x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.CourseLevel, c.CourseType, c.ProgressRequirement, c.IsSurveyQuestBoard };
+                    });
+                    await _userSurveyAssignmentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    methodResult.StatusCode = StatusCodes.Status201Created;
+                    methodResult.Result = true;
+                    return methodResult;
+                });
+            }
 
             return methodResult;
         }
