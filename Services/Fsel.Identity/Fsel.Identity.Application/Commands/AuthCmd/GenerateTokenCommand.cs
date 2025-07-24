@@ -84,7 +84,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
 
             var tenant = await _tenantProvider.GetTenantAsync(request.UserName);
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.UserName) ?? _userManager;
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(request.UserName) ?? _userManager;
             _userTokenRepository = await _tenantProvider.CreateRepositoryAsync<IUserTokenRepository, UserDbContext>(request.UserName) ?? _userTokenRepository;
             _interactionService = await _tenantProvider.CreateServiceAsync<IInteractionService>(_appSetting.Services?.InteractionApiUrl, request.UserName) ?? _interactionService;
             _trainingService = await _tenantProvider.CreateServiceAsync<ITrainingService>(_appSetting.Services?.TrainingApiUrl, request.UserName) ?? _trainingService;

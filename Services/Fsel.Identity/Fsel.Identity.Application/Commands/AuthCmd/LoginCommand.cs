@@ -65,8 +65,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.Username) ?? _userManager;
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.Username) ?? _signInManager;
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(request.Username) ?? _userManager;
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(request.Username) ?? _signInManager;
             _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(request.Username) ?? _platformRepository;
             _studentCompetitionEventsRepository = await _tenantProvider.CreateRepositoryAsync<IStudentCompetitionEventsRepository, UserDbContext>(request.Username) ?? _studentCompetitionEventsRepository;
             _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>(request.Username) ?? _studentRepository;
