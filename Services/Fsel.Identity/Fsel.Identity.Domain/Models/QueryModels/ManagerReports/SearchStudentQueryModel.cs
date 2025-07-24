@@ -17,6 +17,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
         public string? ListStudentId { get; set; }
         public string? ListCourseType { get; set; }
         public string? ListCourseLevel { get; set; }
+        public string? ListLearningStatus { get; set; }
 
         public IList<EnumCourseLevel>? CourseLevels
         {
@@ -83,14 +84,18 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
-        public string? SchoolGrade { get; set; }
-        public string? SchoolClass { get; set; }
+        [JsonIgnore]
+        public IList<EnumLearningStatus>? LearningStatuses
+        {
+            get
+            {
+                return ListLearningStatus.ToList<EnumLearningStatus>();
+            }
+        }
 
         public bool? IsLearning { get; set; }
         public EnumCourseType? CourseType { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
-        public EnumLearningStatus? LearningStatus { get; set; }
-        public EnumCompletionStatus? Status { get; set; }
         public bool IsCheckDate { get; set; }
     }
 }

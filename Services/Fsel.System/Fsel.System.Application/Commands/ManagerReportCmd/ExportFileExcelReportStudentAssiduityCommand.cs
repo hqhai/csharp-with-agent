@@ -5,6 +5,7 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.System.Application.Queries.ManagerReportQuery;
     using Fsel.System.Application.Services.UserServices;
@@ -41,14 +42,15 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                IsSearchReport = request.IsSearchReport,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
 
-                SchoolClass = request.SchoolClass,
-                SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
                 StartDate = request.StartDate,
                 CourseType = request.CourseType,
-                LearningStatus = request.LearningStatus,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportStudentAssiduityQuery
             {
@@ -58,13 +60,14 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                IsSearchReport = request.IsSearchReport,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 Keyword = request.Keyword,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
             }, cancellationToken);
             var userResult = await _userService.GetUserProfileAsync();
@@ -73,21 +76,27 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
             return methodResult;
         }
 
+        private static object Format(object template, dynamic? values) => Shared.Helpers.StringHelper.FormatStringWithParam(template, values);
+
         public static Stream ExportExcelTemplate(ExportFileExcelReportStudentAssiduityCommand request, IList<StudentAssiduityModel>? studentAssiduityReports, OverallReportStudentAssiduityModel? overallReport, string? schoolName)
         {
             ArgumentNullException.ThrowIfNull(request);
             MemoryStream memoryStream = new MemoryStream();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ManagerReportStudentAssiduityExcel)))
+
+            using (var templateStream = new FileStream(ResourceSettings.ManagerReportStudentAssiduityExcel, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (ExcelPackage excelPackage = new ExcelPackage(templateStream))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                excelWorksheet.Cells["N2"].Value = GetData(excelWorksheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
-                excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["G2"].Value, request.CourseType.HasValue ? request.CourseType.Value : string.Empty);
-                excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.LearningStatus.HasValue ? request.LearningStatus.Value.GetDescription() : null);
-                excelWorksheet.Cells["J2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.ListSchoolGrade ?? request.SchoolGrade);
-                excelWorksheet.Cells["K2"].Value = GetData(excelWorksheet.Cells["J2"].Value, request.ListSchoolClass ?? request.SchoolClass);
-                excelWorksheet.Cells["L2"].Value = GetData(excelWorksheet.Cells["K2"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
-                excelWorksheet.Cells["M2"].Value = GetData(excelWorksheet.Cells["L2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                string learningStatuseStr = string.Join(",", (request.LearningStatuses ?? new List<EnumLearningStatus>()).Select(x => x.GetDescription()));
+
+                excelWorksheet.Cells["N2"].Value = Format(excelWorksheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
+                excelWorksheet.Cells["H2"].Value = Format(excelWorksheet.Cells["G2"].Value, request.CourseType.HasValue ? request.CourseType.Value : string.Empty);
+                excelWorksheet.Cells["I2"].Value = Format(excelWorksheet.Cells["H2"].Value, learningStatuseStr);
+                excelWorksheet.Cells["J2"].Value = Format(excelWorksheet.Cells["I2"].Value, request.ListSchoolGrade);
+                excelWorksheet.Cells["K2"].Value = Format(excelWorksheet.Cells["J2"].Value, request.ListSchoolClass);
+                excelWorksheet.Cells["L2"].Value = Format(excelWorksheet.Cells["K2"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+                excelWorksheet.Cells["M2"].Value = Format(excelWorksheet.Cells["L2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
 
                 excelWorksheet.Cells["F2"].Value = schoolName;
                 excelWorksheet.Cells["F3"].Value = overallReport?.TotalStudent ?? default;
@@ -122,12 +131,6 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
 
             memoryStream.Position = 0L;
             return memoryStream;
-        }
-
-        private static string GetData(object data, object? param)
-        {
-            string objStr = data?.ToString() ?? string.Empty;
-            return string.Format(objStr, param);
         }
     }
 }

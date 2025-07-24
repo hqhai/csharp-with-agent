@@ -44,15 +44,14 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
+                ListOverallScore = request.ListOverallScore,
+                IsLearning = request.IsLearning,
+                CourseType = request.CourseType,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
-                CourseType = request.CourseType,
-                CourseLevel = request.CourseLevel,
-                OverallScore = request.OverallScore,
-                LearningStatus = request.LearningStatus,
                 SortBy = request.SortBy,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportLearningResultQuery
@@ -63,15 +62,15 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                ListOverallScore = request.ListOverallScore,
+                IsLearning = request.IsLearning,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListCurrentLevel = request.ListCurrentLevel,
+                CourseType = request.CourseType,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
-                CourseType = request.CourseType,
-                CourseLevel = request.CourseLevel,
-                OverallScore = request.OverallScore,
-                LearningStatus = request.LearningStatus,
             }, cancellationToken);
             var userResult = await _userService.GetUserProfileAsync();
             string schoolName = userResult.Content?.Result?.SchoolName ?? string.Empty;
@@ -79,61 +78,45 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             return methodResult;
         }
 
+        private static string GetTemplateFilePath(EnumCourseType courseType)
+        {
+            return courseType switch
+            {
+                EnumCourseType.Academic => ResourceSettings.ManagerReportLearningResultAcaExcel,
+                EnumCourseType.Ielts => ResourceSettings.ManagerReportLearningResultIELTSExcel,
+                _ => ResourceSettings.ManagerReportLearningResultEFExcel
+            };
+        }
+
         public static Stream ExportExcelTemplate(ExportFileExcelReportLearningResultCommand request, IList<LearningResultReportModel>? learningResultReports, OverallReportLearningResultModel? overallReport, string? schoolName)
         {
             ArgumentNullException.ThrowIfNull(request);
             MemoryStream memoryStream = new MemoryStream();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            string filePath = request.CourseType == EnumCourseType.Academic ? ResourceSettings.ManagerReportLearningResultAcaExcel :
-                request.CourseType == EnumCourseType.Ielts ? ResourceSettings.ManagerReportLearningResultIELTSExcel : ResourceSettings.ManagerReportLearningResultEFExcel;
+            string filePath = GetTemplateFilePath(request.CourseType ?? default);
 
-            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(filePath)))
+            using (var templateStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (ExcelPackage excelPackage = new ExcelPackage(templateStream))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                if (request.CourseType == EnumCourseType.Ielts)
-                {
-                    excelWorksheet.Cells["F2"].Value = schoolName;
-                    excelWorksheet.Cells["F3"].Value = overallReport?.TotalStudent;
-                    excelWorksheet.Cells["F7"].Value = ConvertPercent(overallReport?.OverallAvgPercent);
+                string learningStatuseStr = string.Join(",", (request.LearningStatuses ?? new List<EnumLearningStatus>()).Select(x => x.GetDescription()));
+                string overallScoreStr = string.Join(",", (request.OverallScores ?? new List<EnumOverallScore>()).Select(x => x.GetDescription()));
 
-                    excelWorksheet.Cells["G2"].Value = GetData(excelWorksheet.Cells["G2"].Value, request.LearningStatus?.GetDescription());
-                    excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.ListSchoolGrade ?? request.SchoolGrade);
-                    excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.ListSchoolClass ?? request.SchoolClass);
-                    excelWorksheet.Cells["J2"].Value = GetData(excelWorksheet.Cells["J2"].Value, request.CourseLevel?.GetDescription() ?? request.ListCourseLevel);
-                    excelWorksheet.Cells["K2"].Value = GetData(excelWorksheet.Cells["K2"].Value, request.OverallScore?.GetDescription());
-                    excelWorksheet.Cells["L2"].Value = GetData(excelWorksheet.Cells["L2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
-                    excelWorksheet.Cells["M2"].Value = GetData(excelWorksheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy  hh:mm tt", CultureInfo.InvariantCulture));
-                }
-                else if (request.CourseType == EnumCourseType.Academic)
+                switch (request.CourseType)
                 {
-                    excelWorksheet.Cells["G2"].Value = schoolName;
-                    excelWorksheet.Cells["G3"].Value = overallReport?.TotalStudent;
-                    excelWorksheet.Cells["G5"].Value = ConvertPercent(overallReport?.OverallAvgPercent);
-                    excelWorksheet.Cells["G8"].Value = ConvertPercent(overallReport?.OverallAvgPercentFinal);
+                    case EnumCourseType.Ielts:
+                        FillIeltsHeader(excelWorksheet, request, overallReport, schoolName, learningStatuseStr, overallScoreStr);
+                        break;
 
-                    excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.LearningStatus?.GetDescription());
-                    excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.ListSchoolGrade ?? request.SchoolGrade);
-                    excelWorksheet.Cells["J2"].Value = GetData(excelWorksheet.Cells["J2"].Value, request.ListSchoolClass ?? request.SchoolClass);
-                    excelWorksheet.Cells["K2"].Value = GetData(excelWorksheet.Cells["K2"].Value, request.CourseLevel);
-                    excelWorksheet.Cells["L2"].Value = GetData(excelWorksheet.Cells["L2"].Value, request.OverallScore?.GetDescription());
-                    excelWorksheet.Cells["M2"].Value = GetData(excelWorksheet.Cells["M2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
-                    excelWorksheet.Cells["N2"].Value = GetData(excelWorksheet.Cells["N2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
-                }
-                else
-                {
-                    excelWorksheet.Cells["F2"].Value = schoolName;
-                    excelWorksheet.Cells["F3"].Value = overallReport?.TotalStudent;
-                    excelWorksheet.Cells["F5"].Value = ConvertPercent(overallReport?.OverallAvgPercent);
-                    excelWorksheet.Cells["F8"].Value = ConvertPercent(overallReport?.OverallAvgPercentFinal);
+                    case EnumCourseType.Academic:
+                        FillAcademicHeader(excelWorksheet, request, overallReport, schoolName, learningStatuseStr, overallScoreStr);
+                        break;
 
-                    excelWorksheet.Cells["G2"].Value = GetData(excelWorksheet.Cells["G2"].Value, request.LearningStatus?.GetDescription());
-                    excelWorksheet.Cells["H2"].Value = GetData(excelWorksheet.Cells["H2"].Value, request.ListSchoolGrade ?? request.SchoolGrade);
-                    excelWorksheet.Cells["I2"].Value = GetData(excelWorksheet.Cells["I2"].Value, request.ListSchoolClass ?? request.SchoolClass);
-                    excelWorksheet.Cells["J2"].Value = GetData(excelWorksheet.Cells["J2"].Value, request.CourseLevel);
-                    excelWorksheet.Cells["K2"].Value = GetData(excelWorksheet.Cells["K2"].Value, request.OverallScore?.GetDescription());
-                    excelWorksheet.Cells["L2"].Value = GetData(excelWorksheet.Cells["L2"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
-                    excelWorksheet.Cells["M2"].Value = GetData(excelWorksheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
+                    default:
+                        FillEfaHeader(excelWorksheet, request, overallReport, schoolName, learningStatuseStr, overallScoreStr);
+                        break;
                 }
+
                 FillUnitData(excelWorksheet, request.CourseType.GetValueOrDefault(), overallReport);
                 FillCourseLevelData(excelWorksheet, request.CourseType.GetValueOrDefault(), overallReport);
                 if (learningResultReports != null && learningResultReports.Any())
@@ -146,6 +129,57 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             memoryStream.Position = 0L;
             return memoryStream;
         }
+
+        private static void FillIeltsHeader(ExcelWorksheet sheet, ExportFileExcelReportLearningResultCommand request, OverallReportLearningResultModel? report, string? schoolName, string statusStr, string scoreStr)
+        {
+            sheet.Cells["F2"].Value = schoolName;
+            sheet.Cells["F3"].Value = report?.TotalStudent;
+            sheet.Cells["F7"].Value = ConvertPercent(report?.OverallAvgPercent);
+
+            sheet.Cells["G2"].Value = Format(sheet.Cells["G2"].Value, statusStr);
+            sheet.Cells["H2"].Value = Format(sheet.Cells["H2"].Value, request.ListSchoolGrade ?? string.Empty);
+            sheet.Cells["I2"].Value = Format(sheet.Cells["I2"].Value, request.ListSchoolClass ?? string.Empty);
+            sheet.Cells["J2"].Value = Format(sheet.Cells["J2"].Value, request.ListCourseLevel ?? string.Empty);
+            sheet.Cells["K2"].Value = Format(sheet.Cells["K2"].Value, scoreStr);
+            sheet.Cells["L2"].Value = Format(sheet.Cells["L2"].Value, request.EndDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? string.Empty);
+            sheet.Cells["M2"].Value = Format(sheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy  hh:mm tt", CultureInfo.InvariantCulture));
+        }
+
+        private static void FillAcademicHeader(ExcelWorksheet sheet, ExportFileExcelReportLearningResultCommand request, OverallReportLearningResultModel? report, string? schoolName, string statusStr, string scoreStr)
+        {
+            sheet.Cells["G2"].Value = schoolName;
+            sheet.Cells["G3"].Value = report?.TotalStudent;
+            sheet.Cells["G5"].Value = ConvertPercent(report?.OverallAvgPercent);
+            sheet.Cells["G8"].Value = ConvertPercent(report?.OverallAvgPercentFinal);
+
+            sheet.Cells["H2"].Value = Format(sheet.Cells["H2"].Value, statusStr);
+            sheet.Cells["I2"].Value = Format(sheet.Cells["I2"].Value, request.ListSchoolGrade ?? string.Empty);
+            sheet.Cells["J2"].Value = Format(sheet.Cells["J2"].Value, request.ListSchoolClass ?? string.Empty);
+            sheet.Cells["K2"].Value = Format(sheet.Cells["K2"].Value, request.ListCourseLevel ?? string.Empty);
+            sheet.Cells["L2"].Value = Format(sheet.Cells["L2"].Value, scoreStr);
+            sheet.Cells["M2"].Value = Format(sheet.Cells["M2"].Value, request.EndDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? string.Empty);
+            sheet.Cells["N2"].Value = Format(sheet.Cells["N2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
+        }
+
+        private static void FillEfaHeader(ExcelWorksheet sheet, ExportFileExcelReportLearningResultCommand request, OverallReportLearningResultModel? report, string? schoolName, string statusStr, string scoreStr)
+        {
+            sheet.Cells["F2"].Value = schoolName;
+            sheet.Cells["F3"].Value = report?.TotalStudent;
+            sheet.Cells["F5"].Value = ConvertPercent(report?.OverallAvgPercent);
+            sheet.Cells["F8"].Value = ConvertPercent(report?.OverallAvgPercentFinal);
+
+            sheet.Cells["G2"].Value = Format(sheet.Cells["G2"].Value, statusStr);
+            sheet.Cells["H2"].Value = Format(sheet.Cells["H2"].Value, request.ListSchoolGrade ?? string.Empty);
+            sheet.Cells["I2"].Value = Format(sheet.Cells["I2"].Value, request.ListSchoolClass ?? string.Empty);
+            sheet.Cells["J2"].Value = Format(sheet.Cells["J2"].Value, request.ListCourseLevel ?? string.Empty);
+            sheet.Cells["K2"].Value = Format(sheet.Cells["K2"].Value, scoreStr);
+            sheet.Cells["L2"].Value = Format(sheet.Cells["L2"].Value, request.EndDate?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) ?? string.Empty);
+            sheet.Cells["M2"].Value = Format(sheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
+        }
+
+        private static object Format(object template, string? values) => Shared.Helpers.StringHelper.FormatStringWithParam(template, values);
+
+        private static object Format(object template, params object[]? values) => Shared.Helpers.StringHelper.FormatStringWithParam(template, values);
 
         private static string ConvertPercent(double? percent, string pattern = "0 %")
         {
@@ -164,7 +198,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 var startRow = 7;
                 foreach (var item in courseLevelProgress)
                 {
-                    excelWorksheet.Cells[6, startRow].Value = GetData(excelWorksheet.Cells[6, startRow].Value, ConvertPercent(item.Percent));
+                    excelWorksheet.Cells[6, startRow].Value = Format(excelWorksheet.Cells[6, startRow].Value, ConvertPercent(item.Percent));
                     excelWorksheet.Cells[7, startRow].Value = item.TotalStudent + " hs";
                     startRow++;
                 }
@@ -174,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 var startRow = 6;
                 foreach (var item in courseLevelProgress)
                 {
-                    excelWorksheet.Cells[8, startRow].Value = GetData(excelWorksheet.Cells[8, startRow].Value, ConvertPercent(item.Percent));
+                    excelWorksheet.Cells[8, startRow].Value = Format(excelWorksheet.Cells[8, startRow].Value, ConvertPercent(item.Percent));
                     excelWorksheet.Cells[9, startRow].Value = item.TotalStudent + " hs";
                     startRow++;
                 }
@@ -184,7 +218,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 var startRow = 6;
                 foreach (var item in courseLevelProgress)
                 {
-                    excelWorksheet.Cells[6, startRow].Value = GetData(excelWorksheet.Cells[6, startRow].Value, ConvertPercent(item.Percent));
+                    excelWorksheet.Cells[6, startRow].Value = Format(excelWorksheet.Cells[6, startRow].Value, ConvertPercent(item.Percent));
                     excelWorksheet.Cells[7, startRow].Value = item.TotalStudent + " hs";
                     startRow++;
                 }
@@ -196,41 +230,41 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             var courseLevelProgress = overallReport?.CourseLevelProgresses;
             if (courseType == EnumCourseType.Academic)
             {
-                excelWorksheet.Cells["G4"].Value = GetData(excelWorksheet.Cells["G4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.A1));
-                excelWorksheet.Cells["H4"].Value = GetData(excelWorksheet.Cells["H4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.A2));
-                excelWorksheet.Cells["I4"].Value = GetData(excelWorksheet.Cells["I4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B1));
-                excelWorksheet.Cells["J4"].Value = GetData(excelWorksheet.Cells["J4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B1Plus));
-                excelWorksheet.Cells["K4"].Value = GetData(excelWorksheet.Cells["K4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B2));
-                excelWorksheet.Cells["L4"].Value = GetData(excelWorksheet.Cells["L4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.C1));
+                excelWorksheet.Cells["G4"].Value = Format(excelWorksheet.Cells["G4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.A1));
+                excelWorksheet.Cells["H4"].Value = Format(excelWorksheet.Cells["H4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.A2));
+                excelWorksheet.Cells["I4"].Value = Format(excelWorksheet.Cells["I4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B1));
+                excelWorksheet.Cells["J4"].Value = Format(excelWorksheet.Cells["J4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B1Plus));
+                excelWorksheet.Cells["K4"].Value = Format(excelWorksheet.Cells["K4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B2));
+                excelWorksheet.Cells["L4"].Value = Format(excelWorksheet.Cells["L4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.C1));
             }
             else if (courseType == EnumCourseType.Ielts)
             {
                 var ms1Progress = courseLevelProgress?.FirstOrDefault(x => x.CourseLevel == EnumCourseLevel.MS1);
-                excelWorksheet.Cells["F4"].Value = GetData(excelWorksheet.Cells["F4"].Value, $"{ms1Progress?.TotalStudent ?? default} hs");
                 var ms1ProgressFirst = ms1Progress?.OverallTestResults?.FirstOrDefault();
                 var ms1ProgressLast = ms1Progress?.OverallTestResults?.LastOrDefault();
-                excelWorksheet.Cells["F5"].Value = GetData(excelWorksheet.Cells["F5"].Value, new string[] { $"{ms1ProgressFirst?.Score ?? default}", $"{ms1ProgressFirst?.TotalStudent ?? default} hs" });
-                excelWorksheet.Cells["F6"].Value = GetData(excelWorksheet.Cells["F6"].Value, new string[] { $"{ms1ProgressLast?.Score ?? default}", $"{ms1ProgressLast?.TotalStudent ?? default} hs" });
+                excelWorksheet.Cells["F4"].Value = Format(excelWorksheet.Cells["F4"].Value, $"{ms1Progress?.TotalStudent ?? default} hs");
+                excelWorksheet.Cells["F5"].Value = Format(excelWorksheet.Cells["F5"].Value, new string[] { $"{ms1ProgressFirst?.Score ?? default}", $"{ms1ProgressFirst?.TotalStudent ?? default} hs" });
+                excelWorksheet.Cells["F6"].Value = Format(excelWorksheet.Cells["F6"].Value, new string[] { $"{ms1ProgressLast?.Score ?? default}", $"{ms1ProgressLast?.TotalStudent ?? default} hs" });
 
                 var ms2Progress = courseLevelProgress?.FirstOrDefault(x => x.CourseLevel == EnumCourseLevel.MS2);
-                excelWorksheet.Cells["G4"].Value = GetData(excelWorksheet.Cells["G4"].Value, ms2Progress?.TotalStudent ?? default);
                 var ms2ProgressFirst = ms2Progress?.OverallTestResults?.FirstOrDefault();
                 var ms2ProgressLast = ms2Progress?.OverallTestResults?.LastOrDefault();
-                excelWorksheet.Cells["G5"].Value = GetData(excelWorksheet.Cells["G5"].Value, new string[] { $"{ms2ProgressFirst?.Score ?? default}", $"{ms2ProgressFirst?.TotalStudent ?? default} hs" });
-                excelWorksheet.Cells["G6"].Value = GetData(excelWorksheet.Cells["G6"].Value, new string[] { $"{ms2ProgressLast?.Score ?? default}", $"{ms2ProgressLast?.TotalStudent ?? default} hs" });
+                excelWorksheet.Cells["G4"].Value = Format(excelWorksheet.Cells["G4"].Value, ms2Progress?.TotalStudent ?? default);
+                excelWorksheet.Cells["G5"].Value = Format(excelWorksheet.Cells["G5"].Value, new string[] { $"{ms2ProgressFirst?.Score ?? default}", $"{ms2ProgressFirst?.TotalStudent ?? default} hs" });
+                excelWorksheet.Cells["G6"].Value = Format(excelWorksheet.Cells["G6"].Value, new string[] { $"{ms2ProgressLast?.Score ?? default}", $"{ms2ProgressLast?.TotalStudent ?? default} hs" });
 
                 var ms3Progress = courseLevelProgress?.FirstOrDefault(x => x.CourseLevel == EnumCourseLevel.MS3);
-                excelWorksheet.Cells["H4"].Value = GetData(excelWorksheet.Cells["H4"].Value, ms3Progress?.TotalStudent ?? default);
                 var ms3ProgressFirst = ms3Progress?.OverallTestResults?.FirstOrDefault();
                 var ms3ProgressLast = ms3Progress?.OverallTestResults?.LastOrDefault();
-                excelWorksheet.Cells["H5"].Value = GetData(excelWorksheet.Cells["H5"].Value, new string[] { $"{ms3ProgressFirst?.Score ?? default}", $"{ms3ProgressFirst?.TotalStudent ?? default} hs" });
-                excelWorksheet.Cells["H6"].Value = GetData(excelWorksheet.Cells["H6"].Value, new string[] { $"{ms3ProgressLast?.Score ?? default}", $"{ms3ProgressLast?.TotalStudent ?? default} hs" });
+                excelWorksheet.Cells["H4"].Value = Format(excelWorksheet.Cells["H4"].Value, ms3Progress?.TotalStudent ?? default);
+                excelWorksheet.Cells["H5"].Value = Format(excelWorksheet.Cells["H5"].Value, new string[] { $"{ms3ProgressFirst?.Score ?? default}", $"{ms3ProgressFirst?.TotalStudent ?? default} hs" });
+                excelWorksheet.Cells["H6"].Value = Format(excelWorksheet.Cells["H6"].Value, new string[] { $"{ms3ProgressLast?.Score ?? default}", $"{ms3ProgressLast?.TotalStudent ?? default} hs" });
             }
             else
             {
-                excelWorksheet.Cells["F4"].Value = GetData(excelWorksheet.Cells["F4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.EFA1));
-                excelWorksheet.Cells["G4"].Value = GetData(excelWorksheet.Cells["G4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.EFA2));
-                excelWorksheet.Cells["H4"].Value = GetData(excelWorksheet.Cells["H4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.EFB1));
+                excelWorksheet.Cells["F4"].Value = Format(excelWorksheet.Cells["F4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.EFA1));
+                excelWorksheet.Cells["G4"].Value = Format(excelWorksheet.Cells["G4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.EFA2));
+                excelWorksheet.Cells["H4"].Value = Format(excelWorksheet.Cells["H4"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.EFB1));
             }
         }
 
@@ -240,6 +274,9 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
 
             foreach (var item in learningProgressReports)
             {
+                var processDateStr = item.ProcessDate.HasValue ? item.ProcessDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture) : string.Empty;
+                var expiredDateStr = item.ExpiredDate.HasValue ? item.ExpiredDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture) : string.Empty;
+
                 worksheet.Cells[startRow, 1].Value = item.FullName;
                 worksheet.Cells[startRow, 2].Value = item.UserName;
                 worksheet.Cells[startRow, 3].Value = item.PhoneNumber;
@@ -257,9 +294,9 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                         index++;
                     }
 
-                    worksheet.Cells[startRow, 22].Value = item.ProcessDate.HasValue ? item.ProcessDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture) : string.Empty;
+                    worksheet.Cells[startRow, 22].Value = processDateStr;
                     worksheet.Cells[startRow, 23].Value = item.StatusStr;
-                    worksheet.Cells[startRow, 24].Value = item.ExpiredDate.HasValue ? item.ExpiredDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture) : string.Empty;
+                    worksheet.Cells[startRow, 24].Value = expiredDateStr;
                 }
                 else if (courseType == EnumCourseType.Ielts)
                 {
@@ -278,9 +315,9 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                         }
                     }
 
-                    worksheet.Cells[startRow, 34].Value = item.ProcessDate.HasValue ? item.ProcessDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture) : string.Empty;
+                    worksheet.Cells[startRow, 34].Value = processDateStr;
                     worksheet.Cells[startRow, 35].Value = item.StatusStr;
-                    worksheet.Cells[startRow, 36].Value = item.ExpiredDate.HasValue ? item.ExpiredDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture) : string.Empty;
+                    worksheet.Cells[startRow, 36].Value = expiredDateStr;
                 }
                 else
                 {
@@ -290,24 +327,12 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                         index++;
                     }
                     worksheet.Cells[startRow, 21].Value = ConvertPercent(item.OverallModuleReports.FirstOrDefault(x => x.Type == nameof(FinalTest))?.Percent, "-");
-                    worksheet.Cells[startRow, 22].Value = item.ProcessDate.HasValue ? item.ProcessDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture) : string.Empty;
+                    worksheet.Cells[startRow, 22].Value = processDateStr;
                     worksheet.Cells[startRow, 23].Value = item.StatusStr;
-                    worksheet.Cells[startRow, 24].Value = item.ExpiredDate.HasValue ? item.ExpiredDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture) : string.Empty;
+                    worksheet.Cells[startRow, 24].Value = expiredDateStr;
                 }
                 startRow++;
             }
-        }
-
-        private static string GetData(object data, object? param)
-        {
-            string objStr = data?.ToString() ?? string.Empty;
-            return string.Format(objStr, param);
-        }
-
-        private static string GetData(object data, params object[] param)
-        {
-            string objStr = data?.ToString() ?? string.Empty;
-            return string.Format(objStr, param);
         }
 
         private static int GetTotalCount(IList<CourseLevelProgressModel>? courseLevelProgresses, EnumCourseLevel courseLevel)
