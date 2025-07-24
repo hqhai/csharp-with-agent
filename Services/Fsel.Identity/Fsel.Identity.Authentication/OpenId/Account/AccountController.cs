@@ -135,7 +135,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             var email = userRegisterModel?.Email ?? forgotModel?.Email;
 
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(email) ?? _userManager;
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(email) ?? _userManager;
             var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
 
             var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user?.Id}");
@@ -165,11 +165,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
                 var email = userRegisterModel?.Email ?? forgotModel?.Email;
 
-                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(email) ?? _userManager;
-                _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>(email) ?? _studentRepository;
-                _parentRepository = await _tenantProvider.CreateRepositoryAsync<IParentRepository, UserDbContext>(email) ?? _parentRepository;
-                _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(email) ?? _platformRepository;
                 var dbContext = await _tenantProvider.CreateDbContextAsync<UserDbContext>(email);
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(dbContext, email) ?? _userManager;
+                _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>(dbContext, email) ?? _studentRepository;
+                _parentRepository = await _tenantProvider.CreateRepositoryAsync<IParentRepository, UserDbContext>(dbContext, email) ?? _parentRepository;
+                _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(dbContext, email) ?? _platformRepository;
                 _userRepository = new UserRepository(_userManager, _studentRepository, _parentRepository, dbContext!, _platformRepository);
                 var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
 
@@ -300,7 +300,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             if (request.Type == nameof(Register))
             {
                 var userRegister = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
-                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(userRegister?.Email ?? string.Empty) ?? _userManager;
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(userRegister?.Email ?? string.Empty) ?? _userManager;
 
                 user = await _userManager.FindByEmailAsync(userRegister?.Email ?? string.Empty);
                 if (user == null)
@@ -311,7 +311,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             else
             {
                 var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
-                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(forgotModel?.Email ?? string.Empty) ?? _userManager;
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(forgotModel?.Email ?? string.Empty) ?? _userManager;
 
                 user = await _userManager.FindByEmailAsync(forgotModel?.Email ?? string.Empty);
                 if (user == null || !user.EmailConfirmed)
@@ -356,7 +356,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             if (ModelState.IsValid)
             {
                 var forgotPasswordModel = GetFromTempData(nameof(ForgotPasswordModel))?.ToString().Deserialize<ForgotPasswordModel>();
-                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.Email ?? string.Empty) ?? _userManager;
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(request.Email ?? string.Empty) ?? _userManager;
 
                 if (forgotPasswordModel == null)
                 {
@@ -407,7 +407,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         public async Task<IActionResult> Forgot(ForgotModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.Email ?? string.Empty) ?? _userManager;
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(request.Email ?? string.Empty) ?? _userManager;
 
             TempData[nameof(ForgotModel)] = request.Serialize();
 
@@ -454,11 +454,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         public async Task<IActionResult> Register(UserRegisterModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(request.Email) ?? _userManager;
-            _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>(request.Email) ?? _studentRepository;
-            _parentRepository = await _tenantProvider.CreateRepositoryAsync<IParentRepository, UserDbContext>(request.Email) ?? _parentRepository;
-            _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(request.Email) ?? _platformRepository;
             var dbContext = await _tenantProvider.CreateDbContextAsync<UserDbContext>(request.Email);
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(dbContext, request.Email) ?? _userManager;
+            _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>(dbContext, request.Email) ?? _studentRepository;
+            _parentRepository = await _tenantProvider.CreateRepositoryAsync<IParentRepository, UserDbContext>(dbContext, request.Email) ?? _parentRepository;
+            _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(dbContext, request.Email) ?? _platformRepository;
             _userRepository = new UserRepository(_userManager, _studentRepository, _parentRepository, dbContext!, _platformRepository);
 
             var type = GetFromTempData(nameof(VerifyOtp))?.ToString();
@@ -610,7 +610,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             if (context != null && !string.IsNullOrEmpty(clientSecret) && context.Client.ClientSecrets.Any(x => x.Value == clientSecret.ToSha256()))
             {
                 var userId = Guid.TryParse(context.Parameters[RequestHeaderSetting.UserId]?.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture, out var userIdParsed) ? userIdParsed : default(Guid?);
-                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(userId: userId) ?? _userManager;
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(userId: userId) ?? _userManager;
 
                 var user = await _userManager.FindByIdAsync(userId?.ToString() ?? string.Empty);
                 return await LoginWithoutPassword(user, returnUrl);
@@ -652,7 +652,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         public async Task<IActionResult> Login(LoginInputModel model)
         {
             ArgumentNullException.ThrowIfNull(model);
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(model.Username ?? string.Empty) ?? _signInManager;
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(model.Username ?? string.Empty) ?? _signInManager;
 
             var vm = await BuildLoginViewModelAsync(model);
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
@@ -740,7 +740,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
         private async Task<IActionResult> LoginWithoutPassword(User? user, string? returnUrl)
         {
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>(user?.UserName ?? string.Empty) ?? _signInManager;
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(user?.UserName ?? string.Empty) ?? _signInManager;
 
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (user is not null && await ValidateLogin(user))
@@ -798,7 +798,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
             ArgumentNullException.ThrowIfNull(model);
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _signInManager;
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>() ?? _signInManager;
 
             // build a model so the logged out page knows what to display
             var vm = await BuildLoggedOutViewModelAsync(model.LogoutId ?? string.Empty);
@@ -836,7 +836,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> ExternalLogin(string provider, string? returnUrl = null)
         {
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _signInManager;
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>() ?? _signInManager;
 
             var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), new { returnUrl });
 
@@ -857,8 +857,9 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         [HttpGet]
         public async Task<IActionResult> ExternalLoginConfirmation(string? returnUrl = null)
         {
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _signInManager;
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _userManager;
+            var dbContext = await _tenantProvider.CreateDbContextAsync<UserDbContext>();
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(dbContext) ?? _signInManager;
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(dbContext) ?? _userManager;
 
             returnUrl ??= string.Empty;
 
@@ -913,12 +914,12 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginModel request, string? returnUrl = null)
         {
             ArgumentNullException.ThrowIfNull(request);
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _signInManager;
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRoleEntity, UserLoginEntity, UserToken, RoleClaimEntity>() ?? _userManager;
-            _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>() ?? _studentRepository;
-            _parentRepository = await _tenantProvider.CreateRepositoryAsync<IParentRepository, UserDbContext>() ?? _parentRepository;
-            _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>() ?? _platformRepository;
             var dbContext = await _tenantProvider.CreateDbContextAsync<UserDbContext>();
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(dbContext) ?? _signInManager;
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(dbContext) ?? _userManager;
+            _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository, UserDbContext>(dbContext) ?? _studentRepository;
+            _parentRepository = await _tenantProvider.CreateRepositoryAsync<IParentRepository, UserDbContext>(dbContext) ?? _parentRepository;
+            _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository, UserDbContext>(dbContext) ?? _platformRepository;
             _userRepository = new UserRepository(_userManager, _studentRepository, _parentRepository, dbContext!, _platformRepository);
 
             var externalLogin = GetFromTempData(nameof(ExternalLoginModel))?.ToString().Deserialize<ExternalLoginModel>();
