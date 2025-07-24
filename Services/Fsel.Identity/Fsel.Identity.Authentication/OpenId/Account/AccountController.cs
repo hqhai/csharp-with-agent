@@ -496,15 +496,18 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                             user = _mapper.Map<User>(request);
                             user.UserName = request.Email;
                             var result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
-                            result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
-
                             if (!result.Succeeded)
                             {
                                 scope.Dispose();
-                                result.Errors.ForEach(x =>
-                                {
-                                    ModelState.AddModelError(string.Empty, x.Description);
-                                });
+                                result.Errors.ForEach(x => ModelState.AddModelError(string.Empty, x.Description));
+                                return View(request);
+                            }
+
+                            result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                            if (!result.Succeeded)
+                            {
+                                scope.Dispose();
+                                result.Errors.ForEach(x => ModelState.AddModelError(string.Empty, x.Description));
                                 return View(request);
                             }
                         }
