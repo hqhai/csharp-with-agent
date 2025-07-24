@@ -72,6 +72,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
 
         public long? AccessTime { get; set; }
 
+        public DateTime? ExpireDate { get; set; }
+
         public IList<OrderIntegrationModel>? OrderIntegrations { get; set; }
 
         public IList<CourseIntegrationModel>? CourseIntegrations { get; set; }

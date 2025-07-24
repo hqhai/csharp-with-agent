@@ -13,9 +13,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Application.Services.SystemService;
-    using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
-    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
     using Fsel.Identity.Domain.Models.QueryModels.Integration;
@@ -274,7 +272,6 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             {
                 leadsIntegration.Status = (orderTrial.ExpireDate.HasValue && orderTrial.ExpireDate < DateTime.UtcNow) ? EnumIntegrationStatus.TrialExpired : EnumIntegrationStatus.Trial;
                 leadsIntegration.StartTrial = orderTrial.CreatedDate;
-                leadsIntegration.ExpireDate = orderTrial.ExpireDate;
             }
 
             List<OrderIntegrationModel> orderIntegrations = new List<OrderIntegrationModel>();
