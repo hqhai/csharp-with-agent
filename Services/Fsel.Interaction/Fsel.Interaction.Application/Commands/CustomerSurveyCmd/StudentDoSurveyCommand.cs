@@ -6,6 +6,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Caching;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Queues.Publishers;
@@ -35,8 +36,9 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly IMapper _mapper;
         private readonly ICustomerSurveyRepository _customerSurveyRepository;
+        private readonly ICacheService<CustomerSurveyGroup> _cacheService;
 
-        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ICustomerSurveyRepository customerSurveyRepository)
+        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ICustomerSurveyRepository customerSurveyRepository, ICacheService<CustomerSurveyGroup> cacheService)
         {
             _surveyConfigRepository = surveyConfigRepository;
             _customerSurveyGroupRepository = customerSurveyGroupRepository;
@@ -45,6 +47,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _mapper = mapper;
             _customerSurveyRepository = customerSurveyRepository;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<bool>> Handle(StudentDoSurveyCommand request, CancellationToken cancellationToken)
@@ -82,6 +85,12 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             var customerSurveyEntities = await _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId).Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
 
+            if (customerSurveyEntities != null && customerSurveyEntities.Any() && customerSurveyEntities.First().CustomerSurveyGroupId.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(customerSurveyEntities));
+                return methodResult;
+            }
+
             var newCustomerSurveys = new List<CustomerSurvey>();
             var updateCustomerSurveys = new List<CustomerSurvey>();
 
@@ -100,7 +109,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                     return methodResult;
                 }
 
-                var existAnswer = customerSurveyEntities.FirstOrDefault(p => p.SurveyQuestionId == answer.Id);
+                var existAnswer = customerSurveyEntities?.FirstOrDefault(p => p.SurveyQuestionId == answer.Id);
                 if (existAnswer != null)
                 {
                     existAnswer.Answer = answer.Answer;
@@ -131,7 +140,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 };
             }
 
-            UserSurveyAssignment? assignment = new UserSurveyAssignment();
+            UserSurveyAssignment? assignment = null;
 
             if (request.UserSurveyAssignmentId.HasValue)
             {
@@ -150,6 +159,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                     if (assignment != null)
                     {
                         assignment.IsDone = true;
+                        assignment.SurveyConfigId = request.SurveyConfigId;
                         _userSurveyAssignmentRepository.Update(assignment);
                     }
                     customerSurveyGroup = _customerSurveyGroupRepository.Add(customerSurveyGroup);
@@ -165,6 +175,16 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
                 if (customerSurveyGroup != null && customerSurveyGroup.Status == EnumSurveyGroupStatus.Done)
                 {
+                    var key = $"StudentDoSurvey_{_authContext.CurrentUserId}";
+
+                    var studentDoSurveyCache = await _cacheService.GetAsync(key);
+                    if (studentDoSurveyCache != null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                        return methodResult;
+                    }
+                    await _cacheService.SetAsync(key, customerSurveyGroup, TimeSpan.FromSeconds(5));
+
                     await CreateToken(customerSurveyGroup.Id, surveyConfig.Tokens);
                 }
 

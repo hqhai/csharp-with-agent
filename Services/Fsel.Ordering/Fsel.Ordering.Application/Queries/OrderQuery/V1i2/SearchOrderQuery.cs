@@ -86,7 +86,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
             {
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.Contains(request.Keyword));
+                    query = query.Where(p => !string.IsNullOrEmpty(p.Email) && p.Email == request.Keyword);
+                }
+                else if (request.Keyword.IsValidPhoneNumber())
+                {
+                    query = query.Where(p => !string.IsNullOrEmpty(p.PhoneNumber) && p.PhoneNumber == request.Keyword);
                 }
                 else
                 {
