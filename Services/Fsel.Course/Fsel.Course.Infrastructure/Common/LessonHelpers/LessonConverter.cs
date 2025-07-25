@@ -145,7 +145,7 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
             }
 
             double sumPercent = request.LessonModules.Sum(x => x.Percent);
-            if (sumPercent < MinPercent || sumPercent > MaxPercent)
+            if (sumPercent <= MinPercent || sumPercent > MaxPercent)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.PercentNotValid), nameof(sumPercent), sumPercent);
                 return methodResult;
