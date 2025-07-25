@@ -76,7 +76,7 @@ namespace Fsel.Interaction.Api.Controllers.Admin
         /// <summary>
         /// Export students do survey
         /// </summary>
-        [HttpPost("export-students-do-survey")]
+        [HttpGet("export-students-do-survey")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ExportFile([FromQuery] ExportHistoriesDoSurveyCommand command)
