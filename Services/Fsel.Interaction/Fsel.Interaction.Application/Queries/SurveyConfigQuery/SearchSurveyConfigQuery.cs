@@ -38,6 +38,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
             var methodResult = new MethodResult<PagingItemsModel<SurveyConfigModel>>();
 
             var surveyConfigs = await _surveyConfigRepository.Queryable.ToListAsync(cancellationToken);
+            surveyConfigs = surveyConfigs.Where(p => p.ApplicablePrograms == null || !p.ApplicablePrograms.Any(x => x == EnumSurveyFormType.QuestBoard)).ToList();
 
             if (request.StartDate.HasValue && request.EndDate.HasValue && request.StartDate < request.EndDate)
             {

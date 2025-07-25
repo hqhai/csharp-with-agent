@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
+namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 {
     using System.Threading;
     using System.Threading.Tasks;

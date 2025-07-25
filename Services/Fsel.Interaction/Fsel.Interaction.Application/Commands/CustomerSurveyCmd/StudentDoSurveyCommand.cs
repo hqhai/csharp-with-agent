@@ -9,6 +9,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Common.Caching;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Application.Services.UserServices.Models;
@@ -16,6 +17,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -41,8 +43,9 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly ICacheService<CustomerSurveyGroup> _cacheService;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly IUserService _userService;
+        private readonly IMediator _mediator;
 
-        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ICustomerSurveyRepository customerSurveyRepository, ICacheService<CustomerSurveyGroup> cacheService, QuestBoardPublisher questBoardPublisher, IUserService userService)
+        public StudentDoSurveyCommandHandler(ISurveyConfigRepository surveyConfigRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, CreateTokenHistoryPublisher createTokenHistoryPublisher, IMapper mapper, ICustomerSurveyRepository customerSurveyRepository, ICacheService<CustomerSurveyGroup> cacheService, QuestBoardPublisher questBoardPublisher, IUserService userService, IMediator mediator)
         {
             _surveyConfigRepository = surveyConfigRepository;
             _customerSurveyGroupRepository = customerSurveyGroupRepository;
@@ -54,6 +57,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             _cacheService = cacheService;
             _questBoardPublisher = questBoardPublisher;
             _userService = userService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(StudentDoSurveyCommand request, CancellationToken cancellationToken)
@@ -70,14 +74,58 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             var isDuplicate = request.Answers.GroupBy(p => p.Id).Any(p => p.Count() > 1);
             if (isDuplicate)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(isDuplicate));
+                return methodResult;
+            }
+
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var student = studentResult.Content?.Result;
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
             if (!request.IsSurveyPT && !request.UserSurveyAssignmentId.HasValue)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.UserSurveyAssignmentId));
                 return methodResult;
+            }
+            else if (request.IsSurveyPT)
+            {
+                if (!student.CourseLevel.HasValue)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
+                    return methodResult;
+                }
+                var eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
+                if (!eventResults.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(eventResults.Error);
+                    return methodResult;
+                }
+                var events = eventResults.Content?.Result;
+
+                var checkSurveyPTResult = await _mediator.Send(new CheckSurveyPTQuery()
+                {
+                    CompetitionEventId = events?.FirstOrDefault()?.Id,
+                    CourseLevel = student.CourseLevel.Value,
+                    SurveyFormType = events != null && events.Any() ? EnumSurveyFormType.Event : EnumSurveyFormType.Default,
+                    CourseType = EnumCourseLevelHelper.GetEnumCourseType(student.CourseLevel.Value)
+                }, cancellationToken);
+
+                if (!checkSurveyPTResult.IsOK)
+                {
+                    methodResult.AddError(eventResults.Error);
+                    return methodResult;
+                }
+
+                var checkSurveyPT = checkSurveyPTResult.Result;
+                if (!checkSurveyPT)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(checkSurveyPT));
+                    return methodResult;
+                }
             }
 
             var surveyConfig = await _surveyConfigRepository.Queryable.Include(p => p.SurveyQuestions).FirstOrDefaultAsync(p => p.Id == request.SurveyConfigId, cancellationToken);
@@ -151,7 +199,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             if (request.UserSurveyAssignmentId.HasValue)
             {
                 assignment = await _userSurveyAssignmentRepository.GetByIdAsync(request.UserSurveyAssignmentId.Value);
-                if (assignment == null)
+                if (assignment == null || assignment.IsDone)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(assignment));
                     return methodResult;
@@ -197,13 +245,6 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                     }
                     if (surveyConfig.ApplicablePrograms != null && surveyConfig.ApplicablePrograms.Any(p => p == EnumSurveyFormType.QuestBoard))
                     {
-                        var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-                        var student = studentResult.Content?.Result;
-                        if (student == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                            return methodResult;
-                        }
                         await DoQuestBoard(student, cancellationToken);
                     }
                 }
