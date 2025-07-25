@@ -321,7 +321,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 CourseLevel = courseUnitMockTest.Course!.CourseLevel,
                 CourseType = courseUnitMockTest.Course!.CourseType,
-                ProgressRequirement = courseUnitMockTest.Number == 1 ? EnumProgressRequirement.DoneFullMockTestOne : EnumProgressRequirement.DoneFullMockTestTwo
+                ProgressRequirement = courseUnitMockTest.Number == 1 ? EnumProgressRequirement.DoneFullMockTestOne : EnumProgressRequirement.DoneFullMockTestTwo,
+                IsSurveyQuestBoard = false
             }, cancellationToken);
         }
 

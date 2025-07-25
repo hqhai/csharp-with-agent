@@ -258,7 +258,8 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             {
                 CourseLevel = courseResult.Course!.CourseLevel,
                 CourseType = courseResult.Course!.CourseType,
-                ProgressRequirement = EnumProgressRequirement.DoneFinalTest
+                ProgressRequirement = EnumProgressRequirement.DoneFinalTest,
+                IsSurveyQuestBoard = false
             }, cancellationToken);
         }
 

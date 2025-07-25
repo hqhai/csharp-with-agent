@@ -65,11 +65,11 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             if (userSurveyAssignment != null)
             {
-                var dailyQuizWinners = new List<UserSurveyAssignment>() { userSurveyAssignment };
+                var userSurveyAssignments = new List<UserSurveyAssignment>() { userSurveyAssignment };
 
                 await _userSurveyAssignmentRepository.ExecuteTransactionAsync(async () =>
                 {
-                    await _userSurveyAssignmentRepository.BulkMergeAsync(dailyQuizWinners, x =>
+                    await _userSurveyAssignmentRepository.BulkMergeAsync(userSurveyAssignments, x =>
                     {
                         x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.CourseLevel, c.CourseType, c.ProgressRequirement, c.IsSurveyQuestBoard };
                     });

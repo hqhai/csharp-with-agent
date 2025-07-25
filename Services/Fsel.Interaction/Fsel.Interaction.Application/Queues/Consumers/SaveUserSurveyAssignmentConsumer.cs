@@ -3,7 +3,7 @@
 namespace Fsel.Interaction.Application.Queues.Consumers
 {
     using Fsel.Core.Base;
-    using Fsel.Interaction.Application.Commands.SurveyConfigCmd;
+    using Fsel.Interaction.Application.Commands.CustomerSurveyCmd;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
@@ -22,7 +22,7 @@ namespace Fsel.Interaction.Application.Queues.Consumers
             {
                 return;
             }
-            await _mediator.Send(new SaveUserSurveyAssignmentCommand() { CourseLevel = message.CourseLevel, CourseType = message.CourseType, ProgressRequirement = message.ProgressRequirement }).ConfigureAwait(false);
+            await _mediator.Send(new SaveUserSurveyAssignmentCommand() { CourseLevel = message.CourseLevel, CourseType = message.CourseType, ProgressRequirement = message.ProgressRequirement, IsSurveyQuestBoard = message.IsSurveyQuestBoard }).ConfigureAwait(false);
         }
     }
 }

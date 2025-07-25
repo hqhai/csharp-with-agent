@@ -95,7 +95,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             {
                                 CourseLevel = course.CourseLevel,
                                 CourseType = course.CourseType,
-                                ProgressRequirement = progressRequirement.Value
+                                ProgressRequirement = progressRequirement.Value,
+                                IsSurveyQuestBoard = false
                             }, cancellationToken);
                         }
                     }
