@@ -60,6 +60,11 @@ namespace Fsel.Shared.Constants
                 public const string BannerRealTime = $"{KeyQueue}_BannerRealTime";
                 public const string SpeechToTextRealTime = $"{KeyQueue}_SpeechToTextRealTime";
                 public const string DictionaryRealTime = $"{KeyQueue}_DictionaryRealTime";
+
+                public const string SetTimeExamPractice = $"{KeyQueue}_SetTimeExamPractice";
+                public const string GetTimeExamPractice = $"{KeyQueue}_GetTimeExamPractice";
+                public const string ExamPracticeSpeaking = $"{KeyQueue}_ExamPracticeSpeaking";
+                public const string ExamPracticeWriting = $"{KeyQueue}_ExamPracticeWriting";
             }
         }
 
@@ -132,6 +137,20 @@ namespace Fsel.Shared.Constants
                 public const string ErrorExplainGgSheet = $"{KeyQueue}_ErrorEplainGgSheet";
                 public const string ExportExcelSchoolLearningProcess = $"{KeyQueue}_ExportExcelSchoolLearningProcess";
                 public const string SpeechToTextPendingAi = $"{KeyQueue}_SpeechToTextPendingAi";
+                public const string PushNotice = $"{KeyQueue}_PushNotice";
+            }
+        }
+
+        public static class ExamPracticeQueue
+        {
+            public const string KeyQueue = nameof(ExamPracticeQueue);
+
+            public static class NameQueue
+            {
+                public const string GetTimeExamPractice = $"{KeyQueue}_GetTimeExamPractice";
+                public const string SetTimeExamPractice = $"{KeyQueue}_SetTimeExamPractice";
+                public const string ExamPracticeAnwserResponse = $"{KeyQueue}_ExamPracticeAnwserResponse";
+                public const string SpeakingAI = $"{KeyQueue}_SpeakingAI";
             }
         }
 

@@ -119,6 +119,18 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         }
 
         /// <summary>
+        /// get users has order payment
+        /// </summary>
+        [HttpPost("get-users-has-order-payment")]
+        [ProducesResponseType(typeof(MethodResult<IList<Guid>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersHasOrderPayment([FromBody] GetUsersHasOrderPaymentQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// get order revenue
         /// </summary>
         [HttpGet("get-order-revenue")]
