@@ -121,6 +121,8 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
 
                 if (surveyConfig != null)
                 {
+                    surveyConfig.SurveyQuestions = surveyConfig.SurveyQuestions.OrderBy(p => p.DisplayLevel).ThenBy(p => p.DisplayOrder).ToList();
+
                     var surveyConfigModel = _mapper.Map<SurveyConfigModel>(surveyConfig);
 
                     var levels = surveyConfig.SurveyQuestions.Select(p => p.DisplayLevel).Distinct().Order().ToList();

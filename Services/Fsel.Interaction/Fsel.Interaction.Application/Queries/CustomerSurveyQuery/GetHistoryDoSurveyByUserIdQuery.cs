@@ -59,6 +59,8 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
 
             var surveyGroupQuestionModels = new List<SurveyGroupQuestionModel>();
 
+            surveyConfig.SurveyQuestions = surveyConfig.SurveyQuestions.OrderBy(p => p.DisplayLevel).ThenBy(p => p.DisplayOrder).ToList();
+
             foreach (var level in levels)
             {
                 var surveyGroupQuestions = surveyConfig.SurveyQuestions.Where(p => p.DisplayLevel == level).ToList();
