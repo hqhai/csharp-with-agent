@@ -11,7 +11,7 @@
   // Input elements
   const $steps = $(".section-survey");
   const $signUpButton = $(".sign-up-btn");
-  const $emailInput = $("#email");
+/*  const $emailInput = $("#email");*/
   const $phoneNumberInput = $("#phoneNumber");
   const $firstNameInput = $("#firstName");
   const $lastNameInput = $("#lastName");
@@ -278,7 +278,7 @@
     // Validate each field
     const isValidFirstName = validateFirstName();
     const isValidLastName = validateLastName();
-    const isValidEmail = validateEmail();
+/*    const isValidEmail = validateEmail();*/
     const isValidPhoneNumber = validatePhoneNumber();
     const isValidGender = validateGender();
     const isValidDay = validateDay();
@@ -289,7 +289,7 @@
 
     if (!isValidFirstName) isDoneAllValidate = false;
     if (!isValidLastName) isDoneAllValidate = false;
-    if (!isValidEmail) isDoneAllValidate = false;
+   /* if (!isValidEmail) isDoneAllValidate = false;*/
     if (!isValidPhoneNumber) isDoneAllValidate = false;
     if (!isValidGender) isDoneAllValidate = false;
     if (!isValidDay || !isValidMonth || !isValidYear) isDoneAllValidate = false;
@@ -319,7 +319,7 @@
   }
 
   // Event listeners
-  $emailInput.on("input", validateEmail);
+/*  $emailInput.on("input", validateEmail);*/
   $phoneNumberInput.on("input", validatePhoneNumber);
   $firstNameInput.on("input", validateFirstName);
   $lastNameInput.on("input", validateLastName);

@@ -466,5 +466,19 @@ namespace Fsel.Shared.Helpers
 
             return (firstName, lastName);
         }
+
+        public static string InjectParam(this string input, params string[] parameters)
+        {
+            if (string.IsNullOrEmpty(input) || parameters == null || parameters.Length == 0)
+            {
+                return input ?? string.Empty;
+            }
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                string placeholder = $"{{{i}}}";
+                input = input.Replace(placeholder, parameters[i] ?? string.Empty, StringComparison.InvariantCultureIgnoreCase);
+            }
+            return input;
+        }
     }
 }

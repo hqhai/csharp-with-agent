@@ -1,42 +1,45 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System.Globalization;
+using System.Security.Claims;
+using System.Transactions;
 using AutoMapper;
+using Fsel.Common.ActionResults;
+using Fsel.Common.Caching;
+using Fsel.Common.Constants;
+using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Common.Helpers;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.SenderCmd;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+using Fsel.Identity.Application.Commands.UserReferrals;
+using Fsel.Identity.Application.Handlers.Implementations;
+using Fsel.Identity.Application.Handlers.Interfaces;
+using Fsel.Identity.Authentication.Auth;
+using Fsel.Identity.Authentication.OpenId.Base;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums.ErrorCodes;
+using Fsel.Identity.Domain.IRepositories;
+using Fsel.Identity.Domain.Models.CommandModels.OpenId;
+using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Identity.Infrastructure.ValueSettings;
-using Fsel.Common.ActionResults;
-using Fsel.Common.Helpers;
+using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Events;
+using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Globalization;
-using System.Security.Claims;
-using System.Transactions;
-using Fsel.Identity.Domain.Models.CommandModels.OpenId;
-using Fsel.Shared.Constants;
-using Fsel.Shared.Enums;
-using Fsel.Identity.Domain.IRepositories;
-using Fsel.Core.Base.Managers;
-using Fsel.Common.Constants;
-using Microsoft.Extensions.Localization;
 using Microsoft.EntityFrameworkCore;
-using Fsel.Identity.Domain.Enums.ErrorCodes;
-using Fsel.Identity.Domain.Models.EntityModels;
-using Fsel.Common.Caching;
-using Fsel.Identity.Application.Commands.UserReferrals;
+using Microsoft.Extensions.Localization;
 using static IdentityServer4.IdentityServerConstants;
-using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Identity.Authentication.OpenId.Base;
-using IdentityServer4.Extensions;
-using Fsel.Identity.Authentication.Auth;
+using static IdentityServer4.Models.IdentityResources;
 
 namespace Fsel.Identity.Authentication.OpenId.Account
 {
@@ -46,7 +49,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
     /// The interaction service provides a way for the UI to communicate with identityserver for validation and context retrieval
     /// </summary>
     [AllowAnonymous]
-    //[SecurityHeaders]
     public class AccountController : BaseController
     {
         protected IUserSession UserSession { get; private set; }
@@ -65,6 +67,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly IStudentRepository _studentRepository;
         private readonly IUserOtpCodeRepository _userOtpRepository;
         private readonly IPlatformRepository _platformRepository;
+        private readonly IUserRegisterHandler _userRegisterHandler;
         private readonly IUserRepository _userRepository;
         private readonly Core.Base.AuthContext _languageContext;
         private readonly IStringLocalizer _localizer;
@@ -89,7 +92,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             Core.Base.AuthContext languageContext,
             IStringLocalizer localizer,
             ICacheService<UserOtpCodeModel> userOtpCache,
-            IPlatformRepository platformRepository)
+            IPlatformRepository platformRepository,
+            IUserRegisterHandler userRegisterHandler)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -113,30 +117,43 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             _localizer = localizer;
             _userOtpCache = userOtpCache;
             _platformRepository = platformRepository;
+            _userRegisterHandler = userRegisterHandler;
         }
 
         /// <summary>
         /// Verify otp for sample user login
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> VerifyOtp(string? returnUrl, string? type)
+        public async Task<IActionResult> VerifyOtp(string? phoneNumber, string? returnUrl, string? type)
         {
             TempData[nameof(VerifyOtp)] = type;
 
-            var userRegisterModel = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
-            var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
-
-            var email = userRegisterModel?.Email ?? forgotModel?.Email;
-            var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
-
-            var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user?.Id}");
-
-            return View(new VerifyOtpModel
+            if (type == nameof(Register))
             {
-                Type = type,
-                ReturnUrl = returnUrl,
-                ExpiredTime = entry?.ExpiredTime
-            });
+                return View(new VerifyOtpModel
+                {
+                    Type = type,
+                    PhoneNumber = phoneNumber,
+                    ReturnUrl = returnUrl,
+                    ExpiredTime = DateTime.UtcNow.Add(OtpSetting.MinimumBetweenTwoSendsDuration)
+                });
+            }
+            else
+            {
+                var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
+
+                var email = forgotModel?.Email;
+                var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
+
+                var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user?.Id}");
+
+                return View(new VerifyOtpModel
+                {
+                    Type = type,
+                    ReturnUrl = returnUrl,
+                    ExpiredTime = entry?.ExpiredTime
+                });
+            }
         }
 
         [HttpPost]
@@ -148,90 +165,38 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             if (!string.IsNullOrEmpty(button))
             {
                 await ResendOtp(request);
+                request.OtpProviderType = OtpProviderType.Zalo.ToString();
             }
             else if (ModelState.IsValid)
             {
-                var userRegisterModel = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
-                var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
-
-                var email = userRegisterModel?.Email ?? forgotModel?.Email;
-                var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
-
-                var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user?.Id}");
-                request.ExpiredTime = entry?.ExpiredTime;
-
                 if (request.Type == nameof(Register))
                 {
-                    if (userRegisterModel == null)
-                    {
-                        ModelState.AddModelError(string.Empty, _localizer["i18n_Data_does_not_exist"]);
-                    }
-                    else if (string.IsNullOrEmpty(userRegisterModel.Password))
-                    {
-                        ModelState.AddModelError(nameof(userRegisterModel.Password), _localizer["i18n_Password_cannot_be_empty"]);
-                    }
-                    else if (user == null)
-                    {
-                        ModelState.AddModelError(string.Empty, _localizer["i18n_User_does_not_exist"]);
-                    }
-                    else if (user.EmailConfirmed)
-                    {
-                        ModelState.AddModelError(string.Empty, _localizer["i18n_User_has_been_confirmed"]);
-                    }
-                    else if (string.IsNullOrEmpty(request.Otp))
+                    if (string.IsNullOrEmpty(request.Otp))
                     {
                         ModelState.AddModelError(string.Empty, _localizer["i18n_OTP_cannot_be_empty"]);
                     }
+                    var (isSuccessfully, message) = await _userRegisterHandler.VerifyUserAsync(request.PhoneNumber ?? string.Empty, request.Otp);
+                    if (isSuccessfully)
+                    {
+                        await _userRegisterHandler.CreateUserAsync(request.PhoneNumber, request.Otp);
+                        return await LoginWithoutPassword(request.PhoneNumber, request.ReturnUrl);
+                    }
                     else
                     {
-                        var verify = await VerifyOtpAsync(user, request.Otp);
-                        if (verify.Result)
-                        {
-                            return await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
-                            {
-                                using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
-                                {
-                                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                                    var result = await _userManager.ConfirmEmailAsync(user, token);
-
-                                    _mapper.Map(userRegisterModel, user);
-                                    user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, userRegisterModel.Password);
-                                    user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                                    result = await _userManager.UpdateAsync(user);
-                                    if (!result.Succeeded)
-                                    {
-                                        scope.Dispose();
-                                        result.Errors.ForEach(error => ModelState.AddModelError(string.Empty, error.Description));
-                                        return View(request);
-                                    }
-
-                                    scope.Complete();
-                                }
-
-                                #region Create User Referral
-                                var vm = await BuildLoginViewModelAsync(request.ReturnUrl ?? string.Empty);
-                                if (!string.IsNullOrEmpty(vm.ReferralCode))
-                                {
-                                    await _mediator.Send(new CreateUserReferralCommand { ReferralCode = vm.ReferralCode, ReceiverId = user.Id, UserReferralType = EnumUserReferralType.Link }).ConfigureAwait(false);
-                                }
-                                #endregion
-
-                                ViewBag.Success = _localizer["i18n_User_successfuly_added"];
-                                return await LoginWithoutPassword(user, request.ReturnUrl);
-                            });
-                        }
-                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpCodeErrorCode.OtpInvalid)))
-                        {
-                            ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_is_not_valid"]);
-                        }
-                        else if (verify.ErrorMessages.Any(x => x.ErrorCode == nameof(EnumUserOtpCodeErrorCode.OtpExpired)))
-                        {
-                            ModelState.AddModelError(nameof(request.Otp), _localizer["i18n_OTP_has_expired"]);
-                        }
+                        ModelState.AddModelError(string.Empty, message);
                     }
+
                 }
                 else if (request.Type == nameof(Forgot))
                 {
+                    var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
+
+                    var email = forgotModel?.Email;
+                    var user = await _userManager.FindByEmailAsync(email ?? string.Empty);
+
+                    var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user?.Id}");
+                    request.ExpiredTime = entry?.ExpiredTime;
+
                     if (forgotModel == null)
                     {
                         ModelState.AddModelError(string.Empty, _localizer["i18n_Data_does_not_exist"]);
@@ -284,10 +249,10 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             if (request.Type == nameof(Register))
             {
                 var userRegister = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
-                user = await _userManager.FindByEmailAsync(userRegister?.Email ?? string.Empty);
-                if (user == null)
+                var (isSuccess, message) = await _userRegisterHandler.SendRegisterOtpAsync(request.PhoneNumber, OtpProviderType.Zalo);
+                if (!isSuccess)
                 {
-                    ModelState.AddModelError(string.Empty, _localizer["i18n_User_does_not_exist"]);
+                    ModelState.AddModelError(string.Empty, message);
                 }
             }
             else
@@ -300,17 +265,17 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 }
             }
 
-            if (user != null)
-            {
-                var sendResult = await SendOtpAsync(user);
-                if (!sendResult.IsOK)
-                {
-                    ModelState.AddModelError(string.Empty, _localizer[sendResult.ErrorMessages.Select(x => x.ErrorCode).FirstOrDefault() ?? string.Empty]);
-                }
+            //if (user != null)
+            //{
+            //    var sendResult = await SendOtpAsync(user);
+            //    if (!sendResult.IsOK)
+            //    {
+            //        ModelState.AddModelError(string.Empty, _localizer[sendResult.ErrorMessages.Select(x => x.ErrorCode).FirstOrDefault() ?? string.Empty]);
+            //    }
 
-                var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user.Id}");
-                request.ExpiredTime = entry?.ExpiredTime;
-            }
+            //    var entry = await _userOtpCache.GetAsync($"{nameof(SendOtpAsync)}.{user.Id}");
+            //    request.ExpiredTime = entry?.ExpiredTime;
+            //}
         }
 
         public IActionResult Success(string? returnUrl, string? message = null)
@@ -411,6 +376,46 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             return View(request);
         }
 
+        public IActionResult SetPassWord(string? returnUrl)
+        {
+            var vm = new ForgotModel
+            {
+                ReturnUrl = returnUrl
+            };
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetPassWord(ForgotModel? request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            TempData[nameof(ForgotModel)] = request.Serialize();
+
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
+                if (user == null || (!user.EmailConfirmed && (user.Student == null || user.Teacher == null || user.CSO == null || user.Parent == null)))
+                {
+                    ModelState.AddModelError(nameof(request.Email), _localizer["i18n_Email_does_not_exist_in_the_system"]);
+                    return View(request);
+                }
+
+                await _userOtpCache.RemoveAsync($"{nameof(SendOtpAsync)}.{user.Id}");
+                var sendResult = await SendOtpAsync(user);
+                if (!sendResult.IsOK)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer[sendResult.ErrorMessages.Select(x => x.ErrorCode).FirstOrDefault() ?? string.Empty]);
+                    return View(request);
+                }
+
+                return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Forgot) });
+            }
+
+            return View(request);
+        }
+
         /// <summary>
         /// Registration for sample user login
         /// </summary>
@@ -445,57 +450,20 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             TempData[nameof(UserRegisterModel)] = request.Serialize();
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
-                if (user != null && user.EmailConfirmed)
+                var (isRegisterSuccess, message) = await _userRegisterHandler.TempRegisterUserAsync(request);
+                if (isRegisterSuccess)
                 {
-                    ModelState.AddModelError(nameof(request.Email), _localizer["i18n_Email_already_exists_in_the_system"]);
-                    return View(request);
-                }
-
-                if (!string.IsNullOrEmpty(request.PhoneNumber) && await _userManager.Users.AnyAsync(x => x.PhoneNumber == request.PhoneNumber && x.Id != (user != null ? user.Id : Guid.Empty)))
-                {
-                    ModelState.AddModelError(nameof(request.PhoneNumber), _localizer["i18n_phone_number_already_system"]);
-                    return View(request);
-                }
-
-                return await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
-                {
-                    using (var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled))
+                    var (isSendOtpSuccess, sendOtpMessage) = await _userRegisterHandler.SendRegisterOtpAsync(request.PhoneNumber);
+                    if (!isSendOtpSuccess)
                     {
-                        if (user == null)
-                        {
-                            user = _mapper.Map<User>(request);
-                            user.UserName = request.Email;
-                            var result = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
-                            result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
-
-                            if (!result.Succeeded)
-                            {
-                                scope.Dispose();
-                                result.Errors.ForEach(x =>
-                                {
-                                    ModelState.AddModelError(string.Empty, x.Description);
-                                });
-                                return View(request);
-                            }
-                        }
-
-                        await _userOtpCache.RemoveAsync($"{nameof(SendOtpAsync)}.{user.Id}");
-                        var sendResult = await SendOtpAsync(user);
-                        if (!sendResult.IsOK)
-                        {
-                            scope.Dispose();
-                            ModelState.AddModelError(string.Empty, _localizer[sendResult.ErrorMessages.Select(x => x.ErrorCode).FirstOrDefault() ?? string.Empty]);
-                            return View(request);
-                        }
-
-                        scope.Complete();
-
-                        return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Register) });
+                        ModelState.AddModelError(string.Empty, sendOtpMessage);
                     }
-
-                    //var context = await _interaction.GetAuthorizationContextAsync(request.ReturnUrl);
-                });
+                    return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Register), PhoneNumber = request.PhoneNumber });
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, message);
+                }
             }
 
             return View(request);
@@ -595,7 +563,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         [HttpGet]
         public async Task<IActionResult> Login(string? returnUrl)
         {
-            // build a model so we know what to show on the login page  
+            // build a model so we know what to show on the login page
             var vm = await BuildLoginViewModelAsync(returnUrl ?? string.Empty);
             if (!string.IsNullOrEmpty(vm.UiLocales))
             {
@@ -619,7 +587,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         /// Handle postback from username/password login
         /// </summary>
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginInputModel model)
         {
             ArgumentNullException.ThrowIfNull(model);
@@ -648,7 +615,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                                 IsPersistent = true,
                                 ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
                             };
-                        };
+                        }
+                        ;
 
                         // issue authentication cookie with subject ID and username
                         var isuser = new IdentityServerUser(user.Id.ToString())
@@ -706,6 +674,14 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             }
 
             return View(vm);
+        }
+
+        private async Task<IActionResult> LoginWithoutPassword(string phoneNumber, string? returnUrl)
+        {
+            var user = await _userRepository.DbContext.Set<User>()
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
+            return await LoginWithoutPassword(user, returnUrl);
         }
 
         private async Task<IActionResult> LoginWithoutPassword(User? user, string? returnUrl)

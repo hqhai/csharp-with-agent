@@ -8,10 +8,10 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 
     public class UserRegisterModel
     {
-        [RegularExpression(RegexSettings.EmailValid, ErrorMessage = "i18n_Email_is_not_valid")]
-        [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
-        [MaxLength(254, ErrorMessage = "i18n_limit_number_characters")]
-        public string? Email { get; set; }
+        //[RegularExpression(RegexSettings.EmailValid, ErrorMessage = "i18n_Email_is_not_valid")]
+        //[Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
+        //[MaxLength(254, ErrorMessage = "i18n_limit_number_characters")]
+        //public string? Email { get; set; }
 
         [RegularExpression(Common.Helpers.RegexHelper.PhoneNumberValid, ErrorMessage = "i18n_number_phone_invalid")]
         [Required(ErrorMessage = "i18n_Phone_number_cannot_empty")]
