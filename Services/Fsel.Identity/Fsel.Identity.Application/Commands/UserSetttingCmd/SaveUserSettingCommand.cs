@@ -40,16 +40,19 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
 
             await _userSettingRepository.ExecuteTransactionAsync(async () =>
             {
-                var userSetting = await _userSettingRepository.Queryable.Where(x => x.UserId == _authContext.CurrentUserId).FirstOrDefaultAsync(cancellationToken);
+                var userSetting = await _userSettingRepository.Queryable.Include(x => x.UserSenderSettings).Where(x => x.UserId == _authContext.CurrentUserId).FirstOrDefaultAsync(cancellationToken);
 
                 if (userSetting != null)
                 {
                     _mapper.Map(request, userSetting);
+                    SaveUserSenderSetting(request.UserSenderSettings, userSetting);
+
                     userSetting = _userSettingRepository.Update(userSetting);
                 }
                 else
                 {
                     userSetting = _mapper.Map<UserSetting>(request);
+                    SaveUserSenderSetting(request.UserSenderSettings, userSetting);
 
                     userSetting = _userSettingRepository.Add(userSetting);
                 }
@@ -67,6 +70,26 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
             });
 
             return methodResult;
+        }
+
+        private static void SaveUserSenderSetting(IList<SaveUserSenderSetting>? userSenderSettings, UserSetting userSetting)
+        {
+            userSenderSettings.ForEach(item =>
+            {
+                var userSenderSetting = userSetting.UserSenderSettings.FirstOrDefault(x => x.SenderConfigId == item.SenderConfigId);
+                if (userSenderSetting != null)
+                {
+                    userSenderSetting.IsActive = item.IsActive;
+                }
+                else
+                {
+                    userSetting.UserSenderSettings.Add(new UserSenderSetting
+                    {
+                        SenderConfigId = item.SenderConfigId,
+                        IsActive = item.IsActive
+                    });
+                }
+            });
         }
     }
 }

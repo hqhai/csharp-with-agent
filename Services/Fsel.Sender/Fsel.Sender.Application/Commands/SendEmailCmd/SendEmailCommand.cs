@@ -1,10 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Globalization;
 using Amazon.SimpleEmail.Model;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Sender.Application.Services;
 using Fsel.Sender.Application.Services.SystemServices;
+using Fsel.Sender.Application.Services.UserServices;
+using Fsel.Sender.Application.Services.UserServices.QueryModels;
 using Fsel.Sender.Domain.Models.Commands;
 using Fsel.Sender.Domain.Models.Entities;
 using Fsel.Sender.Domain.ValueSettings;
@@ -24,19 +27,30 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         private readonly SESWrapper _wrapper;
         private readonly ISystemService _systemService;
         private readonly IMediator _mediator;
+        private readonly IUserService _userService;
 
-        public SendEmailCommandHandler(AppSetting appSetting, SESWrapper wrapper, ISystemService systemService, IMediator mediator)
+        public SendEmailCommandHandler(AppSetting appSetting, SESWrapper wrapper, ISystemService systemService, IMediator mediator, IUserService userService)
         {
             _appSetting = appSetting;
             _wrapper = wrapper;
             _systemService = systemService;
             _mediator = mediator;
+            _userService = userService;
         }
 
         public async Task<MethodResult<bool>> Handle(SendEmailCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
+
+            if (request.Template.HasValue)
+            {
+                var checkSenderSetting = await CheckSenderSetting(request.ToEmails.ToList() ?? new List<string>(), request.Template.Value);
+                if (checkSenderSetting.Any())
+                {
+                    request.ToEmails = checkSenderSetting;
+                }
+            }
 
             var bccEmail = _appSetting.EmailConfig?.BCCEmail;
             if (bccEmail != null && bccEmail.Count > 0)
@@ -147,6 +161,31 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
         public async Task SendEmail(SendEmailRequest emailRequest)
         {
             await _wrapper.SendEmailAsync(emailRequest);
+        }
+
+        private async Task<List<string>> CheckSenderSetting(List<string> emails, EnumSenderTemplate template)
+        {
+            var senderSettingQuerys = await _userService.GetUserSettingsByEmailsQuery(new GetUserSettingsByEmailsModel { Emails = emails });
+            var senderSettings = senderSettingQuerys.Content?.Result?.ToList();
+            if (!senderSettingQuerys.IsSuccessStatusCode || senderSettings == null || !senderSettings.Any())
+            {
+                return new List<string>();
+            }
+
+            List<string> emailNotActives = new List<string>();
+
+            emails.ForEach(email =>
+            {
+                var senderSetting = senderSettings.FirstOrDefault(x => x.Email?.Trim().ToLower(CultureInfo.CurrentCulture) == email.Trim().ToLower(CultureInfo.CurrentCulture));
+                if (senderSetting != null && senderSetting.UserSenderSettings != null && senderSetting.UserSenderSettings.Any(c => !c.IsActive && c.TemplateEmails != null && c.TemplateEmails.Any(m => m == template)))
+                {
+                    emailNotActives.Add(email);
+                }
+            });
+
+            emails.RemoveAll(x => emailNotActives.Any(c => c.ToLower(CultureInfo.CurrentCulture).Trim() == x.ToLower(CultureInfo.CurrentCulture).Trim()));
+
+            return emails;
         }
     }
 }

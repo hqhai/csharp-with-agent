@@ -98,15 +98,15 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             };
 
             //Lấy những học sinh bật thông báo Gửi Email hàng tuần
-            var studentFilter = await _userService.GetListUserSetting(query);
-            var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
+            //var studentFilter = await _userService.GetListUserSetting(query);
+            //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
 
-            if (studentFilterResult == null || studentFilterResult.Count == 0)
-            {
-                return methodResult;
-            }
+            //if (studentFilterResult == null || studentFilterResult.Count == 0)
+            //{
+            //    return methodResult;
+            //}
             //filter những học sinh bật thông báo email.
-            students = students.Where(x => x.Human != null && studentFilterResult.Contains(x.Human.UserId)).OrderBy(x => x.Human!.Email).ToList();
+            //students = students.Where(x => x.Human != null && studentFilterResult.Contains(x.Human.UserId)).OrderBy(x => x.Human!.Email).ToList();
 
             var userIds = students.Where(p => p.Human != null && p.Human.UserId.HasValue).Select(x => x.Human!.UserId!.Value).Distinct().ToList();
 

@@ -82,5 +82,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/token-history/create-history-deduct-coin-of-student")]
         Task<IApiResponse<MethodResult<bool>>> CreateHistoryDeductCoinOfStudent([Body] CreateHistoryDeductCoinOfStudentCommandModel query);
+
+        [Get("/v1/sender-config")]
+        Task<IApiResponse<MethodResult<IList<SenderConfigModel>>>> GetSenderConfigs();
     }
 }
