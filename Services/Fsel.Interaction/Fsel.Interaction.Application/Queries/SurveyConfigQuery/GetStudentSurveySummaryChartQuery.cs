@@ -97,7 +97,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                                 {
                                     Answer = answerQuestion.Content,
                                     TotalAnswer = countAnswer,
-                                    PercentAnswer = ((double)countAnswer / totalCount) * 100,
+                                    PercentAnswer = countAnswer <= 0 ? 0 : ((double)countAnswer / totalCount) * 100,
                                 });
                             }
                             else
@@ -114,7 +114,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                                             {
                                                 Answer = answerOther.Other ?? answerOther.Content,
                                                 TotalAnswer = 1,
-                                                PercentAnswer = (1.0 / totalCount) * 100,
+                                                PercentAnswer = totalCount <= 0 ? 0 : (1.0 / totalCount) * 100,
                                             });
                                         }
                                     }

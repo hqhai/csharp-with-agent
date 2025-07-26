@@ -8,12 +8,14 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Caching;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Application.Services.UserServices;
     using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.Entities;
+    using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
     using Fsel.Shared.Enums;
@@ -123,10 +125,12 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 var checkSurveyPT = checkSurveyPTResult.Result;
                 if (!checkSurveyPT)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(checkSurveyPT));
+                    methodResult.AddErrorBadRequest(nameof(EnumSurveyErrorCode.NoSurvey), nameof(checkSurveyPT));
                     return methodResult;
                 }
             }
+
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
             var surveyConfig = await _surveyConfigRepository.Queryable.Include(p => p.SurveyQuestions).FirstOrDefaultAsync(p => p.Id == request.SurveyConfigId, cancellationToken);
             if (surveyConfig == null)
@@ -135,15 +139,15 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 return methodResult;
             }
 
+            if (surveyConfig.Status == EnumSurveyConfigStatus.InActive || currentDate < surveyConfig.StartDate || currentDate > surveyConfig.EndDate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSurveyErrorCode.SurveyExpired), nameof(surveyConfig));
+                return methodResult;
+            }
+
             var surveyQuestionIds = surveyConfig.SurveyQuestions.Select(p => p.Id).ToList();
 
             var customerSurveyEntities = await _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId).Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
-
-            if (customerSurveyEntities != null && customerSurveyEntities.Any() && customerSurveyEntities.First().CustomerSurveyGroupId.HasValue)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(customerSurveyEntities));
-                return methodResult;
-            }
 
             var newCustomerSurveys = new List<CustomerSurvey>();
             var updateCustomerSurveys = new List<CustomerSurvey>();
