@@ -36,6 +36,7 @@ namespace Fsel.Shared.Enums
 
         //Version 1.1
         CompletedStreakLogin,
+
         CompleteCourse,
         UpgradeOrder,
         SubcriptionNotice,
@@ -60,6 +61,7 @@ namespace Fsel.Shared.Enums
         AddCoinBuyCourse,
         NullForbiddenClassForum,
         ForbiddenClassForum,
-        LanguageNotEnglish
+        LanguageNotEnglish,
+        SurveyAssignment
     }
 }

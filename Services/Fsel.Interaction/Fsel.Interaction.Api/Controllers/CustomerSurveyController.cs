@@ -12,6 +12,7 @@ namespace Fsel.Interaction.Api.Controllers
     using Fsel.Interaction.Application.Queries.SurveyConfigQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +20,7 @@ namespace Fsel.Interaction.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/customerSurvey")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class CustomerSurveyController : ControllerBase
     {
         private readonly IMediator _mediator;

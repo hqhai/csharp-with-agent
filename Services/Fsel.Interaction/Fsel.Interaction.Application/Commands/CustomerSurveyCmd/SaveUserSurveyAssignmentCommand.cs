@@ -6,9 +6,13 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Caching;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -23,12 +27,16 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly IUserSurveyAssignmentRepository _userSurveyAssignmentRepository;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
+        private readonly NotificationMessagePublisher _notificationMessagePublisher;
+        private readonly ICacheService<UserSurveyAssignment> _cacheService;
 
-        public SaveUserSurveyAssignmentCommandHandler(IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, IMapper mapper)
+        public SaveUserSurveyAssignmentCommandHandler(IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, IMapper mapper, NotificationMessagePublisher notificationMessagePublisher, ICacheService<UserSurveyAssignment> cacheService)
         {
             _userSurveyAssignmentRepository = userSurveyAssignmentRepository;
             _authContext = authContext;
             _mapper = mapper;
+            _notificationMessagePublisher = notificationMessagePublisher;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<bool>> Handle(SaveUserSurveyAssignmentCommand request, CancellationToken cancellationToken)
@@ -58,23 +66,38 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 userSurveyAssignment = new UserSurveyAssignment() { IsSurveyQuestBoard = true };
             }
 
-            if (!userSurveyAssignment.IsValid())
-            {
-                return methodResult;
-            }
-
             if (userSurveyAssignment != null)
             {
-                var userSurveyAssignments = new List<UserSurveyAssignment>() { userSurveyAssignment };
+                if (!userSurveyAssignment.IsValid())
+                {
+                    return methodResult;
+                }
+
+                var key = $"SaveUserSurveyAssignment_{_authContext.CurrentUserId}";
+
+                var studentDoSurveyCache = await _cacheService.GetAsync(key);
+                if (studentDoSurveyCache != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                    return methodResult;
+                }
+                await _cacheService.SetAsync(key, userSurveyAssignment, TimeSpan.FromSeconds(5));
 
                 await _userSurveyAssignmentRepository.ExecuteTransactionAsync(async () =>
                 {
-                    await _userSurveyAssignmentRepository.BulkMergeAsync(userSurveyAssignments, x =>
-                    {
-                        x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.CourseLevel, c.CourseType, c.ProgressRequirement, c.IsSurveyQuestBoard };
-                    });
+                    userSurveyAssignment = _userSurveyAssignmentRepository.Add(userSurveyAssignment);
                     await _userSurveyAssignmentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     methodResult.StatusCode = StatusCodes.Status201Created;
+
+                    await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel()
+                    {
+                        UserIds = new List<Guid>() { _authContext.CurrentUserId },
+                        Type = EnumNotificationType.LinkPage,
+                        Content = EnumNotificationContent.SurveyAssignment,
+                        ObjectId = userSurveyAssignment.Id,
+                        PlatformCode = EnumPlatformCode.LMS
+                    }, cancellationToken);
+
                     methodResult.Result = true;
                     return methodResult;
                 });

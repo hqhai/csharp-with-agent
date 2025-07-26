@@ -8,6 +8,7 @@ using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
 using Fsel.Interaction.Application.Queries.SurveyConfigQuery;
 using Fsel.Interaction.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,7 @@ namespace Fsel.Interaction.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/survey-config")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class SurveyConfigController : ControllerBase
     {
         private readonly IMediator _mediator;
