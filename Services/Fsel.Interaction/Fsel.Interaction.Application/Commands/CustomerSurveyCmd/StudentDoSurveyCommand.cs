@@ -18,6 +18,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Interaction.Domain.Enums.ErrorCodes;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.CommandModels.CustomerSurveys;
+    using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -167,6 +168,20 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                     return methodResult;
                 }
 
+                if (surveyQuestion.Type == EnumSurveyQuestion.ShortAnswer && answer.Answer == null)
+                {
+                    answer.Answer = new List<AnswerSurveyModel>()
+                    {
+                        new AnswerSurveyModel()
+                        {
+                            Id = 0,
+                            Content = null,
+                            Image = null,
+                            IsOther = false,
+                            Other = null
+                        }
+                    };
+                }
                 var existAnswer = customerSurveyEntities?.FirstOrDefault(p => p.SurveyQuestionId == answer.Id);
                 if (existAnswer != null)
                 {
