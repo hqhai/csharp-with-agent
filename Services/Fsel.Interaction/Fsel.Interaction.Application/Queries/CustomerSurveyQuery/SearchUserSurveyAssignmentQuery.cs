@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
+namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
 {
     using System.Linq;
     using System.Linq.Dynamic.Core;
@@ -128,7 +128,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
 
             deleteSurveyAssignment.ForEach(surveyAssignment => { userSurveyAssignments.Remove(surveyAssignment); });
 
-            methodResult.Result = userSurveyAssignments;
+            methodResult.Result = userSurveyAssignments.OrderByDescending(p => p.IsSurveyQuestBoard).ToList();
             return methodResult;
         }
 
