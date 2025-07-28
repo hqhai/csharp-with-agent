@@ -47,52 +47,57 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
-            var unitQuery = _unitRepository.Queryable.Where(p => !p.IsArchive)
-                                    .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                    .Include(unit => unit.UnitLessons.Where(y => !y.IsDeleted))
-                                    .ThenInclude(unitLesson => unitLesson.Lesson)
-                                    .ThenInclude(lesson => lesson!.LessonVideos.Where(y => !y.IsDeleted))
-                                    .ThenInclude(lessonVideo => lessonVideo.Video)
+            var baseQuery = _unitRepository.Queryable.Where(p => !p.IsArchive);
 
-                            .Select(unit => new UnitSearchModel
-                            {
-                                Id = unit.Id,
-                                Name = unit.Name,
-                                Code = unit.Code,
-                                OriginalId = unit.OriginalId,
-                                IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
-                                CourseLevel = unit.CourseLevel,
-                                CreatedDate = unit.CreatedDate,
-                                CreatedFullName = unit.CreatedFullName,
-                                CreatedUserId = unit.CreatedUserId,
-                                UpdatedDate = unit.UpdatedDate,
-                                UpdatedUserId = unit.UpdatedUserId,
-                                UpdatedFullName = unit.UpdatedFullName,
-                                TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
-                                                .SelectMany(lv => lv!.LessonVideos.Where(n => !n.IsDeleted))
-                                                .Select(v => v.Video)
-                                                .Select(n => n!.TeacherId).ToList()
-                            });
+            var filteredQuery = baseQuery;
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 if (Guid.TryParse(request.Keyword, out var guid))
                 {
-                    unitQuery = unitQuery.Where(m => m.Id == guid);
+                    filteredQuery = filteredQuery.Where(m => m.Id == guid);
                 }
                 else
                 {
-                    var unitCodeQuery = unitQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
-                    var unitNameQuery = unitQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
-                    unitQuery = unitCodeQuery.Union(unitNameQuery);
+                    var unitCodeQuery = filteredQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    var unitNameQuery = filteredQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+
+                    filteredQuery = unitCodeQuery.Union(unitNameQuery);
                 }
             }
 
             if (request.CourseLevel != null)
             {
-                unitQuery = unitQuery.Where(m => m.CourseLevel == request.CourseLevel);
+                filteredQuery = filteredQuery.Where(m => m.CourseLevel == request.CourseLevel);
             }
+
+            filteredQuery = filteredQuery
+                .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
+                .Include(unit => unit.UnitLessons.Where(y => !y.IsDeleted))
+                    .ThenInclude(unitLesson => unitLesson.Lesson)
+                    .ThenInclude(lesson => lesson!.LessonVideos.Where(y => !y.IsDeleted))
+                    .ThenInclude(lessonVideo => lessonVideo.Video);
+
+            var unitQuery = filteredQuery.Select(unit => new UnitSearchModel
+            {
+                Id = unit.Id,
+                Name = unit.Name,
+                Code = unit.Code,
+                OriginalId = unit.OriginalId,
+                IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
+                CourseLevel = unit.CourseLevel,
+                CreatedDate = unit.CreatedDate,
+                CreatedFullName = unit.CreatedFullName,
+                CreatedUserId = unit.CreatedUserId,
+                UpdatedDate = unit.UpdatedDate,
+                UpdatedUserId = unit.UpdatedUserId,
+                UpdatedFullName = unit.UpdatedFullName,
+                TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
+                            .SelectMany(lv => lv!.LessonVideos.Where(n => !n.IsDeleted))
+                            .Select(v => v.Video)
+                            .Select(n => n!.TeacherId).ToList()
+            });
 
             if (request.TeacherId.HasValue)
             {

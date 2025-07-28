@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Queues.Publishers;
     using Fsel.Identity.Application.Services.LmsCourseService;
@@ -66,7 +67,8 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(_authContext.CurrentUserId), _authContext.CurrentUserId);
                 return methodResult;
             }
-            var studentFocusTime = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
+            var studentFocusTimes = await _studentFocusTimeRepository.Queryable.Where(x => x.StudentId == student.Id && x.CreatedDate >= DateTime.UtcNow.AddDays(-1).Date).ToListAsync(cancellationToken);
+            var studentFocusTime = studentFocusTimes.Where(x => x.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date == DateTime.Now.Date).FirstOrDefault();
             if (studentFocusTime == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentFocusTime));
@@ -157,7 +159,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
 
                 #region Do QuestBoard
 
-                var days = DateTimeHelper.GetWeekDays(DateTime.UtcNow);
+                var days = Shared.Helpers.DateTimeHelper.GetWeekDays(DateTime.UtcNow);
                 var monDay = days.First();
                 var sunDay = days.Last();
 
