@@ -125,6 +125,8 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             user.UserName = phoneNumber;
             user.Id = Guid.NewGuid();
             user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
+            user.PhoneNumberConfirmed = true;
+            user.EmailConfirmed = true;
             await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
             await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
 

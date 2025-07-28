@@ -7,7 +7,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 
     public class ForgotPasswordModel
     {
-        public string? Email { get; set; }
+        [Required]
+        public string? Identity { get; set; }
 
         [DataType(DataType.Password)]
         [RegularExpression(RegexSettings.PasswordValid, ErrorMessage = "i18n_Password_is_not_valid")]
@@ -21,7 +22,8 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
         [Required(ErrorMessage = "i18n_Confirm_Password_cannot_be_empty.")]
         public string? ConfirmPassword { get; set; }
 
-        public Guid? VerifyId { get; set; }
+        [Required]
+        public string Token { get; set; }
 
         public string? ReturnUrl { get; set; }
     }

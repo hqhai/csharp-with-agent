@@ -3,7 +3,6 @@
 namespace Fsel.Identity.Application.Handlers.Implementations
 {
     using Fsel.Common.Caching;
-    using Fsel.Core.Localization;
     using Fsel.Identity.Application.Handlers.Interfaces;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Microsoft.Extensions.Localization;

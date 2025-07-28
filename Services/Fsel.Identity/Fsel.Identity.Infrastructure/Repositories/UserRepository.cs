@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Shared.Enums;
@@ -86,6 +87,19 @@ namespace Fsel.Identity.Infrastructure.Repositories
                 user.Code = $"PH_{weekNumber}{stt:0000}";
             }
 
+            return user;
+        }
+
+        public async Task<User> GetUserByIdentity(string identity)
+        {
+            if (!identity.IsValidEmail() && !identity.IsValidPhoneNumber())
+            {
+                return null;
+            }
+
+            var isEmail = identity.IsValidEmail();
+            var user = isEmail ? await _userManager.FindByEmailAsync(identity)
+                    : await DbContext.Set<User>().FirstOrDefaultAsync(x => x.PhoneNumber == identity);
             return user;
         }
     }

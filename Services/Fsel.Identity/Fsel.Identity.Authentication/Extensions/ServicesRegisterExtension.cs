@@ -40,6 +40,7 @@ namespace Fsel.Identity.Authentication.Extensions
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Services.AddScoped<IUserRegisterHandler, UserRegisterHandler>();
+            builder.Services.AddScoped<IForgotPasswordHandler, ForgotPasswordHandler>();
             builder.Services.AddScoped<IOtpHandlerPipeline<CheckBlockOtpHandler>, CheckBlockOtpHandler>();
             builder.Services.AddScoped<IOtpHandlerPipeline<CheckBlockSendOtpHandler>, CheckBlockSendOtpHandler>();
             builder.Services.AddScoped<IOtpHandlerPipeline<SendOtpHandler>, SendOtpHandler>();

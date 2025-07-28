@@ -30,14 +30,14 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
 
     public class OtpPipelineContext
     {
-        public OtpPipelineContext(string phoneNumber, OtpPurpose purpose, OtpStep step)
+        public OtpPipelineContext(string identity, OtpPurpose purpose, OtpStep step)
         {
-            PhoneNumber = phoneNumber;
+            Identity = identity;
             Purpose = purpose;
             Step = step;
         }
 
-        public string PhoneNumber { get; }
+        public string Identity { get; }
         public OtpPurpose Purpose { get; }
         public OtpProviderType OtpProviderType { get; set; } = OtpProviderType.Sms;
         public OtpStep Step { get; set; }
@@ -55,18 +55,18 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
         public bool Status { get; set; }
         public KeyValuePair<string, string>? ErrorMessage { get; set; }
 
-        public string BlockedOtpCacheKey => $"{PhoneNumber}:{Purpose}:Block_Send_And_Verify_Otp";
-        public string BlockedSendOtpCacheKey => $"{PhoneNumber}:{Purpose}:Otp_Send_Otp";
-        public string CountFailedVerifyOtpCacheKey => $"{PhoneNumber}:{Purpose}:Failed_Verify_Otp_Count";
-        public string CountSendOtpCacheKey => $"{PhoneNumber}:{Purpose}:Send_Otp_Count";
-        public string OtpCacheKey => $"{PhoneNumber}:{Purpose}:Otp";
+        public string BlockedOtpCacheKey => $"{Identity}:{Purpose}:Block_Send_And_Verify_Otp";
+        public string BlockedSendOtpCacheKey => $"{Identity}:{Purpose}:Otp_Send_Otp";
+        public string CountFailedVerifyOtpCacheKey => $"{Identity}:{Purpose}:Failed_Verify_Otp_Count";
+        public string CountSendOtpCacheKey => $"{Identity}:{Purpose}:Send_Otp_Count";
+        public string OtpCacheKey => $"{Identity}:{Purpose}:Otp";
     }
 
     public enum OtpPurpose
     {
         Register,
         Login,
-        ResetPassword,
+        ForgotPassword,
         ChangePhoneNumber
     }
 

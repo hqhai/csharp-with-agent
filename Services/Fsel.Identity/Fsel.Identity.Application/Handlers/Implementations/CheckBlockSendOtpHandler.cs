@@ -52,7 +52,11 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                             .Value.InjectParam(context.MinimumBetweenTwoSendsDuration.Value.Seconds.ToString()));
                         return;
                     }
-                    context.OtpProviderType = OtpProviderType.Zalo;
+
+                    if (context.OtpProviderType != OtpProviderType.Email)
+                    {
+                        context.OtpProviderType = OtpProviderType.Zalo;
+                    }
                 }
             }
             if (Next != null)
