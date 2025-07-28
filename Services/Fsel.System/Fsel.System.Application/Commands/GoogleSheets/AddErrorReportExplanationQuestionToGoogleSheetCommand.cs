@@ -46,7 +46,8 @@ namespace Fsel.System.Application.Commands.GoogleSheets
             var data = new List<List<string>>() {
                 new List<string>()
                 {
-                    request.VideoId.ToString() ,
+                    request.Id.ToString(),
+                    request.ExplanationType.ToString(),
                     request.CourseLevel.ToString(),
                     request.DisplayTime.ToString(CultureInfo.InvariantCulture),
                     request.QuestionId.ToString(),

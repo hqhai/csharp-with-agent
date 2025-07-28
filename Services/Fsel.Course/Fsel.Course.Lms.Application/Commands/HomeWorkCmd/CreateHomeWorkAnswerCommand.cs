@@ -170,15 +170,18 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd
 
             #endregion Validation
 
-            _homeWorkResultRepository.Update(homeWorkResult);
+            await _homeWorkResultRepository.BulkUpdateList(new List<HomeWorkResult> { homeWorkResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId };
+            });
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-            var homeworkresulttoday = _homeWorkResultRepository.Queryable.Where(x => x.CreatedUserId == _authContext.CurrentUserId);
-            var homeworkTest = homeworkresulttoday.ToList();
 
             if (homeWorkAnswers.Any())
             {
-                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers);
+                await _homeWorkAnswerRepository.BulkMergeAsync(homeWorkAnswers, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId, entity.IsDeleted };
+                });
             }
 
             methodResult.StatusCode = StatusCodes.Status201Created;

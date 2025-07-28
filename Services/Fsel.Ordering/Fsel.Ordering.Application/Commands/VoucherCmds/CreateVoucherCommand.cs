@@ -214,6 +214,13 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                             break;
                         }
                     }
+
+                    var voucherEntity = vouchers.First();
+                    if (!voucherEntity.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(voucher.ErrorMessages);
+                        return methodResult;
+                    }
                     await _voucherRepository.AddList(vouchers);
                 }
 

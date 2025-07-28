@@ -11,7 +11,7 @@ namespace Fsel.System.Domain.Models.CommandModels.CourseSuggestConfigs
 
         public int ToAge { get; set; }
 
-        public EnumPlacementTestLevel PlacementTestLevel { get; set; }
+        public EnumCourseLevel PlacementTestLevel { get; set; }
 
         public EnumCourseSuggestType Type { get; set; }
 

@@ -6,6 +6,7 @@ namespace Fsel.Interaction.Api.Controllers.Admin
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Interaction.Application.Commands.CommentCmd;
     using Fsel.Interaction.Application.Commands.StudentCmd;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -36,6 +37,18 @@ namespace Fsel.Interaction.Api.Controllers.Admin
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteListDataUserCommand { UserId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create action
+        /// </summary>
+        [HttpPost("tool-update-course-id")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ToolUpdateCourseId([FromBody] ToolUpdateCourseIdCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

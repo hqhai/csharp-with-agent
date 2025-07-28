@@ -38,7 +38,7 @@ namespace Fsel.Ordering.Domain.Entities
         /// Tên voucher
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(30, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(80, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         /// <summary>

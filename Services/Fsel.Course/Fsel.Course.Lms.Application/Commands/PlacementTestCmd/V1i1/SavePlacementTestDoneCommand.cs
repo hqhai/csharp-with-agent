@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
@@ -110,8 +111,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 ProcessLevel = placementTest.Level,
                 Status = EnumResultStatus.Process
             };
-            _placementTestGroupResultRepository.Add(placementTestGroupResult);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestGroupResultRepository.BulkMergeAsync(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.IsDeleted };
+            });
         }
 
         private async Task UpdatePlacementGroupResultDoneAsync(PlacementTestResult placementTestResult, EnumCourseLevel desiredLevel, EnumCourseLevel? level)
@@ -129,8 +132,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestGroupResult.CurrentLevel = SendMailHelper.GetPreviousEnumValue(level ?? default);
             placementTestGroupResult.Status = EnumResultStatus.Done;
             placementTestGroupResult.Percent = placementTestResult.Percent;
-            _placementTestGroupResultRepository.Update(placementTestGroupResult);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestGroupResultRepository.BulkUpdateList(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId };
+            });
         }
 
         private async Task AddPlacementTestResultAndGetPlacementTest(EnumCourseLevel desiredLevel, EnumPlacementTestLevel startingLevel, EnumPlacementTestLevel level, Guid studentId, CancellationToken cancellationToken)
@@ -159,8 +164,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 CorrectCount = correctValue.Item1,
                 CorrectTotal = correctValue.Item2,
             };
-            _placementTestResultRepository.Add(placementTestResult);
-            await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestId, c.IsDeleted };
+            });
         }
     }
 }

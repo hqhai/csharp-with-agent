@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Text.Json.Serialization;
 using Fsel.Common.ValueSettings;
 
 namespace Fsel.Ordering.Infrastructure.ValueSettings
@@ -16,6 +17,21 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public VoucherConfigs? VoucherConfigs { get; set; }
         public PurchaseSettings? PurchaseSettings { get; set; }
         public ResourceContent? ResourceContent { get; set; }
+        public BlindBoxConfigs? BlindBoxConfigs { get; set; }
+        public OrderConfigs? OrderConfigs { get; set; }
+        public MarketplacePremiumConfig? MarketplacePremiumConfig { get; set; }
+    }
+
+    public class BlindBoxConfigs
+    {
+        [JsonInclude]
+        private int[]? _packages;
+
+        public IReadOnlyList<int>? Packages
+        {
+            get => _packages;
+            set => _packages = value?.ToArray();
+        }
     }
 
     public class VoucherConfigs
@@ -112,5 +128,20 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public int Port { get; set; }
         public string? Username { get; set; }
         public string? Password { get; set; }
+    }
+
+    public class OrderConfigs
+    {
+        public int TrialPeriod { get; set; }
+    }
+
+    public class MarketplacePremiumConfig
+    {
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public string? BrandImage { get; set; }
+        public string? BrandName { get; set; }
+        public DateTime? StartDateButton { get; set; }
+        public DateTime? EndDateButton { get; set; }
     }
 }

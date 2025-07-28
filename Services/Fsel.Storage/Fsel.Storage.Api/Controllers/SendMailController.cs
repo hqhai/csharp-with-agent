@@ -3,7 +3,6 @@
 namespace Fsel.Storage.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Shared.Attributes;
@@ -12,8 +11,7 @@ namespace Fsel.Storage.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
-    [ApiVersion(ApiSettings.APIVersion1)]
-    [ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/send-mail")]
     [ApiController]
     public class SendMailController : ControllerBase

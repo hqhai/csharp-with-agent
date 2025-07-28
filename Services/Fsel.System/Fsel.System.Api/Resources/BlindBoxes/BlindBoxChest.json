@@ -1,0 +1,68 @@
+[
+  {
+    "id": "d9218ffd-70e6-4e05-a25e-37c585c6532e",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "name": "Rương 1",
+    "maxOpenCount": 10,
+    "openPrice": 90,
+    "index": 1,
+    "isLast": false,
+    "blindBoxId": "ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"
+  },
+  {
+    "id": "47e70b9d-ace8-42a8-b718-3119bc6359bf",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "name": "Rương 2",
+    "maxOpenCount": 20,
+    "openPrice": 90,
+    "index": 2,
+    "isLast": false,
+    "blindBoxId": "ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"
+  },
+  {
+    "id": "1632fece-f46e-4ce5-a374-13c74f61ae58",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "name": "Rương 3",
+    "maxOpenCount": 30,
+    "openPrice": 90,
+    "index": 3,
+    "isLast": false,
+    "blindBoxId": "ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"
+  },
+  {
+    "id": "99133400-9c62-40f4-b491-fe0d8a87bd18",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "name": "Rương 4",
+    "maxOpenCount": 40,
+    "openPrice": 90,
+    "index": 4,
+    "isLast": false,
+    "blindBoxId": "ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"
+  },
+  {
+    "id": "d298d36c-18a8-4843-876c-dbcb1b06018c",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "name": "Rương 5",
+    "maxOpenCount": 50,
+    "openPrice": 90,
+    "index": 5,
+    "isLast": false,
+    "blindBoxId": "ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"
+  },
+  {
+    "id": "374abb96-b10e-4fe7-82a7-79b20ec37548",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "name": "Rương 6",
+    "maxOpenCount": null,
+    "openPrice": 90,
+    "index": 6,
+    "isLast": true,
+    "blindBoxId": "ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"
+  }
+]

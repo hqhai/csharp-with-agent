@@ -5,6 +5,7 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base;
 using Fsel.Core.Entities;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Identity.Infrastructure.Configs;
 using Fsel.Shared.Constants;
 using MediatR;
@@ -13,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserToken>
+    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRole, UserLoginEntity, UserToken>
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
@@ -23,13 +24,20 @@ namespace Fsel.Identity.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(builder);
 
+            //Dùng khi tạo migration, comment lại sau khi tạo xong
+            builder.Ignore<OverallStudentModel>();
+            builder.Ignore<NumberStudentLearnOnSystemModel>();
+            builder.Ignore<SummaryDataOnCityModel>();
+
             builder.Entity<Role>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
             builder.HasSequence<int>(SqlSettings.Sequence.UserSequence).StartsAt(100000).IncrementsBy(1);
 
+            SeedMenus(builder);
             SeedPlatforms(builder);
             SeedRoles(builder);
+            SeedPermissions(builder);
 
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
@@ -52,19 +60,27 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new StudentCompetitionEventsEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentRankingEventEntityTypeConfiguration());
             builder.ApplyConfiguration(new CompetitionEventsEntityTypeConfiguration());
+            builder.ApplyConfiguration(new EventManagerEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserReferralEntityTypeConfiguration());
             builder.ApplyConfiguration(new EventRegistrationEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserDeletionEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentDailyStreakEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserSchoolEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserTokenEntityTypeConfiguration());
+            builder.ApplyConfiguration(new PermissionEntityTypeConfiguration());
+            builder.ApplyConfiguration(new RoleClaimEntityTypeConfiguration());
+            builder.ApplyConfiguration(new MenuEntityTypeConfiguration());
+            builder.ApplyConfiguration(new PermissionGroupEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserGroupMemberShipEntityTypeConfiguration());
+            builder.ApplyConfiguration(new StudentEditHistoryEntityTypeConfiguration());
         }
 
         #region Db Set
 
         public override DbSet<User> Users { get; set; }
-        public DbSet<UserToken> UserTokens { get; set; }
-        public DbSet<Role> Roles { get; set; }
+        public override DbSet<UserToken> UserTokens { get; set; }
+        public override DbSet<Role> Roles { get; set; }
+        public override DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Human> Humans { get; set; }
         public DbSet<Teacher> Teachers { get; set; }
         public DbSet<Student> Students { get; set; }
@@ -84,13 +100,33 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<StudentCompetitionEvent> StudentCompetitionEvents { get; set; }
         public DbSet<StudentRankingEvent> StudentRankingEvents { get; set; }
         public DbSet<CompetitionEvent> CompetitionEvents { get; set; }
+        public DbSet<EventManager> EventManagers { get; set; }
         public DbSet<UserReferral> UserReferrals { get; set; }
         public DbSet<EventRegistration> EventRegistrations { get; set; }
         public DbSet<UserDeletion> UserDeletions { get; set; }
         public DbSet<UserSchool> UserSchools { get; set; }
         public DbSet<SchoolImportHistory> SchoolImportHistorys { get; set; }
+        public DbSet<StudentEventLearningRecord> StudentEventLearningRecords { get; set; }
+        public DbSet<UserGroup> UserGroups { get; set; }
+        public DbSet<UserGroupMemberShip> UserGroupMemberShips { get; set; }
+        public DbSet<StudentEditHistory> StudentEditHistories { get; set; }
+        public DbSet<Menu> Menus { get; set; }
 
         #endregion Db Set
+
+        #region report
+
+        public DbSet<OverallStudentModel> OverallStudentResults { get; set; }
+
+        public DbSet<NumberStudentLearnOnSystemModel> NumberStudentLearnOnSystemResults { get; set; }
+
+        public DbSet<SummaryDataOnCityModel> SummaryDataOnCityResults { get; set; }
+
+        #endregion report
+
+        public DbSet<RoleClaim> RoleClaims { get; set; }
+        public DbSet<PermissionGroup> PermissionGroups { get; set; }
+        public DbSet<Permission> Permissions { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -127,6 +163,38 @@ namespace Fsel.Identity.Infrastructure
             {
                 ArgumentNullException.ThrowIfNull(roles);
                 builder.Entity<Role>().HasData(roles);
+            }
+        }
+
+        private static void SeedPermissions(ModelBuilder builder)
+        {
+            var pathPermissionGroup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PermissionGroupName);
+            var permissionGroups = ConvertHelper.DeserializeFromFilePath<IList<PermissionGroup>>(pathPermissionGroup);
+
+            ArgumentNullException.ThrowIfNull(permissionGroups);
+            builder.Entity<PermissionGroup>().HasData(permissionGroups);
+
+            var pathPermission = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PermissionName);
+            var permissions = ConvertHelper.DeserializeFromFilePath<IList<Permission>>(pathPermission);
+
+            ArgumentNullException.ThrowIfNull(permissions);
+            builder.Entity<Permission>().HasData(permissions);
+
+            var pathRoleClaim = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.RoleClaimName);
+            var roleClaims = ConvertHelper.DeserializeFromFilePath<IList<RoleClaim>>(pathRoleClaim);
+
+            ArgumentNullException.ThrowIfNull(roleClaims);
+            builder.Entity<RoleClaim>().HasData(roleClaims);
+        }
+
+        private static void SeedMenus(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.MenuName);
+            var menus = ConvertHelper.DeserializeFromFilePath<IList<Menu>>(path);
+            ArgumentNullException.ThrowIfNull(menus);
+            if (menus != null)
+            {
+                builder.Entity<Menu>().HasData(menus);
             }
         }
     }

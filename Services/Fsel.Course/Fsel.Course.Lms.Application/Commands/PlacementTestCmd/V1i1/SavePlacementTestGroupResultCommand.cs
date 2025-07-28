@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 {
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -51,8 +52,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 return methodResult;
             }
             placementTestGroupResult.ChooseLevel = request.ChooseCourseLevel;
-            _placementTestGroupResultRepository.Update(placementTestGroupResult);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _placementTestGroupResultRepository.BulkUpdateList(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId };
+            });
             methodResult.Result = true;
             return methodResult;
         }

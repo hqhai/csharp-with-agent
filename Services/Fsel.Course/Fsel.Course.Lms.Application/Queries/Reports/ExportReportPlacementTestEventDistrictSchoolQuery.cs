@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using OfficeOpenXml;
+    using System.IO;
 
     public class ExportReportPlacementTestEventDistrictSchoolQuery : IRequest<MethodResult<Stream>>
     {
@@ -112,9 +113,12 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             MemoryStream memoryStream = new MemoryStream();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
-            using (var excelPackage = new ExcelPackage(ResourceSettings.ReportPTEventDistrictSchool))
+            // Luôn đọc template dưới dạng stream chỉ-đọc để tránh ghi đè file gốc
+            using (var templateStream = new FileStream(ResourceSettings.ReportPTEventDistrictSchool, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (var excelPackage = new ExcelPackage(templateStream))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
+
                 if (reportPlacementTestEvents != null && reportPlacementTestEvents.Any())
                 {
                     int startRow = 9;
@@ -130,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                             {
                                 index++,
                                 item.LocationName ?? string.Empty,
-                                reportPt.SchoolName?? string.Empty,
+                                reportPt.SchoolName ?? string.Empty,
                                 reportPt.NumberValidStudentAccount,
                                 reportPt.NumberStudentAccountRegister,
                                 reportPt.TotalStudentAccount,
@@ -149,17 +153,19 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                                     row.Add(reportLevel.Percent + "%");
                                 }
                             }
+
                             dataRows.Add(row.ToArray());
                         }
                     }
+
                     if (dataRows.Count > 0)
                     {
                         excelWorksheet.Cells[startRow, 1].LoadFromArrays(dataRows);
                     }
                 }
 
-                excelPackage.Save();
-                memoryStream = new MemoryStream(excelPackage.GetAsByteArray());
+                // Lưu kết quả vào MemoryStream thay vì ghi đè file template
+                excelPackage.SaveAs(memoryStream);
             }
 
             memoryStream.Position = 0L;

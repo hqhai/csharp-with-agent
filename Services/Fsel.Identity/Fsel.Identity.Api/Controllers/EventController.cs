@@ -2,19 +2,25 @@
 
 using System.Net;
 using Asp.Versioning;
+using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.CompetitionEventsCmd;
+using Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd;
 using Fsel.Identity.Application.Queries.CompetitionEventsQuery;
+using Fsel.Identity.Application.Queries.EventQuery;
 using Fsel.Identity.Application.Services.SystemService.Model;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
+using Fsel.Identity.Domain.Models;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -22,15 +28,18 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
+    [Permission]
     public class EventController : BaseController
     {
         private readonly IMediator _mediator;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IMapper _mapper;
 
-        public EventController(IMediator mediator, ICompetitionEventsRepository competitionEventsRepository)
+        public EventController(IMediator mediator, ICompetitionEventsRepository competitionEventsRepository, IMapper mapper)
         {
             _mediator = mediator;
             _competitionEventsRepository = competitionEventsRepository;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -102,8 +111,11 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
         {
-            var result = await _competitionEventsRepository.GetListResultAsync<CompetitionEventsModel>(query);
-            return result.GetActionResult();
+            var competitionEvents = await _competitionEventsRepository.Queryable.ToListAsync(CancellationToken.None);
+            var competitionEventModels = _mapper.Map<IList<CompetitionEventsModel>>(competitionEvents);
+            var methodResult = new MethodResult<IList<CompetitionEventsModel>>();
+            methodResult.Result = competitionEventModels;
+            return methodResult.GetActionResult();
         }
 
         /// <summary>
@@ -176,6 +188,64 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetEventsByEventCodeStr([FromQuery] GetCompetitionEventsToEventCodeStrQuery query)
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(query));
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// aggregate data students in event
+        /// </summary>
+        [HttpPost("aggregate-data-students-in-event")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AggregateDataStudentsInEvent()
+        {
+            var commandResult = await _mediator.Send(new AggregateDataStudentsInEventCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get student event learning record
+        /// </summary>
+        [HttpGet("get-student-event-learning-record")]
+        [ProducesResponseType(typeof(MethodResult<StudentEventLearningRecordModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentEventLearningRecord([FromQuery] GetStudentEventLearningRecordQuery query)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(nameof(query));
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// update student event learning record
+        /// </summary>
+        [HttpPost("student-event-view-learning-record")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStudentEventLearningRecord([FromBody] StudentEventViewLearningRecordCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpGet("get-tree-events")]
+        [ProducesResponseType(typeof(MethodResult<IList<CompetitionEvent>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTreeCompetitionEvent([FromQuery] GetTreeCompetitionEventQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get studentIds in event by studentIds
+        /// </summary>
+        [HttpPost("get-student-ids-in-event-by-student-ids")]
+        [ProducesResponseType(typeof(MethodResult<List<Guid>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentsInEventByStudentIds([FromBody] GetStudentIdsInEventByStudentIdsQuery query)
+        {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }

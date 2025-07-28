@@ -54,6 +54,7 @@ builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<AddExpiredDateForStudentPublisher>();
 builder.Services.AddScoped<ChangeStatusOrderPublisher>();
 builder.Services.AddScoped<AddFeatureMissionPublisher>();
+builder.Services.AddScoped<AddCoinWhenCoursePurchasedPublisher>();
 
 //Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

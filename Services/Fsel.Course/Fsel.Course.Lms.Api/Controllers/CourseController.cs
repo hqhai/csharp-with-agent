@@ -14,6 +14,7 @@ using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
 using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Models.ShareModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -111,6 +112,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             MethodResult<CourseResultModel> commandResult = await _mediator.Send(new StartCourseResultCommand { CourseResultId = courseResultId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get course for choose level
+        /// </summary>
+        [HttpGet("get-course-for-choose-level")]
+        [ProducesResponseType(typeof(MethodResult<CourseForChooseLevelModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetCourseForChooseLevel([FromQuery] GetCourseForChooseLevelQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

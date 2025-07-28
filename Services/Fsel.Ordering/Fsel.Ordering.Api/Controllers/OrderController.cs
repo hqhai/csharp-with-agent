@@ -5,6 +5,7 @@ namespace Fsel.Ordering.Api.Controllers
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Commands.OrderCmds;
@@ -20,6 +21,7 @@ namespace Fsel.Ordering.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/order")]
     [ApiController]
+    [Permission]
     public class OrderController : BaseController
     {
         private readonly IMediator _mediator;
@@ -139,6 +141,18 @@ namespace Fsel.Ordering.Api.Controllers
         {
             MethodResult<IList<OrderSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Order Configure add user to blind bag event
+        /// </summary>
+        [HttpPost("get-orders-blind-bag-event")]
+        [ProducesResponseType(typeof(MethodResult<IList<OrderModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetRecentOrders([FromBody] GetRecentOrdersToUserIdsQuery query)
+        {
+            MethodResult<IList<OrderModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

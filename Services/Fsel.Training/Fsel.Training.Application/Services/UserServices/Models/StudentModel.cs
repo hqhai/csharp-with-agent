@@ -17,6 +17,7 @@ namespace Fsel.Training.Application.Services.UserServices.Models
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
+        public DateTime? ExpiredDate { get; set; }
         public HumanModel? Human { get; set; }
     }
 }

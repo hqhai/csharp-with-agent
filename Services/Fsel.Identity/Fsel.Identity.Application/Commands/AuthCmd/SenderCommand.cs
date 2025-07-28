@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Identity.Application.Services;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using MediatR;
     using Refit;
@@ -59,7 +60,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                 if (!sendResult.IsSuccessStatusCode)
                 {
-                    methodResult.AddErrorBadRequest(sendResult.Content?.ErrorMessages);
+                    if (sendResult.Content != null)
+                    {
+                        methodResult.AddErrorBadRequest(sendResult.Content.ErrorMessages);
+                    }
+                    else
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr), sendResult.Error?.Message);
+                    }
                     return methodResult;
                 }
             }

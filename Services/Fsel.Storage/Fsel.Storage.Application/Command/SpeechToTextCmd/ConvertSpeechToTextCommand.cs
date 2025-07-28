@@ -5,6 +5,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Enums;
     using Fsel.Storage.Application.Services.AmazonS3Services;
     using Fsel.Storage.Application.Services.OpenAIServices;
@@ -25,11 +26,14 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
         private readonly IOpenAIService _openAIService;
         private readonly IAmazonS3Service _amazonS3Service;
         private const string AIModel = "whisper-1";
+        private readonly ICognitiveProvider _cognitiveProvider;
 
-        public ConvertSpeechToTextCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service)
+
+        public ConvertSpeechToTextCommandHandler(IOpenAIService openAIService, IAmazonS3Service amazonS3Service, ICognitiveProvider cognitiveProvider)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
+            _cognitiveProvider = cognitiveProvider;
         }
 
         public async Task<MethodResult<TranscriptFileModel>> Handle(ConvertSpeechToTextCommand request, CancellationToken cancellationToken)
@@ -47,16 +51,24 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
             var streamPart = new StreamPart(stream, request.FormFile.FileName, request.FormFile.ContentType);
 
             var content = await _openAIService.SpeechToTextByAIAsync(streamPart, AIModel);
-            if (!content.IsSuccessStatusCode)
+
+            if (content.Content == null || !content.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(content.Error?.Message);
+                var contentDeepgram = await _cognitiveProvider.GetTranscriptionAsync(request.FormFile, cancellationToken);
+                var fileInfomationDeepGram = await UpLoadFileAsync(request.FormFile);
+                methodResult.Result = new TranscriptFileModel { FilePath = fileInfomationDeepGram.Result, Content = contentDeepgram ?? string.Empty };
                 return methodResult;
             }
 
-            var fileInfomation = await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, request.FormFile, EnumFolderType.Videos, false, false);
+            var fileInfomation = await UpLoadFileAsync(request.FormFile);
             var convertContent = !string.IsNullOrEmpty(content.Content) ? JsonConvert.DeserializeObject<ContentModel>(content.Content)?.Text : string.Empty;
             methodResult.Result = new TranscriptFileModel { FilePath = fileInfomation.Result, Content = convertContent };
             return methodResult;
+        }
+
+        public async Task<MethodResult<string?>> UpLoadFileAsync(IFormFile formFile)
+        {
+            return await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
         }
     }
 }

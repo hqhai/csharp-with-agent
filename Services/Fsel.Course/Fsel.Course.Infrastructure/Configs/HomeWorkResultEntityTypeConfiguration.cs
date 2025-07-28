@@ -16,13 +16,13 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Status)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumResultStatus>());
 
             builder.Property(e => e.SubmissionCount)
-                .HasMaxLength(100)
+                .HasMaxLength(20)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumSubmissionCount>());
@@ -37,7 +37,7 @@ namespace Fsel.Course.Infrastructure.Configs
             .HasForeignKey(b => b.HomeWorkId)
             .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(c => new { c.LessonResultId, c.HomeWorkId, c.StudentId }).IsUnique();
+            builder.HasIndex(c => new { c.LessonResultId, c.HomeWorkId, c.StudentId }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.StudentId });
             builder.HasIndexIncludeAllProperties(c => new { c.StudentId });
         }

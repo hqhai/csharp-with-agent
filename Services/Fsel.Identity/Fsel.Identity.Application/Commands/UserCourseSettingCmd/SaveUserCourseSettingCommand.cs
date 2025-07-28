@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Commands.UserCourseSettingCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -20,18 +21,25 @@ namespace Fsel.Identity.Application.Commands.UserCourseSettingCmd
     {
         private readonly IUserCourseSettingRepository _userCourseSettingRepository;
         private readonly IMapper _mapper;
+        private readonly UserManager<User> _userManager;
         private const int MaxValue = 3;
 
-        public SaveUserCourseSettingCommandHandler(IUserCourseSettingRepository userCourseSettingRepository, IMapper mapper)
+        public SaveUserCourseSettingCommandHandler(IUserCourseSettingRepository userCourseSettingRepository, IMapper mapper, UserManager<User> userManager)
         {
             _userCourseSettingRepository = userCourseSettingRepository;
             _mapper = mapper;
+            _userManager = userManager;
         }
 
         public async Task<MethodResult<UserCourseSettingModel>> Handle(SaveUserCourseSettingCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserCourseSettingModel>();
+            var user = await _userManager.Users.Where(x => x.Id == request.UserId).FirstOrDefaultAsync(cancellationToken);
+            if (user == null)
+            {
+                return methodResult;
+            }
             var userCourseSetting = await _userCourseSettingRepository.Queryable.Where(x => !request.CourseLevel.HasValue || x.CourseLevel == request.CourseLevel)
                                                                                 .FirstOrDefaultAsync(x => x.Type == request.Type && x.UserId == request.UserId, cancellationToken);
             if (userCourseSetting == null)

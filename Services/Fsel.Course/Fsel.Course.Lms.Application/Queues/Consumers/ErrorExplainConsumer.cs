@@ -30,7 +30,8 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 Feedback = message.Feedback,
                 FeedbackExplanation = message.FeedbackExplanation,
                 QuestionId = message.QuestionId,
-                VideoResultId = message.VideoResultId
+                ExplanationType = message.ExplanationType,
+                ObjectResultId = message.ObjectResultId
             }).ConfigureAwait(false);
         }
     }

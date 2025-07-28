@@ -28,14 +28,16 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         private readonly AuthContext _authContext;
         private readonly IInteractionService _interactionService;
         private readonly IUserService _userService;
+        private readonly ILessonResultRepository _lessonResultRepository;
 
-        public GetOverallReportByStudentQueryHandler(ICourseResultRepository courseResultRepository, IClassForumResultRepository classForumResultRepository, AuthContext authContext, IInteractionService interactionService, IUserService userService)
+        public GetOverallReportByStudentQueryHandler(ICourseResultRepository courseResultRepository, IClassForumResultRepository classForumResultRepository, AuthContext authContext, IInteractionService interactionService, IUserService userService, ILessonResultRepository lessonResultRepository)
         {
             _courseResultRepository = courseResultRepository;
             _classForumResultRepository = classForumResultRepository;
             _authContext = authContext;
             _interactionService = interactionService;
             _userService = userService;
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task<MethodResult<OverallReportModel>> Handle(GetOverallReportByStudentQuery request, CancellationToken cancellationToken)
@@ -76,16 +78,18 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 return methodResult;
             }
 
-            var courseClassForumResult = await _classForumResultRepository.Queryable.Include(p => p.LessonResult).Where(p => p.LessonResult != null && p.LessonResult.CourseId == request.CourseId).ToListAsync(cancellationToken);
+            var classForumResults = from cfr in _classForumResultRepository.Queryable
+                                    join lr in _lessonResultRepository.Queryable on cfr.LessonResultId equals lr.Id
+                                    where cfr.StudentId == studentId && lr.CourseId == request.CourseId
+                                    select cfr;
 
-            var courseClassForumResultIds = courseClassForumResult.Select(p => p.Id).ToList();
-            var classForumResultIds = courseClassForumResult.Where(p => p.StudentId == studentId).Select(p => p.Id).ToList();
+            var classForumResultIds = classForumResults.Select(p => p.Id).ToList();
 
             var aggregateNumberOfLikesAndCommentsResult = await _interactionService.AggregateNumberOfLikesAndComments(new AggregateNumberOfLikesAndCommentsQueryModel
             {
                 UserId = userId ?? default,
                 ClassForumResultIds = classForumResultIds,
-                CourseClassForumResultIds = courseClassForumResultIds
+                CourseId = request.CourseId
             });
             var aggregateNumberOfLikesAndComments = aggregateNumberOfLikesAndCommentsResult.Content?.Result;
 

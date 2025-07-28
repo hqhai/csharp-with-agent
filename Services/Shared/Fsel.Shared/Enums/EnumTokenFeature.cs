@@ -14,6 +14,11 @@ namespace Fsel.Shared.Enums
         MarketPlace,
         QuestBoard,
         FriendMission,
-        FselEvent
+        FselEvent,
+        ReclaimGift,
+        RecallCoinBug,
+        BuyBlindBox,
+        ReceiveTokensBlindBox,
+        Payment
     }
 }

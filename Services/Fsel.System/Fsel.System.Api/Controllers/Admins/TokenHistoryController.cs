@@ -8,6 +8,7 @@ namespace Fsel.System.Api.Controllers.Admins
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.OtherCmd;
+    using Fsel.System.Application.Commands.TokenHistoryCmd;
     using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -56,6 +57,66 @@ namespace Fsel.System.Api.Controllers.Admins
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "templateAddCoinEvent.xlsx");
+        }
+
+        /// <summary>
+        /// Notification
+        /// </summary>
+        [HttpPost("survey-reward")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddCoinSurveyReward([FromBody] AddCoinSurveyRewardCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// recall gift
+        /// </summary>
+        [HttpPost("recall-gift")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RecallGift([FromBody] RecallGiftCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// recall coin referal code
+        /// </summary>
+        [HttpPost("recall-coin-referal-code")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> RecallCoinReferalCode([FromBody] RecallCoinReferalCodeCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// add coin buy course
+        /// </summary>
+        [HttpPost("add-coin-buy-course")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddCoinWhenCoursePurchased([FromBody] AddCoinWhenCoursePurchasedCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// add coin buy course
+        /// </summary>
+        [HttpPost("add-coin-fsel-event-reward")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AddCoinFselEventReward([FromBody] AddCoinFselEventRewardCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

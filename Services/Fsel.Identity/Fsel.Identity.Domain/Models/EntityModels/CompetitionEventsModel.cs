@@ -31,6 +31,16 @@ namespace Fsel.Identity.Domain.Models.EntityModels
             set { SchoolIdsStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
 
+        public string? DashboardEventConfigStr { get; set; }
+        public DashboardEventConfig? DashboardEventConfig
+        {
+            get
+            {
+                return Common.Helpers.ConvertHelper.Deserialize<DashboardEventConfig>(DashboardEventConfigStr);
+            }
+            set { DashboardEventConfigStr = Common.Helpers.ConvertHelper.Serialize(value); }
+        }
+
         public Guid? LocationId { get; set; }
         public Guid? ParentEventId { get; set; }
     }

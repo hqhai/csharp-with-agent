@@ -9,6 +9,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.EntityModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -48,6 +49,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             {
                 orders = await _orderRepository.Queryable
                                                .Include(p => p.Package)
+                                               .Include(p => p.Voucher)
                                                .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
                                                .ToListAsync(cancellationToken);
 
@@ -59,6 +61,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             {
                 orders = await _orderRepository.Queryable
                                                .Include(p => p.Package)
+                                               .Include(p => p.Voucher)
                                                .Where(x => request.UserIds.Contains(x.UserId))
                                                .ToListAsync(cancellationToken);
 
@@ -92,12 +95,13 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
 
             if (request.Status)
             {
-                orders = orders.Where(x => orderClients.Contains(x.UserId)).ToList();
+                orders = orders.Where(x => orderClients.Contains(x.UserId) && x.RevenueType == EnumPaymentRevenueType.Revenue).ToList();
             }
             else
             {
                 var userExpire = await _orderRepository.Queryable
                                                        .Include(p => p.Package)
+                                                       .Include(p => p.Voucher)
                                                        .Where(x => (x.ExpireDate >= request.StartDate) && (x.ExpireDate <= request.EndDate))
                                                        .ToListAsync(cancellationToken);
 
@@ -105,6 +109,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
 
                 if (userExpire == null || !userExpire.Any())
                 {
+                    methodResult.Result = orders;
                     return methodResult;
                 }
 

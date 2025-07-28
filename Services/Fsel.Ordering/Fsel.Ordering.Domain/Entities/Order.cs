@@ -13,27 +13,27 @@ namespace Fsel.Ordering.Domain.Entities
         /// Code Order
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
 
         /// <summary>
         /// Tên Người dùng
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
 
         /// <summary>
         /// Email Người dùng
         /// </summary>
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(70, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? Email { get; set; }
 
         /// <summary>
         /// SDT Người dùng
         /// </summary>
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(20, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PhoneNumber { get; set; }
 
         /// <summary>
@@ -120,7 +120,7 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Mã giới thiệu
         /// </summary>
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? ReferralCode { get; set; }
 
         #region Company invoice information
@@ -145,10 +145,10 @@ namespace Fsel.Ordering.Domain.Entities
         /// <summary>
         /// Mã số thuế
         /// </summary>
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? CompanyTaxCode { get; set; }
 
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(70, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? CompanyEmail { get; set; }
 
         #endregion Company invoice information

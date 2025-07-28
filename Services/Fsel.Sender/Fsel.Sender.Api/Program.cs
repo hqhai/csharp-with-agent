@@ -11,6 +11,7 @@ using Fsel.Sender.Infrastructure;
 using Fsel.Sender.Application.Services.SMSServices.IRIS;
 using Fsel.Sender.Application.Services.SMSServices.GAPIT;
 using Refit;
+using Fsel.Sender.Application.Services.ZaloServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.AddDbContexts<SenderDBContext>();
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.Services.AddScoped<IAmazonSimpleEmailService, AmazonSimpleEmailServiceClient>();
 builder.Services.AddScoped<IMessageHistoryRepository, MessageHistoryRepository>();
+builder.Services.AddScoped<IZaloService, ZaloService>();
 builder.Services.AddScoped<SESWrapper>();
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
 builder.Services.AddRefitClient<IIRISServiceDC>().ConfigureHttpClient(c => c.BaseAddress = new Uri(appSetting?.Services?.IRISApiUrlDC ?? string.Empty));

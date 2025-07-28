@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.Status)
-                  .HasMaxLength(100)
+                  .HasMaxLength(20)
                   .HasConversion(
                       v => v.ToString(),
                       v => v.EnumParse<EnumAnswerStatus>());
@@ -44,7 +44,7 @@ namespace Fsel.Course.Infrastructure.Configs
                        .HasForeignKey(b => b.VideoTimeCodeResultId)
                        .OnDelete(DeleteBehavior.SetNull);
 
-            builder.HasIndex(c => new { c.VideoResultId, c.QuestionId, c.VideoTimeCodeResultId }).IsUnique();
+            builder.HasIndex(c => new { c.VideoResultId, c.QuestionId, c.VideoTimeCodeResultId }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.QuestionId, c.VideoResultId }).IncludeValueProperties(x => new { x.CorrectCount });
         }
     }

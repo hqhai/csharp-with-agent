@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             foreach (var reportCompetitionEvent in reportCompetitionEvents)
             {
                 var studentDistrictIds = reportCompetitionEvent.StudentIds?.ToHashSet() ?? new HashSet<Guid>();
-                var placementTestResultReports = placementTestResultGroups.Where(x => studentIds.Contains(x.StudentId));
+                var placementTestResultReports = placementTestGroups.Where(x => studentDistrictIds.Contains(x.StudentId));
                 int numberStudentsCompletedPT = placementTestResultReports.Where(x => x.IsDonePT).Select(x => x.StudentId).Distinct().Count();
                 int numberStudentsProcessPT = placementTestResultReports.Where(x => !x.IsDonePT).Select(x => x.StudentId).Distinct().Count();
 

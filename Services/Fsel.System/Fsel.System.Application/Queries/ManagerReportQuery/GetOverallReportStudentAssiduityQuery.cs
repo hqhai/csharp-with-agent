@@ -37,6 +37,10 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
                 SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
                 Keyword = request.Keyword,

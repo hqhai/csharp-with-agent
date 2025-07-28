@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -61,9 +60,14 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             {
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListCourseType = request.ListCourseType,
+                ListCourseLevel = request.ListCourseLevel,
+
                 Keyword = request.Keyword,
                 LearningStatus = request.LearningStatus,
                 CourseLevel = request.CourseLevel,
@@ -90,7 +94,24 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                             studentIds = await _placementTestResultRepository.GetStudentPtIdsAsync(request.StartDate, request.EndDate, studentIds);
                         }
                         var studentPtGroups = await _placementTestGroupResultRepository.GetStudentIdsAsync(request.Status, studentIds, request.CurrentLevel, request.CourseLevel);
+
                         var studentPTIds = studentPtGroups.ToHashSet();
+                        if (request.Status.HasValue && request.Status == EnumCompletionStatus.InProgress && studentIds.Any())
+                        {
+                            var studentHasLearned = await _placementTestGroupResultRepository.Queryable
+                                                    .WhereBulkContains(studentIds, x => x.StudentId)
+                                                    .Select(x => x.StudentId)
+                                                    .ToListAsync(cancellationToken);
+                            var studentNotLearned = studentIds.Except(studentHasLearned).ToList();
+                            if (studentPTIds != null && studentPTIds.Any())
+                            {
+                                studentPTIds.UnionWith(studentNotLearned);
+                            }
+                            else
+                            {
+                                studentPTIds = studentNotLearned.ToHashSet();
+                            }
+                        }
                         students = students.Where(x => studentPTIds.Contains(x.Id)).ToList();
                     }
                     break;
@@ -102,16 +123,16 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                         var courseLearnIds = (await _managerProgressHelper.GetCourseLearnsAsync(courseResults)).Select(x => x.StudentId).ToHashSet();
                         students = students.Where(x => courseLearnIds.Contains(x.Id)).ToList();
                     }
-                    else if (request.IsSearchReport && request.SortBy.Any())
+                    else if (request.SortBy.Any())
                     {
                         IList<CourseCompleteModel> courseCompletes = new List<CourseCompleteModel>();
                         if (request.SortBy.Any(x => x.Property == nameof(CourseCompleteModel.UnitDisplayOrder)))
                         {
-                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterAsync(courseResults, request, request.EndDate);
+                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterAsync(courseResults, request, request.EndDate, request.IsSearchReport);
                         }
                         else
                         {
-                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterCountCompleteAsync(courseResults, request, request.EndDate);
+                            courseCompletes = await _managerProgressHelper.GetCourseCompletesFilterCountCompleteAsync(courseResults, request, request.EndDate, request.IsSearchReport);
                         }
                         var studentLearnIds = courseCompletes.Select(x => x.StudentId).ToHashSet();
                         students = students.Where(x => studentLearnIds.Contains(x.Id)).OrderBy(x => studentLearnIds.ToList().IndexOf(x.Id)).ToList();

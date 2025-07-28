@@ -107,14 +107,15 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
             var course = await _courseRepository.Queryable
                  .Include(x => x.CourseResults.Where(x => courseResult != null && x.Id == courseResult.Id))
-                 .Include(x => x.CourseUnitMockTests)
+                 .Include(x => x.CourseUnitMockTests).AsNoTracking()
                  .FirstOrDefaultAsync(x => courseResult != null && x.Id == courseResult.CourseId, cancellationToken);
 
             if (course == null)
             {
                 course = await _courseRepository.Queryable
-                         .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId))
+                         .Include(x => x.CourseResults.Where(x => x.StudentId == student.Id && x.CourseId == @class.CourseId && x.WorkingStatus == EnumWorkingStatus.Active))
                          .Include(x => x.CourseUnitMockTests)
+                         .AsNoTracking()
                          .FirstOrDefaultAsync(x => x.Id == @class.CourseId, cancellationToken);
             }
 
@@ -188,7 +189,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
         private async Task SaveCourseSettingAsync(Course course, Guid? userId, CancellationToken cancellationToken)
         {
-            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync();
+            var userCourseSettingResults = await _userService.GetUserCourseSettingsAsync(userId ?? _authContext.CurrentUserId);
             if (!userCourseSettingResults.IsSuccessStatusCode)
             {
                 return;
@@ -211,7 +212,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var course = await _courseRepository.Queryable
                           .Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).ThenBy(x => x.CreatedDate))
                           .Include(x => x.CourseTeachers)
-                          .Include(x => x.CourseResults.Where(x => x.StudentId == studentId))
+                          .Include(x => x.CourseResults.Where(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active))
                           .Where(x => x.Id == id)
                           .AsNoTracking()
                           .FirstOrDefaultAsync();
@@ -337,10 +338,15 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             if (!course.CourseResults.Any())
             {
-                course.CourseResults.Add(new CourseResult
+                var courseResult = new CourseResult
                 {
                     StudentId = studentId ?? default,
-                    Status = EnumResultStatus.New
+                    Status = EnumResultStatus.New,
+                    CourseId = course.Id
+                };
+                await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
                 });
             }
 
@@ -379,14 +385,29 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                     continue;
                 }
             }
-            try
+            if (course.UnitResults.Any())
             {
-                course = _courseRepository.Update(course);
-                await _courseRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                var unitResults = course.UnitResults.ToList();
+                await _unitResultRepository.BulkMergeAsync(unitResults, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.UnitId, entity.CourseId, entity.StudentId, entity.IsDeleted };
+                });
             }
-            catch (DbUpdateException ex)
+            if (course.FinalTestResults.Any())
             {
-                _logger.LogWarning("Duplicate CourseResult : " + ex.Message);
+                var finalTestResults = course.FinalTestResults.ToList();
+                await _finalTestResultRepository.BulkMergeAsync(finalTestResults, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.FinalTestId, entity.CourseId, entity.StudentId, entity.IsDeleted };
+                });
+            }
+            if (course.MockTestResults.Any())
+            {
+                var mockTestResults = course.MockTestResults.ToList();
+                await _mockTestResultRepository.BulkMergeAsync(mockTestResults, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.CourseId, entity.StudentId, entity.MockTestId, entity.IsDeleted };
+                });
             }
         }
 
@@ -407,6 +428,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 UnitId = courseUnitMockTest != null ? courseUnitMockTest.UnitId!.Value : default,
                 StudentId = studentId ?? default,
+                CourseId = course.Id,
                 Status = (index == 0 || checkFirstDone) ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
         }
@@ -419,6 +441,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 MockTestId = courseUnitMockTest != null ? courseUnitMockTest.MockTestId!.Value : default,
                 StudentId = studentId ?? default,
+                CourseId = course.Id,
                 Status = checkFirstDone ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
         }
@@ -431,6 +454,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             {
                 FinalTestId = courseUnitMockTest != null ? courseUnitMockTest.FinalTestId!.Value : default,
                 StudentId = studentId ?? default,
+                CourseId = course.Id,
                 Status = checkFirstDone ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
         }

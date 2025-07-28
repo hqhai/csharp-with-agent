@@ -19,7 +19,7 @@ namespace Fsel.System.Infrastructure.Configs
             builder.Property(e => e.PlacementTestLevel)
                    .HasMaxLength(100)
                    .HasConversion(v => v.ToString(),
-                   v => v.EnumParse<EnumPlacementTestLevel>());
+                   v => v.EnumParse<EnumCourseLevel>());
 
             builder.Property(e => e.Type)
                    .HasMaxLength(100)

@@ -102,8 +102,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Post("/v1/user-setting/users")]
         Task<IApiResponse<MethodResult<List<UserSettingModel>>>> GetListUserSetting([Body] UserSettingQuery query);
 
-        [Get("/v1/user-course-setting")]
-        Task<IApiResponse<MethodResult<IList<UserCourseSettingModel>>>> GetUserCourseSettingsAsync();
+        [Get("/v1/user-course-setting/{userId}")]
+        Task<IApiResponse<MethodResult<IList<UserCourseSettingModel>>>> GetUserCourseSettingsAsync([FromRoute] Guid userId);
 
         [Post("/v1/student/get-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetUserByIds([FromBody] IList<Guid>? userIds);
@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         Task<IApiResponse<MethodResult<PagingItemStudentRankingModel>>> GetLeaderBoardDataAsync([FromQuery] GetStudentCompetitionByEventCodeQueryModel query);
 
         [Get("/v1/admin/student/management")]
-        Task<IApiResponse<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>> SearchStudentAsync([FromQuery] BaseQueryModel query);
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentSearchAdminModel>>>> SearchStudentAsync([FromQuery] SearchStudentsQueryModel query);
 
         [Post("/v1/admin/student/search")]
         Task<IApiResponse<MethodResult<PagingItemsModel<StudentDtoModel>>>> SearchStudentSchoolAsync([FromBody] SearchStudentSchoolQueryModel query);
@@ -167,5 +167,12 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/admin/other/get-student-event-registrations")]
         Task<IApiResponse<MethodResult<IList<EventRegistrationModel>>>> GetStudentEventRegistrationsAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Get("/v1/admin-school/student/schoolId")]
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        Task<IApiResponse<MethodResult<Guid>>> GetSchoolIdAsync();
+
+        [Post("/v1/event/get-student-ids-in-event-by-student-ids")]
+        Task<IApiResponse<MethodResult<IList<Guid>?>>> GetStudentsInEventByStudentIds([Body] GetStudentIdsInEventByStudentIdsQueryModel model);
     }
 }

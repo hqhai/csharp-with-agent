@@ -32,6 +32,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
     public class RetakeCourseResultCommand : IRequest<MethodResult<CourseResultModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 
     public class RetakeCourseResultCommandHandler : IRequestHandler<RetakeCourseResultCommand, MethodResult<CourseResultModel>>
@@ -75,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CourseResultModel> methodResult = new MethodResult<CourseResultModel>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -99,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 return methodResult;
             }
 
-            var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync();
+            var userCourseSettingsResult = await _userService.GetUserCourseSettingsAsync(request.UserId ?? _authContext.CurrentUserId);
             if (!userCourseSettingsResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(userCourseSettingsResult));
@@ -145,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             var classResult = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel
             {
                 CourseId = method.Result?.CourseId ?? default,
-                UserId = _authContext.CurrentUserId,
+                UserId = request.UserId ?? _authContext.CurrentUserId,
             });
 
             if (!classResult.IsSuccessStatusCode)
@@ -159,7 +161,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 IsDeduction = true,
                 CourseLevel = request.CourseLevel,
                 Type = EnumUserCourseType.ResetAndLearnAgain,
-                UserId = _authContext.CurrentUserId
+                UserId = request.UserId ?? _authContext.CurrentUserId
             }, cancellationToken).ConfigureAwait(false);
 
             await _userService.UpdateCourseToStudentAsync(method.Result?.CourseId ?? default);
@@ -200,7 +202,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             {
                 await UpdateCoursesStatusNotWorkingAsync(course, student, cancellationToken);
                 courseResultNew.CourseId = course.Id;
-                _courseResultRepository.Add(courseResultNew);
             }
             else
             {
@@ -220,11 +221,18 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                 {
                     courseResultNew.CourseId = courseClone.Id;
                 }
-                _courseResultRepository.Add(courseResultNew);
+            }
+            if (!courseResultNew.IsValid())
+            {
+                methodResult.AddErrorBadRequest(courseResultNew.ErrorMessages);
+                return methodResult;
             }
             try
             {
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResultNew }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
+                });
             }
             catch (Exception ex)
             {
@@ -243,8 +251,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
             if (courseResultActive != null)
             {
                 courseResultActive.WorkingStatus = EnumWorkingStatus.InActive;
-                _courseResultRepository.Update(courseResultActive);
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResultActive }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                });
             }
         }
 
@@ -260,12 +271,14 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
         private async Task<IList<Guid>> UpdateCoursesStatusNotWorkingAsync(Course course, StudentModel student, CancellationToken cancellationToken)
         {
             var courseResults = await _courseResultRepository.Queryable.Include(x => x.Course).Where(x => x.Course != null && x.Course.CourseLevel == course.CourseLevel && x.StudentId == student.Id).ToListAsync(cancellationToken);
-            _courseResultRepository.UpdateList(courseResults.Select(x =>
+            await _courseResultRepository.BulkUpdateList(courseResults.Select(x =>
             {
                 x.WorkingStatus = EnumWorkingStatus.NotWorking;
                 return x;
-            }).ToList());
-            await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }).ToList(), bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+            });
             return courseResults.Select(x => x.CourseId).ToList();
         }
     }

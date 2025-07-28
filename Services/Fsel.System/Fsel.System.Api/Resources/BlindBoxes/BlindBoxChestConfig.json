@@ -1,0 +1,182 @@
+[
+  {
+    "id": "eb5a0855-343c-4b53-aa4c-46915eeac820",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Coin",
+    "imagePath": null,
+    "coin": 45,
+    "percentage": 40,
+    "blindBoxChestId": "d9218ffd-70e6-4e05-a25e-37c585c6532e"
+  },
+  {
+    "id": "d6e5a03e-2524-45c2-be20-5bbfd1b2bff3",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Piece",
+    "imagePath": "",
+    "coin": null,
+    "percentage": 10,
+    "blindBoxChestId": "d9218ffd-70e6-4e05-a25e-37c585c6532e"
+  },
+  {
+    "id": "5a5394be-9b8c-40f0-856b-55836a0fb23c",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "GoodLuck",
+    "imagePath": null,
+    "coin": null,
+    "percentage": 50,
+    "blindBoxChestId": "d9218ffd-70e6-4e05-a25e-37c585c6532e"
+  },
+  {
+    "id": "0aa25d72-54f6-41e6-8960-8f9bbb94b88f",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Coin",
+    "imagePath": null,
+    "coin": 45,
+    "percentage": 40,
+    "blindBoxChestId": "47e70b9d-ace8-42a8-b718-3119bc6359bf"
+  },
+  {
+    "id": "5d13ece6-654f-4744-8600-ead3a9a31200",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Piece",
+    "imagePath": "",
+    "coin": null,
+    "percentage": 10,
+    "blindBoxChestId": "47e70b9d-ace8-42a8-b718-3119bc6359bf"
+  },
+  {
+    "id": "987a25cf-3cb2-4f7a-9fe2-1775a56424da",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "GoodLuck",
+    "imagePath": null,
+    "coin": null,
+    "percentage": 50,
+    "blindBoxChestId": "47e70b9d-ace8-42a8-b718-3119bc6359bf"
+  },
+  {
+    "id": "732df173-39d0-435e-9bf0-ec10ea5ce4ed",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Coin",
+    "imagePath": null,
+    "coin": 45,
+    "percentage": 40,
+    "blindBoxChestId": "1632fece-f46e-4ce5-a374-13c74f61ae58"
+  },
+  {
+    "id": "6226db25-a2f5-4e4f-8e53-becf8a12f4b5",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Piece",
+    "imagePath": "",
+    "coin": null,
+    "percentage": 10,
+    "blindBoxChestId": "1632fece-f46e-4ce5-a374-13c74f61ae58"
+  },
+  {
+    "id": "c617a036-c317-46f2-b716-d9ed0ab26398",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "GoodLuck",
+    "imagePath": null,
+    "coin": null,
+    "percentage": 50,
+    "blindBoxChestId": "1632fece-f46e-4ce5-a374-13c74f61ae58"
+  },
+  {
+    "id": "5923d3f2-68a9-4d10-8fae-5aa1f83c99d3",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Coin",
+    "imagePath": null,
+    "coin": 45,
+    "percentage": 40,
+    "blindBoxChestId": "99133400-9c62-40f4-b491-fe0d8a87bd18"
+  },
+  {
+    "id": "c567813c-d7fc-4771-baf0-b4da940ceb48",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Piece",
+    "imagePath": "",
+    "coin": null,
+    "percentage": 10,
+    "blindBoxChestId": "99133400-9c62-40f4-b491-fe0d8a87bd18"
+  },
+  {
+    "id": "054cd37b-e77c-46d8-8992-23c634f01470",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "GoodLuck",
+    "imagePath": null,
+    "coin": null,
+    "percentage": 50,
+    "blindBoxChestId": "99133400-9c62-40f4-b491-fe0d8a87bd18"
+  },
+  {
+    "id": "50461e5e-a371-4251-b7de-4f29b222b431",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Coin",
+    "imagePath": null,
+    "coin": 45,
+    "percentage": 40,
+    "blindBoxChestId": "d298d36c-18a8-4843-876c-dbcb1b06018c"
+  },
+  {
+    "id": "eb223acc-d4bb-45f2-a2cf-1d7464b596bb",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Piece",
+    "imagePath": "",
+    "coin": null,
+    "percentage": 10,
+    "blindBoxChestId": "d298d36c-18a8-4843-876c-dbcb1b06018c"
+  },
+  {
+    "id": "85e75f6c-d9e8-4d66-97ed-3dcd395e6cd6",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "GoodLuck",
+    "imagePath": null,
+    "coin": null,
+    "percentage": 50,
+    "blindBoxChestId": "d298d36c-18a8-4843-876c-dbcb1b06018c"
+  },
+  {
+    "id": "1aee9bd9-ded8-4dd6-ac4d-e790c4ee0083",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Coin",
+    "imagePath": null,
+    "coin": 45,
+    "percentage": 40,
+    "blindBoxChestId": "374abb96-b10e-4fe7-82a7-79b20ec37548"
+  },
+  {
+    "id": "16462388-8639-44fe-b1bf-db1859379fe4",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "Piece",
+    "imagePath": "",
+    "coin": null,
+    "percentage": 10,
+    "blindBoxChestId": "374abb96-b10e-4fe7-82a7-79b20ec37548"
+  },
+  {
+    "id": "613f7065-18cf-4584-bbad-fea327286db0",
+    "createdDate": "2025-03-20",
+    "createdFullName": "Khoa Ozil",
+    "configType": "GoodLuck",
+    "imagePath": null,
+    "coin": null,
+    "percentage": 50,
+    "blindBoxChestId": "374abb96-b10e-4fe7-82a7-79b20ec37548"
+  }
+]

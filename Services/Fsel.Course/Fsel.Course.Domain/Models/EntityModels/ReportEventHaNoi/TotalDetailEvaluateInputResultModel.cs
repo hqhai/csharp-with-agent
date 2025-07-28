@@ -7,11 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
     [Keyless]
     public class TotalDetailEvaluateInputResultModel
     {
-        public string? DistrictName { get; set; }
-
-        public string? GroupName { get; set; }
-
-        public string? SchoolName { get; set; }
+        public string? GroupedValue { get; set; }
 
         public int? StudentDonePT { get; set; }
 

@@ -569,6 +569,679 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("BannerStudents");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBox", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int>("MileStone")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BlindBoxes");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"),
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            EndDate = new DateTime(2025, 8, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            MileStone = 300,
+                            Name = "Blind Box",
+                            StartDate = new DateTime(2025, 4, 5, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxChest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("BlindBoxId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<int>("Index")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsLast")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MaxOpenCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OpenPrice")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlindBoxId");
+
+                    b.ToTable("BlindBoxChests");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("d9218ffd-70e6-4e05-a25e-37c585c6532e"),
+                            BlindBoxId = new Guid("ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"),
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 1,
+                            IsDeleted = false,
+                            IsLast = false,
+                            MaxOpenCount = 10,
+                            Name = "Rương 1",
+                            OpenPrice = 90
+                        },
+                        new
+                        {
+                            Id = new Guid("47e70b9d-ace8-42a8-b718-3119bc6359bf"),
+                            BlindBoxId = new Guid("ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"),
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 2,
+                            IsDeleted = false,
+                            IsLast = false,
+                            MaxOpenCount = 20,
+                            Name = "Rương 2",
+                            OpenPrice = 90
+                        },
+                        new
+                        {
+                            Id = new Guid("1632fece-f46e-4ce5-a374-13c74f61ae58"),
+                            BlindBoxId = new Guid("ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"),
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 3,
+                            IsDeleted = false,
+                            IsLast = false,
+                            MaxOpenCount = 30,
+                            Name = "Rương 3",
+                            OpenPrice = 90
+                        },
+                        new
+                        {
+                            Id = new Guid("99133400-9c62-40f4-b491-fe0d8a87bd18"),
+                            BlindBoxId = new Guid("ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"),
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 4,
+                            IsDeleted = false,
+                            IsLast = false,
+                            MaxOpenCount = 40,
+                            Name = "Rương 4",
+                            OpenPrice = 90
+                        },
+                        new
+                        {
+                            Id = new Guid("d298d36c-18a8-4843-876c-dbcb1b06018c"),
+                            BlindBoxId = new Guid("ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"),
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 5,
+                            IsDeleted = false,
+                            IsLast = false,
+                            MaxOpenCount = 50,
+                            Name = "Rương 5",
+                            OpenPrice = 90
+                        },
+                        new
+                        {
+                            Id = new Guid("374abb96-b10e-4fe7-82a7-79b20ec37548"),
+                            BlindBoxId = new Guid("ff62d2c7-f1e2-48a4-b613-17b4ebd5cce7"),
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 6,
+                            IsDeleted = false,
+                            IsLast = true,
+                            Name = "Rương 6",
+                            OpenPrice = 90
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxChestConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("BlindBoxChestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Coin")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConfigType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int>("Percentage")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlindBoxChestId");
+
+                    b.ToTable("BlindBoxChestConfigs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("eb5a0855-343c-4b53-aa4c-46915eeac820"),
+                            BlindBoxChestId = new Guid("d9218ffd-70e6-4e05-a25e-37c585c6532e"),
+                            Coin = 45,
+                            ConfigType = "Coin",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 40
+                        },
+                        new
+                        {
+                            Id = new Guid("d6e5a03e-2524-45c2-be20-5bbfd1b2bff3"),
+                            BlindBoxChestId = new Guid("d9218ffd-70e6-4e05-a25e-37c585c6532e"),
+                            ConfigType = "Piece",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ImagePath = "",
+                            IsDeleted = false,
+                            Percentage = 10
+                        },
+                        new
+                        {
+                            Id = new Guid("5a5394be-9b8c-40f0-856b-55836a0fb23c"),
+                            BlindBoxChestId = new Guid("d9218ffd-70e6-4e05-a25e-37c585c6532e"),
+                            ConfigType = "GoodLuck",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 50
+                        },
+                        new
+                        {
+                            Id = new Guid("0aa25d72-54f6-41e6-8960-8f9bbb94b88f"),
+                            BlindBoxChestId = new Guid("47e70b9d-ace8-42a8-b718-3119bc6359bf"),
+                            Coin = 45,
+                            ConfigType = "Coin",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 40
+                        },
+                        new
+                        {
+                            Id = new Guid("5d13ece6-654f-4744-8600-ead3a9a31200"),
+                            BlindBoxChestId = new Guid("47e70b9d-ace8-42a8-b718-3119bc6359bf"),
+                            ConfigType = "Piece",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ImagePath = "",
+                            IsDeleted = false,
+                            Percentage = 10
+                        },
+                        new
+                        {
+                            Id = new Guid("987a25cf-3cb2-4f7a-9fe2-1775a56424da"),
+                            BlindBoxChestId = new Guid("47e70b9d-ace8-42a8-b718-3119bc6359bf"),
+                            ConfigType = "GoodLuck",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 50
+                        },
+                        new
+                        {
+                            Id = new Guid("732df173-39d0-435e-9bf0-ec10ea5ce4ed"),
+                            BlindBoxChestId = new Guid("1632fece-f46e-4ce5-a374-13c74f61ae58"),
+                            Coin = 45,
+                            ConfigType = "Coin",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 40
+                        },
+                        new
+                        {
+                            Id = new Guid("6226db25-a2f5-4e4f-8e53-becf8a12f4b5"),
+                            BlindBoxChestId = new Guid("1632fece-f46e-4ce5-a374-13c74f61ae58"),
+                            ConfigType = "Piece",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ImagePath = "",
+                            IsDeleted = false,
+                            Percentage = 10
+                        },
+                        new
+                        {
+                            Id = new Guid("c617a036-c317-46f2-b716-d9ed0ab26398"),
+                            BlindBoxChestId = new Guid("1632fece-f46e-4ce5-a374-13c74f61ae58"),
+                            ConfigType = "GoodLuck",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 50
+                        },
+                        new
+                        {
+                            Id = new Guid("5923d3f2-68a9-4d10-8fae-5aa1f83c99d3"),
+                            BlindBoxChestId = new Guid("99133400-9c62-40f4-b491-fe0d8a87bd18"),
+                            Coin = 45,
+                            ConfigType = "Coin",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 40
+                        },
+                        new
+                        {
+                            Id = new Guid("c567813c-d7fc-4771-baf0-b4da940ceb48"),
+                            BlindBoxChestId = new Guid("99133400-9c62-40f4-b491-fe0d8a87bd18"),
+                            ConfigType = "Piece",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ImagePath = "",
+                            IsDeleted = false,
+                            Percentage = 10
+                        },
+                        new
+                        {
+                            Id = new Guid("054cd37b-e77c-46d8-8992-23c634f01470"),
+                            BlindBoxChestId = new Guid("99133400-9c62-40f4-b491-fe0d8a87bd18"),
+                            ConfigType = "GoodLuck",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 50
+                        },
+                        new
+                        {
+                            Id = new Guid("50461e5e-a371-4251-b7de-4f29b222b431"),
+                            BlindBoxChestId = new Guid("d298d36c-18a8-4843-876c-dbcb1b06018c"),
+                            Coin = 45,
+                            ConfigType = "Coin",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 40
+                        },
+                        new
+                        {
+                            Id = new Guid("eb223acc-d4bb-45f2-a2cf-1d7464b596bb"),
+                            BlindBoxChestId = new Guid("d298d36c-18a8-4843-876c-dbcb1b06018c"),
+                            ConfigType = "Piece",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ImagePath = "",
+                            IsDeleted = false,
+                            Percentage = 10
+                        },
+                        new
+                        {
+                            Id = new Guid("85e75f6c-d9e8-4d66-97ed-3dcd395e6cd6"),
+                            BlindBoxChestId = new Guid("d298d36c-18a8-4843-876c-dbcb1b06018c"),
+                            ConfigType = "GoodLuck",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 50
+                        },
+                        new
+                        {
+                            Id = new Guid("1aee9bd9-ded8-4dd6-ac4d-e790c4ee0083"),
+                            BlindBoxChestId = new Guid("374abb96-b10e-4fe7-82a7-79b20ec37548"),
+                            Coin = 45,
+                            ConfigType = "Coin",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 40
+                        },
+                        new
+                        {
+                            Id = new Guid("16462388-8639-44fe-b1bf-db1859379fe4"),
+                            BlindBoxChestId = new Guid("374abb96-b10e-4fe7-82a7-79b20ec37548"),
+                            ConfigType = "Piece",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            ImagePath = "",
+                            IsDeleted = false,
+                            Percentage = 10
+                        },
+                        new
+                        {
+                            Id = new Guid("613f7065-18cf-4584-bbad-fea327286db0"),
+                            BlindBoxChestId = new Guid("374abb96-b10e-4fe7-82a7-79b20ec37548"),
+                            ConfigType = "GoodLuck",
+                            CreatedDate = new DateTime(2025, 3, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "Khoa Ozil",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Percentage = 50
+                        });
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("BlindBoxChestConfigId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("Coin")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsPiece")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlindBoxChestConfigId");
+
+                    b.ToTable("BlindBoxHistories");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxUser", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("BlindBoxId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsShowPopUp")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsWin")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("NumberOpen")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BlindBoxId");
+
+                    b.ToTable("BlindBoxUsers");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.ChatBot.ChatBot", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1114,6 +1787,379 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("CourseTargetConfigs");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<Guid>("DailyQuizQuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("TranslationsStr")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DailyQuizQuestionId");
+
+                    b.ToTable("DailyQuizAnswers");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<DateTime?>("CreatedDateLocal")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<Guid>("DailyQuizAnswerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("DailyQuizQuestionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<int?>("Index")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DailyQuizAnswerId");
+
+                    b.HasIndex("DailyQuizQuestionId");
+
+                    b.ToTable("DailyQuizHistories");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizQuestion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Explanation")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("SubCategory")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("TranslationsStr")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DailyQuizQuestions");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizWinner", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("CompetitionEventId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<DateTime?>("CreatedDateLocal")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsWin")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("SchoolId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DailyQuizWinners");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.Dictionary", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("ExampleStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Meaning")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PartOfSpeech")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Phonetic")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("Word")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Word");
+
+                    b.ToTable("Dictionaries");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.DisplayOrderConfig", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1446,6 +2492,10 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("Visit")
                         .HasColumnType("int");
@@ -4490,7 +5540,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("bc261be5-f658-415a-9498-8b813742708c"),
-                            ConfigStr = "[{\"baseValue\":5,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\",\"totalActions\":720,\"description\":\"User is active in focus mode 15\\u0027 continues\",\"displayOrder\":1},{\"baseValue\":15,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\",\"description\":\"User is active in focus mode 30\\u0027 continues\",\"totalActions\":720,\"displayOrder\":2},{\"baseValue\":25,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\",\"description\":\"User is active in focus mode 45\\u0027 continues\",\"totalActions\":720,\"displayOrder\":3},{\"baseValue\":40,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\",\"description\":\"User is active in focus mode 60\\u0027 continues\",\"totalActions\":720,\"displayOrder\":4},{\"baseValue\":60,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\",\"description\":\"User is active in focus mode 90\\u0027 continues\",\"totalActions\":720,\"displayOrder\":5}]",
+                            ConfigStr = "[{\"baseValue\":5,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\",\"totalActions\":720,\"description\":\"User is active in focus mode 15' continues\",\"displayOrder\":1},{\"baseValue\":15,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\",\"description\":\"User is active in focus mode 30' continues\",\"totalActions\":720,\"displayOrder\":2},{\"baseValue\":25,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\",\"description\":\"User is active in focus mode 45' continues\",\"totalActions\":720,\"displayOrder\":3},{\"baseValue\":40,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\",\"description\":\"User is active in focus mode 60' continues\",\"totalActions\":720,\"displayOrder\":4},{\"baseValue\":60,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\",\"description\":\"User is active in focus mode 90' continues\",\"totalActions\":720,\"displayOrder\":5}]",
                             CourseType = "Academic",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -4503,7 +5553,7 @@ namespace Fsel.System.Infrastructure.Migrations
                         new
                         {
                             Id = new Guid("f08945d0-3b03-4299-ae22-e3ce2408b74b"),
-                            ConfigStr = "[{\"baseValue\":5,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\",\"totalActions\":720,\"description\":\"User is active in focus mode 15\\u0027 continues\",\"displayOrder\":1},{\"baseValue\":15,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\",\"description\":\"User is active in focus mode 30\\u0027 continues\",\"totalActions\":720,\"displayOrder\":2},{\"baseValue\":25,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\",\"description\":\"User is active in focus mode 45\\u0027 continues\",\"totalActions\":720,\"displayOrder\":3},{\"baseValue\":40,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\",\"description\":\"User is active in focus mode 60\\u0027 continues\",\"totalActions\":720,\"displayOrder\":4},{\"baseValue\":60,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\",\"description\":\"User is active in focus mode 90\\u0027 continues\",\"totalActions\":720,\"displayOrder\":5}]",
+                            ConfigStr = "[{\"baseValue\":5,\"focustimeid\":\"0A7B57F3-C964-4F1B-8986-DF1579C5D08B\",\"totalActions\":720,\"description\":\"User is active in focus mode 15' continues\",\"displayOrder\":1},{\"baseValue\":15,\"focustimeid\":\"9B4FA7B6-1AF4-458B-82D9-621C1A88654A\",\"description\":\"User is active in focus mode 30' continues\",\"totalActions\":720,\"displayOrder\":2},{\"baseValue\":25,\"focustimeid\":\"124F4341-4C87-4E5F-BA4D-2481D8D36737\",\"description\":\"User is active in focus mode 45' continues\",\"totalActions\":720,\"displayOrder\":3},{\"baseValue\":40,\"focustimeid\":\"82061293-C9D0-4598-99F1-8DFD8162B999\",\"description\":\"User is active in focus mode 60' continues\",\"totalActions\":720,\"displayOrder\":4},{\"baseValue\":60,\"focustimeid\":\"FD7E66D3-A29B-4DA7-BB29-2283536D836A\",\"description\":\"User is active in focus mode 90' continues\",\"totalActions\":720,\"displayOrder\":5}]",
                             CourseType = "Ielts",
                             CreatedDate = new DateTime(2023, 7, 21, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             CreatedFullName = "",
@@ -5356,6 +6406,71 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.ToTable("TokenHistoryTranslations");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.UnknownWord", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<int>("NumberOfSearch")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("Word")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UnknownWords");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.UserConfig", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5464,6 +6579,50 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("Banner");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxChest", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.BlindBoxs.BlindBox", "BlindBox")
+                        .WithMany("BlindBoxChests")
+                        .HasForeignKey("BlindBoxId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlindBox");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxChestConfig", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxChest", "BlindBoxChest")
+                        .WithMany("BlindBoxChestConfigs")
+                        .HasForeignKey("BlindBoxChestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlindBoxChest");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxHistory", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxChestConfig", "BlindBoxChestConfig")
+                        .WithMany("BlindBoxHistories")
+                        .HasForeignKey("BlindBoxChestConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlindBoxChestConfig");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxUser", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.BlindBoxs.BlindBox", "BlindBox")
+                        .WithMany("BlindBoxUsers")
+                        .HasForeignKey("BlindBoxId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BlindBox");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.Chatbots.ChatbotSkillConfig", b =>
                 {
                     b.HasOne("Fsel.System.Domain.Entities.Chatbots.ChatbotConfig", "ChatbotConfig")
@@ -5484,6 +6643,36 @@ namespace Fsel.System.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ChatbotConfig");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizAnswer", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizQuestion", "DailyQuizQuestion")
+                        .WithMany("DailyQuizAnswers")
+                        .HasForeignKey("DailyQuizQuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DailyQuizQuestion");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizHistory", b =>
+                {
+                    b.HasOne("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizAnswer", "DailyQuizAnswer")
+                        .WithMany("DailyQuizHistories")
+                        .HasForeignKey("DailyQuizAnswerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizQuestion", "DailyQuizQuestion")
+                        .WithMany("DailyQuizHistories")
+                        .HasForeignKey("DailyQuizQuestionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("DailyQuizAnswer");
+
+                    b.Navigation("DailyQuizQuestion");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.GameVocabulary", b =>
@@ -5635,11 +6824,40 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Navigation("BannerStudents");
                 });
 
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBox", b =>
+                {
+                    b.Navigation("BlindBoxChests");
+
+                    b.Navigation("BlindBoxUsers");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxChest", b =>
+                {
+                    b.Navigation("BlindBoxChestConfigs");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.BlindBoxs.BlindBoxChestConfig", b =>
+                {
+                    b.Navigation("BlindBoxHistories");
+                });
+
             modelBuilder.Entity("Fsel.System.Domain.Entities.Chatbots.ChatbotConfig", b =>
                 {
                     b.Navigation("ChatbotSkillConfigs");
 
                     b.Navigation("ChatbotTokenConfigs");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizAnswer", b =>
+                {
+                    b.Navigation("DailyQuizHistories");
+                });
+
+            modelBuilder.Entity("Fsel.System.Domain.Entities.DailyQuiz.DailyQuizQuestion", b =>
+                {
+                    b.Navigation("DailyQuizAnswers");
+
+                    b.Navigation("DailyQuizHistories");
                 });
 
             modelBuilder.Entity("Fsel.System.Domain.Entities.GameTopic", b =>

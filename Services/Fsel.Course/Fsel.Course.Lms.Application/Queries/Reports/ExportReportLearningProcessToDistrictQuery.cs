@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 {
     using System;
     using System.Linq;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
@@ -28,30 +27,24 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         public string? EventCodeStr { get; set; }
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
-        public EnumEducationLevel EducationLevel { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
     }
 
     public class ExportReportLearningProcessToDistrictQueryHandler : IRequestHandler<ExportReportLearningProcessToDistrictQuery, MethodResult<Stream>>
     {
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
         private readonly IServiceProvider _serviceProvider;
         private const int RowExportReport = 6;
 
         public ExportReportLearningProcessToDistrictQueryHandler(
-            IMapper mapper,
             IUserService userService,
-            ILessonResultRepository lessonResultRepository,
             ICourseResultRepository courseResultRepository,
             IPlacementTestGroupResultRepository placementTestGroupResultRepository,
             IServiceProvider serviceProvider)
         {
-            _mapper = mapper;
             _userService = userService;
-            _lessonResultRepository = lessonResultRepository;
             _courseResultRepository = courseResultRepository;
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
             _serviceProvider = serviceProvider;
@@ -100,19 +93,21 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             {
                 var eventStudentIdsSet = reportCompetitionEvent.StudentIds?.ToHashSet() ?? new HashSet<Guid>();
                 var numberStudentsCompletedPT = placementTestResultGroups.Where(x => eventStudentIdsSet.Contains(x.StudentId)).Select(x => x.StudentId).Distinct().Count();
-                var numberStudentToLearn = courseStudentResults.Where(x => eventStudentIdsSet.Contains(x)).Distinct().Count();
+                var studentDistrictIds = courseStudentResults.Where(x => eventStudentIdsSet.Contains(x)).Distinct().ToList();
                 var reportPlacementTestEvent = new ReportPlacementTestEventModel
                 {
                     LocationName = reportCompetitionEvent.DistrictName,
+                    NumberStudentAccountRegister = reportCompetitionEvent.NumberStudentAccountRegister,
+                    NumberStudentCompleteVerify = reportCompetitionEvent.NumberStudentCompleteVerify,
                     NumberRegisteredSchool = reportCompetitionEvent.NumberRegisteredSchool,
                     NumberActualParticipatingSchool = reportCompetitionEvent.NumberActualParticipatingSchool,
                     NumberValidStudentAccount = reportCompetitionEvent.NumberValidStudentAccount,
                     NumberStudentsCompletedPT = numberStudentsCompletedPT,
-                    NumberStudentToLearn = numberStudentToLearn,
-                    LearningProgressLearns = await GetStudyPositionAsync(request.CourseType, eventStudentIdsSet.ToList()),
+                    NumberStudentToLearn = studentDistrictIds.Count,
+                    LearningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentDistrictIds),
                 };
                 reportPlacementTestEvents.Add(reportPlacementTestEvent);
-            };
+            }
 
             methodResult.Result = ExportExcelTemplate(reportPlacementTestEvents, request);
             return methodResult;
@@ -133,8 +128,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
                 int startColumn = 10;
                 int mergeRangeCount = courseType == EnumCourseType.Academic ? (CourseProgressValue.CountUnitAca * CourseProgressValue.CountLessonAca + CourseProgressValue.CountFinalTest) * 2
-                    : courseType == EnumCourseType.Ielts ? (CourseProgressValue.CountUnitIELTS * CourseProgressValue.CountLessonIELTS + CourseProgressValue.CountUnitIELTS + CourseProgressValue.CountFullMockTest) * 2
-                    : default;
+                   : courseType == EnumCourseType.Ielts ? (CourseProgressValue.CountUnitIELTS * CourseProgressValue.CountLessonIELTS + CourseProgressValue.CountUnitIELTS + CourseProgressValue.CountFullMockTest) * 2
+                   : courseType == EnumCourseType.EnglishFoundation && request.CourseLevel.HasValue && request.CourseLevel.Value == EnumCourseLevel.EFA1 ? (CourseProgressValue.CountUnitRFIA1 * CourseProgressValue.CountLessonRFI + CourseProgressValue.CountFinalTest) * 2
+                   : (CourseProgressValue.CountUnitRFIA2 * CourseProgressValue.CountLessonRFI + CourseProgressValue.CountFinalTest) * 2;
 
                 // Tạo danh sách các dải ô cần merge và thêm đường viền
                 List<(int row, int startCol, int endCol)> ranges = new()
@@ -262,7 +258,10 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         public async Task<IList<LearningProgressLearnModel>> GetStudyPositionAsync(EnumCourseType courseType, IList<Guid> studentIds)
         {
             var listLearningProcess = new List<LearningProgressLearnModel>();
-
+            if (!studentIds.Any())
+            {
+                return listLearningProcess;
+            }
             using (var scope = _serviceProvider.CreateScope())
             {
                 var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
@@ -273,7 +272,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
                 var unitSkillMockTestRepository = scope.ServiceProvider.GetRequiredService<IUnitSkillMockTestRepository>();
                 var mockTestResultRepository = scope.ServiceProvider.GetRequiredService<IMockTestResultRepository>();
-                if (courseType == EnumCourseType.Academic)
+                if (courseType == EnumCourseType.Academic || courseType == EnumCourseType.EnglishFoundation)
                 {
                     listLearningProcess = await (from baseQ in courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                                  join course in courseRepository.Queryable on baseQ.CourseId equals course.Id

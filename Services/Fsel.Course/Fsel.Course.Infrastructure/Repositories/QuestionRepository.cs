@@ -3,6 +3,7 @@
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Infrastructure.Repositories
@@ -20,7 +21,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return await Queryable.Include(x => x.ExerciseQuestions)
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.TimeCodeExercises)
-                                    .Where(x => ids.Contains(x.Id)).ToListAsync();
+                                    .WhereBulkContains(ids, x => x.Id).ToListAsync();
             }
             catch (Exception)
             {
@@ -28,12 +29,20 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
         }
 
-        public async Task<List<Question>?> GetIncludeSectionByIdAsync(IEnumerable<Guid> ids)
+        public async Task<List<Question>?> GetIncludeSectionByIdAsync(IEnumerable<Guid> ids, double? version = null)
         {
             try
             {
+                if (version == (int)EnumVersion.V1)
+                {
+                    return await Queryable.Include(x => x.SectionQuestions)
+                                      .ThenInclude(x => x.SectionPart)
+                                      .ThenInclude(x => x.Section)
+                                      .WhereBulkContains(ids, x => x.Id).ToListAsync();
+                }
                 return await Queryable.Include(x => x.SectionQuestions)
-                                    .Where(x => ids.Contains(x.Id)).ToListAsync();
+                                      .ThenInclude(x => x.Section)
+                                      .WhereBulkContains(ids, x => x.Id).ToListAsync();
             }
             catch (Exception)
             {
@@ -46,7 +55,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             try
             {
                 return await Queryable.Include(x => x.HomeWorkQuestions)
-                                    .Where(x => ids.Contains(x.Id)).ToListAsync();
+                                    .WhereBulkContains(ids, x => x.Id).ToListAsync();
             }
             catch (Exception)
             {
@@ -62,7 +71,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x.TimeCodeExercises)
                                     .ThenInclude(x => x.VideoTimeCode)
-                                    .Where(x => ids.Contains(x.Id)).ToListAsync();
+                                    .WhereBulkContains(ids, x => x.Id).ToListAsync();
             }
             catch (Exception)
             {

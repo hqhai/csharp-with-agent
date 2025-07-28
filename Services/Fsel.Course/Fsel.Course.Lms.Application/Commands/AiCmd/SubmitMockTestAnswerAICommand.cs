@@ -243,24 +243,28 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             if (mockTestAnswer != null)
             {
                 mockTestAnswer.GradingAlFeedback = gradingAiFeedBack;
-                _mockTestAnswerRepository.Update(mockTestAnswer);
-                await _mockTestAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestAnswerRepository.BulkUpdateList(new List<MockTestAnswer> { mockTestAnswer }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.MockTestResultId, c.SectionGroupResultId, c.SectionQuestionId, c.SectionId, c.SectionTimeCodeId };
+                });
+
+                await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.WorkingTime, c.SectionGroupId, c.PlacementTestResultId, c.MockTestResultId, c.FinalTestResultId, c.StudentId };
+                });
 
                 if (checkSkillMockTest)
                 {
                     var sections = await _sectionRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken);
-                    _mockTestResultRepository.Update(mockTestResult);
+                    await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.MockTestId, c.CourseId, c.UnitId, c.StudentId };
+                    });
                     if (skillScore != null)
                     {
                         await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                         await _mediator.Send(new SendTokenHistoryCommand { MockTestResultId = mockTestResult.Id }, cancellationToken);
-                    }
-                    else
-                    {
-                        await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     }
                 }
             }

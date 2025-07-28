@@ -5,9 +5,12 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Common.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Data.SqlClient;
@@ -30,16 +33,26 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     public class SchoolSummaryQueryHandler : IRequestHandler<SchoolSummaryQuery, MethodResult<PagingItemsModel<SchoolSummaryModel>>>
     {
         private readonly CourseDbContext _courseDbContext;
+        private readonly ICacheService<PagingItemsModel<SchoolSummaryModel>> _cacheService;
 
-        public SchoolSummaryQueryHandler(CourseDbContext courseDbContext)
+        public SchoolSummaryQueryHandler(CourseDbContext courseDbContext, ICacheService<PagingItemsModel<SchoolSummaryModel>> cacheService)
         {
             _courseDbContext = courseDbContext;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<PagingItemsModel<SchoolSummaryModel>>> Handle(SchoolSummaryQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<SchoolSummaryModel>>();
+
+            var keyCache = $"SchoolSummary_{ConvertHelper.Serialize(request)}";
+            var data = await _cacheService.GetAsync(keyCache);
+            if (data != null)
+            {
+                methodResult.Result = data;
+                return methodResult;
+            }
 
             var districtIdsParam = request.DistrictIds != null ? string.Join(",", request.DistrictIds) : (object)DBNull.Value;
             var groupIdsParam = request.GroupIds != null ? string.Join(",", request.GroupIds) : (object)DBNull.Value;
@@ -61,11 +74,14 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
                                                .AsNoTracking()
                                                .ToListAsync(cancellationToken);
 
-            methodResult.Result = new PagingItemsModel<SchoolSummaryModel>
+            var dataResult = new PagingItemsModel<SchoolSummaryModel>
             {
                 Items = result,
                 PagingInfo = new PagingInfoModel { Page = request.PageNumber, PageSize = request.PageSize, TotalItems = result.FirstOrDefault()?.TotalItem ?? default }
             };
+
+            methodResult.Result = dataResult;
+            await _cacheService.SetAsync(keyCache, dataResult, TimeSpan.FromSeconds(CacheSettings.TimeCache.ThreeHour));
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "http://gateway-demo.fsel-demo.svc"
+    "BaseUrl": "http://gateway-production.fsel-prod.svc"
   },
   "RateLimitOptions": {
     "DisableRateLimitHeaders": true,
@@ -20,7 +20,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "auth-demo.fsel-demo.svc",
+          "Host": "auth-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -34,7 +34,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "user-demo.fsel-demo.svc",
+          "Host": "user-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -48,7 +48,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "lcmsapi-demo.fsel-demo.svc",
+          "Host": "lcmsapi-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -62,7 +62,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "lmsapi-demo.fsel-demo.svc",
+          "Host": "lmsapi-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -76,7 +76,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "storage-demo.fsel-demo.svc",
+          "Host": "storage-production.fsel-prod.svc",
           "Port": 80
         }
       ],
@@ -95,7 +95,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "sender-demo.fsel-demo.svc",
+          "Host": "sender-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -109,7 +109,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "training-demo.fsel-demo.svc",
+          "Host": "training-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -123,7 +123,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "interaction-demo.fsel-demo.svc",
+          "Host": "interaction-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -137,7 +137,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ordering-demo.fsel-demo.svc",
+          "Host": "ordering-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -151,7 +151,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "system-demo.fsel-demo.svc",
+          "Host": "system-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -165,7 +165,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "cms-planet-defender-demo.fsel-demo.svc",
+          "Host": "cms-planet-defender-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -179,7 +179,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "realtime-demo.fsel-demo.svc",
+          "Host": "realtime-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -193,7 +193,35 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "notification-demo.fsel-demo.svc",
+          "Host": "notification-production.fsel-prod.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // ExamPractice Service
+    {
+      "SwaggerKey": "exam-practice",
+      "UpstreamPathTemplate": "/exam-practice-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "exam-practice-lcms-production.fsel-prod.svc",
+          "Port": 80
+        }
+      ]
+    },
+    // ExamPracticeLms Service
+    {
+      "SwaggerKey": "exam-practice-lms",
+      "UpstreamPathTemplate": "/exam-practice-lms-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "exam-practice-lms-production.fsel-prod.svc",
           "Port": 80
         }
       ]
@@ -206,17 +234,17 @@
         {
           "Name": "Auths API",
           "Version": "v1",
-          "Url": "http://auth-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://auth-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Auths API",
           "Version": "v1.1",
-          "Url": "http://auth-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://auth-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Auths API",
           "Version": "v1.2",
-          "Url": "http://auth-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://auth-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -226,17 +254,17 @@
         {
           "Name": "Users API",
           "Version": "v1",
-          "Url": "http://user-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://user-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Users API",
           "Version": "v1.1",
-          "Url": "http://user-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://user-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Users API",
           "Version": "v1.2",
-          "Url": "http://user-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://user-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -246,17 +274,17 @@
         {
           "Name": "Lcms Courses API",
           "Version": "v1",
-          "Url": "http://lcmsapi-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://lcmsapi-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Lcms Courses API",
           "Version": "v1.1",
-          "Url": "http://lcmsapi-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://lcmsapi-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Lcms Courses API",
           "Version": "v1.2",
-          "Url": "http://lcmsapi-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://lcmsapi-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -266,17 +294,17 @@
         {
           "Name": "Lms Courses API",
           "Version": "v1",
-          "Url": "http://lmsapi-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://lmsapi-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Lms Courses API",
           "Version": "v1.1",
-          "Url": "http://lmsapi-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://lmsapi-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Lms Courses API",
           "Version": "v1.2",
-          "Url": "http://lmsapi-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://lmsapi-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -286,17 +314,17 @@
         {
           "Name": "Storage API",
           "Version": "v1",
-          "Url": "http://storage-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://storage-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Storage API",
           "Version": "v1.1",
-          "Url": "http://storage-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://storage-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Storage API",
           "Version": "v1.2",
-          "Url": "http://storage-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://storage-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -306,17 +334,17 @@
         {
           "Name": "Senders API",
           "Version": "v1",
-          "Url": "http://sender-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://sender-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Senders API",
           "Version": "v1.1",
-          "Url": "http://sender-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://sender-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Senders API",
           "Version": "v1.2",
-          "Url": "http://sender-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://sender-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -326,17 +354,17 @@
         {
           "Name": "Training API",
           "Version": "v1",
-          "Url": "http://training-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://training-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Training API",
           "Version": "v1.1",
-          "Url": "http://training-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://training-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Training API",
           "Version": "v1.2",
-          "Url": "http://training-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://training-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -346,17 +374,17 @@
         {
           "Name": "Interaction API",
           "Version": "v1",
-          "Url": "http://interaction-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://interaction-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Interaction API",
           "Version": "v1.1",
-          "Url": "http://interaction-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://interaction-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Interaction API",
           "Version": "v1.2",
-          "Url": "http://interaction-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://interaction-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -366,17 +394,17 @@
         {
           "Name": "Ordering API",
           "Version": "v1",
-          "Url": "http://ordering-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://ordering-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Ordering API",
           "Version": "v1.1",
-          "Url": "http://ordering-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://ordering-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Ordering API",
           "Version": "v1.2",
-          "Url": "http://ordering-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://ordering-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -386,17 +414,17 @@
         {
           "Name": "System API",
           "Version": "v1",
-          "Url": "http://system-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://system-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "System API",
           "Version": "v1.1",
-          "Url": "http://system-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://system-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "System API",
           "Version": "v1.2",
-          "Url": "http://system-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://system-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -406,17 +434,17 @@
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1",
-          "Url": "http://cms-planet-defender-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://cms-planet-defender-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1.1",
-          "Url": "http://cms-planet-defender-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://cms-planet-defender-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1.2",
-          "Url": "http://cms-planet-defender-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://cms-planet-defender-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -426,17 +454,17 @@
         {
           "Name": "Realtime API",
           "Version": "v1",
-          "Url": "http://realtime-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://realtime-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Realtime API",
           "Version": "v1.1",
-          "Url": "http://realtime-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://realtime-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Realtime API",
           "Version": "v1.2",
-          "Url": "http://realtime-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://realtime-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -446,17 +474,57 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "http://notification-demo.fsel-demo.svc/swagger/v1/swagger.json"
+          "Url": "http://notification-production.fsel-prod.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Notification API",
           "Version": "v1.1",
-          "Url": "http://notification-demo.fsel-demo.svc/swagger/v1.1/swagger.json"
+          "Url": "http://notification-production.fsel-prod.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Notification API",
           "Version": "v1.2",
-          "Url": "http://notification-demo.fsel-demo.svc/swagger/v1.2/swagger.json"
+          "Url": "http://notification-production.fsel-prod.svc/swagger/v1.2/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "exam-practice",
+      "Config": [
+        {
+          "Name": "ExamPractice API",
+          "Version": "v1",
+          "Url": "http://exam-practice-lcms-production.fsel-prod.svc/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "ExamPractice API",
+          "Version": "v1.1",
+          "Url": "http://exam-practice-lcms-production.fsel-prod.svc/swagger/v1.1/swagger.json"
+        },
+        {
+          "Name": "ExamPractice API",
+          "Version": "v1.2",
+          "Url": "http://exam-practice-lcms-production.fsel-prod.svc/swagger/v1.2/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "exam-practice-lms",
+      "Config": [
+        {
+          "Name": "ExamPracticeLms API",
+          "Version": "v1",
+          "Url": "http://exam-practice-lms-production.fsel-prod.svc/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "ExamPracticeLms API",
+          "Version": "v1.1",
+          "Url": "http://exam-practice-lms-production.fsel-prod.svc/swagger/v1.1/swagger.json"
+        },
+        {
+          "Name": "ExamPracticeLms API",
+          "Version": "v1.2",
+          "Url": "http://exam-practice-lms-production.fsel-prod.svc/swagger/v1.2/swagger.json"
         }
       ]
     }

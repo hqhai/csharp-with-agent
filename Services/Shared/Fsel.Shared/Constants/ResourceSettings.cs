@@ -19,10 +19,17 @@ namespace Fsel.Shared.Constants
         public const string IeltsStudentsNameTestName = "Resources//IeltsStudents.Testing.json";
         public const string IeltsStudentsStagingName = "Resources//IeltsStudents.Staging.json";
         public const string RoleFileName = "Resources//Role.json";
+        public const string PermissionGroupName = "Resources//PermissionGroup.json";
+        public const string PermissionName = "Resources//Permission.json";
+        public const string RoleClaimName = "Resources//RoleClaim.json";
+        public const string MenuName = "Resources//Menu.json";
 
         public const string PackageFileName = "Resources//Packages.json";
         public const string TechieActionFileName = "Resources//TechieAction.json";
         public const string TechieFileName = "Resources//Techie.json";
+        public const string BlindBox = "Resources//BlindBoxes//BlindBox.json";
+        public const string BlindBoxChest = "Resources//BlindBoxes//BlindBoxChest.json";
+        public const string BlindBoxChestConfig = "Resources//BlindBoxes//BlindBoxChestConfig.json";
 
         public const string EventFileName = "Resources//Events.json";
         public const string WheelOfBuffType = "Resources//WheelOfBuffConfig.json";
@@ -82,10 +89,12 @@ namespace Fsel.Shared.Constants
 
         public const string ManagerReportPlacementTestExcel = "Resources//ManagerReports//BaoCaoPlacmentTest.xlsx";
         public const string ManagerReportLearningProgressAcaExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapAca.xlsx";
+        public const string ManagerReportLearningProgressExcel = "Resources//ManagerReports//BaoCaoTienDoV1.xlsx";
         public const string ManagerReportLearningProgressIELTSExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapIELTS.xlsx";
         public const string ManagerReportStudentAssiduityExcel = "Resources//ManagerReports//BaoCaoChuyenCan.xlsx";
         public const string ManagerReportLearningResultAcaExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapAca.xlsx";
         public const string ManagerReportLearningResultIELTSExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapIELTS.xlsx";
+        public const string ManagerReportLearningResultEFExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapEF.xlsx";
         public const string ReportPTEvent = "Resources//ExportExcelTemplates//ReportPTEvent.xlsx";
         public const string ReportPTEventSchool = "Resources//ExportExcelTemplates//ReportPTEventSchool.xlsx";
         public const string ReportPTEventDistrictSchool = "Resources//ExportExcelTemplates//ReportPTEventDistrictSchool.xlsx";
@@ -99,5 +108,25 @@ namespace Fsel.Shared.Constants
         public const string ContentAICheckComment = "Resources//ContentAICheckComment.txt";
         public const string ReportSurveyQuestionEvent = "Resources//ExportExcelTemplates//SurveyQuestionReport.xlsx";
         public const string ReportSurveyQuestionEventSchool = "Resources//ExportExcelTemplates//SurveyQuestionReportSchool.xlsx";
+
+        public const string RevenueReport = "Resources//ExportExcelTemplates//TemplateRevenueReport.xlsx";
+
+        public const string ReportStudentsByAdminSchool = "Resources//ExportExcelTemplates//Template_Export_Data_Student_By_Admin_School.xlsx";
+
+        public const string SuccessCriteriaSchema = "Resources//AIPrompt//JsonSchemas//SuccessCriteriaSchema.json";
+
+        public const string AICheckForbiddenWordRole = "Resources//AIPrompt//Role//CheckForbiddenWord.txt";
+        public const string AICheckForbiddenWordInstruction = "Resources//AIPrompt//Instruction//CheckForbiddenWordInstruction.txt";
+
+        public const string DepartmentLevelReport = "Resources//ExportExcelTemplates//BaoCao_Capso.xlsx";
+        public const string DivisionLevelReport = "Resources//ExportExcelTemplates//BaoCao_CapPhong.xlsx";
+
+        public const string ReportDistrictSchool = "Resources//ExportExcelTemplates//Report_District_School.xlsx";
+        public const string ReportDoetSelfstudy = "Resources//ExportExcelTemplates//Report_Doet_Selfstudy.xlsx";
+        public const string ReportSchoolStudent = "Resources//ExportExcelTemplates//Report_School_Student.xlsx";
+
+        public const string ForbiddenClassForumSchema = "Resources//AIPrompt//JsonSchemas//ForbiddenClassForumSchema.json";
+
+        public const string ProductFileName = "Resources//Products.json";
     }
 }

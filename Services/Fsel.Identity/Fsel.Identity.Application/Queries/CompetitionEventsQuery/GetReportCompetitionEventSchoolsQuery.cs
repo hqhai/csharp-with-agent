@@ -30,7 +30,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             }
         }
 
-        public EnumEducationLevel EducationLevel { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
     }
 
     public class GetReportCompetitionEventSchoolsQueryHandler : IRequestHandler<GetReportCompetitionEventSchoolsQuery, MethodResult<IList<ReportCompetitionEventModel>>>
@@ -86,20 +86,26 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             var schoolResults = await _systemService.GetSchoolsAsync(new GetListSchoolQueryModel { Ids = schoolIds, EducationLevel = request.EducationLevel });
             var schools = schoolResults.Content?.Result ?? new List<SchoolModel>();
 
-            var studentSchoolIds = await (from baseQ in _studentRepository.Queryable.Where(x => x.SchoolId != null).WhereBulkContains(schools.Select(x => x.Id), x => x.SchoolId)
-                                          join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
-                                          join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
-                                          join user in _userManager.Users on human.UserId equals user.Id
-                                          where competitionEventIds.Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
-                                          group new { baseQ, user }
-                                          by baseQ.SchoolId into g
-                                          select new
-                                          {
-                                              SchoolId = g.Key.GetValueOrDefault(),
-                                              StudentIds = g.Select(x => x.baseQ.Id).Distinct().ToList(),
-                                              UserIds = g.Select(x => x.user.Id).Distinct().ToList(),
-                                              CountCompleteVerify = g.Where(x => x.user.EmailConfirmed || x.user.PhoneNumberConfirmed).Select(x => x.user.Id).Distinct().Count()
-                                          }).ToListAsync(cancellationToken);
+            var studentSchoolIds = (await (from baseQ in _studentRepository.Queryable.Where(x => x.SchoolId != null)
+                                           join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
+                                           join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
+                                           join user in _userManager.Users on human.UserId equals user.Id
+                                           where competitionEventIds.Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
+                                           select new
+                                           {
+                                               baseQ.SchoolId,
+                                               StudentId = baseQ.Id,
+                                               UserId = user.Id,
+                                               user.EmailConfirmed,
+                                               user.PhoneNumberConfirmed
+                                           }).ToListAsync(cancellationToken)).GroupBy(x => x.SchoolId.Value)
+                                            .Select(g => new
+                                            {
+                                                SchoolId = g.Key,
+                                                StudentIds = g.Select(x => x.StudentId).Distinct().ToList(),
+                                                UserIds = g.Select(x => x.UserId).Distinct().ToList(),
+                                                CountCompleteVerify = g.Where(x => x.EmailConfirmed || x.PhoneNumberConfirmed).Select(x => x.UserId).Distinct().Count()
+                                            }).ToList();
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
             foreach (var item in competitionEvents)

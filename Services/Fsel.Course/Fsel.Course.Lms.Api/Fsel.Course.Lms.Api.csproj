@@ -14,10 +14,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Update="Resources\AIPrompt\JsonSchemas\SuccessCriteriaSchema.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="Resources\AIPrompt\Instruction\ApprovalClassForumInstruction.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\AIPrompt\Instruction\CheckForbiddenWordInstruction.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\AIPrompt\Role\ApprovalClassForumRole.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\AIPrompt\Role\CheckForbiddenWord.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\ExportExcelTemplates\BaoCaoReportStudentEvent.xlsx">
@@ -36,6 +48,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\ExportExcelTemplates\ReportPTEventSchool.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\ExportExcelTemplates\Report_District_School.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\ExportExcelTemplates\Report_Doet_Selfstudy.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\ExportExcelTemplates\Report_School_Student.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\MailTemplates\Chart.html">
@@ -92,6 +113,9 @@
     <None Update="Resources\ManagerReports\BaoCaoKetQuaHocTapAca.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\ManagerReports\BaoCaoKetQuaHocTapEF.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\ManagerReports\BaoCaoKetQuaHocTapIELTS.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -102,6 +126,9 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\ManagerReports\BaoCaoTienDoHocTapIELTS.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\ManagerReports\BaoCaoTienDoV1.xlsx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Resources\SpeakingAiConfig\FluencyConfig.txt">

@@ -3,6 +3,7 @@
 using System.Net;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.LandingPages;
@@ -10,6 +11,7 @@ using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Queries.AuthQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -118,6 +120,7 @@ namespace Fsel.Identity.Authentication.Controllers
         [HttpPost("sign-up-as-guest")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Student) })]
         public async Task<IActionResult> SignUpAsGuest([FromBody] CreateGuestAccountCommand command)
         {
             MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);

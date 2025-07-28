@@ -6,7 +6,8 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class AddErrorReportExplanationQuestionModel
     {
-        public Guid VideoId { get; set; }
+        public Guid Id { get; set; }
+        public EnumFeatureExplanationType ExplanationType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public double DisplayTime { get; set; }
         public Guid QuestionId { get; set; }

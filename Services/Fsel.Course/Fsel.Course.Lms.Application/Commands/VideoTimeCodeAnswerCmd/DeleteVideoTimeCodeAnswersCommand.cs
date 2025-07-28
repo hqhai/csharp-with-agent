@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
@@ -58,16 +59,20 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
                 if (videoResult != null)
                 {
                     videoResult.Status = EnumResultStatus.Process;
-                    _videoResultRepository.Update(videoResult);
-                    await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.VideoId, c.StudentId, c.LessonResultId };
+                    });
                 }
 
                 var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
                 if (lessonResult != null)
                 {
                     lessonResult.Status = EnumResultStatus.Process;
-                    _lessonResultRepository.Update(lessonResult);
-                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.LessonId, c.StudentId, c.CourseId, c.UnitId };
+                    });
                 }
                 methodResult.Result = true;
                 methodResult.StatusCode = StatusCodes.Status200OK;

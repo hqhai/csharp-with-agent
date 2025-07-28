@@ -44,14 +44,18 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
             }
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
+                ListDistrict = request.ListDistrict,
+                ListProvince = request.ListProvince,
+                ListSchool = request.ListSchool,
+                ListCourseLevel = request.ListCourseLevel,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
+
                 PageSize = request.PageSize,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
                 Page = request.Page,
-                ListDistrict = request.ListDistrict,
-                ListProvince = request.ListProvince,
-                ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
                 StartDate = request.StartDate,
@@ -90,6 +94,8 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 CourseType = request.CourseType,
@@ -101,16 +107,18 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
             students.ForEach(student =>
             {
                 var userId = student.UserId ?? default;
-                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId);
+                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId && x.CourseId == student.CourseId);
                 var studentAssiduity = new StudentAssiduityModel
                 {
                     StudentId = student.Id,
                     FullName = student.FullName,
+                    PhoneNumber = student.PhoneNumber,
                     Email = student.Email,
                     SchoolName = student.School,
                     SchoolClass = student.SchoolClass,
                     SchoolGrade = student.SchoolGrade,
                     CourseLevel = student.CourseLevel,
+                    UserName = student.UserName,
                     ExpiredDate = student.ExpiredDate,
                     ProcessDate = student.CreatedDate
                 };

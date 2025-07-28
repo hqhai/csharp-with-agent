@@ -22,7 +22,12 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public DateTime ExpireDate { get; set; }
         public IList<string>? Images { get; set; }
         public IList<Guid>? EventIds { get; set; }
+        public string? GlobalId { get; set; }
+        public bool IsPremium { get; set; }
+        public string? BrandName { get; set; }
+        public string? BrandImage { get; set; }
         public ProductDescription? Description { get; set; }
+        public ProductGlobalConfig? ProductGlobalConfig { get; set; }
         public IList<ProductTranslationModel>? Translations { get; set; }
     }
 

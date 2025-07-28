@@ -10,8 +10,9 @@ namespace Fsel.System.Api.Controllers.Admins
     using Fsel.Shared.Enums;
     using Fsel.System.Application.Commands.ManagerReportCmd;
     using Fsel.System.Application.Queries.ManagerReportQuery;
+    using Fsel.System.Application.Queries.Reports;
+    using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.EntityModels.ManagerReportModels;
-    using Fsel.System.Domain.Models.QueryModels.ManagerReports;
     using global::System.Net;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -55,6 +56,18 @@ namespace Fsel.System.Api.Controllers.Admins
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Export_Report_StudentAssiduity.xlsx");
+        }
+
+        /// <summary>
+        /// aggregate data students in event
+        /// </summary>
+        [HttpPost("aggregate-data-students-in-event")]
+        [ProducesResponseType(typeof(MethodResult<IList<AggregateDataStudentsInEventModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> AggregateDataStudentsInEvent([FromBody] AggregateDataStudentsInEventQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

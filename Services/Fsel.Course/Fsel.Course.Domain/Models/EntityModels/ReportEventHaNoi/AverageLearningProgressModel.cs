@@ -7,11 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
     [Keyless]
     public class AverageLearningProgressModel
     {
-        public string? DistrictName { get; set; }
-
-        public string? GroupName { get; set; }
-
-        public string? SchoolName { get; set; }
+        public string? GroupedValue { get; set; }
 
         public decimal? PercentLessonDone { get; set; }
     }

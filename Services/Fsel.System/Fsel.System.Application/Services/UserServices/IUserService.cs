@@ -78,7 +78,6 @@ namespace Fsel.System.Application.Services.UserServices
         [Post("/v1/student-daily-streak")]
         Task<IApiResponse<MethodResult<bool>>> SaveDailyStreak([Body] StudentDailyStreakCommandModel cmd);
 
-
         [Get("/v1/student-ranking/get-events-by-user-id")]
         Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>?>>> GetEventsByUserId([Query] Guid? userId);
 
@@ -98,5 +97,8 @@ namespace Fsel.System.Application.Services.UserServices
 
         [Post("/v1/event/event-ids")]
         Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByIds([FromBody] GetEventByIdsModel query);
+
+        [Post("/v1/student/get-by-user-ids")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByUserIds([Body] IList<Guid> ids);
     }
 }

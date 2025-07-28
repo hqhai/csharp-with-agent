@@ -5,16 +5,19 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
 
     public class GetCompetitionEventToEventParentQuery : IRequest<MethodResult<IList<ReportCompetitionEventModel>>>
     {
@@ -31,6 +34,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
+        private readonly ILogger<GetCompetitionEventToEventParentQueryHandler> _logger;
 
         public GetCompetitionEventToEventParentQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
@@ -38,7 +42,8 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             IEventRegistrationRepository eventRegistrationRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
             IHumanRepository humanRepository,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            ILogger<GetCompetitionEventToEventParentQueryHandler> logger)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
@@ -47,6 +52,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _humanRepository = humanRepository;
             _userManager = userManager;
+            _logger = logger;
         }
 
         public async Task<MethodResult<IList<ReportCompetitionEventModel>>> Handle(GetCompetitionEventToEventParentQuery request, CancellationToken cancellationToken)
@@ -62,7 +68,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             }
 
             var competitionEvents = await GetCompetitionEventsAsync(competition);
-
+            _logger.LoggerRequest($"GetCompetitionEventToEventParentQueryHandler : {competitionEvents.Select(x => x.EventCode).Serialize()}");
             var districtIds = competitionEvents.Where(x => x.LocationId.HasValue).Select(x => x.LocationId.GetValueOrDefault()).ToList();
             var locationResults = await _systemService.GetLocationByIdsAsync(new GetLocationsByIdsQueryModel { IdsStr = string.Join(",", districtIds) });
             var locationDistricts = locationResults.Content?.Result;

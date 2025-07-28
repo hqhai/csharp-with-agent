@@ -3,12 +3,12 @@
 using System.Globalization;
 using AutoMapper;
 using Fsel.Common.ActionResults;
-using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Core.Entities;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Commands.UserReferrals;
+using Fsel.Identity.Application.Queries.UserReferrals;
 using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -19,6 +19,7 @@ using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Enums.ErrorCodes;
 using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -39,8 +40,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IMediator _mediator;
         private readonly IPlatformRepository _platformRepository;
         private readonly AppSetting _appSetting;
-        private readonly ITrainingService _trainingService;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserDbContext _userDbContext;
         private readonly ILogger<SignUpCommandHandler> _logger;
 
@@ -50,9 +49,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IMediator mediator,
             AppSetting appSetting,
             IPlatformRepository platformRepository,
-            ITrainingService trainingService,
-            IHumanRepository humanRepository
-,
             ILogger<SignUpCommandHandler> logger,
             UserDbContext userDbContext)
         {
@@ -62,8 +58,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _mediator = mediator;
             _appSetting = appSetting;
             _platformRepository = platformRepository;
-            _trainingService = trainingService;
-            _humanRepository = humanRepository;
             _logger = logger;
             _userDbContext = userDbContext;
         }
@@ -74,6 +68,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             MethodResult<UserModel> methodResult = new MethodResult<UserModel>();
 
             User? user = null;
+
+            if (!string.IsNullOrEmpty(request.ReferralCode))
+            {
+                var checkReferralCodeResult = await _mediator.Send(new CheckReferralCodeQuery() { ReferralCode = request.ReferralCode }, cancellationToken);
+                if (!checkReferralCodeResult.IsOK || checkReferralCodeResult.Result == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.FriendCodeDoesNotExist));
+                    return methodResult;
+                }
+            }
+
             if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
                 if (!request.PhoneNumber.IsValidPhoneNumber())
@@ -82,6 +87,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
                 user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim(), cancellationToken: cancellationToken);
+
+                if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
+                {
+                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
+                    return methodResult;
+                }
                 if (user != null && (user.EmailConfirmed || user.Human != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
@@ -96,6 +107,12 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     return methodResult;
                 }
                 user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken: cancellationToken);
+
+                if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
+                {
+                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
+                    return methodResult;
+                }
                 if (user != null && (user.EmailConfirmed || user.Human != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
@@ -210,7 +227,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 return methodResult;
                             }
 
-                            await _userDbContext.UserRoles.AddAsync(new UserRoleEntity
+                            await _userDbContext.UserRoles.AddAsync(new UserRole
                             {
                                 UserId = user.Id,
                                 RoleId = role.Id
@@ -218,9 +235,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                             //await _userManager.AddToRoleAsync(user, request.Role.ToString());
                         }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "SignUpCommand encouters error: {message}", ex.Message);
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), ex.Message);
+                        return methodResult;
+                    }
 
-                        #region Send Code OTP
+                    #region Send Code OTP
 
+                    try
+                    {
                         var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
                         var param = new SendOtpTemplateModel
                         {
@@ -230,6 +256,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
                         var sendResult = new MethodResult<bool>();
 
+                        ArgumentNullException.ThrowIfNull(request);
                         if (!string.IsNullOrEmpty(request.Email))
                         {
                             sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, IsCCEmailDefault = true, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);
@@ -251,8 +278,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "SignUpCommand encouters error: {message}", ex.Message);
-                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr));
+                        _logger.LogError(ex, "SignUpCommand SendEmail encouters error: {message}", ex.Message);
+                        methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.SendAuthErorr), ex.Message);
+                        return methodResult;
                         //scope.Dispose();
                     }
                 }

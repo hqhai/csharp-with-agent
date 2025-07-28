@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/review-fsel/admin")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class ReviewFselController : BaseController
     {
         private readonly IMediator _mediator;

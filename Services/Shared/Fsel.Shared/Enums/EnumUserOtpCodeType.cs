@@ -5,6 +5,7 @@ namespace Fsel.Shared.Enums
     public enum EnumUserOtpCodeType
     {
         Email,
-        SMS
+        SMS,
+        Zalo
     }
 }

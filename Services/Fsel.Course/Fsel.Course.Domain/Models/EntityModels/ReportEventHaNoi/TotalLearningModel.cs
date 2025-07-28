@@ -11,6 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi
         public int? TotalStudentJoin { get; set; }
         public int? TotalJoinAcademic { get; set; }
         public int? TotalJoinIelts { get; set; }
-        public decimal? AverageDoneQuestion { get; set; }
+        public double? AverageDoneQuestion { get; set; }
     }
 }

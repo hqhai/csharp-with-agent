@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -11,12 +12,14 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Lms.Application.Queries.StudentQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/lesson")]
     [ApiController]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class LessonController : ControllerBase
     {
         private readonly IMediator _mediator;

@@ -25,7 +25,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using Fsel.Ordering.Domain.Enums.ErrorCodes;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders;
-    using Fsel.Ordering.Infrastructure.Repositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -56,6 +55,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IMediator _mediator;
         private readonly IPackageEventRepository _packageEventRepository;
         private readonly IUserVoucherLockRepository _userVoucherLockRepository;
+        private readonly AddCoinWhenCoursePurchasedPublisher _addCoinWhenCoursePurchasedPublisher;
+        private const string PaymentApproval = "Phê duyệt thanh toán";
+        private const string BuyPackage = "Thanh toán gói phí: ";
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -72,7 +74,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             , IMediator mediator
             , IPackageEventRepository packageEventRepository
             , ChangeStatusOrderPublisher changeStatusOrderPublisher
-            , IUserVoucherLockRepository userVoucherLockRepository)
+            , IUserVoucherLockRepository userVoucherLockRepository,
+AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
         {
             _orderRepository = orderRepository;
             _trainingService = trainingService;
@@ -90,6 +93,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             _mediator = mediator;
             _packageEventRepository = packageEventRepository;
             _userVoucherLockRepository = userVoucherLockRepository;
+            _addCoinWhenCoursePurchasedPublisher = addCoinWhenCoursePurchasedPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(ChangeStatusOrderCommand request, CancellationToken cancellationToken)
@@ -117,6 +121,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 return methodResult;
             }
             var student = studentResult.Content?.Result;
+
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
 
             var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
             if (package == null)
@@ -147,6 +157,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(packageEvent));
                         return methodResult;
                     }
+
+                    var role = _authContext.Roles?.FirstOrDefault();
+
                     if (!order.ExpireDate.HasValue)
                     {
                         order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
@@ -156,17 +169,21 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
                         await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                         {
-                            StudentId = student!.Id,
+                            StudentEditHistoryType = GetStudentEditHistory(role, package.MonthNumber).Item1,
+                            StudentId = student.Id,
                             Month = package.MonthNumber + packageEvent.MonthBonus + monthBonus,
-                            Day = packageEvent.DayBonus
+                            Day = packageEvent.DayBonus,
+                            Description = GetStudentEditHistory(role, package.MonthNumber).Item2
                         }, cancellationToken);
                     }
                     else
                     {
                         await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                         {
-                            StudentId = student!.Id,
-                            ExpiredDate = order.ExpireDate
+                            StudentEditHistoryType = GetStudentEditHistory(role, package.MonthNumber).Item1,
+                            StudentId = student.Id,
+                            ExpiredDate = order.ExpireDate,
+                            Description = GetStudentEditHistory(role, package.MonthNumber).Item2
                         }, cancellationToken);
                     }
 
@@ -194,7 +211,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         return methodResult;
                     }
                     var course = courseResults.Content?.Result?.FirstOrDefault();
-                    if (course != null && order != null && order.Package != null && (order.Package.MonthNumber == ExtendMonth.TwentyFourMonth ||
+                    if (course != null && order.Package != null && (order.Package.MonthNumber == ExtendMonth.TwentyFourMonth ||
                                                                    order.Package.MonthNumber == ExtendMonth.TwelveMonth ||
                                                                    order.Package.MonthNumber == ExtendMonth.SixMonth ||
                                                                    order.Package.MonthNumber == ExtendMonth.ThreeMonth))
@@ -210,6 +227,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                 });
 
                 order.Status = request.OrderStatus;
+                if (!order.IsValid())
+                {
+                    methodResult.AddError(order.ErrorMessages);
+                    return methodResult;
+                }
+
                 order = _orderRepository.Update(order);
                 await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
@@ -246,6 +269,29 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
                         }
                     }
                     await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
+
+                    var blindBoxPackages = _appSetting.BlindBoxConfigs;
+
+                    if (order.RevenueType == EnumPaymentRevenueType.Revenue)
+                    {
+                        await _systemService.AddUserIntoBlindBoxEvent(new AddUserIntoBlindBoxCommandModel()
+                        {
+                            UserId = order.UserId,
+                            IsWin = false,
+                            NumberOpen = 0
+                        });
+                    }
+
+                    if (order.RevenueType == EnumPaymentRevenueType.Revenue && package.BonusCoins > 0)
+                    {
+                        await _addCoinWhenCoursePurchasedPublisher.Publish(new AddCoinWhenCoursePurchasedCommandModel()
+                        {
+                            Coins = package.BonusCoins,
+                            Month = package.MonthNumber,
+                            ObjectId = order.Id,
+                            UserIds = new List<Guid>() { order.UserId }
+                        }, cancellationToken);
+                    }
                 }
 
                 #endregion Gửi mail thanh toán
@@ -308,6 +354,18 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private bool IsInteger(double number)
         {
             return number == (int)number;
+        }
+
+        private (EnumStudentEditHistoryType, string) GetStudentEditHistory(string? role, int package)
+        {
+            if (role == null || role == EnumRole.Student.ToString())
+            {
+                return (EnumStudentEditHistoryType.BuyPackage, BuyPackage + $"{package} tháng");
+            }
+            else
+            {
+                return (EnumStudentEditHistoryType.PaymentApproval, PaymentApproval);
+            }
         }
 
         private async Task ResetUserVoucherLockAsync(Guid userId, CancellationToken cancellationToken)

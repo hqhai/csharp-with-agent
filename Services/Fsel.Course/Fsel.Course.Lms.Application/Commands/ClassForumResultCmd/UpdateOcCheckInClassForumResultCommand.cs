@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -38,8 +39,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 item.CheckCsoId = null;
                 item.CheckStartDate = null;
             }
-            _classForumResultRepository.UpdateList(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _classForumResultRepository.BulkUpdateList(classForumResult, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+            });
             return methodResult;
         }
     }

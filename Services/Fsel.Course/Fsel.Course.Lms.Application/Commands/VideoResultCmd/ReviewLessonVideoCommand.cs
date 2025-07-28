@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
@@ -93,7 +92,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             }
 
             videoResult = await GetVideoResult(videoResult, cancellationToken);
-            await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
+            await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
             {
                 bulk.IgnoreOnUpdateExpression = entity => new { entity.LessonResultId, entity.StudentId, entity.VideoId };
             });

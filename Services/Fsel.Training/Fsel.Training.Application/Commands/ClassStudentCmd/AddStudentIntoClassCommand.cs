@@ -7,9 +7,10 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using Fsel.Training.Application.Queries.ClassQuery;
     using Fsel.Training.Application.Services.CourseServices;
+    using Fsel.Training.Application.Services.SystemServices;
+    using Fsel.Training.Application.Services.SystemServices.Models;
     using Fsel.Training.Application.Services.UserServices;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Fsel.Training.Domain.Entities;
@@ -27,17 +28,19 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     {
         private readonly IClassRepository _classRepository;
         private readonly IClassStudentRepository _classStudentRepository;
+        private readonly ISystemService _systemService;
         private readonly IUserService _userService;
         private readonly IMediator _mediator;
         private readonly ICourseService _courseService;
 
-        public AddStudentIntoClassCommandHandler(IClassRepository classRepository, IUserService userService, IMediator mediator, ICourseService courseService, IClassStudentRepository classStudentRepository)
+        public AddStudentIntoClassCommandHandler(IClassRepository classRepository, IUserService userService, IMediator mediator, ICourseService courseService, IClassStudentRepository classStudentRepository, ISystemService systemService)
         {
             _classRepository = classRepository;
             _userService = userService;
             _mediator = mediator;
             _courseService = courseService;
             _classStudentRepository = classStudentRepository;
+            _systemService = systemService;
         }
 
         public async Task<MethodResult<Guid>> Handle(AddStudentIntoClassCommand request, CancellationToken cancellationToken)
@@ -69,11 +72,20 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            if (!course.CourseLevel.IsCheckCourseLevel(student.BaseCourseLevel ?? default))
+
+            var checkCourseSuggest = await _systemService.CheckCourseSuggetConfigByStudent(new CheckCourseSuggetConfigByStudentQueryModel
+            {
+                BaseCourseLevel = student.BaseCourseLevel ?? default,
+                ChooseCourseLevel = course.CourseLevel,
+                Age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday)
+            });
+
+            if (!checkCourseSuggest.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassErrorCode.YouChoseTheWrongLevel), nameof(course.CourseLevel));
                 return methodResult;
             }
+
             var @class = await _classRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
 
             if (@class == null)

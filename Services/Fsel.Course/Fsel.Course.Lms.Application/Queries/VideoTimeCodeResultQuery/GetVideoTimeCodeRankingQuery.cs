@@ -32,23 +32,17 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
-        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
 
         public GetVideoTimeCodeRankingQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             ILessonResultRepository lessonResultRepository,
             IVideoResultRepository videoResultRepository,
-            IMapper mapper,
-            IUserService userService,
-            IVideoTimeCodeRepository videoTimeCodeRepository)
+            IUserService userService)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
-            _mapper = mapper;
             _userService = userService;
-            _videoTimeCodeRepository = videoTimeCodeRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<TestResultRankingModel>>> Handle(GetVideoTimeCodeRankingQuery request, CancellationToken cancellationToken)
@@ -92,10 +86,11 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             }
 
             var query = from bastQ in _videoTimeCodeResultRepository.Queryable
-                        join vr in _videoResultRepository.Queryable on bastQ.VideoResultId equals vr.Id
-                        join lr in _lessonResultRepository.Queryable on vr.LessonResultId equals lr.Id
-                        where bastQ.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId && bastQ.Status == EnumResultStatus.Done &&
-                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId && lr.LessonId == lessonResult.LessonId
+                        where bastQ.VideoTimeCodeId == videoTimeCodeResult.VideoTimeCodeId &&
+                              bastQ.Status == EnumResultStatus.Done &&
+                              bastQ.VideoResult!.LessonResult!.CourseId == lessonResult.CourseId &&
+                              bastQ.VideoResult.LessonResult.UnitId == lessonResult.UnitId &&
+                              bastQ.VideoResult.LessonResult.LessonId == lessonResult.LessonId
                         select new TestResultRankingModel
                         {
                             WorkingTime = bastQ.WorkingTime,
@@ -153,11 +148,12 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             }
 
             var query = from bastQ in _videoTimeCodeResultRepository.Queryable
-                        join vtc in _videoTimeCodeRepository.Queryable on bastQ.VideoTimeCodeId equals vtc.Id
-                        join vr in _videoResultRepository.Queryable on bastQ.VideoResultId equals vr.Id
-                        join lr in _lessonResultRepository.Queryable on vr.LessonResultId equals lr.Id
-                        where vtc.VideoId == videoResult.VideoId && vtc.TimeCodeType == type && vr.Status == EnumResultStatus.Done &&
-                        lr.CourseId == lessonResult.CourseId && lr.UnitId == lessonResult.UnitId && lr.LessonId == lessonResult.LessonId
+                        where bastQ.VideoTimeCode!.VideoId == videoResult.VideoId &&
+                              bastQ.VideoTimeCode.TimeCodeType == type &&
+                              bastQ.VideoResult!.Status == EnumResultStatus.Done &&
+                              bastQ.VideoResult.LessonResult!.CourseId == lessonResult.CourseId &&
+                              bastQ.VideoResult.LessonResult.UnitId == lessonResult.UnitId &&
+                              bastQ.VideoResult.LessonResult.LessonId == lessonResult.LessonId
                         group bastQ by new { bastQ.StudentId, bastQ.VideoResultId } into g
                         select new TestResultRankingModel
                         {
@@ -168,7 +164,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                             Id = g.Key.VideoResultId,
                             WorkingTime = g.Sum(x => x.WorkingTime),
                             Percent = g.Sum(x => x.CorrectTotal) != 0 ? Math.Round((double)g.Sum(x => x.CorrectCount) * 100 / g.Sum(x => x.CorrectTotal), 0) : default,
-                            Status = g.Select(x => x.VideoResult).Select(x => x!.Status).FirstOrDefault(),
                         };
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -181,9 +176,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(lists.Select(x => x.StudentId).ToList());
             var students = studentResults?.Content?.Result;
 
+            var videoResults = await _videoResultRepository.Queryable.WhereBulkContains(lists.Select(y => y.Id), x => x.Id).ToListAsync(cancellationToken: cancellationToken);
+
             foreach (var item in lists)
             {
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
+                var videoResultStudent = videoResults.FirstOrDefault(x => x.Id == item.Id);
+                item.Status = videoResultStudent?.Status ?? default;
                 item.IsCurrentStudent = student?.Id == videoResult.StudentId;
                 item.FullName = student?.Human?.FullName;
                 item.Percent = NumberHelper.ConvertRound(item.Percent);

@@ -8,7 +8,7 @@ namespace Fsel.Interaction.Domain.Models.QueryModels.InterationActions
     public class AggregateNumberOfLikesAndCommentsQueryModel
     {
         public Guid UserId { get; set; }
+        public Guid CourseId { get; set; }
         public IList<Guid>? ClassForumResultIds { get; set; }
-        public IList<Guid>? CourseClassForumResultIds { get; set; }
     }
 }

@@ -52,6 +52,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
                 Keyword = request.Keyword,
@@ -68,6 +72,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
                 Filters = request.Filters,
@@ -104,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     Status = x.Status,
                     ChooseLevel = x.ChooseLevel,
                     CompletionLevel = x.CompletionLevel,
-                    CurrentLevel = x.CurrentLevel,
+                    CurrentLevel = x.SuggetLevel,
                 })
                 .ToListAsync(cancellationToken);
 
@@ -127,6 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolClass = item.SchoolClass,
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
+                    UserName = item.UserName,
                     ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
                     Status = groupResult != null && groupResult.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.InProgress
                 };

@@ -125,17 +125,26 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region Add Platform to User
 
-            var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
-            if (platform != null)
+            switch (request.Role)
             {
-                user.UserPlatforms.Add(new UserPlatform
-                {
-                    PlatformId = platform.Id
-                });
+                case EnumRoleRegisterWithAdmin.CSO:
+                case EnumRoleRegisterWithAdmin.Teacher:
+                case EnumRoleRegisterWithAdmin.Moderator:
+                    await AddUserToPlatForm(user, EnumPlatformCode.LMSAdmin, cancellationToken);
+                    break;
+
+                default:
+                    await AddUserToPlatForm(user, EnumPlatformCode.LMS, cancellationToken);
+                    break;
             }
 
             #endregion Add Platform to User
 
+            if (!user.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
+                return methodResult;
+            }
             result = await _userManager.CreateAsync(user, newPassword);
             if (!result.Succeeded)
             {
@@ -221,6 +230,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 human.Code = "Moderator";
             }
             return human;
+        }
+
+        private async Task AddUserToPlatForm(User user, EnumPlatformCode platformCode, CancellationToken cancellationToken)
+        {
+            var platform = await _platformRepository.GetPlatformAsync(platformCode, cancellationToken);
+            if (platform != null)
+            {
+                user.UserPlatforms.Add(new UserPlatform
+                {
+                    PlatformId = platform.Id
+                });
+            }
         }
     }
 }

@@ -10,8 +10,12 @@ namespace Fsel.Identity.Api.Controllers
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.StudentCmd;
+    using Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd;
+    using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
     using Fsel.Identity.Application.Queries.StudentQuery;
+    using Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -22,6 +26,7 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student")]
     [ApiController]
+    [Permission]
     public class StudentController : BaseController
     {
         private readonly IMediator _mediator;
@@ -284,6 +289,67 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> GetBySchoolId()
         {
             MethodResult<IList<StudentModel>> commandResult = await _mediator.Send(new GetStudentBySchoolIdQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Send Otp SMS
+        /// </summary>
+        [HttpPost("send-otp-sms")]
+        [ProducesResponseType(typeof(MethodResult<SaveOTPForUserEventHaNoiCommandModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendOtpSMS([FromBody] SendOtpForPhoneVerificationCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Verify Otp SMS
+        /// </summary>
+        [HttpPost("verify-otp-sms")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> VerifyOtpSMS([FromBody] VerifyOtpUserToSMSCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Student Info Event
+        /// </summary>
+        [HttpGet("student-info-event")]
+        [ProducesResponseType(typeof(MethodResult<StudentInfoEventModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentInfoEvent()
+        {
+            MethodResult<StudentInfoEventModel> commandResult = await _mediator.Send(new GetStudentInfoEventQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Verify Otp SMS
+        /// </summary>
+        [HttpPut("student-info-event")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStudentInfoEvent([FromBody] UpdateStudentInfoEventCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// deduct coin of student
+        /// </summary>
+        [HttpPost("deduct-coin-of-student")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> DeductCoinOfStudent([FromBody] DeductCoinOfStudentCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

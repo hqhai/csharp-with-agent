@@ -27,7 +27,8 @@ namespace Fsel.System.Application.Queues.Consumers
                     CourseId = message.CourseId,
                     UnitId = message.UnitId,
                     LessonId = message.LessonId,
-                    Type = message.EnumFeature
+                    Type = message.EnumFeature,
+                    UserAgent = message.UserAgent
                 }).ConfigureAwait(false);
             }
         }

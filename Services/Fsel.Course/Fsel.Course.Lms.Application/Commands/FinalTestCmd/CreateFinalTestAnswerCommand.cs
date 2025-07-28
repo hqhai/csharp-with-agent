@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
     using Fsel.Course.Domain.Models.CommandModels.FinalTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
@@ -111,8 +112,11 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
                     CourseId = request.CourseId,
                     Status = EnumResultStatus.Process
                 };
-                finalTestResult = _finalTestResultRepository.Add(finalTestResult);
-                await _finalTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _finalTestResultRepository.BulkMergeAsync(new List<FinalTestResult> { finalTestResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId, c.IsDeleted };
+                });
             }
             else if (finalTestResult.Status == EnumResultStatus.Done)
             {
@@ -192,8 +196,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd
 
                 // làm nhiệm vụ
                 // await DoQuestBoard(courseId, cancellationToken);
-
-                finalTestResult = _finalTestResultRepository.Update(finalTestResult);
+                await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult> { finalTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId };
+                });
                 await _finalTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

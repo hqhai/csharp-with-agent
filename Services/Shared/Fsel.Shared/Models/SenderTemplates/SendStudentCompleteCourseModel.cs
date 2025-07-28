@@ -4,6 +4,7 @@ namespace Fsel.Shared.Models.SenderTemplates
 {
     public class SendStudentCompleteCourseModel
     {
+        public string? CoursePhoto { get; set; }
         public string? CourseLevel { get; set; }
         public string? Percent { get; set; }
         public string? MockTestMidCourse { get; set; }

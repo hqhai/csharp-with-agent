@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums;
@@ -66,15 +67,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _mediator.Send(new AutoApprovalClassForumCommand
             {
-                ClassForumResulId = classForumResult.Id
+                ClassForumResulId = classForumResult.Id,
+                ClassForumDetailResulId = classForumDetailResult.Id
             }, cancellationToken);
 
-
             #region RankedStudent
+
             await PublishRankedStudent(classForumDetailResult.CreatedUserId, cancellationToken);
-            #endregion
+
+            #endregion RankedStudent
 
             #region Notification
+
             IList<EnumRole> roles = new List<EnumRole>();
             roles.Add(EnumRole.CSO);
 
@@ -88,7 +92,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 PlatformCode = EnumPlatformCode.LMSAdmin
             };
             await _notificationMessagePublisher.Publish(model, cancellationToken);
-            #endregion
+
+            #endregion Notification
 
             return true;
         }
@@ -140,8 +145,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     item.CompletionDate = DateTime.UtcNow;
                 }
             }
-            _classforumDetailResultRepository.UpdateList(classForumDetailResults);
-            await _classforumDetailResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _classforumDetailResultRepository.BulkUpdateList(classForumDetailResults, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+            });
         }
 
         public async Task UpdateClassForumResultAsync(ClassForumResult classForumResult, ClassForumDetailResult classForumDetailResult)
@@ -186,7 +193,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     }
                 };
             }
-            _classForumResultRepository.Update(classForumResult);
+            await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+            });
             await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
         }
 

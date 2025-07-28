@@ -4,6 +4,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
@@ -12,14 +13,12 @@ namespace Fsel.Ordering.Api.Controllers.Admin
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class EventController : BaseController
     {
         private readonly IMediator _mediator;
@@ -35,6 +34,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<EventModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(new[] { PriceManagement.AddPriceList, PriceManagement.UpdatePriceList })]
         public async Task<IActionResult> CreateAndUpdate([FromBody] SaveEventCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -47,6 +47,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         [HttpPost("change-event")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PriceManagement.UpdatePriceList)]
         public async Task<IActionResult> ChangeEvent([FromBody] ChangeEventCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -59,6 +60,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         [HttpGet("get-by-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<EventModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PriceManagement.ViewPriceList)]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
         {
             var commandResult = await _mediator.Send(new GetEventByIdQuery() { Id = id }).ConfigureAwait(false);
@@ -71,6 +73,7 @@ namespace Fsel.Ordering.Api.Controllers.Admin
         [HttpGet("search")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<EventModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PriceManagement.ViewPriceList)]
         public async Task<IActionResult> SearchEvent([FromQuery] SearchEventQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);

@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public Guid StudentId { get; set; }
-        public Guid CourseId { get; set; }
+        public Guid? CourseId { get; set; }
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel Level { get; set; }
         public string? ContentProgress { get; set; }

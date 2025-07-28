@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     {
         public Guid ClassForumResulId { get; set; }
 
+        public Guid? ClassForumDetailResulId { get; set; }
     }
 
     public class AutoApprovalClassForumCommandHandler : IRequestHandler<AutoApprovalClassForumCommand, MethodResult<bool>>
@@ -41,7 +42,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var classForumResult = await _classForumResultRepository.Queryable.Include(x => x.ClassForum).FirstOrDefaultAsync(x => x.Id == request.ClassForumResulId, cancellationToken);
+            var classForumResult = await _classForumResultRepository.Queryable
+                                                                    .Include(x => x.ClassForum)
+                                                                    .Include(x => x.ClassForumDetailResults)
+                                                                    .FirstOrDefaultAsync(x => x.Id == request.ClassForumResulId, cancellationToken);
 
             #region Validate
             if (classForumResult == null)
@@ -55,9 +59,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
             #endregion
 
-            var aiApprovalAndComment = await GetAIModeration(_mediator, classForumResult, cancellationToken);
-
-            await UpdateStatusClassForumAfterApproval(classForumResult.Id, aiApprovalAndComment, _mediator, cancellationToken);
+            //var aiApprovalAndComment = await GetAIModeration(_mediator, classForumResult, cancellationToken);
+            bool isForbidden = request.ClassForumDetailResulId.HasValue && classForumResult.ClassForumDetailResults.Any(x => x.Id == request.ClassForumDetailResulId && (x.IsForbiddenWork || x.IsForbiddenImage));
+            await UpdateStatusClassForumAfterApproval(classForumResult.Id, _mediator, isForbidden, cancellationToken);
 
             return methodResult;
         }
@@ -113,14 +117,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         /// </summary>
         /// <param name="aiApprovalAndComment"></param>
         /// <returns></returns>
-        public async Task UpdateStatusClassForumAfterApproval(Guid classForumResultId, List<AIApprovalModel>? aiApprovalAndComment, IMediator mediator, CancellationToken cancellationToken)
+        public async Task UpdateStatusClassForumAfterApproval(Guid classForumResultId, IMediator mediator, bool isForbidden, CancellationToken cancellationToken)
         {
-            if (aiApprovalAndComment == null || aiApprovalAndComment.Count == 0 || mediator == null)
+            if (mediator == null)
             {
                 return;
             }
 
-            bool isApprove = aiApprovalAndComment.FirstOrDefault()!.Determination == AIAccessContext;
+            bool isApprove = !isForbidden;
             await mediator.Send(new ApproveClassForumPenddingCommand
             {
                 ClassForumResultId = classForumResultId,

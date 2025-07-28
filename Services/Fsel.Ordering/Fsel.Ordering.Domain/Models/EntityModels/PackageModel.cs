@@ -16,6 +16,7 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public int MonthBonus { get; set; }
         public int DayBonus { get; set; }
         public int ReferToken { get; set; }
+        public int BonusCoins { get; set; }
         public IList<string>? ImagePaths { get; set; }
         public string? EventDescription { get; set; }
         public string? Description { get; set; }

@@ -23,8 +23,8 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;

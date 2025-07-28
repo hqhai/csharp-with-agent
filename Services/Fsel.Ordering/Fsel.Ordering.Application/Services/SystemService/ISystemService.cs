@@ -16,5 +16,11 @@ namespace Fsel.Ordering.Application.Services.SystemService
 
         [Post("/v1/google-sheet/add-vouchers-for-ma")]
         Task<IApiResponse<MethodResult<bool>>> AddVouchersForMAIntoGGSheet([Body] AddVouchersForMAIntoGoogleSheetCommandModel model);
+
+        [Get("/v1/location/get-by-ids")]
+        Task<IApiResponse<MethodResult<IList<LocationModel>>>> GetLocationByIdsAsync([Query] GetLocationsByIdsQueryModel query);
+
+        [Post("/v1/admin/blind-box/add-user-into-blind-box")]
+        Task<IApiResponse<MethodResult<bool>>> AddUserIntoBlindBoxEvent([Body] AddUserIntoBlindBoxCommandModel query);
     }
 }

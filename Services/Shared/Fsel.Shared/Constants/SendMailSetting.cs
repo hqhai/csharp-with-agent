@@ -21,6 +21,7 @@ namespace Fsel.Shared.Constants
         public const string Equal = "<img src=\"https://s3-sgn10.fptcloud.com/fsel/Images/MicrosoftTeamsimage_4_1706671214.png\" alt=\"\">";
 
         public const string Display = "style=\"width:100%;display: none;\"";
+        public const string DisplayNone = "display: none;";
 
         public const string LessonName = "Resources//MailTemplates//LessonName.html";
         public const string UnitName = "Resources//MailTemplates//UnitName.html";
@@ -52,6 +53,7 @@ namespace Fsel.Shared.Constants
         public const string CourseInfo = "Resources//MailTemplates//CourseInfo.html";
         public const string AcademicInfo = "đưa học sinh từ trình độ Sơ cấp (A1) đến Nâng cao (C1) và phù hợp với học sinh từ 11-16 tuổi. Chương trình giảng dạy khám phá nhiều chủ đề khác nhau để làm nổi bật ngôn ngữ trong ngữ cảnh và tạo điều kiện cho người dùng để áp dụng những gì đã học thông qua các hoạt động nói và viết dựa trên nhiệm vụ. Chương trình bao gồm 6 cấp độ, mỗi cấp độ có 72 bài học/khóa (180 giờ học/khóa).";
         public const string IELTInfo = "được thiết kế dành cho học viên từ 16 tuổi trở lên đã đạt trình độ Trung cấp (B1+) và hiện đang chuẩn bị tham gia kỳ thi Cambridge IELTS chính thức. Mỗi khóa học giúp học sinh mở rộng kiến thức về ngôn ngữ học thuật, làm quen với hình thức của kỳ thi chính thức và phát triển các kỹ năng làm bài thi cần thiết để đạt kết quả cao. Chương trình bao gồm 3 khóa học, mỗi khóa có 32 bài học và 4 bài thi thử IELTS đầy đủ cho mỗi khóa học (92 giờ học/khóa).";
+        public const string EnglishFoundation = "Một chương trình học tập hiệu quả và tiết kiệm thời gian, giúp học sinh từ trình độ Sơ cấp (A1) đến Trung cấp (B1). Khoá học phù hợp với học sinh trung học từ 16 tuổi trở lên, sinh viên đại học và người lớn. Chương trình giảng dạy khám phá nhiều chủ đề khác nhau, giúp người học được thực hành ngôn ngữ trong ngữ cảnh cụ thể và áp dụng những gì đã học thông qua các hoạt động nói và viết. Chương trình bao gồm tổng cộng 170 bài học, với 50 bài học ở cấp độ A1 (tương đương 75 giờ học), và 60 bài học ở các cấp độ A2 và B1 (tương đương 90 giờ học/khoá).";
 
         public const string TeacherBios = "Resources//TeacherBios.json";
 

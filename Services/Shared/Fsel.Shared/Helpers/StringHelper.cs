@@ -2,6 +2,7 @@
 
 namespace Fsel.Shared.Helpers
 {
+    using System;
     using System.ComponentModel;
     using System.Globalization;
     using System.Text;
@@ -276,6 +277,30 @@ namespace Fsel.Shared.Helpers
             return new string(password.OrderBy(_ => random.Next()).ToArray());
         }
 
+        public static string GenerateLaterPartPassword(int length)
+        {
+            if (length < 3)
+            {
+                throw new ArgumentException("Độ dài mật khẩu phải lớn hơn hoặc bằng 3 để đảm bảo các yêu cầu.");
+            }
+
+            Random random = new Random();
+
+            const string Letters = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+            const string Digits = "123456789";
+
+            StringBuilder sb = new StringBuilder();
+            sb.Append(Digits[random.Next(Digits.Length)]);
+
+            for (int i = 1; i < length; i++)
+            {
+                string chars = Letters + Digits;
+                sb.Append(chars[random.Next(chars.Length)]);
+            }
+
+            return new string(sb.ToString().OrderBy(_ => random.Next()).ToArray());
+        }
+
         public static string JoinWithComma(ICollection<string> items)
         {
             // Kiểm tra nếu danh sách rỗng hoặc null
@@ -297,7 +322,8 @@ namespace Fsel.Shared.Helpers
 
             phoneNumber = phoneNumber.Replace(" ", "", StringComparison.InvariantCultureIgnoreCase);
 
-            string pattern = @"^(0\d{9})$|^(84\d{9})$|^\+84\d{9}$|^\d{9}$";
+            string pattern = @"^(0\d{9})$|^(84\d{9})$|^\+84\d{9}$|^[1-9]\d{8}$";
+
             Regex regex = new Regex(pattern);
 
             return regex.IsMatch(phoneNumber);
@@ -337,6 +363,88 @@ namespace Fsel.Shared.Helpers
         {
             string objStr = data?.ToString() ?? string.Empty;
             return string.Format(objStr, param ?? Array.Empty<object>());
+        }
+
+        public static bool ContainsSpecialChars(string input)
+        {
+            return Regex.IsMatch(input, @"^[\p{L}\s]+$");
+        }
+
+        public static class TextCleaner
+        {
+            // Hàm chuẩn hóa chuỗi: trim, lowercase, chuẩn hóa khoảng trắng
+            private static string NormalizeWhitespaceAndCase(string input)
+            {
+                return Regex.Replace(input.Trim().ToLowerInvariant(), @"\s+", " ");
+            }
+
+            // Hàm loại bỏ toàn bộ dấu câu
+            public static string RemovePunctuation(string input)
+            {
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return string.Empty;
+                }
+                input = DecodeEscapesSmart(input);
+                return Regex.Replace(input, @"[^\w\s]", "");
+            }
+
+            public static string DecodeEscapesSmart(string input)
+            {
+                if (string.IsNullOrEmpty(input))
+                {
+                    return input;
+                }
+                string result = input;
+                string pattern = @"\\[nrtbfv0\\'""]";
+                bool changed = true;
+
+                while (changed)
+                {
+                    string replaced = Regex.Replace(result, pattern, match =>
+                    {
+                        return match.Value switch
+                        {
+                            "\\n" => "\n",
+                            "\\t" => "\t",
+                            "\\r" => "\r",
+                            "\\b" => "\b",
+                            "\\f" => "\f",
+                            "\\v" => "\v",
+                            "\\0" => "\0",
+                            "\\\\" => "\\",
+                            "\\\"" => "\"",
+                            "\\\'" => "'",
+                            _ => match.Value
+                        };
+                    });
+
+                    changed = replaced != result;
+                    result = replaced;
+                }
+                return result;
+            }
+
+            // Hàm chuẩn hóa + loại bỏ dấu câu cho một chuỗi
+            public static string CleanText(string input)
+            {
+                if (string.IsNullOrWhiteSpace(input))
+                {
+                    return string.Empty;
+                }
+                string noPunctuation = RemovePunctuation(input);
+                return NormalizeWhitespaceAndCase(noPunctuation);
+            }
+
+            // Hàm xử lý danh sách đáp án
+            public static IList<string> CleanAnswers(IList<string>? answers)
+            {
+                if (answers == null || answers.Count == 0)
+                {
+                    return answers ?? new List<string>();
+                }
+                return answers.Select(ans => CleanText(ans)).ToList();
+            }
         }
     }
 }

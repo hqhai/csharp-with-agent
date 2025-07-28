@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Services.UserService
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.UserService.Models;
+    using Fsel.Shared.Models.ShareModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -34,5 +35,11 @@ namespace Fsel.Ordering.Application.Services.UserService
 
         [Get("/v1/student/get-student-by-email")]
         Task<IApiResponse<MethodResult<StudentModel?>>> GetStudentByEmail([Query] string email);
+
+        [Put("/v1/admin-school/student/update-expired-date-for-students")]
+        Task<IApiResponse<MethodResult<bool>>> UpdateExpiredDateForStudentsEvent([Body] UpdateExpiredDateForStudentsEventCommandModel model);
+
+        [Post("/v1/student/deduct-coin-of-student")]
+        Task<IApiResponse<MethodResult<bool>>> DeductCoinOfStudent([Body] DeductCoinOfStudentCommandModel model);
     }
 }

@@ -37,6 +37,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Cannot initialize a version smaller than the current version
         /// </summary>
-        VersionTooLow
+        VersionTooLow,
+
+        /// <summary>
+        /// BelowOrEqualTo40
+        /// </summary>
+        BelowOrEqualTo40
     }
 }

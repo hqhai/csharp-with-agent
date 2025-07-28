@@ -6,9 +6,12 @@ namespace Fsel.System.Application.Commands.BannerCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.Enums.ErrorCodes;
     using Fsel.System.Domain.IRepositories;
+    using Fsel.System.Domain.Models.CommandModels.BannerImages;
     using Fsel.System.Domain.Models.CommandModels.Banners;
+    using Fsel.System.Domain.Models.CommandModels.BannerScopes;
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Infrastructure.Common;
     using MediatR;
@@ -56,6 +59,8 @@ namespace Fsel.System.Application.Commands.BannerCmd
                 return methodResult;
             }
 
+            bool checkBanner = (request.BannerScopes == null || !request.BannerScopes.Any()) && request.Status != banner.Status;
+
             if (await _bannerRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Code.ToLower().Trim() == request.Code.ToLower().Trim(), cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumBannerErrorCode.CodeAlreadyExist), nameof(request.Code), request.Code);
@@ -63,14 +68,24 @@ namespace Fsel.System.Application.Commands.BannerCmd
             }
 
             (bool isValid, string errorCode, string field, object? value) = _bannerConverter.ValidateBanner(request);
-            if (!isValid)
+            if (!isValid && !checkBanner)
             {
-                methodResult.AddErrorBadRequest(nameof(errorCode), nameof(field), value);
+                methodResult.AddErrorBadRequest(nameof(errorCode), nameof(field), errorCode);
                 return methodResult;
             }
 
             await _bannerRepository.ExecuteTransactionAsync(async () =>
             {
+                if (checkBanner)
+                {
+                    banner.Status = request.Status;
+                    _bannerRepository.Update(banner);
+                    await _bannerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = _mapper.Map<BannerModel>(banner);
+                    return methodResult;
+                }
+
                 var bannerScopes = banner.BannerScopes.ToList();
                 var bannerImages = banner.BannerImages.ToList();
 
@@ -78,6 +93,8 @@ namespace Fsel.System.Application.Commands.BannerCmd
                 await _bannerScopeRepository.DeleteListAsync(bannerScopes);
 
                 _mapper.Map(request, banner);
+                banner.BannerScopes = _mapper.Map<IList<BannerScope>>(request.BannerScopes);
+                banner.BannerImages = _mapper.Map<IList<BannerImage>>(request.BannerImages);
                 if (!banner.IsValid())
                 {
                     methodResult.AddErrorBadRequest(banner.ErrorMessages);

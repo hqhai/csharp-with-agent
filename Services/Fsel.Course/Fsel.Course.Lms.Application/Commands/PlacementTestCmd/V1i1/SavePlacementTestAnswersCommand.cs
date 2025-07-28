@@ -79,12 +79,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             }
             try
             {
-                var questions = await _sectionQuestionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).Select(x => new
+                var questions = await _sectionQuestionRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId).Select(x => new
                 {
                     SectionQuestionId = x.Id,
                     QuestionType = x.Question!.QuestionType
                 }).ToListAsync();
-                await _placementTestAnswerRepository.BulkMergeAsync(questions.Select(x => new PlacementTestAnswer
+
+                var placementTestAnswers = questions.Select(x => new PlacementTestAnswer
                 {
                     Answer = _answerTypeConverter.GetConfigEmpty(x.QuestionType),
                     SectionQuestionId = x.SectionQuestionId,
@@ -92,7 +93,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     PlacementTestResultId = sectionGroupResult.PlacementTestResultId ?? default,
                     IsCorrect = null,
                     Status = EnumAnswerStatus.Done
-                }).ToList());
+                }).ToList();
+                await _placementTestAnswerRepository.BulkMergeAsync(placementTestAnswers, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
+                });
             }
             catch (Exception ex)
             {
@@ -123,11 +128,14 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 if (createPlacementTestAnswers != null && createPlacementTestAnswers.Any())
                 {
-                    await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers);
+                    await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
+                    });
                 }
                 if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
                 {
-                    await _placementTestAnswerRepository.BulkMergeAsync(updatePlacementTestAnswers, bulk =>
+                    await _placementTestAnswerRepository.BulkUpdateList(updatePlacementTestAnswers, bulk =>
                     {
                         bulk.IgnoreOnUpdateExpression = entity => new { entity.PlacementTestResultId, entity.SectionQuestionId, entity.SectionGroupResultId };
                     });
@@ -184,7 +192,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             return methodResult;
         }
 
-        private static PlacementTestAnswer GetPlacementTestAnswer(PlacementTestAnswer placementTestAnswer, object? answer, int correctCount, bool isAnswered, Question questionItem)
+        private static PlacementTestAnswer GetPlacementTestAnswer(PlacementTestAnswer placementTestAnswer, object? answer, short correctCount, bool isAnswered, Question questionItem)
         {
             placementTestAnswer.Answer = answer;
             placementTestAnswer.CorrectCount = correctCount;

@@ -22,6 +22,11 @@ namespace Fsel.Ordering.Domain.Enums.ErrorCodes
         /// <summary>
         /// Try again in 1 minute
         /// </summary>
-        TryAgainInOneMinute
+        TryAgainInOneMinute,
+
+        /// <summary>
+        /// Cannot Add Student Already Order
+        /// </summary>
+        CannotAddStudentAlreadyOrder
     }
 }

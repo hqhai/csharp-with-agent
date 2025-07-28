@@ -3,8 +3,6 @@
 namespace Fsel.Identity.Application.Queries.StudentRanking
 {
     using System.Collections.Generic;
-    using System.Text.Json.Serialization;
-    using System.Text.Json;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
@@ -25,14 +23,14 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
     public class GetEventsByUserIdQueryHandler : IRequestHandler<GetEventsByUserIdQuery, MethodResult<IList<CompetitionEventsModel>>>
     {
         private readonly AuthContext _authContext;
-        private readonly IStudentCompetitionEventsRepository _studentRankingEventsRepository;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IMapper _mapper;
 
-        public GetEventsByUserIdQueryHandler(AuthContext authContext, IStudentCompetitionEventsRepository studentRankingEventsRepository, IStudentRepository studentRepository, IMapper mapper)
+        public GetEventsByUserIdQueryHandler(AuthContext authContext, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IStudentRepository studentRepository, IMapper mapper)
         {
             _authContext = authContext;
-            _studentRankingEventsRepository = studentRankingEventsRepository;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _studentRepository = studentRepository;
             _mapper = mapper;
         }
@@ -45,7 +43,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
             var student = await _studentRepository.Queryable.Include(p => p.Human).FirstOrDefaultAsync(x => x.Human != null && x.Human.UserId == userId, cancellationToken);
-            var studentRankingEvents = await _studentRankingEventsRepository.Queryable
+            var studentRankingEvents = await _studentCompetitionEventsRepository.Queryable
                 .Include(x => x.CompetitionEvents)
                 .Where(x => student != null && x.StudentId == student.Id)
                 .ToListAsync(cancellationToken);
@@ -56,7 +54,6 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
             ((!x.CompetitionEvents.EventContent.StartDate.HasValue && !x.CompetitionEvents.EventContent.EndDate.HasValue) ||
             (x.CompetitionEvents.EventContent.StartDate.HasValue &&
             x.CompetitionEvents.EventContent.EndDate.HasValue &&
-            x.CompetitionEvents.EventContent.StartDate.Value.Date <= currentDate.Date &&
             x.CompetitionEvents.EventContent.EndDate.Value.Date >= currentDate.Date)))
                 .Select(x => x.CompetitionEvents);
 

@@ -12,13 +12,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Lms.Application.Queries.ManagerReportQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/manager-report/admin")]
-    [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool) })]
     [ApiController]
     public class ManagerReportController : BaseController
     {
@@ -35,6 +34,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("search-report-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<SearchReportLearningProgressModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewLearningProgressReport)]
         public async Task<IActionResult> Get([FromQuery] SearchReportLearningProgressQuery query)
         {
             SetQuery(query);
@@ -48,6 +48,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("search-report-learning-result")]
         [ProducesResponseType(typeof(MethodResult<SearchReportLearningResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewLearningResultsReport)]
         public async Task<IActionResult> Get([FromQuery] SearchReportLearningResultQuery query)
         {
             SetQuery(query);
@@ -61,6 +62,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("search-report-placement-test")]
         [ProducesResponseType(typeof(MethodResult<SearchReportPlacementTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewPTResultsReport)]
         public async Task<IActionResult> Get([FromQuery] SearchReportPlacementTestQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -73,6 +75,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("export-report-placement-test")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewPTResultsReport)]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportPlacementTestCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -80,7 +83,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Report_PlacementTests.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_PlacementTests_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
         }
 
         /// <summary>
@@ -89,6 +92,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("export-report-learning-progress")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewLearningProgressReport)]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportLearningProgressCommand command)
         {
             SetQuery(command);
@@ -97,7 +101,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Report_LearningProgress.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_LearningProgress_{command.CourseType}_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
         }
 
         /// <summary>
@@ -106,6 +110,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("export-report-learning-result")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewLearningResultsReport)]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelReportLearningResultCommand command)
         {
             SetQuery(command);
@@ -114,7 +119,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Export_Report_LearningResult.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, $"Export_Report_LearningResult_{command.CourseType}_{NumberHelper.GenerateCodeNumber(4)}.xlsx");
         }
     }
 }

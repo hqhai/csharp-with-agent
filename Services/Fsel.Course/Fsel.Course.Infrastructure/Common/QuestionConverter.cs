@@ -20,14 +20,21 @@ namespace Fsel.Course.Infrastructure.Common
             _questionTypeConverter = questionTypeConverter;
         }
 
-        public MethodResult<(Question, object?, int, bool)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit, object? oldAnswer = default, bool isTryAgain = false, bool isMandatoryAnswer = false)
+        public MethodResult<(Question, object?, short, bool)> HandleQuestionAnswer(Question? question, object? answer, bool isSubmit, object? oldAnswer = default, bool isTryAgain = false, bool isMandatoryAnswer = false)
         {
-            var methodResult = new MethodResult<(Question, object?, int, bool)>();
+            var methodResult = new MethodResult<(Question, object?, short, bool)>();
             if (question == null || question.Config == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question));
                 return methodResult;
             }
+            var methodValidate = _answerTypeConverter.ValidateAnswerLength(answer, question);
+            if (!methodValidate.IsOK)
+            {
+                methodResult.AddErrorBadRequest(methodValidate.ErrorMessages);
+                return methodResult;
+            }
+
             var (answerConfig, correctCount, isAnswerMissing, isAnswered) = _answerTypeConverter.GetTotalCorrectByAnswerType(answer, oldAnswer, question, isTryAgain, isSubmit, isMandatoryAnswer);
             if (answerConfig == null && !string.IsNullOrEmpty(answer?.ToString()))
             {
@@ -43,7 +50,7 @@ namespace Fsel.Course.Infrastructure.Common
             return methodResult;
         }
 
-        public MethodResult<(Question, object?, int, bool)> HandleAnswerTest(Question? question, object? answer, bool isSubmit, bool isMandatoryAnswer = false)
+        public MethodResult<(Question, object?, short, bool)> HandleAnswerTest(Question? question, object? answer, bool isSubmit, bool isMandatoryAnswer = false)
         {
             return HandleQuestionAnswer(question, answer, isSubmit, default, false, isMandatoryAnswer);
         }

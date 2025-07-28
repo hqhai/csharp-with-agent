@@ -51,5 +51,17 @@ namespace Fsel.System.Api.Controllers.Admins
             MethodResult<IList<TokenConfigModel>> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Notification
+        /// </summary>
+        [HttpPost("recall-coin")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendNotificationRecallCoinSurvey()
+        {
+            var commandResult = await _mediator.Send(new RecallCoinSurveyCommand()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

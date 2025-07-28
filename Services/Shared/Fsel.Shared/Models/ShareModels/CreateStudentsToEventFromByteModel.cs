@@ -2,13 +2,11 @@
 
 namespace Fsel.Shared.Models.ShareModels
 {
-    using System;
+    using Fsel.Shared.Enums;
 
     public class CreateStudentsToEventFromByteModel
     {
-        public Guid DistrictId { get; set; }
-        public Guid SchoolId { get; set; }
-        public string? SchoolName { get; set; }
+        public EnumCompetitionEventCategory Category { get; set; }
         public string? Key { get; set; }
         public byte[]? File { get; set; }
     }

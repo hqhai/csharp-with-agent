@@ -37,7 +37,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             }
             if (currentLevel.HasValue)
             {
-                query = query.Where(x => x.CurrentLevel == currentLevel.Value);
+                query = query.Where(x => x.SuggetLevel == currentLevel.Value);
             }
             if (courseLevel.HasValue)
             {

@@ -2,12 +2,15 @@
 
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
+using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Course.Lms.Application.Services.UserServices.Models;
 using Fsel.Shared.Enums;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
 {
@@ -20,11 +23,13 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
     {
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IUserService _userService;
+        private readonly ICourseResultRepository _courseResultRepository;
 
-        public OpenNextUnitForExtendCmdHandler(IUnitResultRepository unitResultRepository, IUserService userService)
+        public OpenNextUnitForExtendCmdHandler(IUnitResultRepository unitResultRepository, IUserService userService, ICourseResultRepository courseResultRepository)
         {
             _unitResultRepository = unitResultRepository;
             _userService = userService;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(OpenNextUnitForExtendCmd request, CancellationToken cancellationToken)
@@ -51,18 +56,27 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd
             }
 
             var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(request.UserId);
-            var studentId = studentResult.Content?.Result?.Id;
+            var student = studentResult.Content?.Result;
+            var studentId = student?.Id;
 
-            var unitResult = _unitResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done);
-            if (unitResult == null)
+            var courseResult = await _courseResultRepository.Queryable.Where(x => x.StudentId == studentId && x.WorkingStatus == EnumWorkingStatus.Active).FirstOrDefaultAsync(cancellationToken);
+            if (courseResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult), studentId);
+                return methodResult;
+            }
+            var unitResults = await _unitResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == courseResult.CourseId && x.Status == EnumResultStatus.Done).ToListAsync(cancellationToken);
+            if (unitResults == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentId));
                 return methodResult;
             }
-
             await _unitResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _unitResultRepository.UpdateList(unitResult);
+                await _unitResultRepository.BulkUpdateList(unitResults, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId };
+                });
                 await _unitResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = true;
                 return methodResult;

@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.IEntities;
+    using Fsel.Shared.Enums;
     using Newtonsoft.Json;
 
     public class VideoResult : BaseResult, IHighestStreak, ITokenResult
@@ -21,7 +22,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Feedback
         /// </summary>
-        [MaxLength(10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(4000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Feedback { get; set; }
 
         public string? VideoSkillScoresStr { get; set; }
@@ -62,9 +63,8 @@ namespace Fsel.Course.Domain.Entities
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
         public bool IsShowToken { get; set; }
+        public EnumPlaybackSpeed PlaybackSpeed { get; set; } = EnumPlaybackSpeed.Normal;
         public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
-
-        public ICollection<QuestionExplanationError> QuestionExplanationErrors = new List<QuestionExplanationError>();
     }
 }

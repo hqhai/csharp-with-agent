@@ -28,7 +28,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             }
         }
 
-        public EnumEducationLevel EducationLevel { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
     }
 
     public class GetReportCompetitionEventsQueryHandler : IRequestHandler<GetReportCompetitionEventsQuery, MethodResult<IList<ReportCompetitionEventModel>>>
@@ -85,29 +85,39 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                           where competitionEventIds.Contains(sce.CompetitionEventId) && !baseQ.IsDeleted && !user.IsDeleted
                                           select new
                                           {
-                                              SchoolId = baseQ.SchoolId.GetValueOrDefault(),
+                                              baseQ.SchoolId,
                                               StudentId = baseQ.Id,
+                                              UserId = user.Id,
                                               IsConfirmed = user.EmailConfirmed || user.PhoneNumberConfirmed,
-                                              UserId = human.UserId.GetValueOrDefault(),
                                           }).ToListAsync(cancellationToken);
 
             var reportCompetitionEvents = new List<ReportCompetitionEventModel>();
+            var studentSchoolLookup = studentSchoolIds.ToLookup(x => x.SchoolId ?? default);
+            var locationDistrictLookup = locationDistricts?.ToDictionary(x => x.Id, x => x.Name);
+            var schoolSet = schools.Select(x => x.Id).ToHashSet();
             foreach (var item in competitionEvents)
             {
-                var studentDistricts = studentSchoolIds.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.SchoolId)).ToList();
-                var studentIds = studentDistricts.Select(x => x.StudentId).Distinct().ToList();
-                var reportCompetition = new ReportCompetitionEventModel
+                item.SchoolIds = item.SchoolIds ?? new List<Guid>();
+                var studentDistricts = item.SchoolIds.SelectMany(id => studentSchoolLookup[id]).ToList();
+
+                // Dùng HashSet để lọc trùng nhanh
+                var studentIds = new HashSet<Guid>(studentDistricts.Select(x => x.StudentId));
+                var userIds = new HashSet<Guid>(studentDistricts.Select(x => x.UserId));
+                var confirmedUserIds = new HashSet<Guid>(studentDistricts.Where(x => x.IsConfirmed).Select(x => x.UserId));
+
+                reportCompetitionEvents.Add(new ReportCompetitionEventModel
                 {
                     LocationId = item.LocationId.GetValueOrDefault(),
-                    DistrictName = locationDistricts?.FirstOrDefault(x => x.Id == item.LocationId)?.Name,
-                    NumberRegisteredSchool = schools.Where(x => item.SchoolIds != null && item.SchoolIds.Contains(x.Id)).Count(),
+                    DistrictName = locationDistrictLookup != null && locationDistrictLookup.ContainsKey(item.LocationId.GetValueOrDefault())
+                        ? locationDistrictLookup[item.LocationId.GetValueOrDefault()]
+                        : null,
+                    NumberRegisteredSchool = item.SchoolIds.Count(schoolSet.Contains),
                     NumberActualParticipatingSchool = studentDistricts.Select(x => x.SchoolId).Distinct().Count(),
                     NumberValidStudentAccount = studentIds.Count,
-                    NumberStudentCompleteVerify = studentDistricts.Where(x => x.IsConfirmed).Select(x => x.UserId).Distinct().Count(),
-                    StudentIds = studentIds,
-                    UserIds = studentDistricts.Select(x => x.UserId).Distinct().ToList(),
-                };
-                reportCompetitionEvents.Add(reportCompetition);
+                    NumberStudentCompleteVerify = confirmedUserIds.Count,
+                    StudentIds = studentIds.ToList(),
+                    UserIds = userIds.ToList(),
+                });
             }
 
             methodResult.Result = reportCompetitionEvents;

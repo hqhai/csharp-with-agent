@@ -49,18 +49,6 @@ namespace Fsel.System.Application.Commands.CourseSuggestConfigCmd
                 return methodResult;
             }
 
-            if (request.Type == EnumCourseSuggestType.Relaxed && request.PlacementTestLevel == EnumPlacementTestLevel.A1)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseSuggestConfigErrorCode.NoReviewTypeForA1Level), nameof(request));
-                return methodResult;
-            }
-
-            if (request.Type == EnumCourseSuggestType.Challenge && request.PlacementTestLevel == EnumPlacementTestLevel.IELTS)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseSuggestConfigErrorCode.NoChallengeTypeForIELTSLevel), nameof(request));
-                return methodResult;
-            }
-
             var courseSuggestConfig = await _courseSuggestConfigRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (courseSuggestConfig == null)
             {

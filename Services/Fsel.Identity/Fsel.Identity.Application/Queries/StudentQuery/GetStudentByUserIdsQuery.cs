@@ -8,13 +8,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Models;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
-    using Fsel.Identity.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -46,17 +41,19 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             }
 
             var students = await _humanRepository.Queryable
+                .Include(x => x.User)
                 .Where(i => i.UserId != null)
                 .WhereBulkContains(request.UserIds, i => i.UserId)
                 .Select(x => new StudentModel
                 {
-                    Id = x.Id,
+                    Id = x.Student!.Id,
                     ClassId = x.Student!.ClassId,
                     Occupation = x.Student.Occupation,
                     CourseLevel = x.Student.CourseLevel,
                     CreatedDate = x.Student.CreatedDate,
                     School = x.Student.School,
                     SchoolId = x.Student.SchoolId,
+                    ExpiredDate = x.Student.ExpiredDate,
                     Human = _mapper.Map<HumanProfileModel>(x)
                 })
                 .ToListAsync(cancellationToken);

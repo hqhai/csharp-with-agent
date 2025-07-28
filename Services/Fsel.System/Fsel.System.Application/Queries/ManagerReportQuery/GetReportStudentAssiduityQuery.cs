@@ -39,7 +39,11 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 Keyword = request.Keyword,
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 ListSchool = request.ListSchool,
+                ListCourseLevel = request.ListCourseLevel,
+
                 SchoolGrade = request.SchoolGrade,
                 SchoolClass = request.SchoolClass,
                 StartDate = request.StartDate,
@@ -72,15 +76,17 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
             var datas = students.Select(student =>
             {
                 var userId = student.UserId ?? default;
-                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId);
+                var overallFeatureAccessTime = overallFeatureAccessTimes.FirstOrDefault(x => x.UserId == userId && x.CourseId == student.CourseId);
                 var studentAssiduity = new StudentAssiduityModel
                 {
                     FullName = student.FullName,
                     Email = student.Email,
+                    PhoneNumber = student.PhoneNumber,
                     SchoolName = student.School,
                     SchoolClass = student.SchoolClass,
                     SchoolGrade = student.SchoolGrade,
                     CourseLevel = student.CourseLevel,
+                    UserName = student.UserName,
                     ExpiredDate = student.ExpiredDate,
                     ProcessDate = student.CreatedDate
                 };

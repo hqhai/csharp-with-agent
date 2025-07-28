@@ -15,5 +15,8 @@ namespace Fsel.Training.Application.Services.SystemServices
 
         [Post("/v1/course-time-config")]
         Task<IApiResponse<MethodResult<IList<CourseTimeConfigModel>>>> GetCourseTimeConfigByCourseId([Body] IList<Guid> courseIds);
+
+        [Get("/v1/course-suggest-config/check-suggestion")]
+        Task<IApiResponse<MethodResult<bool>>> CheckCourseSuggetConfigByStudent([Query] CheckCourseSuggetConfigByStudentQueryModel query);
     }
 }

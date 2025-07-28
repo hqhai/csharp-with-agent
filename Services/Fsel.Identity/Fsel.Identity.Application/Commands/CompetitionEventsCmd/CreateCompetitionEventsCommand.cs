@@ -44,6 +44,7 @@ namespace Fsel.Identity.Application.Commands.CompetitionEventsCmd
             {
                 EventCode = request.EventCode,
                 EventContent = request.EventContent,
+                DashboardEventConfig = request.DashboardEventConfig,
                 SchoolIds = request.SchoolIds
             };
 

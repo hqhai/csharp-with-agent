@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.QuestionExplanationErrors;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
 
@@ -26,6 +27,8 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IVideoRepository _videoRepository;
         private readonly IQuestionExplanationLogRepository _questionExplanationLogRepository;
+        private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
+        private readonly IHomeWorkRepository _homeWorkRepository;
 
         public CreateQuestionExplanationErrorByQueueCommandHandler(
             IQuestionRepository questionRepository,
@@ -35,7 +38,9 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
             ITimeCodeExerciseRepository timeCodeExerciseRepository,
             IVideoTimeCodeRepository videoTimeCodeRepository,
             IVideoRepository videoRepository,
-            IQuestionExplanationLogRepository questionExplanationLogRepository)
+            IQuestionExplanationLogRepository questionExplanationLogRepository,
+            IHomeWorkQuestionRepository homeWorkQuestionRepository,
+            IHomeWorkRepository homeWorkRepository)
         {
             _questionRepository = questionRepository;
             _systemService = systemService;
@@ -45,6 +50,8 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoRepository = videoRepository;
             _questionExplanationLogRepository = questionExplanationLogRepository;
+            _homeWorkQuestionRepository = homeWorkQuestionRepository;
+            _homeWorkRepository = homeWorkRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateQuestionExplanationErrorByQueueCommand request, CancellationToken cancellationToken)
@@ -55,9 +62,12 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
             return methodResult;
         }
 
-        private async Task AddGoogleSheetErrorReportAsync(CreateQuestionExplanationErrorByQueueCommand request)
+        private async Task<AddErrorReportExplanationQuestionModel?> GetReportExplanationQuestionModel(CreateQuestionExplanationErrorByQueueCommand request)
         {
-            var question = await (from baseQ in _questionRepository.Queryable
+            var question = new AddErrorReportExplanationQuestionModel();
+            if (request.ExplanationType == EnumFeatureExplanationType.Video)
+            {
+                question = await (from baseQ in _questionRepository.Queryable
                                   join eq in _exerciseQuestionRepository.Queryable on baseQ.Id equals eq.QuestionId
                                   join e in _exerciseRepository.Queryable on eq.ExerciseId equals e.Id
                                   join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
@@ -66,7 +76,8 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
                                   where baseQ.Id == request.QuestionId
                                   select new AddErrorReportExplanationQuestionModel
                                   {
-                                      VideoId = v.Id,
+                                      Id = v.Id,
+                                      ExplanationType = request.ExplanationType,
                                       DisplayTime = vtc.DisplayTime,
                                       QuestionId = request.QuestionId,
                                       CourseLevel = v.CourseLevel,
@@ -75,6 +86,32 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
                                       QuestionType = baseQ.QuestionType,
                                       Feedback = request.Feedback ?? request.FeedbackExplanation.ToString(),
                                   }).FirstOrDefaultAsync();
+            }
+            else if (request.ExplanationType == EnumFeatureExplanationType.HomeWork)
+            {
+                question = await (from baseQ in _questionRepository.Queryable
+                                  join hq in _homeWorkQuestionRepository.Queryable on baseQ.Id equals hq.QuestionId
+                                  join h in _homeWorkRepository.Queryable on hq.HomeWorkId equals h.Id
+                                  where baseQ.Id == request.QuestionId
+                                  select new AddErrorReportExplanationQuestionModel
+                                  {
+                                      Id = h.Id,
+                                      ExplanationType = request.ExplanationType,
+                                      DisplayTime = default,
+                                      QuestionId = request.QuestionId,
+                                      CourseLevel = h.CourseLevel,
+                                      Config = baseQ.Config,
+                                      Explanation = baseQ.Explanation,
+                                      QuestionType = baseQ.QuestionType,
+                                      Feedback = request.Feedback ?? request.FeedbackExplanation.ToString(),
+                                  }).FirstOrDefaultAsync();
+            }
+            return question;
+        }
+
+        private async Task AddGoogleSheetErrorReportAsync(CreateQuestionExplanationErrorByQueueCommand request)
+        {
+            var question = await GetReportExplanationQuestionModel(request);
             if (question == null)
             {
                 return;
@@ -84,6 +121,5 @@ namespace Fsel.Course.Lms.Application.Commands.QuestionExplanationErrorCmd
             question.PromptResponse = string.Join("\n", logExplanations.Select(x => x.PromptResponse).ToList());
             await _systemService.AddErrorReportExplanationQuestionToGoogleSheet(question).ConfigureAwait(false);
         }
-
     }
 }

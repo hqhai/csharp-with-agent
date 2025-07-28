@@ -4,7 +4,10 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
+    using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Core.Base.BaseModels;
@@ -13,8 +16,10 @@ namespace Fsel.Course.Infrastructure.Common
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Microsoft.Data.SqlClient;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using static Fsel.Shared.Constants.ValueSettings;
@@ -31,6 +36,7 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
         private readonly IMapper _mapper;
         private readonly IServiceProvider _serviceProvider;
+        private readonly CourseDbContext _courseDbContext;
         private const int NumberModuleLesson = 3;
         private const int NumberDefaultComplete = 1;
         private const int NumberDefault = 0;
@@ -45,7 +51,8 @@ namespace Fsel.Course.Infrastructure.Common
             IMockTestResultRepository mockTestResultRepository,
             ICourseUnitMockTestRepository courseUnitMockTestRepository,
             IMapper mapper,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            CourseDbContext courseDbContext)
         {
             _lessonResultRepository = lessonResultRepository;
             _unitResultRepository = unitResultRepository;
@@ -57,6 +64,7 @@ namespace Fsel.Course.Infrastructure.Common
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
             _mapper = mapper;
             _serviceProvider = serviceProvider;
+            _courseDbContext = courseDbContext;
         }
 
         public async Task<UnitStudentProgressModel?> GetUnitManager(Guid courseId, Guid unitId, Guid? studentId)
@@ -183,89 +191,36 @@ namespace Fsel.Course.Infrastructure.Common
             return (counts.Sum(), totalModules.Sum());
         }
 
+        #region
+
         public async Task<double> GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
         {
-            if (courseResults == null || !courseResults.Any())
+            var studentIds = courseResults != null && courseResults.Any() ? courseResults.Select(x => x.StudentId).ToList() : new List<Guid>();
+            StringBuilder sb = new StringBuilder();
+            foreach (var studentId in studentIds)
+            {
+                sb.Append(studentId).Append(",");
+            }
+            // Xóa dấu phẩy cuối cùng
+            if (sb.Length > 0)
+            {
+                sb.Length--;
+            }
+
+            object studentIdsParam = sb.Length > 0 ? sb.ToString() : (object)DBNull.Value;
+
+            var endDate = arrivalDate ?? (object)DBNull.Value;
+            var courseReports = await _courseDbContext.Set<CourseCompleteReportModel>()
+                                   .FromSqlRaw("EXEC ManagerCourseCountComplete @StudentIds, @EndDate",
+                                        new SqlParameter("@StudentIds", studentIdsParam),
+                                        new SqlParameter("@EndDate", endDate))
+                                   .AsNoTracking().ToListAsync();
+            if (courseReports == null || !courseReports.Any())
             {
                 return default;
             }
-            var learnStudentProcesses = new List<int>();
 
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
-                var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
-                var unitResultRepository = scope.ServiceProvider.GetRequiredService<IUnitResultRepository>();
-                var mockTestResultRepository = scope.ServiceProvider.GetRequiredService<IMockTestResultRepository>();
-                var finalTestResultRepository = scope.ServiceProvider.GetRequiredService<IFinalTestResultRepository>();
-                var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
-                var videoResultRepository = scope.ServiceProvider.GetRequiredService<IVideoResultRepository>();
-                var classForumResultRepository = scope.ServiceProvider.GetRequiredService<IClassForumResultRepository>();
-
-                var query = from baseQ in courseResultRepository.Queryable.WhereBulkContains(courseResults.Select(x => x.StudentId), x => x.StudentId)
-
-                            join cum in courseUnitMockTestRepository.Queryable
-                            on baseQ.CourseId equals cum.CourseId
-
-                            join ur in unitResultRepository.Queryable
-                            on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
-                            from ur in unitGroup.DefaultIfEmpty()
-
-                            join skmt in mockTestResultRepository.Queryable on new { ur.StudentId, UnitId = (Guid?)ur.UnitId, ur.CourseId } equals new { skmt.StudentId, UnitId = skmt.UnitId, skmt.CourseId } into skmtGroup
-                            from skmt in skmtGroup.DefaultIfEmpty()
-
-                            join ftr in finalTestResultRepository.Queryable
-                            on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into ftrGroup
-                            from ftr in ftrGroup.DefaultIfEmpty()
-
-                            join mtr in mockTestResultRepository.Queryable
-                            on new { baseQ.StudentId, baseQ.CourseId, MockTestId = cum.MockTestId } equals new { mtr.StudentId, mtr.CourseId, MockTestId = (Guid?)mtr.MockTestId } into mtrGroup
-                            from mtr in mtrGroup.DefaultIfEmpty()
-
-                            join lr in lessonResultRepository.Queryable
-                            on new { ur.StudentId, ur.UnitId, ur.CourseId } equals new { lr.StudentId, lr.UnitId, lr.CourseId } into lrGroup
-                            from lr in lrGroup.DefaultIfEmpty()
-
-                            join vr in videoResultRepository.Queryable
-                            on lr.Id equals vr.LessonResultId into vrGroup
-                            from vr in vrGroup.DefaultIfEmpty()
-
-                            join clr in classForumResultRepository.Queryable
-                            on lr.Id equals clr.LessonResultId into clrGroup
-                            from clr in clrGroup.DefaultIfEmpty()
-
-                            where baseQ.WorkingStatus == EnumWorkingStatus.Active
-                            group new { baseQ, vr, clr, lr, mtr, ftr, skmt }
-                            by new { baseQ.CourseId, baseQ.StudentId }
-                            into g
-                            select g.Where(x => x.vr.Status == EnumResultStatus.Done)
-                                    .Where(x => !arrivalDate.HasValue || (x.vr.UpdatedDate ?? x.vr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                    .Select(x => x.vr.Id).Distinct().Count() +
-
-                                    g.Where(x => x.clr.Status.HasValue)
-                                    .Where(x => !arrivalDate.HasValue || (x.clr.UpdatedDate ?? x.clr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                    .Select(x => x.clr.Id).Distinct().Count() +
-
-                                    g.Where(x => x.lr.Status == EnumResultStatus.Done)
-                                    .Where(x => !arrivalDate.HasValue || (x.lr.UpdatedDate ?? x.lr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                    .Select(x => x.lr.Id).Distinct().Count() +
-
-                                    g.Where(x => x.ftr.Status == EnumResultStatus.Done)
-                                     .Where(x => !arrivalDate.HasValue || (x.ftr.UpdatedDate ?? x.ftr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                     .Select(x => x.ftr.Id).Distinct().Count() +
-
-                                    g.Where(x => x.mtr.Status == EnumResultStatus.Done)
-                                     .Where(x => !arrivalDate.HasValue || (x.mtr.UpdatedDate ?? x.mtr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                     .Select(x => x.mtr.Id).Distinct().Count() +
-
-                                    g.Where(x => x.skmt.Status == EnumResultStatus.Done)
-                                     .Where(x => !arrivalDate.HasValue || (x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
-                                     .Select(x => x.skmt.Id).Distinct().Count();
-
-                learnStudentProcesses = await query.ToListAsync();
-            }
-
-            return NumberHelper.ConvertRound(learnStudentProcesses.Sum() / courseResults.Count);
+            return NumberHelper.ConvertRound(courseReports.Sum(x => x.CountComplete) / courseReports.Count);
         }
 
         public async Task<int> GetTotalCompleteCourseAsync(IList<CourseResultModel>? courseResults)
@@ -292,7 +247,7 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 countTests.Add(await GetUnitCompletes(unitIds, courseResult));
             }
-            if (course.CourseType == EnumCourseType.Academic)
+            if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
             {
                 var finalTestId = course.CourseUnitMockTests.Where(x => x.FinalTestId.HasValue).Select(x => x.FinalTestId.GetValueOrDefault()).FirstOrDefault();
                 var countDoneFinalTest = await _finalTestResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == courseResult.CourseId)
@@ -336,8 +291,7 @@ namespace Fsel.Course.Infrastructure.Common
                 courseCompleteModule.LessonDisplayOrder = courseCompleteModule.LessonDisplayOrder != 0 ? courseCompleteModule.LessonDisplayOrder : ModuleDefault;
                 learnCourseCompletes.Add(courseCompleteModule);
             });
-
-            return learnCourseCompletes.ToList();
+            return learnCourseCompletes;
         }
 
         public async Task<IList<CourseCompleteModel>> GetCourseCompletesAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default)
@@ -346,105 +300,127 @@ namespace Fsel.Course.Infrastructure.Common
             {
                 return new List<CourseCompleteModel>();
             }
-            var courseCompletes = new List<CourseCompleteModel>();
-            using (var scope = _serviceProvider.CreateScope())
+            #region
+            //using (var scope = _serviceProvider.CreateScope())
+            //{
+            //    var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
+            //    var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
+            //    var unitResultRepository = scope.ServiceProvider.GetRequiredService<IUnitResultRepository>();
+            //    var mockTestResultRepository = scope.ServiceProvider.GetRequiredService<IMockTestResultRepository>();
+            //    var finalTestResultRepository = scope.ServiceProvider.GetRequiredService<IFinalTestResultRepository>();
+            //    var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
+            //    var videoResultRepository = scope.ServiceProvider.GetRequiredService<IVideoResultRepository>();
+            //    var classForumResultRepository = scope.ServiceProvider.GetRequiredService<IClassForumResultRepository>();
+
+            //    var query = await (from baseQ in courseResultRepository.Queryable.WhereBulkContains(courseResults.Select(x => x.StudentId), x => x.StudentId)
+
+            //                       join cum in courseUnitMockTestRepository.Queryable.AsNoTracking()
+            //                       on baseQ.CourseId equals cum.CourseId
+
+            //                       join ur in unitResultRepository.Queryable.AsNoTracking()
+            //                       on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
+            //                       from ur in unitGroup.DefaultIfEmpty()
+
+            //                       join skmt in mockTestResultRepository.Queryable.AsNoTracking() on new { ur.StudentId, UnitId = (Guid?)ur.UnitId, ur.CourseId } equals new { skmt.StudentId, UnitId = skmt.UnitId, skmt.CourseId } into skmtGroup
+            //                       from skmt in skmtGroup.DefaultIfEmpty()
+
+            //                       join ftr in finalTestResultRepository.Queryable.AsNoTracking()
+            //                       on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into ftrGroup
+            //                       from ftr in ftrGroup.DefaultIfEmpty()
+
+            //                       join mtr in mockTestResultRepository.Queryable.AsNoTracking()
+            //                       on new { baseQ.StudentId, baseQ.CourseId, MockTestId = cum.MockTestId } equals new { mtr.StudentId, mtr.CourseId, MockTestId = (Guid?)mtr.MockTestId } into mtrGroup
+            //                       from mtr in mtrGroup.DefaultIfEmpty()
+
+            //                       join lr in lessonResultRepository.Queryable.AsNoTracking()
+            //                       on new { ur.StudentId, ur.UnitId, ur.CourseId } equals new { lr.StudentId, lr.UnitId, lr.CourseId } into lrGroup
+            //                       from lr in lrGroup.DefaultIfEmpty()
+
+            //                       join vr in videoResultRepository.Queryable.AsNoTracking()
+            //                       on lr.Id equals vr.LessonResultId into vrGroup
+            //                       from vr in vrGroup.DefaultIfEmpty()
+
+            //                       join clr in classForumResultRepository.Queryable.AsNoTracking()
+            //                       on lr.Id equals clr.LessonResultId into clrGroup
+            //                       from clr in clrGroup.DefaultIfEmpty()
+
+            //                       where baseQ.WorkingStatus == EnumWorkingStatus.Active
+            //                       group new { baseQ, ur, lr, vr, clr, mtr, ftr, skmt }
+            //                       by new { baseQ.CourseId, baseQ.StudentId }
+            //                               into g
+            //                       select new CourseCompleteModel
+            //                       {
+            //                           StudentId = g.Key.StudentId,
+            //                           CourseId = g.Key.CourseId,
+            //                           CountComplete = g.Where(x => x.vr.Status == EnumResultStatus.Done)
+            //                                            .Where(x => !arrivalDate.HasValue || (x.vr.UpdatedDate ?? x.vr.CreatedDate).Date <= arrivalDate.Value.Date)
+            //                                            .Select(x => x.vr.Id).Distinct().Count() +
+
+            //                                            g.Where(x => x.clr.Status.HasValue)
+            //                                            .Where(x => !arrivalDate.HasValue || (x.clr.UpdatedDate ?? x.clr.CreatedDate).Date <= arrivalDate.Value.Date)
+            //                                            .Select(x => x.clr.Id).Distinct().Count() +
+
+            //                                            g.Where(x => x.lr.Status == EnumResultStatus.Done)
+            //                                            .Where(x => !arrivalDate.HasValue || (x.lr.UpdatedDate ?? x.lr.CreatedDate).Date <= arrivalDate.Value.Date)
+            //                                            .Select(x => x.lr.Id).Distinct().Count() +
+
+            //                                            g.Where(x => x.ftr.Status == EnumResultStatus.Done)
+            //                                             .Where(x => !arrivalDate.HasValue || (x.ftr.UpdatedDate ?? x.ftr.CreatedDate).Date <= arrivalDate.Value.Date)
+            //                                             .Select(x => x.ftr.Id).Distinct().Count() +
+
+            //                                            g.Where(x => x.mtr.Status == EnumResultStatus.Done)
+            //                                             .Where(x => !arrivalDate.HasValue || (x.mtr.UpdatedDate ?? x.mtr.CreatedDate).Date <= arrivalDate.Value.Date)
+            //                                             .Select(x => x.mtr.Id).Distinct().Count() +
+
+            //                                            g.Where(x => x.skmt.Status == EnumResultStatus.Done)
+            //                                             .Where(x => !arrivalDate.HasValue || (x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
+            //                                             .Select(x => x.skmt.Id).Distinct().Count(),
+
+            //                           UnitDisplayOrder = g.Select(x => x.ur).Where(x => x.Status != EnumResultStatus.Unfinished)
+            //                                               .Where(x => !arrivalDate.HasValue || (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+            //                                               .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+            //                                                             x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+            //                                                             x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone : ValueOrderIndex.OrderIndexOther)
+            //                                               .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate).Where(x => x.Unit != null)
+            //                                               .Select(x => x.Unit!.CourseUnitMockTests.Where(n => n.CourseId == x.CourseId)
+            //                                               .Select(n => n.Number).FirstOrDefault()).FirstOrDefault(),
+
+            //                           LessonDisplayOrder = g.Select(x => x.lr).Where(x => x.Status != EnumResultStatus.Unfinished)
+            //                                               .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+            //                                               .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+            //                                                             x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+            //                                                             x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone : ValueOrderIndex.OrderIndexOther)
+            //                                               .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate).Where(x => x.Lesson != null)
+            //                                               .Select(x => x.Lesson!.UnitLessons.Where(n => n.UnitId == x.UnitId).Select(n => n.DisplayOrder).FirstOrDefault()).FirstOrDefault()
+            //                       }).ToListAsync();
+            //    courseCompletes = baseQuery != null && baseQuery.SortBy.Any() ? query.ApplySortAndPaging(baseQuery).ToList() : query.ApplySort(baseQuery).ToList();
+            //};
+            //     return courseCompletes;
+            #endregion
+            var studentIds = courseResults.Select(x => x.StudentId).ToList();
+            StringBuilder sb = new StringBuilder();
+            foreach (var studentId in studentIds)
             {
-                var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
-                var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
-                var unitResultRepository = scope.ServiceProvider.GetRequiredService<IUnitResultRepository>();
-                var mockTestResultRepository = scope.ServiceProvider.GetRequiredService<IMockTestResultRepository>();
-                var finalTestResultRepository = scope.ServiceProvider.GetRequiredService<IFinalTestResultRepository>();
-                var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
-                var videoResultRepository = scope.ServiceProvider.GetRequiredService<IVideoResultRepository>();
-                var classForumResultRepository = scope.ServiceProvider.GetRequiredService<IClassForumResultRepository>();
+                sb.Append(studentId).Append(",");
+            }
+            // Xóa dấu phẩy cuối cùng
+            if (sb.Length > 0)
+            {
+                sb.Length--;
+            }
+            object studentIdsParam = sb.Length > 0 ? sb.ToString() : (object)DBNull.Value;
 
-                var query = await (from baseQ in courseResultRepository.Queryable.WhereBulkContains(courseResults.Select(x => x.StudentId), x => x.StudentId)
+            var endDate = arrivalDate ?? (object)DBNull.Value;
+            var courseReports = await _courseDbContext.Set<CourseCompleteReportModel>()
+                                   .FromSqlRaw("EXEC ManagerCourseComplete @StudentIds, @EndDate",
+                                        new SqlParameter("@StudentIds", studentIdsParam),
+                                        new SqlParameter("@EndDate", endDate))
+                                   .AsNoTracking().ToListAsync();
 
-                                   join cum in courseUnitMockTestRepository.Queryable.AsNoTracking()
-                                   on baseQ.CourseId equals cum.CourseId
-
-                                   join ur in unitResultRepository.Queryable.AsNoTracking()
-                                   on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
-                                   from ur in unitGroup.DefaultIfEmpty()
-
-                                   join skmt in mockTestResultRepository.Queryable.AsNoTracking() on new { ur.StudentId, UnitId = (Guid?)ur.UnitId, ur.CourseId } equals new { skmt.StudentId, UnitId = skmt.UnitId, skmt.CourseId } into skmtGroup
-                                   from skmt in skmtGroup.DefaultIfEmpty()
-
-                                   join ftr in finalTestResultRepository.Queryable.AsNoTracking()
-                                   on new { baseQ.StudentId, baseQ.CourseId, FinalTestId = cum.FinalTestId } equals new { ftr.StudentId, ftr.CourseId, FinalTestId = (Guid?)ftr.FinalTestId } into ftrGroup
-                                   from ftr in ftrGroup.DefaultIfEmpty()
-
-                                   join mtr in mockTestResultRepository.Queryable.AsNoTracking()
-                                   on new { baseQ.StudentId, baseQ.CourseId, MockTestId = cum.MockTestId } equals new { mtr.StudentId, mtr.CourseId, MockTestId = (Guid?)mtr.MockTestId } into mtrGroup
-                                   from mtr in mtrGroup.DefaultIfEmpty()
-
-                                   join lr in lessonResultRepository.Queryable.AsNoTracking()
-                                   on new { ur.StudentId, ur.UnitId, ur.CourseId } equals new { lr.StudentId, lr.UnitId, lr.CourseId } into lrGroup
-                                   from lr in lrGroup.DefaultIfEmpty()
-
-                                   join vr in videoResultRepository.Queryable.AsNoTracking()
-                                   on lr.Id equals vr.LessonResultId into vrGroup
-                                   from vr in vrGroup.DefaultIfEmpty()
-
-                                   join clr in classForumResultRepository.Queryable.AsNoTracking()
-                                   on lr.Id equals clr.LessonResultId into clrGroup
-                                   from clr in clrGroup.DefaultIfEmpty()
-
-                                   where baseQ.WorkingStatus == EnumWorkingStatus.Active
-                                   group new { baseQ, ur, lr, vr, clr, mtr, ftr, skmt }
-                                   by new { baseQ.CourseId, baseQ.StudentId }
-                                           into g
-                                   select new CourseCompleteModel
-                                   {
-                                       StudentId = g.Key.StudentId,
-                                       CourseId = g.Key.CourseId,
-                                       CountComplete = g.Where(x => x.vr.Status == EnumResultStatus.Done)
-                                                        .Where(x => !arrivalDate.HasValue || (x.vr.UpdatedDate ?? x.vr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                                        .Select(x => x.vr.Id).Distinct().Count() +
-
-                                                        g.Where(x => x.clr.Status.HasValue)
-                                                        .Where(x => !arrivalDate.HasValue || (x.clr.UpdatedDate ?? x.clr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                                        .Select(x => x.clr.Id).Distinct().Count() +
-
-                                                        g.Where(x => x.lr.Status == EnumResultStatus.Done)
-                                                        .Where(x => !arrivalDate.HasValue || (x.lr.UpdatedDate ?? x.lr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                                        .Select(x => x.lr.Id).Distinct().Count() +
-
-                                                        g.Where(x => x.ftr.Status == EnumResultStatus.Done)
-                                                         .Where(x => !arrivalDate.HasValue || (x.ftr.UpdatedDate ?? x.ftr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                                         .Select(x => x.ftr.Id).Distinct().Count() +
-
-                                                        g.Where(x => x.mtr.Status == EnumResultStatus.Done)
-                                                         .Where(x => !arrivalDate.HasValue || (x.mtr.UpdatedDate ?? x.mtr.CreatedDate).Date <= arrivalDate.Value.Date)
-                                                         .Select(x => x.mtr.Id).Distinct().Count() +
-
-                                                        g.Where(x => x.skmt.Status == EnumResultStatus.Done)
-                                                         .Where(x => !arrivalDate.HasValue || (x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
-                                                         .Select(x => x.skmt.Id).Distinct().Count(),
-
-                                       UnitDisplayOrder = g.Select(x => x.ur).Where(x => x.Status != EnumResultStatus.Unfinished)
-                                                           .Where(x => !arrivalDate.HasValue || (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
-                                                           .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
-                                                                         x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
-                                                                         x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone : ValueOrderIndex.OrderIndexOther)
-                                                           .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate).Where(x => x.Unit != null)
-                                                           .Select(x => x.Unit!.CourseUnitMockTests.Where(n => n.CourseId == x.CourseId)
-                                                           .Select(n => n.Number).FirstOrDefault()).FirstOrDefault(),
-
-                                       LessonDisplayOrder = g.Select(x => x.lr).Where(x => x.Status != EnumResultStatus.Unfinished)
-                                                           .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
-                                                           .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
-                                                                         x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
-                                                                         x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone : ValueOrderIndex.OrderIndexOther)
-                                                           .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate).Where(x => x.Lesson != null)
-                                                           .Select(x => x.Lesson!.UnitLessons.Where(n => n.UnitId == x.UnitId).Select(n => n.DisplayOrder).FirstOrDefault()).FirstOrDefault()
-                                   }).ToListAsync();
-                courseCompletes = baseQuery != null && baseQuery.SortBy.Any() ? query.ApplySortAndPaging(baseQuery).ToList() : query.ApplySort(baseQuery).ToList();
-            };
-            return courseCompletes;
+            return _mapper.Map<IList<CourseCompleteModel>>(courseReports);
         }
 
-        public async Task<IList<CourseCompleteModel>> GetCourseCompletesFilterAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default)
+        public async Task<IList<CourseCompleteModel>> GetCourseCompletesFilterAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default, bool isSearchReport = false)
         {
             if (courseResults == null || !courseResults.Any())
             {
@@ -457,31 +433,22 @@ namespace Fsel.Course.Infrastructure.Common
                 var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
                 var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
                 var unitResultRepository = scope.ServiceProvider.GetRequiredService<IUnitResultRepository>();
-                var mockTestResultRepository = scope.ServiceProvider.GetRequiredService<IMockTestResultRepository>();
-                var finalTestResultRepository = scope.ServiceProvider.GetRequiredService<IFinalTestResultRepository>();
-                var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
-                var videoResultRepository = scope.ServiceProvider.GetRequiredService<IVideoResultRepository>();
-                var classForumResultRepository = scope.ServiceProvider.GetRequiredService<IClassForumResultRepository>();
 
                 var query = from baseQ in courseResultRepository.Queryable.WhereBulkContains(courseResults.Select(x => x.StudentId), x => x.StudentId)
 
-                            join cum in courseUnitMockTestRepository.Queryable
-                            on baseQ.CourseId equals cum.CourseId
+                            join cum in courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
 
                             join ur in unitResultRepository.Queryable
-                            on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
-                            from ur in unitGroup.DefaultIfEmpty()
+                            on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
 
-                            where baseQ.WorkingStatus == EnumWorkingStatus.Active
-                            group new { baseQ, ur }
-                            by new { baseQ.CourseId, baseQ.StudentId }
-                                           into g
+                            where baseQ.WorkingStatus == EnumWorkingStatus.Active && ur.Status != EnumResultStatus.Unfinished
+                            group new { ur }
+                            by new { ur.CourseId, ur.StudentId } into g
                             select new CourseCompleteModel
                             {
                                 StudentId = g.Key.StudentId,
                                 CourseId = g.Key.CourseId,
-                                UnitDisplayOrder = g.Select(x => x.ur).Where(x => x.Status != EnumResultStatus.Unfinished)
-                                                    .Where(x => !arrivalDate.HasValue || (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                                UnitDisplayOrder = g.Select(x => x.ur).Where(x => !arrivalDate.HasValue || (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
                                                     .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
                                                                   x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
                                                                   x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone : ValueOrderIndex.OrderIndexOther)
@@ -489,12 +456,12 @@ namespace Fsel.Course.Infrastructure.Common
                                                     .Select(x => x.Unit!.CourseUnitMockTests.Where(n => n.CourseId == x.CourseId)
                                                     .Select(n => n.Number).FirstOrDefault()).FirstOrDefault(),
                             };
-                courseCompletes = baseQuery != null && baseQuery.SortBy.Any() ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
-            };
+                courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
+            }
             return courseCompletes;
         }
 
-        public async Task<IList<CourseCompleteModel>> GetCourseCompletesFilterCountCompleteAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default)
+        public async Task<IList<CourseCompleteModel>> GetCourseCompletesFilterCountCompleteAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default, bool isSearchReport = false)
         {
             if (courseResults == null || !courseResults.Any())
             {
@@ -517,9 +484,8 @@ namespace Fsel.Course.Infrastructure.Common
 
                             join cum in courseUnitMockTestRepository.Queryable
                             on baseQ.CourseId equals cum.CourseId
-
                             join ur in unitResultRepository.Queryable
-                            on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
+                                                       on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
                             from ur in unitGroup.DefaultIfEmpty()
 
                             join skmt in mockTestResultRepository.Queryable on new { ur.StudentId, UnitId = (Guid?)ur.UnitId, ur.CourseId } equals new { skmt.StudentId, UnitId = skmt.UnitId, skmt.CourseId } into skmtGroup
@@ -547,8 +513,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                             where baseQ.WorkingStatus == EnumWorkingStatus.Active
                             group new { baseQ, ur, lr, vr, clr, mtr, ftr, skmt }
-                            by new { baseQ.CourseId, baseQ.StudentId }
-                                           into g
+                            by new { baseQ.CourseId, baseQ.StudentId } into g
                             select new CourseCompleteModel
                             {
                                 StudentId = g.Key.StudentId,
@@ -577,8 +542,9 @@ namespace Fsel.Course.Infrastructure.Common
                                                   .Where(x => !arrivalDate.HasValue || (x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
                                                   .Select(x => x.skmt.Id).Distinct().Count(),
                             };
-                courseCompletes = baseQuery != null && baseQuery.SortBy.Any() ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
-            };
+                courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
+            }
+            ;
             return courseCompletes;
         }
 
@@ -589,21 +555,14 @@ namespace Fsel.Course.Infrastructure.Common
                 return new List<CourseCompleteModel>();
             }
 
-            var courseCompletes = new List<CourseCompleteModel>();
-
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
-                var query = from baseQ in courseResultRepository.Queryable.WhereBulkContains(courseResults.Select(x => x.StudentId), x => x.StudentId)
-                            where baseQ.WorkingStatus == EnumWorkingStatus.Active
-                            select new CourseCompleteModel
-                            {
-                                StudentId = baseQ.StudentId,
-                                CourseId = baseQ.CourseId,
-                            };
-                courseCompletes = await query.ToListAsync();
-            }
-            return courseCompletes;
+            var query = from baseQ in _courseResultRepository.Queryable.WhereBulkContains(courseResults.Select(x => x.StudentId), x => x.StudentId)
+                        where baseQ.WorkingStatus == EnumWorkingStatus.Active
+                        select new CourseCompleteModel
+                        {
+                            StudentId = baseQ.StudentId,
+                            CourseId = baseQ.CourseId,
+                        };
+            return await query.ToListAsync();
         }
 
         private async Task<List<OverallModuleLearnModel>> GetCompleteCourseTotalsAsync(IList<CourseResultModel>? courseResults)
@@ -657,8 +616,13 @@ namespace Fsel.Course.Infrastructure.Common
                             on baseQ.CourseId equals cum.CourseId
 
                             join ur in unitResultRepository.Queryable
-                            on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
-                            from ur in unitGroup.DefaultIfEmpty()
+                            on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId }
+
+                            join lr in lessonResultRepository.Queryable on new { ur.StudentId, ur.UnitId, ur.CourseId } equals new { lr.StudentId, lr.UnitId, lr.CourseId }
+
+                            join vr in videoResultRepository.Queryable on lr.Id equals vr.LessonResultId
+
+                            join clr in classForumResultRepository.Queryable on lr.Id equals clr.LessonResultId
 
                             join skmt in mockTestResultRepository.Queryable on new { ur.StudentId, UnitId = (Guid?)ur.UnitId, ur.CourseId } equals new { skmt.StudentId, UnitId = skmt.UnitId, skmt.CourseId } into skmtGroup
                             from skmt in skmtGroup.DefaultIfEmpty()
@@ -671,22 +635,9 @@ namespace Fsel.Course.Infrastructure.Common
                             on new { baseQ.StudentId, baseQ.CourseId, MockTestId = cum.MockTestId } equals new { mtr.StudentId, mtr.CourseId, MockTestId = (Guid?)mtr.MockTestId } into mtrGroup
                             from mtr in mtrGroup.DefaultIfEmpty()
 
-                            join lr in lessonResultRepository.Queryable
-                            on new { ur.StudentId, ur.UnitId, ur.CourseId } equals new { lr.StudentId, lr.UnitId, lr.CourseId } into lrGroup
-                            from lr in lrGroup.DefaultIfEmpty()
-
-                            join vr in videoResultRepository.Queryable
-                            on lr.Id equals vr.LessonResultId into vrGroup
-                            from vr in vrGroup.DefaultIfEmpty()
-
-                            join clr in classForumResultRepository.Queryable
-                            on lr.Id equals clr.LessonResultId into clrGroup
-                            from clr in clrGroup.DefaultIfEmpty()
-
                             where baseQ.WorkingStatus == EnumWorkingStatus.Active
                             group new { baseQ, ur, lr, vr, clr, mtr, ftr, skmt }
-                            by new { baseQ.CourseId, baseQ.StudentId }
-                                     into g
+                            by new { baseQ.CourseId, baseQ.StudentId } into g
                             select new CourseCompleteModel
                             {
                                 StudentId = g.Key.StudentId,
@@ -770,6 +721,230 @@ namespace Fsel.Course.Infrastructure.Common
                 learnCourseCompletes.Add(courseCompleteModule);
             });
             return learnCourseCompletes.ToList();
+        }
+
+        #endregion
+
+        public async Task<IList<CourseCompleteModel>> GetProgressCompleteLessonAsync(IList<CourseResultModel> courseResults, DateTime? arrivalDate = default)
+        {
+            if (courseResults == null || !courseResults.Any())
+            {
+                return new List<CourseCompleteModel>();
+            }
+
+            var learnCourseCompletes = new List<CourseCompleteModel>();
+            var courseCompleteModules = await GetCourseCompleteLessonsAsync(courseResults, arrivalDate: arrivalDate);
+            var courseCompleteTotalModules = await GetCourseTotalLessonsAsync(courseResults);
+            var completeModuleDict = courseCompleteModules.ToDictionary(x => (x.StudentId, x.CourseId));
+            var totalLessonDict = courseCompleteTotalModules.ToDictionary(x => x.CourseId);
+
+            courseResults.ForEach(courseResult =>
+            {
+                completeModuleDict.TryGetValue((courseResult.StudentId, courseResult.CourseId), out var courseCompleteModule);
+                totalLessonDict.TryGetValue(courseResult.CourseId, out var courseCompleteTotalModule);
+                courseCompleteModule ??= new CourseCompleteModel
+                {
+                    StudentId = courseResult.StudentId,
+                    CourseId = courseResult.CourseId,
+                };
+
+                courseCompleteModule.TotalLesson = courseCompleteTotalModule?.TotalLesson ?? default;
+                courseCompleteModule.UnitDisplayOrder = courseCompleteModule.UnitDisplayOrder != 0 ? courseCompleteModule.UnitDisplayOrder : ModuleDefault;
+                courseCompleteModule.LessonDisplayOrder = courseCompleteModule.LessonDisplayOrder != 0 ? courseCompleteModule.LessonDisplayOrder : ModuleDefault;
+                learnCourseCompletes.Add(courseCompleteModule);
+            });
+            return learnCourseCompletes;
+        }
+
+        public async Task<IList<CourseCompleteModel>> GetCourseCompleteLessonsAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default)
+        {
+            if (courseResults == null || !courseResults.Any())
+            {
+                return new List<CourseCompleteModel>();
+            }
+
+            var studentIds = courseResults.Select(x => x.StudentId).Distinct().ToList();
+
+            using var scope = _serviceProvider.CreateScope();
+            var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
+            var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
+            var unitResultRepository = scope.ServiceProvider.GetRequiredService<IUnitResultRepository>();
+            var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
+
+            // Lọc trước các dữ liệu cần thiết
+            var baseQs = await courseResultRepository.Queryable
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                .Select(x => new { x.StudentId, x.CourseId })
+                .Distinct()
+                .ToListAsync();
+
+            var unitResults = await unitResultRepository.Queryable.WhereBulkContains(baseQs, new[] { "StudentId", "CourseId" })
+                .Where(x => !arrivalDate.HasValue || (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                .Select(x => new
+                {
+                    x.StudentId,
+                    x.CourseId,
+                    x.UnitId,
+                    x.Status,
+                    x.UpdatedDate,
+                    x.CreatedDate,
+                    x.CompletionDate,
+                    DisplayOrder = x.Unit.CourseUnitMockTests
+                        .Where(c => c.CourseId == x.CourseId)
+                        .Select(c => c.Number).FirstOrDefault()
+                })
+                .ToListAsync();
+
+            var lessonResults = await lessonResultRepository.Queryable.WhereBulkContains(baseQs, new[] { "StudentId", "CourseId" })
+                .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                .Select(x => new
+                {
+                    x.StudentId,
+                    x.CourseId,
+                    x.UnitId,
+                    x.Status,
+                    x.UpdatedDate,
+                    x.CreatedDate,
+                    x.Id,
+                    DisplayOrder = x.Lesson.UnitLessons
+                        .Where(u => u.UnitId == x.UnitId)
+                        .Select(u => u.DisplayOrder).FirstOrDefault()
+                })
+                .ToListAsync();
+
+            // Gộp dữ liệu lại thành CourseCompleteModel
+            var result = baseQs.Select(q =>
+            {
+                var studentLessonResults = lessonResults
+                    .Where(x => x.StudentId == q.StudentId && x.CourseId == q.CourseId)
+                    .ToList();
+
+                var studentUnitResults = unitResults
+                    .Where(x => x.StudentId == q.StudentId && x.CourseId == q.CourseId)
+                    .ToList();
+
+                return new CourseCompleteModel
+                {
+                    StudentId = q.StudentId,
+                    CourseId = q.CourseId,
+                    TotalLessonDone = studentLessonResults
+                        .Where(x => x.Status == EnumResultStatus.Done)
+                        .Select(x => x.Id).Distinct().Count(),
+
+                    UnitDisplayOrder = studentUnitResults
+                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                        .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+                                      x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+                                      x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone :
+                                      ValueOrderIndex.OrderIndexOther)
+                        .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                        .Select(x => x.DisplayOrder).FirstOrDefault(),
+
+                    LessonDisplayOrder = studentLessonResults
+                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                        .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+                                      x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+                                      x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone :
+                                      ValueOrderIndex.OrderIndexOther)
+                        .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                        .Select(x => x.DisplayOrder).FirstOrDefault()
+                };
+            }).ToList();
+
+            return baseQuery != null && baseQuery.SortBy.Any()
+                ? result.AsQueryable().ApplySortAndPaging(baseQuery).ToList()
+                : result.AsQueryable().ApplySort(baseQuery).ToList();
+        }
+
+        public async Task<IList<CourseCompleteModel>> GetCourseCompletesFilterCountAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default, bool isSearchReport = false)
+        {
+            if (courseResults == null || !courseResults.Any())
+            {
+                return new List<CourseCompleteModel>();
+            }
+
+            var studentIds = courseResults.Select(x => x.StudentId).Distinct().ToList();
+
+            using var scope = _serviceProvider.CreateScope();
+            var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
+            var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
+
+            // Lọc các CourseResult đang active
+            var activeCourseResults = await courseResultRepository.Queryable
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                .Select(x => new { x.StudentId, x.CourseId })
+                .ToListAsync();
+
+            // Lọc LessonResult theo StudentId + CourseId + Status + ArrivalDate
+            var lessonResults = await lessonResultRepository.Queryable
+                .WhereBulkContains(activeCourseResults, new[] { "StudentId", "CourseId" })
+                .Where(x => x.Status == EnumResultStatus.Done)
+                .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                .Select(x => new { x.StudentId, x.CourseId, x.Id })
+                .ToListAsync();
+
+            // Nhóm và tạo kết quả
+            var grouped = lessonResults
+                .GroupBy(x => new { x.StudentId, x.CourseId })
+                .Select(g => new CourseCompleteModel
+                {
+                    StudentId = g.Key.StudentId,
+                    CourseId = g.Key.CourseId,
+                    TotalLessonDone = g.Select(x => x.Id).Distinct().Count()
+                })
+                .ToList();
+
+            // Sắp xếp & phân trang nếu cần
+            return baseQuery != null && baseQuery.SortBy.Any() && isSearchReport
+                ? grouped.AsQueryable().ApplySortAndPaging(baseQuery).ToList()
+                : grouped.AsQueryable().ApplySort(baseQuery).ToList();
+        }
+
+        private async Task<List<CourseLessonModel>> GetCourseTotalLessonsAsync(IList<CourseResultModel>? courseResults)
+        {
+            if (courseResults == null || !courseResults.Any())
+            {
+                return new List<CourseLessonModel>();
+            }
+
+            var courseIds = courseResults
+                .Select(x => x.CourseId)
+                .Distinct()
+                .ToList();
+
+            using var scope = _serviceProvider.CreateScope();
+            var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
+            var unitLessonRepository = scope.ServiceProvider.GetRequiredService<IUnitLessonRepository>();
+
+            // Lấy các UnitId từ các CourseId cần thiết
+            var unitMappings = await courseUnitMockTestRepository.Queryable
+                .WhereBulkContains(courseIds, x => x.CourseId)
+                .Select(x => new { x.CourseId, x.UnitId })
+                .Distinct()
+                .ToListAsync();
+
+            var unitIds = unitMappings.Select(x => x.UnitId).Distinct().ToList();
+
+            // Lấy tất cả UnitLesson liên quan
+            var unitLessons = await unitLessonRepository.Queryable
+                .WhereBulkContains(unitIds, x => x.UnitId)
+                .Select(x => new { x.Id, x.UnitId })
+                .ToListAsync();
+
+            // Ghép và đếm theo CourseId
+            var courseLessons = unitMappings
+                .Join(unitLessons, m => m.UnitId, l => l.UnitId, (m, l) => new { m.CourseId, l.Id })
+                .GroupBy(x => x.CourseId)
+                .Select(g => new CourseLessonModel
+                {
+                    CourseId = g.Key,
+                    TotalLesson = g.Count()
+                })
+                .ToList();
+
+            return courseLessons;
         }
     }
 }

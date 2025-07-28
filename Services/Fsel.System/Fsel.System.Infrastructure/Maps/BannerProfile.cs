@@ -15,7 +15,9 @@ namespace Fsel.System.Infrastructure.Maps
         {
             CreateMap<Banner, BannerModel>().IgnoreAllNonExisting();
             CreateMap<CreateBannerCommandModel, Banner>().IgnoreAllNonExisting();
-            CreateMap<UpdateBannerCommandModel, Banner>().IgnoreAllNonExisting();
+            CreateMap<UpdateBannerCommandModel, Banner>().ForMember(x => x.BannerScopes, c => c.Ignore())
+                                                         .ForMember(x => x.BannerImages, c => c.Ignore())
+                                                         .IgnoreAllNonExisting();
             CreateMap<Banner, BannerStudentQueueModel>().ForMember(x => x.BannerId, x => x.MapFrom(y => y.Id));
         }
     }

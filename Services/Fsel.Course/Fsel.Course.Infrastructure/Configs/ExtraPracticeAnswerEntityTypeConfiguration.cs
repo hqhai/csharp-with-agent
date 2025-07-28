@@ -52,7 +52,7 @@ namespace Fsel.Course.Infrastructure.Configs
              .OnDelete(DeleteBehavior.NoAction);
 
             builder.Property(e => e.Status)
-                   .HasMaxLength(100)
+                   .HasMaxLength(20)
                    .HasConversion(
                        v => v.ToString(),
                        v => v.EnumParse<EnumAnswerStatus>());

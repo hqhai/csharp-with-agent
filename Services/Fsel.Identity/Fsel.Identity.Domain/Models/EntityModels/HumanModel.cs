@@ -16,6 +16,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Address { get; set; }
         public EnumGender? Gender { get; set; }
         public string? Email { get; set; }
+        public Guid? ManageUserId { get; set; }
+        public string? ManageUserName { get; set; }
 
         private string? _avatarPath;
 
@@ -26,6 +28,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         }
 
         public Guid? UserId { get; set; }
+        public Guid? CourseId { get; set; }
         public TeacherModel? Teacher { get; set; }
         public CSOModel? CSO { get; set; }
         public StudentModel? Student { get; set; }
