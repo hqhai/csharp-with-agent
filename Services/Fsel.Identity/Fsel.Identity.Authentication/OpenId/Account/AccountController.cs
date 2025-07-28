@@ -3,18 +3,14 @@
 
 using System.Globalization;
 using System.Security.Claims;
-using System.Transactions;
 using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Caching;
 using Fsel.Common.Constants;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
-using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.SenderCmd;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
-using Fsel.Identity.Application.Commands.UserReferrals;
-using Fsel.Identity.Application.Handlers.Implementations;
 using Fsel.Identity.Application.Handlers.Interfaces;
 using Fsel.Identity.Authentication.Auth;
 using Fsel.Identity.Authentication.OpenId.Base;
@@ -36,10 +32,10 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using static IdentityServer4.IdentityServerConstants;
-using static IdentityServer4.Models.IdentityResources;
 
 namespace Fsel.Identity.Authentication.OpenId.Account
 {
@@ -57,8 +53,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
-        private readonly SignInManager<User> _signInManager;
-        private readonly UserManager<User> _userManager;
+        private readonly Core.Base.Managers.SignInManager<User> _signInManager;
+        private readonly Core.Base.Managers.UserManager<User> _userManager;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
@@ -79,8 +75,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
-            SignInManager<User> signInManager,
-            UserManager<User> userManager,
+            Core.Base.Managers.SignInManager<User> signInManager,
+            Core.Base.Managers.UserManager<User> userManager,
             IMediator mediator,
             IMapper mapper,
             AppSetting appSetting,
@@ -165,7 +161,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             if (!string.IsNullOrEmpty(button))
             {
                 await ResendOtp(request);
-                request.OtpProviderType = OtpProviderType.Zalo.ToString();
             }
             else if (ModelState.IsValid)
             {
@@ -183,9 +178,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     }
                     else
                     {
-                        ModelState.AddModelError(string.Empty, message);
+                        ModelState.AddModelError(message.Value.Key, message.Value.Value);
                     }
-
                 }
                 else if (request.Type == nameof(Forgot))
                 {
@@ -252,7 +246,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 var (isSuccess, message) = await _userRegisterHandler.SendRegisterOtpAsync(request.PhoneNumber, OtpProviderType.Zalo);
                 if (!isSuccess)
                 {
-                    ModelState.AddModelError(string.Empty, message);
+                    ModelState.AddModelError(message.Value.Key, message.Value.Value);
                 }
             }
             else
@@ -456,13 +450,13 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     var (isSendOtpSuccess, sendOtpMessage) = await _userRegisterHandler.SendRegisterOtpAsync(request.PhoneNumber);
                     if (!isSendOtpSuccess)
                     {
-                        ModelState.AddModelError(string.Empty, sendOtpMessage);
+                        ModelState.AddModelError(sendOtpMessage.Value.Key, sendOtpMessage.Value.Value);
                     }
                     return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Register), PhoneNumber = request.PhoneNumber });
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, message);
+                    ModelState.AddModelError(message.Value.Key, message.Value.Value);
                 }
             }
 
@@ -805,23 +799,56 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             {
                 return RedirectToAction(nameof(Login), new { returnUrl });
             }
-            var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
-            if (user != null && !await ValidateLogin(user))
+
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
             {
                 return RedirectToAction(nameof(Login), new { returnUrl });
             }
-            var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
-            if (signInResult.Succeeded)
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
             {
-                return Redirect(returnUrl);
-            }
-            else if (signInResult.IsLockedOut)
-            {
-                return RedirectToAction(nameof(Forgot), new { returnUrl });
+                try
+                {
+                    var newUser = new User
+                    {
+                        Id = Guid.NewGuid(),
+                        UserName = info.Principal.FindFirstValue(ClaimTypes.Email),
+                        Email = info.Principal.FindFirstValue(ClaimTypes.Email),
+                        EmailConfirmed = true,
+                        FirstName = info.Principal.FindFirstValue(ClaimTypes.GivenName),
+                        Birthday = info.Principal.FindFirstValue(ClaimTypes.DateOfBirth)?.ConvertDateTimeFormat("MM/dd/yyyy"),
+                        LastName = info.Principal.FindFirstValue(ClaimTypes.Surname),
+                        SecurityStamp = Guid.NewGuid().ToString()
+                    };
+
+                    _userRepository.DbContext.Add(newUser);
+                    await _userRepository.DbContext.SaveChangesAsync();
+                    var addLoginResult = await _userManager.AddLoginAsync(newUser, info);
+                    if (!addLoginResult.Succeeded)
+                    {
+                        return RedirectToAction(nameof(Login), new { returnUrl });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return RedirectToAction(nameof(Login), new { returnUrl });
+                }
             }
             else
             {
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+                var haveFilledInfo = HaveFilledRequiredInfo(user);
+                if (haveFilledInfo)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return Redirect(returnUrl ?? "~/");
+                }
+            }
+
+            var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
+            if (signInResult.Succeeded)
+            {
                 var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
                 var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
                 var birthday = info.Principal.FindFirstValue(ClaimTypes.DateOfBirth)?.ConvertDateTimeFormat("MM/dd/yyyy");
@@ -844,96 +871,46 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 TempData[nameof(ExternalLoginModel)] = externalLogin.Serialize();
                 return View(nameof(ExternalLoginConfirmation), externalLogin);
             }
+            else
+            {
+                ModelState.AddModelError(string.Empty, _localizer["i18n_External_login_failed"]);
+            }
+            return Redirect(returnUrl ?? "~/");
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ExternalLoginConfirmation(ExternalLoginModel request, string? returnUrl = null)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var externalLogin = GetFromTempData(nameof(ExternalLoginModel))?.ToString().Deserialize<ExternalLoginModel>();
-
-            var info = await _signInManager.GetExternalLoginInfoAsync();
-            if (info == null || externalLogin == null)
-            {
-                return View(request);
-            }
-
-            if (!string.IsNullOrEmpty(externalLogin.Email))
-            {
-                request.Email = externalLogin.Email;
-            }
 
             if (!ModelState.IsValid)
             {
                 return View(request);
             }
 
+            var isExistedPhoneNumber = await _userRepository.DbContext.Set<User>().AnyAsync(u => u.PhoneNumber == request.PhoneNumber);
+            if (isExistedPhoneNumber)
+            {
+                ModelState.AddModelError(string.Empty, _localizer[nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber)]);
+                return View(request);
+            }
+
             var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
-            Microsoft.AspNetCore.Identity.IdentityResult result;
 
             if (user != null)
             {
-                result = await _userManager.AddLoginAsync(user, info);
-                if (result.Succeeded)
-                {
-                    var roles = await _userManager.GetRolesAsync(user);
-                    if (!roles.Contains(EnumRole.Student.ToString()))
-                    {
-                        user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                        result = await _userManager.UpdateAsync(user);
-                        result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
-                    }
-                    if (!await ValidateLogin(user))
-                    {
-                        return View(request);
-                    }
-                    await _signInManager.SignInAsync(user, isPersistent: false);
-                    return Redirect(request.ReturnUrl ?? returnUrl ?? string.Empty);
-                }
+                user.Birthday = request.Birthday;
+                user.FirstName = request.FirstName;
+                user.LastName = request.LastName;
+                user.PhoneNumber = request.PhoneNumber;
+                user.Gender = request.Gender;
+                await _userManager.UpdateAsync(user);
+                await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                return Redirect(request.ReturnUrl ?? returnUrl ?? "/");
             }
-            else
-            {
-                return await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
-                {
-                    using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-                    user = new User
-                    {
-                        Email = request.Email,
-                        PhoneNumber = request.PhoneNumber,
-                        UserName = request.Email,
-                        FirstName = request.FirstName,
-                        LastName = request.LastName,
-                        Gender = request.Gender,
-                        Birthday = request.Birthday,
-                        EmailConfirmed = true,
-                    };
-
-                    user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                    result = await _userManager.CreateAsync(user);
-                    result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
-
-                    if (result.Succeeded)
-                    {
-                        result = await _userManager.AddLoginAsync(user, info);
-                        if (result.Succeeded)
-                        {
-                            await _signInManager.SignInAsync(user, isPersistent: false);
-
-                            scope.Complete();
-                            return Redirect(request.ReturnUrl ?? returnUrl ?? string.Empty);
-                        }
-                    }
-                    scope.Dispose();
-
-                    foreach (var error in result.Errors)
-                    {
-                        ModelState.TryAddModelError(error.Code, error.Description);
-                    }
-                    return View(request);
-                });
-            }
-
             return View(request);
         }
 
@@ -1118,6 +1095,20 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             }
 
             return vm;
+        }
+
+        private bool HaveFilledRequiredInfo(User user)
+        {
+            if (user.PhoneNumber == null
+                || user.Birthday == null
+                || user.FirstName == null
+                || user.LastName == null
+                || user.Gender == null)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

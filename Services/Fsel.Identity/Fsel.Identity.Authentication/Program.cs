@@ -60,7 +60,7 @@ builder.Services.AddMvcCore();
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 builder.Services.AddLocalApiAuthentication();
-//builder.Services.AddHttpsRedirection(opt => opt.HttpsPort = 443);
+builder.Services.AddHttpsRedirection(opt => opt.HttpsPort = 443);
 
 builder.AddRepositories();
 builder.AddHandlers();
@@ -80,22 +80,22 @@ builder.AddMassTransit(appSetting);
 var app = builder.Build();
 app.UseLanguages();
 app.UseStaticFiles();
-//app.UseCertificateForwarding();
+app.UseCertificateForwarding();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseIdentityServer();
 app.MapDefaultControllerRoute();
-//app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.None,
     Secure = CookieSecurePolicy.Always
 });
 
-//app.UseCors();
-//app.UseCors(Settings.CorsPolicy);
+app.UseCors();
+app.UseCors(Settings.CorsPolicy);
 
-//app.UseForwardedHeaders(fordwardedHeaderOptions);
+app.UseForwardedHeaders(fordwardedHeaderOptions);
 app.UseDefaultServices();
 
 #region Initialized Database

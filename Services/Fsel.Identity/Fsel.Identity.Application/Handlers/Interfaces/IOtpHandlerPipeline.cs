@@ -53,7 +53,7 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
         public string? Otp { get; set; }
         public string? RequestOtp { get; set; }
         public bool Status { get; set; }
-        public string? ErrorMessage { get; set; }
+        public KeyValuePair<string, string>? ErrorMessage { get; set; }
 
         public string BlockedOtpCacheKey => $"{PhoneNumber}:{Purpose}:Block_Send_And_Verify_Otp";
         public string BlockedSendOtpCacheKey => $"{PhoneNumber}:{Purpose}:Otp_Send_Otp";

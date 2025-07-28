@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using System.Threading.Tasks;
     using Fsel.Common.Caching;
     using Fsel.Identity.Application.Handlers.Interfaces;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Microsoft.Extensions.Localization;
 
@@ -37,13 +38,18 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                     {
                         context.Status = false;
                         var remainingTime = context.BlockSendOtpDuration.Value - DateTime.UtcNow.Subtract(sendCountInfo.StartTime);
-                        context.ErrorMessage = _stringLocalizer["i18n_OTP_reach_max_verify"].Value.InjectParam(context.MaxCountOtpSend.ToString(), remainingTime.Minutes.ToString());
+
+                        context.ErrorMessage = new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.OtpTryResendAfterMinutes),
+                        _stringLocalizer[nameof(EnumAuthUserErrorCode.OtpTryResendAfterMinutes)]
+                            .Value.InjectParam(remainingTime.Minutes.ToString()));
                         return;
                     }
                     else if (DateTime.UtcNow.Subtract(sendCountInfo.LastSendTime) <= context.MinimumBetweenTwoSendsDuration.Value)
                     {
                         context.Status = false;
-                        context.ErrorMessage = _stringLocalizer["i18n_OTP_wait_gap_resend"].Value.InjectParam(context.MinimumBetweenTwoSendsDuration.Value.Seconds.ToString());
+                        context.ErrorMessage = new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.OtpTryResendAfterSeconds),
+                        _stringLocalizer[nameof(EnumAuthUserErrorCode.OtpTryResendAfterSeconds)]
+                            .Value.InjectParam(context.MinimumBetweenTwoSendsDuration.Value.Seconds.ToString()));
                         return;
                     }
                     context.OtpProviderType = OtpProviderType.Zalo;

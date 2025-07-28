@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using Fsel.Common.Caching;
     using Fsel.Core.Localization;
     using Fsel.Identity.Application.Handlers.Interfaces;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Microsoft.Extensions.Localization;
 
     public class VerifyOtpHandler : BaseOtpHandlerPipeline, IOtpHandlerPipeline<VerifyOtpHandler>
@@ -28,7 +29,9 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 if (value == null)
                 {
                     context.Status = false;
-                    context.ErrorMessage = _stringLocalizer["i18n_OTP_has_expired"];
+                    context.ErrorMessage = new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.OTPExpired),
+                        _stringLocalizer[nameof(EnumAuthUserErrorCode.OTPExpired)]);
+
                     return;
                 }
                 else

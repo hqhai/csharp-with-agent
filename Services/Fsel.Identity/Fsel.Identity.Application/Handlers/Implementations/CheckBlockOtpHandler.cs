@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using System.Threading.Tasks;
     using Fsel.Common.Caching;
     using Fsel.Identity.Application.Handlers.Interfaces;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Microsoft.Extensions.Localization;
 
@@ -29,7 +30,9 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 if (blockToTime > DateTime.UtcNow)
                 {
                     context.Status = false;
-                    context.ErrorMessage = _stringLocalizer["i18n_OTP_block_in_minutes"].Value.InjectParam(blockToTime.Subtract(DateTime.UtcNow).Minutes.ToString());
+                    context.ErrorMessage = new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.OtpBlockInMinutes),
+                        _stringLocalizer[nameof(EnumAuthUserErrorCode.OtpBlockInMinutes)]
+                        .Value.InjectParam(blockToTime.Subtract(DateTime.UtcNow).Minutes.ToString()));
                     return;
                 }
                 else

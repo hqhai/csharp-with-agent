@@ -4,8 +4,8 @@ namespace Fsel.Identity.Application.Handlers.Implementations
 {
     using System.Threading.Tasks;
     using Fsel.Common.Caching;
-    using Fsel.Core.Localization;
     using Fsel.Identity.Application.Handlers.Interfaces;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Microsoft.Extensions.Localization;
 
@@ -44,12 +44,15 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                         ArgumentNullException.ThrowIfNull(context.OtpBlockDuration);
                         _ = await BlockOtp(context.BlockedOtpCacheKey, context.OtpBlockDuration.Value);
                         await _cacheFailedCount.RemoveAsync(context.CountFailedVerifyOtpCacheKey);
-                        context.ErrorMessage = _stringLocalizer["i18n_OTP_reach_max_verify"].Value.InjectParam(context.MaxCountOtpSend.ToString(), context.OtpBlockDuration.Value.Minutes.ToString());
+                        context.ErrorMessage = new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.OtpBlockInMinutes),
+                            _stringLocalizer[nameof(EnumAuthUserErrorCode.OtpBlockInMinutes)]
+                            .Value.InjectParam(context.OtpBlockDuration.Value.Minutes.ToString()));
                         return;
                     }
                     else
                     {
-                        context.ErrorMessage = _stringLocalizer["i18n_OTP_is_not_valid"];
+                        context.ErrorMessage = new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.InvalidOTP),
+                            _stringLocalizer[nameof(EnumAuthUserErrorCode.InvalidOTP)]);
                     }
                 }
             }
