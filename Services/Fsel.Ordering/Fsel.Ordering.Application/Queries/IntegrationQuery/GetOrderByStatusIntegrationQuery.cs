@@ -62,7 +62,7 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
                 orders = await _orderRepository.Queryable
                                                .Include(p => p.Package)
                                                .Include(p => p.Voucher)
-                                               .Where(x => request.UserIds.Contains(x.UserId))
+                                               .WhereBulkContains(request.UserIds, x => x.UserId)
                                                .ToListAsync(cancellationToken);
 
                 var checkLeadOrClient = await CheckLeadOrClient(orders, request, cancellationToken);
