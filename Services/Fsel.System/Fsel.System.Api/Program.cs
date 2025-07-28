@@ -33,7 +33,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<SystemDbContext>();
+builder.AddDbContexts<SystemDbContext, SystemReadDbContext>();
 
 builder.Services.AddDbContext<CrmDbContext>(
         options => options.UseSqlServer(appSetting?.ConnectionStrings?.CrmConnection));

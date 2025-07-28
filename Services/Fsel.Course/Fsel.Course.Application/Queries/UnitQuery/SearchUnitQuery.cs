@@ -84,6 +84,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 Id = unit.Id,
                 Name = unit.Name,
                 Code = unit.Code,
+                OriginalId = unit.OriginalId,
                 IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
                 CourseLevel = unit.CourseLevel,
                 CreatedDate = unit.CreatedDate,

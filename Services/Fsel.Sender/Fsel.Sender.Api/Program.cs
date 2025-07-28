@@ -19,7 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
-builder.AddDbContexts<SenderDBContext>();
+builder.AddDbContexts<SenderDBContext, SenderReadDbContext>();
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.Services.AddScoped<IAmazonSimpleEmailService, AmazonSimpleEmailServiceClient>();
 builder.Services.AddScoped<IMessageHistoryRepository, MessageHistoryRepository>();

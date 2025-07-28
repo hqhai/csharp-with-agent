@@ -4,6 +4,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
@@ -11,7 +12,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class QuestionShuffleRepository : BaseRepository<QuestionShuffle>, IQuestionShuffleRepository
     {
-        public QuestionShuffleRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public QuestionShuffleRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

@@ -30,7 +30,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Trình độ khóa
         /// </summary>
-        public EnumPlacementTestLevel Level { get; set; }
+        public EnumPlacementTestLevel PlacementTestLevel { get; set; }
 
         /// <summary>
         /// Trạng thái Archive
@@ -45,6 +45,11 @@ namespace Fsel.Course.Domain.Entities
                 return PlacementTestSections.Select(x => x.SectionGroup).Sum(x => x!.ExecutionTime);
             }
         }
+
+        public Level? Level { get; set; }
+        public Guid? LevelId { get; set; }
+        public Category? Program { get; set; }
+        public Guid? ProgramId { get; set; }
 
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<PlacementTestSection> PlacementTestSections { get; set; } = new List<PlacementTestSection>();

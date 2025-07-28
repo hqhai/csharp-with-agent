@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class UserConfigRepository : BaseRepository<UserConfig>, IUserConfigRepository
     {
-        public UserConfigRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public UserConfigRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

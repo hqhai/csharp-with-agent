@@ -12,9 +12,12 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public ClassForumProfile()
         {
-            CreateMap<ClassForum, ClassForumModel>().IgnoreAllNonExisting();
-            CreateMap<CreateClassForumCommandModel, ClassForum>().IgnoreAllNonExisting();    
+            CreateMap<ClassForum, ClassForumModel>().ForMember(p => p.SkillName, x => x.MapFrom(n => n.Skill != null ? n.Skill.Name : null));
+            CreateMap<CreateClassForumCommandModel, ClassForum>().IgnoreAllNonExisting();
             CreateMap<ClassForum, ClassForumByStudentModel>().IgnoreAllNonExisting();
+
+            CreateMap<ClassForum, Fsel.Course.Domain.Models.EntityModels.V1i1.ClassForumModel>().ForMember(p => p.NameSkill, x => x.MapFrom(n => n.Skill != null ? n.Skill.Name : null));
+            CreateMap<Fsel.Course.Domain.Models.CommandModels.ClassForums.V1i1.CreateClassForumCommandModel, ClassForum>().IgnoreAllNonExisting();
         }
     }
 }

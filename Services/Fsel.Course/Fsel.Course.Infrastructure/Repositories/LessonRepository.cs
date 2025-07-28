@@ -29,6 +29,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                  .ThenInclude(e => e!.ClassForumFiles.OrderBy(x => x.CreatedDate))
                                  .Include(e => e.LessonExtraPractices.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .Include(e => e.LessonInstructions.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
+                                 .ThenInclude(x => x.Skill)
                                  .Include(e => e.LessonVideos.Where(n => !n.IsDeleted).OrderBy(x => x.CreatedDate))
                                  .ThenInclude(e => e.Video)
                                  .ThenInclude(e => e!.VideoTimeCodes.OrderBy(x => x.CreatedDate))
@@ -66,7 +67,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
 
-            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId))).Where(x => lessonIds.Contains(x.LessonId)).ToListAsync();
+            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId))).Where(x => x.LessonId.HasValue && lessonIds.Contains(x.LessonId.Value)).ToListAsync();
 
             var listDones = classForums.Select(x => new
             {

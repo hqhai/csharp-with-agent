@@ -10,8 +10,23 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         UnitUsed,
 
         /// <summary>
-        /// Invalid Lesson Quantity
+        /// Highlight range is invalid (From must be less than To)
         /// </summary>
-        InvalidLessonQuantity
+        InvalidHighlightRange,
+
+        /// <summary>
+        /// Highlight ranges must start from 0 and end at 100
+        /// </summary>
+        HighlightRangeMissingBoundary,
+
+        /// <summary>
+        /// Highlight ranges contain invalid values like 0 or 100 in the middle
+        /// </summary>
+        HighlightRangeInvalidInnerValue,
+
+        /// <summary>
+        /// Highlight ranges are not sequential or have gaps/overlap
+        /// </summary>
+        HighlightRangeOverlapOrGap
     }
 }

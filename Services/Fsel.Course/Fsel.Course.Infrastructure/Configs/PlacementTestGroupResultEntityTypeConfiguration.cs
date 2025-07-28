@@ -50,6 +50,11 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseLevel>());
 
+            builder.HasOne(a => a.Flow)
+                  .WithMany(b => b.PlacementTestGroupResults)
+                  .HasForeignKey(b => b.FlowId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasIndex(c => c.StudentId).IsUnique().HasFilter("[IsDeleted] = 0");
 
             builder.HasIndex(x => new { x.CreatedDate }).IncludeValueProperties(x => new { x.StudentId });

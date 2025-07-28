@@ -135,14 +135,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                                                            .ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId));
             if (placementTestResult == null)
             {
-                var placementTests = await placementTestQuery.Where(x => x.Level == level && x.IsActive).ToListAsync(cancellationToken);
+                var placementTests = await placementTestQuery.Where(x => x.PlacementTestLevel == level && x.IsActive).ToListAsync(cancellationToken);
                 placementTest = placementTests.OrderBy(x => random.Next()).FirstOrDefault();
                 if (placementTest != null)
                 {
                     var placementTestGroupResult = await SavePlacementGroupResultAsync(placementTest, studentId);
                     placementTestResult = new PlacementTestResult
                     {
-                        Level = placementTest.Level,
+                        Level = placementTest.PlacementTestLevel,
                         PlacementTestId = placementTest.Id,
                         StudentId = studentId,
                         Status = EnumResultStatus.New,
@@ -179,7 +179,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             placementTestGroupResult = new PlacementTestGroupResult
             {
                 StudentId = studentId,
-                ProcessLevel = placementTest.Level,
+                ProcessLevel = placementTest.PlacementTestLevel,
                 NewDate = DateTime.UtcNow,
                 Status = EnumResultStatus.New,
             };

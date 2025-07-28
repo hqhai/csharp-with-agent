@@ -2,7 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Fsel.Common.Attributes;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
@@ -10,26 +10,26 @@ using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class ClassForum : Entity
+    public class ClassForum : Entity, IVersionEntity
     {
         /// <summary>
         /// Cách chấm điểm
         /// </summary>
         public EnumGradingStyle GradingStyle { get; set; }
 
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(300, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PromptName { get; set; }
 
         /// <summary>
         /// Số từ giới hạn
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public long TaggetWordLimit { get; set; }
 
         /// <summary>
         /// Thời gian giới hạn
         /// </summary>
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double TaggetTimeLimit { get; set; }
 
         [NotMapped]
@@ -48,34 +48,50 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
-        public Guid LessonId { get; set; }
+        public Guid? LessonId { get; set; }
         public Lesson? Lesson { get; set; }
 
         public bool IsAlFeedBack { get; set; }
 
-        [RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        //[RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SystemRoleAlConfig { get; set; }
 
-        [RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        //[RequiredIf(nameof(IsAlFeedBack), true, ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? UserAlConfig { get; set; }
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? SettingModel { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 2, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingTemperature { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 4095, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingWordMaxLength { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingTopP { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 2, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingFrequecy { get; set; }
 
-        [Range(1, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 2, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double SettingPresence { get; set; }
+
+        public Skill? Skill { get; set; }
+        public Guid? SkillId { get; set; }
+
+        public Guid? ProgramId { get; set; }
+        public Category? Category { get; set; }
+
+        public Guid OriginalId { get; set; }
+
+        public int Version { get; set; }
+
+        public EnumVersionStatus VersionStatus { get; set; }
+
+        public EnumClassForumLayout Layout { get; set; }
 
         public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
 

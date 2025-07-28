@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class ChatbotConfigRepository : BaseRepository<ChatbotConfig>, IChatbotConfigRepository
     {
-        public ChatbotConfigRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public ChatbotConfigRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

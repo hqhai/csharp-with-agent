@@ -8,7 +8,7 @@ namespace Fsel.Ordering.Infrastructure.Repositories
 
     public class OrderRepository : BaseRepository<Order>, IOrderRepository
     {
-        public OrderRepository(OrderingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public OrderRepository(OrderingDbContext dbContext, OrderingReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

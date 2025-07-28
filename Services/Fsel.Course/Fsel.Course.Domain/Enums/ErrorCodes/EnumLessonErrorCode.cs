@@ -8,5 +8,35 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// Lesson was used
         /// </summary>
         LessonUsed,
+
+        DocumentNotNull,
+
+        ClassForumNotNull,
+
+        CodeNotNullOrEmpty,
+
+        CodeAlreadyExist,
+
+        CodeNotValid,
+
+        InstructionContentNotValid,
+
+        InstructionNotValid,
+
+        LessonModuleNotNull,
+
+        VideoIdNotNull,
+
+        HomeWorkIdNotNull,
+
+        StatusLessonNotInActive,
+
+        PercentNotValid,
+
+        AiConfigNotNull,
+
+        OpenOrderOutOfSequence,
+
+        DisplayOrderOutOfSequence,
     }
 }

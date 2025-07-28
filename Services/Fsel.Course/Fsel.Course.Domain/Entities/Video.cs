@@ -1,9 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Attributes;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
+using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
@@ -14,7 +17,8 @@ namespace Fsel.Course.Domain.Entities
         /// Tên Video
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumVideoErrorCode.InvalidKeywordCharacter))]
         public string? Name { get; set; }
 
         /// <summary>
@@ -48,6 +52,16 @@ namespace Fsel.Course.Domain.Entities
         /// Trạng thái Archive
         /// </summary>
         public bool IsArchive { get; set; }
+
+        public EnumVersionStatus VersionStatus { get; set; }
+        public int Version { get; set; }
+        public Guid? OriginalId { get; set; }
+
+        public Guid? LevelId { get; set; }
+        public Level? Level { get; set; }
+
+        public Guid? ProgramId { get; set; }
+        public Category? Program { get; set; }
 
         public ExtraPractice? ExtraPractice { get; set; }
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();

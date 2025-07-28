@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 StudentId = studentId,
                 NewDate = DateTime.UtcNow,
                 ProcessDate = DateTime.UtcNow,
-                ProcessLevel = placementTest.Level,
+                ProcessLevel = placementTest.PlacementTestLevel,
                 Status = EnumResultStatus.Process
             };
             await _placementTestGroupResultRepository.BulkMergeAsync(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
@@ -147,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 return;
             }
-            var placementTests = await placementTestQuery.Where(x => x.Level == level && x.IsActive).ToListAsync(cancellationToken);
+            var placementTests = await placementTestQuery.Where(x => x.PlacementTestLevel == level && x.IsActive).ToListAsync(cancellationToken);
             var placementTest = placementTests.OrderBy(x => random.Next()).FirstOrDefault();
             if (placementTest == null)
             {
@@ -157,7 +157,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             var correctValue = PlacementTestHelper.GetCorrectCountToLevel(desiredLevel, startingLevel.GetCourseLevelByPlacementTestLevel(), level);
             placementTestResult = new PlacementTestResult
             {
-                Level = placementTest.Level,
+                Level = placementTest.PlacementTestLevel,
                 PlacementTestId = placementTest.Id,
                 StudentId = studentId,
                 Status = EnumResultStatus.Done,

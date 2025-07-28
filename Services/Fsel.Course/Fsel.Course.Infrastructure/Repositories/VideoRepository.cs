@@ -1,5 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using AutoMapper;
+using Amazon.Runtime.Internal.Util;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
@@ -8,18 +10,28 @@ using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoRepository : BaseRepository<Video>, IVideoRepository
     {
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
+        private readonly ILogger<VideoRepository> _logger;
 
-        public VideoRepository(CourseDbContext dbContext, AuthContext authContext, ILessonResultRepository lessonResultRepository, AutoMapper.IMapper mapper, ILessonRepository lessonRepository) : base(dbContext, authContext, mapper)
+        public VideoRepository(CourseDbContext dbContext,
+            AuthContext authContext,
+            ILessonResultRepository lessonResultRepository,
+            AutoMapper.IMapper mapper, 
+            ILessonRepository lessonRepository, 
+            ILogger<VideoRepository> logger) : base(dbContext, authContext, mapper)
         {
             _lessonResultRepository = lessonResultRepository;
+            _mapper = mapper;
             _lessonRepository = lessonRepository;
+            _logger = logger;
         }
 
         public async Task<bool> IsVideoUsed(Guid? id)
@@ -72,9 +84,11 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<VideoModel?> GetIncludeAllAsync(Guid? id)
         {
+            var video = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
+            _logger.LogError("Invalid column name QuestionName", video);
             try
             {
-                return await Queryable.Include(x => x.LessonVideos.Where(y => !y.IsDeleted))
+                return await Queryable
                                 .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
                                 .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
                                 .ThenInclude(x => x.Exercise)
@@ -86,11 +100,15 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     Id = i.Id,
                                     Name = i.Name,
                                     VideoFilePath = i.VideoFilePath,
-                                    IsActive = i.LessonVideos.Any(),
                                     TeacherId = i.TeacherId,
                                     SubFilePath = i.SubFilePath,
                                     Type = i.Type,
                                     CourseLevel = i.CourseLevel,
+                                    VersionStatus = i.VersionStatus,
+                                    Version = i.Version,
+                                    Program = _mapper.Map<ProgramModel>(i.Program),
+                                    Level = _mapper.Map<LevelModel>(i.Level),
+                                    IsUseStudent = i.VideoResults.Any(),
                                     VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                                     {
                                         Id = x.Id,
@@ -104,6 +122,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                             Name = n.Name,
                                             MediaPost = n.MediaPost,
                                             CourseSkill = n.CourseSkill,
+                                            SkillId = n.SkillId,
+                                            SkillName = n.Skill != null ? n.Skill.Name : null,
                                             Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                                             {
                                                 Id = m!.Id,
@@ -117,8 +137,9 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     }).ToList(),
                                 }).FirstOrDefaultAsync();
             }
-            catch (Exception)
+            catch (Exception e)
             {
+                _logger.LogError("Invalid column name QuestionName", e);
                 throw;
             }
         }

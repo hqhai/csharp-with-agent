@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.VideoTimeCodes
 {
     public class CreateVideoTimeCodeCommandModel
     {
+        public Guid? Id { get; set; }
         public EnumTimeCodeType TimeCodeType { get; set; }
         public double DisplayTime { get; set; }
         public double ExecutionTime { get; set; }

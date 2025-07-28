@@ -26,7 +26,6 @@ namespace Fsel.Course.Infrastructure.Common
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
         private readonly IQuestionRepository _questionRepository;
-        private readonly LinQHelper _linQHelper;
         private readonly ISectionRepository _sectionRepository;
         private readonly IFinalTestAnswerRepository _finalTestAnswerRepository;
         private readonly IPlacementTestAnswerRepository _placementTestAnswerRepository;
@@ -42,7 +41,6 @@ namespace Fsel.Course.Infrastructure.Common
             QuestionTypeConverter questionTypeConverter,
             IMapper mapper,
             IQuestionRepository questionRepository,
-            LinQHelper linQHelper,
             ISectionRepository sectionRepository,
             IFinalTestAnswerRepository finalTestAnswerRepository,
             IPlacementTestAnswerRepository placementTestAnswerRepository,
@@ -56,7 +54,6 @@ namespace Fsel.Course.Infrastructure.Common
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
             _questionRepository = questionRepository;
-            _linQHelper = linQHelper;
             _sectionRepository = sectionRepository;
             _finalTestAnswerRepository = finalTestAnswerRepository;
             _placementTestAnswerRepository = placementTestAnswerRepository;
@@ -92,7 +89,7 @@ namespace Fsel.Course.Infrastructure.Common
                 isHighestStreaks = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
                                             .Select(x => x.IsCorrect == true).ToListAsync();
             }
-            return _linQHelper.GetHighestStreak(isHighestStreaks);
+            return isHighestStreaks.GetHighestStreak();
         }
 
         public async Task<SectionGroupResult> UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, SectionGroup sectionGroup, double version = (int)EnumVersion.V1)
@@ -655,6 +652,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(sectionGroup);
             var sectionGroupModel = _mapper.Map<SectionGroupModel>(sectionGroup);
+            sectionGroupModel.SkillName = sectionGroup.Skill?.Name;
             sectionGroupModel.TotalQuestion = GetTotalQuestion(sectionGroup);
             sectionGroupModel.MockTestScores = _mapper.Map<IList<MockTestScoreModel>>(sectionGroup.MockTestScores);
             sectionGroupModel.Sections = sectionGroup.Sections.OrderBy(x => x.CreatedDate).Select(x => GetSection(x, isDisableAnswers)).ToList();

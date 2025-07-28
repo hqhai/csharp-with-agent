@@ -5,12 +5,13 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Microsoft.EntityFrameworkCore;
-
+using AutoMapper;
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class HomeWorkRepository : BaseRepository<HomeWork>, IHomeWorkRepository
     {
-        public HomeWorkRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public HomeWorkRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 
@@ -25,9 +26,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             try
             {
-                return await Queryable.Include(x => x.HomeWorkQuestions.Where(n => !n.IsDeleted))
-                    .ThenInclude(x => x.Question)
-                    .Where(x => x.Id == id)
+                return await Queryable.Where(x => x.Id == id)
                     .Select(x => new HomeWorkModel
                     {
                         Id = x.Id,
@@ -37,6 +36,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                         IsActive = x.LessonHomeWorks.Any(),
                         CourseLevel = x.CourseLevel,
                         CourseSkill = x.CourseSkill,
+                        SkillId = x.SkillId,
+                        SkillName = x.Skill != null ? x.Skill.Name : null,
                         Questions = x.HomeWorkQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                         {
                             Id = m!.Id,
@@ -46,7 +47,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                             CorrectTotal = m.CorrectTotal,
                             Config = m.Config
                         }).ToList()
-                    }).FirstOrDefaultAsync();
+                    }).AsNoTracking().FirstOrDefaultAsync();
             }
             catch (Exception)
             {
@@ -87,6 +88,12 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 throw;
             }
+        }
+
+        public async Task<bool> IsUsingByClient(Guid id)
+        {
+            return await DbContext.Set<HomeWorkResult>().AsQueryable()
+                  .AnyAsync(x => x.HomeWorkId == id);
         }
     }
 }

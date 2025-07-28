@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Repositories
     {
         private readonly IMapper _mapper;
 
-        public UnitRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public UnitRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
             _mapper = mapper;
         }
@@ -67,6 +67,12 @@ namespace Fsel.Course.Infrastructure.Repositories
             return await Queryable
                 .Include(x => x.CourseUnitMockTests.Where(n => !n.IsDeleted))
                 .AnyAsync(x => x.Id == id && x.CourseUnitMockTests.Count > 0);
+        }
+
+        public async Task<bool> IsUsingByClient(Guid id)
+        {
+            return await DbContext.Set<UnitResult>().AsQueryable()
+                  .AnyAsync(x => x.UnitId == id);
         }
     }
 }

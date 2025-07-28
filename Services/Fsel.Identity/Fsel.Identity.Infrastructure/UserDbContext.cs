@@ -14,9 +14,91 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Identity.Infrastructure
 {
-    public class UserDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRole, UserLoginEntity, UserToken>
+    public class UserReadDbContext : UserBaseDbContext
+    {
+        protected override string Connection => Settings.ReadOnlyConnection;
+
+        public UserReadDbContext(DbContextOptions<UserReadDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        {
+        }
+    }
+
+    public class UserDbContext : UserBaseDbContext
     {
         public UserDbContext(DbContextOptions<UserDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            ArgumentNullException.ThrowIfNull(builder);
+            base.OnModelCreating(builder);
+            SeedMenus(builder);
+            SeedPlatforms(builder);
+            SeedRoles(builder);
+            SeedPermissions(builder);
+        }
+
+        private static void SeedPlatforms(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PlatformFileName);
+            var platforms = ConvertHelper.DeserializeFromFilePath<IList<Platform>>(path);
+            if (platforms != null)
+            {
+                ArgumentNullException.ThrowIfNull(platforms);
+                builder.Entity<Platform>().HasData(platforms);
+            }
+        }
+
+        private static void SeedRoles(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.RoleFileName);
+            var roles = ConvertHelper.DeserializeFromFilePath<IList<Role>>(path);
+            if (roles != null)
+            {
+                ArgumentNullException.ThrowIfNull(roles);
+                builder.Entity<Role>().HasData(roles);
+            }
+        }
+
+        private static void SeedPermissions(ModelBuilder builder)
+        {
+            var pathPermissionGroup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PermissionGroupName);
+            var permissionGroups = ConvertHelper.DeserializeFromFilePath<IList<PermissionGroup>>(pathPermissionGroup);
+
+            ArgumentNullException.ThrowIfNull(permissionGroups);
+            builder.Entity<PermissionGroup>().HasData(permissionGroups);
+
+            var pathPermission = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PermissionName);
+            var permissions = ConvertHelper.DeserializeFromFilePath<IList<Permission>>(pathPermission);
+
+            ArgumentNullException.ThrowIfNull(permissions);
+            builder.Entity<Permission>().HasData(permissions);
+
+            var pathRoleClaim = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.RoleClaimName);
+            var roleClaims = ConvertHelper.DeserializeFromFilePath<IList<RoleClaim>>(pathRoleClaim);
+
+            ArgumentNullException.ThrowIfNull(roleClaims);
+            builder.Entity<RoleClaim>().HasData(roleClaims);
+        }
+
+        private static void SeedMenus(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.MenuName);
+            var menus = ConvertHelper.DeserializeFromFilePath<IList<Menu>>(path);
+            ArgumentNullException.ThrowIfNull(menus);
+            if (menus != null)
+            {
+                builder.Entity<Menu>().HasData(menus);
+            }
+        }
+    }
+
+    public class UserBaseDbContext : BaseIdentityDbContext<User, Role, Guid, UserClaimEntity, RoleClaimEntity, UserRole, UserLoginEntity, UserToken>
+    {
+        protected virtual string Connection => Settings.DefaultConnection;
+
+        public UserBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
@@ -33,11 +115,6 @@ namespace Fsel.Identity.Infrastructure
             builder.Entity<User>().HasQueryFilter(e => !e.IsDeleted);
             builder.Entity<UserToken>().HasQueryFilter(e => !e.IsDeleted);
             builder.HasSequence<int>(SqlSettings.Sequence.UserSequence).StartsAt(100000).IncrementsBy(1);
-
-            SeedMenus(builder);
-            SeedPlatforms(builder);
-            SeedRoles(builder);
-            SeedPermissions(builder);
 
             base.OnModelCreating(builder);
             builder.ApplyConfiguration(new HumanEntityTypeConfiguration());
@@ -141,60 +218,6 @@ namespace Fsel.Identity.Infrastructure
                 optionsBuilder.UseSqlServer(
                     configuration.GetConnectionString(Settings.DefaultConnection),
                     options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
-            }
-        }
-
-        private static void SeedPlatforms(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PlatformFileName);
-            var platforms = ConvertHelper.DeserializeFromFilePath<IList<Platform>>(path);
-            if (platforms != null)
-            {
-                ArgumentNullException.ThrowIfNull(platforms);
-                builder.Entity<Platform>().HasData(platforms);
-            }
-        }
-
-        private static void SeedRoles(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.RoleFileName);
-            var roles = ConvertHelper.DeserializeFromFilePath<IList<Role>>(path);
-            if (roles != null)
-            {
-                ArgumentNullException.ThrowIfNull(roles);
-                builder.Entity<Role>().HasData(roles);
-            }
-        }
-
-        private static void SeedPermissions(ModelBuilder builder)
-        {
-            var pathPermissionGroup = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PermissionGroupName);
-            var permissionGroups = ConvertHelper.DeserializeFromFilePath<IList<PermissionGroup>>(pathPermissionGroup);
-
-            ArgumentNullException.ThrowIfNull(permissionGroups);
-            builder.Entity<PermissionGroup>().HasData(permissionGroups);
-
-            var pathPermission = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.PermissionName);
-            var permissions = ConvertHelper.DeserializeFromFilePath<IList<Permission>>(pathPermission);
-
-            ArgumentNullException.ThrowIfNull(permissions);
-            builder.Entity<Permission>().HasData(permissions);
-
-            var pathRoleClaim = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.RoleClaimName);
-            var roleClaims = ConvertHelper.DeserializeFromFilePath<IList<RoleClaim>>(pathRoleClaim);
-
-            ArgumentNullException.ThrowIfNull(roleClaims);
-            builder.Entity<RoleClaim>().HasData(roleClaims);
-        }
-
-        private static void SeedMenus(ModelBuilder builder)
-        {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.MenuName);
-            var menus = ConvertHelper.DeserializeFromFilePath<IList<Menu>>(path);
-            ArgumentNullException.ThrowIfNull(menus);
-            if (menus != null)
-            {
-                builder.Entity<Menu>().HasData(menus);
             }
         }
     }

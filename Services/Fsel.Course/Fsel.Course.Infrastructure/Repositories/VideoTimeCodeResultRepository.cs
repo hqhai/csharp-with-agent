@@ -9,7 +9,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoTimeCodeResultRepository : BaseRepository<VideoTimeCodeResult>, IVideoTimeCodeResultRepository
     {
-        public VideoTimeCodeResultRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public VideoTimeCodeResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

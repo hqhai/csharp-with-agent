@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Entities
 {
+    using Fsel.Course.Domain.Entities.FlowConfigs;
     using Fsel.Shared.Enums;
 
     public class PlacementTestResult : BaseScoreResult
@@ -14,6 +15,10 @@ namespace Fsel.Course.Domain.Entities
 
         public PlacementTestGroupResult? PlacementTestGroupResult { get; set; }
         public Guid? PlacementTestGroupResultId { get; set; }
+        public StepFlow? StepFlow { get; set; }
+        public Guid? StepFlowId { get; set; }
+        public ActionFlow? ActionFlow { get; set; }
+        public Guid? ActionFlowId { get; set; }
         public ICollection<PlacementTestAnswer> PlacementTestAnswers { get; set; } = new List<PlacementTestAnswer>();
         public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();
     }

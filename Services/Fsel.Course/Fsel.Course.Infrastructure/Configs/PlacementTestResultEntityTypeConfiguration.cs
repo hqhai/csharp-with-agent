@@ -37,6 +37,16 @@ namespace Fsel.Course.Infrastructure.Configs
                   .HasForeignKey(b => b.PlacementTestGroupResultId)
                   .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasOne(a => a.StepFlow)
+                  .WithMany(b => b.PlacementTestResults)
+                  .HasForeignKey(b => b.StepFlowId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.ActionFlow)
+                  .WithMany(b => b.PlacementTestResults)
+                  .HasForeignKey(b => b.ActionFlowId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
             builder.HasIndex(c => new { c.PlacementTestId, c.StudentId }).IsUnique().HasFilter("PlacementTestId IS NOT NULL AND [IsDeleted] = 0");
             builder.HasIndex(c => new { c.Status, c.StudentId });
             builder.HasIndex(c => new { c.Level, c.StudentId });

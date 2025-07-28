@@ -35,10 +35,6 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
             MethodResult<PagingItemsModel<MockTestSearchModel>> methodResult = new MethodResult<PagingItemsModel<MockTestSearchModel>>();
 
             var mockTestQuery = _mockTestRepository.Queryable.Where(p => !p.IsArchive)
-                                      .Include(x => x.MockTestSections.Where(y => !y.IsDeleted))
-                                      .ThenInclude(x => x.SectionGroup)
-                                      .Include(x => x.CourseUnitMockTests)
-                                      .Include(x => x.UnitSkillMockTests)
                                       .Select(x => new MockTestSearchModel
                                       {
                                           Id = x.Id,
@@ -50,6 +46,8 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
                                           UpdatedFullName = x.UpdatedFullName,
                                           Version = x.Version,
                                           Skills = x.MockTestSections.Select(x => x.SectionGroup).Select(n => n!.CourseSkill).ToList(),
+                                          SkillNames = x.MockTestSections.Select(x => x.SectionGroup).Where(x => x != null && x.Skill != null).Select(x => x!.Skill!.Name).ToList(),
+                                          SkillIds = x.MockTestSections.Select(x => x.SectionGroup).Where(x => x != null && x.Skill != null).Select(x => x!.Skill!.Id).ToList(),
                                       });
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
@@ -74,7 +72,10 @@ namespace Fsel.Course.Application.Queries.MockTestQuery
             {
                 mockTestQuery = mockTestQuery.Where(x => x.Skills!.Contains(request.CourseSkill ?? default));
             }
-
+            if (request.SkillId.HasValue)
+            {
+                mockTestQuery = mockTestQuery.Where(x => x.SkillIds != null && x.SkillIds.Contains(request.SkillId.Value));
+            }
             int totalItem = await mockTestQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await mockTestQuery
                     .ApplySortAndPaging(request)

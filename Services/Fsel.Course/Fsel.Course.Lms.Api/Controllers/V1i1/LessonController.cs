@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Course.Lms.Application.Commands.LessonCmd.V1i1;
     using Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1;
     using Fsel.Shared.Attributes;
@@ -32,11 +31,11 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// Get List Lesson
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(MethodResult<IList<LessonMockTestResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<Domain.Models.EntityModels.V1i1.LessonMockTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLessons([FromQuery] GetLessonsQuery query)
         {
-            MethodResult<IList<LessonMockTestResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<Domain.Models.EntityModels.V1i1.LessonMockTestResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -56,11 +55,11 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// Get Lesson Report
         /// </summary>
         [HttpGet("lesson-report")]
-        [ProducesResponseType(typeof(MethodResult<LessonReportModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<Domain.Models.EntityModels.V1i1.LessonReportModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLessonReport([FromQuery] GetLessonReportQuery query)
         {
-            MethodResult<LessonReportModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<Domain.Models.EntityModels.V1i1.LessonReportModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

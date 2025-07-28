@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class DictionaryRepository : BaseRepository<Dictionary>, IDictionaryRepository
     {
-        public DictionaryRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public DictionaryRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

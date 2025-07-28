@@ -39,8 +39,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var homeWorkQuery = _homeWorkRepository.Queryable.Where(p => !p.IsArchive)
-                                    .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
+            var query = _homeWorkRepository.Queryable.Where(p => !p.IsArchive).Include(p => p.Program).Include(p => p.Level)
                                     .Select(x => new HomeWorkSearchModel
                                     {
                                         Id = x.Id,
@@ -51,29 +50,63 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                                         IsActive = x.LessonHomeWorks.Where(n => !n.IsDeleted).Any(),
                                         CourseLevel = x.CourseLevel,
                                         CourseSkill = x.CourseSkill,
+                                        OriginalId = x.OriginalId,
+                                        SkillId = x.SkillId,
+                                        ProgramId = x.ProgramId,
+                                        Program = x.Program != null ? x.Program.Name : null,
+                                        LevelId = x.LevelId,
+                                        Version = x.Version,
+                                        VersionStatus = x.VersionStatus,
+                                        Level = x.Level != null ? x.Level.Name : null,
+                                        SkillName = x.Skill != null ? x.Skill.Name : null,
                                     });
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 if (Guid.TryParse(request.Keyword, out var guid))
                 {
-                    homeWorkQuery = homeWorkQuery.Where(m => m.Id == guid);
+                    query = query.Where(m => m.Id == guid);
                 }
                 else
                 {
-                    homeWorkQuery = homeWorkQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    query = query.Where(m => (m.Name != null && m.Name.Contains(request.Keyword) || (m.Code != null && m.Code.Contains(request.Keyword))));
                 }
+            }
+
+            if (request.SkillId.HasValue)
+            {
+                query = query.Where(x => x.SkillId == request.SkillId);
+            }
+
+            if (request.ProgramId.HasValue)
+            {
+                query = query.Where(x => x.ProgramId == request.ProgramId);
+            }
+
+            if (request.LevelId.HasValue)
+            {
+                query = query.Where(x => x.LevelId == request.LevelId);
+            }
+
+            if (request.OriginalId.HasValue)
+            {
+                query = query.Where(x => x.OriginalId == request.OriginalId);
+            }
+            else
+            {
+                query = query.Where(p => p.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
             }
 
             if (request.CourseLevel != null)
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.CourseLevel == request.CourseLevel);
+                query = query.Where(m => m.CourseLevel == request.CourseLevel);
             }
 
             if (request.CourseSkill != null)
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.CourseSkill == request.CourseSkill);
+                query = query.Where(m => m.CourseSkill == request.CourseSkill);
             }
 
             request.SortBy.Add(new Common.Models.GenericSortModel
@@ -82,8 +115,8 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 IsDesc = false
             });
 
-            int totalItem = await homeWorkQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await homeWorkQuery
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)

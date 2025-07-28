@@ -10,5 +10,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.MockTests
     {
         public EnumMockTestType? MockTestType { get; set; }
         public EnumCourseSkill? CourseSkill { get; set; }
+        public Guid? SkillId { get; set; }
     }
 }

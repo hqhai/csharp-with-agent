@@ -11,10 +11,11 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.Models.EntityModels;
     using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.EntityFrameworkCore;
+    using AutoMapper;
 
     public class FinalTestRepository : BaseRepository<FinalTest>, IFinalTestRepository
     {
-        public FinalTestRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public FinalTestRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
 
@@ -58,6 +59,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                               Id = x!.Id,
                                               ExecutionTime = x!.ExecutionTime,
                                               CourseSkill = x.CourseSkill,
+                                              SkillName = x.Skill != null ? x.Skill.Name : null,
+                                              SkillId = x.SkillId,
                                               Sections = x.Sections.OrderBy(x => x!.DisplayOrder).Select(x => new SectionModel
                                               {
                                                   Id = x.Id,

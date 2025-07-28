@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
+using Fsel.Course.Domain.Entities.TestConfigs;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 
@@ -86,5 +87,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<QuestionExplanationError> QuestionExplanationErrors = new List<QuestionExplanationError>();
         public ICollection<QuestionExplanationLog> QuestionExplanationLogs { get; set; } = new List<QuestionExplanationLog>();
         public ICollection<QuestionShuffle> QuestionShuffles { get; set; } = new List<QuestionShuffle>();
+        public ICollection<TestSectionQuestion> TestSectionQuestions { get; set; } = new List<TestSectionQuestion>();
     }
 }

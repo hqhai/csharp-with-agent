@@ -365,7 +365,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                                                                           .OrderBy(x => x.CreatedDate)
                                                                           .FirstOrDefaultAsync(cancellationToken);
 
-                    var (currentLevel, isLockPT) = placementTest.Level.GetLevelInScore(placementTestResult.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
+                    var (currentLevel, isLockPT) = placementTest.PlacementTestLevel.GetLevelInScore(placementTestResult.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
                     if (currentLevel.HasValue)
                     {
                         await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel

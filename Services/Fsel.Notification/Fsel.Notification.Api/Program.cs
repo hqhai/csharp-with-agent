@@ -16,7 +16,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<NotificationsDBContext>();
+builder.AddDbContexts<NotificationsDBContext, NotificationsReadDbContext>();
 
 builder.Services.AddScoped<INotificationsRepository, NotificationsRepository>();
 builder.Services.AddScoped<INotificationTypeRepository, NotificationTypeRepository>();

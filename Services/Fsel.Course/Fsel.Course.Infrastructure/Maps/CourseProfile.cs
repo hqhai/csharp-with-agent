@@ -25,6 +25,7 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<UpdateCourseCommandModel, EntityCourse>().ForMember(m => m.Priority, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<CourseResult, CourseResultModel>().IgnoreAllNonExisting();
             CreateMap<CourseResult, CourseManagerModel>().IgnoreAllNonExisting();
+            CreateMap<EntityCourse, CourseHistoryModel>().IgnoreAllNonExisting();
         }
     }
 }

@@ -8,7 +8,8 @@ namespace Fsel.Ordering.Infrastructure.Repositories
 
     public class UserVoucherRepository : BaseRepository<UserVoucher>, IUserVoucherRepository
     {
-        public UserVoucherRepository(OrderingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public UserVoucherRepository(OrderingDbContext dbContext, OrderingReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

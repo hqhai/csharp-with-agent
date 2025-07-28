@@ -507,7 +507,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
             else
             {
-                lessonId = await _classForumRepository.Queryable.Where(x => x.Id == classForumId).Select(x => x.LessonId).FirstOrDefaultAsync();
+                lessonId = await _classForumRepository.Queryable.Where(x => x.Id == classForumId && x.LessonId.HasValue).Select(x => x.LessonId!.Value).FirstOrDefaultAsync();
             }
             featureModule = await GetFeatureModuleToLesson(featureModule, lessonId);
             var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.LessonResultId == featureModule.LessonResultId))
