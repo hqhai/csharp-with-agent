@@ -61,7 +61,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                               {
                                   Lesson = a,
                                   Videos = (from b in _lessonModuleRepository.Queryable
-                                            join v in _videoRepository.Queryable on b.OriginalId equals v.Id
+                                            join v in _videoRepository.Queryable on b.OriginalId equals v.OriginalId
                                             where b.LessonId == a.Id && b.LessonConfigType == EnumLessonConfigType.Video
                                             select v).ToList()
                               };
