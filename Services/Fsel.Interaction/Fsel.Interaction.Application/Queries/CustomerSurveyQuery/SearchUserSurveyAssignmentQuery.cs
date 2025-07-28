@@ -128,7 +128,7 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
 
             deleteSurveyAssignment.ForEach(surveyAssignment => { userSurveyAssignments.Remove(surveyAssignment); });
 
-            methodResult.Result = userSurveyAssignments.OrderByDescending(p => p.IsSurveyQuestBoard).ToList();
+            methodResult.Result = userSurveyAssignments.OrderByDescending(p => p.IsSurveyQuestBoard).ThenByDescending(p => p.CreatedDate).ToList();
             return methodResult;
         }
 
