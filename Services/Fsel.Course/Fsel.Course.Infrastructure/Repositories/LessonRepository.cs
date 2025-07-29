@@ -14,7 +14,11 @@ namespace Fsel.Course.Infrastructure.Repositories
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IClassForumRepository _classForumRepository;
 
-        public LessonRepository(CourseDbContext dbContext, ILessonResultRepository lessonResultRepository, IClassForumRepository classForumRepository, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public LessonRepository(CourseDbContext dbContext,
+            CourseReadDbContext readDbContext,
+            ILessonResultRepository lessonResultRepository,
+            IClassForumRepository classForumRepository,
+            AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
             _lessonResultRepository = lessonResultRepository;
             _classForumRepository = classForumRepository;

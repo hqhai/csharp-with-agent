@@ -47,7 +47,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
-            var baseQuery = _unitRepository.Queryable.Where(p => !p.IsArchive);
+            var baseQuery = _unitRepository.ReadQueryable.Where(p => !p.IsArchive);
 
             var filteredQuery = baseQuery;
 
@@ -69,10 +69,12 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             if (request.CourseLevel != null)
             {
-                filteredQuery = filteredQuery.Where(m => m.CourseLevel == request.CourseLevel);
+                filteredQuery = filteredQuery.Where(m => m.LevelId == request.CourseLevel);
             }
 
             filteredQuery = filteredQuery
+                .Include(x => x.Level)
+                .Include(x => x.Program)
                 .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
                 .Include(unit => unit.UnitLessons.Where(y => !y.IsDeleted))
                     .ThenInclude(unitLesson => unitLesson.Lesson)
@@ -84,9 +86,10 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 Id = unit.Id,
                 Name = unit.Name,
                 Code = unit.Code,
+                Program = unit.Program != null ? unit.Program.Name : "",
+                CourseLevel = unit.Level != null ? unit.Level.Name : unit.CourseLevel.ToString(),
                 OriginalId = unit.OriginalId,
-                IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
-                CourseLevel = unit.CourseLevel,
+                IsActive = unit.CourseUnitMockTests.Any(n => !n.IsDeleted),
                 CreatedDate = unit.CreatedDate,
                 CreatedFullName = unit.CreatedFullName,
                 CreatedUserId = unit.CreatedUserId,
