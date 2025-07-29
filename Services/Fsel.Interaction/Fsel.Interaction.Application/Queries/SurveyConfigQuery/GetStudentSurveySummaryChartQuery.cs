@@ -72,7 +72,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
             {
                 var customerSurveys = customerSurveyEntities.Where(p => p.SurveyQuestionId == surveyQuestion.Id).Where(p => p.AnswerStr != null).ToList();
 
-                var answers = ConvertHelper.Deserialize<IList<IList<AnswerSurveyModel>>>(customerSurveys.Select(p => p.Answer));
+                var answers = ConvertHelper.Deserialize<IList<IList<AnswerSurveyModel>>>(customerSurveys.Where(p => p.Answer != null).Select(p => p.Answer));
 
                 int totalCount = answers?.SelectMany(innerList => innerList).Where(x => !string.IsNullOrEmpty(x.Content)).Count() ?? 0;
 
