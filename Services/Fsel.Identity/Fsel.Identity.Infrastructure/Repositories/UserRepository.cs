@@ -18,6 +18,8 @@ namespace Fsel.Identity.Infrastructure.Repositories
         private readonly UserDbContext _userDbContext;
         public DbContext DbContext => _userDbContext;
 
+        public IQueryable<User> Queryable => _userDbContext.Set<User>().AsQueryable();
+
         public UserRepository(UserManager<User> userManager, IStudentRepository studentRepository, IParentRepository parentRepository, UserDbContext userDbContext, IPlatformRepository platformRepository)
         {
             _userManager = userManager;
@@ -98,9 +100,20 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
 
             var isEmail = identity.IsValidEmail();
-            var user = isEmail ? await _userManager.FindByEmailAsync(identity)
-                    : await DbContext.Set<User>().FirstOrDefaultAsync(x => x.PhoneNumber == identity);
-            return user;
+
+            if (isEmail)
+            {
+                var user = await _userManager.FindByEmailAsync(identity);
+                if (user != null && user.EmailConfirmed)
+                {
+                    return user;
+                }
+                return null;
+            }
+            else
+            {
+                return await Queryable.AsNoTracking().FirstOrDefaultAsync(x => x.PhoneNumber == identity && x.PhoneNumberConfirmed);
+            }
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             ArgumentNullException.ThrowIfNull(userRegisterModel.PhoneNumber, nameof(userRegisterModel.PhoneNumber));
 
             var isExist = await _userRepository.DbContext.Set<User>().AsQueryable().AsNoTracking()
-               .AnyAsync(x => x.PhoneNumber == userRegisterModel.PhoneNumber);
+               .AnyAsync(x => x.PhoneNumber == userRegisterModel.PhoneNumber && x.PhoneNumberConfirmed);
 
             if (isExist)
             {

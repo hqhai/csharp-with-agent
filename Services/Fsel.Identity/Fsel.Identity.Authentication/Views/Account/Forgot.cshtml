@@ -34,7 +34,7 @@
                            autocomplete="off"
                            required
                            asp-for="Identity" />
-                    <label for="identity" class="input-label">@Localizer["i18n_email"]</label>
+                    <label for="identity" class="input-label">@Localizer["i18n_username"]</label>
                 </div>
                 @Html.CustomValidationMessageFor(model => model.Identity, Localizer, "", new { @class = "content-text-danger" })
             </div>

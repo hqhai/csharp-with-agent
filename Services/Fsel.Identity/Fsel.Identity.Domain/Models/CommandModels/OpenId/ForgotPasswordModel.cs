@@ -15,13 +15,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
         [Required(ErrorMessage = "i18n_Password_cannot_be_empty")]
         public string? Password { get; set; }
 
-        [DataType(DataType.Password)]
-        [Display(Name = "i18n_confirmation_password")]
-        [Compare(nameof(Password), ErrorMessage = "i18n_Password_and_Confirm_Password_not_match")]
-        [RegularExpression(RegexSettings.PasswordValid, ErrorMessage = "i18n_Password_is_not_valid")]
-        [Required(ErrorMessage = "i18n_Confirm_Password_cannot_be_empty.")]
-        public string? ConfirmPassword { get; set; }
-
         [Required]
         public string Token { get; set; }
 
