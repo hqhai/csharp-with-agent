@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using AutoMapper;
-using Amazon.Runtime.Internal.Util;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
@@ -22,11 +21,12 @@ namespace Fsel.Course.Infrastructure.Repositories
         private readonly ILogger<VideoRepository> _logger;
 
         public VideoRepository(CourseDbContext dbContext,
+            CourseReadDbContext courseReadDbContext,
             AuthContext authContext,
             ILessonResultRepository lessonResultRepository,
-            AutoMapper.IMapper mapper, 
-            ILessonRepository lessonRepository, 
-            ILogger<VideoRepository> logger) : base(dbContext, authContext, mapper)
+            AutoMapper.IMapper mapper,
+            ILessonRepository lessonRepository,
+            ILogger<VideoRepository> logger) : base(dbContext, courseReadDbContext, authContext, mapper)
         {
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
