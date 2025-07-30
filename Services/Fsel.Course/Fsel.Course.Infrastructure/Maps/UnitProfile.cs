@@ -3,6 +3,7 @@
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -26,6 +27,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<Unit, UnitModel>().ForMember(x => x.IsActive, p => p.MapFrom(o => o.CourseUnitMockTests.Any()));
 
             CreateMap<UnitResult, CourseUnitMockTestResultModel>().IgnoreAllNonExisting();
+
+            CreateMap<UnitModule, UnitModuleDTO>().IgnoreAllNonExisting();
         }
     }
 }

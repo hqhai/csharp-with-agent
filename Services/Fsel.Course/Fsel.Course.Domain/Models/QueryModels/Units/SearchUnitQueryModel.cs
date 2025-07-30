@@ -8,6 +8,8 @@ namespace Fsel.Course.Domain.Models.QueryModels.Units
     {
         public Guid? TeacherId { get; set; }
 
+        public Guid? ProgramId { get; set; }
+
         public Guid? CourseLevel { get; set; }
     }
 }
