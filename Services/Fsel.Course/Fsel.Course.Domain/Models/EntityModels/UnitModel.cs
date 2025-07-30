@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
@@ -19,6 +20,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public double Percent { get; set; }
         public int Version { get; set; }
         public Guid OriginalId { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Guid? LevelId { get; set; }
+        public IList<HighlightRange>? HighlightRanges { get; set; }
         public IList<UnitModuleDTO>? UnitModules { get; set; }
     }
 
