@@ -20,6 +20,10 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 
         public string? NameProgram { get; set; }
 
+        public string? Overview { get; set; }
+
+        public IList<string>? Skills { get; set; }
+
         public IList<VideoSearchModel>? Videos { get; set; }
 
         public Guid OriginalId { get; set; }
@@ -28,6 +32,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
     public class VideoSearchModel
     {
         public Guid? TeacherId { get; set; }
+
+        public Guid VideoId { get; set; }
 
         public string? NameTeacher { get; set; }
 

@@ -14,6 +14,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestModels
         public string? LevelName { get; set; }
         public Guid? ProgramId { get; set; }
         public string? ProgramName { get; set; }
+        public string? Overview { get; set; }
+        public List<string>? Skills { get; set; }
         public IList<EnumTestLayoutType?>? LayoutTypes { get; set; }
         public bool IsActive { get; set; }
     }

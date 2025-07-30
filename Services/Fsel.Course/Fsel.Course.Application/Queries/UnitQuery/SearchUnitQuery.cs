@@ -3,19 +3,19 @@
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
-using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.SystemServices;
 using Fsel.Course.Application.Services.SystemServices.Models;
+using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
+using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.Units;
+using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Fsel.Shared.Enums;
-using System.Globalization;
 
 namespace Fsel.Course.Application.Queries.UnitQuery
 {
@@ -28,12 +28,20 @@ namespace Fsel.Course.Application.Queries.UnitQuery
         private readonly IUnitRepository _unitRepository;
         private readonly IUserService _userService;
         private readonly ISystemService _systemService;
+        private readonly ILessonRepository _lessonRepository;
+        private readonly IVideoRepository _videoRepository;
 
-        public SearchUnitQueryHandler(IUnitRepository unitRepository, IUserService userService, ISystemService systemService)
+        public SearchUnitQueryHandler(IUnitRepository unitRepository,
+            ILessonRepository lessonRepository,
+            IVideoRepository videoRepository,
+            IUserService userService,
+            ISystemService systemService)
         {
             _unitRepository = unitRepository;
             _userService = userService;
             _systemService = systemService;
+            _lessonRepository = lessonRepository;
+            _videoRepository = videoRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<UnitSearchModel>>> Handle(SearchUnitQuery request, CancellationToken cancellationToken)
@@ -46,57 +54,109 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-
-            var unitQuery = _unitRepository.Queryable.Where(p => !p.IsArchive)
-                                    .Include(x => x.CourseUnitMockTests.Where(y => !y.IsDeleted))
-                                    .Include(unit => unit.UnitLessons.Where(y => !y.IsDeleted))
-                                    .ThenInclude(unitLesson => unitLesson.Lesson)
-                                    .ThenInclude(lesson => lesson!.LessonVideos.Where(y => !y.IsDeleted))
-                                    .ThenInclude(lessonVideo => lessonVideo.Video)
-
-                            .Select(unit => new UnitSearchModel
-                            {
-                                Id = unit.Id,
-                                Name = unit.Name,
-                                Code = unit.Code,
-                                OriginalId = unit.OriginalId,
-                                IsActive = unit.CourseUnitMockTests.Where(n => !n.IsDeleted).Any(),
-                                CourseLevel = unit.CourseLevel,
-                                CreatedDate = unit.CreatedDate,
-                                CreatedFullName = unit.CreatedFullName,
-                                CreatedUserId = unit.CreatedUserId,
-                                UpdatedDate = unit.UpdatedDate,
-                                UpdatedUserId = unit.UpdatedUserId,
-                                UpdatedFullName = unit.UpdatedFullName,
-                                TeacherIds = unit.UnitLessons.Select(l => l.Lesson)
-                                                .SelectMany(lv => lv!.LessonVideos.Where(n => !n.IsDeleted))
-                                                .Select(v => v.Video)
-                                                .Select(n => n!.TeacherId).ToList()
-                            });
-
-            request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
-            if (!string.IsNullOrEmpty(request.Keyword))
-            {
-                if (Guid.TryParse(request.Keyword, out var guid))
-                {
-                    unitQuery = unitQuery.Where(m => m.Id == guid);
-                }
-                else
-                {
-                    var unitCodeQuery = unitQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
-                    var unitNameQuery = unitQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
-                    unitQuery = unitCodeQuery.Union(unitNameQuery);
-                }
-            }
-
-            if (request.CourseLevel != null)
-            {
-                unitQuery = unitQuery.Where(m => m.CourseLevel == request.CourseLevel);
-            }
-
+            IQueryable<UnitSearchModel> unitQuery = null;
             if (request.TeacherId.HasValue)
             {
-                unitQuery = unitQuery.Where(m => m.TeacherIds!.Any(x => x == request.TeacherId));
+                var videoQueryable = _videoRepository.ReadQueryable.Where(x => x.TeacherId == request.TeacherId
+                && x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
+                if (request.ProgramId.HasValue)
+                {
+                    videoQueryable.Where(x => x.ProgramId == request.ProgramId);
+                }
+
+                if (request.CourseLevel.HasValue)
+                {
+                    videoQueryable.Where(x => x.LevelId == request.CourseLevel);
+                }
+
+                var lessonTeacherQueryable = from v in videoQueryable
+                                             join lm in _lessonRepository.ReadOnlyDbContext.Set<LessonModule>().AsQueryable()
+                                             .Where(l => l.LessonConfigType == Domain.Enums.EnumLessonConfigType.Video)
+                                                 on v.OriginalId equals lm.OriginalId
+                                             join l in _lessonRepository.ReadQueryable.Where(l => l.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
+                                                 on lm.LessonId equals l.Id
+                                             join um in _unitRepository.ReadOnlyDbContext.Set<UnitModule>().AsQueryable()
+                                                 on l.OriginalId equals um.OriginalId
+                                             join u in _unitRepository.ReadQueryable
+                                             .Where(u => u.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion && !u.IsArchive)
+                                                on um.UnitId equals u.Id
+                                             select u;
+
+                if (request.ProgramId.HasValue)
+                {
+                    lessonTeacherQueryable.Where(x => x.ProgramId == request.ProgramId);
+                }
+
+                if (request.CourseLevel.HasValue)
+                {
+                    lessonTeacherQueryable.Where(x => x.LevelId == request.CourseLevel);
+                }
+
+                unitQuery = lessonTeacherQueryable.Select(unit => new UnitSearchModel
+                {
+                    Id = unit.Id,
+                    Name = unit.Name,
+                    Code = unit.Code,
+                    Program = unit.Program != null ? unit.Program.Name : "",
+                    CourseLevel = unit.Level != null ? unit.Level.Name : unit.CourseLevel.ToString(),
+                    OriginalId = unit.OriginalId,
+                    IsActive = unit.CourseUnitMockTests.Any(n => !n.IsDeleted),
+                    CreatedDate = unit.CreatedDate,
+                    CreatedFullName = unit.CreatedFullName,
+                    CreatedUserId = unit.CreatedUserId,
+                    UpdatedDate = unit.UpdatedDate,
+                    UpdatedUserId = unit.UpdatedUserId,
+                    UpdatedFullName = unit.UpdatedFullName,
+                    TeacherIds = new List<Guid> { request.TeacherId.Value },
+                });
+            }
+            else
+            {
+                var baseQuery = _unitRepository.ReadQueryable.Where(p => !p.IsArchive).Where(u => u.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
+
+                var filteredQuery = baseQuery;
+
+                if (request.CourseLevel != null)
+                {
+                    filteredQuery = filteredQuery.Where(m => m.LevelId == request.CourseLevel);
+                }
+
+                if (request.ProgramId != null)
+                {
+                    filteredQuery = filteredQuery.Where(m => m.ProgramId == request.ProgramId);
+                }
+
+                filteredQuery = filteredQuery
+                    .Include(x => x.Level)
+                    .Include(x => x.Program)
+                    .Include(x => x.UnitModules.Where(m => m.UnitConfigType == Domain.Enums.EnumUnitConfigType.Lesson).Where(y => !y.IsDeleted));
+
+                unitQuery = filteredQuery.Select(unit => new UnitSearchModel
+                {
+                    Id = unit.Id,
+                    Name = unit.Name,
+                    Code = unit.Code,
+                    Program = unit.Program != null ? unit.Program.Name : "",
+                    CourseLevel = unit.Level != null ? unit.Level.Name : unit.CourseLevel.ToString(),
+                    OriginalId = unit.OriginalId,
+                    IsActive = unit.CourseUnitMockTests.Any(n => !n.IsDeleted),
+                    CreatedDate = unit.CreatedDate,
+                    CreatedFullName = unit.CreatedFullName,
+                    CreatedUserId = unit.CreatedUserId,
+                    UpdatedDate = unit.UpdatedDate,
+                    UpdatedUserId = unit.UpdatedUserId,
+                    UpdatedFullName = unit.UpdatedFullName,
+                    TeacherIds = (from um in unit.UnitModules
+                                  join l in _lessonRepository.ReadQueryable.Where(l => l.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
+                                     on um.OriginalId equals l.OriginalId
+                                  join lm in _lessonRepository.ReadOnlyDbContext.Set<LessonModule>().AsQueryable()
+                                  .Where(x => x.LessonConfigType == Domain.Enums.EnumLessonConfigType.Video)
+                                     on l.Id equals lm.LessonId
+                                  join v in _videoRepository.ReadQueryable
+                                  .Where(v => v.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion && !v.IsArchive)
+                                     on l.OriginalId equals v.OriginalId
+                                  select v.TeacherId).ToList()
+                });
             }
 
             int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -106,7 +166,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = unitQuery.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
+            var teacherResults = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = lists.SelectMany(x => x.TeacherIds!).Distinct().ToList() });
 
             var unitchatbotconfigs = await _systemService.GetUnitChatbotsStatus(new GetUnitChatbotConfigsQueryModel { UnitIds = lists.Select(x => x.Id).ToList() });
 

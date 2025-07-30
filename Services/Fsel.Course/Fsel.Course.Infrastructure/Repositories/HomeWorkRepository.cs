@@ -6,20 +6,25 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
+
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class HomeWorkRepository : BaseRepository<HomeWork>, IHomeWorkRepository
     {
-        public HomeWorkRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+        private readonly ILessonModuleRepository _lessonModuleRepository;
+
+        public HomeWorkRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper, ILessonModuleRepository lessonModuleRepository)
             : base(dbContext, readDbContext, authContext, mapper)
         {
+            _lessonModuleRepository = lessonModuleRepository;
         }
 
         public async Task<bool> IsHomeWorkUsed(Guid? id)
         {
-            return await Queryable
-                 .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
-                 .AnyAsync(x => x.Id == id && x.LessonHomeWorks.Count > 0);
+            return await (from baseQ in Queryable
+                          join lessonModule in _lessonModuleRepository.Queryable on baseQ.OriginalId equals lessonModule.OriginalId
+                          where baseQ.Id == id
+                          select baseQ.Id).AnyAsync();
         }
 
         public async Task<HomeWorkModel?> GetIncludeAllAsync(Guid? id)

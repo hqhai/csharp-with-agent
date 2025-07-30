@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using AutoMapper;
-using Amazon.Runtime.Internal.Util;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
@@ -20,25 +19,30 @@ namespace Fsel.Course.Infrastructure.Repositories
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
         private readonly ILogger<VideoRepository> _logger;
+        private readonly ILessonModuleRepository _lessonModuleRepository;
 
         public VideoRepository(CourseDbContext dbContext,
+            CourseReadDbContext courseReadDbContext,
             AuthContext authContext,
             ILessonResultRepository lessonResultRepository,
-            AutoMapper.IMapper mapper, 
-            ILessonRepository lessonRepository, 
-            ILogger<VideoRepository> logger) : base(dbContext, authContext, mapper)
+            AutoMapper.IMapper mapper,
+            ILessonRepository lessonRepository,
+            ILogger<VideoRepository> logger,
+            ILessonModuleRepository lessonModuleRepository) : base(dbContext, courseReadDbContext, authContext, mapper)
         {
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
             _lessonRepository = lessonRepository;
             _logger = logger;
+            _lessonModuleRepository = lessonModuleRepository;
         }
 
         public async Task<bool> IsVideoUsed(Guid? id)
         {
-            return await Queryable
-                 .Include(x => x.LessonVideos.Where(n => !n.IsDeleted))
-                 .AnyAsync(x => x.Id == id && x.LessonVideos.Count > 0);
+            return await (from baseQ in Queryable
+                          join lessonModule in _lessonModuleRepository.Queryable on baseQ.OriginalId equals lessonModule.OriginalId
+                          where baseQ.Id == id
+                          select baseQ.Id).AnyAsync();
         }
 
         public override async Task<Video?> GetIncludeByIdAsync(Guid id)

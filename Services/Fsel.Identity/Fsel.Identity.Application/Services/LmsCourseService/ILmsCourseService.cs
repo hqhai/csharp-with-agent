@@ -82,5 +82,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Delete("/v1/admin/other/{studentId}/pt-and-course")]
         Task<IApiResponse<MethodResult<bool>>> DeletePTAndCourseAsync([FromRoute] Guid studentId);
+
+        [Post("/v1/course-integration/info-course-integration")]
+        Task<IApiResponse<MethodResult<IList<InfoCourseIntegrationModel>>>> GetInfoCourseIntegration([FromBody] CourseIntegrationQueryModel query);
     }
 }
