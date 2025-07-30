@@ -16,6 +16,7 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
     public class GetHistoryDoSurveyByUserIdQuery : IRequest<MethodResult<SurveyConfigModel>>
     {
         public Guid? UserId { get; set; }
+        public Guid? CustomerSurveyGroupId { get; set; }
         public Guid SurveyConfigId { get; set; }
     }
 
@@ -56,6 +57,15 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
             var surveyQuestionIds = surveyConfig.SurveyQuestions.Select(p => p.Id).ToList();
 
             var customerSurveys = await _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId).Where(p => p.CreatedUserId == userId).ToListAsync(cancellationToken);
+
+            if (request.CustomerSurveyGroupId.HasValue)
+            {
+                customerSurveys = customerSurveys.Where(p => p.CustomerSurveyGroupId == request.CustomerSurveyGroupId).ToList();
+            }
+            else
+            {
+                customerSurveys = customerSurveys.Where(p => !p.CustomerSurveyGroupId.HasValue).ToList();
+            }
 
             var surveyGroupQuestionModels = new List<SurveyGroupQuestionModel>();
 

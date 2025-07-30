@@ -9,5 +9,6 @@ namespace Fsel.Interaction.Domain.Models.EntityModels
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? StudentCode { get; set; }
+        public Guid CustomerSurveyGroupId { get; set; }
     }
 }

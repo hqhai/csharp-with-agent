@@ -55,6 +55,7 @@ builder.Services.AddScoped<DeleteClassForumByFlagPublisher>();
 builder.Services.AddScoped<CompleteApprovalPostPublisher>();
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<SendNotifyUserHasSurveyPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.TrainingApiUrl);
@@ -95,6 +96,7 @@ builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {
     { QueueSettings.InteractionQueue.NameQueue.SaveUserSurveyAssignment, typeof(SaveUserSurveyAssignmentConsumer) },
+    { QueueSettings.InteractionQueue.NameQueue.SendNotifyUserHasSurvey, typeof(SendNotifyUserHasSurveyConsumer) },
 });
 
 var app = builder.Build();

@@ -63,13 +63,14 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                                          {
                                              UserId = csg.UserId,
                                              CreatedDate = csg.CreatedDate,
+                                             CustomerSurveyGroupId = csg.Id
                                          }).ToListAsync(cancellationToken);
 
-            customerSurveys = customerSurveys.DistinctBy(p => p.UserId).ToList();
+            customerSurveys = customerSurveys.DistinctBy(p => p.CustomerSurveyGroupId).ToList();
 
             var studentResults = await _userService.SearchStudentsByUserIds(new SearchStudentsByUserIdsQueryModel()
             {
-                UserIds = customerSurveys.Select(p => p.UserId).ToList(),
+                UserIds = customerSurveys.Select(p => p.UserId).Distinct().ToList(),
                 Keyword = request.Keyword
             });
             var students = studentResults.Content?.Result;
@@ -80,7 +81,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
 
             int totalItem = customerSurveys.Count;
 
-            var lists = customerSurveys
+            var lists = customerSurveys.OrderByDescending(p => p.CreatedDate)
                     .ApplySortAndPaging(request)
                     .ToList();
 

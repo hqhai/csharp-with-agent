@@ -167,6 +167,7 @@ namespace Fsel.Shared.Constants
                 public const string InteractionAction = $"{KeyQueue}_InterationAction";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
                 public const string SaveUserSurveyAssignment = $"{KeyQueue}_SaveUserSurveyAssignment";
+                public const string SendNotifyUserHasSurvey = $"{KeyQueue}_SendNotifyUserHasSurvey";
             }
         }
 

@@ -12,7 +12,6 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
     using Fsel.Interaction.Application.Queues.Publishers;
     using Fsel.Interaction.Domain.Entities;
     using Fsel.Interaction.Domain.IRepositories;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -27,16 +26,16 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
         private readonly IUserSurveyAssignmentRepository _userSurveyAssignmentRepository;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
-        private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ICacheService<UserSurveyAssignment> _cacheService;
+        private readonly SendNotifyUserHasSurveyPublisher _sendNotifyUserHasSurveyPublisher;
 
-        public SaveUserSurveyAssignmentCommandHandler(IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, IMapper mapper, NotificationMessagePublisher notificationMessagePublisher, ICacheService<UserSurveyAssignment> cacheService)
+        public SaveUserSurveyAssignmentCommandHandler(IUserSurveyAssignmentRepository userSurveyAssignmentRepository, AuthContext authContext, IMapper mapper, ICacheService<UserSurveyAssignment> cacheService, SendNotifyUserHasSurveyPublisher sendNotifyUserHasSurveyPublisher)
         {
             _userSurveyAssignmentRepository = userSurveyAssignmentRepository;
             _authContext = authContext;
             _mapper = mapper;
-            _notificationMessagePublisher = notificationMessagePublisher;
             _cacheService = cacheService;
+            _sendNotifyUserHasSurveyPublisher = sendNotifyUserHasSurveyPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(SaveUserSurveyAssignmentCommand request, CancellationToken cancellationToken)
@@ -89,14 +88,15 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                     await _userSurveyAssignmentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                     methodResult.StatusCode = StatusCodes.Status201Created;
 
-                    await _notificationMessagePublisher.Publish(new NotificationSendingQueueModel()
+                    if (!request.IsSurveyQuestBoard && request.CourseType.HasValue && request.CourseLevel.HasValue && request.ProgressRequirement.HasValue)
                     {
-                        UserIds = new List<Guid>() { _authContext.CurrentUserId },
-                        Type = EnumNotificationType.LinkPage,
-                        Content = EnumNotificationContent.SurveyAssignment,
-                        ObjectId = userSurveyAssignment.Id,
-                        PlatformCode = EnumPlatformCode.LMS
-                    }, cancellationToken);
+                        await _sendNotifyUserHasSurveyPublisher.Publish(new SaveUserSurveyAssignmentCommandModel()
+                        {
+                            CourseLevel = request.CourseLevel.Value,
+                            CourseType = request.CourseType.Value,
+                            ProgressRequirement = request.ProgressRequirement.Value
+                        }, cancellationToken);
+                    }
 
                     methodResult.Result = true;
                     return methodResult;

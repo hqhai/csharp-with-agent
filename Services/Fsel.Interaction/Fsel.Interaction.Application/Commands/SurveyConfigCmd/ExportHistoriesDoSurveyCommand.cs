@@ -62,8 +62,7 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
                                              CustomerSurveyGroup = csg
                                          }).ToListAsync(cancellationToken);
 
-            var users = customerSurveys.GroupBy(p => p.CustomerSurvey.UserId);
-            var userIds = users.Select(p => p.Key).ToList();
+            var userIds = customerSurveys.Select(p => p.CustomerSurveyGroup.UserId).Distinct().ToList();
             var studentResults = await _userService.GetStudentByUserIdsAsync(userIds);
             var students = studentResults.Content?.Result;
 
@@ -99,12 +98,14 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
 
             var dataBag = new ConcurrentBag<(int row, List<string> values)>();
 
-            var tasks = userIds.Select(async (item, index) =>
+            var customerSurveyGroup = customerSurveys.GroupBy(p => p.CustomerSurveyGroup).Select(g => g.Key).OrderByDescending(p => p.CreatedDate).ToList();
+
+            var tasks = customerSurveyGroup.Select(async (item, index) =>
             {
-                var student = students.FirstOrDefault(x => x.Human != null && x.Human.UserId == item);
+                var student = students.FirstOrDefault(x => x.Human != null && x.Human.UserId == item.UserId);
 
                 var answers = customerSurveys
-                    .Where(p => p.CustomerSurvey.UserId == item)
+                    .Where(p => p.CustomerSurvey.UserId == item.UserId && p.CustomerSurveyGroup.Id == item.Id)
                     .ToList();
 
                 List<string> rowValues = new List<string>()
