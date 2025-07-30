@@ -13,6 +13,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Course.Domain.Models.QueryModels.Lessons.V1i1;
+    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -123,7 +124,8 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                     TeacherId = v.TeacherId,
                     TimeCodeTypes = v.VideoTimeCodes.Select(t => t.TimeCodeType).Distinct().ToList(),
                 }).ToList(),
-                OriginalId = x.Lesson.OriginalId
+                OriginalId = x.Lesson.OriginalId,
+                Skills = x.Lesson.LessonInstructions.Select(i => i.Skill.Name).ToList()
             });
 
             int totalItem = await lesson.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -132,28 +134,10 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                                     .ToListAsync(cancellationToken: cancellationToken)
                                     .ConfigureAwait(false);
 
-            var videoIds = lessons.SelectMany(x => x.Videos.Select(x => x.VideoId)).ToList();
-            if (videoIds.Any())
+            lessons.ForEach(x =>
             {
-                var videoSkills = await (
-                              from vtc in _videoTimeCodeRepository.ReadQueryable.WhereBulkContains(videoIds, x => x.VideoId)
-                              join tce in _timeCodeExerciseRepository.ReadQueryable on vtc.Id equals tce.VideoTimeCodeId
-                              join e in _exerciseRepository.ReadQueryable on tce.ExerciseId equals e.Id
-                              join s in _skillRepository.ReadQueryable on e.SkillId equals s.Id into skillJoin
-                              from s in skillJoin.DefaultIfEmpty() // LEFT JOIN
-                              select new
-                              {
-                                  VideoId = vtc.VideoId,
-                                  SkillName = s != null ? s.Name : null,
-                              }
-                          ).ToListAsync(cancellationToken);
-                lessons.ForEach(x =>
-                {
-                    x.Skills = (from v in x.Videos
-                                join vs in videoSkills on v.VideoId equals vs.VideoId
-                                select vs.SkillName).Where(x => x != null).Distinct().ToList();
-                });
-            }
+                x.Skills = x.Skills?.Where(x => !string.IsNullOrEmpty(x)).Distinct().ToList();
+            });
 
             foreach (var item in lessons)
             {
