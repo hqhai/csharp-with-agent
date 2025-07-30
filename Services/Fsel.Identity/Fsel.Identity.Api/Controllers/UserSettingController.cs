@@ -79,5 +79,17 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Sender Setting Generate Token
+        /// </summary>
+        [HttpPost("sender-setting-generate-token")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SenderSettingGenerateToken([FromBody] SenderSettingGenerateTokenCommand command)
+        {
+            MethodResult<string> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
