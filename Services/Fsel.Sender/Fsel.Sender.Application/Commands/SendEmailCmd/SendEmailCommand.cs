@@ -46,10 +46,7 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             if (request.Template.HasValue)
             {
                 var checkSenderSetting = await CheckSenderSetting(request.ToEmails.ToList() ?? new List<string>(), request.Template.Value);
-                if (checkSenderSetting.Any())
-                {
-                    request.ToEmails = checkSenderSetting;
-                }
+                request.ToEmails = checkSenderSetting;
             }
 
             var bccEmail = _appSetting.EmailConfig?.BCCEmail;

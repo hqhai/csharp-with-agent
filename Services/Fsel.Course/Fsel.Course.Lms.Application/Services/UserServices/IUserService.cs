@@ -174,5 +174,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Post("/v1/event/get-student-ids-in-event-by-student-ids")]
         Task<IApiResponse<MethodResult<IList<Guid>?>>> GetStudentsInEventByStudentIds([Body] GetStudentIdsInEventByStudentIdsQueryModel model);
+
+        [Post("/v1/user-setting/sender-setting-generate-token")]
+        Task<IApiResponse<MethodResult<string>>> SenderSettingGenerateToken([Body] UpdateSenderSettingCommandModel command);
     }
 }
