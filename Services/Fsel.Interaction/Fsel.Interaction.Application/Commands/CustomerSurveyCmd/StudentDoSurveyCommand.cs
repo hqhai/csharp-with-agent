@@ -148,7 +148,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
             var surveyQuestionIds = surveyConfig.SurveyQuestions.Select(p => p.Id).ToList();
 
-            var customerSurveyEntities = await _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId).Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
+            var customerSurveyEntities = await _customerSurveyRepository.Queryable.WhereBulkContains(surveyQuestionIds, p => p.SurveyQuestionId).Where(p => p.CreatedUserId == _authContext.CurrentUserId && !p.CustomerSurveyGroupId.HasValue).ToListAsync(cancellationToken);
 
             var newCustomerSurveys = new List<CustomerSurvey>();
             var updateCustomerSurveys = new List<CustomerSurvey>();

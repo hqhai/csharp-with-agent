@@ -64,7 +64,7 @@ namespace Fsel.Interaction.Application.Queries.CustomerSurveyQuery
             }
             else
             {
-                customerSurveys = customerSurveys.Where(p => !p.CustomerSurveyGroupId.HasValue).ToList();
+                customerSurveys = customerSurveys.Where(p => !p.CustomerSurveyGroupId.HasValue).OrderByDescending(p => p.CreatedDate).ToList();
             }
 
             var surveyGroupQuestionModels = new List<SurveyGroupQuestionModel>();
