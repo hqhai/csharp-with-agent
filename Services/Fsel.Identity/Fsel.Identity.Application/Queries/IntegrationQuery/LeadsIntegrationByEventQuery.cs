@@ -2,11 +2,9 @@
 
 namespace Fsel.Identity.Application.Queries.IntegrationQuery
 {
-    using System.Threading;
-    using System.Threading.Tasks;
+    using System.Linq;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
@@ -22,11 +20,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class LeadsIntegrationQuery : IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
+    public class LeadsIntegrationByEventQuery : IntegrationQueryModel, IRequest<MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
     {
+        public string? EventCode { get; set; }
     }
 
-    public class LeadsIntegrationQueryHandler : IRequestHandler<LeadsIntegrationQuery, MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
+    public class LeadsIntegrationByEventQueryHandler : IRequestHandler<LeadsIntegrationByEventQuery, MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
     {
         private readonly IOrderService _orderService;
         private readonly IHumanRepository _humanRepository;
@@ -36,15 +35,19 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly BaseIntegrationQuery _baseIntegrationQuery;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IStudentRepository _studentRepository;
 
-        public LeadsIntegrationQueryHandler(IOrderService orderService,
+        public LeadsIntegrationByEventQueryHandler(IOrderService orderService,
                                             IHumanRepository humanRepository,
                                             ILmsCourseService lmsCourseService,
                                             ISystemService systemService,
                                             IMapper mapper,
                                             IUserOtpCodeRepository userOtpCodeRepository,
                                             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-                                            BaseIntegrationQuery baseIntegrationQuery)
+                                            BaseIntegrationQuery baseIntegrationQuery,
+                                            ICompetitionEventsRepository competitionEventsRepository,
+                                            IStudentRepository studentRepository)
         {
             _orderService = orderService;
             _humanRepository = humanRepository;
@@ -54,53 +57,31 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             _userOtpCodeRepository = userOtpCodeRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _baseIntegrationQuery = baseIntegrationQuery;
+            _competitionEventsRepository = competitionEventsRepository;
+            _studentRepository = studentRepository;
         }
-        public async Task<MethodResult<PagingItemsModel<LeadsIntegrationModel>>> Handle(LeadsIntegrationQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<LeadsIntegrationModel>>> Handle(LeadsIntegrationByEventQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<LeadsIntegrationModel>>();
-
-            #region Lấy dữ liệu thay đổi trong khoảng thời gian
             List<Guid> distinctUserIds = new List<Guid>();
 
-            if (!string.IsNullOrEmpty(request.Email))
-            {
-                var user = await _humanRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.User != null && x.User.Email == request.Email.Trim(), cancellationToken);
-                if (user == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
-                    return methodResult;
-                }
+            #region Lấy dữ liệu thay đổi trong khoảng thời gian
+            var competitionEventIds = await _competitionEventsRepository.Queryable
+                                                                        .Include(x => x.CompetitionEvents)
+                                                                        .Where(x => x.EventCode == request.EventCode)
+                                                                        .AsNoTracking()
+                                                                        .SelectMany(x => x.CompetitionEvents.Select(x => x.Id))
+                                                                        .ToListAsync(cancellationToken);
 
-                distinctUserIds.Add(user.UserId!.Value);
-            }
+            var studentCompetitionEvents = _studentCompetitionEventsRepository.Queryable.WhereBulkContains((competitionEventIds ?? new List<Guid>()), x => x.CompetitionEventId);
 
-            else if (!string.IsNullOrEmpty(request.UserName))
-            {
-                var user = await _humanRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.User != null && x.User.UserName == request.UserName.Trim(), cancellationToken);
-                if (user == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
-                    return methodResult;
-                }
+            distinctUserIds = await (from a in studentCompetitionEvents
+                                     join b in _studentRepository.Queryable on a.StudentId equals b.Id
+                                     join c in _humanRepository.Queryable on b.HumanId equals c.Id
+                                     where c.UserId.HasValue
+                                     select c.UserId!.Value).Distinct().ToListAsync(cancellationToken);
 
-                distinctUserIds.Add(user.UserId!.Value);
-            }
-
-            else
-            {
-                var userInteractedInRange = await _baseIntegrationQuery.UserInteractedInRange(request.StartDate, request.EndDate, false, cancellationToken);
-                if (!userInteractedInRange.IsOK || userInteractedInRange.Result == null)
-                {
-                    methodResult.AddErrorBadRequest(userInteractedInRange.ErrorMessages);
-                    return methodResult;
-                }
-
-                distinctUserIds = userInteractedInRange.Result.ToList();
-            }
-            #endregion
-
-            #region Lấy dữ liệu
             // bỏ những lead đã thành client
             var orderClients = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
             var orderClientResults = orderClients.Content?.Result ?? new List<OrderSearchModel>();
@@ -110,6 +91,9 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 distinctUserIds = distinctUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
             }
 
+            #endregion
+
+            #region Lấy dữ liệu
             // phân trang
             var paging = distinctUserIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
