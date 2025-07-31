@@ -3,6 +3,7 @@
 namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
 {
     using System.Collections.Generic;
+    using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -10,6 +11,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -29,6 +31,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
         private readonly ICustomerSurveyGroupRepository _customerSurveyGroupRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private const int ChunkSize = 10000;
 
         public GetStudentSurveySummaryChartQueryHandler(ISurveyConfigRepository surveyConfigRepository, ISurveyQuestionRepository surveyQuestionRepository, ICustomerSurveyRepository customerSurveyRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserService userService, IMapper mapper)
         {
@@ -59,14 +62,28 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                                                 where csg.Status == EnumSurveyGroupStatus.Done
                                                 select cs).ToListAsync(cancellationToken);
 
-            var userIds = customerSurveyEntities.Select(p => p.UserId).Distinct().ToList();
-            var studentResults = await _userService.GetStudentByUserIdsAsync(userIds);
-            var students = studentResults.Content?.Result;
+            var userIds = customerSurveyEntities.Select(p => p.UserId).ToList();
+            var distinctUserIds = userIds.Distinct().ToList();
+
+            var userIdsChunk = distinctUserIds.Chunk(ChunkSize);
+            var students = new List<StudentModel>();
+            foreach (var item in userIdsChunk)
+            {
+                var result = await _userService.GetStudentByUserIdsAsync(item.ToList());
+                if (result?.Content?.Result != null)
+                {
+                    students.AddRange(result.Content.Result);
+                }
+            }
 
             surveyConfig.SurveyQuestions = surveyConfig.SurveyQuestions.OrderBy(p => p.DisplayLevel).ThenBy(p => p.DisplayOrder).ToList();
 
+            var groupedCounts = customerSurveyEntities
+            .GroupBy(x => new { x.UserId, x.CustomerSurveyGroupId })
+            .ToList();
+
             var results = new StudentSurveySummaryChartModels();
-            results.TotalUser = userIds.Count;
+            results.TotalUser = groupedCounts.Count;
 
             foreach (var surveyQuestion in surveyConfig.SurveyQuestions)
             {
@@ -127,7 +144,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                 {
                     foreach (var customerSurvey in customerSurveys)
                     {
-                        var student = students?.FirstOrDefault(p => p.Human != null && p.Human.UserId == customerSurvey.UserId);
+                        var student = students.FirstOrDefault(p => p.Human != null && p.Human.UserId == customerSurvey.UserId);
 
                         var answer = ConvertHelper.Deserialize<IList<AnswerSurveyModel>>(customerSurvey.Answer)?.FirstOrDefault();
                         if (answer != null && !string.IsNullOrEmpty(answer.Content))

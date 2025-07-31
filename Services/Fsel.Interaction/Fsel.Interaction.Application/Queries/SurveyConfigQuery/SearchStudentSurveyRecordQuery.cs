@@ -10,6 +10,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Interaction.Application.Services.UserServices;
+    using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Domain.IRepositories;
     using Fsel.Interaction.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
@@ -31,6 +32,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
         private readonly ICustomerSurveyGroupRepository _customerSurveyGroupRepository;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private const int ChunkSize = 10000;
 
         public SearchStudentSurveyRecordQueryHandler(ISurveyConfigRepository surveyConfigRepository, ISurveyQuestionRepository surveyQuestionRepository, ICustomerSurveyRepository customerSurveyRepository, ICustomerSurveyGroupRepository customerSurveyGroupRepository, IUserService userService, IMapper mapper)
         {
@@ -68,16 +70,23 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
 
             customerSurveys = customerSurveys.DistinctBy(p => p.CustomerSurveyGroupId).ToList();
 
-            var studentResults = await _userService.SearchStudentsByUserIds(new SearchStudentsByUserIdsQueryModel()
+            var distinctUserIds = customerSurveys.Select(p => p.UserId).Distinct().ToList();
+            var userIdsChunk = distinctUserIds.Chunk(ChunkSize);
+            var students = new List<StudentModel>();
+
+            foreach (var item in userIdsChunk)
             {
-                UserIds = customerSurveys.Select(p => p.UserId).Distinct().ToList(),
-                Keyword = request.Keyword
-            });
-            var students = studentResults.Content?.Result;
+                var studentResults = await _userService.SearchStudentsByUserIds(new SearchStudentsByUserIdsQueryModel()
+                {
+                    UserIds = item.ToList(),
+                    Keyword = request.Keyword
+                });
 
-            var userIds = students?.Where(p => p.Human != null && p.Human.UserId.HasValue).Select(p => p.Human!.UserId ?? default).ToList();
-
-            customerSurveys = customerSurveys.Where(p => userIds != null && userIds.Contains(p.UserId)).ToList();
+                if (studentResults?.Content?.Result != null)
+                {
+                    students.AddRange(studentResults.Content.Result);
+                }
+            }
 
             int totalItem = customerSurveys.Count;
 
