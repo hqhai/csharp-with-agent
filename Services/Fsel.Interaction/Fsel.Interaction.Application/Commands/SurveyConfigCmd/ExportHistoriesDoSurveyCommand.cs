@@ -167,7 +167,7 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
 
             return string.Join(", ", answers
                 .Where(a => !string.IsNullOrWhiteSpace(a.Content))
-                .Select(a => $"{a.Content}"));
+                .Select(a => a.IsOther ? a.Other : a.Content));
         }
     }
 }
