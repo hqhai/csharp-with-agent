@@ -1,13 +1,12 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Net.Http.Headers;
 using System.Security.Claims;
-using System.Text;
 using System.Text.Json;
 using AutoMapper;
 using Fsel.Authentication.Infrastructure.Configs;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
+using Fsel.Core.Entities;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Events;
 using Fsel.Identity.Application.Queues.Publishers;
@@ -25,14 +24,10 @@ using Fsel.Identity.Infrastructure.Common;
 using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
-using IdentityModel;
-using IdentityServer4;
 using IdentityServer4.EntityFramework.Mappers;
-using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -48,7 +43,7 @@ var tenantMasterConnection = builder.Configuration.GetConnectionString(Settings.
 var appSetting = builder.AddAppSettings<AppSetting>();
 
 builder.AddServices(appSetting);
-builder.AddDbContexts<UserDbContext>();
+builder.AddDbContexts<UserDbContext, User, Role, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>();
 
 #region AddOpenIdServices
 

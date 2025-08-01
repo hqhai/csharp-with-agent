@@ -7,7 +7,9 @@ namespace Fsel.Identity.Application.Events
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using IdentityServer4.Events;
@@ -17,14 +19,16 @@ namespace Fsel.Identity.Application.Events
     public class TokenIssuedEventHandler : IEventSink
     {
         private readonly AuthContext _authContext;
-        private readonly UserManager<User> _userManager;
+        private UserManager<User> _userManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ITenantProvider _tenantProvider;
 
-        public TokenIssuedEventHandler(UserManager<User> userManager, AuthContext authContext, IHttpContextAccessor httpContextAccessor)
+        public TokenIssuedEventHandler(UserManager<User> userManager, AuthContext authContext, IHttpContextAccessor httpContextAccessor, ITenantProvider tenantProvider)
         {
             _userManager = userManager;
             _authContext = authContext;
             _httpContextAccessor = httpContextAccessor;
+            _tenantProvider = tenantProvider;
         }
 
 
@@ -36,6 +40,8 @@ namespace Fsel.Identity.Application.Events
             if (evt.Id == EventIds.TokenIssuedSuccess)
             {
                 var tokenIssuedEvent = evt as TokenIssuedSuccessEvent;
+
+                _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: tokenIssuedEvent?.SubjectId.Parse<Guid>()) ?? _userManager;
                 var user = await _userManager.FindByIdAsync(tokenIssuedEvent?.SubjectId ?? string.Empty);
                 // Xử lý sự kiện khi token được phát hành thành công ở đây
                 // Ví dụ: Ghi log, thống kê, v.v.

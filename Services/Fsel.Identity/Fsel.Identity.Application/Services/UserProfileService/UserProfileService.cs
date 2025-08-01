@@ -9,6 +9,8 @@ namespace Fsel.Identity.Application.Services.UserProfileService
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.LmsCourseService;
@@ -28,14 +30,15 @@ namespace Fsel.Identity.Application.Services.UserProfileService
 
     public class UserProfileService : ProfileService<User>, IProfileService
     {
-        private readonly Core.Base.Managers.UserManager<User> _userManager;
-        private readonly Core.Base.Managers.RoleManager<Role> _roleManager;
+        private Core.Base.Managers.UserManager<User> _userManager;
+        private Core.Base.Managers.RoleManager<Role> _roleManager;
         private readonly IInteractionService _interactionService;
         private readonly ITrainingService _trainingService;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IOrderService _orderService;
+        private readonly ITenantProvider _tenantProvider;
 
-        public UserProfileService(Core.Base.Managers.UserManager<User> usermanager, Core.Base.Managers.RoleManager<Role> roleManager, IUserClaimsPrincipalFactory<User> userClaimsPrincipalFactory, IInteractionService interactionService, ITrainingService trainingService, ILmsCourseService lmsCourseService, IOrderService orderService)
+        public UserProfileService(Core.Base.Managers.UserManager<User> usermanager, Core.Base.Managers.RoleManager<Role> roleManager, IUserClaimsPrincipalFactory<User> userClaimsPrincipalFactory, IInteractionService interactionService, ITrainingService trainingService, ILmsCourseService lmsCourseService, IOrderService orderService, ITenantProvider tenantProvider)
             : base(usermanager, userClaimsPrincipalFactory)
         {
             _userManager = usermanager;
@@ -44,11 +47,15 @@ namespace Fsel.Identity.Application.Services.UserProfileService
             _trainingService = trainingService;
             _lmsCourseService = lmsCourseService;
             _orderService = orderService;
+            _tenantProvider = tenantProvider;
         }
 
         public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
+            var userId = _userManager.GetUserId(context.Subject);
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager;
+            _roleManager = await _tenantProvider.CreateRoleManagerAsync<Role>(userId: userId.Parse<Guid>()) ?? _roleManager;
 
             var user = await _userManager.GetUserAsync(context.Subject);
 
@@ -150,6 +157,8 @@ namespace Fsel.Identity.Application.Services.UserProfileService
         public override async Task IsActiveAsync(IsActiveContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
+            var userId = _userManager.GetUserId(context.Subject);
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager;
 
             var sub = context.Subject.GetSubjectId();
             var user = await _userManager.FindByIdAsync(sub);

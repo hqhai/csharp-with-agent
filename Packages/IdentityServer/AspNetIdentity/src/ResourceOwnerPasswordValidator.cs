@@ -11,6 +11,8 @@ using static IdentityModel.OidcConstants;
 using IdentityServer4.Services;
 using IdentityServer4.Events;
 using System;
+using Fsel.Core.Base.Interfaces;
+using Fsel.Core.Entities;
 
 namespace IdentityServer4.AspNetIdentity
 {
@@ -20,10 +22,11 @@ namespace IdentityServer4.AspNetIdentity
     /// <typeparam name="TUser">The type of the user.</typeparam>
     /// <seealso cref="IdentityServer4.Validation.IResourceOwnerPasswordValidator" />
     public class ResourceOwnerPasswordValidator<TUser> : IResourceOwnerPasswordValidator
-        where TUser : class
+        where TUser : UserEntity
     {
-        private readonly SignInManager<TUser> _signInManager;
-        private readonly UserManager<TUser> _userManager;
+        private SignInManager<TUser> _signInManager;
+        private UserManager<TUser> _userManager;
+        private readonly ITenantProvider _tenantProvider;
         private readonly ILogger<ResourceOwnerPasswordValidator<TUser>> _logger;
 
         /// <summary>
@@ -35,10 +38,12 @@ namespace IdentityServer4.AspNetIdentity
         public ResourceOwnerPasswordValidator(
             UserManager<TUser> userManager,
             SignInManager<TUser> signInManager,
+            ITenantProvider tenantProvider,
             ILogger<ResourceOwnerPasswordValidator<TUser>> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _tenantProvider = tenantProvider;
             _logger = logger;
         }
 
@@ -51,6 +56,8 @@ namespace IdentityServer4.AspNetIdentity
         {
             ArgumentNullException.ThrowIfNull(context);
 
+            _userManager = await _tenantProvider.CreateUserManagerAsync<TUser>(context.UserName) ?? _userManager;
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<TUser>(context.UserName) ?? _signInManager;
             var user = await _userManager.FindByNameAsync(context.UserName);
             if (user != null)
             {
