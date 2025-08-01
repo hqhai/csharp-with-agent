@@ -12,7 +12,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Fsel.Core.Base.Interfaces;
-    using Fsel.Identity.Infrastructure;
 
     public class ConfirmUserOtpCommand : IRequest<MethodResult<bool>>
     {
@@ -37,7 +36,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         public async Task<MethodResult<bool>> Handle(ConfirmUserOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            _userOtpRepository = await _tenantProvider.CreateRepositoryAsync<IUserOtpCodeRepository, UserDbContext>(userId: request.UserId) ?? _userOtpRepository;
+            _userOtpRepository = await _tenantProvider.CreateRepositoryAsync<IUserOtpCodeRepository>(userId: request.UserId) ?? _userOtpRepository;
 
             var methodResult = new MethodResult<bool>();
 

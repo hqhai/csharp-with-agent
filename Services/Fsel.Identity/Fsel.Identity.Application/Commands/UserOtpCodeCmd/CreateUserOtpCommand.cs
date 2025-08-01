@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         public async Task<MethodResult<UserOtpCodeModel>> Handle(CreateUserOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            _userOtpRepository = await _tenantProvider.CreateRepositoryAsync<IUserOtpCodeRepository, UserDbContext>(userId: request.UserId) ?? _userOtpRepository;
+            _userOtpRepository = await _tenantProvider.CreateRepositoryAsync<IUserOtpCodeRepository>(userId: request.UserId) ?? _userOtpRepository;
 
             var methodResult = new MethodResult<UserOtpCodeModel>();
 

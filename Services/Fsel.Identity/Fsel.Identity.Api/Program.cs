@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Core.Entities;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Queues.Consumers;
 using Fsel.Identity.Application.Queues.Publishers;
@@ -22,9 +23,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
-builder.AddOpenIdSwaggerGens(appSetting);
-builder.AddOpenIdAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<UserDbContext>();
+builder.AddSwaggerGens(appSetting);
+builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddDbContexts<UserDbContext, User, Role, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>();
 
 builder.AddIdentity<User, Role, UserDbContext>();
 builder.AddConfigureIdentityOptions();
