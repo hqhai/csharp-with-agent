@@ -43,6 +43,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                         CourseSkill = x.CourseSkill,
                         SkillId = x.SkillId,
                         SkillName = x.Skill != null ? x.Skill.Name : null,
+                        ProgramId = x.ProgramId,
+                        ProgramName = x.Program != null ? x.Program.Name : null,
+                        LevelId = x.LevelId,
+                        LevelName = x.Level != null ? x.Level.Name : null,
                         Questions = x.HomeWorkQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                         {
                             Id = m!.Id,
