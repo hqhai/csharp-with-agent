@@ -196,6 +196,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListCourseLevel = request.ListCourseLevel,
                 Keyword = request.Keyword,
                 ListLearningStatus = request.ListLearningStatus,
 
