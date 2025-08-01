@@ -47,6 +47,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                         ProgramName = x.Program != null ? x.Program.Name : null,
                         LevelId = x.LevelId,
                         LevelName = x.Level != null ? x.Level.Name : null,
+                        OriginalId = x.OriginalId,
                         Questions = x.HomeWorkQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                         {
                             Id = m!.Id,
