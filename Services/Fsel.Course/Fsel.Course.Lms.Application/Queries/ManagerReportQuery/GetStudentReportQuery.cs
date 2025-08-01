@@ -64,6 +64,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             switch (request.ManagerReportType)
             {
                 case EnumManagerReportType.ReportManagerPT:
+                    request.ListCourseLevel = string.Empty;
                     students = await FilterPlacementTestStudentsAsync(request, students, cancellationToken);
                     break;
 
