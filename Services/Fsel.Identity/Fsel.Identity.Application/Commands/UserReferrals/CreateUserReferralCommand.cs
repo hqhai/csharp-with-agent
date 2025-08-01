@@ -41,8 +41,8 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
         public async Task<MethodResult<VoidMethodResult>> Handle(CreateUserReferralCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User, Role, UserDbContext, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>(userId: request.ReceiverId) ?? _userManager;
-            _userReferralRepository = await _tenantProvider.CreateRepositoryAsync<IUserReferralRepository, UserDbContext>(userId: request.ReceiverId) ?? _userReferralRepository;
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: request.ReceiverId) ?? _userManager;
+            _userReferralRepository = await _tenantProvider.CreateRepositoryAsync<IUserReferralRepository>(userId: request.ReceiverId) ?? _userReferralRepository;
 
             var methodResult = new MethodResult<VoidMethodResult>();
 
