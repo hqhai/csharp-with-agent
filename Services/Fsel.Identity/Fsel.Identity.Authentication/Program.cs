@@ -44,6 +44,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 
 builder.AddServices(appSetting);
 builder.AddDbContexts<UserDbContext, User, Role, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>();
+builder.AddTenantMasterDbContexts<DataProtectionKeyContext>();
 
 #region AddOpenIdServices
 

@@ -27,6 +27,7 @@ builder.AddServices(appSetting);
 builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<UserDbContext, User, Role, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>();
+builder.AddTenantMasterDbContexts<DataProtectionKeyContext>();
 
 builder.AddConfigureIdentityOptions();
 builder.AddIdentity<User, Role, UserDbContext>().AddTotpProvider();
