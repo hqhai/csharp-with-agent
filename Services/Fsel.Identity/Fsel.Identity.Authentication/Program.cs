@@ -49,7 +49,7 @@ builder.AddDbContexts<UserDbContext, User, Role, UserClaimEntity, UserRole, User
 
 builder.AddConfigureIdentityOptions();
 builder.AddTenantMasterDbContexts<DataProtectionKeyContext>();
-builder.Services.AddDataProtection().PersistKeysToDbContext<DataProtectionKeyContext>();
+builder.Services.AddDataProtection().SetApplicationName(nameof(DataProtectionKeyContext)).PersistKeysToDbContext<DataProtectionKeyContext>();
 builder.Services.AddAntiforgery();
 
 builder.AddIdentity<User, Role, UserDbContext>().AddTotpProvider();
