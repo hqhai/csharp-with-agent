@@ -280,7 +280,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
         public IActionResult ResetPassword(string token, string identity, string? returnUrl)
         {
-            var viewModel = new ForgotPasswordModel
+            var viewModel = new ResetPasswordModel
             {
                 ReturnUrl = returnUrl,
                 Token = token,
@@ -291,7 +291,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(ForgotPasswordModel? request)
+        public async Task<IActionResult> ResetPassword(ResetPasswordModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
             if (ModelState.IsValid)
@@ -963,6 +963,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         {
             if (otpSessionInfo != null)
             {
+                ViewData["Provider"] = otpSessionInfo.SendInfo?.Provider ?? string.Empty;
                 if (otpSessionInfo.IsOtpBlocked)
                 {
                     ViewData["IsOtpBlocked"] = true;

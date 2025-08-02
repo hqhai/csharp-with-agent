@@ -109,6 +109,7 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
     public class SendOtpCountInfo
     {
         public int Count { get; set; }
+        public string LastProvider { get; set; }
         public DateTime LastSendTime { get; set; }
         public DateTime StartTime { get; set; }
     }
@@ -137,6 +138,7 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
         public bool IsBlockedByReachMaxSendCount { get; set; }
         public bool IsBlockedByGap { get; set; }
         public TimeSpan? WaitTimeDuration { get; set; }
+        public string Provider { get; set; }
     }
 
     public class VerifyInfo

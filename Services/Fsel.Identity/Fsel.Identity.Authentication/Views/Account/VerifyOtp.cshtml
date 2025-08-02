@@ -7,8 +7,14 @@
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
     var isError = ViewContext.ModelState.IsValid;
 
+    var provider = ViewData["Provider"] as string;
     var isBlocked = ViewData["IsOtpBlocked"] as bool?;
     var isOtpExpired = ViewData["OtpExpired"] as bool?;
+    var sentMessage = $"Một mã xác thực gồm 5 chữ số đã được gửi tới {provider}. Vui lòng nhập mã tại đây";
+    if (string.IsNullOrEmpty(provider))
+    {
+        sentMessage = $"Một mã xác thực gồm 5 chữ số đã được gửi. Vui lòng nhập mã tại đây";
+    }
 }
 
 @section styles {
@@ -24,10 +30,8 @@
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
         <h1 class="title">Xác minh tài khoản</h1>
 
-        <form id="form-VerifyOtp" asp-route="VerifyOtp">
-            <p class="sub-title sub-verify-otp">
-                Một mã xác thực gồm 5 chữ số đã được gửi tới số điện thoại. Vui lòng nhập mã tại đây
-            </p>
+        <form id="form-VerifyOtp" asp-route="VerifyOtp">  
+            @Html.Raw($"<p class='sub-title sub-verify-otp''>{sentMessage}</p>")
 
             <input type="hidden" asp-for="ReturnUrl" />
             <input type="hidden" asp-for="Type" />
@@ -121,7 +125,7 @@
                             }
                         </div>
                         <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
-                            @Localizer["i18n_did_not_a_code"]
+                            Gửi lại mã: 
                             @if (Model.Identity.IsValidEmail())
                             {
                                 <button id="email" type="submit" name="button" value="resend">Email</button>
@@ -160,7 +164,7 @@
                             }
                         </div>
                         <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
-                            @Localizer["i18n_did_not_a_code"]
+                            Gửi lại mã:
                             @if (Model.Identity.IsValidEmail())
                             {
                                 <button id="email" type="submit" name="button" value="resend">Email</button>
@@ -183,8 +187,12 @@
                     
                 }
             }
-            
         </form>
+        <div class="text-footer">
+            <a href="@Url.Action("Forgot", "Account", new { Model.ReturnUrl })"</a>
+                Đổi địa chỉ email/số điện thoại
+        </div>
+        <div class="text-footer">Bạn không nhận được mã xác thực?</div>
     </div>
 
     @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })

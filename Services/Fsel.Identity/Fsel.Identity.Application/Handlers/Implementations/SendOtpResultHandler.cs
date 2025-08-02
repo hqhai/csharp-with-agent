@@ -26,24 +26,30 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 var sendCountInfo = await _sendOtpCountCache.GetAsync(context.CountSendOtpCacheKey);
                 if (sendCountInfo == null)
                 {
-                    await CreateSendCountInfo(context.CountSendOtpCacheKey, context.SendOtpCountLifeTimeDuration.Value);
+                    await CreateSendCountInfo(context.CountSendOtpCacheKey, context.SendOtpCountLifeTimeDuration.Value, context.OtpProviderType.ToString());
                 }
                 else
                 {
-                    await UpdateSendCountInfo(sendCountInfo, context.CountSendOtpCacheKey, context.SendOtpCountLifeTimeDuration.Value);
+                    await UpdateSendCountInfo(sendCountInfo, context.CountSendOtpCacheKey, context.SendOtpCountLifeTimeDuration.Value, context.OtpProviderType.ToString());
                 }
             }
         }
 
-        private async Task CreateSendCountInfo(string key, TimeSpan lifeTime)
+        private async Task CreateSendCountInfo(string key, TimeSpan lifeTime, string provider)
         {
-            var sendCountInfo = new SendOtpCountInfo { Count = 1, StartTime = DateTime.UtcNow };
+            var sendCountInfo = new SendOtpCountInfo
+            {
+                Count = 1,
+                StartTime = DateTime.UtcNow,
+                LastProvider = provider,
+            };
             sendCountInfo.LastSendTime = sendCountInfo.StartTime;
             await _sendOtpCountCache.SetAsync(key, sendCountInfo, lifeTime);
         }
 
-        private async Task UpdateSendCountInfo(SendOtpCountInfo sendCountInfo, string key, TimeSpan lifeTime)
+        private async Task UpdateSendCountInfo(SendOtpCountInfo sendCountInfo, string key, TimeSpan lifeTime, string provider)
         {
+            sendCountInfo.LastProvider = provider;
             var elapsedTime = DateTime.UtcNow - sendCountInfo.StartTime;
             if (elapsedTime > lifeTime)
             {

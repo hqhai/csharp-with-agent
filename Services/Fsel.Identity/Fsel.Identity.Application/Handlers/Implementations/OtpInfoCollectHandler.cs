@@ -99,6 +99,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             {
                 var sendInfo = new SendInfo();
                 context.OtpSessionInfo.SendInfo = sendInfo;
+                sendInfo.Provider = sendCountInfo.LastProvider;
                 if (CheckBlockSendOtpHandler.HasReachedMaxSendCount(sendCountInfo.Count, context.MaxCountOtpSend.Value))
                 {
                     sendInfo.IsBlockedByReachMaxSendCount = true;
