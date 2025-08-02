@@ -54,6 +54,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
         {
             ArgumentNullException.ThrowIfNull(context);
             var userId = _userManager.GetUserId(context.Subject);
+            var tenant = await _tenantProvider.GetTenantAsync(string.Empty, userId.Parse<Guid>());
             _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager;
             _roleManager = await _tenantProvider.CreateRoleManagerAsync<Role>(userId: userId.Parse<Guid>()) ?? _roleManager;
 
@@ -78,7 +79,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Profile))
                 {
-                    claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString()));
+                    claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString(), ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.FullName, user.FullName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.Surname, user.LastName ?? string.Empty, ClaimValueTypes.String));
@@ -144,6 +145,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.OpenId))
                 {
+                    claims.Add(new Claim(JwtClaimNames.TenantId, tenant?.Id.ToString() ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString()));
                 }
