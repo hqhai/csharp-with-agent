@@ -12,13 +12,15 @@ namespace Fsel.Identity.Application.Handlers.Implementations
         private readonly IOtpHandlerPipeline<SendOtpResultHandler> _sendOtpResultHandler;
         private IOtpHandlerPipeline<VerifyOtpHandler> _verifyOtpHandler;
         private readonly IOtpHandlerPipeline<VerifyOtpResultHandler> _verifyOtpResultHandler;
+        private readonly IOtpHandlerPipeline<OtpInfoCollectHandler> _otpInfoCollectHandler;
 
         public OtpPipelineFactory(IOtpHandlerPipeline<CheckBlockOtpHandler> checkBlockOtpHandler,
             IOtpHandlerPipeline<CheckBlockSendOtpHandler> checkBlockSendOtpHandler,
             IOtpHandlerPipeline<SendOtpHandler> sendOtpHandler,
             IOtpHandlerPipeline<SendOtpResultHandler> sucessSendOtpHandler,
             IOtpHandlerPipeline<VerifyOtpHandler> verifyOtpHandler,
-            IOtpHandlerPipeline<VerifyOtpResultHandler> failedVerifyOtpHandler)
+            IOtpHandlerPipeline<VerifyOtpResultHandler> failedVerifyOtpHandler,
+            IOtpHandlerPipeline<OtpInfoCollectHandler> otpInfoCollectHandler)
         {
             _checkBlockOtpHandler = checkBlockOtpHandler;
             _checkBlockSendOtpHandler = checkBlockSendOtpHandler;
@@ -26,21 +28,22 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             _sendOtpResultHandler = sucessSendOtpHandler;
             _verifyOtpHandler = verifyOtpHandler;
             _verifyOtpResultHandler = failedVerifyOtpHandler;
+            _otpInfoCollectHandler = otpInfoCollectHandler;
         }
 
         public IOtpHandlerPipeline CreatePipeline(OtpStep otpStep)
         {
-            IOtpHandlerPipeline startNode = null;
+            IOtpHandlerPipeline startNode = _otpInfoCollectHandler;
             if (otpStep == OtpStep.VerifyOtp)
             {
-                startNode = _checkBlockOtpHandler;
-                startNode.SetNext(_verifyOtpHandler)
+                startNode.SetNext(_checkBlockOtpHandler)
+                .SetNext(_verifyOtpHandler)
                 .SetNext(_verifyOtpResultHandler);
             }
             else if (otpStep == OtpStep.SendOtp)
             {
-                startNode = _checkBlockOtpHandler;
-                startNode.SetNext(_checkBlockSendOtpHandler)
+                startNode.SetNext(_checkBlockOtpHandler)
+                .SetNext(_checkBlockSendOtpHandler)
                 .SetNext(_sendOtpHandler)
                 .SetNext(_sendOtpResultHandler);
             }

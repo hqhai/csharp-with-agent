@@ -4,7 +4,6 @@ namespace Fsel.Identity.Application.Handlers.Implementations
 {
     using System.Globalization;
     using System.Threading.Tasks;
-    using Fsel.Common.ActionResults;
     using Fsel.Common.Caching;
     using Fsel.Common.Helpers;
     using Fsel.Identity.Application.Handlers.Interfaces;
@@ -38,20 +37,15 @@ namespace Fsel.Identity.Application.Handlers.Implementations
         {
             ArgumentNullException.ThrowIfNull(context, nameof(context));
             ArgumentNullException.ThrowIfNull(context.Step, nameof(context.Step));
+            ArgumentNullException.ThrowIfNull(context.Identity, nameof(context.Identity));
+            ArgumentNullException.ThrowIfNull(context.OtpCacheKey, nameof(context.OtpCacheKey));
+            ArgumentNullException.ThrowIfNull(context.OtpLifeTimeDuration, nameof(context.OtpLifeTimeDuration));
 
-            if (context.Step == OtpStep.SendOtp)
-            {
-                ArgumentNullException.ThrowIfNull(context.Identity, nameof(context.Identity));
-                ArgumentNullException.ThrowIfNull(context.OtpCacheKey, nameof(context.OtpCacheKey));
-                ArgumentNullException.ThrowIfNull(context.OtpLifeTimeDuration, nameof(context.OtpLifeTimeDuration));
-
-                var otp = GenerateHelper.GetOtp();
-                context.Otp = otp;
-                await _cache.SetAsync(context.OtpCacheKey, otp, context.OtpLifeTimeDuration);
-                await SendOtpAsync(context.OtpProviderType, otp, context.Identity, context.OtpLifeTimeDuration);
-                context.Status = true;
-            }
-
+            var otp = GenerateHelper.GetOtp();
+            context.Otp = otp;
+            await _cache.SetAsync(context.OtpCacheKey, otp, context.OtpLifeTimeDuration);
+            await SendOtpAsync(context.OtpProviderType, otp, context.Identity, context.OtpLifeTimeDuration);
+            context.Status = true;
             if (Next != null)
             {
                 await Next.Handle(context);

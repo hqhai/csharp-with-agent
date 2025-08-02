@@ -15,16 +15,16 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 
         public DateTime? ExpiredTime { get; set; }
 
+        public string? OtpProvider { get; set; }
+
         public long? RemainSecond
         {
             get
             {
-                var dateNow = DateTime.UtcNow;
-                if (ExpiredTime.HasValue && ExpiredTime.Value > dateNow)
+                if (ExpiredTime.HasValue)
                 {
-                    return (long)(ExpiredTime.Value - dateNow).TotalSeconds;
+                    return (long)(ExpiredTime.Value - DateTime.UtcNow).TotalSeconds;
                 }
-
                 return default;
             }
         }

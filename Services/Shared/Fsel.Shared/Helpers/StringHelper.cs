@@ -6,8 +6,11 @@ namespace Fsel.Shared.Helpers
     using System.ComponentModel;
     using System.Globalization;
     using System.Text;
+    using System.Text.Json;
     using System.Text.RegularExpressions;
+    using System.Web;
     using Fsel.Shared.Constants;
+    using Nest;
 
     public static class StringHelper
     {
@@ -480,5 +483,47 @@ namespace Fsel.Shared.Helpers
             }
             return input;
         }
+
+        public static T DecodeUrlBase64ToObject<T>(this string urlBase64)
+        {
+            if (string.IsNullOrWhiteSpace(urlBase64))
+            {
+                return default;
+            }
+
+            try
+            {
+                string decodedBase64 = HttpUtility.UrlDecode(urlBase64);
+                byte[] data = Convert.FromBase64String(decodedBase64);
+                string jsonString = Encoding.UTF8.GetString(data);
+
+                // Deserialize thành object
+                return JsonSerializer.Deserialize<T>(jsonString);
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        public static string EncodeObjectToUrlBase64(this object obj)
+        {
+            if (obj == null)
+            {
+                return string.Empty;
+            }
+
+            // Serialize object thành JSON
+            string jsonString = JsonSerializer.Serialize(obj);
+
+            // Chuyển sang base64
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonString);
+            string base64String = Convert.ToBase64String(bytes);
+
+            // Encode URL để đảm bảo an toàn
+            return HttpUtility.UrlEncode(base64String);
+        }
+
+
     }
 }

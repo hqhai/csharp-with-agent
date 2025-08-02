@@ -6,12 +6,12 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
 
     public interface IUserRegisterHandler
     {
-        Task<(bool, KeyValuePair<string, string>?)> TempRegisterUserAsync(UserRegisterModel userRegisterModel);
+        Task<bool> TempRegisterUserAsync(UserRegisterModel userRegisterModel);
 
-        Task<(bool, KeyValuePair<string, string>?)> SendRegisterOtpAsync(string phoneNumber, OtpProviderType otpProviderType = OtpProviderType.Sms);
+        Task<(bool, OtpSessionInfo)> SendRegisterOtpAsync(string phoneNumber, OtpProviderType otpProviderType = OtpProviderType.Sms);
 
-        Task<(bool, KeyValuePair<string, string>?)> VerifyUserAsync(string phoneNumber, string otpCode);
+        Task<(bool, OtpSessionInfo)> VerifyUserAsync(string phoneNumber, string otpCode);
 
-        Task<(bool, KeyValuePair<string, string>?)> CreateUserAsync(string phoneNumber, string otpCode);
+        Task<bool> CreateUserAsync(string phoneNumber, string otpCode);
     }
 }

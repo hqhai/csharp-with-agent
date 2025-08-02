@@ -2,6 +2,9 @@
 
 namespace Fsel.Identity.Application.Handlers.Interfaces
 {
+    using Fsel.Shared.Constants;
+    using Z.BulkOperations;
+
     public interface IOtpHandlerPipeline
     {
         Task Handle(OtpPipelineContext context);
@@ -35,6 +38,13 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
             Identity = identity;
             Purpose = purpose;
             Step = step;
+
+            OtpBlockDuration = OtpSetting.OtpBlockDuration;
+            OtpLifeTimeDuration = OtpSetting.OtpLifeTimeDuration;
+            GapSendDuration = OtpSetting.GapSendDuration;
+            SendOtpCountLifeTimeDuration = OtpSetting.SendOtpCountLifeTimeDuration;
+            MaxCountOtpSend = OtpSetting.MaxCountOtpSend;
+            MaxCountVerifyFail = OtpSetting.MaxCountVerifyFail;
         }
 
         public string Identity { get; }
@@ -46,14 +56,17 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
         public int? MaxCountOtpSend { get; set; }
 
         public TimeSpan? OtpBlockDuration { get; set; }
-        public TimeSpan? BlockSendOtpDuration { get; set; }
-        public TimeSpan? MinimumBetweenTwoSendsDuration { get; set; }
+        public TimeSpan? SendOtpCountLifeTimeDuration { get; set; }
+        public TimeSpan? GapSendDuration { get; set; }
         public TimeSpan OtpLifeTimeDuration { get; set; }
 
         public string? Otp { get; set; }
         public string? RequestOtp { get; set; }
         public bool Status { get; set; }
         public KeyValuePair<string, string>? ErrorMessage { get; set; }
+
+
+        public OtpSessionInfo OtpSessionInfo { get; set; } = new OtpSessionInfo();
 
         public string BlockedOtpCacheKey => $"{Identity}:{Purpose}:Block_Send_And_Verify_Otp";
         public string BlockedSendOtpCacheKey => $"{Identity}:{Purpose}:Otp_Send_Otp";
@@ -66,8 +79,7 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
     {
         Register,
         Login,
-        ForgotPassword,
-        ChangePhoneNumber
+        Forgot
     }
 
     public enum OtpProviderType
@@ -80,7 +92,18 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
     public enum OtpStep
     {
         SendOtp,
-        VerifyOtp
+        VerifyOtp,
+        CollectData
+    }
+
+    public enum FailType
+    {
+        Blocked,
+        BlockedResend,
+        GapResend,
+
+        Expired,
+        VerifyInvalid
     }
 
     public class SendOtpCountInfo
@@ -95,5 +118,29 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
         public int Count { get; set; }
         public DateTime LastFailedTime { get; set; }
         public DateTime StartTime { get; set; }
+    }
+
+
+    public class OtpSessionInfo
+    {
+        public bool OtpExpired { get; set; }
+        public bool IsOtpBlocked { get; set; }
+        public TimeSpan? WaitTimeDuration { get; set; }
+        public SendInfo? SendInfo { get; set; }
+        public VerifyInfo? VerifyInfo { get; set; }
+
+        public bool CanSendDirectly => SendInfo == null || (!SendInfo.IsBlockedByReachMaxSendCount && !SendInfo.IsBlockedByGap);
+    }
+
+    public class SendInfo
+    {
+        public bool IsBlockedByReachMaxSendCount { get; set; }
+        public bool IsBlockedByGap { get; set; }
+        public TimeSpan? WaitTimeDuration { get; set; }
+    }
+
+    public class VerifyInfo
+    {
+        public int VerifyFailCount { get; set; }
     }
 }

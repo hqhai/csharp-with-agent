@@ -2,10 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.Security.Claims;
+using System.Text.Json;
 using System.Transactions;
 using Fsel.Common.Constants;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
+using Fsel.Identity.Application.Handlers.Implementations;
 using Fsel.Identity.Application.Handlers.Interfaces;
 using Fsel.Identity.Authentication.Auth;
 using Fsel.Identity.Authentication.OpenId.Base;
@@ -15,6 +17,7 @@ using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.OpenId;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Events;
@@ -45,6 +48,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly IPlatformRepository _platformRepository;
         private readonly IUserRegisterHandler _userRegisterHandler;
         private readonly IForgotPasswordHandler _forgotPasswordHandler;
+        private readonly IOtpDataCollector _otpDataCollector;
         private readonly IUserRepository _userRepository;
         private readonly Core.Base.AuthContext _languageContext;
         private readonly IStringLocalizer _localizer;
@@ -63,7 +67,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             IStringLocalizer localizer,
             IPlatformRepository platformRepository,
             IUserRegisterHandler userRegisterHandler,
-            IForgotPasswordHandler forgotPasswordHandler)
+            IForgotPasswordHandler forgotPasswordHandler,
+            IOtpDataCollector otpDataCollector)
         {
             UserSession = userSession;
             _interaction = interaction;
@@ -79,20 +84,36 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             _platformRepository = platformRepository;
             _userRegisterHandler = userRegisterHandler;
             _forgotPasswordHandler = forgotPasswordHandler;
+            _otpDataCollector = otpDataCollector;
         }
 
         /// <summary>
         /// Verify otp for sample user login
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> VerifyOtp(string? identity, string? returnUrl, string? type)
+        public async Task<IActionResult> VerifyOtp(string? identity, string? returnUrl, string? type, string? otpInfo)
         {
+            var otpSessionInfo = otpInfo?.DecodeUrlBase64ToObject<OtpSessionInfo>();
+            otpSessionInfo ??= await _otpDataCollector.GetOtpSessionInfo(identity, type);
+            if (otpSessionInfo != null)
+            {
+                var verifyOtpModel = new VerifyOtpModel
+                {
+                    Type = type,
+                    Identity = identity,
+                    ReturnUrl = returnUrl,
+                };
+
+                SetDataForViewByOtpSessionIfo(otpSessionInfo, verifyOtpModel);
+                return View(verifyOtpModel);
+            }
+
             return View(new VerifyOtpModel
             {
                 Type = type,
                 Identity = identity,
                 ReturnUrl = returnUrl,
-                ExpiredTime = DateTime.UtcNow.Add(OtpSetting.MinimumBetweenTwoSendsDuration)
+                ExpiredTime = DateTime.UtcNow.Add(OtpSetting.GapSendDuration)
             });
         }
 
@@ -104,7 +125,15 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             if (!string.IsNullOrEmpty(button))
             {
-                await ResendOtp(request);
+                var otpSessionInfo = await ResendOtp(request);
+                if (otpSessionInfo != null)
+                {
+                    SetDataForViewByOtpSessionIfo(otpSessionInfo, request);
+                }
+                else
+                {
+                    request.ExpiredTime = DateTime.UtcNow.Add(OtpSetting.GapSendDuration);
+                }
             }
             else if (ModelState.IsValid)
             {
@@ -114,7 +143,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     {
                         ModelState.AddModelError(string.Empty, _localizer["i18n_OTP_cannot_be_empty"]);
                     }
-                    var (isSuccessfully, message) = await _userRegisterHandler.VerifyUserAsync(request.Identity ?? string.Empty, request.Otp);
+                    var (isSuccessfully, otpSessionInfo) = await _userRegisterHandler.VerifyUserAsync(request.Identity ?? string.Empty, request.Otp);
                     if (isSuccessfully)
                     {
                         await _userRegisterHandler.CreateUserAsync(request.Identity, request.Otp);
@@ -122,7 +151,16 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     }
                     else
                     {
-                        ModelState.AddModelError(message.Value.Key, message.Value.Value);
+                        if (otpSessionInfo.OtpExpired)
+                        {
+                            ViewData["OtpExpired"] = true;
+                            ModelState.AddModelError(string.Empty, $"Otp expired");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, $"Invalid otp");
+                        }
+                        SetDataForViewByOtpSessionIfo(otpSessionInfo, request);
                     }
                 }
                 else if (request.Type == nameof(Forgot))
@@ -134,15 +172,31 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                         ModelState.AddModelError(nameof(request.Identity), _localizer["i18n_error_email_or_phone_number"]);
                         return View(request);
                     }
-
-                    var token = await _forgotPasswordHandler.GetResetPasswordToken(identity);
-                    if (string.IsNullOrEmpty(token))
+                    var (isSuccessfully, otpSessionInfo) = await _forgotPasswordHandler.VerifyOtpAsync(request.Identity, request.Otp);
+                    if (isSuccessfully)
                     {
-                        ModelState.AddModelError(string.Empty, _localizer["i18n_error_generate_token"]);
+                        var token = await _forgotPasswordHandler.GetResetPasswordToken(identity);
+                        if (string.IsNullOrEmpty(token))
+                        {
+                            ModelState.AddModelError(string.Empty, _localizer["i18n_error_generate_token"]);
+                        }
+                        else
+                        {
+                            return RedirectToAction(nameof(ResetPassword), new { Identity = identity, Token = token, ReturnUrl = request.ReturnUrl });
+                        }
                     }
                     else
                     {
-                        return RedirectToAction(nameof(ForgotPassword), new { Identity = identity, Token = token, ReturnUrl = request.ReturnUrl });
+                        if (otpSessionInfo.OtpExpired)
+                        {
+                            ViewData["OtpExpired"] = true;
+                            ModelState.AddModelError(string.Empty, $"Otp expired");
+                        }
+                        else
+                        {
+                            ModelState.AddModelError(string.Empty, $"Invalid otp");
+                        }
+                        SetDataForViewByOtpSessionIfo(otpSessionInfo, request);
                     }
                 }
             }
@@ -150,32 +204,81 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             return View(request);
         }
 
-        private async Task ResendOtp(VerifyOtpModel? request)
+        private async Task<OtpSessionInfo> ResendOtp(VerifyOtpModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
             ArgumentNullException.ThrowIfNull(request.Identity);
 
+            var otpProvider = OtpProviderType.Zalo;
+
+            if (Equals(request.OtpProvider, OtpProviderType.Sms.ToString()))
+            {
+                otpProvider = OtpProviderType.Sms;
+            }
+            else if (Equals(request.OtpProvider, OtpProviderType.Email.ToString()))
+            {
+                otpProvider = OtpProviderType.Email;
+            }
+
             if (request.Type == nameof(Register))
             {
                 var userRegister = GetFromTempData(nameof(UserRegisterModel))?.ToString().Deserialize<UserRegisterModel>();
-                var (isSuccess, message) = await _userRegisterHandler.SendRegisterOtpAsync(request.Identity, OtpProviderType.Zalo);
-                if (!isSuccess)
-                {
-                    ModelState.AddModelError(message.Value.Key, message.Value.Value);
-                }
+                var (isSuccess, otpSessionInfo) = await _userRegisterHandler.SendRegisterOtpAsync(request.Identity, otpProvider);
+                return otpSessionInfo;
             }
             else
             {
                 var forgotModel = GetFromTempData(nameof(ForgotModel))?.ToString().Deserialize<ForgotModel>();
-                var (isSuccess, message) = await _forgotPasswordHandler.SendOtpAsync(request.Identity);
-                if (!isSuccess)
-                {
-                    ModelState.AddModelError(message.Value.Key, message.Value.Value);
-                }
+                var (isSuccess, otpSessionInfo) = await _forgotPasswordHandler.SendOtpAsync(request.Identity, otpProvider);
+                return otpSessionInfo;
             }
         }
 
-        public IActionResult ForgotPassword(string token, string identity, string? returnUrl)
+        public IActionResult Forgot(string? returnUrl)
+        {
+            var vm = new ForgotModel
+            {
+                ReturnUrl = returnUrl
+            };
+            return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Forgot([FromForm] ForgotModel? request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+
+            if (ModelState.IsValid)
+            {
+                if (!request.Identity.IsValidEmail() && !request.Identity.IsValidPhoneNumber())
+                {
+                    ModelState.AddModelError(nameof(request.Identity), _localizer["i18n_error_email_or_phone_number"]);
+                    return View(request);
+                }
+
+                var user = await _userRepository.GetUserByIdentity(request.Identity);
+
+                if (user == null)
+                {
+                    ModelState.AddModelError(nameof(request.Identity), _localizer["i18n_Email_does_not_exist_in_the_system"]);
+                    return View(request);
+                }
+
+                var result = await _forgotPasswordHandler.SendOtpAsync(request.Identity, request.Identity.IsValidEmail() ? OtpProviderType.Email : OtpProviderType.Zalo);
+
+                if (!result.Item1)
+                {
+                    var otpInfo = result.Item2.EncodeObjectToUrlBase64();
+                    return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Forgot), Identity = request.Identity, otpInfo });
+                }
+                return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Forgot), Identity = request.Identity });
+            }
+
+            return View(request);
+        }
+
+        public IActionResult ResetPassword(string token, string identity, string? returnUrl)
         {
             var viewModel = new ForgotPasswordModel
             {
@@ -188,7 +291,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordModel? request)
+        public async Task<IActionResult> ResetPassword(ForgotPasswordModel? request)
         {
             ArgumentNullException.ThrowIfNull(request);
             if (ModelState.IsValid)
@@ -225,49 +328,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             return View(request);
         }
 
-        public IActionResult Forgot(string? returnUrl)
-        {
-            var vm = new ForgotModel
-            {
-                ReturnUrl = returnUrl
-            };
-            return View(vm);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Forgot([FromForm] ForgotModel? request)
-        {
-            ArgumentNullException.ThrowIfNull(request);
-
-            if (ModelState.IsValid)
-            {
-                if (!request.Identity.IsValidEmail() && !request.Identity.IsValidPhoneNumber())
-                {
-                    ModelState.AddModelError(nameof(request.Identity), _localizer["i18n_error_email_or_phone_number"]);
-                    return View(request);
-                }
-
-                var user = await _userRepository.GetUserByIdentity(request.Identity);
-
-                if (user == null)
-                {
-                    ModelState.AddModelError(nameof(request.Identity), _localizer["i18n_Email_does_not_exist_in_the_system"]);
-                    return View(request);
-                }
-
-                var result = await _forgotPasswordHandler.SendOtpAsync(request.Identity, request.Identity.IsValidEmail() ? OtpProviderType.Email : OtpProviderType.Sms);
-                if (!result.Item1)
-                {
-                    ModelState.AddModelError(result.Item2.Value.Key, result.Item2.Value.Value);
-                    return View(request);
-                }
-                return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Forgot), Identity = request.Identity });
-            }
-
-            return View(request);
-        }
-
         public IActionResult Register(string? returnUrl)
         {
             TempData[nameof(VerifyOtp)] = string.Empty;
@@ -297,19 +357,15 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             TempData[nameof(UserRegisterModel)] = request.Serialize();
             if (ModelState.IsValid)
             {
-                var (isRegisterSuccess, message) = await _userRegisterHandler.TempRegisterUserAsync(request);
+                var isRegisterSuccess = await _userRegisterHandler.TempRegisterUserAsync(request);
                 if (isRegisterSuccess)
                 {
                     var (isSendOtpSuccess, sendOtpMessage) = await _userRegisterHandler.SendRegisterOtpAsync(request.PhoneNumber);
-                    if (!isSendOtpSuccess)
-                    {
-                        ModelState.AddModelError(sendOtpMessage.Value.Key, sendOtpMessage.Value.Value);
-                    }
                     return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Register), Identity = request.PhoneNumber });
                 }
                 else
                 {
-                    ModelState.AddModelError(message.Value.Key, message.Value.Value);
+                    ModelState.AddModelError(string.Empty, "Đã tồn tại tài khoản");
                 }
             }
 
@@ -900,6 +956,29 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             }
 
             return vm;
+        }
+
+
+        private void SetDataForViewByOtpSessionIfo(OtpSessionInfo otpSessionInfo, VerifyOtpModel verifyOtpModel)
+        {
+            if (otpSessionInfo != null)
+            {
+                if (otpSessionInfo.IsOtpBlocked)
+                {
+                    ViewData["IsOtpBlocked"] = true;
+                    verifyOtpModel.ExpiredTime = DateTime.UtcNow.Add(otpSessionInfo.WaitTimeDuration.Value);
+                    return;
+                }
+                else if (otpSessionInfo.CanSendDirectly)
+                {
+                    verifyOtpModel.ExpiredTime = default(DateTime);
+                    return;
+                }
+                else
+                {
+                    verifyOtpModel.ExpiredTime = DateTime.UtcNow.Add(otpSessionInfo.SendInfo.WaitTimeDuration.Value);
+                }
+            }
         }
     }
 }

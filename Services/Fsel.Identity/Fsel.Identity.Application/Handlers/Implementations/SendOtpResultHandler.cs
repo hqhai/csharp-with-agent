@@ -18,38 +18,47 @@ namespace Fsel.Identity.Application.Handlers.Implementations
         public override async Task Handle(OtpPipelineContext context)
         {
             ArgumentNullException.ThrowIfNull(context, nameof(context));
-            if (context.Step == OtpStep.SendOtp && context.Status)
+            if (context.Status)
             {
                 ArgumentNullException.ThrowIfNull(context.CountSendOtpCacheKey, nameof(context.CountSendOtpCacheKey));
-                ArgumentNullException.ThrowIfNull(context.BlockSendOtpDuration, nameof(context.BlockSendOtpDuration));
+                ArgumentNullException.ThrowIfNull(context.SendOtpCountLifeTimeDuration, nameof(context.SendOtpCountLifeTimeDuration));
 
-                var durationTimeToLimit = context.BlockSendOtpDuration;
                 var sendCountInfo = await _sendOtpCountCache.GetAsync(context.CountSendOtpCacheKey);
                 if (sendCountInfo == null)
                 {
-                    sendCountInfo = new SendOtpCountInfo { Count = 1, StartTime = DateTime.UtcNow };
-                    sendCountInfo.LastSendTime = sendCountInfo.StartTime;
+                    await CreateSendCountInfo(context.CountSendOtpCacheKey, context.SendOtpCountLifeTimeDuration.Value);
                 }
                 else
                 {
-                    var elapsedTime = DateTime.UtcNow - sendCountInfo.StartTime;
-                    if (elapsedTime > context.BlockSendOtpDuration)
-                    {
-                        // reset the count if the duration has passed
-                        sendCountInfo.Count = 1;
-                        sendCountInfo.StartTime = DateTime.UtcNow;
-                        sendCountInfo.LastSendTime = sendCountInfo.StartTime;
-                    }
-                    else
-                    {
-                        sendCountInfo.Count++;
-                        durationTimeToLimit -= elapsedTime;
-                        sendCountInfo.LastSendTime = DateTime.UtcNow;
-                    }
+                    await UpdateSendCountInfo(sendCountInfo, context.CountSendOtpCacheKey, context.SendOtpCountLifeTimeDuration.Value);
                 }
-
-                await _sendOtpCountCache.SetAsync(context.CountSendOtpCacheKey, sendCountInfo, durationTimeToLimit.Value);
             }
+        }
+
+        private async Task CreateSendCountInfo(string key, TimeSpan lifeTime)
+        {
+            var sendCountInfo = new SendOtpCountInfo { Count = 1, StartTime = DateTime.UtcNow };
+            sendCountInfo.LastSendTime = sendCountInfo.StartTime;
+            await _sendOtpCountCache.SetAsync(key, sendCountInfo, lifeTime);
+        }
+
+        private async Task UpdateSendCountInfo(SendOtpCountInfo sendCountInfo, string key, TimeSpan lifeTime)
+        {
+            var elapsedTime = DateTime.UtcNow - sendCountInfo.StartTime;
+            if (elapsedTime > lifeTime)
+            {
+                sendCountInfo.Count = 1;
+                sendCountInfo.StartTime = DateTime.UtcNow;
+                sendCountInfo.LastSendTime = sendCountInfo.StartTime;
+            }
+            else
+            {
+                sendCountInfo.Count++;
+                lifeTime -= elapsedTime;
+                sendCountInfo.LastSendTime = DateTime.UtcNow;
+            }
+
+            await _sendOtpCountCache.SetAsync(key, sendCountInfo, lifeTime);
         }
     }
 }

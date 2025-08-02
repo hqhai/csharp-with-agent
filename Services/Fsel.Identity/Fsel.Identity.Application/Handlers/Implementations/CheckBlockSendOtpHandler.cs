@@ -2,67 +2,72 @@
 
 namespace Fsel.Identity.Application.Handlers.Implementations
 {
+    using System;
     using System.Threading.Tasks;
     using Fsel.Common.Caching;
     using Fsel.Identity.Application.Handlers.Interfaces;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
-    using Fsel.Shared.Helpers;
-    using Microsoft.Extensions.Localization;
 
     public class CheckBlockSendOtpHandler : BaseOtpHandlerPipeline, IOtpHandlerPipeline<CheckBlockSendOtpHandler>
     {
         private readonly ICacheService<SendOtpCountInfo> _sendOtpCountCache;
-        private readonly IStringLocalizer _stringLocalizer;
 
-        public CheckBlockSendOtpHandler(ICacheService<SendOtpCountInfo> sendOtpCountCache, IStringLocalizer stringLocalizer)
+        public CheckBlockSendOtpHandler(ICacheService<SendOtpCountInfo> sendOtpCountCache)
         {
             _sendOtpCountCache = sendOtpCountCache;
-            _stringLocalizer = stringLocalizer;
         }
 
         public override async Task Handle(OtpPipelineContext context)
         {
             ArgumentNullException.ThrowIfNull(context, nameof(context));
             ArgumentNullException.ThrowIfNull(context.Step, nameof(context.Step));
-            ArgumentNullException.ThrowIfNull(context.MinimumBetweenTwoSendsDuration, nameof(context.MinimumBetweenTwoSendsDuration));
-            if (context.Step == OtpStep.SendOtp)
+            ArgumentNullException.ThrowIfNull(context.GapSendDuration, nameof(context.GapSendDuration));
+            ArgumentNullException.ThrowIfNull(context.SendOtpCountLifeTimeDuration, nameof(context.SendOtpCountLifeTimeDuration));
+            ArgumentNullException.ThrowIfNull(context.MaxCountOtpSend, nameof(context.MaxCountOtpSend));
+
+            var sendCountInfo = await _sendOtpCountCache.GetAsync(context.CountSendOtpCacheKey);
+            if (sendCountInfo != null)
             {
-                var sendCountInfo = await _sendOtpCountCache.GetAsync(context.CountSendOtpCacheKey);
-                if (sendCountInfo != null)
+                if (IsExpiredSendCounter(sendCountInfo.StartTime, context.SendOtpCountLifeTimeDuration.Value))
                 {
-                    if (DateTime.UtcNow.Subtract(sendCountInfo.StartTime) > context.BlockSendOtpDuration)
-                    {
-                        await _sendOtpCountCache.RemoveAsync(context.CountSendOtpCacheKey);
-                    }
-                    else if (sendCountInfo.Count >= context.MaxCountOtpSend)
-                    {
-                        context.Status = false;
-                        var remainingTime = context.BlockSendOtpDuration.Value - DateTime.UtcNow.Subtract(sendCountInfo.StartTime);
-
-                        context.ErrorMessage = new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.OtpTryResendAfterMinutes),
-                        _stringLocalizer[nameof(EnumAuthUserErrorCode.OtpTryResendAfterMinutes)]
-                            .Value.InjectParam(remainingTime.Minutes.ToString()));
-                        return;
-                    }
-                    else if (DateTime.UtcNow.Subtract(sendCountInfo.LastSendTime) <= context.MinimumBetweenTwoSendsDuration.Value)
-                    {
-                        context.Status = false;
-                        context.ErrorMessage = new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.OtpTryResendAfterSeconds),
-                        _stringLocalizer[nameof(EnumAuthUserErrorCode.OtpTryResendAfterSeconds)]
-                            .Value.InjectParam(context.MinimumBetweenTwoSendsDuration.Value.Seconds.ToString()));
-                        return;
-                    }
-
-                    if (context.OtpProviderType != OtpProviderType.Email)
-                    {
-                        context.OtpProviderType = OtpProviderType.Zalo;
-                    }
+                    await _sendOtpCountCache.RemoveAsync(context.CountSendOtpCacheKey);
+                }
+                else if (HasReachedMaxSendCount(sendCountInfo.Count, context.MaxCountOtpSend.Value)
+                    || GetGapSendDuration(sendCountInfo.LastSendTime, context.GapSendDuration.Value).HasValue)
+                {
+                    context.Status = false;
+                    return;
                 }
             }
+
             if (Next != null)
             {
                 await Next.Handle(context);
             }
+        }
+
+        public static TimeSpan? GetGapSendDuration(DateTime lastSentTime, TimeSpan gapDuration)
+        {
+            var durationFromLastSent = DateTime.UtcNow.Subtract(lastSentTime);
+            var remainDuration = gapDuration - durationFromLastSent;
+            if (remainDuration > TimeSpan.Zero)
+            {
+                return remainDuration;
+            }
+
+            return null;
+        }
+
+        public static bool HasReachedMaxSendCount(int currentCount, int maxCount)
+        {
+            return currentCount >= maxCount;
+        }
+
+        public static bool IsExpiredSendCounter(DateTime createdDateCounter, TimeSpan durationLifeTime)
+        {
+            var durationFromCreated = DateTime.UtcNow.Subtract(createdDateCounter);
+            var remainToExpiredDuration = durationLifeTime - durationFromCreated;
+
+            return remainToExpiredDuration < TimeSpan.Zero;
         }
     }
 }

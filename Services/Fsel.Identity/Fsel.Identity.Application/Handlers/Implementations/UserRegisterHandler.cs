@@ -7,13 +7,10 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using Fsel.Common.Caching;
     using Fsel.Identity.Application.Handlers.Interfaces;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.OpenId;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Localization;
 
     public class UserRegisterHandler : IUserRegisterHandler
     {
@@ -22,7 +19,6 @@ namespace Fsel.Identity.Application.Handlers.Implementations
         private readonly IOtpPipelineFactory _otpPipelineFactory;
         private readonly Microsoft.AspNetCore.Identity.UserManager<User> _userManager;
         private readonly IUserOtpCodeRepository _userOtpRepository;
-        private readonly IStringLocalizer _localizer;
         private readonly IMapper _mapper;
 
         public UserRegisterHandler(ICacheService<UserRegisterModel> cacheService,
@@ -30,7 +26,6 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             IOtpPipelineFactory otpPipelineFactory,
             Microsoft.AspNetCore.Identity.UserManager<User> userManager,
             IUserOtpCodeRepository userOtpRepository,
-            IStringLocalizer localizer,
             IMapper mapper)
         {
             _cacheService = cacheService;
@@ -38,11 +33,10 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             _otpPipelineFactory = otpPipelineFactory;
             _userManager = userManager;
             _userOtpRepository = userOtpRepository;
-            _localizer = localizer;
             _mapper = mapper;
         }
 
-        public async Task<(bool, KeyValuePair<string, string>?)> TempRegisterUserAsync(UserRegisterModel userRegisterModel)
+        public async Task<bool> TempRegisterUserAsync(UserRegisterModel userRegisterModel)
         {
             ArgumentNullException.ThrowIfNull(userRegisterModel, nameof(userRegisterModel));
             ArgumentNullException.ThrowIfNull(userRegisterModel.PhoneNumber, nameof(userRegisterModel.PhoneNumber));
@@ -52,17 +46,16 @@ namespace Fsel.Identity.Application.Handlers.Implementations
 
             if (isExist)
             {
-                return (false, new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber),
-                    _localizer[nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber)]));
+                return false;
             }
 
             var cacheKey = GetKeyToCacheRegisterInfo(userRegisterModel.PhoneNumber);
             await _cacheService.SetAsync(cacheKey, userRegisterModel, TimeSpan.FromMinutes(30));
 
-            return (true, default);
+            return true;
         }
 
-        public async Task<(bool, KeyValuePair<string, string>?)> SendRegisterOtpAsync(string phoneNumber, OtpProviderType otpProviderType = OtpProviderType.Sms)
+        public async Task<(bool, OtpSessionInfo)> SendRegisterOtpAsync(string phoneNumber, OtpProviderType otpProviderType = OtpProviderType.Zalo)
         {
             var sendOtpPipeline = _otpPipelineFactory.CreatePipeline(OtpStep.SendOtp);
             var sendOtpContext = new OtpPipelineContext(
@@ -70,23 +63,13 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 OtpPurpose.Register,
                 OtpStep.SendOtp)
             {
-                OtpProviderType = otpProviderType,
-                OtpBlockDuration = OtpSetting.OtpBlockDuration,
-                OtpLifeTimeDuration = OtpSetting.OtpLifeTimeDuration,
-                MinimumBetweenTwoSendsDuration = OtpSetting.MinimumBetweenTwoSendsDuration,
-                BlockSendOtpDuration = OtpSetting.BlockSendOtpDuration,
-                MaxCountOtpSend = OtpSetting.MaxCountOtpSend,
-                MaxCountVerifyFail = OtpSetting.MaxCountVerifyFail,
+                OtpProviderType = otpProviderType
             };
             await sendOtpPipeline.Handle(sendOtpContext);
-            if (!sendOtpContext.Status)
-            {
-                return (false, sendOtpContext.ErrorMessage);
-            }
-            return (true, default);
+            return (sendOtpContext.Status, sendOtpContext.OtpSessionInfo);
         }
 
-        public async Task<(bool, KeyValuePair<string, string>?)> VerifyUserAsync(string phoneNumber, string otpCode)
+        public async Task<(bool, OtpSessionInfo)> VerifyUserAsync(string phoneNumber, string otpCode)
         {
             var sendOtpPipeline = _otpPipelineFactory.CreatePipeline(OtpStep.VerifyOtp);
             var sendOtpContext = new OtpPipelineContext(
@@ -94,30 +77,19 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 OtpPurpose.Register,
                 OtpStep.VerifyOtp)
             {
-                OtpBlockDuration = OtpSetting.OtpBlockDuration,
-                OtpLifeTimeDuration = OtpSetting.OtpLifeTimeDuration,
-                MinimumBetweenTwoSendsDuration = OtpSetting.MinimumBetweenTwoSendsDuration,
-                BlockSendOtpDuration = OtpSetting.BlockSendOtpDuration,
-                MaxCountOtpSend = OtpSetting.MaxCountOtpSend,
-                MaxCountVerifyFail = OtpSetting.MaxCountVerifyFail,
-                RequestOtp = otpCode,
+                RequestOtp = otpCode
             };
             await sendOtpPipeline.Handle(sendOtpContext);
-            if (!sendOtpContext.Status)
-            {
-                return (false, sendOtpContext.ErrorMessage);
-            }
-            return (true, default);
+            return (sendOtpContext.Status, sendOtpContext.OtpSessionInfo);
         }
 
-        public async Task<(bool, KeyValuePair<string, string>?)> CreateUserAsync(string phoneNumber, string otp)
+        public async Task<bool> CreateUserAsync(string phoneNumber, string otp)
         {
             var cacheKey = GetKeyToCacheRegisterInfo(phoneNumber);
             var cachedRegisterInfo = await _cacheService.GetAsync(cacheKey);
             if (cachedRegisterInfo == null)
             {
-                return (false, new KeyValuePair<string, string>(nameof(EnumAuthUserErrorCode.RegisterExpired),
-                    _localizer[nameof(EnumAuthUserErrorCode.RegisterExpired)]));
+                return false;
             }
 
             var user = _mapper.Map<User>(cachedRegisterInfo);
@@ -139,7 +111,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             _userOtpRepository.Add(userOtpCode);
             await _userOtpRepository.UnitOfWork.SaveChangesAsync();
 
-            return (true, default);
+            return true;
         }
 
         private static string GetKeyToCacheRegisterInfo(string indentity)

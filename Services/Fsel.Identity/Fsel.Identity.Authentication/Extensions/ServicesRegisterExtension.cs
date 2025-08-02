@@ -32,6 +32,7 @@ namespace Fsel.Identity.Authentication.Extensions
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.EntityFrameworkCore;
+    using Refit;
     using static IdentityServer4.IdentityServerConstants;
 
     public static class ServicesRegisterExtension
@@ -47,6 +48,8 @@ namespace Fsel.Identity.Authentication.Extensions
             builder.Services.AddScoped<IOtpHandlerPipeline<SendOtpResultHandler>, SendOtpResultHandler>();
             builder.Services.AddScoped<IOtpHandlerPipeline<VerifyOtpHandler>, VerifyOtpHandler>();
             builder.Services.AddScoped<IOtpHandlerPipeline<VerifyOtpResultHandler>, VerifyOtpResultHandler>();
+            builder.Services.AddScoped<IOtpHandlerPipeline<OtpInfoCollectHandler>, OtpInfoCollectHandler>();
+            builder.Services.AddScoped<IOtpDataCollector, OtpInfoCollectHandler>();
             builder.Services.AddScoped<IOtpPipelineFactory, OtpPipelineFactory>();
             return builder;
         }
@@ -103,13 +106,17 @@ namespace Fsel.Identity.Authentication.Extensions
         public static WebApplicationBuilder AddExternalServices(this WebApplicationBuilder builder, AppSetting appSetting)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
             builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
             builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
             builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
             builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
             builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
-
+            builder.Services.AddRefitClient<ISenderService>()
+            .ConfigureHttpClient(httpClient =>
+            {
+                httpClient.BaseAddress = new Uri(appSetting?.Services?.SenderApiUrl);
+                httpClient.Timeout = TimeSpan.FromSeconds(3);
+            });
             return builder;
         }
 
