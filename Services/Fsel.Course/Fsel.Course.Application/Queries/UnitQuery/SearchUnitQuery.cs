@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -92,6 +93,21 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     lessonTeacherQueryable.Where(x => x.LevelId == request.CourseLevel);
                 }
 
+                request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
+                if (!string.IsNullOrEmpty(request.Keyword))
+                {
+                    if (Guid.TryParse(request.Keyword, out var guid))
+                    {
+                        lessonTeacherQueryable = lessonTeacherQueryable.Where(m => m.Id == guid);
+                    }
+                    else
+                    {
+                        var unitCodeQuery = lessonTeacherQueryable.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                        var unitNameQuery = lessonTeacherQueryable.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+                        lessonTeacherQueryable = unitCodeQuery.Union(unitNameQuery);
+                    }
+                }
+
                 unitQuery = lessonTeacherQueryable.Select(unit => new UnitSearchModel
                 {
                     Id = unit.Id,
@@ -131,6 +147,19 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     .Include(x => x.Program)
                     .Include(x => x.UnitModules.Where(m => m.UnitConfigType == Domain.Enums.EnumUnitConfigType.Lesson).Where(y => !y.IsDeleted));
 
+                if (!string.IsNullOrEmpty(request.Keyword))
+                {
+                    if (Guid.TryParse(request.Keyword, out var guid))
+                    {
+                        filteredQuery = filteredQuery.Where(m => m.Id == guid);
+                    }
+                    else
+                    {
+                        var unitCodeQuery = filteredQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                        var unitNameQuery = filteredQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+                        filteredQuery = unitCodeQuery.Union(unitNameQuery);
+                    }
+                }
                 unitQuery = filteredQuery.Select(unit => new UnitSearchModel
                 {
                     Id = unit.Id,
