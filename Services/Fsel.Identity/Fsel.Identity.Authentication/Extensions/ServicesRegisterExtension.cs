@@ -115,7 +115,7 @@ namespace Fsel.Identity.Authentication.Extensions
             .ConfigureHttpClient(httpClient =>
             {
                 httpClient.BaseAddress = new Uri(appSetting?.Services?.SenderApiUrl);
-                httpClient.Timeout = TimeSpan.FromSeconds(3);
+                httpClient.Timeout = TimeSpan.FromSeconds(10);
             });
             return builder;
         }
