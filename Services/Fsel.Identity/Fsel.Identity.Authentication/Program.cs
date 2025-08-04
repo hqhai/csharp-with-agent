@@ -48,8 +48,7 @@ builder.AddDbContexts<UserDbContext, User, Role, UserClaimEntity, UserRole, User
 #region AddOpenIdServices
 
 builder.AddConfigureIdentityOptions();
-builder.AddTenantMasterDbContexts<DataProtectionKeyContext>();
-builder.Services.AddDataProtection().SetApplicationName(nameof(DataProtectionKeyContext)).PersistKeysToDbContext<DataProtectionKeyContext>();
+builder.Services.AddDataProtection().PersistKeysToDbContext<UserDbContext>();
 builder.Services.AddAntiforgery();
 
 builder.AddIdentity<User, Role, UserDbContext>().AddTotpProvider();

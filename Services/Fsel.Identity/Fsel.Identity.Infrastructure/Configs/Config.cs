@@ -79,8 +79,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://localhost:4400/auth/login",
                         "https://lms-dev.fsel.edu.vn/auth/login",
                         "http://lms-dev.fsel.edu.vn/auth/login",
-                        "https://lms-dev-tenant-1.fsel.edu.vn/login",
-                        "http://lms-dev-tenant-1.fsel.edu.vn/login"
+                        "https://lms-dev-tenant-1.fsel.edu.vn/auth/login",
+                        "http://lms-dev-tenant-1.fsel.edu.vn/auth/login"
                     },
 
                     AllowOfflineAccess = true,
