@@ -2,6 +2,8 @@
 @model Fsel.Identity.Domain.Models.CommandModels.OpenId.VerifyOtpModel
 @using Fsel.Common.Helpers
 @using Fsel.Identity.Authentication.OpenId.Account;
+@using Fsel.Shared.Constants
+@using Fsel.Shared.Helpers
 
 @{
     Layout = "~/Views/Shared/_LayoutMain.cshtml";
@@ -10,10 +12,12 @@
     var provider = ViewData["Provider"] as string;
     var isBlocked = ViewData["IsOtpBlocked"] as bool?;
     var isOtpExpired = ViewData["OtpExpired"] as bool?;
-    var sentMessage = $"Một mã xác thực gồm 5 chữ số đã được gửi tới {provider}. Vui lòng nhập mã tại đây";
-    if (string.IsNullOrEmpty(provider))
+    
+    var sentMessage = Localizer["i18n_otp_sent_to"].ToString().InjectParam(string.Empty);
+    if (!string.IsNullOrEmpty(provider))
     {
-        sentMessage = $"Một mã xác thực gồm 5 chữ số đã được gửi. Vui lòng nhập mã tại đây";
+        
+        sentMessage = Localizer["i18n_otp_sent_to"].ToString().InjectParam($"{provider} {Model.Identity}");
     }
 }
 
@@ -28,7 +32,7 @@
         </div>
 
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
-        <h1 class="title">Xác minh tài khoản</h1>
+        <h1 class="title">@Localizer["i18n_verify_account"]</h1>
 
         <form id="form-VerifyOtp" asp-route="VerifyOtp">  
             @Html.Raw($"<p class='sub-title sub-verify-otp''>{sentMessage}</p>")
@@ -100,27 +104,24 @@
                 
             </div>
             @{
+                <div class="hidden" id="countTimeInSecond" data-value="@Localizer["i18n_otp_wait_in_second"]"></div>
+                <div class="hidden" id="isOtpExpired" data-value="@isOtpExpired"></div>
+                <div class="hidden" id="maxNumberOfVerify" data-value="@OtpSetting.MaxCountVerifyFail.ToString()"></div>
                 if (isBlocked.HasValue && isBlocked.Value)
                 {
-                    <div class="hidden" id="isBlocked" data-value="true"></div>
-                    <div class="hidden" id="isOtpExpired" data-value="@isOtpExpired"></div>
-                    <div class="hidden" id="countTimeInSecond" data-value="Bạn đang bị block và cần chờ trong {{0}} giây</a>"></div>
-                    <div class="hidden" id="countTimeInMinutesSecond" data-value="Bạn đang bị block và cần chờ trong {{0}} phút {{1}} giây"></div>
+                    <div class="hidden" id="countTimeInMinutesSecond" data-value="@Localizer["i18n_otp_locked"]"></div>
+                    <div class="hidden" id="isBlocked" data-value="true"></div> 
                     <div class="resend-otp">
                         <div class="resend-otp-1 @(Model.RemainSecond.HasValue ? "" : "hidden")" data-value="@Localizer["i18n_send_otp_after"]">
                             @{
                                 if (Model.RemainSecond.HasValue)
                                 {
-                                    if (Model.RemainSecond.Value > 60)
-                                    {
-                                        Html.Raw($"<a>Bạn đang bị block và cần chờ trong {{0}} phút {{1}} giây</a>"
-                                        .Replace("{{0}}", Math.Floor((double)Model.RemainSecond.Value / 60).ToString()
-                                        .Replace("{{1}}", (Model.RemainSecond.Value % 60).ToString())));
-                                    }
-                                    else
-                                    {
-                                        Html.Raw($"<a>Bạn đang bị block và cần chờ trong {{0}} giây</a>".Replace("{{0}}", (Model.RemainSecond.Value).ToString()));
-                                    }
+                                    var waitTime = Model.RemainSecond.Value > 60 ? Math.Floor((double)Model.RemainSecond.Value / 60).ToString() : "1";
+                                    Html.Raw($"<a>{Localizer["i18n_otp_locked"].ToString().InjectParam(OtpSetting.MaxCountVerifyFail.ToString(), waitTime)}</a>");
+                                }
+                                else
+                                {
+                                    Html.Raw($"<a>{Localizer["i18n_otp_locked"].ToString().InjectParam(OtpSetting.MaxCountVerifyFail.ToString(), OtpSetting.OtpBlockDuration.ToString())}</a>");
                                 }
                             }
                         </div>
@@ -141,10 +142,9 @@
                 }
                 else
                 {
+
+                    <div class="hidden" id="countTimeInMinutesSecond" data-value="@Localizer["i18n_otp_wait_in_minute_and_second"]"></div>
                     <div class="hidden" id="isBlocked" data-value="false"></div>
-                    <div class="hidden" id="isOtpExpired" data-value="@isOtpExpired"></div>
-                    <div class="hidden" id="countTimeInSecond" data-value="Bạn cần chờ trong {{0}} giây"></div>
-                    <div class="hidden" id="countTimeInMinutesSecond" data-value="Bạn cần chờ trong {{0}} phút {{1}} giây"></div>
                     <div class="resend-otp">
                         <div class="resend-otp-1 @(Model.RemainSecond.HasValue ? "" : "hidden")" data-value="@Localizer["i18n_send_otp_after"]">
                             @{
@@ -152,13 +152,12 @@
                                 {
                                     if (Model.RemainSecond.Value > 60)
                                     {
-                                        Html.Raw($"<a>Bạn cần chờ trong {{0}} phút {{1}} giây</a>"
-                                        .Replace("{{0}}", Math.Floor((double)Model.RemainSecond.Value / 60).ToString()
-                                        .Replace("{{1}}", (Model.RemainSecond.Value % 60).ToString())));
+                                        Html.Raw($"<a>{Localizer["i18n_otp_wait_in_minute_and_second"].ToString()}</a>"
+                                        .InjectParam(Math.Floor((double)Model.RemainSecond.Value / 60).ToString(), (Model.RemainSecond.Value % 60).ToString()));
                                     }
                                     else
                                     {
-                                        Html.Raw($"<a>Bạn cần chờ trong {{0}} giây</a>".Replace("{{0}}", (Model.RemainSecond.Value).ToString()));
+                                        Html.Raw($"<a>{Localizer["i18n_otp_wait_in_second"].ToString()}</a>".InjectParam(Model.RemainSecond.Value.ToString()).ToString());
                                     }
                                 }
                             }
@@ -190,9 +189,9 @@
         </form>
         <div class="text-footer">
             <a href="@Url.Action("Forgot", "Account", new { Model.ReturnUrl })"</a>
-                Đổi địa chỉ email/số điện thoại
+            @Localizer["i18n_change_email_or_phone_number"]
         </div>
-        <div class="text-footer">Bạn không nhận được mã xác thực?</div>
+        <div class="text-footer">@Localizer["i18n_did_not_a_code"]</div>
     </div>
 
     @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })

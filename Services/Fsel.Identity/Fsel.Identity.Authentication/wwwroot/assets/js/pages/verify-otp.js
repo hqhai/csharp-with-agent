@@ -24,36 +24,37 @@
   currentUrl.searchParams.delete('otpInfo');
   window.history.replaceState({}, document.title, currentUrl.toString());
 
-  $(".number-item").keyup(function(event) {
-      var currentInput = $(this);
-      var index = $(".number-item").index(currentInput);
-      var previousInputId = index > 0 ? "otp-" + index : null;
-      var nextInputId = index < $(".number-item").length - 1 ? "otp-" + (index + 2) : null;
-        
-      moveToNext(event, currentInput, previousInputId, nextInputId);
-      valueFill();
+  $(".number-item").keyup(function (event) {
+    var currentInput = $(this);
+    var index = $(".number-item").index(currentInput);
+    var previousInputId = index > 0 ? "otp-" + index : null;
+    var nextInputId = index < $(".number-item").length - 1 ? "otp-" + (index + 2) : null;
+
+    moveToNext(event, currentInput, previousInputId, nextInputId);
+    valueFill();
   });
 
-  $(".number-item").on("paste", function(event) {
-      var currentInput = $(this);
-      autoFill(event, currentInput);
-      valueFill();
+  $(".number-item").on("paste", function (event) {
+    var currentInput = $(this);
+    autoFill(event, currentInput);
+    valueFill();
   });
 
-  function valueFill(){
-      var otpValue = "";
-      $(".number-item").each(function() {
-          otpValue += $(this).val();
-      });
-      $("#otp").val(otpValue);
-      $(".message-otp-error").remove();
-      $(".number-list").removeClass("number-list-error");
+  function valueFill() {
+    var otpValue = "";
+    $(".number-item").each(function () {
+      otpValue += $(this).val();
+    });
+    $("#otp").val(otpValue);
+    $(".message-otp-error").remove();
+    $(".number-list").removeClass("number-list-error");
   }
-
 
   let remainSeconds = parseInt($("#RemainSecond").attr("data-value"));
   let countTimeInSecond = $("#countTimeInSecond").attr("data-value")
   let countTimeInMinutesSecond = $("#countTimeInMinutesSecond").attr("data-value")
+  let isLocked = $("#isBlocked").attr("data-value") === 'true'
+  let maxNumberOfVerify = $("#maxNumberOfVerify").attr("data-value")
   let startTime = Date.now();
   function formatString(template, ...values) {
     return template.replace(/\{\{(\d+)\}\}/g, (match, index) => {
@@ -70,10 +71,19 @@
       if (currentSeconds > 60) {
         const minutes = Math.floor(currentSeconds / 60);
         const seconds = currentSeconds % 60;
-        displayText = formatString(countTimeInMinutesSecond, minutes, seconds);
+        if (isLocked) {
+          displayText = formatString(countTimeInMinutesSecond, maxNumberOfVerify, minutes);
+        }
+        else {
+          displayText = formatString(countTimeInMinutesSecond, minutes, seconds);
+        }
       }
       else {
-        displayText = formatString(countTimeInSecond, currentSeconds);
+        if (isLocked) {
+          displayText = formatString(countTimeInMinutesSecond, maxNumberOfVerify, "1");
+        } else {
+          displayText = formatString(countTimeInSecond, currentSeconds);
+        }
       }
 
       text = "<a>" + displayText + "</a>";
@@ -142,5 +152,4 @@
   }
 
   let timeoutId = setTimeout(countdownStep, 1000);
-
-}(jQuery));	
+}(jQuery));

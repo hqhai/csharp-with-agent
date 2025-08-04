@@ -154,11 +154,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                         if (otpSessionInfo.OtpExpired)
                         {
                             ViewData["OtpExpired"] = true;
-                            ModelState.AddModelError(string.Empty, $"Otp expired");
+                            ModelState.AddModelError(string.Empty, _localizer["i18n_OTP_has_expired"]);
                         }
                         else
                         {
-                            ModelState.AddModelError(string.Empty, $"Invalid otp");
+                            ModelState.AddModelError(string.Empty, _localizer["i18n_OTP_is_not_valid"]);
                         }
                         SetDataForViewByOtpSessionIfo(otpSessionInfo, request);
                     }
@@ -190,11 +190,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                         if (otpSessionInfo.OtpExpired)
                         {
                             ViewData["OtpExpired"] = true;
-                            ModelState.AddModelError(string.Empty, $"Otp expired");
+                            ModelState.AddModelError(string.Empty, _localizer["i18n_OTP_has_expired"]);
                         }
                         else
                         {
-                            ModelState.AddModelError(string.Empty, $"Invalid otp");
+                            ModelState.AddModelError(string.Empty, _localizer["i18n_OTP_is_not_valid"]);
                         }
                         SetDataForViewByOtpSessionIfo(otpSessionInfo, request);
                     }

@@ -478,7 +478,7 @@ namespace Fsel.Shared.Helpers
             }
             for (int i = 0; i < parameters.Length; i++)
             {
-                string placeholder = $"{{{i}}}";
+                string placeholder = $"{{{{{i}}}}}";
                 input = input.Replace(placeholder, parameters[i] ?? string.Empty, StringComparison.InvariantCultureIgnoreCase);
             }
             return input;
