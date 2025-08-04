@@ -36,11 +36,11 @@ namespace Fsel.Hangfire.Host.Jobs
             JobExtensions.SetRecurringJob<ChooseDailyQuizWinnersWorker>(WorkerSettings.JobName.ChooseDailyQuizWinners, Cron.Daily(13, 59));
             JobExtensions.SetRecurringJob<AggregateDataStudentsInEventWorker>(WorkerSettings.JobName.AggregateDataStudentsInEvent, Cron.Daily(17, 1));
 
-            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNotice, Cron.Hourly(), new PushNoticeTime(EnumPushNoticeTimeType.EveryHour));
-            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNotice, Cron.Daily(0, 30), new PushNoticeTime(EnumPushNoticeTimeType.At07h30));
-            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNotice, Cron.Daily(5, 0), new PushNoticeTime(EnumPushNoticeTimeType.At12h00));
-            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNotice, Cron.Daily(10, 30), new PushNoticeTime(EnumPushNoticeTimeType.At17h30));
-            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNotice, Cron.Daily(12, 30), new PushNoticeTime(EnumPushNoticeTimeType.At19h30));
+            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNoticeEveryHour, Cron.Hourly(), new PushNoticeTime(EnumPushNoticeTimeType.EveryHour));
+            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNoticeAt07h30, Cron.Daily(0, 30), new PushNoticeTime(EnumPushNoticeTimeType.At07h30));
+            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNoticeAt12h00, Cron.Daily(5, 0), new PushNoticeTime(EnumPushNoticeTimeType.At12h00));
+            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNoticeAt17h30, Cron.Daily(10, 30), new PushNoticeTime(EnumPushNoticeTimeType.At17h30));
+            JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNoticeAt19h30, Cron.Daily(12, 30), new PushNoticeTime(EnumPushNoticeTimeType.At19h30));
         }
     }
 }
