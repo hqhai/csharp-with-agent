@@ -81,14 +81,9 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                      join c in _humanRepository.Queryable on b.HumanId equals c.Id
                                      where c.UserId.HasValue
                                      select c.UserId!.Value).Distinct().ToListAsync(cancellationToken);
-            #endregion
-
-            #region Lấy dữ liệu
-            // phân trang
-            var paging = distinctUserIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             // lấy order
-            var orders = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = paging, Status = true });
+            var orders = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
             if (!orders.IsSuccessStatusCode)
             {
                 methodResult.AddError(orders.Error);
@@ -101,8 +96,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 return methodResult;
             }
 
-            // xoá những user không phải là client trong list user id
-            paging = paging.Where(x => orderResults.Select(x => x.UserId).Contains(x)).ToList();
+            var clientUserIds = orderResults.Select(x => x.UserId).Distinct().ToList();
+            #endregion
+
+            #region Lấy dữ liệu
+            // phân trang
+            var paging = clientUserIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             // lấy Pt
             var courseIntegrationQueryModel = new CourseIntegrationQueryModel
@@ -234,7 +233,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             };
             #endregion
 
-            int totalItem = distinctUserIds.Count;
+            int totalItem = clientUserIds.Count;
             methodResult.Result = new PagingItemsModel<ClientsIntegrationModel>(clientsIntegrations, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

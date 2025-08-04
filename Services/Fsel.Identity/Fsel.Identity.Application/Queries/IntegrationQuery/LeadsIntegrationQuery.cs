@@ -62,9 +62,32 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             #region Lấy dữ liệu thay đổi trong khoảng thời gian
             List<Guid> distinctUserIds = new List<Guid>();
-            List<OrderSearchModel> orderClients = new List<OrderSearchModel>();
 
-            if (string.IsNullOrEmpty(request.Email))
+            if (!string.IsNullOrEmpty(request.Email))
+            {
+                var user = await _humanRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.User != null && x.User.Email == request.Email.Trim(), cancellationToken);
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
+                    return methodResult;
+                }
+
+                distinctUserIds.Add(user.UserId!.Value);
+            }
+
+            else if (!string.IsNullOrEmpty(request.UserName))
+            {
+                var user = await _humanRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.User != null && x.User.UserName == request.UserName.Trim(), cancellationToken);
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
+                    return methodResult;
+                }
+
+                distinctUserIds.Add(user.UserId!.Value);
+            }
+
+            else
             {
                 var userInteractedInRange = await _baseIntegrationQuery.UserInteractedInRange(request.StartDate, request.EndDate, false, cancellationToken);
                 if (!userInteractedInRange.IsOK || userInteractedInRange.Result == null)
@@ -74,45 +97,16 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 }
 
                 distinctUserIds = userInteractedInRange.Result.ToList();
-
-                // lấy client
-                var clientUsers = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { StartDate = request.StartDate, EndDate = request.EndDate, Status = true });
-                if (!clientUsers.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(clientUsers.Error);
-                    return methodResult;
-                }
-
-                orderClients = clientUsers.Content?.Result?.ToList() ?? new List<OrderSearchModel>();
-            }
-            else
-            {
-                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken);
-                if (user == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
-                    return methodResult;
-                }
-
-                distinctUserIds.Add(user.UserId!.Value);
-
-                // lấy client
-                var clientUsers = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
-                if (!clientUsers.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(clientUsers.Error);
-                    return methodResult;
-                }
-
-                orderClients = clientUsers.Content?.Result?.ToList() ?? new List<OrderSearchModel>();
             }
             #endregion
 
             #region Lấy dữ liệu
             // bỏ những lead đã thành client
-            if (orderClients.Any())
+            var orderClients = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
+            var orderClientResults = orderClients.Content?.Result ?? new List<OrderSearchModel>();
+            if (orderClientResults.Any())
             {
-                var clientUserResultIds = orderClients.Select(x => x.UserId).Distinct().ToList();
+                var clientUserResultIds = orderClientResults.Select(x => x.UserId).Distinct().ToList();
                 distinctUserIds = distinctUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
             }
 

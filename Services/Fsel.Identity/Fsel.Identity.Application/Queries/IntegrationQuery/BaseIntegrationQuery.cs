@@ -22,26 +22,14 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         private readonly IOrderService _orderService;
         private readonly IHumanRepository _humanRepository;
         private readonly ILmsCourseService _lmsCourseService;
-        private readonly ISystemService _systemService;
-        private readonly IMapper _mapper;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
-        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
 
         public BaseIntegrationQuery(IOrderService orderService,
-                                            IHumanRepository humanRepository,
-                                            ILmsCourseService lmsCourseService,
-                                            ISystemService systemService,
-                                            IMapper mapper,
-                                            IUserOtpCodeRepository userOtpCodeRepository,
-                                            IStudentCompetitionEventsRepository studentCompetitionEventsRepository)
+                                    IHumanRepository humanRepository,
+                                    ILmsCourseService lmsCourseService)
         {
             _orderService = orderService;
             _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
-            _systemService = systemService;
-            _mapper = mapper;
-            _userOtpCodeRepository = userOtpCodeRepository;
-            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
         }
 
         public async Task<MethodResult<IList<Guid>>> UserInteractedInRange(DateTime startDate, DateTime endDate, bool status, CancellationToken cancellationToken)

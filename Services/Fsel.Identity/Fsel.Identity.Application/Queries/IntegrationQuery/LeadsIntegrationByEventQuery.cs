@@ -64,11 +64,9 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<LeadsIntegrationModel>>();
+            List<Guid> distinctUserIds = new List<Guid>();
 
             #region Lấy dữ liệu thay đổi trong khoảng thời gian
-            List<Guid> distinctUserIds = new List<Guid>();
-            List<OrderSearchModel> orderClients = new List<OrderSearchModel>();
-
             var competitionEventIds = await _competitionEventsRepository.Queryable
                                                                         .Include(x => x.CompetitionEvents)
                                                                         .Where(x => x.EventCode == request.EventCode)
@@ -83,28 +81,21 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                      join c in _humanRepository.Queryable on b.HumanId equals c.Id
                                      where c.UserId.HasValue
                                      select c.UserId!.Value).Distinct().ToListAsync(cancellationToken);
+
+            // bỏ những lead đã thành client
+            var orderClients = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
+            var orderClientResults = orderClients.Content?.Result ?? new List<OrderSearchModel>();
+            if (orderClientResults.Any())
+            {
+                var clientUserResultIds = orderClientResults.Select(x => x.UserId).Distinct().ToList();
+                distinctUserIds = distinctUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
+            }
+
             #endregion
 
             #region Lấy dữ liệu
             // phân trang
             var paging = distinctUserIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
-
-            // lấy client
-            var clientUsers = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = paging, Status = true });
-            if (!clientUsers.IsSuccessStatusCode)
-            {
-                methodResult.AddError(clientUsers.Error);
-                return methodResult;
-            }
-
-            orderClients = clientUsers.Content?.Result?.ToList() ?? new List<OrderSearchModel>();
-
-            // bỏ những lead đã thành client
-            if (orderClients.Any())
-            {
-                var clientUserResultIds = orderClients.Select(x => x.UserId).Distinct().ToList();
-                distinctUserIds = distinctUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
-            }
 
             // lấy order
             var orders = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = paging, Status = false });

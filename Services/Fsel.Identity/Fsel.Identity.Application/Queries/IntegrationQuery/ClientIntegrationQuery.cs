@@ -63,21 +63,11 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             #region Lấy dữ liệu thay đổi trong khoảng thời gian
             List<Guid> distinctUserIds = new List<Guid>();
+            IList<OrderSearchModel> orderResults = new List<OrderSearchModel>();
 
-            if (string.IsNullOrEmpty(request.Email))
+            if (!string.IsNullOrEmpty(request.Email))
             {
-                var userInteractedInRange = await _baseIntegrationQuery.UserInteractedInRange(request.StartDate, request.EndDate, false, cancellationToken);
-                if (!userInteractedInRange.IsOK || userInteractedInRange.Result == null)
-                {
-                    methodResult.AddErrorBadRequest(userInteractedInRange.ErrorMessages);
-                    return methodResult;
-                }
-
-                distinctUserIds = userInteractedInRange.Result.ToList();
-            }
-            else
-            {
-                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken);
+                var user = await _humanRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.User != null && x.User.Email == request.Email.Trim(), cancellationToken);
 
                 if (user == null)
                 {
@@ -86,28 +76,45 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 }
                 distinctUserIds.Add(user.UserId!.Value);
             }
-            #endregion
 
-            #region Lấy dữ liệu
-            // phân trang
-            var paging = distinctUserIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
+            else if (!string.IsNullOrEmpty(request.UserName))
+            {
+                var user = await _humanRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.User != null && x.User.UserName == request.UserName.Trim(), cancellationToken);
+
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
+                    return methodResult;
+                }
+                distinctUserIds.Add(user.UserId!.Value);
+            }
+
+            else
+            {
+                var userInteractedInRange = await _baseIntegrationQuery.UserInteractedInRange(request.StartDate, request.EndDate, true, cancellationToken);
+                if (!userInteractedInRange.IsOK || userInteractedInRange.Result == null)
+                {
+                    methodResult.AddErrorBadRequest(userInteractedInRange.ErrorMessages);
+                    return methodResult;
+                }
+
+                distinctUserIds = userInteractedInRange.Result.ToList();
+            }
 
             // lấy order
-            var orders = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = paging, Status = true });
+            var orders = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
             if (!orders.IsSuccessStatusCode)
             {
                 methodResult.AddError(orders.Error);
                 return methodResult;
             }
-            var orderResults = orders.Content?.Result;
-            if (orderResults == null)
-            {
-                methodResult.AddError(orders.Error);
-                return methodResult;
-            }
+            orderResults = orders.Content?.Result ?? new List<OrderSearchModel>();
+            distinctUserIds = orderResults.Select(x => x.UserId).Distinct().ToList();
+            #endregion
 
-            // xoá những user không phải là client trong list user id
-            paging = paging.Where(x => orderResults.Select(x => x.UserId).Contains(x)).ToList();
+            #region Lấy dữ liệu
+            // phân trang
+            var paging = distinctUserIds.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).ToList();
 
             // lấy Pt
             var courseIntegrationQueryModel = new CourseIntegrationQueryModel
