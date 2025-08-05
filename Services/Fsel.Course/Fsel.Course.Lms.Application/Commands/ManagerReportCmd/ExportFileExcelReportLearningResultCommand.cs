@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using OfficeOpenXml;
     using static Fsel.Shared.Constants.ValueSettings;
@@ -99,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             using (ExcelPackage excelPackage = new ExcelPackage(templateStream))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                string learningStatuseStr = string.Join(",", (request.LearningStatuses ?? new List<EnumLearningStatus>()).Select(x => x.GetDescription()));
+                string learningStatuseStr = string.Join(",", (request.ListLearningStatus.ToList<EnumLearningStatus>() ?? new List<EnumLearningStatus>()).Select(x => x.GetDescription()));
                 string overallScoreStr = string.Join(",", (request.OverallScores ?? new List<EnumOverallScore>()).Select(x => x.GetDescription()));
 
                 switch (request.CourseType)

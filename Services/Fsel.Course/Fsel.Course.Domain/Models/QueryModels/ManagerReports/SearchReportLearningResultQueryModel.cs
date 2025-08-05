@@ -2,14 +2,14 @@
 
 namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
 {
+    using System.Text.Json.Serialization;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.QueryModels;
 
     public class SearchReportLearningResultQueryModel : SearchStudentSchoolQueryModel
     {
-        public string? ListOverallScore { get; set; }
-
+        [JsonIgnore]
         public IList<EnumOverallScore>? OverallScores
         {
             get

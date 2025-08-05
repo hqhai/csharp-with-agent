@@ -88,7 +88,7 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
             using (ExcelPackage excelPackage = new ExcelPackage(templateStream))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                string learningStatuseStr = string.Join(",", (request.LearningStatuses ?? new List<EnumLearningStatus>()).Select(x => x.GetDescription()));
+                string learningStatuseStr = string.Join(",", (request.ListLearningStatus.ToList<EnumLearningStatus>() ?? new List<EnumLearningStatus>()).Select(x => x.GetDescription()));
 
                 excelWorksheet.Cells["N2"].Value = Format(excelWorksheet.Cells["M2"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
                 excelWorksheet.Cells["H2"].Value = Format(excelWorksheet.Cells["G2"].Value, request.CourseType.HasValue ? request.CourseType.Value : string.Empty);

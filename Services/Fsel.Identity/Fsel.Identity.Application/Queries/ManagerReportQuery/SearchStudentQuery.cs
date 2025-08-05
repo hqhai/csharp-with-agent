@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 {
-    using System.Diagnostics;
     using System.Globalization;
     using System.Text.RegularExpressions;
     using Fsel.Common.ActionResults;

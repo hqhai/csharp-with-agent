@@ -2,16 +2,13 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
-    using System.Collections.Generic;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
-    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using static Fsel.Shared.Constants.ValueSettings;

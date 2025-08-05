@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using OfficeOpenXml;
 
@@ -116,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
 
         private static void FillSearchKeyData(ExcelWorksheet excelWorksheet, ExportFileExcelReportPlacementTestCommand request)
         {
-            string completionStatusStr = string.Join(",", (request.CompletionStatuses ?? new List<EnumCompletionStatus>()).Select(x => x.GetDescription()));
+            string completionStatusStr = string.Join(",", (request.ListCompletionStatus.ToList<EnumCompletionStatus>() ?? new List<EnumCompletionStatus>()).Select(x => x.GetDescription()));
             excelWorksheet.Cells["K1"].Value = Format(excelWorksheet.Cells["K1"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
             excelWorksheet.Cells["E3"].Value = Format(excelWorksheet.Cells["E3"].Value, completionStatusStr);
             excelWorksheet.Cells["F3"].Value = Format(excelWorksheet.Cells["F3"].Value, request.ListSchoolGrade ?? string.Empty);

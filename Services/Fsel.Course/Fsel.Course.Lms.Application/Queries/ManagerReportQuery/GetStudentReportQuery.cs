@@ -21,6 +21,46 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
     public class GetStudentReportQuery : SearchStudentReportQueryModel, IRequest<MethodResult<IList<StudentDtoModel>>>
     {
+        public IList<EnumCompletionStatus>? CompletionStatuses
+        {
+            get
+            {
+                return ListCompletionStatus.ToList<EnumCompletionStatus>();
+            }
+        }
+
+        public IList<EnumLearningStatus>? LearningStatuses
+        {
+            get
+            {
+                return ListLearningStatus.ToList<EnumLearningStatus>();
+            }
+        }
+
+        public IList<EnumOverallScore>? OverallScores
+        {
+            get
+            {
+                return ListOverallScore.ToList<EnumOverallScore>();
+            }
+        }
+
+        public IList<EnumCourseLevel>? CurrentLevels
+        {
+            get
+            {
+                return ListCurrentLevel.ToList<EnumCourseLevel>();
+            }
+        }
+
+        public IList<EnumCourseLevel>? CourseLevels
+        {
+            get
+            {
+                return ListCourseLevel.ToList<EnumCourseLevel>();
+            }
+        }
+
         public bool IsSearchReport { get; set; }
         public EnumManagerReportType ManagerReportType { get; set; }
     }

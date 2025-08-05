@@ -19,6 +19,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
         public string? ListCourseLevel { get; set; }
         public string? ListLearningStatus { get; set; }
 
+        [JsonIgnore]
         public IList<EnumCourseLevel>? CourseLevels
         {
             get
@@ -27,6 +28,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        [JsonIgnore]
         public IList<string>? SchoolClasses
         {
             get
@@ -35,6 +37,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        [JsonIgnore]
         public IList<string>? SchoolGrades
         {
             get
@@ -43,6 +46,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        [JsonIgnore]
         public IList<Guid>? SchoolIds
         {
             get
@@ -51,6 +55,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        [JsonIgnore]
         public IList<Guid>? DistrictIds
         {
             get
@@ -59,6 +64,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        [JsonIgnore]
         public IList<Guid>? ProvinceIds
         {
             get
@@ -67,6 +73,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        [JsonIgnore]
         public IList<Guid>? StudentIds
         {
             get
