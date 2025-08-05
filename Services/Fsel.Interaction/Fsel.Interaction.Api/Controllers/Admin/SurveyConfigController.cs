@@ -45,7 +45,8 @@ namespace Fsel.Interaction.Api.Controllers.Admin
         [HttpPost("save")]
         [ProducesResponseType(typeof(MethodResult<SurveyConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        [Permission(SurveyManagement.Add, SurveyManagement.Update)]
+        [Permission(SurveyManagement.Add)]
+        [Permission(SurveyManagement.Update)]
         public async Task<IActionResult> Create([FromBody] SaveSurveyConfigCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
