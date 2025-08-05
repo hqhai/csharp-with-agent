@@ -3,7 +3,6 @@
 namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
 {
     using System.Text.Json.Serialization;
-    using Fsel.Identity.Domain.Enums;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
@@ -54,6 +53,32 @@ namespace Fsel.Identity.Domain.Models.EntityModels.IntegrationModel
         public DateTime? DateEdit { get; set; }
 
         public DateTime? CreateAccount { get; set; }
+
+        public string? SchoolGrade { get; set; }
+
+        public string? SchoolClass { get; set; }
+
+        public string? HumanCode { get; set; }
+
+        public string? OTPPhoneNumber { get; set; }
+
+        public string? OTPEmail { get; set; }
+
+        public EnumCourseLevel CurrentLevel { get; set; }
+
+        public string? EventCode { get; set; }
+
+        public EnumIntegrationStatus? Status { get; set; }
+
+        public long? AccessTime { get; set; }
+
+        public DateTime? ExpireDate { get; set; }
+
+        public IList<OrderIntegrationModel>? OrderIntegrations { get; set; }
+
+        public IList<CourseIntegrationModel>? CourseIntegrations { get; set; }
+
+        public IList<CourseSuggestModel>? CourseSuggests { get; set; }
 
         public IList<IntegrationPlacementTestResultModels>? PlacementTestResults { get; set; }
     }

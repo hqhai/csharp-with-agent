@@ -11,5 +11,6 @@ namespace Fsel.Shared.Enums
         Fsis,
         AG,
         HRM,
+        LHP,
     }
 }

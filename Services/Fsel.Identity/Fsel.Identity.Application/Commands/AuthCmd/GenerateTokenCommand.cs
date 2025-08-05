@@ -3,6 +3,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
@@ -40,6 +41,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IOrderService _orderService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AppSetting _appSetting;
+        private readonly IRoleClaimRepository _roleClaimRepository;
+        private readonly RoleManager<Role> _roleManager;
+        private readonly IMapper _mapper;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
             IInteractionService interactionService,
@@ -48,7 +52,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IUserTokenRepository userTokenRepository,
             IOrderService orderService,
             AppSetting appSetting,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IRoleClaimRepository roleClaimRepository,
+            RoleManager<Role> roleManager,
+            IMapper mapper)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -58,6 +65,9 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _orderService = orderService;
             _appSetting = appSetting;
             _httpContextAccessor = httpContextAccessor;
+            _roleClaimRepository = roleClaimRepository;
+            _roleManager = roleManager;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -87,6 +97,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 authClaims.Add(new Claim(JwtClaimNames.Role, userRole));
             }
+
+            var role = await _roleManager.FindByNameAsync(userRoles.FirstOrDefault() ?? string.Empty);
+            if (role == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
+                return methodResult;
+            }
+
+            var roleClaims = await _roleClaimRepository.GetClaimsByRole(role.Id, cancellationToken);
+            authClaims.AddRange(_mapper.Map<IList<Claim>>(roleClaims));
 
             var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
             var signin = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha256);
