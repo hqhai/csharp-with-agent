@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -13,10 +13,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Menus_PermissionGroups_Id",
-                table: "Menus");
-
             migrationBuilder.InsertData(
                 table: "Menus",
                 columns: new[] { "Id", "Category", "ConfigStr", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "Index", "IsDeleted", "Name", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" },
@@ -38,34 +34,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     { new Guid("63b8f5af-7432-4ad2-9499-95eb9368612d"), "SurveyManagement.View", new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, null, false, "Xem khảo sát", new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"), true, null, null, null },
                     { new Guid("af2ea7ab-77dc-487c-bda2-082baa34d4e8"), "SurveyManagement.Export", new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), "", new Guid("00000000-0000-0000-0000-000000000000"), null, null, null, null, false, "Xuất dữ liệu khảo sát", new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"), true, null, null, null }
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PermissionGroups_MenuId",
-                table: "PermissionGroups",
-                column: "MenuId",
-                unique: true,
-                filter: "[MenuId] IS NOT NULL");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_PermissionGroups_Menus_MenuId",
-                table: "PermissionGroups",
-                column: "MenuId",
-                principalTable: "Menus",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_PermissionGroups_Menus_MenuId",
-                table: "PermissionGroups");
-
-            migrationBuilder.DropIndex(
-                name: "IX_PermissionGroups_MenuId",
-                table: "PermissionGroups");
-
             migrationBuilder.DeleteData(
                 table: "Permissions",
                 keyColumn: "Id",
@@ -100,14 +73,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 table: "Menus",
                 keyColumn: "Id",
                 keyValue: new Guid("49dece94-b2de-4271-88ef-72f3e2461a2f"));
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Menus_PermissionGroups_Id",
-                table: "Menus",
-                column: "Id",
-                principalTable: "PermissionGroups",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
         }
     }
 }
