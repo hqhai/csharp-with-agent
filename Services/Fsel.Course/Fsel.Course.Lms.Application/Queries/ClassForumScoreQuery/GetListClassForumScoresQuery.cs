@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -57,11 +58,13 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumScoreQuery
             }
 
             var classForumResult = await _classForumResultRepository.GetByIdAsync(request.ClassForumResultId);
-            if (classForumResult != null && classForumResult.IsViewed == false)
+            if (classForumResult != null && !classForumResult.IsViewed)
             {
                 classForumResult.IsViewed = true;
-                _classForumResultRepository.Update(classForumResult);
-                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumId, c.StudentId, c.LessonResultId };
+                });
             }
 
             var classForumScores = await _classForumScoreRepository.Queryable

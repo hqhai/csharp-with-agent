@@ -145,8 +145,10 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                     {
                         item.WorkingStatus = EnumWorkingStatus.InActive;
                     }
-                    _courseResultRepository.UpdateList(courseResultActives, false, x => x.CourseId, x => x.StudentId);
-                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseResultRepository.BulkUpdateList(courseResultActives, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                    });
                 }
 
                 if (courseResult == null)
@@ -158,28 +160,37 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd
                         Status = EnumResultStatus.New,
                         WorkingStatus = EnumWorkingStatus.Active
                     };
-                    _courseResultRepository.Add(courseResult);
+                    if (!courseResult.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
+                        return methodResult;
+                    }
+                    try
+                    {
+                        await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning($"Log Duplicate CourseResult : {ex.Message}");
+                        courseResult = await _courseResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id)
+                                                                              .FirstOrDefaultAsync(cancellationToken) ?? new CourseResult();
+                    }
                 }
                 else
                 {
                     courseResult.WorkingStatus = EnumWorkingStatus.Active;
-                    _courseResultRepository.Update(courseResult, false, x => x.CourseId, x => x.StudentId);
-                }
-                if (!courseResult.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
-                    return methodResult;
-                }
-
-                try
-                {
-                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning($"Log Duplicate CourseResult : {ex.Message}");
-                    courseResult = await _courseResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id)
-                                                                          .FirstOrDefaultAsync(cancellationToken);
+                    if (!courseResult.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(courseResult.ErrorMessages);
+                        return methodResult;
+                    }
+                    await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                    });
                 }
 
                 methodResult.Result = _mapper.Map<CourseResultModel>(courseResult);

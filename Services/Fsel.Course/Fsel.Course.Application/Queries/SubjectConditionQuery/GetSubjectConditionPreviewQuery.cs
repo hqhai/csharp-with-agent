@@ -76,7 +76,7 @@ namespace Fsel.Course.Application.Queries.SubjectConditionQuery
             var subjectConditionRules = _subjectConditionHelper.SubjectConditionRuleHandler(conditionRuleCourseSuggests, levelId, age);
             List<SubjectConditionPreviewModel> subjectConditionPreviews = new List<SubjectConditionPreviewModel>();
 
-            var conditionValues = subjectConditionRules.Where(x => x.ConditionRules != null).SelectMany(x => x.ConditionValues!).ToList();
+            var conditionValues = subjectConditionRules.Where(x => x.ConditionValues != null).SelectMany(x => x.ConditionValues!).ToList();
 
             var levelIds = conditionValues.Where(x => x.LevelIds != null).SelectMany(x => x.LevelIds!).ToList();
             var levelDatas = await _levelRepository.Queryable.Include(x => x.Category).WhereBulkContains(levelIds, x => x.Id).ToListAsync(cancellationToken);

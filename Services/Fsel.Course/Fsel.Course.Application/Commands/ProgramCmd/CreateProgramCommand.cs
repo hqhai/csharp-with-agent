@@ -5,6 +5,7 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
     using System.Text.RegularExpressions;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -26,18 +27,18 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
         private readonly ProgramConverter _programConverter;
-        private readonly IPlacementTestRepository _placementTestRepository;
+        private readonly ITestRepository _testRepository;
         private static readonly Regex s_regexCode = new Regex("^[a-zA-Z0-9]+$", RegexOptions.Compiled);
 
         public CreateProgramCommandHandler(ICategoryRepository categoryRepository,
                                            IMapper mapper,
                                            ProgramConverter programConverter,
-                                           IPlacementTestRepository placementTestRepository)
+                                           ITestRepository testRepository)
         {
             _categoryRepository = categoryRepository;
             _mapper = mapper;
             _programConverter = programConverter;
-            _placementTestRepository = placementTestRepository;
+            _testRepository = testRepository;
         }
 
         public async Task<MethodResult<ProgramModel>> Handle(CreateProgramCommand request, CancellationToken cancellationToken)
@@ -82,12 +83,12 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.TestMode), programs.Any(x => x.IsTestDefault));
                 return methodResult;
             }
-            if (request.PlacementTestIds != null && request.PlacementTestIds.Any())
+            if (request.TestOriginalIds != null && request.TestOriginalIds.Any())
             {
-                var placementTests = await _placementTestRepository.Queryable.WhereBulkContains(request.PlacementTestIds, x => x.Id).ToListAsync(cancellationToken);
-                if (placementTests.Count != request.PlacementTestIds.Distinct().Count())
+                var tests = await _testRepository.Queryable.WhereBulkContains(request.TestOriginalIds, x => x.Id).Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).ToListAsync(cancellationToken);
+                if (tests.Count != request.TestOriginalIds.Distinct().Count())
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NotEnoughPlacementTests));
+                    methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NotEnoughTests));
                     return methodResult;
                 }
             }
@@ -96,11 +97,11 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
 
             var category = _mapper.Map<Category>(request);
             category.Type = Shared.Enums.EnumTypeCategory.Program;
-            if (request.PlacementTestIds != null && request.PlacementTestIds.Any())
+            if (request.TestOriginalIds != null && request.TestOriginalIds.Any())
             {
-                category.CategoryTestBanks = request.PlacementTestIds.Distinct().Select(x => new CategoryTestBank
+                category.CategoryTestBanks = request.TestOriginalIds.Distinct().Select(x => new CategoryTestBank
                 {
-                    TestId = x,
+                    TestOriginalId = x,
                     TestType = EnumTestType.PlacementTest,
                 }).ToList();
             }

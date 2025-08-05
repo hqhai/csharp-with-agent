@@ -49,17 +49,19 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
-            #region Validate New
+            #region Validate Newư
 
             if (request.OriginalId.HasValue)
             {
-                var videoOriginal = await _videoRepository.GetByIdAsync(request.OriginalId.Value);
-                if (videoOriginal == null)
+                var isOriginal = await _videoRepository.Queryable.AnyAsync(x => x.OriginalId == request.OriginalId.Value, cancellationToken);
+                if (!isOriginal)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.OriginalId), request.OriginalId);
                     return methodResult;
                 }
             }
+            request.OriginalId = request.OriginalId ?? Guid.NewGuid();
+
             Category? program = null;
             if (request.ProgramId.HasValue)
             {
@@ -86,7 +88,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 return methodResult;
             }
 
-            #endregion Validate New
+            #endregion Validate Newư
 
             #region Validation
 
@@ -99,8 +101,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
 
             if (request.OriginalId.HasValue)
             {
-                var countVersion = await _videoRepository.Queryable.Where(x => x.OriginalId == request.OriginalId.Value).CountAsync(cancellationToken);
-                video.Version = countVersion + 1;
+                video.Version = await _videoRepository.Queryable.Where(x => x.OriginalId == request.OriginalId.Value).CountAsync(cancellationToken);
             }
             video.VersionStatus = EnumVersionStatus.LastVersion;
             var method = await _videoConverter.CreateTimeCodeToVideo(video, request);

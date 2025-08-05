@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -41,8 +42,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 item.GradingStartDate = null;
             }
 
-            _classForumResultRepository.UpdateList(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _classForumResultRepository.BulkUpdateList(classForumResult, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+            });
 
             var mockTestResult = await _mockTestResultRepository.Queryable
                          .Where(x => x.GradingTeacherId != null && x.GradingStartDate!.Value.AddMinutes(30) < dateNow).ToListAsync(cancellationToken);
@@ -52,8 +55,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 item.GradingTeacherId = null;
                 item.GradingStartDate = null;
             }
-            _mockTestResultRepository.UpdateList(mockTestResult, false, x => x.MockTestId, x => x.CourseId, x => x.UnitId, x => x.StudentId);
-            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _mockTestResultRepository.BulkUpdateList(mockTestResult, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.MockTestId, c.CourseId, c.UnitId, c.StudentId };
+            });
             return methodResult;
         }
     }

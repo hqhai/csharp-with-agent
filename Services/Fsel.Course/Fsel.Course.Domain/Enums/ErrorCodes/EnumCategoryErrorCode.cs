@@ -8,6 +8,6 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
 
         CodeNotValid,
 
-        NotEnoughPlacementTests
+        NotEnoughTests
     }
 }

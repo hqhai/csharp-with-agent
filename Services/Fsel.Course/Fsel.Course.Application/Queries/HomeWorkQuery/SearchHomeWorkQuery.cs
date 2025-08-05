@@ -39,7 +39,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var query = _homeWorkRepository.Queryable.Where(p => !p.IsArchive)
+            var query = _homeWorkRepository.Queryable.Where(p => !p.IsArchive).Include(p => p.Program).Include(p => p.Level)
                                     .Select(x => new HomeWorkSearchModel
                                     {
                                         Id = x.Id,
@@ -50,11 +50,19 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                                         IsActive = x.LessonHomeWorks.Where(n => !n.IsDeleted).Any(),
                                         CourseLevel = x.CourseLevel,
                                         CourseSkill = x.CourseSkill,
+                                        OriginalId = x.OriginalId,
                                         SkillId = x.SkillId,
+                                        ProgramId = x.ProgramId,
+                                        Program = x.Program != null ? x.Program.Name : null,
+                                        LevelId = x.LevelId,
+                                        Version = x.Version,
+                                        VersionStatus = x.VersionStatus,
+                                        Level = x.Level != null ? x.Level.Name : null,
                                         SkillName = x.Skill != null ? x.Skill.Name : null,
                                     });
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
+
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 if (Guid.TryParse(request.Keyword, out var guid))
@@ -63,13 +71,34 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 }
                 else
                 {
-                    query = query.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    query = query.Where(m => (m.Name != null && m.Name.Contains(request.Keyword) || (m.Code != null && m.Code.Contains(request.Keyword))));
                 }
             }
+
             if (request.SkillId.HasValue)
             {
                 query = query.Where(x => x.SkillId == request.SkillId);
             }
+
+            if (request.ProgramId.HasValue)
+            {
+                query = query.Where(x => x.ProgramId == request.ProgramId);
+            }
+
+            if (request.LevelId.HasValue)
+            {
+                query = query.Where(x => x.LevelId == request.LevelId);
+            }
+
+            if (request.OriginalId.HasValue)
+            {
+                query = query.Where(x => x.OriginalId == request.OriginalId);
+            }
+            else
+            {
+                query = query.Where(p => p.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
+            }
+
             if (request.CourseLevel != null)
             {
                 query = query.Where(m => m.CourseLevel == request.CourseLevel);

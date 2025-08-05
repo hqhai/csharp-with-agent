@@ -21,7 +21,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<CreateTestCommandModel, Test>().ForMember(dest => dest.TestSections, opt => opt.Ignore()).IgnoreAllNonExisting();
 
             CreateMap<UpdateTestSectionCommandModel, TestSection>().ForMember(dest => dest.TestAISettings, opt => opt.Ignore()).IgnoreAllNonExisting();
-            CreateMap<UpdateTestCommandModel, Test>().ForMember(dest => dest.TestSections, opt => opt.Ignore()).IgnoreAllNonExisting();
+            CreateMap<UpdateTestCommandModel, Test>().ForMember(dest => dest.TestSections, opt => opt.Ignore())
+                                                     .IgnoreAllNonExisting();
 
             CreateMap<CreateTestAICriteriaSettingCommandModel, TestAICriteriaSetting>().IgnoreAllNonExisting();
             CreateMap<CreateTestAISettingCommandModel, TestAISetting>().IgnoreAllNonExisting();

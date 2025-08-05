@@ -5,6 +5,7 @@ using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
+using Fsel.Course.Infrastructure.Common.LessonHelpers;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
 using Fsel.Course.Lms.Application.InternalEvents;
@@ -33,7 +34,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<CourseDbContext>();
+builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -117,6 +118,7 @@ builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGro
 builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository>();
 builder.Services.AddScoped<IWeeklyReportRepository, WeeklyReportRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
+builder.Services.AddScoped<IClassforumDetailResultHistoryRepository, ClassforumDetailResultHistoryRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ILevelRepository, LevelRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
@@ -155,7 +157,7 @@ builder.Services.AddScoped<DateTimeConverter>();
 builder.Services.AddScoped<SectionGroupManagerConverter>();
 builder.Services.AddScoped<ProgramConverter>();
 builder.Services.AddScoped<LessonConverter>();
-builder.Services.AddScoped<TestHelper>();
+builder.Services.AddScoped<TestConverter>();
 
 // Helper
 builder.Services.AddScoped<LinQAnswerHelper>();
@@ -237,6 +239,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
     { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
 });
 
 var app = builder.Build();

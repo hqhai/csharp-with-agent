@@ -27,7 +27,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumCourseSkill CourseSkill { get; set; }
         public Guid? SkillId { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Guid? LevelId { get; set; }
+        public Guid OriginalId { get; set; }
         public string? SkillName { get; set; }
+        public string? ProgramName { get; set; }
+        public string? LevelName { get; set; }
         public HomeWorkResultModel? HomeWorkResult { get; set; }
     }
 }

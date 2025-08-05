@@ -11,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
 
     public class SetTimeModuleCommand : SetTimeModuleModel, IRequest<bool>
     {
@@ -20,16 +19,12 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     public class SetTimeModuleCommandHandler : IRequestHandler<SetTimeModuleCommand, bool>
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
-        private readonly IMapper _mapper;
-        private readonly ILogger<SetTimeModuleCommand> _logger;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
 
-        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, ILogger<SetTimeModuleCommand> logger, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
+        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
-            _mapper = mapper;
-            _logger = logger;
             _dateTimeConverter = dateTimeConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
         }
@@ -65,26 +60,44 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-
+            if (videoTimeCodeResult.Status == EnumResultStatus.Done && videoTimeCodeResult.UpdatedDate.HasValue && videoTimeCodeResult.UpdatedDate.Value.AddMinutes(3) < DateTime.UtcNow)
+            {
+                return;
+            }
             if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoTimeCodeResult.WorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
+                var workingTime = (DateTime.UtcNow - videoTimeCodeResult.CreatedDate).TotalMilliseconds;
+                if (videoTimeCodeResult.WorkingTime > workingTime)
+                {
+                    videoTimeCodeResult.WorkingTime = workingTime;
+                }
             }
             else
             {
                 if (request.SubmissionCount == EnumSubmissionCount.FirstSubmit || videoTimeCodeResult.Status == EnumResultStatus.New)
                 {
                     videoTimeCodeResult.WorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
+                    var workingTime = (DateTime.UtcNow - videoTimeCodeResult.CreatedDate).TotalMilliseconds;
+                    if (videoTimeCodeResult.WorkingTime > workingTime)
+                    {
+                        videoTimeCodeResult.WorkingTime = workingTime;
+                    }
                 }
                 else if (request.SubmissionCount == EnumSubmissionCount.SecondSubmit || videoTimeCodeResult.Status == EnumResultStatus.Process)
                 {
+                    var accessTime = (DateTime.UtcNow - (videoTimeCodeResult.UpdatedDate ?? videoTimeCodeResult.CreatedDate)).TotalMilliseconds;
+                    if (request.AccessTime > accessTime)
+                    {
+                        request.AccessTime = accessTime;
+                    }
                     videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
             }
 
             await _videoTimeCodeResultRepository.BulkUpdateList(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
             {
-                bulk.ColumnInputExpression = entity => new { entity.WorkingTime, entity.RetryWorkingTime };
+                bulk.ColumnInputExpression = entity => new { entity.WorkingTime, entity.RetryWorkingTime, entity.UpdatedDate };
             });
         }
 
@@ -92,15 +105,25 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
 
-            if (sectionGroupResult != null && sectionGroupResult.SectionGroup != null)
+            if (sectionGroupResult == null || sectionGroupResult.SectionGroup == null)
             {
-                sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
-
-                await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
-                {
-                    bulk.ColumnInputExpression = entity => new { entity.WorkingTime };
-                });
+                return;
             }
+            if (sectionGroupResult.Status == EnumResultStatus.Done && sectionGroupResult.UpdatedDate.HasValue && sectionGroupResult.UpdatedDate.Value.AddMinutes(3) < DateTime.UtcNow)
+            {
+                return;
+            }
+
+            sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
+            var workingTime = (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalMilliseconds;
+            if (sectionGroupResult.WorkingTime > workingTime)
+            {
+                sectionGroupResult.WorkingTime = workingTime;
+            }
+            await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+            {
+                bulk.ColumnInputExpression = entity => new { entity.WorkingTime, entity.UpdatedDate };
+            });
         }
     }
 }

@@ -9,7 +9,7 @@ namespace Fsel.Sender.Infrastructure.Repositories
 
     public class MessageHistoryRepository : BaseRepository<MessageHistory>, IMessageHistoryRepository
     {
-        public MessageHistoryRepository(SenderDBContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public MessageHistoryRepository(SenderDBContext dbContext, SenderReadDbContext readDbContext, AuthContext authContext, IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

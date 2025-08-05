@@ -16,9 +16,56 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Course.Infrastructure
 {
-    public class CourseDbContext : BaseDbContext
+    /// <summary>
+    /// Represents the read database context for the course service.
+    /// </summary>
+    public class CourseReadDbContext : CourseBaseDbContext
     {
-        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        protected override string Connection => Settings.ReadOnlyConnection;
+
+        public CourseReadDbContext(DbContextOptions<CourseReadDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+    }
+    /// <summary>
+    /// Represents for the master database context for the course service.
+    /// </summary>
+    public class CourseDbContext : CourseBaseDbContext
+    {
+        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            if (!optionsBuilder.IsConfigured)
+            {
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile(Settings.SettingFileName)
+                    .Build();
+                optionsBuilder.UseSqlServer(
+                    configuration.GetConnectionString(Connection),
+                    options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
+            }
+        }
+    }
+
+    public class CourseBaseDbContext : BaseDbContext
+    {
+        protected virtual string Connection => Settings.DefaultConnection;
+
+        public CourseBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
@@ -93,6 +140,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
+        public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
         public DbSet<Level> Levels { get; set; }
         public DbSet<Category> Categorys { get; set; }
         public DbSet<Skill> Skills { get; set; }
@@ -106,6 +154,12 @@ namespace Fsel.Course.Infrastructure
         public DbSet<UnitModule> UnitModules { get; set; }
         public DbSet<SubjectCondition> SubjectConditions { get; set; }
         public DbSet<SubjectConditionRule> SubjectConditionRules { get; set; }
+        public DbSet<CourseModule> CourseModules { get; set; }
+        public DbSet<Test> Tests { get; set; }
+        public DbSet<TestSection> TestSections { get; set; }
+        public DbSet<TestSectionQuestion> TestSectionQuestions { get; set; }
+        public DbSet<TestAICriteriaSetting> TestAICriteriaSettings { get; set; }
+        public DbSet<TestAISetting> TestAISettings { get; set; }
 
         #region Report
 
@@ -140,11 +194,6 @@ namespace Fsel.Course.Infrastructure
         #endregion Report
 
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
-        public DbSet<Test> Tests { get; set; }
-        public DbSet<TestSection> TestSections { get; set; }
-        public DbSet<TestSectionQuestion> TestSectionQuestions { get; set; }
-        public DbSet<TestAICriteriaSetting> TestAICriteriaSettings { get; set; }
-        public DbSet<TestAISetting> TestAISettings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -220,6 +269,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumDetailResultHistoryTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LevelEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SkillEntityTypeConfiguration());
@@ -238,6 +288,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new UnitModuleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SubjectConditionTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SubjectConditionRuleTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseModuleEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
@@ -260,10 +311,10 @@ namespace Fsel.Course.Infrastructure
             //modelBuilder.Ignore<DistrictInfoModel>();
             //modelBuilder.Ignore<ReportLearningProcessModel>();
             //modelBuilder.Ignore<ReportLearningResultModel>();
-            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
-            //modelBuilder.Ignore<ExportStudentEventModel>();
-            //modelBuilder.Ignore<ExportDistrictEventModel>();
             //modelBuilder.Ignore<ExportSchoolEventModel>();
+            //modelBuilder.Ignore<ExportStudentEventModel>();
+            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
+            //modelBuilder.Ignore<ExportDistrictEventModel>();
 
             base.OnModelCreating(modelBuilder);
         }

@@ -135,8 +135,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
                 classForumDetailResult.Status = string.IsNullOrEmpty(request.WordContent) ? EnumClassForumResultStatus.ErrorSpeechToText : EnumClassForumResultStatus.Pending;
 
-                _classForumDetailResultRepository.Update(classForumDetailResult);
-                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                });
 
                 var token = isFirst ? await GetTokenAsync(classForum, classForumResult, course.CourseType) : null;
                 await UpdateClassForumResult(classForumResult, token, cancellationToken);
@@ -169,8 +171,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         {
             classForumResult.TokenFirstTime = token;
             classForumResult.IsPendingSpeechToText = false;
-            _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+            });
         }
 
         private async Task DoQuestBoard(Guid studentId, EnumQuestBoardType type, EnumQuestBoardCategory category, CancellationToken cancellationToken)

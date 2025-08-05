@@ -13,9 +13,6 @@ namespace Fsel.Course.Infrastructure.Maps
         public LessonModuleProfile()
         {
             CreateMap<LessonModule, LessonModuleModel>().IgnoreAllNonExisting();
-            CreateMap<CreateLessonModuleCommandModel, LessonModule>()
-                    .ForMember(p => p.ClassForum, x => x.Ignore())
-                    .ForMember(p => p.HomeWork, x => x.Ignore());
         }
     }
 }

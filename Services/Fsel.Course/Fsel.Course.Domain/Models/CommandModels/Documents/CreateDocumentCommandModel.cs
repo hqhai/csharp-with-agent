@@ -2,19 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.Documents
 {
-    using Fsel.Course.Domain.Enums;
+    using Fsel.Course.Domain.Entities;
 
     public class CreateDocumentCommandModel
     {
-        public IList<CreateDocumentFileModel>? Files { get; set; }
-    }
-
-    public class CreateDocumentFileModel
-    {
-        public EnumDocumentType Type { get; set; }
-
-        public string? Name { get; set; }
-
-        public string? FilePath { get; set; }
+        public IList<DocumentFile>? Files { get; set; }
     }
 }

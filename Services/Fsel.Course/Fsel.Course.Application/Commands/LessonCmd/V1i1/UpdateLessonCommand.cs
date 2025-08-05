@@ -2,18 +2,16 @@
 
 namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
 {
-    using System.Text.RegularExpressions;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Lessons.V1i1;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
-    using Fsel.Course.Infrastructure.Common;
-    using Fsel.Shared.Enums;
+    using Fsel.Course.Infrastructure.Common.LessonHelpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -26,187 +24,145 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
     {
         private readonly ILessonRepository _lessonRepository;
         private readonly IMapper _mapper;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly ILevelRepository _levelRepository;
         private readonly LessonConverter _lessonConverter;
-        private readonly IMediator _mediator;
+        private readonly IVersionEntityUpdater<Lesson> _versionEntityUpdater;
+        private readonly IUnitRepository _unitRepository;
 
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository,
                                           IMapper mapper,
-                                          ICategoryRepository categoryRepository,
-                                          ILevelRepository levelRepository,
                                           LessonConverter lessonConverter,
-                                          IMediator mediator)
+                                          IVersionEntityUpdater<Lesson> versionEntityUpdater,
+                                          IUnitRepository unitRepository)
         {
             _lessonRepository = lessonRepository;
             _mapper = mapper;
-            _categoryRepository = categoryRepository;
-            _levelRepository = levelRepository;
             _lessonConverter = lessonConverter;
-            _mediator = mediator;
+            _versionEntityUpdater = versionEntityUpdater;
+            _unitRepository = unitRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
         {
-
-            // tạm thời pending đợi BA chốt lại rule nghiệp vụ
-
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
-            Regex regexCode = new Regex("^[a-zA-Z0-9._]+$");
-            Regex regexInstructionContent = new Regex("^[^<>&#*]{1,2000}$");
 
-            #region Validate
             var lesson = await _lessonRepository.Queryable
+                                                .Include(x => x.LessonModules)
                                                 .Include(x => x.LessonInstructions)
-                                                .Include(x => x.LessonModules)
-                                                .ThenInclude(x => x.ClassForum)
-                                                .ThenInclude(x => x.ClassForumFiles)
-                                                .Include(x => x.LessonModules)
-                                                .ThenInclude(x => x.Document)
                                                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (lesson == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
                 return methodResult;
             }
 
-            if (lesson.Status == EnumStatus.Active)
+            var validate = await _lessonConverter.ValidateLesson(request, true, lesson.OriginalId, cancellationToken);
+            if (!validate.IsOK)
             {
-                var handlerLessonActive = await HandlerLessonActive(request, lesson, cancellationToken);
-                if (!handlerLessonActive.IsOK)
+                methodResult.AddErrorBadRequest(validate.ErrorMessages);
+                return methodResult;
+            }
+
+            bool isCheckUnit = await _unitRepository.Queryable
+                                                    .AnyAsync(x => x.UnitModules.Any(c => c.UnitConfigType == EnumUnitConfigType.Lesson && c.OriginalId == lesson.OriginalId), cancellationToken);
+
+            var lessonConverter = await _lessonConverter.LessonModuleHandler(request.LessonModules!, true, isCheckUnit, cancellationToken);
+            if (!lessonConverter.IsOK)
+            {
+                methodResult.AddErrorBadRequest(lessonConverter.ErrorMessages);
+                return methodResult;
+            }
+
+            var newVersionLesson = LessonFactory.Create(request).Build();
+            if (!newVersionLesson.IsValid())
+            {
+                methodResult.AddErrorBadRequest(newVersionLesson.ErrorMessages);
+                return methodResult;
+            }
+
+            await _versionEntityUpdater.UpdateEntity(lesson, newVersionLesson,
+                async (_, entity) => isCheckUnit,
+                async (oldEntity, newEntity) =>
                 {
-                    methodResult.AddErrorBadRequest(handlerLessonActive.ErrorMessages);
-                    return methodResult;
+                    oldEntity.Name = newEntity.Name;
+                    oldEntity.InstructionContent = newEntity.InstructionContent;
+                    oldEntity.VideoCount = newEntity.VideoCount;
+                    oldEntity.ClassForumCount = newEntity.ClassForumCount;
+                    oldEntity.HomeWorkCount = newEntity.HomeWorkCount;
+                    oldEntity.DocumentCount = newEntity.DocumentCount;
+                    oldEntity.Status = newEntity.Status;
+                    oldEntity.LevelId = newEntity.LevelId;
+                    oldEntity.ProgramId = newEntity.ProgramId;
+
+                    LessonModuleHandler(lesson, newVersionLesson, newEntity, oldEntity);
+                    LessonInstructionHandler(lesson, newVersionLesson, newEntity, oldEntity);
+
+                    await Task.Yield();
                 }
+            );
 
-                methodResult.Result = handlerLessonActive.Result;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
-            if (string.IsNullOrEmpty(request.Name))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotNullOrEmpty), request.Name);
-                return methodResult;
-            }
-
-            if (!regexCode.IsMatch(request.Name))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotValid), request.Name);
-                return methodResult;
-            }
-
-            var checkCode = await _lessonRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Status != EnumStatus.InActive && x.Name == request.Name.Trim(), cancellationToken);
-            if (checkCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeAlreadyExist), request.Name);
-                return methodResult;
-            }
-
-            var checkProgram = await _categoryRepository.AnyGuidAsync(request.ProgramId);
-            if (!checkProgram)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ProgramId));
-                return methodResult;
-            }
-
-            var checkLevel = await _levelRepository.AnyGuidAsync(request.LevelId);
-            if (!checkLevel)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LevelId));
-                return methodResult;
-            }
-
-            if (!string.IsNullOrEmpty(request.InstructionContent) && !regexInstructionContent.IsMatch(request.InstructionContent))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.InstructionContentNotValid), request.InstructionContent);
-                return methodResult;
-            }
-
-            if (request.LessonModules == null || !request.LessonModules.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonModuleNotNull), nameof(request.LessonModules));
-                return methodResult;
-            }
-
-            _mapper.Map(request, lesson);
-            if (!lesson.IsValid())
-            {
-                methodResult.AddErrorBadRequest(lesson.ErrorMessages);
-                return methodResult;
-            }
-            #endregion
-
-            if (request.LessonInstructions != null && request.LessonInstructions.Any())
-            {
-                var lessonInstruction = await _lessonConverter.LessonInstructionHandler(request.LessonInstructions, lesson, cancellationToken);
-                if (!lessonInstruction.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(lessonInstruction.ErrorMessages);
-                    return methodResult;
-                }
-            }
-
-            var lessonModule = await _lessonConverter.LessonModuleHandler(request.LessonModules, lesson, cancellationToken);
-            if (!lessonModule.IsOK)
-            {
-                methodResult.AddErrorBadRequest(lessonModule.ErrorMessages);
-                return methodResult;
-            }
-
-            await _lessonRepository.ExecuteTransactionAsync(async () =>
-            {
-                lesson.VideoCount = lesson.LessonModules.Count(x => x.LessonConfigType == EnumLessonConfigType.Video);
-                lesson.ClassForumCount = lesson.LessonModules.Count(x => x.LessonConfigType == EnumLessonConfigType.ClassForum);
-                lesson.HomeWorkCount = lesson.LessonModules.Count(x => x.LessonConfigType == EnumLessonConfigType.HomeWork);
-                lesson.DocumentCount = lesson.LessonModules.Count(x => x.LessonConfigType == EnumLessonConfigType.Document);
-
-                _lessonRepository.Update(lesson);
-                await _lessonRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.Result = _mapper.Map<LessonModel>(lesson);
-                methodResult.StatusCode = StatusCodes.Status201Created;
-                return methodResult;
-            });
-
+            methodResult.Result = _mapper.Map<LessonModel>(lesson);
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task<MethodResult<LessonModel>> HandlerLessonActive(UpdateLessonCommandModel request, Lesson lesson, CancellationToken cancellationToken)
+        private static void LessonModuleHandler(Lesson lesson, Lesson newVersionLesson, Lesson newEntity, Lesson oldEntity)
         {
-            MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
-
-            // New lesson
-            var newLesson = await _mediator.Send(new CreateLessonCommand
+            var removedModules = lesson.LessonModules
+                                       .ExceptBy(newVersionLesson.LessonModules.Select(x => $"{x.OriginalId}-{x.LessonConfigType}"), u => $"{u.OriginalId}-{u.LessonConfigType}")
+                                       .ToList();
+            if (removedModules.Any())
             {
-                Name = request.Name,
-                InstructionContent = request.InstructionContent,
-                LevelId = request.LevelId,
-                ProgramId = request.ProgramId,
-                LessonInstructions = request.LessonInstructions,
-                LessonModules = request.LessonModules
-            }, cancellationToken);
-
-            if (!newLesson.IsOK)
-            {
-                methodResult.AddErrorBadRequest(newLesson.ErrorMessages);
-                return methodResult;
+                removedModules.ForEach(module =>
+                {
+                    lesson.LessonModules.Remove(module);
+                });
             }
 
-            // InActive Lesson cũ
-            await _lessonRepository.ExecuteTransactionAsync(async () =>
+            foreach (var module in newEntity.LessonModules)
             {
-                lesson.Status = EnumStatus.InActive;
-                _lessonRepository.Update(lesson);
-                await _lessonRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                var existingModule = lesson.LessonModules.FirstOrDefault(m => m.OriginalId == module.OriginalId && m.LessonConfigType == module.LessonConfigType);
+                if (existingModule != null)
+                {
+                    existingModule.Name = module.Name;
+                    existingModule.Thumbnail = module.Thumbnail;
+                    existingModule.Description = module.Description;
+                    existingModule.Percent = module.Percent;
+                    existingModule.OpenOrder = module.OpenOrder;
+                    existingModule.DisplayOrder = module.DisplayOrder;
+                    existingModule.DisplayNumber = module.DisplayNumber;
+                    existingModule.OriginalId = module.OriginalId;
+                }
+                else
+                {
+                    oldEntity.LessonModules.Add(module);
+                }
+            }
+        }
 
-                methodResult.Result = newLesson.Result;
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            });
+        private static void LessonInstructionHandler(Lesson lesson, Lesson newVersionLesson, Lesson newEntity, Lesson oldEntity)
+        {
+            var removedInstructions = lesson.LessonInstructions.ExceptBy(newVersionLesson.LessonInstructions.Select(x => x.SkillId), u => u.SkillId).ToList();
+            if (removedInstructions.Any())
+            {
+                removedInstructions.ForEach(instruction =>
+                {
+                    lesson.LessonInstructions.Remove(instruction);
+                });
+            }
 
-            return methodResult;
+            foreach (var instruction in newEntity.LessonInstructions)
+            {
+                var existingInstruction = lesson.LessonInstructions.FirstOrDefault(m => m.SkillId == instruction.SkillId);
+                if (existingInstruction != null)
+                {
+                    existingInstruction.Instruction = instruction.Instruction;
+                }
+                else
+                {
+                    oldEntity.LessonInstructions.Add(instruction);
+                }
+            }
         }
     }
 }

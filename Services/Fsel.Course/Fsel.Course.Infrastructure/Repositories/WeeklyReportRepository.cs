@@ -9,7 +9,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class WeeklyReportRepository : BaseRepository<WeeklyReport>, IWeeklyReportRepository
     {
-        public WeeklyReportRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public WeeklyReportRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

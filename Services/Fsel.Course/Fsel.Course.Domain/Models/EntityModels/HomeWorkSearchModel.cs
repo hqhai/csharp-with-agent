@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using Fsel.Common.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -11,9 +12,16 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? Code { get; set; }
         public string? MediaPost { get; set; }
         public bool IsActive { get; set; }
+        public int Version { get; set; }
+        public EnumVersionStatus VersionStatus { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
         public Guid? SkillId { get; set; }
+        public Guid? ProgramId { get; set; }
+        public string? Program { get; set; }
+        public Guid? LevelId { get; set; }
+        public Guid OriginalId { get; set; }
+        public string? Level { get; set; }
         public string? SkillName { get; set; }
     }
 }

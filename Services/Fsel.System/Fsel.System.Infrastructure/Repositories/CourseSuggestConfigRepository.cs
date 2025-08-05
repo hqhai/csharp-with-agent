@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class CourseSuggestConfigRepository : BaseRepository<CourseSuggestConfig>, ICourseSuggestConfigRepository
     {
-        public CourseSuggestConfigRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public CourseSuggestConfigRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

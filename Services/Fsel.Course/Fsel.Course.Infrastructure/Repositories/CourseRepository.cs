@@ -25,6 +25,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         private readonly ICourseResultRepository _courseResultRepository;
 
         public CourseRepository(CourseDbContext dbContext,
+            CourseReadDbContext courseReadDbContext,
             IUnitResultRepository unitResultRepository,
             IFinalTestResultRepository finalTestResultRepository,
             IMockTestResultRepository mockTestResultRepository,
@@ -34,7 +35,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             IMapper mapper,
             ICourseUnitMockTestRepository courseUnitMockTestRepository,
             IUnitLessonRepository unitLessonRepository,
-            ICourseResultRepository courseResultRepository) : base(dbContext, authContext, mapper)
+            ICourseResultRepository courseResultRepository) : base(dbContext, courseReadDbContext, authContext, mapper)
         {
             _unitResultRepository = unitResultRepository;
             _finalTestResultRepository = finalTestResultRepository;

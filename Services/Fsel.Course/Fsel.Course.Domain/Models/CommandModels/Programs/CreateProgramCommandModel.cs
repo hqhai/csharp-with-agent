@@ -18,7 +18,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Programs
         public EnumStatus Status { get; set; }
         public bool IsTestDefault { get; set; }
         public EnumTestMode? TestMode { get; set; }
-        public IList<Guid>? PlacementTestIds { get; set; }
+        public IList<Guid>? TestOriginalIds { get; set; }
         public IList<UpdateLevelCommandModel>? Levels { get; set; }
     }
 

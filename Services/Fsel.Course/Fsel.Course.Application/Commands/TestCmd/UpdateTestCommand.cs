@@ -2,17 +2,20 @@
 
 namespace Fsel.Course.Application.Commands.TestCmd
 {
+    using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Interfaces;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Common.TestHelper;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdateTestCommand : UpdateTestCommandModel, IRequest<MethodResult<TestModel>>
     {
@@ -22,15 +25,27 @@ namespace Fsel.Course.Application.Commands.TestCmd
     {
         private readonly IMapper _mapper;
         private readonly ITestRepository _testRepository;
-        private readonly TestHelper _testHelper;
+        private readonly TestConverter _testHelper;
+        private readonly QuestionConverter _questionConverter;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly TestConverter _testConverter;
+        private readonly IVersionEntityUpdater<Test> _versionEntityUpdater;
 
         public UpdateTestConfigCommandHandler(IMapper mapper
             , ITestRepository testRepository
-            , TestHelper testHelper)
+            , TestConverter testHelper
+            , QuestionConverter questionConverter
+            , IServiceProvider serviceProvider
+            , TestConverter testConverter
+            , IVersionEntityUpdater<Test> versionEntityUpdater)
         {
             _mapper = mapper;
             _testRepository = testRepository;
             _testHelper = testHelper;
+            _questionConverter = questionConverter;
+            _serviceProvider = serviceProvider;
+            _testConverter = testConverter;
+            _versionEntityUpdater = versionEntityUpdater;
         }
 
         public async Task<MethodResult<TestModel>> Handle(UpdateTestCommand request, CancellationToken cancellationToken)
@@ -44,13 +59,11 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
                 return methodResult;
             }
+            var isUsingByClient = await _testRepository.IsUsingByClient(test.OriginalId);
 
-            var codeExists = await _testRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.Id != request.Id, cancellationToken);
-            if (codeExists)
+            var newVersionTest = TestFactory.Create(request, _mapper, _questionConverter).Build(test.OriginalId, true);
+            if (await newVersionTest.ValidateDuplicateTest(_testRepository).ConfigureAwait(false))
             {
-<<<<<<< Updated upstream
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
-=======
                 methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
                 return methodResult;
             }
@@ -63,30 +76,41 @@ namespace Fsel.Course.Application.Commands.TestCmd
             if (!await newVersionTest.IsValid(_serviceProvider))
             {
                 methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
->>>>>>> Stashed changes
                 return methodResult;
             }
 
-            _mapper.Map(request, test);
-            if (!test.IsValid())
+            if (isUsingByClient)
             {
-                methodResult.AddErrorBadRequest(test.ErrorMessages);
-                return methodResult;
+                await _versionEntityUpdater.UpdateEntity(test, newVersionTest,
+                        async (_, entity) => isUsingByClient,
+                        async (oldEntity, newEntity) =>
+                        {
+                            await Task.Yield();
+                        }
+                    );
             }
-            await _testHelper.UpdateSectionRecursive(request.TestSections, test: test);
-            // Bắt đầu transaction
-            await _testRepository.ExecuteTransactionAsync(async () =>
+            else
             {
-                // Cập nhật Test
-                await _testHelper.DeleteDataAsync(test);
+                var methodHelper = await _testHelper.UpdateSectionRecursive(request.TestSections, test: test);
+                if (!methodHelper.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(methodHelper.ErrorMessages);
+                    return methodResult;
+                }
+                await _testRepository.ExecuteTransactionAsync(async () =>
+                {
+                    // Cập nhật Test
+                    await _testHelper.DeleteDataAsync(test);
 
-                _testRepository.Update(test);
-                await _testRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    _testRepository.Update(test);
+                    await _testRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<TestModel>(test);
-                return methodResult;
-            });
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = _mapper.Map<TestModel>(test);
+                    return methodResult;
+                });
+            }
+
             return methodResult;
         }
     }

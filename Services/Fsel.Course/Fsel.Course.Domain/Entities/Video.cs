@@ -1,11 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
-using Fsel.Common.Enums;
 using Fsel.Common.Attributes;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Shared.Enums;
@@ -57,7 +56,6 @@ namespace Fsel.Course.Domain.Entities
         public EnumVersionStatus VersionStatus { get; set; }
         public int Version { get; set; }
         public Guid? OriginalId { get; set; }
-        public Video? OriginalVideo { get; set; }
 
         public Guid? LevelId { get; set; }
         public Level? Level { get; set; }
@@ -66,10 +64,8 @@ namespace Fsel.Course.Domain.Entities
         public Category? Program { get; set; }
 
         public ExtraPractice? ExtraPractice { get; set; }
-        public ICollection<Video> Videos { get; set; } = new List<Video>();
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
         public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
-        public ICollection<LessonModule> LessonModules { get; set; } = new List<LessonModule>();
     }
 }

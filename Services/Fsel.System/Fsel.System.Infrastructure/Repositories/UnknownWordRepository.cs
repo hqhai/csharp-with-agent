@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class UnknownWordRepository : BaseRepository<UnknownWord>, IUnknownWordRepository
     {
-        public UnknownWordRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public UnknownWordRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

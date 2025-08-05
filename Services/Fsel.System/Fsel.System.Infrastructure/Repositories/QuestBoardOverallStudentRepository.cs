@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class QuestBoardOverallStudentRepository : BaseRepository<QuestBoardOverallStudent>, IQuestBoardOverallStudentRepository
     {
-        public QuestBoardOverallStudentRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public QuestBoardOverallStudentRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

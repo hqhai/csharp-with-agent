@@ -2,15 +2,15 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class ClassForum : Entity
+    public class ClassForum : Entity, IVersionEntity
     {
         /// <summary>
         /// Cách chấm điểm
@@ -85,6 +85,12 @@ namespace Fsel.Course.Domain.Entities
         public Guid? ProgramId { get; set; }
         public Category? Category { get; set; }
 
+        public Guid OriginalId { get; set; }
+
+        public int Version { get; set; }
+
+        public EnumVersionStatus VersionStatus { get; set; }
+
         public EnumClassForumLayout Layout { get; set; }
 
         public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
@@ -92,7 +98,5 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();
 
         public ICollection<ClassForumFile> ClassForumFiles { get; set; } = new List<ClassForumFile>();
-
-        public ICollection<LessonModule> LessonModules { get; set; } = new List<LessonModule>();
     }
 }

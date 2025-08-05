@@ -227,7 +227,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 return methodResult;
                             }
 
-                            await _userDbContext.UserRoles.AddAsync(new UserRoleEntity
+                            await _userDbContext.UserRoles.AddAsync(new UserRole
                             {
                                 UserId = user.Id,
                                 RoleId = role.Id

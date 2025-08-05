@@ -90,5 +90,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteTestCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Test Histories
+        /// </summary>
+        [HttpGet("histories")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TestModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTestHistory([FromQuery] GetTestHistoryQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

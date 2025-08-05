@@ -6,11 +6,12 @@ namespace Fsel.Course.Application.Queries.TestQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
-    using Fsel.Course.Domain.Models.QueryModels.MockTests;
+    using Fsel.Course.Domain.Models.QueryModels.Test;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -36,13 +37,13 @@ namespace Fsel.Course.Application.Queries.TestQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<TestSearchModel>> methodResult = new MethodResult<PagingItemsModel<TestSearchModel>>();
 
-            var queryTestSection = _testSectionRepository.Queryable.Where(x => x.TestId.HasValue);
+            var queryTestSection = _testSectionRepository.Queryable.Where(x => !x.ParentId.HasValue);
             if (request.LayoutType.HasValue)
             {
                 queryTestSection = queryTestSection.Where(m => m.LayoutType == request.LayoutType);
             }
 
-            var query = _testRepository.Queryable;
+            var query = _testRepository.Queryable.Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).Where(p => !p.IsArchive);
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -80,6 +81,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                                 ProgramName = baseQ.Program != null ? baseQ.Program.Name : string.Empty,
                                 Name = baseQ.Name,
                                 Code = baseQ.Code,
+                                OriginalId = baseQ.OriginalId,
                                 LevelId = baseQ.LevelId,
                                 ProgramId = baseQ.ProgramId,
                                 LayoutTypes = testSections.Select(ts => ts.LayoutType).Distinct().ToList(),
@@ -91,7 +93,11 @@ namespace Fsel.Course.Application.Queries.TestQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
-
+            var originalIds = await _testRepository.GetUsedOriginalIdsAsync(list.Select(x => x.Id).ToList());
+            foreach (var item in list)
+            {
+                item.IsActive = originalIds.Any(x => x == item.OriginalId);
+            }
             methodResult.Result = new PagingItemsModel<TestSearchModel>(list, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

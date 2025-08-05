@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class TokenConfigRepository : BaseRepository<TokenConfig>, ITokenConfigRepository
     {
-        public TokenConfigRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public TokenConfigRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

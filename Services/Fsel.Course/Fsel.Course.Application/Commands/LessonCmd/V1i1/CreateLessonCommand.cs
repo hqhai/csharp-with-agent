@@ -2,25 +2,18 @@
 
 namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
 {
-    using System.Text.RegularExpressions;
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Lessons.V1i1;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
-    using Fsel.Course.Infrastructure.Common;
-    using Fsel.Shared.Enums;
+    using Fsel.Course.Infrastructure.Common.LessonHelpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
-    public class CreateLessonCommand : CreateLessonCommandModel, IRequest<MethodResult<LessonModel>>
+    public class CreateLessonCommand : UpdateLessonCommandModel, IRequest<MethodResult<LessonModel>>
     {
     }
 
@@ -28,22 +21,14 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
     {
         private readonly ILessonRepository _lessonRepository;
         private readonly IMapper _mapper;
-        private readonly ICategoryRepository _categoryRepository;
-        private readonly ILevelRepository _levelRepository;
         private readonly LessonConverter _lessonConverter;
-        private static readonly Regex s_regexCode = new Regex("^[a-zA-Z0-9._]+$", RegexOptions.Compiled);
-        private static readonly Regex s_regexInstructionContent = new Regex("^[^<>&#*]{1,2000}$", RegexOptions.Compiled);
 
         public CreateLessonCommandHandler(ILessonRepository lessonRepository,
                                           IMapper mapper,
-                                          ICategoryRepository categoryRepository,
-                                          ILevelRepository levelRepository,
                                           LessonConverter lessonConverter)
         {
             _lessonRepository = lessonRepository;
             _mapper = mapper;
-            _categoryRepository = categoryRepository;
-            _levelRepository = levelRepository;
             _lessonConverter = lessonConverter;
         }
 
@@ -52,89 +37,33 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<LessonModel> methodResult = new MethodResult<LessonModel>();
 
-            #region Validate
-            if (string.IsNullOrEmpty(request.Name))
+            var validate = await _lessonConverter.ValidateLesson(request, true, null, cancellationToken);
+            if (!validate.IsOK)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotNullOrEmpty), request.Name);
+                methodResult.AddErrorBadRequest(validate.ErrorMessages);
                 return methodResult;
             }
 
-            if (!s_regexCode.IsMatch(request.Name))
+            var lessonConverter = await _lessonConverter.LessonModuleHandler(request.LessonModules!, false, false, cancellationToken);
+            if (!lessonConverter.IsOK)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotValid), request.Name);
+                methodResult.AddErrorBadRequest(lessonConverter.ErrorMessages);
                 return methodResult;
             }
 
-            var checkCode = await _lessonRepository.Queryable.AnyAsync(x => x.Name == request.Name.Trim(), cancellationToken);
-            if (checkCode)
+            var lesson = LessonFactory.Create(request).Build(version: 0, originalId: Guid.NewGuid());
+            if (!lesson.IsValid())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeAlreadyExist), request.Name);
-                return methodResult;
-            }
-
-            var checkProgram = await _categoryRepository.AnyGuidAsync(request.ProgramId);
-            if (!checkProgram)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ProgramId));
-                return methodResult;
-            }
-
-            var checkLevel = await _levelRepository.AnyGuidAsync(request.LevelId);
-            if (!checkLevel)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LevelId));
-                return methodResult;
-            }
-
-            if (!string.IsNullOrEmpty(request.InstructionContent) && !s_regexInstructionContent.IsMatch(request.InstructionContent))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.InstructionContentNotValid), request.InstructionContent);
-                return methodResult;
-            }
-
-            if (request.LessonModules == null || !request.LessonModules.Any())
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.LessonModuleNotNull), nameof(request.LessonModules));
-                return methodResult;
-            }
-
-            var newLesson = _mapper.Map<Lesson>(request);
-            if (!newLesson.IsValid())
-            {
-                methodResult.AddErrorBadRequest(newLesson.ErrorMessages);
-                return methodResult;
-            }
-            #endregion
-
-            if (request.LessonInstructions != null && request.LessonInstructions.Any())
-            {
-                var lessonInstruction = await _lessonConverter.LessonInstructionHandler(request.LessonInstructions, newLesson, cancellationToken);
-                if (!lessonInstruction.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(lessonInstruction.ErrorMessages);
-                    return methodResult;
-                }
-            }
-
-            var lessonModule = await _lessonConverter.LessonModuleHandler(request.LessonModules, newLesson, cancellationToken);
-            if (!lessonModule.IsOK)
-            {
-                methodResult.AddErrorBadRequest(lessonModule.ErrorMessages);
+                methodResult.AddErrorBadRequest(lesson.ErrorMessages);
                 return methodResult;
             }
 
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
-                newLesson.VideoCount = newLesson.LessonModules.Count(x => x.LessonConfigType == EnumLessonConfigType.Video);
-                newLesson.ClassForumCount = newLesson.LessonModules.Count(x => x.LessonConfigType == EnumLessonConfigType.ClassForum);
-                newLesson.HomeWorkCount = newLesson.LessonModules.Count(x => x.LessonConfigType == EnumLessonConfigType.HomeWork);
-                newLesson.DocumentCount = newLesson.LessonModules.Count(x => x.LessonConfigType == EnumLessonConfigType.Document);
-                newLesson.Status = EnumStatus.InActive;
-
-                _lessonRepository.Add(newLesson);
+                _lessonRepository.Add(lesson);
                 await _lessonRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                methodResult.Result = _mapper.Map<LessonModel>(newLesson);
+                methodResult.Result = _mapper.Map<LessonModel>(lesson);
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 return methodResult;
             });

@@ -7,42 +7,41 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.HomeWorks;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Common.HomeworkHelper;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class CreateHomeWorkCommand : CreateHomeWorkCommandModel, IRequest<MethodResult<HomeWorkModel>>
+    public class CreateHomeWorkCommand : UpdateHomeWorkCommandModel, IRequest<MethodResult<HomeWorkModel>>
     {
     }
 
     public class CreateHomeWorkCommandHandler : IRequestHandler<CreateHomeWorkCommand, MethodResult<HomeWorkModel>>
     {
         private readonly IMapper _mapper;
-        private readonly QuestionConverter _questionConverter;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly ISkillRepository _skillRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ILevelRepository _levelRepository;
+        private readonly QuestionConverter _questionConverter;
 
-        public CreateHomeWorkCommandHandler(IMapper mapper
-            , QuestionConverter questionConverter
-            , IHomeWorkRepository homeWorkRepository
-            , ISkillRepository skillRepository)
+        public CreateHomeWorkCommandHandler(IMapper mapper, IHomeWorkRepository homeWorkRepository, ISkillRepository skillRepository, ICategoryRepository categoryRepository, ILevelRepository levelRepository, QuestionConverter questionConverter)
         {
             _mapper = mapper;
-            _questionConverter = questionConverter;
             _homeWorkRepository = homeWorkRepository;
             _skillRepository = skillRepository;
+            _categoryRepository = categoryRepository;
+            _levelRepository = levelRepository;
+            _questionConverter = questionConverter;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<HomeWorkModel> methodResult = new MethodResult<HomeWorkModel>();
-
-            HomeWork homeWork = _mapper.Map<HomeWork>(request);
 
             if (request.Questions == null || request.Questions.Count == 0)
             {
@@ -60,28 +59,40 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 }
             }
 
-            foreach (var question in request.Questions)
+            if (request.ProgramId.HasValue)
             {
-                if (question == null)
+                var skillExists = await _categoryRepository.AnyGuidAsync(request.ProgramId.Value);
+                if (!skillExists)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ProgramId), request.ProgramId);
                     return methodResult;
                 }
-                else
+            }
+
+            if (request.LevelId.HasValue)
+            {
+                var skillExists = await _levelRepository.AnyGuidAsync(request.LevelId.Value);
+                if (!skillExists)
                 {
-                    var newQuestion = _mapper.Map<Question>(question);
-                    var method = _questionConverter.HandleQuestion(newQuestion, true);
-                    if (!method.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(method.ErrorMessages);
-                        return methodResult;
-                    }
-                    homeWork.HomeWorkQuestions.Add(new HomeWorkQuestion
-                    {
-                        Question = method.Result
-                    });
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LevelId), request.LevelId);
+                    return methodResult;
                 }
             }
+
+            var build = HomeWorkFactory.Create(request, _mapper, _questionConverter).Build(version: 0, originalId: Guid.NewGuid(), true, methodResult);
+            if (!build.Item1)
+            {
+                return methodResult;
+            }
+
+            var homeWork = build.Item2;
+
+            if (homeWork == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
+                return methodResult;
+            }
+
             if (!homeWork.IsValid())
             {
                 methodResult.AddErrorBadRequest(homeWork.ErrorMessages);
@@ -92,7 +103,6 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             {
                 homeWork = _homeWorkRepository.Add(homeWork);
                 await _homeWorkRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<HomeWorkModel>(homeWork);
                 return methodResult;

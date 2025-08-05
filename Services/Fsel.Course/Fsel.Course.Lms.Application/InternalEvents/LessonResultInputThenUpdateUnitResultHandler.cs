@@ -82,8 +82,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (lessonResultNext != null && lessonResultNext.Status == EnumResultStatus.Unfinished)
                 {
                     lessonResultNext.Status = EnumResultStatus.New;
-                    _lessonResultRepository.Update(lessonResultNext, false, x => x.CourseId, x => x.StudentId, x => x.UnitId, x => x.LessonId);
-                    await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResultNext }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId };
+                    });
                 }
             }
             else if (mockTestId.HasValue)
@@ -92,8 +94,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 if (mockTestResult != null && mockTestResult.Status == EnumResultStatus.Unfinished)
                 {
                     mockTestResult.Status = EnumResultStatus.New;
-                    _mockTestResultRepository.Update(mockTestResult, false, x => x.MockTestId, x => x.UnitId, x => x.StudentId, x => x.CourseId);
-                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };
+                    });
                 }
             }
         }

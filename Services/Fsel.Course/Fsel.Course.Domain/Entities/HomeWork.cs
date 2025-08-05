@@ -1,20 +1,21 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
-using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
-    public class HomeWork : Entity
+    public class HomeWork : Entity, IVersionEntity
     {
         /// <summary>
         /// Tên bài tập
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegularExpression(@"^[^<>,]{1,200}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Name { get; set; }
 
         /// <summary>
@@ -22,7 +23,8 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         ///
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegularExpression(@"^[^<>,]{1,200}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Code { get; set; }
 
         /// <summary>
@@ -47,11 +49,21 @@ namespace Fsel.Course.Domain.Entities
 
         public Skill? Skill { get; set; }
         public Guid? SkillId { get; set; }
+
+        public EnumVersionStatus VersionStatus { get; set; }
+        public int Version { get; set; }
+
+        public Guid OriginalId { get; set; }
+
+        public Guid? LevelId { get; set; }
+        public Level? Level { get; set; }
+
+        public Guid? ProgramId { get; set; }
+        public Category? Program { get; set; }
+
         public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();
         public ICollection<LessonHomeWork> LessonHomeWorks { get; set; } = new List<LessonHomeWork>();
 
         public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
-
-        public ICollection<LessonModule> LessonModules { get; set; } = new List<LessonModule>();
     }
 }
