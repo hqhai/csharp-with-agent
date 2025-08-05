@@ -48,7 +48,7 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
             }
-            var method = _testConverter.IsValidateQuestion(test.TestSections);
+            var method = _testConverter.IsValidateQuestion(request.TestSections);
             if (!method.IsOK)
             {
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
