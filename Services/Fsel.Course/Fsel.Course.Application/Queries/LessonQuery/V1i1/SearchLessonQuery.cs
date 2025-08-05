@@ -13,7 +13,6 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
     using Fsel.Course.Domain.Models.QueryModels.Lessons.V1i1;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -125,7 +124,11 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                     TimeCodeTypes = v.VideoTimeCodes.Select(t => t.TimeCodeType).Distinct().ToList(),
                 }).ToList(),
                 OriginalId = x.Lesson.OriginalId,
-                Skills = x.Lesson.LessonInstructions.Select(i => i.Skill.Name).ToList()
+                Skills = x.Lesson.LessonInstructions.Select(i => new SkillDTO
+                {
+                    Name = i.Skill.Name,
+                    FilePath = i.Skill.FilePath ?? string.Empty
+                }).ToList()
             });
 
             int totalItem = await lesson.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -136,7 +139,7 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
 
             lessons.ForEach(x =>
             {
-                x.Skills = x.Skills?.Where(x => !string.IsNullOrEmpty(x)).Distinct().ToList();
+                x.Skills = x.Skills?.Where(x => !string.IsNullOrEmpty(x.Name)).Distinct().ToList();
             });
 
             foreach (var item in lessons)

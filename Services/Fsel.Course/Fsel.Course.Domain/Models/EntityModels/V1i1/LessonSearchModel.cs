@@ -22,13 +22,18 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 
         public string? Overview { get; set; }
 
-        public IList<string>? Skills { get; set; }
+        public IList<SkillDTO>? Skills { get; set; }
 
         public IList<VideoSearchModel>? Videos { get; set; }
 
         public Guid OriginalId { get; set; }
     }
+    public class SkillDTO
+    {
+        public string Name { get; set; }
 
+        public string FilePath { get; set; }
+    }
     public class VideoSearchModel
     {
         public Guid? TeacherId { get; set; }
