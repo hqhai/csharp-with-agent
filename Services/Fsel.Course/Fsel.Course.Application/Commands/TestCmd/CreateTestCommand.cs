@@ -44,8 +44,18 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
+<<<<<<< Updated upstream
             var test = _mapper.Map<Test>(request);
             if (!test.IsValid())
+=======
+            var method = _testConverter.IsValidateQuestion(request.TestSections);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            if (!await test.IsValid(_serviceProvider))
+>>>>>>> Stashed changes
             {
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;

@@ -50,6 +50,49 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Validate
 
+<<<<<<< Updated upstream:Services/Fsel.Course/Fsel.Course.Infrastructure/Common/TestHelper.cs
+=======
+        public VoidMethodResult IsValidateQuestion(IEnumerable<UpdateTestSectionCommandModel> testSections)
+        {
+            var methodResult = new VoidMethodResult();
+            if (testSections == null || !testSections.Any())
+            {
+                return methodResult;
+            }
+
+            foreach (var testSection in testSections)
+            {
+                if (testSection.Questions != null && testSection.Questions.Any())
+                {
+                    foreach (var questionRequest in testSection.Questions)
+                    {
+                        var question = _mapper.Map<Question>(questionRequest);
+                        if (!question.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(question.ErrorMessages);
+                        }
+                        var method = _questionConverter.HandleQuestion(question);
+                        if (!method.IsOK)
+                        {
+                            methodResult.AddErrorBadRequest(method.ErrorMessages);
+                        }
+                    }
+                }
+
+                if (testSection.Childrens != null && testSection.Childrens.Any())
+                {
+                    var childResult = IsValidateQuestion(testSection.Childrens);
+                    if (!childResult.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(childResult.ErrorMessages);
+                    }
+                }
+            }
+
+            return methodResult;
+        }
+
+>>>>>>> Stashed changes:Services/Fsel.Course/Fsel.Course.Infrastructure/Common/TestConverter.cs
         private void ValidateTestLayout(CreateTestSectionCommandModel testSectionRequest)
         {
             if (testSectionRequest.LayoutType.HasValue)

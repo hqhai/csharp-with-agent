@@ -48,7 +48,22 @@ namespace Fsel.Course.Application.Commands.TestCmd
             var codeExists = await _testRepository.Queryable.AnyAsync(x => x.Code == request.Code && x.Id != request.Id, cancellationToken);
             if (codeExists)
             {
+<<<<<<< Updated upstream
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
+=======
+                methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
+                return methodResult;
+            }
+            var method = _testConverter.IsValidateQuestion(request.TestSections);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            if (!await newVersionTest.IsValid(_serviceProvider))
+            {
+                methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
+>>>>>>> Stashed changes
                 return methodResult;
             }
 
