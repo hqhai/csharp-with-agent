@@ -253,7 +253,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                     var studentDoSurveyCache = await _cacheService.GetAsync(key);
                     if (studentDoSurveyCache != null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                        methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.DuplicateAnswers));
                         return methodResult;
                     }
                     await _cacheService.SetAsync(key, customerSurveyGroup, TimeSpan.FromSeconds(5));
