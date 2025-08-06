@@ -106,6 +106,12 @@ IHomeWorkQuestionRepository homeWorkQuestionRepository)
                 return methodResult;
             }
 
+            if (await _homeWorkRepository.Queryable.AnyAsync(p => p.Code == request.Code && p.Id != homeWork.Id, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+
             bool isUsed = await _homeWorkRepository.IsUsingByClient(homeWork.Id);
 
             var build = HomeWorkFactory.Create(request, _mapper, _questionConverter).Build(0, null, isUsed, methodResult);

@@ -14,6 +14,7 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
     using Fsel.Course.Infrastructure.Common.HomeworkHelper;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class CreateHomeWorkCommand : UpdateHomeWorkCommandModel, IRequest<MethodResult<HomeWorkModel>>
     {
@@ -46,6 +47,12 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             if (request.Questions == null || request.Questions.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Questions));
+                return methodResult;
+            }
+
+            if (await _homeWorkRepository.Queryable.AnyAsync(p => p.Code == request.Code, cancellationToken))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
 
