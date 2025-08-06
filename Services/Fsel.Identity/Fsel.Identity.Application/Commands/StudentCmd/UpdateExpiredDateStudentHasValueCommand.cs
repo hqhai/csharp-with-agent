@@ -51,11 +51,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.StudentHasNotExpiredDate));
                 return methodResult;
             }
-            if (await _studentEditHistoryRepository.Queryable.AnyAsync(p => p.CreatedUserId == _authContext.CurrentUserId && p.StudentId == request.StudentId, cancellationToken))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumStudentEditHistoryErrorCode.AlreadyEdited));
-                return methodResult;
-            }
 
             var role = _authContext.Roles?.FirstOrDefault();
             if (role != EnumRole.Admin.ToString())
@@ -69,6 +64,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 else if (request.ExpiredDate.Date > currentDate.AddDays(7).Date)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumStudentEditHistoryErrorCode.ExceedsAllowedEditWindow));
+                    return methodResult;
+                }
+                if (await _studentEditHistoryRepository.Queryable.AnyAsync(p => p.CreatedUserId == _authContext.CurrentUserId && p.StudentId == request.StudentId, cancellationToken))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumStudentEditHistoryErrorCode.AlreadyEdited));
                     return methodResult;
                 }
             }
