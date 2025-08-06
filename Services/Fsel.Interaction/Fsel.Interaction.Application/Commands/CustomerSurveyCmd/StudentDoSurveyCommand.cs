@@ -225,6 +225,19 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 }
             }
 
+            if (customerSurveyGroup != null)
+            {
+                var key = $"StudentDoSurvey_{_authContext.CurrentUserId}";
+
+                var studentDoSurveyCache = await _cacheService.GetAsync(key);
+                if (studentDoSurveyCache != null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.DuplicateAnswers));
+                    return methodResult;
+                }
+                await _cacheService.SetAsync(key, customerSurveyGroup, TimeSpan.FromSeconds(5));
+            }
+
             await _surveyConfigRepository.ExecuteTransactionAsync(async () =>
             {
                 if (customerSurveyGroup != null)
@@ -248,16 +261,6 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
 
                 if (customerSurveyGroup != null && customerSurveyGroup.Status == EnumSurveyGroupStatus.Done)
                 {
-                    var key = $"StudentDoSurvey_{_authContext.CurrentUserId}";
-
-                    var studentDoSurveyCache = await _cacheService.GetAsync(key);
-                    if (studentDoSurveyCache != null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.DuplicateAnswers));
-                        return methodResult;
-                    }
-                    await _cacheService.SetAsync(key, customerSurveyGroup, TimeSpan.FromSeconds(5));
-
                     if (surveyConfig.Tokens > 0)
                     {
                         await CreateToken(customerSurveyGroup.Id, surveyConfig.Tokens);
