@@ -1,9 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+// ReSharper disable All
 namespace Fsel.Identity.Authentication.Extensions
 {
+    using System;
+    using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
+    using System.Security.Cryptography;
     using System.Text.Json;
+    using AspNet.Security.OAuth.Apple;
     using Fsel.Authentication.Infrastructure.Configs;
     using Fsel.Common.Constants;
     using Fsel.Core.Extensions;
@@ -24,14 +29,24 @@ namespace Fsel.Identity.Authentication.Extensions
     using Fsel.Identity.Infrastructure.Providers;
     using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
+    using IdentityServer4;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authentication.OAuth;
+    using Microsoft.AspNetCore.Authentication.OpenIdConnect;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Http.Extensions;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.FileProviders.Physical;
+    using Microsoft.IdentityModel.JsonWebTokens;
+    using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+    using Microsoft.IdentityModel.Tokens;
+    using Org.BouncyCastle.Crypto.Parameters;
+    using Org.BouncyCastle.OpenSsl;
+    using Org.BouncyCastle.Security;
     using Refit;
     using static IdentityServer4.IdentityServerConstants;
 
@@ -151,6 +166,7 @@ namespace Fsel.Identity.Authentication.Extensions
             })
             .AddDeveloperSigningCredential()
             .AddProfileService<UserProfileService>();
+
 
             builder.Services.AddAuthentication()
                 .AddGoogle(options =>
@@ -287,6 +303,26 @@ namespace Fsel.Identity.Authentication.Extensions
                             return Task.CompletedTask;
                         }
                     };
+                })
+                .AddApple(options =>
+                {
+                    options.ClientId = appSetting?.Authentication?.Apple?.ClientId ?? string.Empty;
+                    options.KeyId = appSetting?.Authentication?.Apple?.KeyId ?? string.Empty;
+                    options.TeamId = appSetting?.Authentication?.Apple?.TeamId ?? string.Empty;
+                    options.UsePrivateKey(keyId =>
+                    {
+                        var env = builder.Services.BuildServiceProvider().GetRequiredService<IWebHostEnvironment>();
+                        var fileInfo = env.ContentRootFileProvider.GetFileInfo(appSetting?.Authentication?.Apple?.PrivateKey ?? string.Empty);
+
+                        if (!fileInfo.Exists)
+                        {
+                            throw new FileNotFoundException($"Apple private key file not found: {fileInfo.PhysicalPath}");
+                        }
+
+                        return fileInfo;
+                    });
+                    options.SaveTokens = false;
+                    options.CallbackPath = appSetting?.Authentication?.Apple?.Callback ?? string.Empty;
                 })
                 .AddCookie(options =>
                 {

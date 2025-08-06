@@ -427,21 +427,17 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     {
                         await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
 
-                        // only set explicit expiration here if user chooses "remember me".
-                        // otherwise we rely upon expiration configured in cookie middleware.
                         AuthenticationProperties? props = null;
                         if (AccountOptions.AllowRememberLogin && model.RememberLogin)
                         {
                             props = new AuthenticationProperties
                             {
-                                // Check cookies có lưu lại thông tin sau khi đăng nhập
                                 IsPersistent = true,
                                 ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
                             };
                         }
                         ;
 
-                        // issue authentication cookie with subject ID and username
                         var isuser = new IdentityServerUser(user.Id.ToString())
                         {
                             DisplayName = user.UserName
@@ -454,17 +450,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                             if (context.IsNativeClient())
                             {
                                 Thread.Sleep(1300);
-
-                                // The client is native, so this change in how to
-                                // return the response is for better UX for the end user.
-                                //return this.LoadingPage("Redirect", model.ReturnUrl ?? string.Empty);
                             }
 
-                            // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
                             return Redirect(model.ReturnUrl ?? string.Empty);
                         }
 
-                        // request for a local page
                         if (Url.IsLocalUrl(model.ReturnUrl))
                         {
                             return Redirect(model.ReturnUrl);
@@ -476,7 +466,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                         else
                         {
                             _logger.LogWarning("Invalid return URL");
-                            // user might have clicked on a malicious link - should be logged
                         }
                     }
                     else if (userLogin.IsLockedOut)

@@ -44,8 +44,22 @@ builder.Services.AddSingleton<ICorsPolicyService>((container) =>
     };
 });
 
-builder.WebHost.UseKestrel();
+#if DEBUG
+var env = builder.Environment;
+if (env.IsDevelopment() &&
+    builder.Configuration["Urls"]?.Contains("https://fsel-auth-dev.fsel.edu.vn:443") == true)
+{
+    builder.WebHost.ConfigureKestrel(serverOptions =>
+    {
+        serverOptions.ListenAnyIP(443, listenOptions =>
+        {
+            listenOptions.UseHttps("./Resources/CertificateSSL/fsel-auth-dev.fsel.edu.vn.pfx", "");
+        });
+    });
+}
+#endif
 
+builder.WebHost.UseKestrel();
 var fordwardedHeaderOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
