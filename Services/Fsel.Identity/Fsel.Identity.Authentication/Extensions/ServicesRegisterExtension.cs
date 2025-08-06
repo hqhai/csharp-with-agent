@@ -5,6 +5,7 @@ namespace Fsel.Identity.Authentication.Extensions
 {
     using System;
     using System.IdentityModel.Tokens.Jwt;
+    using System.Reflection;
     using System.Security.Claims;
     using System.Security.Cryptography;
     using System.Text.Json;
@@ -40,6 +41,7 @@ namespace Fsel.Identity.Authentication.Extensions
     using Microsoft.AspNetCore.WebUtilities;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.FileProviders;
     using Microsoft.Extensions.FileProviders.Physical;
     using Microsoft.IdentityModel.JsonWebTokens;
     using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -311,9 +313,8 @@ namespace Fsel.Identity.Authentication.Extensions
                     options.TeamId = appSetting?.Authentication?.Apple?.TeamId ?? string.Empty;
                     options.UsePrivateKey(keyId =>
                     {
-                        var env = builder.Services.BuildServiceProvider().GetRequiredService<IWebHostEnvironment>();
-                        var fileInfo = env.ContentRootFileProvider.GetFileInfo(appSetting?.Authentication?.Apple?.PrivateKey ?? string.Empty);
-
+                        var binFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
+                        var fileInfo = new PhysicalFileProvider(binFolder).GetFileInfo($"Resources/{appSetting?.Authentication?.Apple?.PrivateKey}");
                         if (!fileInfo.Exists)
                         {
                             throw new FileNotFoundException($"Apple private key file not found: {fileInfo.PhysicalPath}");

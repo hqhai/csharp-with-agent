@@ -36,7 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="AuthKey_544ML2H3QN_1.p8">
+    <None Update="Resources\ApplePrivateKey.p8">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\CertificateSSL\certificate.crt">
