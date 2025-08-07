@@ -153,5 +153,13 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Account has been cut off
         /// </summary>
         AccountHasBeenCutOff,
+
+        OtpBlockInMinutes,
+
+        OtpTryResendAfterMinutes,
+
+        OtpTryResendAfterSeconds,
+
+        RegisterExpired
     }
 }
