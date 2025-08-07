@@ -89,11 +89,13 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             return methodResult;
         }
 
-        private async Task<User?> CreateUserStudentAsync(CreateStudentByParentCommandModel request, Parent parent, CancellationToken cancellationToken)
+        private async Task<MethodResult<User>> CreateUserStudentAsync(CreateStudentByParentCommandModel request, Parent parent, CancellationToken cancellationToken)
         {
+            var methodResult = new MethodResult<User>();
             var user = _mapper.Map<User>(request);
 
             #region Add Platform to User
+
             var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
             if (platform != null)
             {
@@ -102,12 +104,18 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
                     PlatformId = platform.Id
                 });
             }
-            #endregion
 
+            #endregion Add Platform to User
+
+            if (!user.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
+                return methodResult;
+            }
             var identityResult = await _userManager.CreateAsync(user, request.Password ?? string.Empty);
             if (!identityResult.Succeeded)
             {
-                return null;
+                return methodResult;
             }
 
             await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
@@ -115,13 +123,19 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await _userManager.ConfirmEmailAsync(user, token);
 
-            await CreateHumanAsync(request, user, parent);
-
-            return user;
+            var method = await CreateHumanAsync(request, user, parent);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            methodResult.Result = user;
+            return methodResult;
         }
 
-        private async Task CreateHumanAsync(CreateStudentByParentCommandModel request, User user, Parent parent)
+        private async Task<VoidMethodResult> CreateHumanAsync(CreateStudentByParentCommandModel request, User user, Parent parent)
         {
+            var methodResult = new VoidMethodResult();
             var human = new Human
             {
                 UserId = user.Id,
@@ -136,9 +150,20 @@ namespace Fsel.Identity.Application.Commands.ParentCmd
                     Occupation = "Student"
                 }
             };
+            if (!human.IsValid())
+            {
+                methodResult.AddErrorBadRequest(human.ErrorMessages);
+                return methodResult;
+            }
+            if (human.Student != null && !human.Student.IsValid())
+            {
+                methodResult.AddErrorBadRequest(human.Student.ErrorMessages);
+                return methodResult;
+            }
 
             _humanRepository.Add(human);
-            await _humanRepository.UnitOfWork.SaveEntitiesAsync().ConfigureAwait(false);
+            await _humanRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            return methodResult;
         }
     }
 }

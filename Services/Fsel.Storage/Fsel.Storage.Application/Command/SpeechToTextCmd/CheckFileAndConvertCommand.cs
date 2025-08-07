@@ -5,10 +5,10 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Storage.Application.Services.FFmpegServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
     using Refit;
 
     public class CheckFileAndConvertCommand : IRequest<MethodResult<IFormFile>>
@@ -19,13 +19,19 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
     public class CheckFileAndConvertCommandHandler : IRequestHandler<CheckFileAndConvertCommand, MethodResult<IFormFile>>
     {
         private readonly IFFmpegServices _fFmpegServices;
+        private readonly ILogger<CheckFileAndConvertCommand> _logger;
+        private readonly IHttpClientFactory _httpClient;
         private List<string> _codecs = new List<string> { "WebM", "ADTS" };
         private List<string> _nameFiles = new List<string> { "AAC", "mp4", "WMA" };
         //private List<(string, string)> _fileCodecs = new List<(string, string)> { ("WMA", "Windows media") };
 
-        public CheckFileAndConvertCommandHandler(IFFmpegServices fFmpegServices)
+        public CheckFileAndConvertCommandHandler(IFFmpegServices fFmpegServices,
+                                                 ILogger<CheckFileAndConvertCommand> logger,
+                                                 IHttpClientFactory httpClient)
         {
             _fFmpegServices = fFmpegServices;
+            _logger = logger;
+            _httpClient = httpClient;
         }
 
         public async Task<MethodResult<IFormFile>> Handle(CheckFileAndConvertCommand request, CancellationToken cancellationToken)
@@ -45,6 +51,8 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
                 methodResult.AddError(checkFileResult.Error);
                 return methodResult;
             }
+
+            _logger.LogInformation($"LogInfoAudio:{checkFile}");
 
             if (_codecs.Any(x => x.ToLower() == checkFile.AudioInfo.Codec.ToLower()) ||
                 _nameFiles.Any(x => x.ToLower() == checkFile.Filename?.Substring(checkFile.Filename.LastIndexOf('.') + 1).ToLower()))
@@ -70,35 +78,30 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
             await using var stream = originalFile.OpenReadStream();
             var filePart = new StreamPart(stream, originalFile.FileName, originalFile.ContentType);
 
+            // convert file ffmpeg
             var ffmpegConvert = await _fFmpegServices.Convert(filePart);
-            if (!ffmpegConvert.IsSuccessStatusCode)
+            if (!ffmpegConvert.IsSuccessStatusCode || string.IsNullOrEmpty(ffmpegConvert.Content?.Paths3))
             {
                 methodResult.AddError(ffmpegConvert.Error);
                 return methodResult;
             }
 
-            var jobConvertResult = await _fFmpegServices.Status(ffmpegConvert.Content?.JobId ?? Guid.Empty);
-            if (!jobConvertResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(jobConvertResult.Error);
-                return methodResult;
-            }
-            var jobConvert = jobConvertResult.Content;
-            if (jobConvert == null || jobConvert.FileData == null || jobConvert.FileName == null || jobConvert.ContentType == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(jobConvert));
-                return methodResult;
-            }
+            _logger.LogInformation($"LogConvertAudio:{ffmpegConvert.Content}");
 
-            byte[] byteArray = Convert.FromBase64String(jobConvert.FileData);
-            IFormFile formFile = ConvertToIFormFile(byteArray, jobConvert.FileName, jobConvert.ContentType);
-            if (formFile == null)
+            // đọc dữ liệu từ link s3
+            var httpClient = _httpClient.CreateClient();
+            var response = await httpClient.GetAsync(ffmpegConvert.Content.Paths3);
+            if (!response.IsSuccessStatusCode)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(formFile));
                 return methodResult;
             }
+            var fileName = response.Content.Headers.ContentDisposition?.FileName?.Trim('"') ?? "audio.wav";
+            var contentType = response.Content.Headers.ContentType?.ToString() ?? "audio/wav";
+            var bytes = await response.Content.ReadAsByteArrayAsync();
 
-            methodResult.Result = formFile;
+            IFormFile formFileDefault = ConvertToIFormFile(bytes, fileName, contentType);
+
+            methodResult.Result = formFileDefault;
             return methodResult;
         }
 

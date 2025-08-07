@@ -52,5 +52,28 @@ namespace Fsel.Identity.Application.Services.GoogleSheetServices
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        public bool CreateDataFromSheet(string spreadsheetId, string range, IList<IList<object>> values)
+        {
+            var valueRange = new ValueRange
+            {
+                Values = values
+            };
+
+            var appendRequest = _sheetsService.Spreadsheets.Values.Append(valueRange, spreadsheetId, range);
+
+            // sử dụng USERENTERED sẽ xử lý giống như cách người dùng nhập vào Google Sheets (ví dụ dùng hàm SUM sẽ trả ra kết quả sau khi được SUM)
+            // còn RAW khi dùng mã ko muốn Google Sheets xử lý (nhập hàm SUM sẽ dữ nguyên hàm)
+            appendRequest.ValueInputOption = SpreadsheetsResource.ValuesResource.AppendRequest.ValueInputOptionEnum.USERENTERED;
+
+            var response = appendRequest.Execute();
+
+            if (response.Updates.UpdatedRows <= 0)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

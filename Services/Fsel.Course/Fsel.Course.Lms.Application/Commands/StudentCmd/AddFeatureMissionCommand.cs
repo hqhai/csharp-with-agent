@@ -37,7 +37,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(request.ReceiverId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(request.ReceiverId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 return methodResult;

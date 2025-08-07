@@ -7,13 +7,15 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Android
     using Google.Apis.AndroidPublisher.v3.Data;
     using Google.Apis.Auth.OAuth2;
     using Google.Apis.Services;
+    using Microsoft.Extensions.Logging;
 
     public class GooglePlayBillingService : IDisposable, IGooglePlayBillingService
     {
         private readonly AndroidPublisherService _service;
         private bool _disposed;
+        private readonly ILogger<GooglePlayBillingService> _logger;
 
-        public GooglePlayBillingService()
+        public GooglePlayBillingService(ILogger<GooglePlayBillingService> logger)
         {
             GoogleCredential credential;
             using (var stream = new FileStream(ResourceSettings.AndroidPrivateKey, FileMode.Open, FileAccess.Read))
@@ -24,14 +26,23 @@ namespace Fsel.Ordering.Application.Services.InAppPurchase.Android
             _service = new AndroidPublisherService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
-                ApplicationName = "Your Application Name",
+                ApplicationName = "FSEL- Learning English",
             });
+            _logger = logger;
         }
 
-        public async Task<SubscriptionPurchase> VerifySubscriptionAsync(string packageName, string subscriptionId, string token)
+        public async Task<SubscriptionPurchaseV2?> VerifySubscriptionAsync(string packageName, string token)
         {
-            var request = _service.Purchases.Subscriptions.Get(packageName, subscriptionId, token);
-            return await request.ExecuteAsync();
+            try
+            {
+                var request = _service.Purchases.Subscriptionsv2.Get(packageName, token);
+                return await request.ExecuteAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return null;
+            }
         }
 
         public async Task<ProductPurchase> VerifyProductAsync(string packageName, string productId, string token)

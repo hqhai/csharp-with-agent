@@ -131,6 +131,23 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
 
             _mapper.Map(request, user.Human);
+            if (!user.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
+                return methodResult;
+            }
+            if (!user.Human.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.Human.ErrorMessages);
+                return methodResult;
+            }
+
+            if (!user.Human.Student.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.Human.Student.ErrorMessages);
+                return methodResult;
+            }
+
             await _userManager.UpdateAsync(user);
 
             methodResult.StatusCode = StatusCodes.Status200OK;

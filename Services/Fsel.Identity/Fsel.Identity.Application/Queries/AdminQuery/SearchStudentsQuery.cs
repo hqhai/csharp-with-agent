@@ -53,9 +53,42 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 return methodResult;
             }
 
+            var queryStudent = _studentRepository.Queryable;
+            if (request.Grades != null && request.Grades.Count > 0)
+            {
+                queryStudent = queryStudent.WhereBulkContains(request.Grades, x => x.SchoolGrade);
+            }
+            if (request.Classes != null && request.Classes.Count > 0)
+            {
+                queryStudent = queryStudent.WhereBulkContains(request.Classes, x => x.SchoolClass);
+            }
+            if (!string.IsNullOrEmpty(request.SchoolName))
+            {
+                request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
+                queryStudent = queryStudent.Where(m => m.School != null && m.School == request.SchoolName);
+            }
+            if (request.IsCourseProcess)
+            {
+                queryStudent = queryStudent.Where(x => x.CourseId.HasValue);
+            }
+            if (request.CourseType.HasValue)
+            {
+                var courseLevels = request.CourseType.GetEnumCourseLevels();
+                queryStudent = queryStudent.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value));
+            }
+            if (request.CourseLevel.HasValue)
+            {
+                queryStudent = queryStudent.Where(m => m.CourseLevel == request.CourseLevel);
+            }
+            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            {
+                var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
+                queryStudent = queryStudent.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
+            }
+
             var query = from u in _userManager.Users
                         join h in _humanRepository.Queryable on u.Id equals h.UserId
-                        join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                        join s in queryStudent on h.Id equals s.HumanId
                         select new { User = u, Human = h, Student = s };
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -79,37 +112,6 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     var queryFullName = query.Where(m => m.User.FullName != null && EF.Functions.Contains(m.User.FullName, $"\"{request.Keyword}\"") && EF.Functions.Like(m.User.FullName, $"%{request.Keyword}%"));
                     query = queryUserName.Union(queryFullName);
                 }
-            }
-            if (!string.IsNullOrEmpty(request.SchoolName))
-            {
-                request.SchoolName = request.SchoolName.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
-                query = query.Where(m => m.Student.School != null && m.Student.School == request.SchoolName);
-            }
-            if (request.Grades != null && request.Grades.Count > 0)
-            {
-                query = query.WhereBulkContains(request.Grades, x => x.Student.SchoolGrade);
-            }
-            if (request.Classes != null && request.Classes.Count > 0)
-            {
-                query = query.WhereBulkContains(request.Classes, x => x.Student.SchoolClass);
-            }
-            if (request.IsCourseProcess)
-            {
-                query = query.Where(x => x.Student.CourseId.HasValue);
-            }
-            if (request.CourseType.HasValue)
-            {
-                var courseLevels = request.CourseType.GetEnumCourseLevels();
-                query = query.Where(x => x.Student.CourseLevel.HasValue && courseLevels.Contains(x.Student.CourseLevel.Value));
-            }
-            if (request.CourseLevel.HasValue)
-            {
-                query = query.Where(m => m.Student.CourseLevel == request.CourseLevel);
-            }
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
-            {
-                var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
-                query = query.Where(x => x.Student.SchoolId.HasValue && x.Student.SchoolId == schoolId);
             }
 
             var dataQuery = query.Select(x => new StudentSearchAdminModel

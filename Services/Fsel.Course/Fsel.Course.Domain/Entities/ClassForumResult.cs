@@ -16,10 +16,12 @@ namespace Fsel.Course.Domain.Entities
 
     public class ClassForumResult : Entity, ITokenResult
     {
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
 
         private string? _wordContent;
 
+        [MaxLength(5000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? WordContent
         {
             get { return _wordContent; }
@@ -84,13 +86,13 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Số câu trả lời đúng của Student
         /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectCount { get; set; }
 
         /// <summary>
         /// Tổng số câu trả lời đúng
         /// </summary>
-        [Range(0, 10000_0000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(0, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int CorrectTotal { get; set; }
 
         /// <summary>

@@ -1872,6 +1872,9 @@ namespace Fsel.System.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
 
+                    b.Property<DateTime?>("CreatedDateLocal")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("CreatedFullName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1900,6 +1903,9 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<Guid?>("DeletedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
+
+                    b.Property<int?>("Index")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -2026,6 +2032,9 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnOrder(107);
+
+                    b.Property<DateTime?>("CreatedDateLocal")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("CreatedFullName")
                         .IsRequired()
@@ -2483,6 +2492,10 @@ namespace Fsel.System.Infrastructure.Migrations
                     b.Property<Guid?>("UpdatedUserId")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<int>("Visit")
                         .HasColumnType("int");

@@ -205,7 +205,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             {
                 if (createHomeWorkAnswers.Any())
                 {
-                    await _homeWorkAnswerRepository.BulkMergeAsync(createHomeWorkAnswers);
+                    await _homeWorkAnswerRepository.BulkMergeAsync(createHomeWorkAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.HomeWorkQuestionId, entity.HomeWorkResultId, entity.IsDeleted };
+                    });
                 }
                 if (updateHomeWorkAnswers.Any())
                 {
@@ -321,8 +324,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
             }
 
-            _homeWorkResultRepository.Update(homeWorkResult, false, x => x.HomeWorkId, x => x.LessonResultId, x => x.StudentId);
-            homeWorkResult.HomeWorkAnswers.ForEach(answer => _homeWorkResultRepository.DbContext.Entry(answer).State = EntityState.Unchanged);
+            await _homeWorkResultRepository.BulkUpdateList(new List<HomeWorkResult> { homeWorkResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId };
+            });
             await _homeWorkResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
             await PublishRankedStudent(homeWorkResult.CreatedUserId, cancellationToken).ConfigureAwait(false);

@@ -13,7 +13,6 @@ namespace Fsel.Ordering.Application.Commands.PackageCmds
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class SavePackagesCommand : SavePackagesCommandModel, IRequest<MethodResult<bool>>
     {

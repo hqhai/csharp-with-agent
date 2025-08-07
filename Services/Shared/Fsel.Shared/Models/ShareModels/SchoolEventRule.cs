@@ -61,9 +61,7 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<CollectiveAward>? CollectiveAwards { get; set; }
         public FormConfig? FormConfig { get; set; }
         public Guid? LocationId { get; set; }
-
         public string? BackGroundImage { get; set; }
-
         public IList<string>? TabNames { get; set; }
         public ButtonNavSettings? ButtonNavSettings { get; set; }
         public bool? AutoGenAge { get; set; }
@@ -83,7 +81,9 @@ namespace Fsel.Shared.Models.ShareModels
         ExportAccount,
         EventGuideScreen,
         WarningScreen,
-        DailyQuiz
+        DailyQuiz,
+        EventRegistrationSuccess,
+        EventGiftDisplay
     }
 
     public enum EnumByPassPaymentType
@@ -145,6 +145,7 @@ namespace Fsel.Shared.Models.ShareModels
     public class StopAtLevelSelectionConfig
     {
         public string? Image { get; set; }
+        public string? ImageMobile { get; set; }
         public string? Title { get; set; }
         public IList<string>? Content { get; set; }
         public IList<string>? Footer { get; set; }

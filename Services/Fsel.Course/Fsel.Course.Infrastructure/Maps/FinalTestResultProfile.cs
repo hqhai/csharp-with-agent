@@ -14,7 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         public FinalTestResultProfile()
         {
             CreateMap<FinalTestResult, FinalTestResultModel>()
-            .ForMember(x => x.ProgressPercent, p => p.MapFrom(x => x.FinalTest != null ? NumberHelper.GetPercent(x.SectionGroupResults.Where(y => y.Status == EnumResultStatus.Done).Count(), x.FinalTest.FinalTestSections.Count) : default));
+            .ForMember(x => x.ProgressPercent, p => p.MapFrom(x => x.FinalTest != null ? NumberHelper.GetPercent(x.SectionGroupResults.Where(y => y.Status == EnumResultStatus.Done).Count(), x.FinalTest.FinalTestSections.Count, 0) : default));
             CreateMap<FinalTestResult, TestResultRankingModel>()
             .ForMember(x => x.Score, p => p.MapFrom(o => o.CorrectCount));
             CreateMap<FinalTestResult, TestResultReportModel>()

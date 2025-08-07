@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Queries.Reports
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
@@ -34,7 +33,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
     public class ExportReportLearningProcessToSchoolsQueryHandler : IRequestHandler<ExportReportLearningProcessToSchoolsQuery, MethodResult<Stream>>
     {
-        private readonly IMapper _mapper;
         private readonly IUserService _userService;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IServiceProvider _serviceProvider;
@@ -44,7 +42,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         private const int RowExportReport = 5;
 
         public ExportReportLearningProcessToSchoolsQueryHandler(
-            IMapper mapper,
             IUserService userService,
             ICourseResultRepository courseResultRepository,
             IServiceProvider serviceProvider,
@@ -52,7 +49,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             ILessonResultRepository lessonResultRepository,
             IStorageService storageService)
         {
-            _mapper = mapper;
             _userService = userService;
             _courseResultRepository = courseResultRepository;
             _serviceProvider = serviceProvider;
@@ -121,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     LocationName = reportCompetitionEvent.DistrictName,
                     ReportPlacementTestEventSchools = new List<ReportPlacementTestEventSchoolModel>()
                 };
-
+                var reportPlacementTestEventSchools = new List<ReportPlacementTestEventSchoolModel>();
                 foreach (var eventSchool in reportCompetitionEvent.ReportCompetitionEventSchools)
                 {
                     var eventStudentIdsSet = eventSchool.StudentIds?.ToHashSet() ?? new HashSet<Guid>();
@@ -131,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     var studentLearnSchool = studentLearnHashSet.Where(x => eventStudentIdsSet.Contains(x)).Distinct().ToList();
 
                     var learningProgressLearns = await GetStudyPositionAsync(request.CourseType, studentResultSchoolIds);
-                    reportPlacementTestEvent.ReportPlacementTestEventSchools.Add(new ReportPlacementTestEventSchoolModel
+                    reportPlacementTestEventSchools.Add(new ReportPlacementTestEventSchoolModel
                     {
                         SchoolName = eventSchool.SchoolName,
                         TotalStudentToLearn = studentLearnSchool.Count,
@@ -143,6 +139,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                         LearningProgressLearns = learningProgressLearns,
                     });
                 }
+                reportPlacementTestEvent.ReportPlacementTestEventSchools = reportPlacementTestEventSchools;
                 reportPlacementTestEvents.Add(reportPlacementTestEvent);
             }
             methodResult.Result = ExportExcelTemplate(reportPlacementTestEvents.ToList(), request);
@@ -169,7 +166,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportLearningSchoolEvent)))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
-                TemplateExecel(excelWorksheet, request.CourseType);
+                TemplateExecel(excelWorksheet, request.CourseType, request.CourseLevel);
 
                 int startRow = 6;
                 int indexReport = 1;
@@ -211,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             return memoryStream;
         }
 
-        private static void TemplateExecel(ExcelWorksheet excelWorksheet, EnumCourseType courseType)
+        private static void TemplateExecel(ExcelWorksheet excelWorksheet, EnumCourseType courseType, EnumCourseLevel? courseLevel = null)
         {
             excelWorksheet.Cells["G4"].Value = Shared.Helpers.StringHelper.FormatStringWithParam(excelWorksheet.Cells["G4"].Value, $"{courseType.GetDescription()}");
             excelWorksheet.Cells["H4"].Value = Shared.Helpers.StringHelper.FormatStringWithParam(excelWorksheet.Cells["H4"].Value, $"{courseType.GetDescription()}");
@@ -219,7 +216,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             int startColumn = 9;
             int mergeRangeCount = courseType == EnumCourseType.Academic ? (CourseProgressValue.CountUnitAca * CourseProgressValue.CountLessonAca + CourseProgressValue.CountFinalTest) * 2
                 : courseType == EnumCourseType.Ielts ? (CourseProgressValue.CountUnitIELTS * CourseProgressValue.CountLessonIELTS + CourseProgressValue.CountUnitIELTS + CourseProgressValue.CountFullMockTest) * 2
-                : default;
+                : courseType == EnumCourseType.EnglishFoundation && courseLevel.HasValue && courseLevel.Value == EnumCourseLevel.EFA1 ? (CourseProgressValue.CountUnitRFIA1 * CourseProgressValue.CountLessonRFI + CourseProgressValue.CountFinalTest) * 2
+                : (CourseProgressValue.CountUnitRFIA2 * CourseProgressValue.CountLessonRFI + CourseProgressValue.CountFinalTest) * 2;
 
             // Tạo danh sách các dải ô cần merge và thêm đường viền
             List<(int row, int startCol, int endCol)> ranges = new()
@@ -329,7 +327,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
                 var unitSkillMockTestRepository = scope.ServiceProvider.GetRequiredService<IUnitSkillMockTestRepository>();
                 var mockTestResultRepository = scope.ServiceProvider.GetRequiredService<IMockTestResultRepository>();
-                if (courseType == EnumCourseType.Academic)
+                if (courseType == EnumCourseType.Academic || courseType == EnumCourseType.EnglishFoundation)
                 {
                     var query = (from baseQ in courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
 

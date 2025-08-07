@@ -32,10 +32,11 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         public async Task<MethodResult<bool>> Handle(ConvertSpeechToTextCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            ArgumentNullException.ThrowIfNull(request.FormFile);
             var methodResult = new MethodResult<bool>();
 
             using var memoryStream = new MemoryStream();
-            await request.FormFile.CopyToAsync(memoryStream);
+            await request.FormFile.CopyToAsync(memoryStream, cancellationToken);
 
             var speechToTextAi = new SpeechToTextAiConsumerModel
             {

@@ -23,6 +23,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
     public class SendOtpForPhoneVerificationCommand : IRequest<MethodResult<SaveOTPForUserEventHaNoiCommandModel>>
     {
+        public bool IsSMS { get; set; }
     }
 
     public class SendOtpForPhoneVerificationCommandHandler : IRequestHandler<SendOtpForPhoneVerificationCommand, MethodResult<SaveOTPForUserEventHaNoiCommandModel>>
@@ -58,6 +59,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             var userOtpCode = await _userOtpCodeRepository.Queryable.Where(p => p.UserId == user.Id && p.Type == EnumUserOtpCodeType.SMS)
                                                                 .Where(x => x.Status == EnumOtpCodeStatus.New)
                                                                 .FirstOrDefaultAsync(cancellationToken);
+
             if (userOtpCode != null && userOtpCode.RetryCount >= ValueSettings.Retrycount)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.AttemptsExhausted), nameof(user.PhoneNumber), user.PhoneNumber);
@@ -88,17 +90,34 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
                 await _userOtpCodeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                var sendSMSResult = await _senderService.SendSMSAsync(new SendSMSCommandModel()
+                if (request.IsSMS)
                 {
-                    PhoneNumbers = new List<string> { user.PhoneNumber ?? string.Empty },
-                    Template = EnumSendSMSTemplate.SendOTP,
-                    Params = new
+                    var sendSMSResult = await _senderService.SendSMSAsync(new SendSMSCommandModel()
                     {
-                        OTP = userOtpCode.OTPCode,
-                        CountOTP = userOtpCode.RetryCount
-                    },
-                    IsCheckDuplicate = false,
-                });
+                        PhoneNumbers = new List<string> { user.PhoneNumber ?? string.Empty },
+                        Template = EnumSendSMSTemplate.SendOTP,
+                        Params = new
+                        {
+                            OTP = userOtpCode.OTPCode,
+                            CountOTP = userOtpCode.RetryCount
+                        },
+                        IsCheckDuplicate = false,
+                    });
+                }
+                else
+                {
+                    var sendSMSResult = await _senderService.SendSMSWithZaloAsync(new SendSMSByZaloCommandModel()
+                    {
+                        PhoneNumbers = new List<string> { user.PhoneNumber ?? string.Empty },
+                        Type = 1,
+                        Template = EnumZaloTemplate.OTP,
+                        Params = new
+                        {
+                            otp = userOtpCode.OTPCode
+                        },
+                        UseUnicode = 0
+                    });
+                }
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = new SaveOTPForUserEventHaNoiCommandModel { Action = EnumActionSaveOTPForEventHaNoi.Success, CountOTP = userOtpCode.RetryCount };

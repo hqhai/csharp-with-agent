@@ -28,7 +28,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             }
         }
 
-        public EnumEducationLevel EducationLevel { get; set; }
+        public EnumEducationLevel? EducationLevel { get; set; }
     }
 
     public class GetReportCompetitionEventsQueryHandler : IRequestHandler<GetReportCompetitionEventsQuery, MethodResult<IList<ReportCompetitionEventModel>>>

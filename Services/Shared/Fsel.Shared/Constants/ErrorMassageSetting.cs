@@ -18,5 +18,7 @@ namespace Fsel.Shared.Constants
         public const string PhoneNumberAlreadyExistVN = "Số điện thoại đã tồn tại trên hệ thống";
         public const string EmailAlreadyExistInListVN = "Email đã tồn tại trong danh sách này";
         public const string PhoneNumberAlreadyExistInListVN = "Số điện thoại đã tồn tại trong danh sách này";
+        public const string DataAlreadyExistInListVN = "Đã tồn tại tài khoản này trong danh sách này";
+        public const string DataAlreadyExistVN = "Đã tồn tại tài khoản này trong hệ thống";
     }
 }

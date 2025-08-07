@@ -4,13 +4,11 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -96,6 +94,11 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             {
                 student.SchoolId = location.Id;
                 student.School = location.Name;
+                if (!student.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(student.ErrorMessages);
+                    return methodResult;
+                }
 
                 _studentRepository.Update(student);
                 await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

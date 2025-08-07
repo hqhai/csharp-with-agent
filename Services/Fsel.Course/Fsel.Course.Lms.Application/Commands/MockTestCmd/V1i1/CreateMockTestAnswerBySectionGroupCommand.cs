@@ -31,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class CreateMockTestAnswerBySectionGroupCommand : CreateAnswerBySectionGroupCommandModel, IRequest<MethodResult<SectionGroupResultModel>>
     {
@@ -292,14 +293,13 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                 mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
                 mockTestResult = GetMockTestResult(sectionGroupResults, mockTestResult);
-                _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
+                await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.MockTestId, c.UnitId };
+                });
                 if (mockTestResult.Status == EnumResultStatus.Done)
                 {
                     await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -394,7 +394,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             {
                 if (createMockTestAnswers != null && createMockTestAnswers.Any())
                 {
-                    await _mockTestAnswerRepository.BulkMergeAsync(createMockTestAnswers);
+                    await _mockTestAnswerRepository.BulkMergeAsync(createMockTestAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId, entity.IsDeleted };
+                    });
                 }
                 if (updateMockTestAnswers != null && updateMockTestAnswers.Any())
                 {
@@ -485,11 +488,23 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
                         return methodResult;
                     }
+                    int answerLength = item.Answer?.ToString()?.Length ?? default;
+                    if (section.DisplayOrder == AnswerLength.Section0 && answerLength > AnswerLength.MaxLengthDisplayOrder0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(item.Answer), item.Answer ?? new(), answerLength);
+                        return methodResult;
+                    }
+                    if (section.DisplayOrder == AnswerLength.Section1 && answerLength > AnswerLength.MaxLengthDisplayOrder1)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(item.Answer), item.Answer ?? new(), answerLength);
+                        return methodResult;
+                    }
                     var mockTestAnswer = mockTestAnswers.FirstOrDefault(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionId == section.Id);
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, section.Id);
                         mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item.Answer, item.SpeechTextAnswer, 0);
+
                         if (!mockTestAnswer.IsValid())
                         {
                             methodResult.AddErrorBadRequest(mockTestAnswer.ErrorMessages);

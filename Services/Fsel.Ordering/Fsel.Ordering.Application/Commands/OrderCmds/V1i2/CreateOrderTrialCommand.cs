@@ -7,12 +7,14 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Application.Services.UserService;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
+    using Fsel.Ordering.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
@@ -30,20 +32,29 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
         private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
+        private readonly AppSetting _appSetting;
 
-        public CreateOrderTrialCommandHandler(IUserService userService, IOrderRepository orderRepository, AuthContext authContext, IMediator mediator, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher)
+        public CreateOrderTrialCommandHandler(IUserService userService, IOrderRepository orderRepository, AuthContext authContext, IMediator mediator, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, AppSetting appSetting)
         {
             _userService = userService;
             _orderRepository = orderRepository;
             _authContext = authContext;
             _mediator = mediator;
             _addExpiredDateForStudentPublisher = addExpiredDateForStudentPublisher;
+            _appSetting = appSetting;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateOrderTrialCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
+
+            int? trialPeriod = _appSetting.OrderConfigs?.TrialPeriod;
+            if (!trialPeriod.HasValue)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(trialPeriod));
+                return methodResult;
+            }
 
             if (await _orderRepository.Queryable.AnyAsync(p => p.UserId == _authContext.CurrentUserId && p.IsTrial, cancellationToken))
             {
@@ -59,13 +70,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
             var student = studentResult.Content?.Result;
 
-            if (string.IsNullOrEmpty(student?.Human?.FullName) || string.IsNullOrEmpty(student?.Human?.Email))
+            if (student == null || string.IsNullOrEmpty(student.Human?.FullName) || string.IsNullOrEmpty(student.Human?.Email))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;
             }
 
-            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student?.Human?.Code }, cancellationToken).ConfigureAwait(false);
+            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.Human?.Code }, cancellationToken).ConfigureAwait(false);
             string code = codeSend.Result ?? string.Empty;
 
             if (string.IsNullOrEmpty(code) || await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
@@ -77,11 +88,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             var orderTrial = new Order()
             {
                 Code = code,
-                FullName = student?.Human?.FullName,
-                Email = student?.Human?.Email,
-                PhoneNumber = student?.Human?.PhoneNumber,
+                FullName = student.Human?.FullName,
+                Email = student.Human?.Email,
+                PhoneNumber = student.Human?.PhoneNumber,
                 Status = EnumOrderStatus.Payment,
-                ExpireDate = DateTime.UtcNow.AddDays(14),
+                ExpireDate = DateTime.UtcNow.AddDays(trialPeriod.Value),
                 IsTrial = true,
                 IsInvoice = false,
                 UserId = _authContext.CurrentUserId,
@@ -93,17 +104,30 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 methodResult.AddErrorBadRequest(orderTrial.ErrorMessages);
                 return methodResult;
             }
+
             await _orderRepository.ExecuteTransactionAsync(async () =>
             {
-                orderTrial = _orderRepository.Add(orderTrial);
-                await _orderRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                var orders = new List<Order>() { orderTrial };
+
+                await _orderRepository.BulkMergeAsync(orders, x =>
+                {
+                    x.ColumnPrimaryKeyExpression = c => new { c.UserId, c.IsTrial };
+                });
+
+                await _orderRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
                 await _userService.CreateStudentTrialRegistration();
+
+                var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).AddDays(trialPeriod.Value);
+
                 await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                 {
-                    StudentId = student!.Id,
+                    StudentId = student.Id,
                     Month = null,
-                    Day = 14
+                    Day = null,
+                    ExpiredDate = currentDate
                 }, cancellationToken);
+
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = true;
                 return methodResult;

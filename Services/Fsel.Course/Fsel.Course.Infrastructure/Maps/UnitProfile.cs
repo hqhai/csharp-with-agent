@@ -19,8 +19,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<UnitResult, UnitResultModel>().ForMember(x => x.ProgressPercent, p => p.MapFrom(x =>
                 x.Unit != null ?
                     x.Unit.UnitSkillMockTests.Any() ?
-                    NumberHelper.GetPercent(x.Unit.LessonResults.Where(y => y.Status == EnumResultStatus.Done).Count() + x.Unit.UnitSkillMockTests.Select(x => x.MockTest).Where(x => x!.MockTestResults.Any()).SelectMany(x => x!.MockTestResults).Count(y => y.UnitId == x.UnitId && y.Status == EnumResultStatus.Done), x.Unit.UnitLessons.Count + x.Unit.UnitSkillMockTests.Count)
-                    : NumberHelper.GetPercent(x.Unit.LessonResults.Where(y => y.Status == EnumResultStatus.Done).Count(), x.Unit.UnitLessons.Count)
+                    NumberHelper.GetPercent(x.Unit.LessonResults.Where(y => y.Status == EnumResultStatus.Done).Count() + x.Unit.UnitSkillMockTests.Select(x => x.MockTest).Where(x => x!.MockTestResults.Any()).SelectMany(x => x!.MockTestResults).Count(y => y.UnitId == x.UnitId && y.Status == EnumResultStatus.Done), x.Unit.UnitLessons.Count + x.Unit.UnitSkillMockTests.Count, 0)
+                    : NumberHelper.GetPercent(x.Unit.LessonResults.Where(y => y.Status == EnumResultStatus.Done).Count(), x.Unit.UnitLessons.Count, 0)
                 : default
             ));
             CreateMap<Unit, UnitModel>().ForMember(x => x.IsActive, p => p.MapFrom(o => o.CourseUnitMockTests.Any()));

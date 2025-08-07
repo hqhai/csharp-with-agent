@@ -7,7 +7,7 @@ namespace Fsel.Course.Application.Queries.ReportEventHaNoiQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Core.Caching;
+    using Fsel.Common.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
     using Fsel.Shared.Constants;

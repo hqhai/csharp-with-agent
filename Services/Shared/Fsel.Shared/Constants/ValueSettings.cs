@@ -150,6 +150,9 @@ namespace Fsel.Shared.Constants
             public const int SkillFullMocKTest = 4;
             public const int CountLessonAca = 6;
             public const int CountLessonIELTS = 4;
+            public const int CountLessonRFI = 5;
+            public const int CountUnitRFIA1 = 10;
+            public const int CountUnitRFIA2 = 12;
         }
 
         public static class ValueOrderIndex
@@ -241,7 +244,11 @@ namespace Fsel.Shared.Constants
         public static class AnswerLength
         {
             public const int ShortAnswerMaxLength = 255;    // Giới hạn câu trả lời ngắn
-            public const int LongAnswerMaxLength = 10000;   // Giới hạn câu trả lời dài
+            public const int LongAnswerMaxLength = 4000;   // Giới hạn câu trả lời dài
+            public const int MaxLengthDisplayOrder0 = 1800;
+            public const int MaxLengthDisplayOrder1 = 3000;
+            public const int Section0 = 0;
+            public const int Section1 = 1;
         }
     }
 }

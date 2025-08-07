@@ -12,7 +12,7 @@ namespace Fsel.Identity.Domain.Entities
     public class User : UserEntity
     {
         [Required]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
 
         [EmailValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
@@ -40,5 +40,6 @@ namespace Fsel.Identity.Domain.Entities
         public virtual ICollection<UserSchool> UserSchools { get; set; } = new List<UserSchool>();
         public virtual UserReferral? Receiver { get; set; }
         public virtual ICollection<UserDeletion> UserDeletions { get; set; } = new List<UserDeletion>();
+        public virtual ICollection<UserGroupMemberShip> UserGroups { get; set; } = new List<UserGroupMemberShip>();
     }
 }
