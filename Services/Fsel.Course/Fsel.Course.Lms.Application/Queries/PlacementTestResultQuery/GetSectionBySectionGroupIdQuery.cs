@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -114,8 +113,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
         private async Task UpdatePlacementTestResult(PlacementTestResult placementTestResult)
         {
             placementTestResult.Status = EnumResultStatus.Process;
-            _placementTestResultRepository.Update(placementTestResult);
-            await _placementTestResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestResultRepository.BulkUpdateList(new List<PlacementTestResult> { placementTestResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.PlacementTestId };
+            });
         }
 
         private async Task<PlacementTestGroupResult> SavePlacementGroupResultAsync(Guid studentId)
@@ -127,8 +128,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             }
             placementTestGroupResult.Status = EnumResultStatus.Process;
             placementTestGroupResult.ProcessDate = DateTime.UtcNow;
-            _placementTestGroupResultRepository.Update(placementTestGroupResult);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestGroupResultRepository.BulkUpdateList(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId };
+            });
             return placementTestGroupResult;
         }
 
@@ -137,12 +140,21 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == request.PlacementTestResultId && x.StudentId == studentId).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
-                _logger.LoggerRequest(request);
-                sectionGroupResult = _sectionGroupResultRepository.Add(new SectionGroupResult { StudentId = studentId, SectionGroupId = request.SectionGroupId, PlacementTestResultId = request.PlacementTestResultId, Status = EnumResultStatus.New });
+                sectionGroupResult = new SectionGroupResult
+                {
+                    StudentId = studentId,
+                    SectionGroupId = request.SectionGroupId,
+                    PlacementTestResultId = request.PlacementTestResultId,
+                    Status = EnumResultStatus.New
+                };
 
                 try
                 {
-                    await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                    await _sectionGroupResultRepository.BulkMergeAsync(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestResultId, c.SectionGroupId, c.IsDeleted };
+                    });
+                    sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == sectionGroupResult.Id) ?? sectionGroupResult;
                 }
                 catch (Exception ex)
                 {
@@ -152,8 +164,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             else if (sectionGroupResult.Status != EnumResultStatus.Done)
             {
                 sectionGroupResult.Status = EnumResultStatus.Process;
-                sectionGroupResult = _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+                await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.PlacementTestResultId, c.SectionGroupId, c.WorkingTime };
+                });
             }
             return sectionGroupResult;
         }

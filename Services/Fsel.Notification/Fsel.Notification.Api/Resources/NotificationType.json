@@ -1379,5 +1379,1160 @@
         "language": "fr-FR"
       }
     ]
+  },
+  {
+    "id": "29fd645f-4e60-4c0a-8266-d24c9854310e",
+    "type": "LinkPage",
+    "content": "OneHourAfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🚨 Cảnh báo từ trung tâm FSEL Store: Có người vừa đổi quà trước bạn 1 bước! Coin bạn vẫn còn... nhưng quà thì không chắc 😬",
+    "templateLink": "/marketplace",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "6d748f13-16b4-4075-8c20-33f6a641cbbd",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "29fd645f-4e60-4c0a-8266-d24c9854310e",
+        "templateMessage": "🚨 Cảnh báo từ trung tâm FSEL Store: Có người vừa đổi quà trước bạn 1 bước! Coin bạn vẫn còn... nhưng quà thì không chắc 😬",
+        "language": "vi-VN"
+      },
+      {
+        "id": "15f70c1e-72ad-4c88-8b5b-0f8fa7cbbdb1",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "29fd645f-4e60-4c0a-8266-d24c9854310e",
+        "templateMessage": "🚨 Warning from FSEL Store: Someone just redeemed their reward before you! Your coins are still there... but the reward might be gone 😬",
+        "language": "en-US"
+      },
+      {
+        "id": "14641324-e185-4bab-be4c-9aaad65d9b5f",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "29fd645f-4e60-4c0a-8266-d24c9854310e",
+        "templateMessage": "🚨 Alerte du centre FSEL Store: Quelqu'un vient de récupérer son cadeau avant vous ! Vos pièces sont encore là... mais le cadeau pourrait être parti 😬",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "1c23bddb-426a-4749-95ec-ddcbad71af9e",
+    "type": "LinkPage",
+    "content": "Day1At7h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "👨‍🚀 Trung tâm chỉ huy đang chờ bạn phản hồi! 🤖 Techie đã định vị lộ trình. Hãy vào học bài đầu để khởi động chuyến bay!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "6083c4b5-9d3a-4720-9f86-b41eec30e098",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "1c23bddb-426a-4749-95ec-ddcbad71af9e",
+        "templateMessage": "👨‍🚀 Trung tâm chỉ huy đang chờ bạn phản hồi! 🤖 Techie đã định vị lộ trình. Hãy vào học bài đầu để khởi động chuyến bay!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "6ac19ab3-7054-48ac-b280-092e846e2b72",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "1c23bddb-426a-4749-95ec-ddcbad71af9e",
+        "templateMessage": "👨‍🚀 The command center is waiting for your response! 🤖 Techie has set the learning path. Start your journey by taking the first lesson!",
+        "language": "en-US"
+      },
+      {
+        "id": "172a6057-f27b-4194-9fba-a49801ba9f95",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "1c23bddb-426a-4749-95ec-ddcbad71af9e",
+        "templateMessage": "👨‍🚀 Le centre de commande attend votre réponse ! 🤖 Techie a défini le parcours d'apprentissage. Commencez votre voyage en prenant la première leçon !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "b2de4124-4b28-4120-8156-ddef65cde6bd",
+    "type": "LinkPage",
+    "content": "Day1At19h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🤖 Techie: \"Chắc bạn bị bắt cóc khỏi vũ trụ học mất rồi?\" Nếu bạn còn nhớ mật khẩu… vào học bài đầu tiên để nhận lại quyền truy cập vũ trụ nhé!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "abf26b88-83f0-42d4-af8f-a7fce0994d6c",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "b2de4124-4b28-4120-8156-ddef65cde6bd",
+        "templateMessage": "🤖 Techie: \"Chắc bạn bị bắt cóc khỏi vũ trụ học mất rồi?\" Nếu bạn còn nhớ mật khẩu… vào học bài đầu tiên để nhận lại quyền truy cập vũ trụ nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "0a75a7f0-aae1-4091-a773-9ec146634a3e",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "b2de4124-4b28-4120-8156-ddef65cde6bd",
+        "templateMessage": "🤖 Techie: \"Did you get kidnapped from the learning universe?\" If you still remember the password... come back and take the first lesson to regain access to the universe!",
+        "language": "en-US"
+      },
+      {
+        "id": "1ef2fb87-d639-4514-a5d3-8fa14ee5f7d6",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "b2de4124-4b28-4120-8156-ddef65cde6bd",
+        "templateMessage": "🤖 Techie : \"Tu as été kidnappé de l'univers d'apprentissage ?\" Si tu te souviens du mot de passe... viens apprendre la première leçon pour retrouver l'accès à l'univers !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "3df9fae4-6879-4196-b70e-4776b65fc51a",
+    "type": "LinkPage",
+    "content": "Day2At12h00AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🤪 Techie tẻn tẻn khắp vũ trụ đi tìm bạn học tiếp đây nè! Không thấy bạn đâu hết trơn, vào học lẹ đi để tớ còn phát xu!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "82aee582-3c40-47d9-94f1-de8a5e23ab87",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "3df9fae4-6879-4196-b70e-4776b65fc51a",
+        "templateMessage": "🤪 Techie tẻn tẻn khắp vũ trụ đi tìm bạn học tiếp đây nè! Không thấy bạn đâu hết trơn, vào học lẹ đi để tớ còn phát xu!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "2171fb8f-d8ae-404b-b6a6-6191841ed706",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "3df9fae4-6879-4196-b70e-4776b65fc51a",
+        "templateMessage": "🤪 Techie is searching the universe to find you and continue the lesson! Can’t find you anywhere, hurry up and start studying so I can give you some coins!",
+        "language": "en-US"
+      },
+      {
+        "id": "b514dbff-efdc-4256-b935-20f3bdaf1ab4",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "3df9fae4-6879-4196-b70e-4776b65fc51a",
+        "templateMessage": "🤪 Techie parcourt l'univers pour te retrouver et continuer la leçon ! Je ne te trouve nulle part, dépêche-toi de commencer à étudier pour que je puisse te donner des pièces !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "5d324b4a-d608-4e49-9992-b6703c534550",
+    "type": "LinkPage",
+    "content": "Day2At19h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🌼 Cô nàng, anh chàng thư giãn giờ này chắc đang nằm lướt TikTok? Lướt xong thì học nhẹ 1 bài cùng Techie rồi chill tiếp nhé!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "244e2fc4-0bf1-4a69-a28a-0b9cd5a5ed86",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "5d324b4a-d608-4e49-9992-b6703c534550",
+        "templateMessage": "🌼 Cô nàng, anh chàng thư giãn giờ này chắc đang nằm lướt TikTok? Lướt xong thì học nhẹ 1 bài cùng Techie rồi chill tiếp nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "1d6b4320-f4f7-468e-bd27-8ac2c3309fc8",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "5d324b4a-d608-4e49-9992-b6703c534550",
+        "templateMessage": "🌼 Are you the chill type, probably scrolling TikTok right now? After scrolling, just study one lesson with Techie and then chill some more!",
+        "language": "en-US"
+      },
+      {
+        "id": "c56c0145-dec9-4b24-9bbd-5680eb862ead",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "5d324b4a-d608-4e49-9992-b6703c534550",
+        "templateMessage": "🌼 Tu es du genre relax, probablement en train de faire défiler TikTok maintenant ? Après avoir scrollé, étudie une leçon avec Techie et puis détends-toi !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "0b16fc25-ec1d-4677-84a3-6761afa2bb03",
+    "type": "LinkPage",
+    "content": "Day3At7h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🌌 Techie: “Hôm nay bạn muốn khám phá hành tinh nào?” Mỗi bài học là một hành tinh mới. Vào chọn bài và khởi động tàu nhé!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "efd0bb6a-93a2-4b6b-84fc-9e20cd86adaa",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "0b16fc25-ec1d-4677-84a3-6761afa2bb03",
+        "templateMessage": "🌌 Techie: \"Hôm nay bạn muốn khám phá hành tinh nào?\" Mỗi bài học là một hành tinh mới. Vào chọn bài và khởi động tàu nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "1ef93023-c60c-4803-93f0-2b166c49cf5b",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "0b16fc25-ec1d-4677-84a3-6761afa2bb03",
+        "templateMessage": "🌌 Techie: \"Which planet do you want to explore today?\" Each lesson is a new planet. Choose a lesson and start your journey!",
+        "language": "en-US"
+      },
+      {
+        "id": "abacd77f-1a6b-47a9-8414-259d6fabd929",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "0b16fc25-ec1d-4677-84a3-6761afa2bb03",
+        "templateMessage": "🌌 Techie : \"Quelle planète veux-tu explorer aujourd'hui ?\" Chaque leçon est une nouvelle planète. Choisis une leçon et commence ton voyage !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "2d4af96c-5344-42f3-b31f-584fa05adee2",
+    "type": "LinkPage",
+    "content": "Day3At12h00AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "⚠️ Đội bạn đã đến sao Thưởng Quà! Techie nhắc: Hãy vào học để kịp lấy coin và ghé FSEL Store trước khi kho báu đóng lại!",
+    "templateLink": "/marketplace",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "7c1b567d-1ced-4f0d-9158-cc291f9c3f86",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "2d4af96c-5344-42f3-b31f-584fa05adee2",
+        "templateMessage": "⚠️ Đội bạn đã đến sao Thưởng Quà! Techie nhắc: Hãy vào học để kịp lấy coin và ghé FSEL Store trước khi kho báu đóng lại!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "f39fec50-ed50-4ae6-b42a-5c02ef8444e9",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "2d4af96c-5344-42f3-b31f-584fa05adee2",
+        "templateMessage": "⚠️ Your team has arrived at the Prize Planet! Techie reminds you: Join the lesson to get coins and visit the FSEL Store before the treasure closes!",
+        "language": "en-US"
+      },
+      {
+        "id": "3a9c93c7-35a3-49a5-93ed-2fff62a91c9e",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "2d4af96c-5344-42f3-b31f-584fa05adee2",
+        "templateMessage": "⚠️ Votre équipe est arrivée sur la planète des prix ! Techie vous rappelle : Rejoignez la leçon pour obtenir des pièces et visiter le FSEL Store avant que le trésor ne se ferme !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "921cdf08-0201-4a3f-a191-d415c4101018",
+    "type": "LinkPage",
+    "content": "Day4At17h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "👀 Techie đang check VAR: bạn hôm nay chưa học bài nào luôn á! VAR xác nhận: coin đang bị bỏ lỡ, cơ hội bóc Túi Mù đang chờ bạn đó!",
+    "templateLink": "/marketplace",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "1e0f89d5-fa98-4ebb-90df-a1fe34d851a8",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "921cdf08-0201-4a3f-a191-d415c4101018",
+        "templateMessage": "👀 Techie đang check VAR: bạn hôm nay chưa học bài nào luôn á! VAR xác nhận: coin đang bị bỏ lỡ, cơ hội bóc Túi Mù đang chờ bạn đó!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "e211ceea-672b-4f3d-a397-9b197a816f36",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "921cdf08-0201-4a3f-a191-d415c4101018",
+        "templateMessage": "👀 Techie is checking VAR: you haven’t studied any lessons today! VAR confirms: coins are being missed, and the Mystery Bag opportunity is waiting for you!",
+        "language": "en-US"
+      },
+      {
+        "id": "d000ca20-654a-43d9-b112-3ca383e4d0c3",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "921cdf08-0201-4a3f-a191-d415c4101018",
+        "templateMessage": "👀 Techie vérifie VAR : tu n'as pas étudié de leçon aujourd'hui ! VAR confirme : des pièces sont manquées, et l'opportunité du Sac Mystère t'attend !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "8607c5e0-15e4-4a52-9312-ead10428f8c8",
+    "type": "LinkPage",
+    "content": "Day5At12h00AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "✨ 8386 là phát tài phát lộc, còn học là phát xu phát quà! Mỗi bài học hôm nay sẽ giúp bạn tiến gần hơn tới phần thưởng khủng từ FSEL Store!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "cce4997d-c0cd-44d9-bec5-1b2dce09c5df",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "8607c5e0-15e4-4a52-9312-ead10428f8c8",
+        "templateMessage": "✨ 8386 là phát tài phát lộc, còn học là phát xu phát quà! Mỗi bài học hôm nay sẽ giúp bạn tiến gần hơn tới phần thưởng khủng từ FSEL Store!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "0823874f-fc87-428e-8e3d-91620693586a",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "8607c5e0-15e4-4a52-9312-ead10428f8c8",
+        "templateMessage": "✨ 8386 is prosperity and wealth, and studying leads to coins and rewards! Every lesson today will bring you closer to the big prizes from the FSEL Store!",
+        "language": "en-US"
+      },
+      {
+        "id": "896b0614-0a2b-4ba2-a0fa-3e0d96ca1187",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "8607c5e0-15e4-4a52-9312-ead10428f8c8",
+        "templateMessage": "✨ 8386, c'est la prospérité et la richesse, et étudier mène à des pièces et des récompenses ! Chaque leçon d'aujourd'hui vous rapprochera des grands prix du FSEL Store !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "c2a40d5d-6735-40cb-a090-193aa93bcca2",
+    "type": "LinkPage",
+    "content": "Day6At12h00AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "😅 Cả nhóm học tới bài 4 rồi đó, còn bạn thì… Techie giữ chỗ cho bạn học cùng nè. Vào lẹ kẻo tụt mood học nhóm!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "e7c2e7c7-2367-4c87-9eb0-82dd261e512d",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "c2a40d5d-6735-40cb-a090-193aa93bcca2",
+        "templateMessage": "😅 Cả nhóm học tới bài 4 rồi đó, còn bạn thì… Techie giữ chỗ cho bạn học cùng nè. Vào lẹ kẻo tụt mood học nhóm!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "b3da3ba3-d8ce-40d7-a318-d9a9422cbb88",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "c2a40d5d-6735-40cb-a090-193aa93bcca2",
+        "templateMessage": "😅 The whole group has completed lesson 4, how about you? Techie has saved a spot for you to study with them. Hurry up before the study group mood drops!",
+        "language": "en-US"
+      },
+      {
+        "id": "7f211f2f-4fff-4f9f-b22b-43af2351fd9b",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "c2a40d5d-6735-40cb-a090-193aa93bcca2",
+        "templateMessage": "😅 Le groupe entier a terminé la leçon 4, et vous ? Techie a réservé une place pour vous étudier avec eux. Dépêche-toi avant que l'ambiance du groupe d'étude ne baisse !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "e10e8e9e-a132-41f2-b9e8-5a6ec055be2e",
+    "type": "LinkPage",
+    "content": "Day6At17h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "⏳ Đừng để hôm nay trôi qua mà chưa chọn khóa học! Học sớm hơn = nhận coin sớm hơn! Bắt đầu từ bài đầu tiên ngay nhé!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "825b0ef3-be07-4188-9e5a-f0ebf3aa3c14",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "e10e8e9e-a132-41f2-b9e8-5a6ec055be2e",
+        "templateMessage": "⏳ Đừng để hôm nay trôi qua mà chưa chọn khóa học! Học sớm hơn = nhận coin sớm hơn! Bắt đầu từ bài đầu tiên ngay nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "f92b8309-b585-47c8-a762-f2d944a6314e",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "e10e8e9e-a132-41f2-b9e8-5a6ec055be2e",
+        "templateMessage": "⏳ Don’t let today pass without choosing a course! The earlier you start studying = the sooner you get coins! Start from the first lesson now!",
+        "language": "en-US"
+      },
+      {
+        "id": "900e0318-dadf-4bba-8ca7-b12701e5c21e",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "e10e8e9e-a132-41f2-b9e8-5a6ec055be2e",
+        "templateMessage": "⏳ Ne laissez pas passer aujourd'hui sans avoir choisi un cours ! Étudier plus tôt = obtenir des pièces plus tôt ! Commencez dès maintenant par la première leçon !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "c15a5dd2-c897-464f-9f1c-5aa8db6cae40",
+    "type": "LinkPage",
+    "content": "Day6At19h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Cơm thì ăn đều, mà bài thì bỏ đó? 😅 Techie thấy bạn có tiềm năng đổi iPhone nếu học đều đó. Vào học lẹ đi người đẹp!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "f941d86a-925d-4180-aba4-a72a1d24042d",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "c15a5dd2-c897-464f-9f1c-5aa8db6cae40",
+        "templateMessage": "Cơm thì ăn đều, mà bài thì bỏ đó? 😅 Techie thấy bạn có tiềm năng đổi iPhone nếu học đều đó. Vào học lẹ đi người đẹp!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "f1563bc3-ede7-4bf6-a53d-a35d2a334d99",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "c15a5dd2-c897-464f-9f1c-5aa8db6cae40",
+        "templateMessage": "You eat regularly, but leave your lessons undone? 😅 Techie sees you have the potential to trade for an iPhone if you study regularly. Start studying now, beautiful!",
+        "language": "en-US"
+      },
+      {
+        "id": "a0ac924f-d399-4e1c-a3e2-c645b685606e",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "c15a5dd2-c897-464f-9f1c-5aa8db6cae40",
+        "templateMessage": "Tu manges régulièrement, mais laisses tes leçons de côté ? 😅 Techie voit que tu as le potentiel pour échanger contre un iPhone si tu étudies régulièrement. Commence à étudier maintenant, belle !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "c182d087-fe4f-413c-ae1c-0042899e5b16",
+    "type": "LinkPage",
+    "content": "Day7At7h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🌞 Dậy chưa đó? Techie nhắc nhẹ nè! Nhớ dành chút thời gian hôm nay để vào học cùng Techie nha – xu vẫn đang rơi đều, quà vẫn đang chờ bạn gom!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "6920fe84-a5c0-4370-9d55-83d36db229c2",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "c182d087-fe4f-413c-ae1c-0042899e5b16",
+        "templateMessage": "🌞 Dậy chưa đó? Techie nhắc nhẹ nè! Nhớ dành chút thời gian hôm nay để vào học cùng Techie nha – xu vẫn đang rơi đều, quà vẫn đang chờ bạn gom!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "2a0092c6-47f1-43b4-b7af-b08cad56173f",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "c182d087-fe4f-413c-ae1c-0042899e5b16",
+        "templateMessage": "🌞 Are you awake yet? Techie gently reminds you! Remember to spend a little time today to study with Techie – coins are still falling, and rewards are waiting for you to collect!",
+        "language": "en-US"
+      },
+      {
+        "id": "3d1b042a-4f7a-4d38-bcdc-af4985d62a89",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "c182d087-fe4f-413c-ae1c-0042899e5b16",
+        "templateMessage": "🌞 Tu es réveillé ? Techie te rappelle gentiment ! N'oublie pas de passer un peu de temps aujourd'hui pour étudier avec Techie – les pièces tombent encore et les récompenses t'attendent pour être collectées !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "f398551d-cd3a-4641-bc82-473d718df074",
+    "type": "LinkPage",
+    "content": "Day7At12h00AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "👀 Techie đang check VAR: bạn hôm nay chưa học bài nào luôn á! VAR xác nhận: coin đang bị bỏ lỡ, cơ hội bóc Túi Mù đang chờ bạn đó!",
+    "templateLink": "/marketplace",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "e2c95722-0baa-4b4f-a46f-8f2aca355813",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "f398551d-cd3a-4641-bc82-473d718df074",
+        "templateMessage": "👀 Techie đang check VAR: bạn hôm nay chưa học bài nào luôn á! VAR xác nhận: coin đang bị bỏ lỡ, cơ hội bóc Túi Mù đang chờ bạn đó!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "8067655c-e9e4-4e64-9e99-3ae58ccc8e74",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "f398551d-cd3a-4641-bc82-473d718df074",
+        "templateMessage": "👀 Techie is checking VAR: you haven’t studied any lessons today! VAR confirms: coins are being missed, and the Mystery Bag opportunity is waiting for you!",
+        "language": "en-US"
+      },
+      {
+        "id": "029d8556-2d49-473f-8085-dc60568801d9",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "f398551d-cd3a-4641-bc82-473d718df074",
+        "templateMessage": "👀 Techie vérifie VAR : tu n'as pas étudié de leçon aujourd'hui ! VAR confirme : des pièces sont manquées, et l'opportunité du Sac Mystère t'attend !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "fe46415d-4e6e-4248-b828-785f5486b41f",
+    "type": "LinkPage",
+    "content": "Day7At17h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "0042ee0c-6d9c-445c-905d-e5e76ffb6662",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "fe46415d-4e6e-4248-b828-785f5486b41f",
+        "templateMessage": "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞",
+        "language": "vi-VN"
+      },
+      {
+        "id": "05880e81-f2b7-4a75-86ac-97191bde46d5",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "fe46415d-4e6e-4248-b828-785f5486b41f",
+        "templateMessage": "📊 AI predicts you'll study today… If correct, Techie will reward you with 160 coins. If wrong… Techie will be sad again 😞",
+        "language": "en-US"
+      },
+      {
+        "id": "f54a34a8-254e-4112-8021-482055b4275f",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "fe46415d-4e6e-4248-b828-785f5486b41f",
+        "templateMessage": "📊 L'IA prévoit que tu vas étudier aujourd'hui… Si c'est vrai, Techie te récompensera avec 160 pièces. Si c'est faux... Techie sera encore triste 😞",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "23990ecc-834f-44b7-a7a5-a03baa703b32",
+    "type": "LinkPage",
+    "content": "Day7At19h30AfterChooseLevel",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "😳 Hôm nay bạn đang… vượt mức pickleball về độ lười học! Techie cảnh báo: Không học bài hôm nay là trượt bảng vàng thật đó nhaaa!",
+    "templateLink": "/learn",
+    "createdDate": "2025-05-30",
+    "translations": [
+      {
+        "id": "c0b6de90-4362-4178-98b8-c5225c2d3e9c",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "23990ecc-834f-44b7-a7a5-a03baa703b32",
+        "templateMessage": "😳 Hôm nay bạn đang… vượt mức pickleball về độ lười học! Techie cảnh báo: Không học bài hôm nay là trượt bảng vàng thật đó nhaaa!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "808ed0b9-d93d-4350-8cd0-85c6e5e633e9",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "23990ecc-834f-44b7-a7a5-a03baa703b32",
+        "templateMessage": "😳 Today, you're... surpassing pickleball in laziness! Techie warns: If you don’t study today, you’ll truly fall off the leaderboard!",
+        "language": "en-US"
+      },
+      {
+        "id": "07f77fa5-27f7-4b55-9d1a-505e3876daa4",
+        "createdDate": "2025-05-30",
+        "notificationTypeId": "23990ecc-834f-44b7-a7a5-a03baa703b32",
+        "templateMessage": "😳 Aujourd'hui, tu surpasses même le pickleball en paresse ! Techie avertit : Si tu n'étudies pas aujourd'hui, tu vas vraiment tomber du classement !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "2655aa79-8a88-4a1f-9449-1884cb791123",
+    "type": "LinkPage",
+    "content": "OneHourAfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "👉 Nhận ngay 160 FSEL Coin thôi nào! 🎯 Bạn đã hoàn thành bài kiểm tra! Lộ trình học cá nhân đã sẵn sàng. Nhấn để bắt đầu săn FSEL Coin ngay 💪",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "b8aba20e-47b3-4911-b5d0-0df5f62da9ed",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "2655aa79-8a88-4a1f-9449-1884cb791123",
+        "templateMessage": "👉 Nhận ngay 160 FSEL Coin thôi nào! 🎯 Bạn đã hoàn thành bài kiểm tra! Lộ trình học cá nhân đã sẵn sàng. Nhấn để bắt đầu săn FSEL Coin ngay 💪",
+        "language": "vi-VN"
+      },
+      {
+        "id": "70991cb8-d0bc-4471-b9c1-4947a93d9f2d",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "2655aa79-8a88-4a1f-9449-1884cb791123",
+        "templateMessage": "👉 Get 160 FSEL Coins now! 🎯 You have completed the test! Your personal learning path is ready. Click to start hunting for FSEL Coins now 💪",
+        "language": "en-US"
+      },
+      {
+        "id": "2e97428c-fa50-47c9-ad97-29bd3ea3b246",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "2655aa79-8a88-4a1f-9449-1884cb791123",
+        "templateMessage": "👉 Obtenez 160 pièces FSEL maintenant ! 🎯 Vous avez terminé le test ! Le parcours d’apprentissage personnel est prêt. Cliquez pour commencer à chasser les pièces FSEL maintenant 💪",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "ba4ccb0d-ee54-46b6-b091-e6c99ee1f224",
+    "type": "LinkPage",
+    "content": "Day1At7h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🎁 Chọn khóa học – nhận ngay phần quà khởi động! Mỗi khóa học là một cơ hội nhận coin, leo bảng thi đua và đổi quà Túi Mù FSEL!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "13787811-66ed-4fdd-8f27-5a059d9021d4",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "ba4ccb0d-ee54-46b6-b091-e6c99ee1f224",
+        "templateMessage": "🎁 Chọn khóa học – nhận ngay phần quà khởi động! Mỗi khóa học là một cơ hội nhận coin, leo bảng thi đua và đổi quà Túi Mù FSEL!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "f985110b-33f6-4282-9217-4d2a93c2a9b4",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "ba4ccb0d-ee54-46b6-b091-e6c99ee1f224",
+        "templateMessage": "🎁 Choose a course – get a welcome gift right away! Each course is a chance to earn coins, climb the leaderboard, and exchange for a FSEL Mystery Bag!",
+        "language": "en-US"
+      },
+      {
+        "id": "fe8555aa-3edd-4ceb-a1ce-d9635ec70ec9",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "ba4ccb0d-ee54-46b6-b091-e6c99ee1f224",
+        "templateMessage": "🎁 Choisissez un cours – recevez immédiatement un cadeau de bienvenue ! Chaque cours est une chance de gagner des pièces, de grimper au classement et d’échanger contre un sac mystère FSEL !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "85fe84d6-d116-4b69-86f8-f97849888f87",
+    "type": "LinkPage",
+    "content": "Day1At19h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🚀 Bắt đầu hành trình học tiếng Anh của bạn ngay hôm nay! Đừng để tài khoản nằm yên – chọn khóa học đầu tiên và khám phá FSEL Store!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "4553653f-3416-43c1-8efc-47657e7ad0ba",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "85fe84d6-d116-4b69-86f8-f97849888f87",
+        "templateMessage": "🚀 Bắt đầu hành trình học tiếng Anh của bạn ngay hôm nay! Đừng để tài khoản nằm yên – chọn khóa học đầu tiên và khám phá FSEL Store!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "28f5127e-d440-46ee-af42-00762465518c",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "85fe84d6-d116-4b69-86f8-f97849888f87",
+        "templateMessage": "🚀 Start your English learning journey today! Don’t let your account sit idle – pick your first course and explore the FSEL Store!",
+        "language": "en-US"
+      },
+      {
+        "id": "064f51ff-75af-4776-ae1b-4dbeb4bf4021",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "85fe84d6-d116-4b69-86f8-f97849888f87",
+        "templateMessage": "🚀 Commencez votre parcours d’apprentissage de l’anglais dès aujourd’hui ! Ne laissez pas votre compte inactif – choisissez votre premier cours et explorez la boutique FSEL !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "91b551e5-d4f1-4aee-bf08-582678cf5250",
+    "type": "LinkPage",
+    "content": "Day2At12h00AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "⏰ Còn vài giờ để nhận thưởng! Bài học đầu tiên giúp bạn mở khóa coin và cơ hội bóc Túi Mù FSEL – đừng bỏ lỡ ⏳",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "a2ca820a-c1ce-4bc9-b654-f833e5e9588a",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "91b551e5-d4f1-4aee-bf08-582678cf5250",
+        "templateMessage": "⏰ Còn vài giờ để nhận thưởng! Bài học đầu tiên giúp bạn mở khóa coin và cơ hội bóc Túi Mù FSEL – đừng bỏ lỡ ⏳",
+        "language": "vi-VN"
+      },
+      {
+        "id": "d7ade9c0-5444-4584-acdc-e01ebfc6b69c",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "91b551e5-d4f1-4aee-bf08-582678cf5250",
+        "templateMessage": "⏰ Only a few hours left to claim your reward! The first lesson unlocks coins and a chance to open a FSEL Mystery Bag – don’t miss out ⏳",
+        "language": "en-US"
+      },
+      {
+        "id": "59c32b91-ca6f-4312-af18-6dfa9e4c78a1",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "91b551e5-d4f1-4aee-bf08-582678cf5250",
+        "templateMessage": "⏰ Il ne vous reste que quelques heures pour réclamer votre récompense ! La première leçon débloque des pièces et une chance d’ouvrir un sac mystère FSEL – ne manquez pas cette occasion ⏳",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "f2f234d2-abab-4bef-8e05-be83776628a8",
+    "type": "LinkPage",
+    "content": "Day2At19h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "😱 U là trời! Bạn bỏ lỡ 2 ngày học rồi đó… Coin không học là mất, quà không tích là bay. Techie cảnh báo bạn đang trôi khỏi bảng vàng!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "51c2bc5d-641e-4b77-95fa-2199b95c1198",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "f2f234d2-abab-4bef-8e05-be83776628a8",
+        "templateMessage": "😱 U là trời! Bạn bỏ lỡ 2 ngày học rồi đó… Coin không học là mất, quà không tích là bay. Techie cảnh báo bạn đang trôi khỏi bảng vàng!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "6d1d4f8b-aa22-4165-8526-de2cf552037a",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "f2f234d2-abab-4bef-8e05-be83776628a8",
+        "templateMessage": "😱 Oh no! You’ve missed 2 days of learning… No study, no coins. No progress, no gifts. Techie warns you’re slipping off the leaderboard!",
+        "language": "en-US"
+      },
+      {
+        "id": "8ea67da6-9f4d-4def-8f5b-ff03c6476e98",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "f2f234d2-abab-4bef-8e05-be83776628a8",
+        "templateMessage": "😱 Mon dieu ! Vous avez manqué 2 jours d’étude… Pas d’apprentissage, pas de pièces. Pas de progrès, pas de cadeaux. Techie vous prévient : vous quittez le tableau d’honneur !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "02111ed0-9c34-4c08-ad52-896f843622bb",
+    "type": "LinkPage",
+    "content": "Day3At7h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🌱 Mọi hành trình đều bắt đầu từ bước đầu tiên Chọn khóa học đầu tiên để FSEL đồng hành cùng bạn mỗi ngày!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "aaa34ec6-39da-4345-bb1b-01f71c7b2896",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "02111ed0-9c34-4c08-ad52-896f843622bb",
+        "templateMessage": "🌱 Mọi hành trình đều bắt đầu từ bước đầu tiên Chọn khóa học đầu tiên để FSEL đồng hành cùng bạn mỗi ngày!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "45734f25-0754-451a-83a8-f2c27ec2dd77",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "02111ed0-9c34-4c08-ad52-896f843622bb",
+        "templateMessage": "🌱 Every journey starts with a first step. Choose your first course and let FSEL accompany you every day!",
+        "language": "en-US"
+      },
+      {
+        "id": "8f847b4f-7843-4b7a-902e-683342d3e0f9",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "02111ed0-9c34-4c08-ad52-896f843622bb",
+        "templateMessage": "🌱 Chaque voyage commence par un premier pas. Choisissez votre premier cours et laissez FSEL vous accompagner chaque jour !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "56d463aa-463a-4b91-96d9-b50cf16720b9",
+    "type": "LinkPage",
+    "content": "Day3At12h00AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "⚠️ Techie cảnh báo: Bạn đang bị tụt lại phía sau! Mỗi ngày học = coin + cơ hội trúng Túi Mù FSEL! Không học = không quà 😢",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "0900d63d-499c-43fc-b159-d69a4b134b22",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "56d463aa-463a-4b91-96d9-b50cf16720b9",
+        "templateMessage": "⚠️ Techie cảnh báo: Bạn đang bị tụt lại phía sau! Mỗi ngày học = coin + cơ hội trúng Túi Mù FSEL! Không học = không quà 😢",
+        "language": "vi-VN"
+      },
+      {
+        "id": "2d96bb55-f125-4445-909d-f15b73e4dff1",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "56d463aa-463a-4b91-96d9-b50cf16720b9",
+        "templateMessage": "⚠️ Techie warns: You're falling behind! Every day you study = coin + chance to win FSEL Mystery Bag! No study = no reward 😢",
+        "language": "en-US"
+      },
+      {
+        "id": "6deaa803-86b7-42aa-b849-20a2ee13760b",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "56d463aa-463a-4b91-96d9-b50cf16720b9",
+        "templateMessage": "⚠️ Techie avertit : Vous prenez du retard ! Chaque jour d'étude = coin + chance de gagner un Sac Mystère FSEL ! Pas d'étude = pas de récompense 😢",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "19c331f9-7aed-4c21-a7a6-dd4b9e90a285",
+    "type": "LinkPage",
+    "content": "Day3At17h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "📚 Lộ trình học của bạn đang chờ! FSEL đã gợi ý khóa học phù hợp – vào chọn ngay để không lỡ nhịp cùng bạn bè!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "346c2afd-3ee8-4b54-8c8e-1bb1399a5ced",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "19c331f9-7aed-4c21-a7a6-dd4b9e90a285",
+        "templateMessage": "📚 Lộ trình học của bạn đang chờ! FSEL đã gợi ý khóa học phù hợp – vào chọn ngay để không lỡ nhịp cùng bạn bè!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "39a928d0-1610-41e8-8357-3655c1dedc2b",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "19c331f9-7aed-4c21-a7a6-dd4b9e90a285",
+        "templateMessage": "📚 Your learning path is waiting! FSEL has suggested a suitable course – choose now so you don’t fall behind your friends!",
+        "language": "en-US"
+      },
+      {
+        "id": "33ed40bd-5069-41d2-a9e0-ffd354ae8097",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "19c331f9-7aed-4c21-a7a6-dd4b9e90a285",
+        "templateMessage": "📚 Votre parcours d'apprentissage vous attend ! FSEL a suggéré un cours adapté – choisissez maintenant pour ne pas prendre de retard par rapport à vos amis !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "df161229-9390-492b-85b0-b2d0fc61cc89",
+    "type": "LinkPage",
+    "content": "Day4At7h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "👨‍🚀 Trung tâm chỉ huy đang chờ bạn phản hồi! 🤖 Techie đã định vị lộ trình. Hãy vào học bài đầu để khởi động chuyến bay!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "0ce416be-4e34-4efb-89e5-87eb592f48f7",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "df161229-9390-492b-85b0-b2d0fc61cc89",
+        "templateMessage": "👨‍🚀 Trung tâm chỉ huy đang chờ bạn phản hồi! 🤖 Techie đã định vị lộ trình. Hãy vào học bài đầu để khởi động chuyến bay!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "c48bc1b8-9ed3-4aae-ae3b-207820ed4e78",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "df161229-9390-492b-85b0-b2d0fc61cc89",
+        "templateMessage": "👨‍🚀 The command center is waiting for your response! 🤖 Techie has set the learning path. Start your journey by taking the first lesson!",
+        "language": "en-US"
+      },
+      {
+        "id": "7a2e0d42-7928-4aa7-b997-6271ea70d48b",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "df161229-9390-492b-85b0-b2d0fc61cc89",
+        "templateMessage": "👨‍🚀 Le centre de commande attend votre réponse ! 🤖 Techie a défini le parcours d'apprentissage. Commencez votre voyage en prenant la première leçon !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "ce9bea9f-dcf9-4a62-8580-218889016932",
+    "type": "LinkPage",
+    "content": "Day4At17h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "⏱️ Cảnh báo từ Techie: Kho quà sắp... tan biến! Quà tại FSEL Store chỉ còn trong vài vòng quay nữa. Vào học để gom coin liền tay!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "6f84789f-ee86-4196-8e9a-d6211bd8bf72",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "ce9bea9f-dcf9-4a62-8580-218889016932",
+        "templateMessage": "⏱️ Cảnh báo từ Techie: Kho quà sắp... tan biến! Quà tại FSEL Store chỉ còn trong vài vòng quay nữa. Vào học để gom coin liền tay!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "6c45046e-2eea-40d8-a207-4e8c8d813a85",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "ce9bea9f-dcf9-4a62-8580-218889016932",
+        "templateMessage": "⏱️ Warning from Techie: The gift stash is about to... vanish! FSEL Store rewards are running out in just a few spins. Study now to collect coins quickly!",
+        "language": "en-US"
+      },
+      {
+        "id": "aaa5368f-eec1-449f-8db4-89a317e3a234",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "ce9bea9f-dcf9-4a62-8580-218889016932",
+        "templateMessage": "⏱️ Avertissement de Techie : Le stock de cadeaux est sur le point de... disparaître ! Les récompenses du FSEL Store ne seront plus disponibles après quelques tours. Étudiez maintenant pour collecter des pièces rapidement !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "19876859-11c6-4d5d-a043-6325af55817f",
+    "type": "LinkPage",
+    "content": "Day5At12h00AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "💰 Techie: “Nhiệm vụ hôm nay – tích thêm 100 coin!” Học bài mới = coin mới. Gom xu mỗi ngày để đổi quà cực chất trong Tháng Tự Học!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "dd392bfe-9379-43b3-b4b6-e8e0edefa2f5",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "19876859-11c6-4d5d-a043-6325af55817f",
+        "templateMessage": "💰 Techie: \"Nhiệm vụ hôm nay – tích thêm 100 coin!\" Học bài mới = coin mới. Gom xu mỗi ngày để đổi quà cực chất trong Tháng Tự Học!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "fdb01670-3871-401b-a958-1accd1420774",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "19876859-11c6-4d5d-a043-6325af55817f",
+        "templateMessage": "💰 Techie: \"Today's mission – earn 100 coins!\" Learn a new lesson = new coins. Collect coins daily to redeem great rewards during Self-Study Month!",
+        "language": "en-US"
+      },
+      {
+        "id": "3093e36a-8e21-43c2-92a1-6b62f8e3045e",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "19876859-11c6-4d5d-a043-6325af55817f",
+        "templateMessage": "💰 Techie : \"La mission du jour – gagnez 100 pièces !\" Apprenez une nouvelle leçon = nouvelles pièces. Collectez des pièces chaque jour pour échanger contre de superbes récompenses pendant le Mois d'Auto-apprentissage !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "65bc348b-99a8-4573-af05-7d4108fc11d2",
+    "type": "LinkPage",
+    "content": "Day5At19h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Cơm thì ăn đều, mà bài thì bỏ đó? 😅 Techie thấy bạn có tiềm năng đổi iPhone nếu học đều đó. Vào học lẹ đi người đẹp!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "77b6a9a9-3c1b-4033-9cd6-9cb60a664230",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "65bc348b-99a8-4573-af05-7d4108fc11d2",
+        "templateMessage": "Cơm thì ăn đều, mà bài thì bỏ đó? 😅 Techie thấy bạn có tiềm năng đổi iPhone nếu học đều đó. Vào học lẹ đi người đẹp!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "6402dea8-dff7-461e-9e87-e69097a19819",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "65bc348b-99a8-4573-af05-7d4108fc11d2",
+        "templateMessage": "You eat regularly, but leave your lessons undone? 😅 Techie sees you have the potential to trade for an iPhone if you study regularly. Start studying now, beautiful!",
+        "language": "en-US"
+      },
+      {
+        "id": "fa3b6ea3-6979-4e9d-b752-f3411fac9214",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "65bc348b-99a8-4573-af05-7d4108fc11d2",
+        "templateMessage": "Vous mangez régulièrement, mais laissez vos leçons de côté ? 😅 Techie voit que vous avez le potentiel de gagner un iPhone si vous étudiez régulièrement. Commencez à étudier maintenant, belle !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "cc34c9bf-e7e1-48db-bd33-c9351aaa7c5f",
+    "type": "LinkPage",
+    "content": "Day6At12h00AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "😮 Lớp bạn đã có 12 người học rồi, còn bạn thì sao? 🤖 Techie nhắc bạn: càng học sớm, càng dễ gom coin và lên bảng vàng!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "0d787987-619a-47c6-a4a8-971e44cd5ae4",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "cc34c9bf-e7e1-48db-bd33-c9351aaa7c5f",
+        "templateMessage": "😮 Lớp bạn đã có 12 người học rồi, còn bạn thì sao? 🤖 Techie nhắc bạn: càng học sớm, càng dễ gom coin và lên bảng vàng!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "4be1d8fd-02f6-46b3-b6c5-96ec75d138af",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "cc34c9bf-e7e1-48db-bd33-c9351aaa7c5f",
+        "templateMessage": "😮 Your class already has 12 students, how about you? 🤖 Techie reminds you: the earlier you start studying, the easier it is to collect coins and climb the leaderboard!",
+        "language": "en-US"
+      },
+      {
+        "id": "044915bf-f8d7-4d10-b0f9-e39d8a4421a5",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "cc34c9bf-e7e1-48db-bd33-c9351aaa7c5f",
+        "templateMessage": "😮 Votre classe compte déjà 12 étudiants, et vous ? 🤖 Techie vous rappelle : plus vous commencez tôt, plus il est facile de collecter des pièces et de grimper dans le classement !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "63685b29-a8a4-4117-b4ca-dd8e08b9e439",
+    "type": "LinkPage",
+    "content": "Day6At17h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "adafdf21-a4fb-4035-bf71-39139bb4fc12",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "63685b29-a8a4-4117-b4ca-dd8e08b9e439",
+        "templateMessage": "📊 AI dự đoán bạn sẽ học bài hôm nay …Nếu đúng, Techie sẽ thưởng bạn 160 coin. Nếu sai… Techie sẽ buồn thêm lần nữa 😞",
+        "language": "vi-VN"
+      },
+      {
+        "id": "0547e4ca-a9f4-4dcc-97e5-42d2bc4e7978",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "63685b29-a8a4-4117-b4ca-dd8e08b9e439",
+        "templateMessage": "📊 AI predicts you'll study today… If correct, Techie will reward you with 160 coins. If wrong... Techie will be sad again 😞",
+        "language": "en-US"
+      },
+      {
+        "id": "7de5fc5a-b421-4292-b6f7-e740e0551df8",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "63685b29-a8a4-4117-b4ca-dd8e08b9e439",
+        "templateMessage": "📊 L'IA prévoit que vous allez étudier aujourd'hui... Si c'est vrai, Techie vous récompensera avec 160 pièces. Si c'est faux... Techie sera encore triste 😞",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "f5a60340-dbb6-4f50-ad84-abaa77905bb2",
+    "type": "LinkPage",
+    "content": "Day6At19h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "🍚 Cơm nước chưa người đẹp? Nếu ăn xong rồi thì… học 1 bài thôi nè. Coin đang đợi để được gom về túi bạn đó!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "b95dd6ad-c662-4077-bde7-3f723429aacf",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "f5a60340-dbb6-4f50-ad84-abaa77905bb2",
+        "templateMessage": "🍚 Cơm nước chưa người đẹp? Nếu ăn xong rồi thì… học 1 bài thôi nè. Coin đang đợi để được gom về túi bạn đó!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "43d69e76-fc50-4204-b351-c23157540f28",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "f5a60340-dbb6-4f50-ad84-abaa77905bb2",
+        "templateMessage": "Have you eaten yet, beautiful? If you’re done, then… just study one lesson. Coins are waiting to be collected in your pocket!",
+        "language": "en-US"
+      },
+      {
+        "id": "fc290b60-6d8c-4d60-8ac1-48d93121ce56",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "f5a60340-dbb6-4f50-ad84-abaa77905bb2",
+        "templateMessage": "Tu as mangé, jolie ? Si c'est fait, alors... étudie juste une leçon. Les pièces attendent d'être collectées dans ta poche !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "5b08de2c-0de4-4287-a07c-b7def40313e9",
+    "type": "LinkPage",
+    "content": "Day7At7h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "⏳ Còn 2 ngày để nhận quà khởi động! Nếu bạn chưa chọn khóa học, coin thưởng sẽ hết hạn. Tối nay vào học ngay nhé!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "97678b67-48ce-40eb-8bc3-b2be51f7809d",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "5b08de2c-0de4-4287-a07c-b7def40313e9",
+        "templateMessage": "⏳ Còn 2 ngày để nhận quà khởi động! Nếu bạn chưa chọn khóa học, coin thưởng sẽ hết hạn. Tối nay vào học ngay nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "f975284d-589e-4604-a230-e0d2e294557a",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "5b08de2c-0de4-4287-a07c-b7def40313e9",
+        "templateMessage": "⏳ Only 2 days left to claim your starter gift! If you haven’t chosen a course yet, your reward coins will expire. Start studying tonight!",
+        "language": "en-US"
+      },
+      {
+        "id": "83bb070c-ef7b-43a6-9401-778afe112066",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "5b08de2c-0de4-4287-a07c-b7def40313e9",
+        "templateMessage": "⏳ Il ne vous reste plus que 2 jours pour réclamer votre cadeau de départ ! Si vous n'avez pas encore choisi un cours, vos pièces de récompense expireront. Commencez à étudier ce soir !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "fd440834-703d-4728-a059-bebcd17069d9",
+    "type": "LinkPage",
+    "content": "Day7At12h00AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "💅 Học xong rồi lên Store đổi quà là slay hết nước chấm luôn á! Học 1 bài thôi, đổi tai nghe, loa, sách vở đủ cả. Vào học đi bạn slay!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "076c6072-0d26-4065-a74f-b774f83c67f2",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "fd440834-703d-4728-a059-bebcd17069d9",
+        "templateMessage": "💅 Học xong rồi lên Store đổi quà là slay hết nước chấm luôn á! Học 1 bài thôi, đổi tai nghe, loa, sách vở đủ cả. Vào học đi bạn slay!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "82e71cbc-53ed-4dfe-bc05-bd038f14efa0",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "fd440834-703d-4728-a059-bebcd17069d9",
+        "templateMessage": "💅 Study, then head to the store to redeem gifts – you’ll be slaying! Study just one lesson, and you can get headphones, speakers, books, and more. Go study, you’re slaying!",
+        "language": "en-US"
+      },
+      {
+        "id": "bdf8a59a-2bea-4000-bf2e-7584ff9153a9",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "fd440834-703d-4728-a059-bebcd17069d9",
+        "templateMessage": "💅 Étudiez, puis allez au magasin pour échanger contre des cadeaux – vous allez tout déchirer ! Étudiez juste une leçon, et vous pourrez obtenir des écouteurs, des haut-parleurs, des livres et plus encore. Allez étudier, vous déchirez !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "f30517dd-af21-499c-88a2-46a22ad142a3",
+    "type": "LinkPage",
+    "content": "Day7At17h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "⏳ Đừng để hôm nay trôi qua mà chưa chọn khóa học! Học sớm hơn = nhận coin sớm hơn! Bắt đầu từ bài đầu tiên ngay nhé!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "321c1cee-f949-46f0-bbc8-940f2a5881f9",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "f30517dd-af21-499c-88a2-46a22ad142a3",
+        "templateMessage": "⏳ Đừng để hôm nay trôi qua mà chưa chọn khóa học! Học sớm hơn = nhận coin sớm hơn! Bắt đầu từ bài đầu tiên ngay nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "d8fd8423-0d0c-47ab-a20c-025c1c6252d0",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "f30517dd-af21-499c-88a2-46a22ad142a3",
+        "templateMessage": "⏳ Don’t let today pass without choosing a course! Study earlier = earn coins earlier! Start from the first lesson now!",
+        "language": "en-US"
+      },
+      {
+        "id": "494fc24e-d137-4298-805f-6140e990124d",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "f30517dd-af21-499c-88a2-46a22ad142a3",
+        "templateMessage": "⏳ Ne laissez pas passer aujourd'hui sans avoir choisi un cours ! Étudier plus tôt = gagner des pièces plus tôt ! Commencez dès maintenant par la première leçon !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "62413604-f229-4e39-aa96-3b0a3acad3e3",
+    "type": "LinkPage",
+    "content": "Day7At19h30AfterDonePT",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "😢 Techie: “Tớ có nói gì đâu, bạn đã học đâu mà bỏ rồi?” Bài học đầu đang đợi bạn. Không vào là coin mất, Techie buồn!",
+    "templateLink": "/change-level",
+    "createdDate": "2025-06-03",
+    "translations": [
+      {
+        "id": "3ea49bca-b0eb-4fa0-8b58-79a06e9b1d96",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "62413604-f229-4e39-aa96-3b0a3acad3e3",
+        "templateMessage": "😢 Techie: \"Tớ có nói gì đâu, bạn đã học đâu mà bỏ rồi?\" Bài học đầu đang đợi bạn. Không vào là coin mất, Techie buồn!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "bdfb081e-6b75-452b-a927-b9f2add14d06",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "62413604-f229-4e39-aa96-3b0a3acad3e3",
+        "templateMessage": "😢 Techie: \"I didn’t say anything, but you haven’t studied yet, why did you leave?\" The first lesson is waiting for you. If you don’t join, the coins are lost, and Techie is sad!",
+        "language": "en-US"
+      },
+      {
+        "id": "4f6508d1-835b-4378-b5fd-d74ce6b249b9",
+        "createdDate": "2025-06-03",
+        "notificationTypeId": "62413604-f229-4e39-aa96-3b0a3acad3e3",
+        "templateMessage": "😢 Techie : \"Je n'ai rien dit, mais tu n'as pas encore étudié, pourquoi partir ?\" La première leçon t'attend. Si tu ne rejoins pas, les pièces sont perdues, et Techie est triste !",
+        "language": "fr-FR"
+      }
+    ]
   }
 ]

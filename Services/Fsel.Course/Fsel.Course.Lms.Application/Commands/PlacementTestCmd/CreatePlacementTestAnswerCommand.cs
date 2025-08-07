@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
@@ -226,9 +227,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
             await _placementTestAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                placementTestResult = _placementTestResultRepository.Add(placementTestResult);
-                await _placementTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
+                await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.PlacementTestId, c.StudentId, c.IsDeleted };
+                });
                 placementTestResults.Add(placementTestResult);
                 placementTestResults = placementTestResults.OrderBy(x => x.CreatedDate).ToList();
 

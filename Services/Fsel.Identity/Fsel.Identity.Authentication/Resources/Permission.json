@@ -1,0 +1,713 @@
+[
+  {
+    "id": "7d14f6e2-6f80-4e47-bfcd-b60f9ed6d101",
+    "claimValue": "UserManagement.View",
+    "name": "Xem và tìm kiếm danh sách, thông tin người dùng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "c9c55ef5-01e0-4fa6-b68a-3aaea1089548",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "c79f6403-5033-4691-bd3f-c73a47be79dc",
+    "claimValue": "UserManagement.Add",
+    "name": "Thêm mới thông tin người dùng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "c9c55ef5-01e0-4fa6-b68a-3aaea1089548",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "fa343a8b-6ef9-48bb-94fa-2c20a6bc4e12",
+    "claimValue": "UserManagement.Update",
+    "name": "Chỉnh sửa thông tin người dùng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "c9c55ef5-01e0-4fa6-b68a-3aaea1089548",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "4a32d1c9-21f2-48c0-98e0-2f5c908f6c34",
+    "claimValue": "UserManagement.Delete",
+    "name": "Xóa thông tin người dùng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "c9c55ef5-01e0-4fa6-b68a-3aaea1089548",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "3d925e57-f62a-4d85-b7d5-7a31720d84d4",
+    "claimValue": "UserManagement.Export",
+    "name": "Tải xuống file thông tin người dùng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "c9c55ef5-01e0-4fa6-b68a-3aaea1089548",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "cb38a1e4-03d5-4a7c-b445-36c8892d8e9a",
+    "claimValue": "ClassManagement.View",
+    "name": "Xem và tìm kiếm danh sách, thông tin lớp học",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "b0a0b3b1-35aa-4ef5-8c17-95a5b7cf7a2b",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "1ad1231e-7994-4659-b872-90e4f43794f0",
+    "claimValue": "ClassManagement.Add",
+    "name": "Thêm mới lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "b0a0b3b1-35aa-4ef5-8c17-95a5b7cf7a2b",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "f1db5cd3-0a63-43e5-9ac5-3cf52495d4cd",
+    "claimValue": "ClassManagement.Update",
+    "name": "Chỉnh sửa thông tin lớp học",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "b0a0b3b1-35aa-4ef5-8c17-95a5b7cf7a2b",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "9fc8bbf6-0a62-4a80-9c06-9a1094e3f2de",
+    "claimValue": "StudentManagement.View",
+    "name": "Xem và tìm kiếm danh sách thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "68e5e3d2-90a1-4c60-9b8f-77a03381dc92",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "1fae41db-67cf-4b6f-8dc8-c01be7fceae4",
+    "claimValue": "StudentManagement.Update",
+    "name": "Chỉnh sửa thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "68e5e3d2-90a1-4c60-9b8f-77a03381dc92",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "f3087b7a-4215-4041-9f70-3a9b4bb6cbe9",
+    "claimValue": "StudentManagement.Export",
+    "name": "Xuất dữ liệu danh sách học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "68e5e3d2-90a1-4c60-9b8f-77a03381dc92",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "de71e5bc-b8cb-4b84-a470-c182bd9b73b3",
+    "claimValue": "ForbiddenWordsStorage.View",
+    "name": "Xen thông tin kho từ cấm",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e758b51b-74de-4a2b-87b3-394f701bce9f",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "1a3d195c-6b7f-46a6-bd3b-c43e4e276bd2",
+    "claimValue": "ForbiddenWordsStorage.Update",
+    "name": "Xóa/chỉnh sửa thông tin từ cấm",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e758b51b-74de-4a2b-87b3-394f701bce9f",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "8b2f8f46-68f6-49d2-b0c0-e3c582d56301",
+    "claimValue": "ForbiddenWordsStorage.Add",
+    "name": "Thêm mới từ cấm",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e758b51b-74de-4a2b-87b3-394f701bce9f",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "ec2cf5cc-f202-4de1-bdee-89dcac21d0d9",
+    "claimValue": "PaymentManagement.View",
+    "name": "Xem và tìm kiếm danh sách, thông tin thanh toán",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "b369b45f-2b8e-4cb0-91c2-2ad73d29d88d",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "fbe61a77-69e7-40a9-bbff-c76f5b49f2f9",
+    "claimValue": "PaymentManagement.Update",
+    "name": "Phê duyệt/Từ chối thanh toán",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "b369b45f-2b8e-4cb0-91c2-2ad73d29d88d",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "e4cf2c12-44c5-46f6-b0a4-370bdb6a5d43",
+    "claimValue": "PromotionManagement.View",
+    "name": "Xem và tìm kiếm danh sách các ưu đãi",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "b2b1272c-3b9d-4c6e-91f4-60c302c7d7e1",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "c9cd8d5b-e86e-49a6-b408-5c40f7305f7e",
+    "claimValue": "PromotionManagement.Add",
+    "name": "Tạo ưu đãi mới",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "b2b1272c-3b9d-4c6e-91f4-60c302c7d7e1",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "d2531479-9bc9-42e7-a716-243ce2b053c2",
+    "claimValue": "TaskManagement.View",
+    "name": "Xem và tìm kiếm danh sách các nhiệm vụ",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "95a2cf57-3b18-41b4-b5d5-9291a7bb87a5",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "cfb04a92-c72e-4f7b-bc84-0b0ebac6b597",
+    "claimValue": "TaskManagement.Add",
+    "name": "Tạo nhiệm vụ mới",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "95a2cf57-3b18-41b4-b5d5-9291a7bb87a5",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "e8d09769-181f-4483-bf4b-4f03d13c4537",
+    "claimValue": "StudentProgressManagement.View",
+    "name": "Xem và tìm kiếm danh sách tiến độ của học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "39d8915b-4373-4ed2-9a79-d59db3a5285f",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "6124621e-ecf9-4c80-81cc-48d0d16e22d0",
+    "claimValue": "StudentProgressManagement.LoginAsUser",
+    "name": "Log in as user",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "39d8915b-4373-4ed2-9a79-d59db3a5285f",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "0f2aeb4f-4e34-4375-9757-b546fb4aa4c7",
+    "claimValue": "ErrorReportManagement.View",
+    "name": "Xem thông tin danh sách lỗi",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "ab4582fd-e613-4904-bdc3-c50ff03a1d4d",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "d826f149-1a31-4ec7-91d3-49e537fc08e5",
+    "claimValue": "ErrorReportManagement.Update",
+    "name": "Chỉnh sửa thông tin báo lỗi",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "ab4582fd-e613-4904-bdc3-c50ff03a1d4d",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "b6e04f5e-090f-4e7f-b127-2ad8dd3df62c",
+    "claimValue": "PriceManagement.ViewPriceList",
+    "name": "Xem và tìm kiếm thông tin bảng giá",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e4961eb7-931a-4403-b94a-fb2f7860b80e",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "26fae26a-1994-4328-a4f2-94b8a36c8c2d",
+    "claimValue": "PriceManagement.UpdatePriceList",
+    "name": "Chỉnh sửa thông tin bảng giá",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e4961eb7-931a-4403-b94a-fb2f7860b80e",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "b7bacc00-e12e-438e-8e06-30eaa876cf2a",
+    "claimValue": "PriceManagement.AddPriceList",
+    "name": "Thêm mới bảng giá",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e4961eb7-931a-4403-b94a-fb2f7860b80e",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "fb00742a-82db-42f7-b63f-4a5dbf0b9de0",
+    "claimValue": "PriceManagement.AddPackage",
+    "name": "Thêm mới gói bán hàng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e4961eb7-931a-4403-b94a-fb2f7860b80e",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "c1cf6e9b-3378-4a84-b040-8bc2a688a3c3",
+    "claimValue": "PriceManagement.ViewPackage",
+    "name": "Xem danh sách gói bán hàng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e4961eb7-931a-4403-b94a-fb2f7860b80e",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "9cb2f671-29ae-4218-80b0-4c5a3b22d1b3",
+    "claimValue": "PriceManagement.UpdatePackage",
+    "name": "Chỉnh sửa thông tin gói bán hàng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e4961eb7-931a-4403-b94a-fb2f7860b80e",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "89bee2df-df40-44f6-9f86-7a7fa315a186",
+    "claimValue": "ReferralCodeManagement.View",
+    "name": "Xem và tìm kiếm thông tin mã giới thiệu",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "b652d6d2-f5f0-4c5d-a8b1-ec58860cc6d7",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "e4e6aeac-f23d-41d5-b5e4-18ad27d20bb9",
+    "claimValue": "VoucherManagement.View",
+    "name": "Tìm kiếm và xem thông tin voucher",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "57cbd9f0-87d5-4c5c-8986-08e6fae58d99",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "b9d4227f-9146-4174-b285-dbe307d239d4",
+    "claimValue": "VoucherManagement.Add",
+    "name": "Thêm voucher mới",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "57cbd9f0-87d5-4c5c-8986-08e6fae58d99",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "f03891a1-6b57-4f58-a25b-d9b249654315",
+    "claimValue": "VoucherManagement.Update",
+    "name": "Chỉnh sửa thông tin voucher",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "57cbd9f0-87d5-4c5c-8986-08e6fae58d99",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "6c1fcd70-9e03-4202-9b4a-06cbb5f0f57b",
+    "claimValue": "VoucherManagement.Delete",
+    "name": "Xóa thông tin voucher",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "57cbd9f0-87d5-4c5c-8986-08e6fae58d99",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "d553e5b1-0bc3-476d-a593-6bb31b90c184",
+    "claimValue": "VoucherManagement.Export",
+    "name": "Xuất file voucher",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "57cbd9f0-87d5-4c5c-8986-08e6fae58d99",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "a49d92f6-b4df-4c0f-b7ee-bf16b74fef5b",
+    "claimValue": "GiftManagement.View",
+    "name": "Xem được danh sách và lịch sử các quà tặng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "3d33a7c7-2cf2-4383-9487-e88c0640d12c",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "41d2342f-72dc-4c07-a35e-d0f3ea01367d",
+    "claimValue": "GiftManagement.Update",
+    "name": "Chính sửa xóa thông tin quà tặng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "3d33a7c7-2cf2-4383-9487-e88c0640d12c",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "c34f9166-6c6d-4bb8-9d49-bfb6b9cc9e03",
+    "claimValue": "GiftManagement.Delete",
+    "name": "Xóa thông tin quà tặng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "3d33a7c7-2cf2-4383-9487-e88c0640d12c",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "1a1ab73e-7fcb-4d49-a4ff-f3c9b299f58d",
+    "claimValue": "GiftManagement.Add",
+    "name": "Thêm mới thông tin quà tặng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "3d33a7c7-2cf2-4383-9487-e88c0640d12c",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "e4c3e95b-4a1d-45a6-87c5-537801c4f7e2",
+    "claimValue": "GiftManagement.Export",
+    "name": "Xuất danh sách thông tin đổi quà",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "3d33a7c7-2cf2-4383-9487-e88c0640d12c",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "89b8e2df-df40-4cb6-9f86-7a75a315a186",
+    "claimValue": "PopupOrderManagement.View",
+    "name": "Xem danh sách popup hiện có",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "22960350-3a0f-468b-849f-bf0fd7db264b",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "89b8e2df-df40-46b6-9f86-7a73a315a186",
+    "claimValue": "PopupOrderManagement.Update",
+    "name": "Chỉnh sửa thông tin popup",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "22960350-3a0f-468b-849f-bf0fd7db264b",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "4f1f9949-060a-4704-8f6e-4072052fd83e",
+    "claimValue": "BannerManagement.View",
+    "name": "Xem và tìm kiếm danh sách, thông tin banner",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d9679732-17a3-44ff-b4ed-b39f631c3e13",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "15471d32-9b2f-489e-b23e-6ec1a476973f",
+    "claimValue": "BannerManagement.Update",
+    "name": "Chỉnh sửa/bật/tắt/xóa banner",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d9679732-17a3-44ff-b4ed-b39f631c3e13",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "bcb9f3f3-5383-44f5-8038-2e2b54516dbe",
+    "claimValue": "BannerManagement.Add",
+    "name": "Tạo mới banner",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d9679732-17a3-44ff-b4ed-b39f631c3e13",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "bbdebc34-4918-42b4-bd1e-ea3169188fc7",
+    "claimValue": "BannerManagement.Preview",
+    "name": "Xem preview banner",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d9679732-17a3-44ff-b4ed-b39f631c3e13",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "9e12d4d1-5949-4f62-985f-d50ed2c94b94",
+    "claimValue": "BannerManagement.EditFrequencyOfAppearance",
+    "name": "Chỉnh sửa tần suất xuất hiện giữa các banner",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d9679732-17a3-44ff-b4ed-b39f631c3e13",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "89b8e2df-df40-4cb7-9f86-7a7fa315a121",
+    "claimValue": "CourseGoalManagement.View",
+    "name": "Xem thông tin cấu hình mục tiêu khóa học",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "df96b682-99c5-4ae2-9516-329d2f2d3054",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "89b8e2df-df40-4cb6-9f86-7a7fa315a122",
+    "claimValue": "CourseGoalManagement.Add",
+    "name": "Thêm mới các cột mốc trong thông tin cấu hình mục tiêu khóa học",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "df96b682-99c5-4ae2-9516-329d2f2d3054",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "89b8e2df-df40-4cb2-9f86-7a7fa315a123",
+    "claimValue": "CourseGoalManagement.Update",
+    "name": "Chỉnh sửa/xóa thông tin cấu hình mục tiêu khóa học",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "df96b682-99c5-4ae2-9516-329d2f2d3054",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "89b2e2df-df50-6cb6-9f86-7a7fa315a186",
+    "claimValue": "HomeDashboard.ViewDashboard",
+    "name": "Xem thông tin dashboard",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "89b8e2df-df40-4cb6-9f86-7a7fa315a194",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "2fa87083-9448-4fd6-9ff0-17476b164ae9",
+    "claimValue": "UserGroupManagement.Add",
+    "name": "Thêm mới nhóm người dùng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "5f09fd6f-3a0b-4c40-85b6-0d5cbd85c3ce",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "1e6ac8a6-d1d4-48ed-86c3-8856d1086172",
+    "claimValue": "UserGroupManagement.Update",
+    "name": "Chỉnh sửa nhóm người dùng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "5f09fd6f-3a0b-4c40-85b6-0d5cbd85c3ce",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "921cb40a-c0c3-4aa2-b29e-9614cf1bb7b1",
+    "claimValue": "UserGroupManagement.Delete",
+    "name": "Xóa nhóm người dùng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "5f09fd6f-3a0b-4c40-85b6-0d5cbd85c3ce",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "f51e98e1-30a5-4da2-9b6b-cb395116ed56",
+    "claimValue": "UserGroupManagement.View",
+    "name": "Xem thông tin nhóm người dùng",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "5f09fd6f-3a0b-4c40-85b6-0d5cbd85c3ce",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "83dc20d0-f42a-4c5b-bc97-2d31b553bbdf",
+    "claimValue": "RoleGroupManagement.Add",
+    "name": "Thêm mới nhóm quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "31bafbd0-7346-4aaf-a1fa-bf2194b1be68",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "cc0e79f6-d0c4-4097-bef3-d6eb1e6cd39c",
+    "claimValue": "RoleGroupManagement.Update",
+    "name": "Chỉnh sửa nhóm quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "31bafbd0-7346-4aaf-a1fa-bf2194b1be68",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "4b769b93-94b3-4a4e-83ff-09c29d580d64",
+    "claimValue": "RoleGroupManagement.Delete",
+    "name": "Xóa nhóm quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "31bafbd0-7346-4aaf-a1fa-bf2194b1be68",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "9b0ebf6a-f5d9-4fd2-a87d-73aa4a6c2e11",
+    "claimValue": "RoleGroupManagement.View",
+    "name": "Xem thông tin nhóm quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "31bafbd0-7346-4aaf-a1fa-bf2194b1be68",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "8020537c-8f9f-44c5-89ce-55e1e52a1d9e",
+    "claimValue": "PermissionManagement.Add",
+    "name": "Thêm mới quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "9fc99947-c7a9-44aa-b9eb-ea42b28590fc",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "3e3f1397-0860-4b60-9c56-cf01e145e4d4",
+    "claimValue": "PermissionManagement.Update",
+    "name": "Chỉnh sửa quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "9fc99947-c7a9-44aa-b9eb-ea42b28590fc",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "07e2099e-4c7a-4c93-bbb6-3cf9ff9fcfa7",
+    "claimValue": "PermissionManagement.Delete",
+    "name": "Xóa quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "9fc99947-c7a9-44aa-b9eb-ea42b28590fc",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "75d60a3b-7f0d-43c1-b3e6-352b2b313d91",
+    "claimValue": "PermissionManagement.View",
+    "name": "Xem thông tin quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "9fc99947-c7a9-44aa-b9eb-ea42b28590fc",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "89b2e2df-df40-4cb9-9f86-7a7fa315a112",
+    "claimValue": "AuthorizationManagement.View",
+    "name": "Xem bảng phân quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "f9142961-5fe0-4015-8d01-9e12d202a7ae",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "19b8e2df-d240-4cb6-9f86-7a7fa315a186",
+    "claimValue": "AuthorizationManagement.Update",
+    "name": "Chỉnh sửa phân quyền",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "f9142961-5fe0-4015-8d01-9e12d202a7ae",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "23b5e2df-df40-4cb6-9f86-9a7fa215a686",
+    "claimValue": "AddStudentToBlindBox.Add",
+    "name": "Thêm học sinh vào túi mù",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "6f12e0d0-774c-4868-a062-e94b0b6ecf2d",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "79e900b5-cb1a-49bb-a8ad-33925b97e095",
+    "claimValue": "SchoolStudentManagement.View",
+    "name": "Xem và tìm kiếm danh sách, thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "ce8b975b-6f31-454e-b21f-18a35061e266",
+    "claimValue": "SchoolStudentManagement.Add",
+    "name": "Thêm mới học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "1e938573-3317-449a-b322-76225eb87039",
+    "claimValue": "SchoolStudentManagement.Update",
+    "name": "Chỉnh sửa thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "90897566-3edf-4aae-969a-9acb31c80c0b",
+    "claimValue": "SchoolStudentManagement.Delete",
+    "name": "Xóa học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "6df0f361-0d99-4a38-b5be-706225b7f22b",
+    "claimValue": "ReportManagementByAdminSchool.ViewPTResultsReport",
+    "name": "Xem báo cáo kết quả đánh giá đầu vào",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "a092a54c-1306-4600-af02-8cae97875977",
+    "claimValue": "ReportManagementByAdminSchool.ViewLearningProgressReport",
+    "name": "Xem báo cáo tiến độ học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "27b1c0ae-d63a-4553-a130-e008183940c7",
+    "claimValue": "ReportManagementByAdminSchool.ViewLearningResultsReport",
+    "name": "Xem báo cáo kết quả học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "09748430-9ce7-4f22-a777-2516fc98d16c",
+    "claimValue": "ReportManagementByAdminSchool.ViewAttendanceReport",
+    "name": "Xem báo cáo chuyên cần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "createdDate": "2025-06-19"
+  },
+  {
+    "id": "e5e6f8f3-aaa3-480f-bd6e-f005aec41167",
+    "claimValue": "DashboardManagementByAdminSchool.ViewPTResultsReport",
+    "name": "Xem báo cáo kết quả đánh giá đầu vào",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "18f69e03-68d9-4be2-8d86-126f3fd87022",
+    "claimValue": "DashboardManagementByAdminSchool.ViewLearningProgressReport",
+    "name": "Xem báo cáo tiến độ học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "1aacc9b4-8abb-4e18-9583-acaab2a302aa",
+    "claimValue": "DashboardManagementByAdminSchool.ViewLearningResultsReport",
+    "name": "Xem báo cáo kết quả học tập",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "29799ab5-71de-444e-b68e-9c00f9160346",
+    "claimValue": "DashboardManagementByAdminSchool.ViewAttendanceReport",
+    "name": "Xem báo cáo chuyên cần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  }
+]
