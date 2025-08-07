@@ -4,6 +4,7 @@
 namespace Fsel.Identity.Authentication.Extensions
 {
     using System;
+    using System.Globalization;
     using System.IdentityModel.Tokens.Jwt;
     using System.Reflection;
     using System.Security.Claims;
@@ -30,6 +31,7 @@ namespace Fsel.Identity.Authentication.Extensions
     using Fsel.Identity.Infrastructure.Providers;
     using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
+    using Fsel.Shared.Constants;
     using IdentityServer4;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
@@ -314,7 +316,7 @@ namespace Fsel.Identity.Authentication.Extensions
                     options.UsePrivateKey(keyId =>
                     {
                         var binFolder = Path.GetDirectoryName(Assembly.GetEntryAssembly()?.Location) ?? string.Empty;
-                        var fileInfo = new PhysicalFileProvider(binFolder).GetFileInfo($"Resources/{appSetting?.Authentication?.Apple?.PrivateKey}");
+                        var fileInfo = new PhysicalFileProvider(binFolder).GetFileInfo(string.Format(CultureInfo.InvariantCulture, ResourceSettings.ApplePrivateKeyFilePath, appSetting?.Authentication?.Apple?.PrivateKey));
                         if (!fileInfo.Exists)
                         {
                             throw new FileNotFoundException($"Apple private key file not found: {fileInfo.PhysicalPath}");
