@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -46,9 +47,8 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
                 return methodResult;
             }
 
-            StudentFocusTimeModel studentFocusTime = new StudentFocusTimeModel();
-            var studentFocusTimesQuery = _studentFocusTimeRepository.Queryable.Where(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
-            if (studentFocusTimesQuery == null)
+            var studentFocusTimes = await _studentFocusTimeRepository.Queryable.Where(x => x.StudentId == student.Id && x.CreatedDate >= DateTime.UtcNow.AddDays(-1).Date).ToListAsync(cancellationToken);
+            if (studentFocusTimes == null)
             {
                 methodResult.Result = new StudentFocusTimeModel();
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -57,7 +57,8 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
 
             //Check xem học sinh có học liên tiếp trong 7 ngày hay không
             var hasContinuousData = await _mediator.Send(new CheckSuperFireModeQuery(), cancellationToken);
-            studentFocusTime = _mapper.Map<StudentFocusTimeModel>(studentFocusTimesQuery.FirstOrDefault());
+
+            var studentFocusTime = _mapper.Map<StudentFocusTimeModel>(studentFocusTimes.Where(x => x.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date == DateTime.Now.Date).FirstOrDefault());
             if (studentFocusTime != null)
             {
                 studentFocusTime.StudentId = student.Id;

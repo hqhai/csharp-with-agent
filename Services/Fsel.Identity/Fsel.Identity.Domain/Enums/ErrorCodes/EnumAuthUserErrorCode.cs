@@ -25,6 +25,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         OldPasswordIncorrect,
 
         /// <summary>
+        /// Duplicate username, please select another email
+        /// </summary>
+        DuplicateUsername,
+
+        /// <summary>
         /// Duplicate email, please select another email
         /// </summary>
         DuplicateEmail,
@@ -153,5 +158,10 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// Account has been cut off
         /// </summary>
         AccountHasBeenCutOff,
+
+        /// <summary>
+        /// Role ko thuộc trang báo cáo
+        /// </summary>
+        RoleNotInDashboard
     }
 }

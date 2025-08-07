@@ -9,6 +9,7 @@ namespace Fsel.Training.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Models.ShareModels;
     using Fsel.Training.Application.Commands.ClassCmd;
     using Fsel.Training.Application.Commands.ClassLiveCmd;
     using Fsel.Training.Application.Commands.ClassStudentCmd;
@@ -246,6 +247,18 @@ namespace Fsel.Training.Api.Controllers
         public async Task<IActionResult> GetsByCourseIds([FromQuery] GetListClassByCourseIdsQuery query)
         {
             MethodResult<IList<ClassModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get students in 7 day choose level
+        /// </summary>
+        [HttpGet("get-students-in-7-day-choose-level")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentsIn7DayChooseLevelModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetStudentsIn7DayChooseLevel()
+        {
+            var queryResult = await _mediator.Send(new GetStudentsIn7DayChooseLevelQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
