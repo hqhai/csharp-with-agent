@@ -63,7 +63,11 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 {
                     PhoneNumbers = new List<string> { identity },
                     Template = EnumSendSMSTemplate.SendOTP,
-                    Content = _stringLocalizer["i18n_OTP_notify"].Value.InjectParam(otp, expiredTime.Minutes.ToString()),
+                    Params = new
+                    {
+                        CountOTP = 1,
+                        OTP = otp,
+                    },
                 });
             }
             else if (otpProviderType == OtpProviderType.Zalo)
