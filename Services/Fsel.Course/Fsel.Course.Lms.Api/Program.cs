@@ -135,6 +135,8 @@ builder.Services.AddScoped<ITestAISettingRepository, TestAISettingRepository>();
 builder.Services.AddScoped<ITestAICriteriaSettingRepository, TestAICriteriaSettingRepository>();
 builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionRepository>();
 builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
+builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
+builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
