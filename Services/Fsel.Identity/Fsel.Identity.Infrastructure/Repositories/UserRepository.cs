@@ -1,5 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Common.Helpers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Shared.Enums;
@@ -16,6 +17,8 @@ namespace Fsel.Identity.Infrastructure.Repositories
         private readonly IPlatformRepository _platformRepository;
         private readonly UserDbContext _userDbContext;
         public DbContext DbContext => _userDbContext;
+
+        public IQueryable<User> Queryable => _userDbContext.Set<User>().AsQueryable();
 
         public UserRepository(UserManager<User> userManager, IStudentRepository studentRepository, IParentRepository parentRepository, UserDbContext userDbContext, IPlatformRepository platformRepository)
         {
@@ -87,6 +90,30 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
 
             return user;
+        }
+
+        public async Task<User> GetUserByIdentity(string identity)
+        {
+            if (!identity.IsValidEmail() && !identity.IsValidPhoneNumber())
+            {
+                return null;
+            }
+
+            var isEmail = identity.IsValidEmail();
+
+            if (isEmail)
+            {
+                var user = await _userManager.FindByEmailAsync(identity);
+                if (user != null && user.EmailConfirmed)
+                {
+                    return user;
+                }
+                return null;
+            }
+            else
+            {
+                return await Queryable.AsNoTracking().FirstOrDefaultAsync(x => x.PhoneNumber == identity && x.PhoneNumberConfirmed);
+            }
         }
     }
 }

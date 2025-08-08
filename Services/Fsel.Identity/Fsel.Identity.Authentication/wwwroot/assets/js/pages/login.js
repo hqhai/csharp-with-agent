@@ -8,24 +8,31 @@
     }
   });
 
-  const emailInput = $("#username");
+  const identityInput = $("#username");
   const passwordInput = $("#password");
   const loginButton = $("#loginButton");
 
-  emailInput.on("input", validateEmail);
+  identityInput.on("input", validateEmail);
   //passwordInput.on("input", validatePasswordFormat);
-
   function validateEmail() {
-    const email = emailInput.val();
+    const identity = identityInput.val();
     const emailPattern = /^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
-    if (email !== "" && emailPattern.test(email)) {
-      emailInput.removeClass("content-border-danger");
-      return true;
-    } else {
-      emailInput.addClass("content-border-danger");
-      return false;
+    const phonePattern = /^\+?\d{7,15}$/;
+
+    if (identity !== "") {
+      if (phonePattern.test(identity)) {
+        identityInput.removeClass("content-border-danger");
+        return true;
+      }
+      if (emailPattern.test(identity)) {
+        identityInput.removeClass("content-border-danger");
+        return true;
+      }
     }
+    identityInput.addClass("content-border-danger");
+    return false;
   }
+
 
   function validatePasswordFormat() {
     var password = passwordInput.val();

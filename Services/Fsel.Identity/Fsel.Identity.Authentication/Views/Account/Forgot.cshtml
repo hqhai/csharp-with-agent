@@ -18,8 +18,12 @@
         </div>
 
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
-        <h1 class="title">@Localizer["i18n_forgot_password"]</h1>
-
+        <p class="form-title">@Localizer["i18n_forgot_password"]</p>
+        <p class="form-subtitle">
+            Nhập địa chỉ email hoặc số điện thoại đã liên kết với tài khoản
+            của bạn và chúng mình sẽ gửi cho bạn một mã xác thực để đặt lại
+            mật khẩu.
+        </p>
         <form id="form-Forgot" asp-route="Forgot">
             <input type="hidden" asp-for="ReturnUrl" />
             @Html.AntiForgeryToken()
@@ -28,17 +32,18 @@
                 <div class="float-input float-input-validate">
                     <input class="text-input"
                            type="text"
-                           name="Email"
-                           id="email"
+                           name="Identity"
+                           id="identity"
                            placeholder=" "
                            autocomplete="off"
                            required
-                           asp-for="Email" />
-                    <label for="Email" class="input-label">@Localizer["i18n_email"]</label>
+                           asp-for="Identity" />
+                    <label for="identity" class="input-label">@Localizer["i18n_username"]</label>
                 </div>
-                @Html.CustomValidationMessageFor(model => model.Email, Localizer, "", new { @class = "content-text-danger" })
+                @Html.CustomValidationMessageFor(model => model.Identity, Localizer, "", new { @class = "content-text-danger" })
             </div>
             <button type="submit" class="btn send-otp-button">@Localizer["i18n_send_otp"]</button>
+            <div class="text-footer">Quay lại<a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">Login</a></div>
         </form>
     </div>
 

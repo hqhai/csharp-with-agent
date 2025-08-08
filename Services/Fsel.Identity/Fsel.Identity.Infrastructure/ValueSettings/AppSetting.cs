@@ -103,6 +103,8 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public Facebook? Facebook { get; set; }
 
         public Zalo? Zalo { get; set; }
+
+        public Apple? Apple { get; set; }
     }
 
     public class Google
@@ -140,5 +142,18 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? TokenEndpoint { get; set; }
 
         public string? UserInformationEndpoint { get; set; }
+    }
+
+    public class Apple
+    {
+        public string? ClientId { get; set; }
+
+        public string? TeamId { get; set; }
+
+        public string? KeyId { get; set; }
+
+        public string? PrivateKey { get; set; }
+
+        public string? Callback { get; set; }
     }
 }

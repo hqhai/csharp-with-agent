@@ -1,15 +1,13 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
-
 using System.ComponentModel.DataAnnotations;
-using Fsel.Identity.Domain.Constants;
 
 namespace Fsel.Identity.Authentication.OpenId.Account
 {
     public class LoginInputModel
     {
-        [RegularExpression(RegexSettings.EmailValid, ErrorMessage = "i18n_Email_is_not_valid")]
+        //[RegularExpression(RegexSettings.EmailValid, ErrorMessage = "i18n_Email_is_not_valid")]
         [Required(ErrorMessage = "i18n_Username_cannot_be_empty")]
         public string? Username { get; set; }
 

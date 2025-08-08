@@ -9,7 +9,6 @@
   });
 
   const $newPasswordInput = $("#Password");
-  const $confirmationPasswordInput = $("#ConfirmPassword");
   const $passwordMeter = $("#passwordMeter");
   const $meterText = $("#meter-text");
   const $ruleList = $("#rule-list");
@@ -40,21 +39,6 @@
     }
 
     return result;
-  }
-
-  function validateConfirmationPassword() {
-    const newPassword = $newPasswordInput.val();
-    const confirmationPassword = $confirmationPasswordInput.val();
-
-    if (newPassword !== confirmationPassword) {
-      $confirmationPasswordInput.addClass("content-border-danger");
-      return false;
-    } else {
-      $confirmationPasswordInput.removeClass("content-border-danger");
-    }
-
-    updateContinueButtonStatePass();
-    return true;
   }
 
   function validateNewPassword() {
@@ -140,10 +124,8 @@
 
     // Validate each field
     const isValidPassword = validateNewPassword();
-    const isValidConfirmationPassword = validateConfirmationPassword();
 
     if (!isValidPassword) isDoneAllValidate = false;
-    if (!isValidConfirmationPassword) isDoneAllValidate = false;
 
     return isDoneAllValidate;
   }
@@ -154,6 +136,5 @@
   }
 
   $newPasswordInput.on("input", validateAll);
-  $confirmationPasswordInput.on("input", validateConfirmationPassword);
 
 }(jQuery));	

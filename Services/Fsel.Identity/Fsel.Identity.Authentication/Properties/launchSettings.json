@@ -36,6 +36,15 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
+    "https-domain": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://fsel-auth-dev.fsel.edu.vn:443",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
     "https (Testing)": {
       "commandName": "Project",
       "dotnetRunMessages": true,

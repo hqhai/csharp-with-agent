@@ -10,6 +10,10 @@ namespace Fsel.Identity.Domain.IRepositories
     {
         DbContext DbContext { get; }
 
+        IQueryable<User> Queryable { get; }
+
         Task<User> GenerateUserDataAsync(User user, EnumRoleRegister role);
+
+        Task<User> GetUserByIdentity(string identity);
     }
 }

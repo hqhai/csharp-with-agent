@@ -7,22 +7,24 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
         //[Required(ErrorMessage = "i18n_OTP_cannot_be_empty")]
         public string? Otp { get; set; }
 
+        public string? Identity { get; set; }
+
         public string? ReturnUrl { get; set; }
 
         public string? Type { get; set; }
 
         public DateTime? ExpiredTime { get; set; }
 
+        public string? OtpProvider { get; set; }
+
         public long? RemainSecond
         {
             get
             {
-                var dateNow = DateTime.UtcNow;
-                if (ExpiredTime.HasValue && ExpiredTime.Value > dateNow)
+                if (ExpiredTime.HasValue)
                 {
-                    return (long)(ExpiredTime.Value - dateNow).TotalSeconds;
+                    return (long)(ExpiredTime.Value - DateTime.UtcNow).TotalSeconds;
                 }
-
                 return default;
             }
         }
