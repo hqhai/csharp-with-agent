@@ -7,14 +7,24 @@ namespace Fsel.Course.Infrastructure.Common
     using System.Text.Json;
     using System.Text.RegularExpressions;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Microsoft.EntityFrameworkCore;
 
     public class QuestionTypeConverter
     {
+        private readonly IKeyboardTextRepository _keyboardTextRepository;
+
+        public QuestionTypeConverter(IKeyboardTextRepository keyboardTextRepository)
+        {
+            _keyboardTextRepository = keyboardTextRepository;
+        }
+
         public (object?, int) QuestionTypeConverterObject(object? config, EnumQuestionType type, bool isShowCorrectTotal = false, bool isDisableAnswers = false, bool isCreated = false)
         {
             int totalCorrect = default;
@@ -178,6 +188,16 @@ namespace Fsel.Course.Infrastructure.Common
                     totalCorrect = isShowCorrectTotal ? GetTotalCorrect(tableCompletion) : ValueSettings.ValueDefault;
                     break;
 
+                case EnumQuestionType.Tracing:
+                    var tracingQuestion = config.Deserialize<TracingQuestion>();
+                    if (tracingQuestion != null)
+                    {
+                        tracingQuestion.KeyboardText = GetKeyboardText(tracingQuestion.KeyboardTextId);
+                    }
+
+                    result = tracingQuestion;
+                    totalCorrect = ValueSettings.ValueDefaultTracingScore;
+                    break;
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -564,6 +584,10 @@ namespace Fsel.Course.Infrastructure.Common
                         }
                     }
                     break;
+
+                case TracingQuestion tracingQuestion:
+
+                    break;
             }
             return data;
         }
@@ -661,6 +685,17 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
             }
             return (result, questionShuffleStr);
+        }
+
+        private KeyboardTextModel? GetKeyboardText(Guid keyboardTextId)
+        {
+            return _keyboardTextRepository.ReadOnlyDbContext.Set<KeyboardText>().Select(keyboardText => new KeyboardTextModel
+            {
+                Id = keyboardText.Id,
+                Name = keyboardText.Name,
+                Unicode = keyboardText.Unicode,
+                FilePath = keyboardText.FilePath,
+            }).FirstOrDefault(x => x.Id == keyboardTextId);
         }
     }
 }
