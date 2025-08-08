@@ -93,6 +93,7 @@ builder.Services.AddScoped<IDailyQuizAnswerRepository, DailyQuizAnswerRepository
 builder.Services.AddScoped<IDailyQuizHistoryRepository, DailyQuizHistoryRepository>();
 builder.Services.AddScoped<IDailyQuizQuestionRepository, DailyQuizQuestionRepository>();
 builder.Services.AddScoped<IDailyQuizWinnerRepository, DailyQuizWinnerRepository>();
+builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
