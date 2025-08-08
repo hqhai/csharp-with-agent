@@ -218,9 +218,14 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             if (request.UserSurveyAssignmentId.HasValue)
             {
                 assignment = await _userSurveyAssignmentRepository.GetByIdAsync(request.UserSurveyAssignmentId.Value);
-                if (assignment == null || assignment.IsDone)
+                if (assignment == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(assignment));
+                    return methodResult;
+                }
+                if (assignment.IsDone)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumCustomerSurveyErrorCode.DuplicateAnswers));
                     return methodResult;
                 }
             }
