@@ -7,7 +7,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
     using Fsel.Identity.Domain.Constants;
     using Fsel.Shared.Enums;
 
-    public class ExternalLoginModel
+    public class ExternalLoginModel : IRequestBodyTenantAware
     {
         [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         [MaxLength(254, ErrorMessage = "i18n_limit_number_characters")]
@@ -76,5 +76,19 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
         public ClaimsPrincipal? Principal { get; set; }
 
         public string? ReturnUrl { get; set; }
+
+        public string? Identity
+        {
+            get { return Email; }
+            set { Email = value; }
+        }
+
+        public string? UserName
+        {
+            get { return Email; }
+            set { Email = value; }
+        }
+
+        public Guid? UserId { get; set; }
     }
 }

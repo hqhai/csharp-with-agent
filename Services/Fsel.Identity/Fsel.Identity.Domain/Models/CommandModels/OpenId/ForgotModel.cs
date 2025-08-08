@@ -4,11 +4,15 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 {
     using System.ComponentModel.DataAnnotations;
 
-    public class ForgotModel
+    public class ForgotModel : IRequestBodyTenantAware
     {
         [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
         public string? Identity { get; set; }
 
         public string? ReturnUrl { get; set; }
+
+        public string? UserName { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 }

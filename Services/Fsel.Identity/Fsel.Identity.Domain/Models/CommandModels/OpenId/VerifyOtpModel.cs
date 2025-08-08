@@ -2,7 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 {
-    public class VerifyOtpModel
+    public class VerifyOtpModel : IRequestBodyTenantAware
     {
         //[Required(ErrorMessage = "i18n_OTP_cannot_be_empty")]
         public string? Otp { get; set; }
@@ -28,5 +28,9 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
                 return default;
             }
         }
+
+        public string? UserName { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 }

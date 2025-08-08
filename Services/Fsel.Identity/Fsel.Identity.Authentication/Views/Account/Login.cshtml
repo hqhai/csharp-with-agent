@@ -33,7 +33,7 @@
                                id="username"
                                placeholder=""
                                autocomplete="off"
-                               asp-for="Username" autofocus />
+                               asp-for="UserName" autofocus />
                         @* <input class="text-input"
                                 type="text"
                                 name="username"
@@ -44,7 +44,7 @@
                                 required/> *@
                         <label for="username" class="input-label">@Localizer["i18n_username"]</label>
                     </div>
-                    @Html.CustomValidationMessageFor(model => model.Username, Localizer, "", new { @class = "content-text-danger" })
+                    @Html.CustomValidationMessageFor(model => model.UserName, Localizer, "", new { @class = "content-text-danger" })
                 </div>
 
                 <div>

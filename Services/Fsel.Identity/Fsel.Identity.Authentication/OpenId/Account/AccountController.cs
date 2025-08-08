@@ -9,6 +9,8 @@ using Fsel.Common.Constants;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
+using Fsel.Core.Extensions;
+using Fsel.Identity.Application.Attributes;
 using Fsel.Identity.Application.Handlers.Implementations;
 using Fsel.Identity.Application.Handlers.Interfaces;
 using Fsel.Identity.Authentication.Auth;
@@ -36,6 +38,7 @@ using static IdentityServer4.IdentityServerConstants;
 namespace Fsel.Identity.Authentication.OpenId.Account
 {
     [AllowAnonymous]
+    [TenantAware]
     public class AccountController : BaseController
     {
         protected IUserSession UserSession { get; private set; }
@@ -54,6 +57,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly Core.Base.AuthContext _languageContext;
         private readonly IStringLocalizer _localizer;
         private readonly IOtpDataCollector _otpDataCollector;
+        private readonly ITenantProvider _tenantProvider;
 
         public AccountController(
             IUserSession userSession,
@@ -70,7 +74,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             IPlatformRepository platformRepository,
             IUserRegisterHandler userRegisterHandler,
             IForgotPasswordHandler forgotPasswordHandler,
-            IOtpDataCollector otpDataCollector)
+            IOtpDataCollector otpDataCollector,
+            ITenantProvider tenantProvider)
         {
             UserSession = userSession;
             _interaction = interaction;
@@ -87,6 +92,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             _userRegisterHandler = userRegisterHandler;
             _forgotPasswordHandler = forgotPasswordHandler;
             _otpDataCollector = otpDataCollector;
+            _tenantProvider = tenantProvider;
         }
 
         /// <summary>
@@ -420,7 +426,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             if (ModelState.IsValid)
             {
-                var user = await _signInManager.UserManager.FindByNameAsync(model.Username ?? string.Empty);
+                var user = await _signInManager.UserManager.FindByNameAsync(model.UserName ?? string.Empty);
                 if (user is not null && await ValidateLogin(user))
                 {
                     var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, true);
@@ -483,7 +489,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     ModelState.AddModelError(string.Empty, _localizer["ERROR_CODE.UserNameAndPasswordIncorrect"]);
                 }
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, _localizer["i18n_Invalid_Credentials"], clientId: context?.Client.ClientId));
+                await _events.RaiseAsync(new UserLoginFailureEvent(model.UserName, _localizer["i18n_Invalid_Credentials"], clientId: context?.Client.ClientId));
             }
 
             return View(vm);
@@ -614,6 +620,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             {
                 return RedirectToAction(nameof(Login), new { returnUrl });
             }
+
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(email ?? string.Empty) ?? _userManager;
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User>(email ?? string.Empty) ?? _signInManager;
+
             var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
             if (user != null && !await ValidateLogin(user))
             {
@@ -630,7 +641,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             }
             else
             {
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
                 var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
                 var birthday = info.Principal.FindFirstValue(ClaimTypes.DateOfBirth)?.ConvertDateTimeFormat("MM/dd/yyyy");
@@ -822,7 +832,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             var vm = new LoginViewModel
             {
                 ReturnUrl = returnUrl,
-                Username = context?.LoginHint,
+                UserName = context?.LoginHint,
                 UiLocales = context?.UiLocales,
                 OSName = context?.Parameters[Settings.RequestHeader.OSName],
                 DeviceId = context?.Parameters[Settings.RequestHeader.DeviceId],
@@ -880,7 +890,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private async Task<LoginViewModel> BuildLoginViewModelAsync(LoginInputModel model)
         {
             var vm = await BuildLoginViewModelAsync(model.ReturnUrl ?? string.Empty);
-            vm.Username = model.Username;
+            vm.UserName = model.UserName;
             vm.RememberLogin = model.RememberLogin;
             return vm;
         }
