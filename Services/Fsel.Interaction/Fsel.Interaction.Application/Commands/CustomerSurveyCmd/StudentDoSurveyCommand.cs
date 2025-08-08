@@ -126,7 +126,7 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 var checkSurveyPT = checkSurveyPTResult.Result;
                 if (!checkSurveyPT)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSurveyErrorCode.NoSurvey), nameof(checkSurveyPT));
+                    methodResult.AddErrorBadRequest(nameof(EnumSurveyErrorCode.SurveyExpired), nameof(checkSurveyPT), checkSurveyPT);
                     return methodResult;
                 }
             }
