@@ -13,7 +13,6 @@
   const loginButton = $("#loginButton");
 
   identityInput.on("input", validateEmail);
-  //passwordInput.on("input", validatePasswordFormat);
   function validateEmail() {
     const identity = identityInput.val();
     const emailPattern = /^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
@@ -32,7 +31,6 @@
     identityInput.addClass("content-border-danger");
     return false;
   }
-
 
   function validatePasswordFormat() {
     var password = passwordInput.val();
@@ -70,22 +68,21 @@
   }
 
   function enableDisableLoginButton() {
-      const email = emailInput.val();
-      const password = passwordInput.val();
-      //const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-z]{2,}$/;
-      const hasUppercase = /[A-Z]/.test(password);
-      const hasLowercase = /[a-z]/.test(password);
-      const hasSpecialChar = /[@$!%*?&.]/.test(password);
-      const hasNumber = /\d/.test(password);
+    const email = emailInput.val();
+    const password = passwordInput.val();
+    //const emailRegex = /^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-z]{2,}$/;
+    const hasUppercase = /[A-Z]/.test(password);
+    const hasLowercase = /[a-z]/.test(password);
+    const hasSpecialChar = /[@$!%*?&.]/.test(password);
+    const hasNumber = /\d/.test(password);
 
-      if (/*emailRegex.test(email) &&*/ email && password && hasUppercase && hasLowercase && hasSpecialChar && hasNumber && password.length >= 8) {
-          loginButton.prop("disabled", false);
-      } else {
-          loginButton.prop("disabled", true);
-      }
+    if (/*emailRegex.test(email) &&*/ email && password && hasUppercase && hasLowercase && hasSpecialChar && hasNumber && password.length >= 8) {
+      loginButton.prop("disabled", false);
+    } else {
+      loginButton.prop("disabled", true);
+    }
   }
 
   // Kiểm tra khi trang web tải lần đầu
   //enableDisableLoginButton();
-
-}(jQuery));	
+}(jQuery));

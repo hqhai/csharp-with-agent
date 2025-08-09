@@ -8,29 +8,23 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using Fsel.Common.Helpers;
     using Fsel.Identity.Application.Handlers.Interfaces;
     using Fsel.Identity.Application.Services.SenderService;
-    using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.SenderTemplates;
-    using Microsoft.Extensions.Localization;
 
     public class SendOtpHandler : BaseOtpHandlerPipeline, IOtpHandlerPipeline<SendOtpHandler>
     {
         private readonly ICacheService<string> _cache;
         private readonly ISenderService _senderService;
-        private readonly IStringLocalizer _stringLocalizer;
-        private readonly AppSetting _appSetting;
+        private readonly ICacheService<SendOtpCountInfo> _sendOtpCountCache;
 
         public SendOtpHandler(ICacheService<string> cache,
             ISenderService senderService,
-            IStringLocalizer stringLocalizer,
-            AppSetting appSetting)
+            ICacheService<SendOtpCountInfo> sendOtpCountCache)
         {
             _cache = cache;
             _senderService = senderService;
-            _stringLocalizer = stringLocalizer;
-            _appSetting = appSetting;
+            _sendOtpCountCache = sendOtpCountCache;
         }
 
         public override async Task Handle(OtpPipelineContext context)
@@ -44,7 +38,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             var otp = GenerateHelper.GetOtp();
             context.Otp = otp;
             await _cache.SetAsync(context.OtpCacheKey, otp, context.OtpLifeTimeDuration);
-            await SendOtpAsync(context.OtpProviderType, otp, context.Identity, context.OtpLifeTimeDuration);
+            await SendOtpAsync(context.CountSendOtpCacheKey, context.OtpProviderType, otp, context.Identity, context.OtpLifeTimeDuration);
             context.Status = true;
             if (Next != null)
             {
@@ -52,11 +46,14 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             }
         }
 
-        private async Task SendOtpAsync(OtpProviderType otpProviderType,
+        private async Task SendOtpAsync(string countSendOtpCacheKey,
+            OtpProviderType otpProviderType,
             string otp,
             string identity,
             TimeSpan expiredTime)
         {
+            var sendCountInfo = await _sendOtpCountCache.GetAsync(countSendOtpCacheKey);
+            var otpCount = sendCountInfo != null ? sendCountInfo.Count + 1 : 1;
             if (otpProviderType == OtpProviderType.Sms)
             {
                 await _senderService.SendSMSAsync(new Shared.Models.ShareModels.SendSMSCommandModel
@@ -65,7 +62,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                     Template = EnumSendSMSTemplate.SendOTP,
                     Params = new
                     {
-                        CountOTP = 1,
+                        CountOTP = otpCount,
                         OTP = otp,
                     },
                 });
@@ -89,7 +86,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 var param = new SendOtpTemplateModel
                 {
                     OtpCode = otp,
-                    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
+                    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, expiredTime.Minutes)
                 };
 
                 if (!string.IsNullOrEmpty(identity))
