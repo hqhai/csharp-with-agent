@@ -8,7 +8,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class ErrorReportRepository : BaseRepository<ErrorReport>, IErrorReportRepository
     {
-        public ErrorReportRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public ErrorReportRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

@@ -44,7 +44,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd.V1i1
                 return methodResult;
             }
 
-            var lessonConverter = await _lessonConverter.LessonModuleHandler(request.Modules!, false, false, cancellationToken);
+            var lessonConverter = await _lessonConverter.LessonModuleHandler(request.LessonModules!, false, false, cancellationToken);
             if (!lessonConverter.IsOK)
             {
                 methodResult.AddErrorBadRequest(lessonConverter.ErrorMessages);

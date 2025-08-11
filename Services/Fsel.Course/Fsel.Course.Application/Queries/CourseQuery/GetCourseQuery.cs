@@ -2,6 +2,7 @@
 
 using AutoMapper;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Application.Services.UserServices.Models;
@@ -93,8 +94,8 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             var testIds = course.CourseModules?.Where(x => x.CourseConfigType == EnumCourseConfigType.Test).Select(x => x.OriginalId).ToList() ?? new List<Guid>();
             var unitIds = course.CourseModules?.Where(x => x.CourseConfigType == EnumCourseConfigType.Unit).Select(x => x.OriginalId).ToList() ?? new List<Guid>();
 
-            var tests = await _testRepository.Queryable.WhereBulkContains(testIds, x => x.Id).AsNoTracking().ToListAsync(cancellationToken);
-            var units = await _unitRepository.Queryable.WhereBulkContains(unitIds, x => x.Id).AsNoTracking().ToListAsync(cancellationToken);
+            var tests = await _testRepository.Queryable.WhereBulkContains(testIds, x => x.OriginalId).Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).AsNoTracking().ToListAsync(cancellationToken);
+            var units = await _unitRepository.Queryable.WhereBulkContains(unitIds, x => x.OriginalId).Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).AsNoTracking().ToListAsync(cancellationToken);
 
             if (course.CourseModules != null)
             {
@@ -103,12 +104,12 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                     switch (item.CourseConfigType)
                     {
                         case EnumCourseConfigType.Unit:
-                            var unit = units.FirstOrDefault(x => x.Id == item.OriginalId);
+                            var unit = units.FirstOrDefault(x => x.OriginalId == item.OriginalId);
                             item.UnitName = unit?.Name;
                             break;
 
                         case EnumCourseConfigType.Test:
-                            var test = tests.FirstOrDefault(x => x.Id == item.OriginalId);
+                            var test = tests.FirstOrDefault(x => x.OriginalId == item.OriginalId);
                             item.TestName = test?.Name;
                             break;
                     }

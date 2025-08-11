@@ -29,13 +29,21 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
         private readonly ILevelRepository _levelRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUserService _userService;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly ITimeCodeExerciseRepository _timeCodeExerciseRepository;
+        private readonly IExerciseRepository _exerciseRepository;
+        private readonly ISkillRepository _skillRepository;
 
         public SearchLessonQueryHandler(ILessonRepository lessonRepository,
                                         ILessonModuleRepository lessonModuleRepository,
                                         IVideoRepository videoRepository,
                                         ILevelRepository levelRepository,
                                         ICategoryRepository categoryRepository,
-                                        IUserService userService)
+                                        IUserService userService,
+                                        IVideoTimeCodeRepository videoTimeCodeRepository,
+                                        ITimeCodeExerciseRepository timeCodeExerciseRepository,
+                                        IExerciseRepository exerciseRepository,
+                                        ISkillRepository skillRepository)
         {
             _lessonRepository = lessonRepository;
             _lessonModuleRepository = lessonModuleRepository;
@@ -43,6 +51,10 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
             _levelRepository = levelRepository;
             _categoryRepository = categoryRepository;
             _userService = userService;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _timeCodeExerciseRepository = timeCodeExerciseRepository;
+            _exerciseRepository = exerciseRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<LessonSearchModel>>> Handle(SearchLessonQuery request, CancellationToken cancellationToken)
@@ -55,13 +67,13 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                 return methodResult;
             }
 
-            var lessonQuery = from a in _lessonRepository.Queryable
-                              where a.Status != Shared.Enums.EnumStatus.Archive && a.VersionStatus == EnumVersionStatus.LastVersion
+            var lessonQuery = from a in _lessonRepository.ReadQueryable
+                              where !a.IsArchive && a.VersionStatus == EnumVersionStatus.LastVersion
                               select new
                               {
                                   Lesson = a,
-                                  Videos = (from b in _lessonModuleRepository.Queryable
-                                            join v in _videoRepository.Queryable on b.OriginalId equals v.Id
+                                  Videos = (from b in _lessonModuleRepository.ReadQueryable
+                                            join v in _videoRepository.ReadQueryable on b.OriginalId equals v.OriginalId
                                             where b.LessonId == a.Id && b.LessonConfigType == EnumLessonConfigType.Video
                                             select v).ToList()
                               };
@@ -91,7 +103,6 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
             {
                 lessonQuery = lessonQuery.Where(x => x.Videos.Any(v => v.VideoTimeCodes.Any(t => t.TimeCodeType == request.TimeCodeType)));
             }
-
             var lesson = lessonQuery.Select(x => new LessonSearchModel
             {
                 Id = x.Lesson.Id,
@@ -105,26 +116,38 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
                 Status = x.Lesson.Status,
                 LevelId = x.Lesson.LevelId,
                 ProgramId = x.Lesson.ProgramId,
+                Overview = x.Lesson.InstructionContent,
                 Videos = x.Videos.Select(v => new VideoSearchModel
                 {
+                    VideoId = v.Id,
                     TeacherId = v.TeacherId,
                     TimeCodeTypes = v.VideoTimeCodes.Select(t => t.TimeCodeType).Distinct().ToList(),
                 }).ToList(),
-                OriginalId = x.Lesson.OriginalId
+                OriginalId = x.Lesson.OriginalId,
+                Skills = x.Lesson.LessonInstructions.Select(i => new SkillDTO
+                {
+                    Name = i.Skill.Name,
+                    FilePath = i.Skill.FilePath ?? string.Empty
+                }).ToList()
             });
 
             int totalItem = await lesson.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await lesson.ApplySortAndPaging(request)
+            var lessons = await lesson.ApplySortAndPaging(request)
                                     .AsNoTracking()
                                     .ToListAsync(cancellationToken: cancellationToken)
                                     .ConfigureAwait(false);
 
-            foreach (var item in lists)
+            lessons.ForEach(x =>
             {
-                var level = await _levelRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.LevelId, cancellationToken);
+                x.Skills = x.Skills?.Where(x => !string.IsNullOrEmpty(x.Name)).Distinct().ToList();
+            });
+
+            foreach (var item in lessons)
+            {
+                var level = await _levelRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == item.LevelId, cancellationToken);
                 item.NameLevel = level?.Name;
 
-                var category = await _categoryRepository.Queryable.FirstOrDefaultAsync(x => x.Id == item.ProgramId, cancellationToken);
+                var category = await _categoryRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == item.ProgramId, cancellationToken);
                 item.NameProgram = category?.Name;
             }
 
@@ -132,13 +155,13 @@ namespace Fsel.Course.Application.Queries.LessonQuery.V1i1
             if (teacherResults.IsSuccessStatusCode)
             {
                 var teachers = teacherResults.Content?.Result;
-                foreach (var item in lists.Where(x => x.Videos != null).SelectMany(x => x.Videos!))
+                foreach (var item in lessons.Where(x => x.Videos != null).SelectMany(x => x.Videos!))
                 {
                     item.NameTeacher = teachers?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human?.FullName;
                 }
             }
 
-            methodResult.Result = new PagingItemsModel<LessonSearchModel>(lists, request, totalItem);
+            methodResult.Result = new PagingItemsModel<LessonSearchModel>(lessons, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

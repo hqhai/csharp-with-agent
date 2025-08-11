@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class BannerStudentRepository : BaseRepository<BannerStudent>, IBannerStudentRepository
     {
-        public BannerStudentRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public BannerStudentRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

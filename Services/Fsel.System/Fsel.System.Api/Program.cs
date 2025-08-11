@@ -33,7 +33,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<SystemDbContext>();
+builder.AddDbContexts<SystemDbContext, SystemReadDbContext>();
 
 builder.Services.AddDbContext<CrmDbContext>(
         options => options.UseSqlServer(appSetting?.ConnectionStrings?.CrmConnection));
@@ -93,6 +93,7 @@ builder.Services.AddScoped<IDailyQuizAnswerRepository, DailyQuizAnswerRepository
 builder.Services.AddScoped<IDailyQuizHistoryRepository, DailyQuizHistoryRepository>();
 builder.Services.AddScoped<IDailyQuizQuestionRepository, DailyQuizQuestionRepository>();
 builder.Services.AddScoped<IDailyQuizWinnerRepository, DailyQuizWinnerRepository>();
+builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();

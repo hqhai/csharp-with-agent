@@ -49,7 +49,7 @@ namespace Fsel.Course.Infrastructure.Common
 
         #region Validate
 
-        public VoidMethodResult IsValidateQuestion(IEnumerable<TestSection> testSections)
+        public VoidMethodResult IsValidateQuestion(IEnumerable<UpdateTestSectionCommandModel> testSections)
         {
             var methodResult = new VoidMethodResult();
             if (testSections == null || !testSections.Any())
@@ -59,10 +59,11 @@ namespace Fsel.Course.Infrastructure.Common
 
             foreach (var testSection in testSections)
             {
-                if (testSection.TestSectionQuestions != null && testSection.TestSectionQuestions.Any())
+                if (testSection.Questions != null && testSection.Questions.Any())
                 {
-                    foreach (var question in testSection.TestSectionQuestions.Select(x => x.Question))
+                    foreach (var questionRequest in testSection.Questions)
                     {
+                        var question = _mapper.Map<Question>(questionRequest);
                         if (!question.IsValid())
                         {
                             methodResult.AddErrorBadRequest(question.ErrorMessages);
@@ -75,9 +76,9 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                 }
 
-                if (testSection.TestSections != null && testSection.TestSections.Any())
+                if (testSection.Childrens != null && testSection.Childrens.Any())
                 {
-                    var childResult = IsValidateQuestion(testSection.TestSections);
+                    var childResult = IsValidateQuestion(testSection.Childrens);
                     if (!childResult.IsOK)
                     {
                         methodResult.AddErrorBadRequest(childResult.ErrorMessages);

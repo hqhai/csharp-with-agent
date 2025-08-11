@@ -145,8 +145,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished,
                     StudentId = studentId ?? default
                 }).ToList();
-                await _lessonResultRepository.AddList(lessonResults);
-                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _lessonResultRepository.BulkMergeAsync(lessonResults, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId, c.IsDeleted };
+                });
             }
         }
 
@@ -163,8 +165,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                     Status = EnumResultStatus.Unfinished,
                     CourseId = request.CourseId
                 }).ToList();
-                await _mockTestResultRepository.AddList(mockTestResults);
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+                await _mockTestResultRepository.BulkMergeAsync(mockTestResults, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId, c.IsDeleted };
+                });
             }
         }
 

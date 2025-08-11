@@ -102,5 +102,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             MethodResult<PagingItemsModel<VideoModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Video By OriginalId
+        /// </summary>
+        [HttpGet("original/{originalId}")]
+        [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetVideoByOriginal([FromRoute] Guid originalId)
+        {
+            MethodResult<VideoModel> queryResult = await _mediator.Send(new GetVideoByOriginalIdQuery { OriginalId = originalId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

@@ -7,6 +7,7 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Queries.UnitQuery
 {
@@ -32,28 +33,17 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
             MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
 
-            var unit = await _unitRepository.GetIncludeByIdAsync(request.Id);
+            var unit = await _unitRepository.ReadQueryable.Where(x => x.Id == request.Id)
+                .Include(x => x.UnitModules)
+                .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
             if (unit == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), "unit");
                 return methodResult;
             }
 
             var unitModel = _mapper.Map<UnitModel>(unit);
-            unitModel.IsActive = unit.CourseUnitMockTests.Any();
-            unitModel.Lessons = unit.UnitLessons.Select(x =>
-                                {
-                                    var model = _mapper.Map<LessonModel>(x.Lesson);
-                                    model.DisplayOrder = x.DisplayOrder;
-                                    return model;
-                                }).OrderBy(x => x.DisplayOrder).ToList();
-            unitModel.SkillMockTest = unit.UnitSkillMockTests.Select(x =>
-            {
-                var model = _mapper.Map<MockTestModel>(x.MockTest);
-                model.Skill = x.MockTest!.MockTestSections.Select(x => x.SectionGroup).Select(x => x!.CourseSkill).FirstOrDefault();
-                return model;
-            }).FirstOrDefault();
 
             methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

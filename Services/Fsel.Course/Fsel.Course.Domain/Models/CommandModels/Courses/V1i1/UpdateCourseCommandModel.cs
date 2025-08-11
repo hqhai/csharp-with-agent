@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Courses.V1i1
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.CommandModels.CourseTeachers;
+    using Fsel.Shared.Enums;
 
     public class UpdateCourseCommandModel : BaseCommandModel
     {
@@ -17,6 +18,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.Courses.V1i1
         public Guid LevelId { get; set; }
 
         public Guid ProgramId { get; set; }
+
+        public EnumCourseStatus Status { get; set; }
 
         public IList<UpdateCourseModuleModel>? Modules { get; set; }
 

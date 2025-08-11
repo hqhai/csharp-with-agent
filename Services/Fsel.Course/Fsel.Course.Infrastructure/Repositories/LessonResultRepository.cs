@@ -11,10 +11,12 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Microsoft.EntityFrameworkCore;
+    using AutoMapper;
 
     public class LessonResultRepository : BaseRepository<LessonResult>, ILessonResultRepository
     {
-        public LessonResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public LessonResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

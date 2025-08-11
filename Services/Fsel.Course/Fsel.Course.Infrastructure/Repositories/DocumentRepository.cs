@@ -9,7 +9,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class DocumentRepository : BaseRepository<Document>, IDocumentRepository
     {
-        public DocumentRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public DocumentRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

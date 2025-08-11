@@ -7,85 +7,128 @@ namespace Fsel.Course.Infrastructure.Common
     using System.Text.Json;
     using System.Text.RegularExpressions;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions.V1i1;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Microsoft.EntityFrameworkCore;
 
     public class QuestionTypeConverter
     {
+        private readonly IKeyboardTextRepository _keyboardTextRepository;
+
+        public QuestionTypeConverter(IKeyboardTextRepository keyboardTextRepository)
+        {
+            _keyboardTextRepository = keyboardTextRepository;
+        }
+
         public (object?, int) QuestionTypeConverterObject(object? config, EnumQuestionType type, bool isShowCorrectTotal = false, bool isDisableAnswers = false, bool isCreated = false)
         {
             int totalCorrect = default;
-            object? result;
+            object? result = null;
             switch (type)
             {
                 case EnumQuestionType.Multichoice:
                 case EnumQuestionType.Dropdown:
                     var multichoice = config.Deserialize<MultipleChoiceQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(multichoice) : multichoice;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoice) : ValueSettings.ValueDefault;
+                    if (multichoice != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(multichoice) : multichoice;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoice) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.Checklist:
                     var checklist = config.Deserialize<MultipleChoiceQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(checklist) : checklist;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checklist) : ValueSettings.ValueDefault;
+                    if (checklist != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(checklist) : checklist;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checklist) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.Listing:
                     result = config.Deserialize<ListingQuestion>();
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
+                    if (result != null)
+                    {
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.MatchingType1:
                 case EnumQuestionType.MatchingType2:
                 case EnumQuestionType.DragAndDropPicture:
                     var matchingTypeQuestion = config.Deserialize<MatchingTypeQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion) : matchingTypeQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingTypeQuestion) : ValueSettings.ValueDefault;
+                    if (matchingTypeQuestion != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(matchingTypeQuestion) : matchingTypeQuestion;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingTypeQuestion) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.ShortAnswerWordBase:
                     var shortAnswerQuestionWordBaseQuestion = config.Deserialize<ShortAnswerQuestionWordBaseQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion) : shortAnswerQuestionWordBaseQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
+                    if (shortAnswerQuestionWordBaseQuestion != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(shortAnswerQuestionWordBaseQuestion) : shortAnswerQuestionWordBaseQuestion;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.ShortAnswerWordCount:
                     result = config.Deserialize<ShortAnswerQuestionWordCountBaseQuestion>();
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
+                    if (result != null)
+                    {
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(result) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.GapFillScoreByQuestion:
                     var gapFillQuestion = config.Deserialize<GapFillQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(gapFillQuestion) : gapFillQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestion) : ValueSettings.ValueDefault;
+                    if (gapFillQuestion != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(gapFillQuestion) : gapFillQuestion;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestion) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByQuestion:
                     var gapFillWordBankScoreQuestion = config.Deserialize<GapFillQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreQuestion) : gapFillWordBankScoreQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreQuestion) : ValueSettings.ValueDefault;
+                    if (gapFillWordBankScoreQuestion != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreQuestion) : gapFillWordBankScoreQuestion;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreQuestion) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                     var gapFillWordBankScoreByGap = config.Deserialize<GapFillQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreByGap) : gapFillWordBankScoreByGap;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreByGap, true) : ValueSettings.ValueDefault;
+                    if (gapFillWordBankScoreByGap != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(gapFillWordBankScoreByGap) : gapFillWordBankScoreByGap;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillWordBankScoreByGap, true) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.GapFillScoreByGap:
                     var gapFillQuestionByGap = config.Deserialize<GapFillQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(gapFillQuestionByGap) : gapFillQuestionByGap;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestionByGap, true) : ValueSettings.ValueDefault;
+                    if (gapFillQuestionByGap != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(gapFillQuestionByGap) : gapFillQuestionByGap;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(gapFillQuestionByGap, true) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.DragAndDropSentenceOrder:
                     var dragAndDropSentenceOrderQuestion = config.Deserialize<DragAndDropSentenceOrderQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion) : dragAndDropSentenceOrderQuestion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropSentenceOrderQuestion) : ValueSettings.ValueDefault;
+                    if (dragAndDropSentenceOrderQuestion != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(dragAndDropSentenceOrderQuestion) : dragAndDropSentenceOrderQuestion;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropSentenceOrderQuestion) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.DragAndDropListSentenceOrder:
@@ -93,15 +136,18 @@ namespace Fsel.Course.Infrastructure.Common
                     if (dragAndDropList != null)
                     {
                         dragAndDropList.Contents = dragAndDropList.Contents?.Select((x, index) => { x.Id = ++index; return x; }).ToList();
+                        result = isDisableAnswers ? ClearAnswers(dragAndDropList) : dragAndDropList;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropList) : ValueSettings.ValueDefault;
                     }
-                    result = isDisableAnswers ? ClearAnswers(dragAndDropList) : dragAndDropList;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(dragAndDropList) : ValueSettings.ValueDefault;
                     break;
 
                 case EnumQuestionType.MultipleOptionSentenceCompletion:
                     var multipleOption = config.Deserialize<MultipleOptionSentenceCompletionQuestion>();
-                    result = isDisableAnswers ? ClearAnswers(multipleOption) : multipleOption;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multipleOption) : ValueSettings.ValueDefault;
+                    if (multipleOption != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(multipleOption) : multipleOption;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multipleOption) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.ExercisePreparation:
@@ -112,72 +158,116 @@ namespace Fsel.Course.Infrastructure.Common
                 // Dạng câu hỏi mới
                 case EnumQuestionType.MatchingParagraphInfo:
                     var matchingParagraphInfo = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
-                    result = isDisableAnswers ? ClearAnswers(matchingParagraphInfo) : matchingParagraphInfo;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingParagraphInfo) : ValueSettings.ValueDefault;
+                    if (matchingParagraphInfo != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(matchingParagraphInfo) : matchingParagraphInfo;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingParagraphInfo) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.MatchingHeading:
                     var matchingHeading = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
-                    result = isDisableAnswers ? ClearAnswers(matchingHeading) : matchingHeading;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingHeading) : ValueSettings.ValueDefault;
+                    if (matchingHeading != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(matchingHeading) : matchingHeading;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(matchingHeading) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.YesNoNotGivenDropDown:
                     var yesNoNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
-                    result = isDisableAnswers ? ClearAnswers(yesNoNotGivenDropDown) : yesNoNotGivenDropDown;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(yesNoNotGivenDropDown) : ValueSettings.ValueDefault;
+                    if (yesNoNotGivenDropDown != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(yesNoNotGivenDropDown) : yesNoNotGivenDropDown;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(yesNoNotGivenDropDown) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.TrueFalseNotGivenDropDown:
                     var trueFalseNotGivenDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
-                    result = isDisableAnswers ? ClearAnswers(trueFalseNotGivenDropDown) : trueFalseNotGivenDropDown;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(trueFalseNotGivenDropDown) : ValueSettings.ValueDefault;
+                    if (trueFalseNotGivenDropDown != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(trueFalseNotGivenDropDown) : trueFalseNotGivenDropDown;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(trueFalseNotGivenDropDown) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.MapLabelingDropDown:
                     var mapLabelingDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
-                    result = isDisableAnswers ? ClearAnswers(mapLabelingDropDown) : mapLabelingDropDown;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(mapLabelingDropDown) : ValueSettings.ValueDefault;
+                    if (mapLabelingDropDown != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(mapLabelingDropDown) : mapLabelingDropDown;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(mapLabelingDropDown) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.SummaryCompletionDropDown:
                     var summaryCompletionDropDown = HandleQuestion(config.Deserialize<MatchingTaskQuestion>(), isCreated);
-                    result = isDisableAnswers ? ClearAnswers(summaryCompletionDropDown) : summaryCompletionDropDown;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionDropDown) : ValueSettings.ValueDefault;
+                    if (summaryCompletionDropDown != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(summaryCompletionDropDown) : summaryCompletionDropDown;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionDropDown) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.MultichoiceV1:
                     var multichoiceV1 = config.Deserialize<MultipleChoiceQuestionV1>();
-                    result = isDisableAnswers ? ClearAnswers(multichoiceV1) : multichoiceV1;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoiceV1) : ValueSettings.ValueDefault;
+                    if (multichoiceV1 != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(multichoiceV1) : multichoiceV1;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(multichoiceV1) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.CheckListV1:
                     var checkList = HandleQuestion(config.Deserialize<CheckListQuestionV1>(), isCreated);
-                    result = isDisableAnswers ? ClearAnswers(checkList) : checkList;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checkList) : ValueSettings.ValueDefault;
+                    if (checkList != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(checkList) : checkList;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(checkList) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.SummaryCompletionGapFill:
                     var summaryCompletionGapFill = HandleQuestion(config.Deserialize<CheckListQuestionV1>(), isCreated);
-                    result = isDisableAnswers ? ClearAnswers(summaryCompletionGapFill) : summaryCompletionGapFill;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionGapFill) : ValueSettings.ValueDefault;
+                    if (summaryCompletionGapFill != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(summaryCompletionGapFill) : summaryCompletionGapFill;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(summaryCompletionGapFill) : ValueSettings.ValueDefault;
+                    }
+
                     break;
 
                 case EnumQuestionType.CompletionDiagrams:
                 case EnumQuestionType.FlowChartCompletion:
                     var completionDiagrams = HandleQuestion(config.Deserialize<CheckListQuestionV1>(), isCreated);
-                    result = isDisableAnswers ? ClearAnswers(completionDiagrams) : completionDiagrams;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : ValueSettings.ValueDefault;
+                    if (completionDiagrams != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(completionDiagrams) : completionDiagrams;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(completionDiagrams) : ValueSettings.ValueDefault;
+                    }
                     break;
 
                 case EnumQuestionType.TableCompletion:
                     var tableCompletion = config.Deserialize<TableCompletionQuestion>();
-                    tableCompletion = HandleQuestion(tableCompletion, isCreated, tableCompletion?.Rows);
-                    result = isDisableAnswers ? ClearAnswers(tableCompletion) : tableCompletion;
-                    totalCorrect = isShowCorrectTotal ? GetTotalCorrect(tableCompletion) : ValueSettings.ValueDefault;
+                    if (tableCompletion != null)
+                    {
+                        tableCompletion = HandleQuestion(tableCompletion, isCreated, tableCompletion?.Rows);
+                        result = isDisableAnswers ? ClearAnswers(tableCompletion) : tableCompletion;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(tableCompletion) : ValueSettings.ValueDefault;
+                    }
                     break;
 
+                case EnumQuestionType.Tracing:
+                    var tracingQuestion = config.Deserialize<TracingQuestion>();
+                    if (tracingQuestion != null)
+                    {
+                        tracingQuestion.KeyboardText = GetKeyboardText(tracingQuestion.KeyboardTextId);
+                    }
+
+                    result = tracingQuestion;
+                    totalCorrect = ValueSettings.ValueDefaultTracingScore;
+                    break;
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -564,12 +654,20 @@ namespace Fsel.Course.Infrastructure.Common
                         }
                     }
                     break;
+
+                case TracingQuestion tracingQuestion:
+
+                    break;
             }
             return data;
         }
 
         private static int GetTotalCorrect<T>(T? data, bool calculateByGap = false) where T : class
         {
+            if (data == null)
+            {
+                return ValueSettings.ValueDefault;
+            }
             switch (data)
             {
                 case MultipleChoiceQuestion multipleChoice:
@@ -661,6 +759,17 @@ namespace Fsel.Course.Infrastructure.Common
                     break;
             }
             return (result, questionShuffleStr);
+        }
+
+        private KeyboardTextModel? GetKeyboardText(Guid keyboardTextId)
+        {
+            return _keyboardTextRepository.ReadOnlyDbContext.Set<KeyboardText>().Select(keyboardText => new KeyboardTextModel
+            {
+                Id = keyboardText.Id,
+                Name = keyboardText.Name,
+                Unicode = keyboardText.Unicode,
+                FilePath = keyboardText.FilePath,
+            }).FirstOrDefault(x => x.Id == keyboardTextId);
         }
     }
 }

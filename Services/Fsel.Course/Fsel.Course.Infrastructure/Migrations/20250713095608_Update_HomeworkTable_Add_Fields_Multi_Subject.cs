@@ -42,7 +42,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 table: "HomeWorks",
                 type: "uniqueidentifier",
                 nullable: false,
-                defaultValue: "NEWID()");
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
 
             migrationBuilder.AddColumn<Guid>(
                 name: "ProgramId",
@@ -88,6 +88,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                 column: "LevelId",
                 principalTable: "Levels",
                 principalColumn: "Id");
+
+            migrationBuilder.Sql(
+                @"UPDATE HomeWorks
+                SET OriginalId = NEWID()
+                WHERE OriginalId = '00000000-0000-0000-0000-000000000000'");
         }
 
         /// <inheritdoc />

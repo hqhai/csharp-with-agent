@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class GameVocabularyTypeRepository : BaseRepository<GameVocabularyType>, IGameVocabularyTypeRepository
     {
-        public GameVocabularyTypeRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public GameVocabularyTypeRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
     using Fsel.Course.Domain.Models.CommandModels.MockTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -213,10 +214,17 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd
             {
                 if (mockTestAnswers.Count > 0)
                 {
-                    await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers);
+                    await _mockTestAnswerRepository.BulkMergeAsync(mockTestAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionId, entity.SectionTimeCodeId, entity.SectionQuestionId, entity.MockTestResultId, entity.IsDeleted };
+                    });
                 }
 
-                _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
+                await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.MockTestId, c.UnitId };
+                });
+
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

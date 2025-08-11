@@ -11,10 +11,11 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.Models.EntityModels;
     using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.EntityFrameworkCore;
+    using AutoMapper;
 
     public class FinalTestRepository : BaseRepository<FinalTest>, IFinalTestRepository
     {
-        public FinalTestRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public FinalTestRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

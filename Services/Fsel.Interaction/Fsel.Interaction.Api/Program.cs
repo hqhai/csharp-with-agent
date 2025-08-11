@@ -25,7 +25,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<InteractionDbContext>();
+builder.AddDbContexts<InteractionDbContext, InteractionReadDbContext>();
 
 builder.Services.AddScoped<ISurveyQuestionRepository, SurveyQuestionRepository>();
 builder.Services.AddScoped<ICustomerSurveyRepository, CustomerSurveyRepository>();

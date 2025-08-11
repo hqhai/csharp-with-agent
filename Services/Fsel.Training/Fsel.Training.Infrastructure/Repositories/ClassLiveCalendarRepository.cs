@@ -8,7 +8,8 @@ namespace Fsel.Training.Infrastructure.Repositories
 
     public class ClassLiveCalendarRepository : BaseRepository<ClassLiveCalendar>, IClassLiveCalendarRepository
     {
-        public ClassLiveCalendarRepository(TrainingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public ClassLiveCalendarRepository(TrainingDbContext dbContext, TrainingReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

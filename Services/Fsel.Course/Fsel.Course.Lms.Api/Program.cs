@@ -34,7 +34,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<CourseDbContext>();
+builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -118,6 +118,7 @@ builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGro
 builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository>();
 builder.Services.AddScoped<IWeeklyReportRepository, WeeklyReportRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
+builder.Services.AddScoped<IClassforumDetailResultHistoryRepository, ClassforumDetailResultHistoryRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ILevelRepository, LevelRepository>();
 builder.Services.AddScoped<ISkillRepository, SkillRepository>();
@@ -134,6 +135,8 @@ builder.Services.AddScoped<ITestAISettingRepository, TestAISettingRepository>();
 builder.Services.AddScoped<ITestAICriteriaSettingRepository, TestAICriteriaSettingRepository>();
 builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionRepository>();
 builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
+builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
+builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
@@ -238,6 +241,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
     { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
 });
 
 var app = builder.Build();

@@ -9,7 +9,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class SkillLevelRepository : BaseRepository<SkillLevel>, ISkillLevelRepository
     {
-        public SkillLevelRepository(CourseDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public SkillLevelRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

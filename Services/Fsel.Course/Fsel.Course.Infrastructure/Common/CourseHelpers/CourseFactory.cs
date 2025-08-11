@@ -33,7 +33,7 @@ namespace Fsel.Course.Infrastructure.Common.CourseHelpers
                 Version = version,
                 LevelId = _createRequest.LevelId,
                 ProgramId = _createRequest.ProgramId,
-                Status = EnumCourseStatus.New
+                Status = _createRequest.Status
             };
             course.OriginalId = originalId.HasValue ? originalId.Value : course.Id;
 

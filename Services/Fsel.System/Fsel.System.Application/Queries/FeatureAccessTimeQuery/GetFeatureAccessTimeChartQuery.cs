@@ -112,7 +112,7 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                 {
                     AccessTime = totalAccessTime,
                     HourActive = firstMatchingFeature?.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Hour ?? i,
-                    DayActive = firstMatchingFeature?.LastVisited!.Value.DayOfWeek ?? DateTime.UtcNow.DayOfWeek
+                    DayActive = firstMatchingFeature?.LastVisited!.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam).DayOfWeek ?? DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).DayOfWeek
                 });
             }
 
