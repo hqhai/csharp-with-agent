@@ -21,6 +21,8 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
     public class UpdateSenderSettingCommand : IRequest<MethodResult<bool>>
     {
         public string? Token { get; set; }
+
+        public bool IsActive { get; set; }
     }
 
     public class UpdateSenderSettingCommandHandler : IRequestHandler<UpdateSenderSettingCommand, MethodResult<bool>>
@@ -80,13 +82,13 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
 
                 if (userSetting != null)
                 {
-                    await SaveUserSenderSetting(model, userSetting);
+                    await SaveUserSenderSetting(model, userSetting, request.IsActive);
                     userSetting = _userSettingRepository.Update(userSetting);
                 }
                 else
                 {
                     var newUserSetting = new UserSetting(true);
-                    await SaveUserSenderSetting(model, newUserSetting);
+                    await SaveUserSenderSetting(model, newUserSetting, request.IsActive);
                     userSetting = _userSettingRepository.Add(newUserSetting);
                 }
 
@@ -107,7 +109,7 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
             return methodResult;
         }
 
-        private async Task SaveUserSenderSetting(UpdateSenderSettingCommandModel request, UserSetting userSetting)
+        private async Task SaveUserSenderSetting(UpdateSenderSettingCommandModel request, UserSetting userSetting, bool isActive)
         {
             var senderConfigQuery = await _systemService.GetSenderConfigs();
             if (!senderConfigQuery.IsSuccessStatusCode)
@@ -123,14 +125,14 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
                 var userSenderSetting = userSetting.UserSenderSettings.FirstOrDefault(x => x.SenderConfigId == senderConfig.Id);
                 if (userSenderSetting != null)
                 {
-                    userSenderSetting.IsActive = !userSenderSetting.IsActive;
+                    userSenderSetting.IsActive = isActive;
                 }
                 else
                 {
                     userSetting.UserSenderSettings.Add(new UserSenderSetting
                     {
                         SenderConfigId = senderConfig.Id,
-                        IsActive = false
+                        IsActive = isActive
                     });
                 }
             }
