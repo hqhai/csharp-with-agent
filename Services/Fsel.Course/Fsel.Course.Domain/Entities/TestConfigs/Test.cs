@@ -10,7 +10,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.TestSections;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
@@ -158,6 +157,46 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                 });
             }
             return isDuplicatedTest;
+        }
+
+        public async Task<bool> ValidateProgram(ICategoryRepository categoryRepository)
+        {
+            var exists = await categoryRepository.Queryable
+                       .AnyAsync(u => u.Id == ProgramId)
+                       .ConfigureAwait(false);
+
+            if (!exists)
+            {
+                AddErrorResults(new ErrorResult
+                {
+                    ErrorCode = nameof(EnumSystemErrorCode.DataNotExist),
+                    Errors = { new Error
+                    {
+                        FieldName = nameof(ProgramId)
+                    } }
+                });
+            }
+            return exists;
+        }
+
+        public async Task<bool> ValidateLevel(ILevelRepository levelRepository)
+        {
+            var exists = await levelRepository.Queryable
+                       .AnyAsync(u => u.Id == LevelId)
+                       .ConfigureAwait(false);
+
+            if (!exists)
+            {
+                AddErrorResults(new ErrorResult
+                {
+                    ErrorCode = nameof(EnumSystemErrorCode.DataNotExist),
+                    Errors = { new Error
+                    {
+                        FieldName = nameof(LevelId)
+                    } }
+                });
+            }
+            return exists;
         }
     }
 }

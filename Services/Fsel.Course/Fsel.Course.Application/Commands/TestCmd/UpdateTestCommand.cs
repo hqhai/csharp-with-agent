@@ -14,6 +14,7 @@ namespace Fsel.Course.Application.Commands.TestCmd
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Infrastructure.Common.TestHelper;
+    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -30,6 +31,8 @@ namespace Fsel.Course.Application.Commands.TestCmd
         private readonly IServiceProvider _serviceProvider;
         private readonly TestConverter _testConverter;
         private readonly IVersionEntityUpdater<Test> _versionEntityUpdater;
+        private readonly ILevelRepository _levelRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
         public UpdateTestConfigCommandHandler(IMapper mapper
             , ITestRepository testRepository
@@ -37,7 +40,10 @@ namespace Fsel.Course.Application.Commands.TestCmd
             , QuestionConverter questionConverter
             , IServiceProvider serviceProvider
             , TestConverter testConverter
-            , IVersionEntityUpdater<Test> versionEntityUpdater)
+            , IVersionEntityUpdater<Test> versionEntityUpdater
+            , ILevelRepository levelRepository
+            , ICategoryRepository categoryRepository
+            )
         {
             _mapper = mapper;
             _testRepository = testRepository;
@@ -46,6 +52,8 @@ namespace Fsel.Course.Application.Commands.TestCmd
             _serviceProvider = serviceProvider;
             _testConverter = testConverter;
             _versionEntityUpdater = versionEntityUpdater;
+            _levelRepository = levelRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<MethodResult<TestModel>> Handle(UpdateTestCommand request, CancellationToken cancellationToken)
@@ -65,6 +73,17 @@ namespace Fsel.Course.Application.Commands.TestCmd
             if (await newVersionTest.ValidateDuplicateTest(_testRepository).ConfigureAwait(false))
             {
                 methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
+                return methodResult;
+            }
+
+            if (!await test.ValidateLevel(_levelRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                return methodResult;
+            }
+            if (!await test.ValidateProgram(_categoryRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
             }
             var method = _testConverter.IsValidateQuestion(newVersionTest.TestSections);
