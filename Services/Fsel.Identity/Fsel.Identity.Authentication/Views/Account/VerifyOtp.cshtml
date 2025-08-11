@@ -126,7 +126,7 @@
                             }
                         </div>
                         <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
-                            Gửi lại mã: 
+                            @Localizer["i18n_resend_verification_code"]:
                             @if (Model.Identity.IsValidEmail())
                             {
                                 <button id="email" type="submit" name="button" value="resend">Email</button>
@@ -134,6 +134,7 @@
                             else
                             {
                                 <button id="zalo" type="submit" name="button" value="resend">Zalo</button>
+                                <span class="divider">|</span>
                                 <button id="sms" type="submit" name="button" value="resend">Sms</button>
                             }
                         </div>
@@ -163,7 +164,7 @@
                             }
                         </div>
                         <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
-                            Gửi lại mã:
+                            @Localizer["i18n_resend_verification_code"]:
                             @if (Model.Identity.IsValidEmail())
                             {
                                 <button id="email" type="submit" name="button" value="resend">Email</button>
@@ -171,6 +172,7 @@
                             else
                             {
                                 <button id="zalo" type="submit" name="button" value="resend">Zalo</button>
+                                <span class="divider">|</span>
                                 <button id="sms" type="submit" name="button" value="resend">Sms</button>
                             }
                         </div>

@@ -1,4 +1,41 @@
 (function ($) {
+  const dateOfBirthInput = document.getElementById("birthday");
+  const $phoneNumberInput = $("#phoneNumber");
+  const $firstNameInput = $("#firstName");
+  const $lastNameInput = $("#lastName");
+  const $policyCheckbox = $("#policy");
+  const $genderRadios = $("input[name='gender']");
+  const $gender = $("#gender");
+  const $policy = $(".service-policy");
+
+  $phoneNumberInput.on("input", validatePhoneNumber);
+  $firstNameInput.on("input", validateFirstName);
+  $lastNameInput.on("input", validateLastName);
+  dateOfBirthInput.addEventListener("input", runValidateDateOfBirth);
+  dateOfBirthInput.addEventListener("change", runValidateDateOfBirth);
+
+  $policyCheckbox.on("change", function () {
+    const $label = $('label[for="policy"]');
+    $label.removeClass("content-border-danger")
+    $policy.removeClass("content-text-danger")
+  });
+  dateOfBirthInput.addEventListener("input", function (e) {
+    let value = e.target.value.replace(/\D/g, "");
+
+    if (value.length > 8) {
+      value = value.slice(0, 8);
+    }
+
+    if (value.length > 1 && value.length <= 3) {
+      value = value.replace(/^(\d{2})(\d{0,2})$/, "$1/$2");
+    }
+    else if (value.length > 3) {
+      value = value.replace(/^(\d{2})(\d{2})(\d{0,4})$/, "$1/$2/$3");
+    }
+
+    e.target.value = value;
+  });
+
   $('#form-ExternalLogin').on('submit', function (e) {
     if (validateAll() && this.checkValidity()) {
       $('.loading').removeClass('hidden');
@@ -7,46 +44,6 @@
       e.preventDefault();
     }
   });
-
-  // Input elements
-  const $steps = $(".section-survey");
-  const $signUpButton = $(".sign-up-btn");
-  const $emailInput = $("#email");
-  const $phoneNumberInput = $("#phoneNumber");
-  const $firstNameInput = $("#firstName");
-  const $lastNameInput = $("#lastName");
-  const $meterText = $("#meter-text");
-  const $ruleList = $("#rule-list");
-  const $ruleItems = $ruleList.find(".rule-item");
-  const $passLengthItem = $("#pass-length");
-  const $passNumberItem = $("#pass-number");
-  const $passUpCaseItem = $("#pass-Up-case");
-  const $passSymboItem = $("#pass-symbo");
-  const $referralCodeElement = $("#referral-code");
-  const $policyCheckbox = $("#policy");
-  const $dayInput = $("#Day");
-  const $monthBirthdayInput = $("#MonthBirthday");
-  const $monthInput = $("#Month");
-  const $yearInput = $("#Year");
-  const $genderRadios = $("input[name='gender']");
-  const $gender = $("#gender");
-  const $policy = $(".service-policy");
-  const $optionGender = $(".option");
-  const $radioButtons = $(".round-radio");
-  const $radioLabels = $(".round-radio-label");
-
-  // Validation functions
-  function validateEmail() {
-    const email = $emailInput.val();
-    const emailPattern = /^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
-    if (email !== "" && emailPattern.test(email)) {
-      $emailInput.removeClass("content-border-danger");
-      return true;
-    } else {
-      $emailInput.addClass("content-border-danger");
-      return false;
-    }
-  }
 
   function validatePhoneNumber() {
     const phone = $phoneNumberInput.val().trim();
@@ -60,33 +57,6 @@
     }
   }
 
-  function validateGender() {
-    // gender
-    let selectedGender;
-    $genderRadios.each(function () {
-      if ($(this).is(':checked')) {
-        selectedGender = $(this).val();
-        return false; // break the loop
-      }
-    });
-
-    if (selectedGender) {
-      $optionGender.removeClass("content-text-danger content-border-danger");
-      $radioLabels.each(function () {
-        $(this).removeClass("content-border-danger");
-        $(this).addClass("content-border-success"); // Assuming you have a success class for the desired style
-      });
-    }
-    else {
-      $optionGender.addClass("content-text-danger content-border-danger");
-      $radioLabels.each(function () {
-        $(this).removeClass("content-border-success");
-        $(this).addClass("content-border-danger");
-      });
-    }
-
-    return selectedGender;
-  }
   function validateFirstName() {
     const firstName = $firstNameInput.val().trim();
     if (firstName === "") {
@@ -109,90 +79,22 @@
     }
   }
 
-  function validateDay() {
-    var isValidDay = $dayInput.val().trim() !== "";
-    if (!isValidDay) {
-      $dayInput.addClass("content-border-danger");
-    }
-    else {
-      $dayInput.removeClass("content-border-danger");
-    }
-    return isValidDay && validateDate();
-  }
-
-  function validateMonth() {
-    var isValidMonth = $monthBirthdayInput.val().trim() !== "";
-    if (!isValidMonth) {
-      $monthInput.addClass("content-border-danger");
-    }
-    else {
-      $monthInput.removeClass("content-border-danger");
-    }
-    return isValidMonth && validateDate();
-  }
-
-  function validateYear() {
-    var isValidYear = $yearInput.val().trim() !== "";
-    if (!isValidYear) {
-      $yearInput.addClass("content-border-danger");
-    }
-    else {
-      $yearInput.removeClass("content-border-danger");
-    }
-    return isValidYear && validateDate();
-  }
-
-  function validateDate() {
-    if ($yearInput.val().trim() !== "" && $monthBirthdayInput.val().trim() !== "" && $dayInput.val().trim() !== "") {
-      var year = parseInt($yearInput.val().trim());
-      var month = parseInt($monthBirthdayInput.val().trim()) - 1;
-      var day = parseInt($dayInput.val().trim());
-
-      const date = new Date(year, month, day);
-      if (date.getFullYear() === year && date.getMonth() === month && date.getDate() === day) {
-        $yearInput.removeClass("content-border-danger");
-        $monthInput.removeClass("content-border-danger");
-        $dayInput.removeClass("content-border-danger");
-        $("input.text-input-hidden[name='Birthday']").attr("value", `${year}-${month}-${day}`)
-        $("input.text-input-hidden[name='Birthday']").valid();
-        $("input.text-input-hidden[name='BirthdayStr']").attr("value", "BirthdayStr");
-        $("input.text-input-hidden[name='BirthdayStr']").valid();
-      }
-      else {
-        $yearInput.addClass("content-border-danger");
-        $monthInput.addClass("content-border-danger");
-        $dayInput.addClass("content-border-danger");
-        $("input.text-input-hidden[name='BirthdayStr']").attr("value", "Birthday");
-        $("input.text-input-hidden[name='BirthdayStr']").valid();
-      }
-    }
-    return true;
-  }
-
   function validateAll() {
     let isDoneAllValidate = true;
 
     // Validate each field
     const isValidFirstName = validateFirstName();
     const isValidLastName = validateLastName();
-    const isValidEmail = validateEmail();
     const isValidPhoneNumber = validatePhoneNumber();
-    const isValidGender = validateGender();
-    const isValidDay = validateDay();
-    const isValidMonth = validateMonth();
-    const isValidYear = validateYear();
+    const isValidBirthday = validateDateOfBirth();
     const isPolicyChecked = $policyCheckbox.is(":checked");
 
     if (!isValidFirstName) isDoneAllValidate = false;
     if (!isValidLastName) isDoneAllValidate = false;
-    if (!isValidEmail) isDoneAllValidate = false;
     if (!isValidPhoneNumber) isDoneAllValidate = false;
-    if (!isValidGender) isDoneAllValidate = false;
-    if (!isValidDay || !isValidMonth || !isValidYear) isDoneAllValidate = false;
+    if (!isValidBirthday) isDoneAllValidate = false;
     if (!isPolicyChecked) isDoneAllValidate = false;
 
-
-    // Update UI for policy checkbox
     if (!isPolicyChecked) {
       const $label = $('label[for="policy"]');
       $label.addClass("content-border-danger");
@@ -202,166 +104,57 @@
     return isDoneAllValidate;
   }
 
-  function checkFormValidity() {
-    validateAll();
-    // Check form validity and enable/disable continue button
-    // $continueButton.prop('disabled', !validateAll());
+  function runValidateDateOfBirth() {
+
+    const isValid = validateDateOfBirth();
+    dateOfBirthInput.classList.remove("content-border-danger");
+    if (!isValid) {
+      dateOfBirthInput.classList.add("content-border-danger");
+      return false;
+    }
+    return true;
   }
 
-  // Event listeners
-  //$emailInput.on("input", validateEmail);
-  $phoneNumberInput.on("input", validatePhoneNumber);
-  $firstNameInput.on("input", validateFirstName);
-  $lastNameInput.on("input", validateLastName);
-  $dayInput.on("input", validateDay);
-  $monthInput.on("input", validateMonth);
-  $yearInput.on("input", validateYear);
-
-  //$genderRadios.on("change", checkFormValidity);
-  $genderRadios.on("change", isGenderSelected);
-
-  $policyCheckbox.on("change", function () {
-    const $label = $('label[for="policy"]');
-    $label.removeClass("content-border-danger")
-    $policy.removeClass("content-text-danger")
-  });
-
-  function selectOptionMonth(inputId, inputValueId, option, value) {
-    $("#" + inputValueId).attr("value", value);
-    selectOption(inputId, option);
-  }
-
-  function selectOption(inputId, option) {
-    // Gán giá trị lựa chọn vào phần tử input
-    $("#" + inputId).attr("value", option);
-
-    // Ẩn các dropdown menu
-    $("#dayDropdownContent").hide();
-    $("#monthDropdownContent").hide();
-    $("#yearDropdownContent").hide();
-
-    // Đánh dấu lựa chọn đã chọn
-    const $dropdownContent = $("#" + inputId.toLowerCase() + "DropdownContent");
-    $dropdownContent.find("div").removeClass("selected");
-    $(event.target).addClass("selected");
-  }
-
-  $dayInput.on("click", function () {
-    $("#dayDropdownContent").show();
-    //$dayInput.css("border-color", "");
-  });
-
-  $monthInput.on("click", function () {
-    $("#monthDropdownContent").show();
-    //$monthInput.css("border-color", "");
-  });
-
-  $yearInput.on("click", function () {
-    $("#yearDropdownContent").show();
-    //$yearInput.css("border-color", "");
-  });
-
-  // Sự kiện click bên ngoài dropdown menu để ẩn nó
-  $(document).on("click", function (event) {
-    if (!$(event.target).is($dayInput) && !$(event.target).closest(".dropdown-content").length) {
-      $("#dayDropdownContent").hide();
-      //$("#dayDropdownContent div").css({
-      //  "background-color": "initial",
-      //  "color": "initial"
-      //});
+  function validateDateOfBirth() {
+    const value = dateOfBirthInput.value.trim();
+    if (!value) {
+      return false;
     }
 
-    if (!$(event.target).is($monthInput) && !$(event.target).closest(".dropdown-content").length) {
-      $("#monthDropdownContent").hide();
-      //$("#monthDropdownContent div").css({
-      //  "background-color": "initial",
-      //  "color": "initial"
-      //});
-    }
+    function parseDateFromDDMMYYYY(value) {
+      const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+      const match = value.match(regex);
+      if (!match) return null;
 
-    if (!$(event.target).is($yearInput) && !$(event.target).closest(".dropdown-content").length) {
-      $("#yearDropdownContent").hide();
-      //$("#yearDropdownContent div").css({
-      //  "background-color": "initial",
-      //  "color": "initial"
-      //});
-    }
-  });
+      const day = parseInt(match[1], 10);
+      const month = parseInt(match[2], 10) - 1;
+      const year = parseInt(match[3], 10);
 
-  // Lấy ngày tháng năm hiện tại
-  const currentDate = new Date();
-  const currentDay = currentDate.getDate();
-  const currentMonth = currentDate.getMonth() + 1; // Tháng tính từ 0
-  const currentYear = currentDate.getFullYear();
-
-  // Tạo mảng chứa các tùy chọn ngày, tháng, năm
-  const dayOptions = [];
-  const monthOptions = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const yearOptions = [];
-
-  // Tạo các tùy chọn ngày (1-31)
-  for (let i = 1; i <= 31; i++) {
-    dayOptions.push(i.toString());
-  }
-
-  // Tạo các tùy chọn năm (chỉ những năm mà tuổi của người dùng sẽ là 100 tuổi)
-  for (let i = 0; i < 100; i++) {
-    yearOptions.push((currentYear - i).toString());
-  }
-
-  // Tạo các phần tử dropdown
-  const $dayDropdownContent = $("#dayDropdownContent");
-  const $monthDropdownContent = $("#monthDropdownContent");
-  const $yearDropdownContent = $("#yearDropdownContent");
-
-  // Thêm các tùy chọn vào các dropdown
-  dayOptions.forEach(function (option) {
-    $("<div>").addClass("dropdown-option")
-      .text(option)
-      .appendTo($dayDropdownContent)
-      .on("click", function () {
-        selectOption('Day', option);
-        validateDay();
-      });
-  });
-
-  $('.MonthBirthday-values').each(function () {
-    var months = $(this).attr('data-values').split(',');
-    months.forEach(function (option, index) {
-      var curMonth = $("#Month").attr("value");
-      if (curMonth && curMonth == index + 1) {
-        $("#Month").attr("value", option);
+      const date = new Date(year, month, day);
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month ||
+        date.getDate() !== day
+      ) {
+        return null;
       }
+      return date;
+    }
 
-      $("<div>").addClass("dropdown-option")
-        .text(option)
-        .appendTo($monthDropdownContent)
-        .on("click", function () {
-          selectOptionMonth('Month', 'MonthBirthday', option, index + 1);
-          validateMonth();
-        });
-    });
-  });
+    const date = parseDateFromDDMMYYYY(value);
+    const today = new Date();
 
-  yearOptions.forEach(function (option) {
-    $("<div>").addClass("dropdown-option")
-      .text(option)
-      .appendTo($yearDropdownContent)
-      .on("click", function () {
-        selectOption('Year', option);
-        validateYear();
-      });
-  });
+    if (!date) {
+      return false;
+    }
 
-  function isGenderSelected() {
-    $optionGender.removeClass("content-text-danger content-border-danger");
-    $radioLabels.each(function () {
-      $(this).removeClass("content-border-danger").addClass("content-border-success");
-    });
+    if (date > today) {
+      return false;
+    }
 
-    // Kiểm tra xem radio button giới tính đã được chọn chưa
-    return $genderRadios.is(":checked");
+    return true;
   }
+
 
   $(window).on('pageshow', function () {
     var gender = $gender.attr("value");
@@ -370,5 +163,4 @@
     }
     $policyCheckbox.prop('checked', false);
   });
-
-}(jQuery));	
+}(jQuery));

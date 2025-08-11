@@ -8,7 +8,7 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
     {
         Task<bool> TempRegisterUserAsync(UserRegisterModel userRegisterModel);
 
-        Task<(bool, OtpSessionInfo)> SendRegisterOtpAsync(string phoneNumber, OtpProviderType otpProviderType = OtpProviderType.Sms);
+        Task<(bool, OtpSessionInfo)> SendRegisterOtpAsync(string phoneNumber, OtpProviderType otpProviderType = OtpProviderType.Zalo);
 
         Task<(bool, OtpSessionInfo)> VerifyUserAsync(string phoneNumber, string otpCode);
 

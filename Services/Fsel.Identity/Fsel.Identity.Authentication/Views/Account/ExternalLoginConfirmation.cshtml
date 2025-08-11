@@ -109,114 +109,21 @@
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
-                        <input type="text" asp-for="BirthdayStr" class="text-input-hidden" readonly />
-                        <input type="text" asp-for="Birthday" class="text-input-hidden" readonly />
                         <div class="float-input float-input-validate option-birthday">
-                            <div class="name-option">
-                                <span>@Localizer["i18nSignUpLabelBirthday"]</span>
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     width="18"
-                                     height="18"
-                                     viewBox="0 0 18 18"
-                                     fill="none">
-                                    <path d="M8.99365 15.5566C12.7312 15.5566 15.8162 12.4717 15.8162 8.74072C15.8162 5.00977 12.7246 1.9248 8.98706 1.9248C5.2561 1.9248 2.17773 5.00977 2.17773 8.74072C2.17773 12.4717 5.2627 15.5566 8.99365 15.5566ZM8.83545 10.0986C8.40698 10.0986 8.16968 9.90088 8.16968 9.50537V9.43286C8.16968 8.81323 8.52563 8.46387 9.01343 8.12109C9.59351 7.71899 9.87695 7.50146 9.87695 7.07959C9.87695 6.62476 9.52759 6.32153 8.98706 6.32153C8.59155 6.32153 8.30151 6.51929 8.08398 6.85547C7.87305 7.09277 7.77417 7.29712 7.37866 7.29712C7.05566 7.29712 6.79199 7.08618 6.79199 6.75659C6.79199 6.62476 6.81836 6.5061 6.8645 6.38745C7.08203 5.74146 7.87305 5.21411 9.05298 5.21411C10.2791 5.21411 11.314 5.8667 11.314 7.01367C11.314 7.80469 10.8789 8.2002 10.1934 8.64185C9.7583 8.92529 9.50781 9.1626 9.48804 9.51855C9.48804 9.53833 9.48145 9.57129 9.48145 9.59766C9.46167 9.8811 9.21777 10.0986 8.83545 10.0986ZM8.82886 12.208C8.38062 12.208 8.01147 11.885 8.01147 11.45C8.01147 11.0149 8.37402 10.6919 8.82886 10.6919C9.2771 10.6919 9.63965 11.0149 9.63965 11.45C9.63965 11.8916 9.27051 12.208 8.82886 12.208Z"
-                                          fill="#657990" />
-                                </svg>
-                            </div>
                             <div class="birthday">
                                 <div class="float-input float-input-validate">
                                     <input type="text"
                                            placeholder=""
-                                           class="text-input"
-                                           id="Day"
-                                           asp-for="DayBirthday"
-                                           name="DayBirthday"
-                                           autocomplete="off"
-                                           readonly />
-                                    <label for="DayBirthday" class="input-label">@Localizer["i18n_day"]</label>
-                                    <div class="dropdown-content" id="dayDropdownContent"></div>
-                                </div>
-
-                                <div class="float-input float-input-validate">
-                                    <input type="hidden" asp-for="MonthBirthday" name="MonthBirthday" id="MonthBirthday" />
-                                    <input type="text"
-                                           placeholder=""
-                                           class="text-input"
-                                           id="Month"
-                                           value="@Model.MonthBirthday"
-                                           autocomplete="off"
-                                           readonly />
-                                    <label for="MonthBirthday" class="input-label">@Localizer["i18n_month"]</label>
-                                    <div class="dropdown-content"
-                                         id="monthDropdownContent"></div>
-                                </div>
-                                <div class="MonthBirthday-values hidden" data-values="@months">
-                                </div>
-
-                                <div class="float-input float-input-validate">
-                                    <input type="text"
-                                           placeholder=""
-                                           class="text-input"
-                                           id="Year"
-                                           asp-for="YearBirthday"
-                                           name="YearBirthday"
-                                           autocomplete="off"
-                                           readonly />
-                                    <label for="YearBirthday" class="input-label">@Localizer["i18n_year"]</label>
-                                    <div class="dropdown-content"
-                                         id="yearDropdownContent"></div>
+                                           class="text-input text-input-date"
+                                           id="birthday"
+                                           name="Birthday"
+                                           asp-for="Birthday"
+                                           autocomplete="off" />
+                                    <label for="Birthday" class="input-label">@Localizer["i18n_year"]</label>
                                 </div>
                             </div>
                         </div>
-                        @Html.CustomValidationMessageFor(model => model.BirthdayStr, Localizer, "", new { @class = "content-text-danger" })
                         @Html.CustomValidationMessageFor(model => model.Birthday, Localizer, "", new { @class = "content-text-danger" })
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="option-birthday">
-                            <div class="name-option">
-                                <span>@Localizer["i18nSignUpLabelGender"]</span>
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     width="18"
-                                     height="18"
-                                     viewBox="0 0 18 18"
-                                     fill="none">
-                                    <path d="M8.99365 15.5566C12.7312 15.5566 15.8162 12.4717 15.8162 8.74072C15.8162 5.00977 12.7246 1.9248 8.98706 1.9248C5.2561 1.9248 2.17773 5.00977 2.17773 8.74072C2.17773 12.4717 5.2627 15.5566 8.99365 15.5566ZM8.83545 10.0986C8.40698 10.0986 8.16968 9.90088 8.16968 9.50537V9.43286C8.16968 8.81323 8.52563 8.46387 9.01343 8.12109C9.59351 7.71899 9.87695 7.50146 9.87695 7.07959C9.87695 6.62476 9.52759 6.32153 8.98706 6.32153C8.59155 6.32153 8.30151 6.51929 8.08398 6.85547C7.87305 7.09277 7.77417 7.29712 7.37866 7.29712C7.05566 7.29712 6.79199 7.08618 6.79199 6.75659C6.79199 6.62476 6.81836 6.5061 6.8645 6.38745C7.08203 5.74146 7.87305 5.21411 9.05298 5.21411C10.2791 5.21411 11.314 5.8667 11.314 7.01367C11.314 7.80469 10.8789 8.2002 10.1934 8.64185C9.7583 8.92529 9.50781 9.1626 9.48804 9.51855C9.48804 9.53833 9.48145 9.57129 9.48145 9.59766C9.46167 9.8811 9.21777 10.0986 8.83545 10.0986ZM8.82886 12.208C8.38062 12.208 8.01147 11.885 8.01147 11.45C8.01147 11.0149 8.37402 10.6919 8.82886 10.6919C9.2771 10.6919 9.63965 11.0149 9.63965 11.45C9.63965 11.8916 9.27051 12.208 8.82886 12.208Z"
-                                          fill="#657990" />
-                                </svg>
-                            </div>
-                            <div class="option-gender">
-                                <input type="hidden" id="gender" value="@(Model.Gender.HasValue? Model.Gender.Value.ToString() : string.Empty)" />
-                                <div class="option">
-                                    <input class="round-radio"
-                                           type="radio"
-                                           asp-for="Gender"
-                                           name="gender"
-                                           id="male"
-                                           value="Male" />
-                                    <label for="male" class="round-radio-label">@Localizer["i18n_male"]</label>
-                                </div>
-                                <div class="option">
-                                    <input class="round-radio"
-                                           type="radio"
-                                           asp-for="Gender"
-                                           name="gender"
-                                           id="female"
-                                           value="Female" />
-                                    <label for="female" class="round-radio-label">@Localizer["i18n_female"]</label>
-                                </div>
-                                <div class="option">
-                                    <input class="round-radio"
-                                           type="radio"
-                                           asp-for="Gender"
-                                           name="gender"
-                                           id="other"
-                                           value="Other" />
-                                    <label for="other" class="round-radio-label">@Localizer["i18n_other"]</label>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -248,7 +155,6 @@
         <script src="~/lib/momentjs/js/moment.min.js"></script>
         <script src="~/lib/daterangepicker/js/daterangepicker.min.js"></script>
         <script src="~/lib/flatpickr/js/flatpickr.js"></script>
-
         <script src="~/assets/js/pages/external-login.js"></script>
     }
 }
