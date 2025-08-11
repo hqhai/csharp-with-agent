@@ -8,6 +8,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
@@ -23,12 +24,15 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
     {
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IMapper _mapper;
+        private readonly ILessonModuleRepository _lessonModuleRepository;
 
         public GetHomeWorkByOriginalIdQueryHandler(IHomeWorkRepository homeWorkRepository,
-                                                IMapper mapper)
+                                                IMapper mapper,
+                                                ILessonModuleRepository lessonModuleRepository)
         {
             _homeWorkRepository = homeWorkRepository;
             _mapper = mapper;
+            _lessonModuleRepository = lessonModuleRepository;
         }
 
         public async Task<MethodResult<HomeWorkModel>> Handle(GetHomeWorkByOriginalIdQuery request, CancellationToken cancellationToken)
@@ -46,7 +50,13 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<HomeWorkModel>(homeWork);
+            var lessonModules = await _lessonModuleRepository.Queryable.Where(p => p.OriginalId == homeWork.OriginalId).Where(p => p.LessonConfigType == EnumLessonConfigType.HomeWork).ToListAsync(cancellationToken);
+
+            var homeWorkModel = _mapper.Map<HomeWorkModel>(homeWork);
+
+            homeWorkModel.IsActive = lessonModules.Any();
+
+            methodResult.Result = homeWorkModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
