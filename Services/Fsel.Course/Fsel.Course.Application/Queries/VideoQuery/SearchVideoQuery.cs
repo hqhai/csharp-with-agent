@@ -149,6 +149,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                             UpdatedUserId = baseQ.UpdatedUserId,
                             VideoFilePath = baseQ.VideoFilePath,
                             LevelName = level.Name,
+                            OriginalId = baseQ.OriginalId,
                             IsActive = videoResults.Any()
                         };
 
