@@ -4,7 +4,7 @@
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <!-- Core -->
-  <ItemGroup Label="Use Core" Condition="'$(IsUseCore)' == 'true'">
+  <ItemGroup Label="Use Core">
     <PackageReference Include="MMLib.SwaggerForOcelot" Version="6.2.0" />
     <PackageReference Include="Ocelot" Version="18.0.0" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.103.51" />
