@@ -44,7 +44,7 @@ namespace Fsel.Identity.Application.Attributes
             if (!string.IsNullOrWhiteSpace(username) || userId.HasValue)
             {
                 var tenant = await _tenantProvider.GetTenantAsync(username, userId);
-                if (tenant != null)
+                if (tenant != null && tenant.IsMultiLogin)
                 {
                     context.HttpContext.SetHeader(JwtClaimNames.TenantId, tenant.Id.ToString());
                 }
