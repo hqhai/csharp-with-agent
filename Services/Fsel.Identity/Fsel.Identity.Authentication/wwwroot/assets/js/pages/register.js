@@ -1,19 +1,28 @@
 (function ($) {
+  const dateOfBirthInput = document.getElementById("birthday");
+  const $phoneNumberInput = $("#phoneNumber");
+  const $firstNameInput = $("#firstName");
+  const $lastNameInput = $("#lastName");
+  const $gender = $("#gender");
+  const $passwordMock = $("#password-mock");
+  const $passwordMeter = $("#meter");
+  const $meterText = $("#meter-text");
+  const $ruleList = $("#rule-list");
+  const $passLengthItem = $("#pass-length");
+  const $passNumberItem = $("#pass-number");
+  const $passUpCaseItem = $("#pass-Up-case");
+  const $passSymboItem = $("#pass-symbo");
+  const $policyCheckbox = $("#policy");
+  const $genderRadios = $("input[name='gender']");
+  const $policy = $(".service-policy");
 
-  $(document).ready(function () {
-    $("#birthday").flatpickr({
-      dateFormat: "d/m/y",
-      maxDate: "today"
-    });
-  });
-
-  $.validator.addMethod(
-    "daterequired",
-    function (value, element) {
-      return value != null && value != undefined && value;
-    },
-    "Date is required"
-  );
+  $phoneNumberInput.on("input", () => isValid($phoneNumberInput));
+  $firstNameInput.on("input", () => isValid($firstNameInput));
+  $lastNameInput.on("input", () => isValid($lastNameInput));
+  $passwordMock.on("input", validateNewPassword);
+  dateOfBirthInput.addEventListener("input", runValidateDateOfBirth);
+  dateOfBirthInput.addEventListener("change", runValidateDateOfBirth);
+  $policyCheckbox.on("change", () => isValidPolicy());
 
   $("#form-Register").on("submit", function (e) {
     if (validateRegisterForm() && this.checkValidity()) {
@@ -32,34 +41,28 @@
         if (field.value) {
           $("#form-Password input[name=" + field.name + "]").val(field.value);
         }
-      });
-      $("#form-Password input[name=Gender]").val(getGenderValue());
+      });;
       this.submit();
     }
     e.preventDefault();
   });
 
+  dateOfBirthInput.addEventListener("input", function (e) {
+    let value = e.target.value.replace(/\D/g, "");
 
+    if (value.length > 8) {
+      value = value.slice(0, 8);
+    }
 
-  const $phoneNumberInput = $("#phoneNumber");
-  const $firstNameInput = $("#firstName");
-  const $lastNameInput = $("#lastName");
-  const $gender = $("#gender");
-  const $birthday = $("#birthday");
-  const $passwordMock = $("#password-mock");
-  const $passwordMeter = $("#meter");
-  const $meterText = $("#meter-text");
-  const $ruleList = $("#rule-list");
-  const $passLengthItem = $("#pass-length");
-  const $passNumberItem = $("#pass-number");
-  const $passUpCaseItem = $("#pass-Up-case");
-  const $passSymboItem = $("#pass-symbo");
-  const $policyCheckbox = $("#policy");
-  const $genderRadios = $("input[name='gender']");
-  const $policy = $(".service-policy");
-  const $optionGender = $(".option");
-  const $radioLabels = $(".round-radio-label");
+    if (value.length > 1 && value.length <= 3) {
+      value = value.replace(/^(\d{2})(\d{0,2})$/, "$1/$2");
+    }
+    else if (value.length > 3) {
+      value = value.replace(/^(\d{2})(\d{2})(\d{0,4})$/, "$1/$2/$3");
+    }
 
+    e.target.value = value;
+  });
   function isValid($queryElement) {
     if (!$queryElement) {
       return false;
@@ -72,7 +75,6 @@
     }
     return isValid;
   }
-
   function isValidPolicy() {
     const isPolicyChecked = $policyCheckbox.is(":checked");
     if (!isPolicyChecked) {
@@ -81,43 +83,6 @@
       $policy.addClass("content-text-danger");
     }
     return isPolicyChecked;
-  }
-
-  function validateGender() {
-    let selectedGender;
-    $genderRadios.each(function () {
-      if ($(this).is(":checked")) {
-        selectedGender = $(this).val();
-        return false; // break the loop
-      }
-    });
-
-    if (selectedGender) {
-      $optionGender.removeClass("content-text-danger content-border-danger");
-      $radioLabels.each(function () {
-        $(this).removeClass("content-border-danger");
-        $(this).addClass("content-border-success"); // Assuming you have a success class for the desired style
-      });
-    } else {
-      $optionGender.addClass("content-text-danger content-border-danger");
-      $radioLabels.each(function () {
-        $(this).removeClass("content-border-success");
-        $(this).addClass("content-border-danger");
-      });
-    }
-
-    return selectedGender;
-  }
-
-  function getGenderValue() {
-    let selectedGender;
-    $genderRadios.each(function () {
-      if ($(this).is(":checked")) {
-        selectedGender = $(this).val();
-        return false; // break the loop
-      }
-    });
-    return selectedGender;
   }
 
   function validatePasswordFormat() {
@@ -151,8 +116,6 @@
     } else {
       $meterText.text("");
     }
-
-    // Update password rules
     updatePasswordRules(passwordValue);
   }
 
@@ -198,15 +161,62 @@
       passSymboItem.find("img").attr("src", "/assets/icons/close-icon.svg");
     }
   }
+  function runValidateDateOfBirth() {
+    const isValid = validateDateOfBirth();
+    dateOfBirthInput.classList.remove("content-border-danger");
+    if (!isValid) {
+      dateOfBirthInput.classList.add("content-border-danger");
+      return false;
+    }
+    return true;
+  }
 
+  function validateDateOfBirth() {
+    const value = dateOfBirthInput.value.trim();
+    if (!value) {
+      return false;
+    }
+
+    function parseDateFromDDMMYYYY(value) {
+      const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+      const match = value.match(regex);
+      if (!match) return null;
+
+      const day = parseInt(match[1], 10);
+      const month = parseInt(match[2], 10) - 1;
+      const year = parseInt(match[3], 10);
+
+      const date = new Date(year, month, day);
+      if (
+        date.getFullYear() !== year ||
+        date.getMonth() !== month ||
+        date.getDate() !== day
+      ) {
+        return null;
+      }
+      return date;
+    }
+
+    const date = parseDateFromDDMMYYYY(value);
+    const today = new Date();
+
+    if (!date) {
+      return false;
+    }
+
+    if (date > today) {
+      return false;
+    }
+
+    return true;
+  }
   function validateRegisterForm() {
     const isValidFirstName = isValid($firstNameInput);
     const isValidLastName = isValid($lastNameInput);
     const isValidPhoneNumber = isValid($phoneNumberInput);
-    const isValidBirthday = isValid($birthday);
-    const isValidGender = validateGender();
+    const isValidBirthday = validateDateOfBirth();
     const isCheckedPolicy = isValidPolicy();
-    return isValidFirstName && isValidLastName && isValidPhoneNumber && isValidBirthday && isValidGender && isCheckedPolicy;
+    return isValidFirstName && isValidLastName && isValidPhoneNumber && isValidBirthday && isCheckedPolicy;
   }
   function validateAll() {
     const isValidRegister = validateRegisterForm();
@@ -219,23 +229,6 @@
       return isValidPassword;
     }
     return true;
-  }
-
-  $phoneNumberInput.on("input", () => isValid($phoneNumberInput));
-  $firstNameInput.on("input", () => isValid($firstNameInput));
-  $lastNameInput.on("input", () => isValid($lastNameInput));
-  $passwordMock.on("input", validateNewPassword);
-  $genderRadios.on("change", isGenderSelected);
-  $policyCheckbox.on("change", () => isValidPolicy());
-
-  function isGenderSelected() {
-    $optionGender.removeClass("content-text-danger content-border-danger");
-    $radioLabels.each(function () {
-      $(this).removeClass("content-border-danger").addClass("content-border-success");
-    });
-
-    // Kiểm tra xem radio button giới tính đã được chọn chưa
-    return $genderRadios.is(":checked");
   }
 
   $(window).on("pageshow", function () {

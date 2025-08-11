@@ -338,7 +338,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
         public IActionResult Register(string? returnUrl)
         {
-            TempData[nameof(VerifyOtp)] = string.Empty;
             var vm = new UserRegisterModel
             {
                 ReturnUrl = returnUrl
@@ -373,7 +372,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 }
                 else
                 {
-                    ModelState.AddModelError(string.Empty, "Đã tồn tại tài khoản");
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_phone_number_already_regsiter"]);
                 }
             }
 
@@ -653,9 +652,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     PhoneNumber = phoneNumber,
                     FirstName = firstName,
                     LastName = lastName,
-                    DayBirthday = birthday?.Day,
-                    MonthBirthday = birthday?.Month,
-                    YearBirthday = birthday?.Year,
                     Provider = info.LoginProvider,
                     ReturnUrl = returnUrl
                 };
@@ -675,9 +671,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
                     externalLogin.FirstName = firstName;
                     externalLogin.LastName = lastName;
-                    externalLogin.DayBirthday = birthday?.Day;
-                    externalLogin.MonthBirthday = birthday?.Month;
-                    externalLogin.YearBirthday = birthday?.Year;
                 }
 
                 TempData[nameof(ExternalLoginModel)] = externalLogin.Serialize();
@@ -741,7 +734,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                         UserName = request.Email,
                         FirstName = request.FirstName,
                         LastName = request.LastName,
-                        Gender = request.Gender,
                         Birthday = request.Birthday,
                         EmailConfirmed = true,
                     };
@@ -821,10 +813,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             return View();
         }
 
-        /*****************************************/
-        /* helper APIs for the AccountController */
-        /*****************************************/
-
         private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
@@ -844,8 +832,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
             {
                 var local = context.IdP == IdentityServerConstants.LocalIdentityProvider;
-
-                // this is meant to short circuit the UI and only trigger the one external IdP
                 vm.EnableLocalLogin = local;
 
                 if (!local)

@@ -138,12 +138,7 @@ namespace Fsel.Identity.Authentication.Extensions
             builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
             builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
             builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
-            builder.Services.AddRefitClient<ISenderService>()
-            .ConfigureHttpClient(httpClient =>
-            {
-                httpClient.BaseAddress = new Uri(appSetting?.Services?.SenderApiUrl);
-                httpClient.Timeout = TimeSpan.FromSeconds(10);
-            });
+            builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
             return builder;
         }
 

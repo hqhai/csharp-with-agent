@@ -34,14 +34,6 @@
                                placeholder=""
                                autocomplete="off"
                                asp-for="UserName" autofocus />
-                        @* <input class="text-input"
-                                type="text"
-                                name="username"
-                                id="username"
-                                placeholder=" "
-                                autocomplete="off"
-                                pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
-                                required/> *@
                         <label for="username" class="input-label">@Localizer["i18n_username"]</label>
                     </div>
                     @Html.CustomValidationMessageFor(model => model.UserName, Localizer, "", new { @class = "content-text-danger" })
@@ -117,8 +109,7 @@
 
                 <button type="submit" class="btn" id="loginButton">@Localizer["i18nSigninButtonSignIn"]</button>
 
-                <div class="text-footer">@Localizer["i18n_not_a_member"]<a href="@Url.Action("Register", "Account", new { Model.ReturnUrl })">@Localizer["i18n_sign_up_now"]</a></div>
-                @* <div class="text-footer">Not a member? <a href="/Account/Register?returnUrl=@System.Net.WebUtility.UrlEncode(Model.ReturnUrl)">Sign up now</a></div> *@
+                <div class="text-footer">@Localizer["i18n_not_a_member"] <a href="@Url.Action("Register", "Account", new { Model.ReturnUrl })">@Localizer["i18n_sign_up_now"]</a></div>
             </form>
         }
     </div>

@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.OpenId;
+    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
@@ -99,6 +100,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
             user.PhoneNumberConfirmed = true;
             user.EmailConfirmed = true;
+            await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
             await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
             await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
 

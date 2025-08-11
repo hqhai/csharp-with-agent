@@ -7,7 +7,6 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using Fsel.Identity.Application.Handlers.Interfaces;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
-    using Fsel.Shared.Constants;
     using Microsoft.AspNetCore.Identity;
 
     public class ForgotPasswordHandler : IForgotPasswordHandler

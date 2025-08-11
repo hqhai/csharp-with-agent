@@ -4,7 +4,6 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Identity.Domain.Constants;
-    using Fsel.Shared.Enums;
 
     public class UserRegisterModel
     {
@@ -23,17 +22,12 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
         public string? LastName { get; set; }
 
         [Required(ErrorMessage = "i18n_Birth_day_cannot_be_empty")]
-        public EnumGender? Gender { get; set; }
-
-        [Required(ErrorMessage = "i18n_Birth_day_cannot_be_empty")]
         public DateTime? Birthday { get; set; }
 
         [DataType(DataType.Password)]
         [RegularExpression(RegexSettings.PasswordValid, ErrorMessage = "i18n_Password_is_not_valid")]
         [Required(ErrorMessage = "i18n_Password_cannot_be_empty")]
         public string? Password { get; set; }
-
-        public string? ReferralCode { get; set; }
 
         public string? ReturnUrl { get; set; }
 
