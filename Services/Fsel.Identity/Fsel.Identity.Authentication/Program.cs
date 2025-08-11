@@ -94,9 +94,10 @@ builder.AddMassTransit(appSetting);
 
 //App config
 var app = builder.Build();
-app.UseLanguages();
 app.UseStaticFiles();
 app.UseCertificateForwarding();
+app.UseRouting();
+app.UseLanguages();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseIdentityServer();
