@@ -103,7 +103,7 @@ namespace Fsel.Course.Application.Commands.SubjectConditionCmd
 
             _mapper.Map(request, subjectCondition);
 
-            if (!subjectCondition.Status)
+            if (!subjectCondition.Status && (request.SubjectConditionRules == null || !request.SubjectConditionRules.Any()))
             {
                 methodResult.Result = true;
                 return methodResult;
