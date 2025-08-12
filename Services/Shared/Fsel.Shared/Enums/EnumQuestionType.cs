@@ -97,5 +97,8 @@ namespace Fsel.Shared.Enums
 
         [Description("Tracing")]
         Tracing,
+
+        [Description("Color Matching Type")]
+        ColorMatchingType,
     }
 }

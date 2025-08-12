@@ -268,6 +268,15 @@ namespace Fsel.Course.Infrastructure.Common
                     result = tracingQuestion;
                     totalCorrect = ValueSettings.ValueDefaultTracingScore;
                     break;
+
+                case EnumQuestionType.ColorMatchingType:
+                    var colorMatchingTypeQuestion = config.Deserialize<ColorMatchingTypeQuestion>();
+                    if (colorMatchingTypeQuestion != null)
+                    {
+                        result = isDisableAnswers ? ClearAnswers(colorMatchingTypeQuestion) : colorMatchingTypeQuestion;
+                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(colorMatchingTypeQuestion) : ValueSettings.ValueDefault;
+                    }
+                    break;
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -658,6 +667,11 @@ namespace Fsel.Course.Infrastructure.Common
                 case TracingQuestion tracingQuestion:
 
                     break;
+
+                case ColorMatchingTypeQuestion colorMatchingType:
+                    // Clear correct answers for display
+                    colorMatchingType.CorrectAnswers?.Clear();
+                    break;
             }
             return data;
         }
@@ -712,6 +726,9 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case FlowChartCompletionQuestion flowChart:
                     return flowChart.Answers?.Count ?? ValueSettings.ValueDefault;
+
+                case ColorMatchingTypeQuestion colorMatchingType:
+                    return colorMatchingType.CorrectAnswers?.Count ?? ValueSettings.ValueDefault;
 
                 default:
                     return 1;
