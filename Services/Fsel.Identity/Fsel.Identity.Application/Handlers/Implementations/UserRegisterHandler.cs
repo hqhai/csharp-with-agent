@@ -5,12 +5,14 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.Caching;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Application.Handlers.Interfaces;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.OpenId;
     using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
 
     public class UserRegisterHandler : IUserRegisterHandler
@@ -84,13 +86,16 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             return (sendOtpContext.Status, sendOtpContext.OtpSessionInfo);
         }
 
-        public async Task<bool> CreateUserAsync(string phoneNumber, string otp)
+        public async Task<IdentityResult> CreateUserAsync(string phoneNumber, string otp)
         {
             var cacheKey = GetKeyToCacheRegisterInfo(phoneNumber);
             var cachedRegisterInfo = await _cacheService.GetAsync(cacheKey);
             if (cachedRegisterInfo == null)
             {
-                return false;
+                return IdentityResult.Failed(new IdentityError
+                {
+                    Code = EnumSystemErrorCode.ServerError.ToString(),
+                });
             }
 
             var user = _mapper.Map<User>(cachedRegisterInfo);
@@ -101,8 +106,16 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             user.PhoneNumberConfirmed = true;
             user.EmailConfirmed = true;
             await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-            await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
-            await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+            var identityResult = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
+            if (!identityResult.Succeeded)
+            {
+                return identityResult;
+            }
+            identityResult = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+            if (!identityResult.Succeeded)
+            {
+                return identityResult;
+            }
 
             var userOtpCode = new UserOtpCode
             {
@@ -113,7 +126,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             _userOtpRepository.Add(userOtpCode);
             await _userOtpRepository.UnitOfWork.SaveChangesAsync();
 
-            return true;
+            return identityResult;
         }
 
         private static string GetKeyToCacheRegisterInfo(string indentity)

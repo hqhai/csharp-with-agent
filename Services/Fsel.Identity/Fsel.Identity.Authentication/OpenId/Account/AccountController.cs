@@ -154,7 +154,14 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     var (isSuccessfully, otpSessionInfo) = await _userRegisterHandler.VerifyUserAsync(request.Identity ?? string.Empty, request.Otp);
                     if (isSuccessfully)
                     {
-                        await _userRegisterHandler.CreateUserAsync(request.Identity, request.Otp);
+                        var identityResult = await _userRegisterHandler.CreateUserAsync(request.Identity, request.Otp);
+                        if (!identityResult.Succeeded)
+                        {
+                            foreach (var error in identityResult.Errors.Select(x => x.Code))
+                            {
+                                ModelState.TryAddModelError(error, _localizer[error]);
+                            }
+                        }
                         return await LoginWithoutPassword(request.Identity, request.ReturnUrl);
                     }
                     else
