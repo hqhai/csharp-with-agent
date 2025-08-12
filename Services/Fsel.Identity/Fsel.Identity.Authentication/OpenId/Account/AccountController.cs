@@ -496,9 +496,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
         private async Task<IActionResult> LoginWithoutPassword(string phoneNumber, string? returnUrl)
         {
-            var user = await _userRepository.DbContext.Set<User>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
+            var user = await _userManager.Users.AsNoTracking().FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
             return await LoginWithoutPassword(user, returnUrl);
         }
 
