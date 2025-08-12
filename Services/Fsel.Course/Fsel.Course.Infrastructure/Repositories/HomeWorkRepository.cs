@@ -36,6 +36,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                     {
                         Id = x.Id,
                         Name = x.Name,
+                        CreatedDate = x.CreatedDate,
+                        UpdatedDate = x.UpdatedDate,
                         Code = x.Code,
                         MediaPost = x.MediaPost,
                         IsActive = x.LessonHomeWorks.Any(),

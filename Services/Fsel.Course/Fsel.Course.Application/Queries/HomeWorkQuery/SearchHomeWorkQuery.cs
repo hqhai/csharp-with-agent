@@ -61,6 +61,7 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                                         VersionStatus = x.VersionStatus,
                                         Level = x.Level != null ? x.Level.Name : null,
                                         SkillName = x.Skill != null ? x.Skill.Name : null,
+                                        UpdatedDate = x.UpdatedDate,
                                     });
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
