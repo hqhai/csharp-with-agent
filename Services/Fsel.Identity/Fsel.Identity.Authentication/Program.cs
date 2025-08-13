@@ -6,6 +6,7 @@ using Fsel.Common.Constants;
 using Fsel.Core.Entities;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Events;
+using Fsel.Identity.Application.Queries.IntegrationQuery;
 using Fsel.Identity.Authentication.Extensions;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure;
@@ -87,6 +88,7 @@ builder.Services.AddTransient<IEventSink, TokenIssuedEventHandler>();
 builder.AddQueue();
 
 builder.Services.AddScoped<SaveOtpCodeConverter>();
+builder.Services.AddScoped<BaseIntegrationQuery>();
 
 builder.AddExternalServices(appSetting);
 

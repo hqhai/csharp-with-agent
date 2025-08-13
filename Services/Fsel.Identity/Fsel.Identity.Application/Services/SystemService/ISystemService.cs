@@ -85,5 +85,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/token-history/create-history-deduct-coin-of-student")]
         Task<IApiResponse<MethodResult<bool>>> CreateHistoryDeductCoinOfStudent([Body] CreateHistoryDeductCoinOfStudentCommandModel query);
+
+        [Post("/v1/course-suggest-config/level-suggestion-users")]
+        Task<IApiResponse<MethodResult<IList<CourseSuggestUsersModel>>>> GetCourseSuggestByUserIds([Body] GetCourseSuggestByUserIdsQueryModel query);
     }
 }

@@ -33,20 +33,14 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly UserManager<User> _userManager;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly RoleManager<Role> _roleManager;
-        private readonly IUserGroupMemberShipRepository _userGroupMemberShipRepository;
-        private readonly IUserGroupRepository _userGroupRepository;
 
         public GetUserManagesByRoleQueryHandler(UserManager<User> userManager,
                                                 IUserRoleRepository userRoleRepository,
-                                                RoleManager<Role> roleManager,
-                                                IUserGroupMemberShipRepository userGroupMemberShipRepository,
-                                                IUserGroupRepository userGroupRepository)
+                                                RoleManager<Role> roleManager)
         {
             _userManager = userManager;
             _userRoleRepository = userRoleRepository;
             _roleManager = roleManager;
-            _userGroupMemberShipRepository = userGroupMemberShipRepository;
-            _userGroupRepository = userGroupRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<UserManageModel>>> Handle(GetUserManagesByRoleQuery request, CancellationToken cancellationToken)
@@ -55,8 +49,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             MethodResult<PagingItemsModel<UserManageModel>> methodResult = new MethodResult<PagingItemsModel<UserManageModel>>();
 
             var userQuerys = from a in _userManager.Users
-                             join grm in _userGroupMemberShipRepository.Queryable on a.Id equals grm.UserId into grmGroup
-                             from grm in grmGroup.DefaultIfEmpty()
                              join ur in _userRoleRepository.GetQuery() on a.Id equals ur.UserId
                              join r in _roleManager.Roles on ur.RoleId equals r.Id
                              where r.Name == request.Role.ToString()
@@ -70,7 +62,8 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                  Gender = a.Gender,
                                  Position = a.Position,
                                  ManageUserId = a.ManageUserId,
-                                 GroupId = grm.GroupId,
+                                 RoleId = ur.RoleId,
+                                 GroupName = r.Name,
                                  UserName = a.UserName,
                                  Status = a.Status,
                                  CreatedDate = a.CreatedDate,
@@ -104,7 +97,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
             if (request.GroupId.HasValue)
             {
-                userQuerys = userQuerys.Where(x => x.GroupId == request.GroupId);
+                userQuerys = userQuerys.Where(x => x.RoleId == request.GroupId);
             }
 
             if (request.ManageUserId.HasValue)
@@ -121,16 +114,11 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             var manageUserId = lists.Select(x => x.ManageUserId).Distinct().ToList();
             var manageUsers = await _userManager.Users.WhereBulkContains(manageUserId, x => x.Id).ToListAsync(cancellationToken);
 
-            var groupIds = lists.Select(x => x.GroupId).Distinct().ToList();
-            var groups = await _userGroupRepository.Queryable.WhereBulkContains(groupIds, x => x.Id).ToListAsync(cancellationToken);
-
             foreach (var item in lists)
             {
                 var manageUser = manageUsers.FirstOrDefault(x => x.Id == item.ManageUserId);
-                var group = groups.FirstOrDefault(x => x.Id == item.GroupId);
 
                 item.ManageUser = manageUser?.FullName;
-                item.GroupName = group?.GroupName;
             }
 
             methodResult.Result = new PagingItemsModel<UserManageModel>(lists, request, totalItem);

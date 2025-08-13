@@ -2,6 +2,7 @@
 
 using Fsel.Core.Entities;
 using Fsel.Core.Extensions;
+using Fsel.Identity.Application.Queries.IntegrationQuery;
 using Fsel.Identity.Application.Queues.Consumers;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.InteractionService;
@@ -79,6 +80,7 @@ builder.Services.AddScoped<SendStudentsFromFilePublisher>();
 
 //Common
 builder.Services.AddScoped<SaveOtpCodeConverter>();
+builder.Services.AddScoped<BaseIntegrationQuery>();
 
 //Refit
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
