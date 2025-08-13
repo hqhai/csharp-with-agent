@@ -5,7 +5,6 @@ using Fsel.Common.ActionResults;
 using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
 using Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery;
 using Fsel.Shared.Attributes;
@@ -19,7 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/cso/course")]
     [ApiController]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+    [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -59,7 +58,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Cso
         [HttpPost("change-course-level")]
         [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelCommand command)
+        public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelByAdminCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

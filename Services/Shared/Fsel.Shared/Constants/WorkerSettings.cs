@@ -28,7 +28,11 @@ namespace Fsel.Shared.Constants
             public const string CheckUserDeletionJob = "CheckUserDeletion";
             public const string ChooseDailyQuizWinners = "ChooseDailyQuizWinners";
             public const string AggregateDataStudentsInEvent = "AggregateDataStudentsInEvent";
-            public const string PushNotice = "PushNotice";
+            public const string PushNoticeEveryHour = "PushNoticeEveryHour";
+            public const string PushNoticeAt07h30 = "PushNoticeAt07h30";
+            public const string PushNoticeAt12h00 = "PushNoticeAt12h00";
+            public const string PushNoticeAt17h30 = "PushNoticeAt17h30";
+            public const string PushNoticeAt19h30 = "PushNoticeAt19h30";
         }
     }
 }

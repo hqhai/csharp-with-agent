@@ -43,27 +43,33 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<OrderSearchModel>>();
 
-            List<Order> orders = new List<Order>();
+            IQueryable<Order> orders;
 
             if (request.UserIds == null && request.StartDate.HasValue && request.EndDate.HasValue)
             {
-                orders = await _orderRepository.Queryable
-                                               .Include(p => p.Package)
-                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate))
-                                               .ToListAsync(cancellationToken);
+                var orderInRangeQuerys = _orderRepository.Queryable
+                                                         .Include(p => p.Package)
+                                                         .Include(p => p.Voucher)
+                                                         .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= request.StartDate && x.CreatedDate <= request.EndDate) : (x.UpdatedDate.Value >= request.StartDate && x.UpdatedDate.Value <= request.EndDate));
 
-                var checkLeadOrClient = await CheckLeadOrClient(orders, request, cancellationToken);
-                methodResult.Result = _mapper.Map(checkLeadOrClient.Result, methodResult.Result);
+                if (!request.Status)
+                {
+                    orderInRangeQuerys.Where(x => (x.ExpireDate >= request.StartDate) && (x.ExpireDate <= request.EndDate));
+                }
+
+                var orderInRanges = await orderInRangeQuerys.AsNoTracking().ToListAsync(cancellationToken);
+
+                methodResult.Result = _mapper.Map(orderInRanges, methodResult.Result);
             }
 
             else if (request.UserIds != null && request.UserIds.Any())
             {
-                orders = await _orderRepository.Queryable
-                                               .Include(p => p.Package)
-                                               .Where(x => request.UserIds.Contains(x.UserId))
-                                               .ToListAsync(cancellationToken);
+                orders = _orderRepository.Queryable
+                                         .Include(p => p.Package)
+                                         .Include(p => p.Voucher)
+                                         .WhereBulkContains(request.UserIds, x => x.UserId);
 
-                var checkLeadOrClient = await CheckLeadOrClient(orders, request, cancellationToken);
+                var checkLeadOrClient = await CheckLeadOrClient(orders, request.Status, cancellationToken);
                 methodResult.Result = _mapper.Map(checkLeadOrClient.Result, methodResult.Result);
 
                 if (methodResult.Result != null && methodResult.Result.Any())
@@ -85,38 +91,18 @@ namespace Fsel.Ordering.Application.Queries.IntegrationQuery
             return methodResult;
         }
 
-        private async Task<MethodResult<IList<Order>>> CheckLeadOrClient(IList<Order> orders, GetOrderByStatusIntegrationQuery request, CancellationToken cancellationToken)
+        private static async Task<MethodResult<IList<Order>>> CheckLeadOrClient(IQueryable<Order> orderQueryable, bool status, CancellationToken cancellationToken)
         {
             MethodResult<IList<Order>> methodResult = new MethodResult<IList<Order>>();
+            IList<Order> orders = new List<Order>();
 
-            var orderClients = orders.Where(x => x.ExpireDate.HasValue && x.ExpireDate.Value > DateTime.UtcNow && !x.IsTrial).Select(x => x.UserId).ToList();
-
-            if (request.Status)
+            if (status)
             {
-                orders = orders.Where(x => orderClients.Contains(x.UserId) && x.RevenueType == EnumPaymentRevenueType.Revenue).ToList();
+                orders = await orderQueryable.Where(x => x.ExpireDate.HasValue && x.ExpireDate.Value > DateTime.UtcNow && !x.IsTrial && x.RevenueType == EnumPaymentRevenueType.Revenue).AsNoTracking().ToListAsync(cancellationToken);
             }
             else
             {
-                var userExpire = await _orderRepository.Queryable
-                                                       .Include(p => p.Package)
-                                                       .Where(x => (x.ExpireDate >= request.StartDate) && (x.ExpireDate <= request.EndDate))
-                                                       .ToListAsync(cancellationToken);
-
-                orders = orders.Where(x => !orderClients.Contains(x.UserId)).ToList();
-
-                if (userExpire == null || !userExpire.Any())
-                {
-                    return methodResult;
-                }
-
-                // lấy nhưng order hết hạn đưa vào leads
-                foreach (var item in userExpire)
-                {
-                    if (!orders.Any(x => x.Id == item.Id))
-                    {
-                        orders.Add(item);
-                    }
-                }
+                orders = await orderQueryable.Where(x => !(x.ExpireDate.HasValue && x.ExpireDate.Value > DateTime.UtcNow && !x.IsTrial && x.RevenueType == EnumPaymentRevenueType.Revenue)).AsNoTracking().ToListAsync(cancellationToken);
             }
 
             methodResult.Result = orders;
