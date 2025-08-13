@@ -183,5 +183,15 @@ namespace Fsel.Shared.Constants
                 public const string SetTimeExamPracticeHub = $"SetTimeExamPracticeHub";
             }
         }
+
+        public static class TracingQuestionTypeHub
+        {
+            public const string Pattern = $"/tracing-question-type";
+
+            public static class Methods
+            {
+                public const string TracingQuestionType = $"TracingQuestionType";
+            }
+        }
     }
 }
