@@ -17,6 +17,8 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
         public KeyboardTextModel? KeyboardText { get; set; }
 
         public string? Popup { get; set; }
+
+        public int Trial { get; set; }
     }
 
     public class KeyboardTextModel

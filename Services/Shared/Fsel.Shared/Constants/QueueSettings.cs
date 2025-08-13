@@ -65,6 +65,7 @@ namespace Fsel.Shared.Constants
                 public const string GetTimeExamPractice = $"{KeyQueue}_GetTimeExamPractice";
                 public const string ExamPracticeSpeaking = $"{KeyQueue}_ExamPracticeSpeaking";
                 public const string ExamPracticeWriting = $"{KeyQueue}_ExamPracticeWriting";
+                public const string TracingQuestionType = $"{KeyQueue}_TracingQuestionType";
             }
         }
 

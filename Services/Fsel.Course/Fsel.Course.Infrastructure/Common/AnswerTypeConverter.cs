@@ -119,6 +119,10 @@ namespace Fsel.Course.Infrastructure.Common
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleColorMatchingTypeAnswer(ref configAnswer, configOldAnswer.Deserialize<ColorMatchingTypeAnswer>(), question.Config.Deserialize<ColorMatchingTypeQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
+                case EnumQuestionType.Tracing:
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerTracing(ref configAnswer, configOldAnswer.Deserialize<TracingAnswer>(), question.Config.Deserialize<TracingQuestion>(), isTryAgain, isSubmit);
+                    break;
+
                 default:
                     return default;
             }
@@ -401,6 +405,10 @@ namespace Fsel.Course.Infrastructure.Common
                     result = GetAnswer(colorMatchingTypeAnswer, isShowSubStatus, status, isDisableAnswer);
                     break;
 
+                case EnumQuestionType.Tracing:
+                    var tracingAnswer = configAnswer.Deserialize<TracingAnswer>();
+                    result = tracingAnswer;
+                    break;
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -1228,6 +1236,28 @@ namespace Fsel.Course.Infrastructure.Common
                 }
             }
             return data;
+        }
+
+        private static (short, bool, bool) HandleAnswerTracing(ref object? configAnswer, TracingAnswer? dataOldAnswer, TracingQuestion? question, bool isTryAgain, bool isSubmit)
+        {
+            int valueDefaut = 0;
+            var dataAnswer = configAnswer.Deserialize<TracingAnswer>();
+
+            if (dataOldAnswer?.CountFail == question?.Trial)
+            {
+                dataAnswer = dataOldAnswer;
+            }
+
+            if (!isTryAgain && dataAnswer != null && !dataAnswer.IsExact && isSubmit)
+            {
+                dataAnswer.CountFail = valueDefaut;
+                dataAnswer.CountStrokes = valueDefaut;
+            }
+
+            short number = (dataAnswer != null && dataAnswer.IsExact) ? (short)1 : (short)valueDefaut;
+            bool isAnswerMissing = dataAnswer == null;
+            configAnswer = dataAnswer;
+            return (number, isAnswerMissing, true);
         }
 
         #endregion V1
