@@ -50,18 +50,27 @@
   dateOfBirthInput.addEventListener("input", function (e) {
     let value = e.target.value.replace(/\D/g, "");
 
-    if (value.length > 8) {
-      value = value.slice(0, 8);
-    }
+    if (value.length > 8) value = value.slice(0, 8);
 
-    if (value.length > 1 && value.length <= 3) {
-      value = value.replace(/^(\d{2})(\d{0,2})$/, "$1/$2");
-    }
-    else if (value.length > 3) {
+    if (value.length >= 4) {
       value = value.replace(/^(\d{2})(\d{2})(\d{0,4})$/, "$1/$2/$3");
+    } else if (value.length >= 2) {
+      value = value.replace(/^(\d{2})(\d{0,2})$/, "$1/$2");
     }
 
     e.target.value = value;
+  });
+
+  dateOfBirthInput.addEventListener("keydown", function (e) {
+    if (e.key === "Backspace") {
+      const pos = e.target.selectionStart;
+      const val = e.target.value;
+      if (pos > 0 && val[pos - 1] === "/") {
+        e.preventDefault();
+        e.target.value = val.slice(0, pos - 1) + val.slice(pos);
+        e.target.setSelectionRange(pos - 1, pos - 1);
+      }
+    }
   });
   function isValid($queryElement) {
     if (!$queryElement) {
