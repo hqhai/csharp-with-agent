@@ -108,7 +108,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     }
                 }
 
-                unitQuery = lessonTeacherQueryable.Select(unit => new UnitSearchModel
+                unitQuery = lessonTeacherQueryable.Where(u => !u.IsArchive).Distinct().Select(unit => new UnitSearchModel
                 {
                     Id = unit.Id,
                     Name = unit.Name,
@@ -160,7 +160,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                         filteredQuery = unitCodeQuery.Union(unitNameQuery);
                     }
                 }
-                unitQuery = filteredQuery.Select(unit => new UnitSearchModel
+                unitQuery = filteredQuery.Where(u => !u.IsArchive).Distinct().Select(unit => new UnitSearchModel
                 {
                     Id = unit.Id,
                     Name = unit.Name,
@@ -183,8 +183,8 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                      on l.Id equals lm.LessonId
                                   join v in _videoRepository.ReadQueryable
                                   .Where(v => v.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion && !v.IsArchive)
-                                     on l.OriginalId equals v.OriginalId
-                                  select v.TeacherId).ToList()
+                                     on lm.OriginalId equals v.OriginalId
+                                  select v.TeacherId).Distinct().ToList()
                 });
             }
 
