@@ -26,9 +26,11 @@ using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
+using Microsoft.Extensions.Options;
 using static IdentityServer4.IdentityServerConstants;
 
 namespace Fsel.Identity.Authentication.OpenId.Account
@@ -49,6 +51,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly IUserRegisterHandler _userRegisterHandler;
         private readonly IForgotPasswordHandler _forgotPasswordHandler;
         private readonly IOtpDataCollector _otpDataCollector;
+        private readonly IdentityOptions _identityOptions;
         private readonly IUserRepository _userRepository;
         private readonly Core.Base.AuthContext _languageContext;
         private readonly IStringLocalizer _localizer;
@@ -68,7 +71,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             IPlatformRepository platformRepository,
             IUserRegisterHandler userRegisterHandler,
             IForgotPasswordHandler forgotPasswordHandler,
-            IOtpDataCollector otpDataCollector)
+            IOtpDataCollector otpDataCollector,
+            IOptions<IdentityOptions> identityOptions)
         {
             UserSession = userSession;
             _interaction = interaction;
@@ -85,6 +89,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             _userRegisterHandler = userRegisterHandler;
             _forgotPasswordHandler = forgotPasswordHandler;
             _otpDataCollector = otpDataCollector;
+            _identityOptions = identityOptions.Value;
         }
 
         /// <summary>
@@ -404,7 +409,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 // we only have one option for logging in and it's an external provider
                 return RedirectToAction("Challenge", "External", new { scheme = vm.ExternalLoginScheme, returnUrl });
             }
-
             return View(vm);
         }
 
@@ -469,7 +473,9 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     }
                     else if (userLogin.IsLockedOut)
                     {
-                        ModelState.AddModelError(string.Empty, _localizer["i18n_account_locked_in_minutes"]);
+                        var numberOfFail = _identityOptions.Lockout?.MaxFailedAccessAttempts.ToString() ?? string.Empty;
+                        var lockDuration = _identityOptions.Lockout?.DefaultLockoutTimeSpan.TotalMinutes.ToString() ?? string.Empty;
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_account_locked_in_minutes"].Value.InjectParam(numberOfFail, lockDuration));
                     }
                     else
                     {
