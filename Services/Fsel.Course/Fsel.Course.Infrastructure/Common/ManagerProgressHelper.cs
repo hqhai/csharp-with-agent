@@ -301,6 +301,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return new List<CourseCompleteModel>();
             }
             #region
+            //var courseCompletes = new List<CourseCompleteModel>();
             //using (var scope = _serviceProvider.CreateScope())
             //{
             //    var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
@@ -394,8 +395,8 @@ namespace Fsel.Course.Infrastructure.Common
             //                                               .Select(x => x.Lesson!.UnitLessons.Where(n => n.UnitId == x.UnitId).Select(n => n.DisplayOrder).FirstOrDefault()).FirstOrDefault()
             //                       }).ToListAsync();
             //    courseCompletes = baseQuery != null && baseQuery.SortBy.Any() ? query.ApplySortAndPaging(baseQuery).ToList() : query.ApplySort(baseQuery).ToList();
-            //};
-            //     return courseCompletes;
+            //}
+            //return courseCompletes;
             #endregion
             var studentIds = courseResults.Select(x => x.StudentId).ToList();
             StringBuilder sb = new StringBuilder();

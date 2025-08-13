@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices.Model
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public EnumPaymentRevenueType? RevenueType { get; set; }
+        public int? CountOrder { get; set; }
         public decimal TotalPrice { get; set; }
         public decimal DiscountPrice { get; set; }
         public decimal Price { get; set; }

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.Reports
+namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
 {
     using System.Drawing;
     using System.Globalization;
@@ -136,7 +136,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     FirstStudyDate = courseResult?.ProcessDate,
                     ExpiredDate = item.ExpiredDate,
                     ProgressModule = (item.CourseId.HasValue || courseResult != null) && courseComplete != null ? $"{courseComplete.CountComplete} / {courseComplete.TotalComplete}" : null,
-                    ProgressPercent = (item.CourseId.HasValue || courseResult != null) && courseComplete != null ? NumberHelper.GetPercent(courseComplete.CountComplete, courseComplete.TotalComplete) : null,
+                    ProgressPercent = (item.CourseId.HasValue || courseResult != null) && courseComplete != null ? courseComplete.CountComplete.GetPercent(courseComplete.TotalComplete) : null,
                     DaysSinceLastAccess = daysSinceLast
                 };
                 var processDate = unitResult?.ProcessDate ?? courseResult?.ProcessDate ?? (courseResult != null && courseResult.Status != EnumResultStatus.New ? courseResult.CreatedDate.AddDays(1) : null);
@@ -170,7 +170,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         private async Task<IList<FeatureAccessTimeModel>> GetFeatureAccessTimesAsync(List<Guid> userIds)
         {
             var result = await _systemService.GetLastFeatureAccessByUserIdsAsync(new GetFeatureAccessTimesByUserIdsQueryModel { UserIds = userIds });
-            return (result.Content?.Result ?? new List<FeatureAccessTimeModel>());
+            return result.Content?.Result ?? new List<FeatureAccessTimeModel>();
         }
 
         private async Task<Dictionary<Guid, int>> GetLessonResultGroupsAsync(List<CourseResultModel> lists, CancellationToken cancellationToken)
@@ -193,7 +193,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
         public static Stream ExportExcelTemplate(IList<StudentLearningReportModel>? studentEventLearnProcesses)
         {
-            MemoryStream memoryStream = new MemoryStream();
+            var memoryStream = new MemoryStream();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
             using (var stream = File.OpenRead(ResourceSettings.ReportSaleStudentProgress))
             using (var package = new ExcelPackage(stream))
@@ -391,8 +391,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
             for (int week = 1; week <= totalWeeks; week++)
             {
-                DateTime weekStart = startDate.AddDays((int)((week - 1) * DaysPerWeek));
-                DateTime weekEnd = weekStart.AddDays(6);
+                var weekStart = startDate.AddDays((int)((week - 1) * DaysPerWeek));
+                var weekEnd = weekStart.AddDays(6);
 
                 string status;
                 if (totalCompletedLessons == RequiredLessonsPerWeek)

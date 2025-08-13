@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queries.Reports;
+    using Fsel.Course.Lms.Application.Queries.Reports.Sales;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -282,6 +283,19 @@ namespace Fsel.Course.Lms.Api.Controllers
                 return queryResult.GetActionResult();
             }
             return File(queryResult.Result, Settings.Excels.ContentType, $"ExportReportSaleProgress_{DateTime.Now.Ticks}.xlsx");
+        }
+
+        /// <summary>
+        /// Get Overall Report By Student
+        /// </summary>
+        [HttpGet("get-file-report-sale-support")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+        public async Task<IActionResult> Get()
+        {
+            var queryResult = await _mediator.Send(new GetFileExcelUserInformationSupportSaleQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

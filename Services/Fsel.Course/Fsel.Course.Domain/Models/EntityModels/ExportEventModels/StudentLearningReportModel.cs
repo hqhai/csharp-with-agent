@@ -35,6 +35,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.ExportEventModels
         public int WeekNumber { get; set; }
         public DateTime WeekStartDate { get; set; }
         public DateTime WeekEndDate { get; set; }
+        public string? LearnedLesson { get; set; }
+        public string? PresentLesson { get; set; }
+        public string? TargetLesson { get; set; }
         public int RequiredLessons { get; set; }
         public int CompletedLessons { get; set; }
         public string? Status { get; set; }
