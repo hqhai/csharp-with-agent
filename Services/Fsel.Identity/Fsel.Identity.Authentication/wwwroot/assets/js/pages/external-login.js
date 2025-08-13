@@ -48,6 +48,16 @@
   $('#form-ExternalLogin').on('submit', function (e) {
     if (validateAll() && this.checkValidity()) {
       $('.loading').removeClass('hidden');
+      let $birthdayInput = $(this).find('[name="Birthday"]');
+      let originalValue = $birthdayInput.val(); 
+
+      let parts = originalValue.split("/");
+      if (parts.length === 3) {
+        $birthdayInput.val(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`);
+      }
+      setTimeout(() => {
+        $birthdayInput.val(originalValue);
+      }, 0);
     }
     else {
       e.preventDefault();
