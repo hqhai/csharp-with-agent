@@ -23,18 +23,24 @@ namespace Fsel.Course.Application.Commands.TestCmd
         private readonly QuestionConverter _questionConverter;
         private readonly IServiceProvider _serviceProvider;
         private readonly TestConverter _testConverter;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ILevelRepository _levelRepository;
 
         public CreateTestConfigCommandHandler(IMapper mapper,
             ITestRepository testRepository,
             QuestionConverter questionConverter,
             IServiceProvider serviceProvider,
-            TestConverter testConverter)
+            TestConverter testConverter,
+            ICategoryRepository categoryRepository,
+            ILevelRepository levelRepository)
         {
             _mapper = mapper;
             _testRepository = testRepository;
             _questionConverter = questionConverter;
             _serviceProvider = serviceProvider;
             _testConverter = testConverter;
+            _categoryRepository = categoryRepository;
+            _levelRepository = levelRepository;
         }
 
         public async Task<MethodResult<TestModel>> Handle(CreateTestCommand request, CancellationToken cancellationToken)
@@ -44,6 +50,16 @@ namespace Fsel.Course.Application.Commands.TestCmd
 
             var test = TestFactory.Create(request, _mapper, _questionConverter).Build();
             if (await test.ValidateDuplicateTest(_testRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                return methodResult;
+            }
+            if (await test.ValidateLevel(_levelRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                return methodResult;
+            }
+            if (await test.ValidateProgram(_categoryRepository).ConfigureAwait(false))
             {
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
