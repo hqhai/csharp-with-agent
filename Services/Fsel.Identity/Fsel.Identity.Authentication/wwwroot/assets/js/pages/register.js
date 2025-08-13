@@ -37,6 +37,14 @@
     if (validateAll() && this.checkValidity()) {
       e.preventDefault();
       var sourceData = $("#form-Register").serializeArray();
+      let birthdayItem = sourceData.find(item => item.name === 'Birthday');
+      if (birthdayItem && birthdayItem.value) {
+        let parts = birthdayItem.value.split("/");
+        if (parts.length === 3) {
+          let isoDate = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+          birthdayItem.value = isoDate;
+        }
+      }
       $.each(sourceData, function (i, field) {
         if (field.value) {
           $("#form-Password input[name=" + field.name + "]").val(field.value);
