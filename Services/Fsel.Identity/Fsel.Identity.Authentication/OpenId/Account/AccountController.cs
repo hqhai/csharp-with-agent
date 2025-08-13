@@ -421,7 +421,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 var user = await _signInManager.UserManager.FindByNameAsync(model.Username ?? string.Empty);
                 if (user is not null && await ValidateLogin(user))
                 {
-                    var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, true);
+                    var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, lockoutOnFailure: true);
                     if (userLogin.Succeeded)
                     {
                         await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
@@ -469,7 +469,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     }
                     else if (userLogin.IsLockedOut)
                     {
-                        ModelState.AddModelError(string.Empty, _localizer["i18n_account_locked"]);
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_account_locked_in_minutes"]);
                     }
                     else
                     {
