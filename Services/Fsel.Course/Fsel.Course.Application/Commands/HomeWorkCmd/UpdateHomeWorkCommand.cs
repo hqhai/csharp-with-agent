@@ -106,7 +106,7 @@ IHomeWorkQuestionRepository homeWorkQuestionRepository)
                 return methodResult;
             }
 
-            if (await _homeWorkRepository.Queryable.AnyAsync(p => p.Code == request.Code && p.Id != homeWork.Id, cancellationToken))
+            if (await _homeWorkRepository.Queryable.AnyAsync(p => p.Code == request.Code && p.Id != homeWork.Id && p.OriginalId != homeWork.OriginalId, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
