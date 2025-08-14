@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Shared.Models
+namespace Fsel.Shared.Models.ShareModels
 {
     using Fsel.Shared.Enums;
 
@@ -12,8 +12,8 @@ namespace Fsel.Shared.Models
 
         public EnumQuestionResultType Type { get; set; }
 
-        public int CountFail { get; set; }
+        public EnumQuestionType QuestionType { get; set; }
 
-        public int CountStrokes { get; set; }
+        public object? Config { get; set; }
     }
 }

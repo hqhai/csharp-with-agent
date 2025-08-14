@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.Handler
+namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -10,18 +10,19 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.H
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.Interface;
+    using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Interface;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models;
+    using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.QuestionResultConfigModels;
     using Microsoft.EntityFrameworkCore;
 
-    public class TracingQuestionTypeHomeWork : ITracingQuestionType
+    public class QuestionTypeHomeWorkHandler : IQuestionType
     {
         private readonly QuestionResultQueueModel _request;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
 
-        public TracingQuestionTypeHomeWork(QuestionResultQueueModel request,
+        public QuestionTypeHomeWorkHandler(QuestionResultQueueModel request,
                                           IHomeWorkResultRepository homeWorkResultRepository,
                                           IHomeWorkQuestionRepository homeWorkQuestionRepository)
         {
@@ -50,34 +51,11 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.H
                 return methodResult;
             }
 
-            var homeWorkAnswer = homeWorkResult.HomeWorkAnswers.FirstOrDefault(x => homeWorkQuestion.QuestionId == _request.QuestionId);
-            if (homeWorkAnswer != null)
+            switch (_request.QuestionType)
             {
-                var dataAnswer = homeWorkAnswer.Answer.Deserialize<TracingAnswer>();
-                if (dataAnswer != null)
-                {
-                    dataAnswer.CountFail = _request.CountFail;
-                    dataAnswer.CountStrokes = _request.CountStrokes;
-                }
-
-                homeWorkAnswer.Answer = dataAnswer;
-            }
-            else
-            {
-                var dataAnswer = new TracingAnswer
-                {
-                    IsExact = false,
-                    CountFail = _request.CountFail,
-                    CountStrokes = _request.CountStrokes
-                };
-
-                homeWorkResult.HomeWorkAnswers.Add(new HomeWorkAnswer
-                {
-                    HomeWorkQuestionId = homeWorkQuestion.Id,
-                    HomeWorkResultId = _request.TResultId,
-                    Answer = dataAnswer,
-                    Status = EnumAnswerStatus.Process
-                });
+                case EnumQuestionType.Tracing:
+                    await TracingQuestionHandler(homeWorkResult, homeWorkQuestion, cancellationToken);
+                    break;
             }
 
             await _homeWorkResultRepository.ExecuteTransactionAsync(async () =>
@@ -90,6 +68,45 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.H
             });
 
             return methodResult;
+        }
+
+        private async Task TracingQuestionHandler(HomeWorkResult homeWorkResult, HomeWorkQuestion homeWorkQuestion, CancellationToken cancellationToken)
+        {
+            var configConvert = _request.Config.Deserialize<TracingQuestionConfigModel>();
+            if (configConvert == null)
+            {
+                return;
+            }
+
+            var homeWorkAnswer = homeWorkResult.HomeWorkAnswers.FirstOrDefault(x => homeWorkQuestion.QuestionId == _request.QuestionId);
+            if (homeWorkAnswer != null)
+            {
+                var dataAnswer = homeWorkAnswer.Answer.Deserialize<TracingAnswer>();
+                if (dataAnswer != null)
+                {
+                    dataAnswer.CountFail = configConvert.CountFail;
+                    dataAnswer.CountStrokes = configConvert.CountStrokes;
+                }
+
+                homeWorkAnswer.Answer = dataAnswer;
+            }
+            else
+            {
+                var dataAnswer = new TracingAnswer
+                {
+                    IsExact = false,
+                    CountFail = configConvert.CountFail,
+                    CountStrokes = configConvert.CountStrokes
+                };
+
+                homeWorkResult.HomeWorkAnswers.Add(new HomeWorkAnswer
+                {
+                    HomeWorkQuestionId = homeWorkQuestion.Id,
+                    HomeWorkResultId = _request.TResultId,
+                    Answer = dataAnswer,
+                    Status = EnumAnswerStatus.Process
+                });
+            }
         }
     }
 }
