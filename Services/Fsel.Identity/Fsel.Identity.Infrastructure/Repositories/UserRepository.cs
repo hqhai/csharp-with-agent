@@ -112,7 +112,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
             else
             {
-                return await Queryable.AsNoTracking().FirstOrDefaultAsync(x => x.PhoneNumber == identity && x.PhoneNumberConfirmed);
+                return await Queryable.FirstOrDefaultAsync(x => x.PhoneNumber == identity && x.PhoneNumberConfirmed);
             }
         }
     }

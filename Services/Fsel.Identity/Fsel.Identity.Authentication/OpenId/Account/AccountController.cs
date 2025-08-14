@@ -7,6 +7,7 @@ using System.Transactions;
 using Fsel.Common.Constants;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
+using Fsel.Identity.Application.Attributes;
 using Fsel.Identity.Application.Handlers.Implementations;
 using Fsel.Identity.Application.Handlers.Interfaces;
 using Fsel.Identity.Authentication.Auth;
@@ -96,6 +97,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         /// Verify otp for sample user login
         /// </summary>
         /// <returns></returns>
+        [AllowOnlyAnonymous]
         public async Task<IActionResult> VerifyOtp(string? identity, string? returnUrl, string? type, string? otpInfo)
         {
             var otpSessionInfo = otpInfo?.DecodeUrlBase64ToObject<OtpSessionInfo>();
@@ -239,6 +241,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             }
         }
 
+        [AllowOnlyAnonymous]
         public IActionResult Forgot(string? returnUrl)
         {
             var vm = new ForgotModel
@@ -283,6 +286,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             return View(request);
         }
 
+        [AllowOnlyAnonymous]
         public IActionResult ResetPassword(string token, string identity, string? returnUrl)
         {
             var viewModel = new ResetPasswordModel
@@ -321,7 +325,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                         var resetPassResult = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
                         if (resetPassResult.Succeeded)
                         {
-                            return RedirectToAction(nameof(Login));
+                            return Redirect(request.ReturnUrl ?? "~/");
                         }
                         foreach (var error in resetPassResult.Errors)
                         {
@@ -333,6 +337,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             return View(request);
         }
 
+        [AllowOnlyAnonymous]
         public IActionResult Register(string? returnUrl)
         {
             var vm = new UserRegisterModel
@@ -391,9 +396,9 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         }
 
         [HttpGet]
+        [AllowOnlyAnonymous]
         public async Task<IActionResult> Login(string? returnUrl)
         {
-            // build a model so we know what to show on the login page
             var vm = await BuildLoginViewModelAsync(returnUrl ?? string.Empty);
             if (!string.IsNullOrEmpty(vm.UiLocales))
             {
@@ -423,63 +428,66 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             if (ModelState.IsValid)
             {
                 var user = await _signInManager.UserManager.FindByNameAsync(model.Username ?? string.Empty);
-                if (user is not null && await ValidateLogin(user))
+                if (user is not null)
                 {
-                    var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, lockoutOnFailure: true);
-                    if (userLogin.Succeeded)
+                    if (await ValidateLogin(user))
                     {
-                        await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
-
-                        AuthenticationProperties? props = null;
-                        if (AccountOptions.AllowRememberLogin && model.RememberLogin)
+                        var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, lockoutOnFailure: true);
+                        if (userLogin.Succeeded)
                         {
-                            props = new AuthenticationProperties
+                            await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
+
+                            AuthenticationProperties? props = null;
+                            if (AccountOptions.AllowRememberLogin && model.RememberLogin)
                             {
-                                IsPersistent = true,
-                                ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
+                                props = new AuthenticationProperties
+                                {
+                                    IsPersistent = true,
+                                    ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
+                                };
+                            }
+                            ;
+
+                            var isuser = new IdentityServerUser(user.Id.ToString())
+                            {
+                                DisplayName = user.UserName
                             };
-                        }
-                        ;
 
-                        var isuser = new IdentityServerUser(user.Id.ToString())
-                        {
-                            DisplayName = user.UserName
-                        };
+                            await HttpContext.SignInAsync(isuser, props).ConfigureAwait(false);
 
-                        await HttpContext.SignInAsync(isuser, props).ConfigureAwait(false);
-
-                        if (context != null)
-                        {
-                            if (context.IsNativeClient())
+                            if (context != null)
                             {
-                                Thread.Sleep(1300);
+                                if (context.IsNativeClient())
+                                {
+                                    Thread.Sleep(1300);
+                                }
+
+                                return Redirect(model.ReturnUrl ?? string.Empty);
                             }
 
-                            return Redirect(model.ReturnUrl ?? string.Empty);
+                            if (Url.IsLocalUrl(model.ReturnUrl))
+                            {
+                                return Redirect(model.ReturnUrl);
+                            }
+                            else if (string.IsNullOrEmpty(model.ReturnUrl))
+                            {
+                                return Redirect("~/");
+                            }
+                            else
+                            {
+                                _logger.LogWarning("Invalid return URL");
+                            }
                         }
-
-                        if (Url.IsLocalUrl(model.ReturnUrl))
+                        else if (userLogin.IsLockedOut)
                         {
-                            return Redirect(model.ReturnUrl);
-                        }
-                        else if (string.IsNullOrEmpty(model.ReturnUrl))
-                        {
-                            return Redirect("~/");
+                            var numberOfFail = _identityOptions.Lockout?.MaxFailedAccessAttempts.ToString() ?? string.Empty;
+                            var lockDuration = _identityOptions.Lockout?.DefaultLockoutTimeSpan.TotalMinutes.ToString() ?? string.Empty;
+                            ModelState.AddModelError(string.Empty, _localizer["i18n_account_locked_in_minutes"].Value.InjectParam(numberOfFail, lockDuration));
                         }
                         else
                         {
-                            _logger.LogWarning("Invalid return URL");
+                            ModelState.AddModelError(string.Empty, _localizer["ERROR_CODE.UserNameAndPasswordIncorrect"]);
                         }
-                    }
-                    else if (userLogin.IsLockedOut)
-                    {
-                        var numberOfFail = _identityOptions.Lockout?.MaxFailedAccessAttempts.ToString() ?? string.Empty;
-                        var lockDuration = _identityOptions.Lockout?.DefaultLockoutTimeSpan.TotalMinutes.ToString() ?? string.Empty;
-                        ModelState.AddModelError(string.Empty, _localizer["i18n_account_locked_in_minutes"].Value.InjectParam(numberOfFail, lockDuration));
-                    }
-                    else
-                    {
-                        ModelState.AddModelError(string.Empty, _localizer["ERROR_CODE.UserNameAndPasswordIncorrect"]);
                     }
                 }
                 else
@@ -779,10 +787,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 else if (user.Status == EnumUserStatus.Inactive)
                 {
                     ModelState.AddModelError(string.Empty, _localizer[nameof(EnumAuthUserErrorCode.AccountHasBeenLocked)]);
-                }
-                else if (user.Status == EnumUserStatus.Disable)
-                {
-                    ModelState.AddModelError(string.Empty, _localizer[nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff)]);
                 }
                 else
                 {

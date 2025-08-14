@@ -15,23 +15,16 @@
   identityInput.on("input", validateEmail);
   function validateEmail() {
     const identity = identityInput.val();
-    const emailPattern = /^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
-    const phonePattern = /^\+?\d{7,15}$/;
-
-    if (identity !== "") {
-      if (phonePattern.test(identity)) {
-        identityInput.removeClass("content-border-danger");
-        return true;
-      }
-      if (emailPattern.test(identity)) {
-        identityInput.removeClass("content-border-danger");
-        return true;
-      }
+    if (!isNullOrWhiteSpace(identity)) {
+      identityInput.removeClass("content-border-danger");
+      return true;
     }
     identityInput.addClass("content-border-danger");
     return false;
   }
-
+  function isNullOrWhiteSpace(input) {
+    return !((input ?? "").trim());
+  }
   function validatePasswordFormat() {
     var password = passwordInput.val();
     const conditions = [
