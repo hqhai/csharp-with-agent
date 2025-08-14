@@ -65,6 +65,7 @@
   });
 
   function validatePhoneNumber() {
+    $('input[name="PhoneNumber"]').valid();
     const phone = $phoneNumberInput.val().trim();
     const phonePattern = /^\+?\d{7,15}$/;
     if (phone !== "" && phonePattern.test(phone)) {
@@ -78,6 +79,7 @@
 
   function validateFirstName() {
     const firstName = $firstNameInput.val().trim();
+    $('input[name="FirstName"]').valid();
     if (firstName === "") {
       $firstNameInput.addClass("content-border-danger");
       return false;
@@ -88,6 +90,7 @@
   }
 
   function validateLastName() {
+    $('input[name="LastName"]').valid();
     const lastName = $lastNameInput.val().trim();
     if (lastName === "") {
       $lastNameInput.addClass("content-border-danger");
@@ -136,6 +139,7 @@
 
   function validateDateOfBirth() {
     const value = dateOfBirthInput.value.trim();
+    $('input[name="Birthday"]').valid();
     if (!value) {
       return false;
     }

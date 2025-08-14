@@ -13,6 +13,7 @@
   identityInput.on("input", validateEmail);
 
   function validateEmail() {
+    $('input[name="Identity"]').valid();
     const identity = identityInput.val();
     const emailPattern = /^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
     const phonePattern = /^\+?\d{7,15}$/;

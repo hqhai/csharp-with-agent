@@ -80,20 +80,15 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
-                                <div class="float-input float-input-validate option-birthday">
-                                    <div class="birthday">
-                                        <div class="float-input float-input-validate">
-                                            <input type="text"
-                                                   placeholder=""
-                                                   class="text-input text-input-date"
-                                                   id="birthday"
-                                                   name="Birthday"
-                                                   asp-for="Birthday"
-                                                   autocomplete="off"
-                                                   />
-                                            <label for="Birthday" class="input-label">@Localizer["i18nSignUpLabelBirthday"]</label>
-                                        </div>
-                                    </div>
+                                <div class="float-input float-input-validate">
+                                    <input type="text"
+                                           placeholder=""
+                                           class="text-input text-input-date"
+                                           id="birthday"
+                                           name="Birthday"
+                                           asp-for="Birthday"
+                                           autocomplete="off" />
+                                    <label for="Birthday" class="input-label">@Localizer["i18nSignUpLabelBirthday"]</label>
                                 </div>
                                 @Html.CustomValidationMessageFor(model => model.Birthday, Localizer, "", new { @class = "content-text-danger" })
                             </div>
