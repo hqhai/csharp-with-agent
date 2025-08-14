@@ -440,7 +440,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             if (ModelState.IsValid)
             {
-                var user = await _signInManager.UserManager.FindByNameAsync(model.Username ?? string.Empty);
+                var user = await _signInManager.UserManager.FindByNameAsync(model.UserName ?? string.Empty);
                 if (user is not null)
                 {
                     if (await ValidateLogin(user))
