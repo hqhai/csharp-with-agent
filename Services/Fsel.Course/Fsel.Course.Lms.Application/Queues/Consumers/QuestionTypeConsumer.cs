@@ -3,15 +3,15 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using System.Threading.Tasks;
     using Fsel.Core.Base;
     using Fsel.Course.Lms.Application.Commands.QuestionCmd;
-    using Fsel.Shared.Models;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class TracingQuestionTypeConsumer : BaseConsumer<QuestionResultQueueModel>
+    public class QuestionTypeConsumer : BaseConsumer<QuestionResultQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public TracingQuestionTypeConsumer(AuthContext authContext, IHttpContextAccessor httpContextAccessor, IMediator mediator) : base(authContext, httpContextAccessor)
+        public QuestionTypeConsumer(AuthContext authContext, IHttpContextAccessor httpContextAccessor, IMediator mediator) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }
@@ -20,13 +20,13 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
         {
             if (message != null)
             {
-                await _mediator.Send(new TracingQuestionTypeHandlerCommand
+                await _mediator.Send(new QuestionTypeHandlerCommand
                 {
                     TResultId = message.TResultId,
                     QuestionId = message.QuestionId,
                     Type = message.Type,
-                    CountFail = message.CountFail,
-                    CountStrokes = message.CountStrokes
+                    Config = message.Config,
+                    QuestionType = message.QuestionType
                 });
             }
         }

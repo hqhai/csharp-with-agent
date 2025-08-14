@@ -22,7 +22,7 @@ builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<DictionaryPublisher>();
 builder.Services.AddScoped<SetTimeExamPracticePublisher>();
 builder.Services.AddScoped<GetTimeExamPracticePublisher>();
-builder.Services.AddScoped<TracingQuestionTypePublisher>();
+builder.Services.AddScoped<QuestionTypePublisher>();
 
 builder.Services.AddScoped<SetTimeModuleHub>();
 builder.Services.AddScoped<TechieHub>();
@@ -32,7 +32,7 @@ builder.Services.AddScoped<TranscriptHub>();
 builder.Services.AddScoped<BuyBlindBoxHub>();
 builder.Services.AddScoped<DictionaryHub>();
 builder.Services.AddScoped<SetTimeExamPracticeHub>();
-builder.Services.AddScoped<TracingQuestionTypeHub>();
+builder.Services.AddScoped<QuestionTypeHub>();
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>
@@ -77,7 +77,7 @@ app.UseHubs<BuyBlindBoxHub>(RealtimeSettings.SendNotifyBuyBlindBoxHub.Pattern);
 app.UseHubs<DictionaryHub>(RealtimeSettings.SendDictionaryHub.Pattern);
 app.UseHubs<ExamPracticeSpeakingHub>(RealtimeSettings.ExamPracticeSpeakingAIFeedBackHub.Pattern);
 app.UseHubs<SetTimeExamPracticeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
-app.UseHubs<TracingQuestionTypeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
-app.UseHubs<TracingQuestionTypeHub>(RealtimeSettings.TracingQuestionTypeHub.Pattern);
+app.UseHubs<QuestionTypeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
+app.UseHubs<QuestionTypeHub>(RealtimeSettings.QuestionTypeHub.Pattern);
 
 app.Run();

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.Handler
+namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -10,18 +10,19 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.H
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs.Answers;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.Interface;
+    using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Interface;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Models;
+    using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.QuestionResultConfigModels;
     using Microsoft.EntityFrameworkCore;
 
-    public class TracingQuestionTypeVideo : ITracingQuestionType
+    public class QuestionTypeVideoHandler : IQuestionType
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly QuestionResultQueueModel _request;
         private readonly IExerciseQuestionRepository _exerciseQuestionRepository;
 
-        public TracingQuestionTypeVideo(IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
+        public QuestionTypeVideoHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
                                        QuestionResultQueueModel request,
                                        IExerciseQuestionRepository exerciseQuestionRepository)
         {
@@ -43,14 +44,41 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.H
                 return methodResult;
             }
 
+            switch (_request.QuestionType)
+            {
+                case EnumQuestionType.Tracing:
+                    await TracingQuestionHandler(videoTimeCodeResult, cancellationToken);
+                    break;
+            }
+
+            await _videoTimeCodeResultRepository.ExecuteTransactionAsync(async () =>
+            {
+                _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
+                await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                methodResult.Result = true;
+                return methodResult;
+            });
+
+            return methodResult;
+        }
+
+        private async Task TracingQuestionHandler(VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
+        {
+            var configConvert = _request.Config.Deserialize<TracingQuestionConfigModel>();
+            if (configConvert == null)
+            {
+                return;
+            }
+
             var videoTimeCodeAnswer = videoTimeCodeResult.VideoTimeCodeAnswers.FirstOrDefault(x => x.QuestionId == _request.QuestionId);
             if (videoTimeCodeAnswer != null)
             {
                 var dataAnswer = videoTimeCodeAnswer.Answer.Deserialize<TracingAnswer>();
                 if (dataAnswer != null)
                 {
-                    dataAnswer.CountFail = _request.CountFail;
-                    dataAnswer.CountStrokes = _request.CountStrokes;
+                    dataAnswer.CountFail = configConvert.CountFail;
+                    dataAnswer.CountStrokes = configConvert.CountStrokes;
                 }
 
                 videoTimeCodeAnswer.Answer = dataAnswer;
@@ -61,8 +89,8 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.H
                 var dataAnswer = new TracingAnswer
                 {
                     IsExact = false,
-                    CountFail = _request.CountFail,
-                    CountStrokes = _request.CountStrokes
+                    CountFail = configConvert.CountFail,
+                    CountStrokes = configConvert.CountStrokes
                 };
 
                 videoTimeCodeResult.VideoTimeCodeAnswers.Add(new VideoTimeCodeAnswer()
@@ -76,17 +104,6 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType.H
                     Status = EnumAnswerStatus.Process
                 });
             }
-
-            await _videoTimeCodeResultRepository.ExecuteTransactionAsync(async () =>
-            {
-                _videoTimeCodeResultRepository.Update(videoTimeCodeResult);
-                await _videoTimeCodeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.Result = true;
-                return methodResult;
-            });
-
-            return methodResult;
         }
     }
 }

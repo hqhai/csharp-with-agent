@@ -6,7 +6,7 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
 using Fsel.Course.Infrastructure.Common.LessonHelpers;
-using Fsel.Course.Infrastructure.Common.QuestionHelper.TracingQuestionType;
+using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
 using Fsel.Course.Lms.Application.InternalEvents;
@@ -167,7 +167,7 @@ builder.Services.AddScoped<LinQAnswerHelper>();
 builder.Services.AddScoped<ChangeCourseHelper>();
 builder.Services.AddScoped<ManagerProgressHelper>();
 builder.Services.AddScoped<SubjectConditionHelper>();
-builder.Services.AddScoped<TracingQuestionTypeFactory>();
+builder.Services.AddScoped<QuestionTypeFactory>();
 
 // Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
@@ -244,7 +244,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
     { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
     { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.TracingQuestionType, typeof(TracingQuestionTypeConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.QuestionType, typeof(QuestionTypeConsumer) },
 });
 
 var app = builder.Build();

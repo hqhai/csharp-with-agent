@@ -4,13 +4,13 @@ namespace Fsel.Realtime.Application.Queues.Publishers
 {
     using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Models;
+    using Fsel.Shared.Models.ShareModels;
 
-    public class TracingQuestionTypePublisher
+    public class QuestionTypePublisher
     {
         private readonly IQueueProvider _queueProvider;
 
-        public TracingQuestionTypePublisher(IQueueProvider queueProvider)
+        public QuestionTypePublisher(IQueueProvider queueProvider)
         {
             _queueProvider = queueProvider;
         }
@@ -21,7 +21,7 @@ namespace Fsel.Realtime.Application.Queues.Publishers
             {
                 return;
             }
-            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.TracingQuestionType, request, cancellationToken);
+            await _queueProvider.Publish(QueueSettings.RealtimeQueue.NameQueue.QuestionType, request, cancellationToken);
         }
     }
 }

@@ -184,13 +184,13 @@ namespace Fsel.Shared.Constants
             }
         }
 
-        public static class TracingQuestionTypeHub
+        public static class QuestionTypeHub
         {
-            public const string Pattern = $"/tracing-question-type";
+            public const string Pattern = $"/question-type";
 
             public static class Methods
             {
-                public const string TracingQuestionType = $"TracingQuestionType";
+                public const string QuestionType = $"QuestionType";
             }
         }
     }
