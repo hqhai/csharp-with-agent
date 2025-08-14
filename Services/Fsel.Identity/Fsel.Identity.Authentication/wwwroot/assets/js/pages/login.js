@@ -15,6 +15,7 @@
   identityInput.on("input", validateEmail);
   function validateEmail() {
     const identity = identityInput.val();
+    $('input[name="Username"]').valid();
     if (!isNullOrWhiteSpace(identity)) {
       identityInput.removeClass("content-border-danger");
       return true;

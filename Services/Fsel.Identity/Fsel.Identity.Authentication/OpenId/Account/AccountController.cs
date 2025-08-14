@@ -325,7 +325,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                         var resetPassResult = await _userManager.ResetPasswordAsync(user, request.Token, request.Password);
                         if (resetPassResult.Succeeded)
                         {
-                            return Redirect(request.ReturnUrl ?? "~/");
+                            return Redirect(request.ReturnUrl.ToSafeString("~/"));
                         }
                         foreach (var error in resetPassResult.Errors)
                         {
@@ -635,7 +635,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             var signInResult = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: false, bypassTwoFactor: true);
             if (signInResult.Succeeded)
             {
-                return Redirect(returnUrl);
+                return Redirect(returnUrl.ToSafeString("~/"));
             }
             else if (signInResult.IsLockedOut)
             {

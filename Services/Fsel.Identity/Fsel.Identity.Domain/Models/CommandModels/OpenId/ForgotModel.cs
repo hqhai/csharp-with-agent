@@ -6,7 +6,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 
     public class ForgotModel
     {
-        [Required(ErrorMessage = "i18n_Email_cannot_be_empty")]
+        [Required(ErrorMessage = "i18nFieldRequired")]
         public string? Identity { get; set; }
 
         public string? ReturnUrl { get; set; }
