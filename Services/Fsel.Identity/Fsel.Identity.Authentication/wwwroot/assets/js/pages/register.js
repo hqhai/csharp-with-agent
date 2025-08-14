@@ -189,6 +189,7 @@
   }
 
   function validateDateOfBirth() {
+    $('input[name="Birthday"]').valid();
     const value = dateOfBirthInput.value.trim();
     if (!value) {
       return false;

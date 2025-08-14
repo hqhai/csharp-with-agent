@@ -8,7 +8,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 {
     public class LoginInputModel : IRequestBodyTenantAware
     {
-        //[RegularExpression(RegexSettings.EmailValid, ErrorMessage = "i18n_Email_is_not_valid")]
         [Required(ErrorMessage = "i18n_Username_cannot_be_empty")]
         public string? UserName { get; set; }
 
