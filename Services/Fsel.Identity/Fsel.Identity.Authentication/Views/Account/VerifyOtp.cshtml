@@ -13,10 +13,9 @@
     var isBlocked = ViewData["IsOtpBlocked"] as bool?;
     var isOtpExpired = ViewData["OtpExpired"] as bool?;
     
-    var sentMessage = Localizer["i18n_otp_sent_to"].ToString().InjectParam(string.Empty);
+    var sentMessage = string.Empty;
     if (!string.IsNullOrEmpty(provider))
     {
-        
         sentMessage = Localizer["i18n_otp_sent_to"].ToString().InjectParam($"{provider} {Model.Identity}");
     }
 }
@@ -32,7 +31,14 @@
         </div>
 
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
-        <h1 class="title">@Localizer["i18n_verify_account"]</h1>
+        @if (Model.Identity.IsValidEmail())
+        {
+            <h1 class="title">@Localizer["i18n_verify_account"]</h1>
+        }
+        else
+        {
+            <h1 class="title">@Localizer["i18n_verify_phone_number"]</h1>
+        }
 
         <form id="form-VerifyOtp" asp-route="VerifyOtp">  
             @Html.Raw($"<p class='sub-title sub-verify-otp''>{sentMessage}</p>")
@@ -43,7 +49,7 @@
             <div class="hidden" id="RemainSecond" data-value="@Model.RemainSecond"></div>
             @Html.AntiForgeryToken()
 
-            <div>
+            <div class="otps">
                 <div class="number-list @(ViewContext.ModelState.IsValid ? "" : "number-list-error")">
                     <input 
                            class="number-item"
@@ -117,11 +123,11 @@
                                 if (Model.RemainSecond.HasValue)
                                 {
                                     var waitTime = Model.RemainSecond.Value > 60 ? Math.Floor((double)Model.RemainSecond.Value / 60).ToString() : "1";
-                                    Html.Raw($"<a>{Localizer["i18n_otp_locked"].ToString().InjectParam(OtpSetting.MaxCountVerifyFail.ToString(), waitTime)}</a>");
+                                    Html.Raw($"<p>{Localizer["i18n_otp_locked"].ToString().InjectParam(OtpSetting.MaxCountVerifyFail.ToString(), waitTime)}</p>");
                                 }
                                 else
                                 {
-                                    Html.Raw($"<a>{Localizer["i18n_otp_locked"].ToString().InjectParam(OtpSetting.MaxCountVerifyFail.ToString(), OtpSetting.OtpBlockDuration.ToString())}</a>");
+                                    Html.Raw($"<p>{Localizer["i18n_otp_locked"].ToString().InjectParam(OtpSetting.MaxCountVerifyFail.ToString(), OtpSetting.OtpBlockDuration.ToString())}</p>");
                                 }
                             }
                         </div>
@@ -133,10 +139,13 @@
                             }
                             else
                             {
-                                <button id="zalo" type="submit" name="button" value="resend">Zalo</button>
-                                <span class="divider">|</span>
-                                <button id="sms" type="submit" name="button" value="resend">Sms</button>
+                                <button id="zalo" type="submit" name="button" value="resend">
+                                    <img src="~/assets/icons/refresh.png" /> @Localizer["i18n_resend_zalo"]
+                                </button>
                             }
+                        </div>
+                        <div class="resend-otp-3">
+                            <p>@Localizer["i18n_or_resend"] <button id="sms" type="submit" name="button" value="resend">@Localizer["i18n_resend_sms"]</button></p>
                         </div>
                     </div>
                     @Html.Raw($"<button id='submit-otp' type='submit' class='btn' disabled>{Localizer["i18n_verify"]}</button>")
@@ -153,28 +162,30 @@
                                 {
                                     if (Model.RemainSecond.Value > 60)
                                     {
-                                        Html.Raw($"<a>{Localizer["i18n_otp_wait_in_minute_and_second"].ToString()}</a>"
+                                        Html.Raw($"<p>{Localizer["i18n_otp_wait_in_minute_and_second"].ToString()}</p>"
                                         .InjectParam(Math.Floor((double)Model.RemainSecond.Value / 60).ToString(), (Model.RemainSecond.Value % 60).ToString()));
                                     }
                                     else
                                     {
-                                        Html.Raw($"<a>{Localizer["i18n_otp_wait_in_second"].ToString()}</a>".InjectParam(Model.RemainSecond.Value.ToString()).ToString());
+                                        Html.Raw($"<p>{Localizer["i18n_otp_wait_in_second"].ToString()}</p>".InjectParam(Model.RemainSecond.Value.ToString()).ToString());
                                     }
                                 }
                             }
                         </div>
                         <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
-                            @Localizer["i18n_resend_verification_code"]:
                             @if (Model.Identity.IsValidEmail())
                             {
                                 <button id="email" type="submit" name="button" value="resend">Email</button>
                             }
                             else
                             {
-                                <button id="zalo" type="submit" name="button" value="resend">Zalo</button>
-                                <span class="divider">|</span>
-                                <button id="sms" type="submit" name="button" value="resend">Sms</button>
+                                <button id="zalo" type="submit" name="button" value="resend">
+                                    <img src="~/assets/icons/refresh.png" /> @Localizer["i18n_resend_zalo"]
+                                </button>
                             }
+                        </div>
+                        <div class="resend-otp-3">
+                            <p>@Localizer["i18n_or_resend"] <button id="sms" type="submit" name="button" value="resend">@Localizer["i18n_resend_sms"]</button></p>
                         </div>
                     </div>
                     if (isOtpExpired.HasValue && isOtpExpired.Value)
@@ -189,11 +200,18 @@
                 }
             }
         </form>
-        <div class="text-footer">
-            <a href="@Url.Action("Forgot", "Account", new { Model.ReturnUrl })"</a>
-            @Localizer["i18n_change_email_or_phone_number"]
-        </div>
-        <div class="text-footer">@Localizer["i18n_did_not_a_code"]</div>
+        
+         @if (Model.Type == "Forgot")
+         {
+            <div class="text-footer">
+                <a href="@Url.Action("Forgot", "Account", new { Model.ReturnUrl })">@Localizer["i18n_change_email_or_phone_number"]</a>
+            </div>
+         }
+         else
+         {
+            <div class="text-footer">@Localizer["i18n_did_not_a_code"]</div>
+         }
+        
     </div>
 
     @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })

@@ -12,13 +12,13 @@
 
 
 <div class="all-content">
-    <div class="content">
+    <div class="content user-info-for">
         <div class="langs">
             @await Component.InvokeAsync("Languages")
         </div>
 
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
-
+        <div class="item-title">@Localizer["i18n_login"].Value?.ToUpper()</div>
         @if (Model.EnableLocalLogin)
         {
             <form id="form-Login" asp-route="Login">

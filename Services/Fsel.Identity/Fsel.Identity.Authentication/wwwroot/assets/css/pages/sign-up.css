@@ -446,7 +446,7 @@ otp-request-form,
 .content form {
   /* height: 100%; */
   max-width: 586px;
-  padding-top: 20px;
+  padding-top: 24px;
 }
 
   /* .content form section,
@@ -579,4 +579,18 @@ otp-request-form,
 
 .rule-item.rule-item--valid {
   color: var(--white-color);
+}
+
+.user-info-form{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.item-title
+{
+    color: #fff;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 28px;
 }
