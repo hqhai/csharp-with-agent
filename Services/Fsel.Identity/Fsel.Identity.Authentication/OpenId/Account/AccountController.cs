@@ -11,11 +11,13 @@ using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Attributes;
+using Fsel.Identity.Application.Commands.UserDeletionCmd;
 using Fsel.Identity.Application.Handlers.Implementations;
 using Fsel.Identity.Application.Handlers.Interfaces;
 using Fsel.Identity.Authentication.Auth;
 using Fsel.Identity.Authentication.OpenId.Base;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.OpenId;
@@ -28,6 +30,7 @@ using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using IdentityServer4.Stores;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -44,7 +47,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
     public class AccountController : BaseController
     {
         protected IUserSession UserSession { get; private set; }
-
+        private readonly IMediator _mediator;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
@@ -57,12 +60,16 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly IForgotPasswordHandler _forgotPasswordHandler;
         private readonly IOtpDataCollector _otpDataCollector;
         private readonly IdentityOptions _identityOptions;
+        private readonly IStudentRepository _studentRepository;
         private readonly IUserRepository _userRepository;
         private readonly Core.Base.AuthContext _languageContext;
         private readonly IStringLocalizer _localizer;
+        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly ITenantProvider _tenantProvider;
 
         public AccountController(
+            IMediator mediator,
             IUserSession userSession,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
@@ -79,9 +86,13 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             IForgotPasswordHandler forgotPasswordHandler,
             IOtpDataCollector otpDataCollector,
             IOptions<IdentityOptions> identityOptions,
+            IStudentRepository studentRepository,
+            IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
+            ICompetitionEventsRepository competitionEventsRepository,
             ITenantProvider tenantProvider)
         {
             UserSession = userSession;
+            _mediator = mediator;
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
@@ -97,6 +108,9 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             _forgotPasswordHandler = forgotPasswordHandler;
             _otpDataCollector = otpDataCollector;
             _identityOptions = identityOptions.Value;
+            _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
+            _studentRepository = studentRepository;
+            _competitionEventsRepository = competitionEventsRepository;
             _tenantProvider = tenantProvider;
         }
 
@@ -448,8 +462,10 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     if (await ValidateLogin(user))
                     {
                         var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, lockoutOnFailure: true);
+
                         if (userLogin.Succeeded)
                         {
+                            await RecoverWaitToDeleteAccount(user.Id);
                             await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id.ToString(), user.UserName, clientId: context?.Client.ClientId));
 
                             AuthenticationProperties? props = null;
@@ -804,6 +820,10 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 {
                     ModelState.AddModelError(string.Empty, _localizer[nameof(EnumAuthUserErrorCode.AccountHasBeenLocked)]);
                 }
+                else if (!IsAccountConfirmed(user) && !await IsByPassByCompetionEvent(user.Id))
+                {
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_account_not_verify_yet"]);
+                }
                 else
                 {
                     return true;
@@ -980,6 +1000,27 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     verifyOtpModel.ExpiredTime = DateTime.UtcNow.Add(otpSessionInfo.SendInfo.WaitTimeDuration.Value);
                 }
             }
+        }
+
+        private async Task<bool> IsByPassByCompetionEvent(Guid userId)
+        {
+            var competitionEvent = await (from baseQ in _userManager.Users
+                                          join s in _studentRepository.Queryable on baseQ.Id equals s.UserId
+                                          join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
+                                          join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id
+                                          where baseQ.Id == userId
+                                          select ce).FirstOrDefaultAsync();
+            return competitionEvent?.EventContent?.IsByPassEmailComfirm ?? default;
+        }
+
+        private static bool IsAccountConfirmed(User user)
+        {
+            return user.EmailConfirmed || user.PhoneNumberConfirmed;
+        }
+
+        private async Task RecoverWaitToDeleteAccount(Guid userId)
+        {
+            await _mediator.Send(new UpdateStatusUserDeletionCommand { UserId = userId, Status = EnumUserDeletionStatus.Cancel }).ConfigureAwait(false);
         }
     }
 }
