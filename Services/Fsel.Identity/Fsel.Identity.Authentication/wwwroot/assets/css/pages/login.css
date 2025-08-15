@@ -10,3 +10,18 @@
   border-color: #d98c93;
 }
 /*# sourceMappingURL=login.css.map */
+.user-info-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.item-title {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+  margin-bottom: 24px;
+}
+

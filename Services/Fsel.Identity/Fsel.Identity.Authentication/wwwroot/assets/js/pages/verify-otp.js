@@ -93,14 +93,16 @@
         }
       }
 
-      text = "<a>" + displayText + "</a>";
+      text = "<p>" + displayText + "</p>";
       $(".resend-otp-1").html(text);
       $(".resend-otp-1").removeClass("hidden");
       $(".resend-otp-2").addClass("hidden");
+      $("#sms").prop("disabled", true);
       timeoutId = setTimeout(updateCountdown, 1000);
     } else {
       $(".resend-otp-2").removeClass("hidden");
       $(".resend-otp-1").addClass("hidden");
+      $("#sms").prop("disabled", false);
       clearTimeout(timeoutId);
     }
   }
