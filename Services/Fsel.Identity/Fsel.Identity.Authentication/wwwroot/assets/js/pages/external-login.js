@@ -63,7 +63,12 @@
       e.preventDefault();
     }
   });
-
+  $.validator.methods.required = function (value, element, param) {
+    if (typeof value === "string") {
+      value = $.trim(value);
+    }
+    return value.length > 0;
+  }
   function validatePhoneNumber() {
     $('input[name="PhoneNumber"]').valid();
     const phone = $phoneNumberInput.val().trim();

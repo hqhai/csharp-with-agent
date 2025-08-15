@@ -8,6 +8,14 @@
     }
   });
 
+
+  $.validator.methods.required = function (value, element, param) {
+    if (typeof value === "string") {
+      value = $.trim(value);
+    }
+    return value.length > 0;
+  };
+
   const identityInput = $("#username");
   const passwordInput = $("#password");
   const loginButton = $("#loginButton");
