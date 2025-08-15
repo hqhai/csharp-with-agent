@@ -259,13 +259,14 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             if (ModelState.IsValid)
             {
-                if (!request.Identity.IsValidEmail() && !request.Identity.IsValidPhoneNumber())
+                var identity = request.Identity.ToSafeString();
+                if (!identity.IsValidEmail() && !identity.IsValidPhoneNumber())
                 {
                     ModelState.AddModelError(nameof(request.Identity), _localizer["i18n_error_email_or_phone_number"]);
                     return View(request);
                 }
 
-                var user = await _userRepository.GetUserByIdentity(request.Identity);
+                var user = await _userRepository.GetUserByIdentity(identity);
 
                 if (user == null)
                 {
@@ -273,14 +274,14 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     return View(request);
                 }
 
-                var result = await _forgotPasswordHandler.SendOtpAsync(request.Identity, request.Identity.IsValidEmail() ? OtpProviderType.Email : OtpProviderType.Zalo);
+                var result = await _forgotPasswordHandler.SendOtpAsync(identity, identity.IsValidEmail() ? OtpProviderType.Email : OtpProviderType.Zalo);
 
                 if (!result.Item1)
                 {
                     var otpInfo = result.Item2.EncodeObjectToUrlBase64();
-                    return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Forgot), Identity = request.Identity, otpInfo });
+                    return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Forgot), Identity = identity, otpInfo });
                 }
-                return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Forgot), Identity = request.Identity });
+                return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Forgot), Identity = identity });
             }
 
             return View(request);
@@ -366,11 +367,12 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             TempData[nameof(UserRegisterModel)] = request.Serialize();
             if (ModelState.IsValid)
             {
+                var phoneNumber = request.PhoneNumber.ToSafeString(string.Empty);
                 var isRegisterSuccess = await _userRegisterHandler.TempRegisterUserAsync(request);
                 if (isRegisterSuccess)
                 {
-                    var (isSendOtpSuccess, sendOtpMessage) = await _userRegisterHandler.SendRegisterOtpAsync(request.PhoneNumber);
-                    return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Register), Identity = request.PhoneNumber });
+                    var (isSendOtpSuccess, sendOtpMessage) = await _userRegisterHandler.SendRegisterOtpAsync(phoneNumber);
+                    return RedirectToAction(nameof(VerifyOtp), new { request.ReturnUrl, type = nameof(Register), Identity = phoneNumber });
                 }
                 else
                 {
@@ -427,7 +429,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             if (ModelState.IsValid)
             {
-                var user = await _signInManager.UserManager.FindByNameAsync(model.Username ?? string.Empty);
+                var user = await _signInManager.UserManager.FindByNameAsync(model.Username.ToSafeString());
                 if (user is not null)
                 {
                     if (await ValidateLogin(user))
@@ -942,7 +944,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             return vm;
         }
-
 
         private void SetDataForViewByOtpSessionIfo(OtpSessionInfo otpSessionInfo, VerifyOtpModel verifyOtpModel)
         {

@@ -50,6 +50,13 @@
     $(".number-list").removeClass("number-list-error");
   }
 
+  $.validator.methods.required = function (value, element, param) {
+    if (typeof value === "string") {
+      value = $.trim(value);
+    }
+    return value.length > 0;
+  }
+
   let remainSeconds = parseInt($("#RemainSecond").attr("data-value"));
   let countTimeInSecond = $("#countTimeInSecond").attr("data-value")
   let countTimeInMinutesSecond = $("#countTimeInMinutesSecond").attr("data-value")

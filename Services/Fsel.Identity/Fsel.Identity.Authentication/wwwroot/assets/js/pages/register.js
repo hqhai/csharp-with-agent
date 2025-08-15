@@ -80,6 +80,12 @@
       }
     }
   });
+  $.validator.methods.required = function (value, element, param) {
+    if (typeof value === "string") {
+      value = $.trim(value);
+    }
+    return value.length > 0;
+  }
   function isValid($queryElement) {
     if (!$queryElement) {
       return false;
