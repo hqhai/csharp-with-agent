@@ -60,37 +60,15 @@
                         @Html.CustomValidationMessageFor(model => model.FirstName, Localizer, "", new { @class = "content-text-danger" })
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="float-input float-input-validate">
-                            @if (Model.IsEmailReadonly)
-                            {
-                                <input class="text-input"
-                                       type="text"
-                                       name="Email"
-                                       id="email"
-                                       placeholder=""
-                                       autocomplete="off"
-                                       required
-                                       readonly
-                                       asp-for="Email" />
-                            }
-                            else
-                            {
-                                <input class="text-input"
-                                       type="text"
-                                       name="Email"
-                                       id="email"
-                                       placeholder=""
-                                       autocomplete="off"
-                                       required
-                                       asp-for="Email" />
-                            }
-                            <label for="Email" class="input-label">@Localizer["i18n_email"]</label>
-                        </div>
-                        @Html.CustomValidationMessageFor(model => model.Email, Localizer, "", new { @class = "content-text-danger" })
-                    </div>
-                </div>
+                <input hidden class="text-input"
+                       type="text"
+                       name="Email"
+                       id="email"
+                       placeholder=""
+                       autocomplete="off"
+                       required
+                       readonly
+                       asp-for="Email" />
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="float-input float-input-validate">
@@ -137,10 +115,10 @@
             </div>
 
             <button type="submit" class="btn sign-up-btn">
-                @Localizer["i18n_confirm"]
+                @Localizer["i18n_next"]
             </button>
 
-            <div class="text-footer">@Localizer["i18n_already_a_member"] <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">@Localizer["i18n_login_now"]</a></div>
+            <div class="text-footer">@Localizer["i18n_back"] <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">Login</a></div>
         </form>
     </div>
 
