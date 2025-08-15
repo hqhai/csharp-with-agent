@@ -524,7 +524,7 @@ namespace Fsel.Shared.Helpers
             return HttpUtility.UrlEncode(base64String);
         }
 
-        public static string ToSafeString(this string input, string replace = "")
+        public static string ToSafeString(this string? input, string replace = "")
         {
             if (string.IsNullOrEmpty(input))
             {
