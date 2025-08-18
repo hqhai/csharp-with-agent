@@ -54,12 +54,12 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
             }
-            if (await test.ValidateLevel(_levelRepository).ConfigureAwait(false))
+            if (!await test.ValidateLevel(_levelRepository).ConfigureAwait(false))
             {
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
             }
-            if (await test.ValidateProgram(_categoryRepository).ConfigureAwait(false))
+            if (!await test.ValidateProgram(_categoryRepository).ConfigureAwait(false))
             {
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
