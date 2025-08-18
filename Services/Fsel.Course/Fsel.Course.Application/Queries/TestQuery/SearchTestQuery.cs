@@ -93,7 +93,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                     .AsNoTracking()
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
-            var originalIds = await _testRepository.GetUsedOriginalIdsAsync(list.Select(x => x.Id).ToList());
+            var originalIds = await _testRepository.GetUsedOriginalIdsAsync(list.Select(x => x.OriginalId).ToList());
             foreach (var item in list)
             {
                 item.IsActive = originalIds.Any(x => x == item.OriginalId);
