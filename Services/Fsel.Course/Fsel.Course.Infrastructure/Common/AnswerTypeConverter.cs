@@ -300,22 +300,6 @@ namespace Fsel.Course.Infrastructure.Common
                         }
                     }
                     break;
-
-                case EnumQuestionType.ColorMatchingType:
-                    var colorMatchingAnswer = configAnswer.Deserialize<ColorMatchingTypeAnswer>();
-                    if (colorMatchingAnswer == null || colorMatchingAnswer.Answers == null)
-                    {
-                        break;
-                    }
-                    foreach (var item in colorMatchingAnswer.Answers)
-                    {
-                        if (item == null || string.IsNullOrEmpty(item.OptionId))
-                        {
-                            continue;
-                        }
-                        // No length validation needed for ColorMatchingType as it only uses OptionId selections
-                    }
-                    break;
             }
             return methodResult;
         }
@@ -402,13 +386,14 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.ColorMatchingType:
                     var colorMatchingTypeAnswer = configAnswer.Deserialize<ColorMatchingTypeAnswer>();
-                    result = GetAnswer(colorMatchingTypeAnswer, isShowSubStatus, status, isDisableAnswer);
+                    result = colorMatchingTypeAnswer;
                     break;
 
                 case EnumQuestionType.Tracing:
                     var tracingAnswer = configAnswer.Deserialize<TracingAnswer>();
                     result = tracingAnswer;
                     break;
+
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -592,7 +577,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return _linQAnswerHelper.IsDuplicateAnswerId(dataAnswer, nameof(ConfigAnswer.Id));
 
                 case EnumQuestionType.ColorMatchingType:
-                    return !_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(ColorMatchingTypeAnswers.IsSelected));
+                    return !_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(ColorMatchingTypeAnswers.IsChecked), false);
 
                 default:
                     return default;
@@ -1200,42 +1185,29 @@ namespace Fsel.Course.Infrastructure.Common
                 configAnswer = dataAnswer;
                 return (default, isAnswerMissing, false);
             }
-
+            if (dataOldAnswer != null && dataOldAnswer.CountFail == dataQuestion.Trial)
+            {
+                dataAnswer = dataOldAnswer;
+            }
+            dataAnswer.IsFirstSubmit = isTryAgain;
             foreach (var item in dataAnswer.Answers)
             {
-                if (!item.IsSelected)
+                if (!item.IsChecked)
                 {
                     item.IsExact = default;
                     continue;
                 }
 
-                var isCorrect = dataQuestion.CorrectAnswers?.Contains(item.OptionId) ?? false;
+                var isCorrect = dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
                 item.IsExact = isCorrect;
                 number = isCorrect ? ++number : --number;
-
-                if (isTryAgain && dataOldAnswer != null && dataOldAnswer.Answers != null)
-                {
-                    var answer = dataOldAnswer.Answers.FirstOrDefault(x => x.OptionId == item.OptionId);
-                    if (!(answer != null && answer.IsExact == true && answer.IsFirstSubmit))
-                    {
-                        item.IsFirstSubmit = false;
-                    }
-                }
+            }
+            if (!isTryAgain && isSubmit)
+            {
+                dataAnswer.CountFail = ValueDefault;
             }
             configAnswer = dataAnswer;
-            return (number > 0 ? number : default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer.Answers, nameof(ColorMatchingTypeAnswers.IsSelected)));
-        }
-
-        private static object? GetAnswer(ColorMatchingTypeAnswer? data, bool isShowSubStatus, EnumResultStatus status, bool isDisableAnswer)
-        {
-            if (data != null && data.Answers != null && status != EnumResultStatus.Done)
-            {
-                foreach (var item in data.Answers)
-                {
-                    item.IsExact = IsDisableAnswers(status, item.IsFirstSubmit, item.IsExact, isShowSubStatus, isDisableAnswer);
-                }
-            }
-            return data;
+            return (number > 0 ? number : default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer.Answers, nameof(ColorMatchingTypeAnswers.IsChecked)));
         }
 
         private static (short, bool, bool) HandleAnswerTracing(ref object? configAnswer, TracingAnswer? dataOldAnswer, TracingQuestion? question, bool isTryAgain, bool isSubmit)
