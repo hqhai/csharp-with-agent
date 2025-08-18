@@ -49,6 +49,10 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
                 case EnumQuestionType.Tracing:
                     await TracingQuestionHandler(videoTimeCodeResult, cancellationToken);
                     break;
+
+                case EnumQuestionType.ColorMatchingType:
+                    await ColorMatchingQuestionHandler(videoTimeCodeResult, cancellationToken);
+                    break;
             }
 
             await _videoTimeCodeResultRepository.ExecuteTransactionAsync(async () =>
@@ -63,47 +67,106 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
             return methodResult;
         }
 
+        private async Task UpsertVideoAnswerAsync<TAnswer>(
+          VideoTimeCodeResult result,
+          Guid questionId,
+          Action<TAnswer> mutate,                 // cập nhật dữ liệu answer
+          Func<TAnswer> createFactory,            // khởi tạo answer mặc định
+          CancellationToken ct
+      ) where TAnswer : class
+        {
+            var vta = result.VideoTimeCodeAnswers
+                            .FirstOrDefault(x => x.QuestionId == questionId);
+
+            TAnswer answer;
+
+            if (vta != null)
+            {
+                // Deserialize sang kiểu mong muốn, nếu null thì tạo mới
+                answer = vta.Answer.Deserialize<TAnswer>() ?? createFactory();
+                mutate(answer);
+                vta.Answer = answer;
+            }
+            else
+            {
+                var exerciseId = await GetExerciseIdAsync(ct);
+                answer = createFactory();
+                mutate(answer);
+
+                result.VideoTimeCodeAnswers.Add(new VideoTimeCodeAnswer
+                {
+                    QuestionId = questionId,
+                    ExerciseId = exerciseId,
+                    VideoTimeCodeId = result.VideoTimeCodeId,
+                    VideoResultId = result.VideoResultId,
+                    VideoTimeCodeResultId = result.VideoTimeCodeId, // hoặc _request.TResultId nếu đúng
+                    Answer = answer,
+                    Status = EnumAnswerStatus.Process
+                });
+            }
+        }
+
+        private async Task<Guid> GetExerciseIdAsync(CancellationToken cancellationToken)
+        {
+            return await _exerciseQuestionRepository.Queryable
+                .Where(x => x.QuestionId == _request.QuestionId)
+                .Select(x => x.ExerciseId)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
         private async Task TracingQuestionHandler(VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
         {
-            var configConvert = _request.Config.Deserialize<TracingQuestionConfigModel>();
-            if (configConvert == null)
+            var cfg = _request.Config.Deserialize<TracingQuestionConfigModel>();
+            if (cfg == null)
+            {
+                return;
+            }
+            // Hàm lấy ExerciseId (chỉ gọi khi cần tạo mới answer)
+
+            await UpsertVideoAnswerAsync(
+                videoTimeCodeResult,
+                _request.QuestionId,
+                // mutate: cách cập nhật dữ liệu khi đã có answer
+                ans =>
+                {
+                    ans.CountFail = cfg.CountFail;
+                    ans.CountStrokes = cfg.CountStrokes;
+                },
+                // createFactory: tạo answer mặc định khi chưa có
+                () => new TracingAnswer
+                {
+                    IsExact = false,
+                    CountFail = cfg.CountFail,
+                    CountStrokes = cfg.CountStrokes
+                }, cancellationToken);
+        }
+
+        private async Task ColorMatchingQuestionHandler(VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
+        {
+            var cfg = _request.Config.Deserialize<ColorMatchingTypeAnswer>();
+            if (cfg == null)
             {
                 return;
             }
 
-            var videoTimeCodeAnswer = videoTimeCodeResult.VideoTimeCodeAnswers.FirstOrDefault(x => x.QuestionId == _request.QuestionId);
-            if (videoTimeCodeAnswer != null)
-            {
-                var dataAnswer = videoTimeCodeAnswer.Answer.Deserialize<TracingAnswer>();
-                if (dataAnswer != null)
-                {
-                    dataAnswer.CountFail = configConvert.CountFail;
-                    dataAnswer.CountStrokes = configConvert.CountStrokes;
-                }
+            await UpsertVideoAnswerAsync(
+                 videoTimeCodeResult,
+                _request.QuestionId,
+                  // mutate: cách cập nhật khi có dữ liệu
+                  ans =>
+                  {
+                      ans.CountFail = cfg.CountFail;
+                      ans.Answers = cfg.Answers;
+                      // Có thể gắn thêm các field khác nếu cần
+                  },
 
-                videoTimeCodeAnswer.Answer = dataAnswer;
-            }
-            else
-            {
-                var exerciseQuestion = await _exerciseQuestionRepository.Queryable.FirstOrDefaultAsync(x => x.QuestionId == _request.QuestionId, cancellationToken);
-                var dataAnswer = new TracingAnswer
-                {
-                    IsExact = false,
-                    CountFail = configConvert.CountFail,
-                    CountStrokes = configConvert.CountStrokes
-                };
-
-                videoTimeCodeResult.VideoTimeCodeAnswers.Add(new VideoTimeCodeAnswer()
-                {
-                    QuestionId = _request.QuestionId,
-                    ExerciseId = exerciseQuestion?.ExerciseId ?? Guid.Empty,
-                    VideoTimeCodeId = videoTimeCodeResult.VideoTimeCodeId,
-                    VideoResultId = videoTimeCodeResult.VideoResultId,
-                    VideoTimeCodeResultId = _request.TResultId,
-                    Answer = dataAnswer,
-                    Status = EnumAnswerStatus.Process
-                });
-            }
+                  // createFactory: cách khởi tạo mặc định khi chưa có Answer
+                  () => new ColorMatchingTypeAnswer
+                  {
+                      CountFail = cfg.CountFail,
+                      Answers = cfg.Answers
+                  }, cancellationToken
+              );
         }
     }
 }

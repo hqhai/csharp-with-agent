@@ -6,6 +6,8 @@ namespace Fsel.Course.Infrastructure.Common
     using System.Collections.Generic;
     using System.Text.Json;
     using System.Text.RegularExpressions;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.QuestionTypeConfigs;
@@ -277,10 +279,50 @@ namespace Fsel.Course.Infrastructure.Common
                         totalCorrect = isShowCorrectTotal ? GetTotalCorrect(colorMatchingTypeQuestion) : ValueSettings.ValueDefault;
                     }
                     break;
+
                 default:
                     throw new ArgumentException("Invalid question type");
             }
             return (result, totalCorrect);
+        }
+
+        public VoidMethodResult ValidateQuestionV1(object? config, EnumQuestionType questionType)
+        {
+            var method = new VoidMethodResult();
+            switch (questionType)
+            {
+                case EnumQuestionType.ColorMatchingType:
+
+                    var colorMatchingType = config.Deserialize<ColorMatchingTypeQuestion>();
+                    if (colorMatchingType == null)
+                    {
+                        return method;
+                    }
+                    if (!colorMatchingType.IsValid())
+                    {
+                        method.AddErrorBadRequest(colorMatchingType.ErrorMessages);
+                        return method;
+                    }
+
+                    if (!colorMatchingType.Contents.Any(x => x.IsCorrect == true))
+                    {
+                        method.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(ColorMatchingTypeQuestionOption.IsCorrect), colorMatchingType.Contents);
+                        return method;
+                    }
+                    foreach (var item in colorMatchingType.Contents)
+                    {
+                        if (!item.IsValid())
+                        {
+                            method.AddErrorBadRequest(item.ErrorMessages);
+                            return method;
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+            return method;
         }
 
         public bool ValidateQuestion(object? config, EnumQuestionType questionType)
@@ -670,7 +712,13 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case ColorMatchingTypeQuestion colorMatchingType:
                     // Clear correct answers for display
-                    colorMatchingType.CorrectAnswers?.Clear();
+                    if (colorMatchingType.Contents != null)
+                    {
+                        foreach (var item in colorMatchingType.Contents)
+                        {
+                            item.IsCorrect = default;
+                        }
+                    }
                     break;
             }
             return data;
@@ -728,7 +776,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return flowChart.Answers?.Count ?? ValueSettings.ValueDefault;
 
                 case ColorMatchingTypeQuestion colorMatchingType:
-                    return colorMatchingType.CorrectAnswers?.Count ?? ValueSettings.ValueDefault;
+                    return colorMatchingType.Contents?.Count(x => x.IsCorrect.HasValue && x.IsCorrect.Value) ?? ValueSettings.ValueDefault;
 
                 default:
                     return 1;

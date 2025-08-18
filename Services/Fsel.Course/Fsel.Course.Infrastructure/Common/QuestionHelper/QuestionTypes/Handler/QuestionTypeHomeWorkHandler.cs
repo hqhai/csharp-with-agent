@@ -54,7 +54,11 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
             switch (_request.QuestionType)
             {
                 case EnumQuestionType.Tracing:
-                    await TracingQuestionHandler(homeWorkResult, homeWorkQuestion, cancellationToken);
+                    TracingQuestionHandler(homeWorkResult, homeWorkQuestion);
+                    break;
+
+                case EnumQuestionType.ColorMatchingType:
+                    ColorMatchingQuestionHandler(homeWorkResult, homeWorkQuestion);
                     break;
             }
 
@@ -70,43 +74,103 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes.Handler
             return methodResult;
         }
 
-        private async Task TracingQuestionHandler(HomeWorkResult homeWorkResult, HomeWorkQuestion homeWorkQuestion, CancellationToken cancellationToken)
+        // Upsert 1 HomeWorkAnswer với kiểu dữ liệu Answer là TAnswer
+        private static void UpsertAnswer<TAnswer>(
+            HomeWorkResult result,
+            HomeWorkQuestion homeWorkQuestion,
+            Action<TAnswer> mutate,         // cách cập nhật giá trị cho answer
+            Func<TAnswer> createFactory     // cách khởi tạo answer nếu chưa có
+        ) where TAnswer : class
         {
-            var configConvert = _request.Config.Deserialize<TracingQuestionConfigModel>();
-            if (configConvert == null)
+            // Tìm HomeWorkAnswer cho câu hỏi hiện tại
+            var hwAnswer = result.HomeWorkAnswers
+                .FirstOrDefault(x => x.HomeWorkQuestionId == homeWorkQuestion.Id);
+
+            // Lấy hoặc tạo dữ liệu answer kiểu TAnswer
+            TAnswer ans;
+            if (hwAnswer != null)
+            {
+                // hwAnswer.Answer có thể là object/json => dùng Deserialize<TAnswer>()
+                ans = hwAnswer.Answer.Deserialize<TAnswer>() ?? createFactory();
+            }
+            else
+            {
+                ans = createFactory();
+            }
+
+            // Cho caller mutate nó (gán Count, flags,...)
+            mutate(ans);
+
+            // Ghi ngược lại vào result
+            if (hwAnswer == null)
+            {
+                result.HomeWorkAnswers.Add(new HomeWorkAnswer
+                {
+                    HomeWorkQuestionId = homeWorkQuestion.Id,
+                    HomeWorkResultId = result.Id,
+                    Answer = ans,
+                    Status = EnumAnswerStatus.Process
+                });
+            }
+            else
+            {
+                hwAnswer.Answer = ans;
+            }
+        }
+
+        private void TracingQuestionHandler(HomeWorkResult homeWorkResult, HomeWorkQuestion homeWorkQuestion)
+        {
+            var cfg = _request.Config.Deserialize<TracingQuestionConfigModel>();
+            if (cfg == null)
             {
                 return;
             }
 
-            var homeWorkAnswer = homeWorkResult.HomeWorkAnswers.FirstOrDefault(x => homeWorkQuestion.QuestionId == _request.QuestionId);
-            if (homeWorkAnswer != null)
-            {
-                var dataAnswer = homeWorkAnswer.Answer.Deserialize<TracingAnswer>();
-                if (dataAnswer != null)
+            UpsertAnswer(
+                homeWorkResult,
+                homeWorkQuestion,
+                // mutate: cách cập nhật khi có dữ liệu
+                ans =>
                 {
-                    dataAnswer.CountFail = configConvert.CountFail;
-                    dataAnswer.CountStrokes = configConvert.CountStrokes;
-                }
-
-                homeWorkAnswer.Answer = dataAnswer;
-            }
-            else
-            {
-                var dataAnswer = new TracingAnswer
+                    ans.CountFail = cfg.CountFail;
+                    ans.CountStrokes = cfg.CountStrokes;
+                    // Có thể gắn thêm các field khác nếu cần
+                },
+                // createFactory: cách khởi tạo mặc định khi chưa có Answer
+                () => new TracingAnswer
                 {
                     IsExact = false,
-                    CountFail = configConvert.CountFail,
-                    CountStrokes = configConvert.CountStrokes
-                };
+                    CountFail = cfg.CountFail,
+                    CountStrokes = cfg.CountStrokes
+                }
+            );
+        }
 
-                homeWorkResult.HomeWorkAnswers.Add(new HomeWorkAnswer
-                {
-                    HomeWorkQuestionId = homeWorkQuestion.Id,
-                    HomeWorkResultId = _request.TResultId,
-                    Answer = dataAnswer,
-                    Status = EnumAnswerStatus.Process
-                });
+        private void ColorMatchingQuestionHandler(HomeWorkResult homeWorkResult, HomeWorkQuestion homeWorkQuestion)
+        {
+            var cfg = _request.Config.Deserialize<ColorMatchingTypeAnswer>();
+            if (cfg == null)
+            {
+                return;
             }
+            UpsertAnswer(
+                homeWorkResult,
+                homeWorkQuestion,
+                // mutate: cách cập nhật khi có dữ liệu
+                ans =>
+                {
+                    ans.CountFail = cfg.CountFail;
+                    ans.Answers = cfg.Answers;
+                    // Có thể gắn thêm các field khác nếu cần
+                },
+
+                // createFactory: cách khởi tạo mặc định khi chưa có Answer
+                () => new ColorMatchingTypeAnswer
+                {
+                    CountFail = cfg.CountFail,
+                    Answers = cfg.Answers
+                }
+            );
         }
     }
 }

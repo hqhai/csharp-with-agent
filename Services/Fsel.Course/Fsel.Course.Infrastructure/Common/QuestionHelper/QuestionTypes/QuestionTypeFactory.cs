@@ -11,6 +11,7 @@ namespace Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes
     public class QuestionTypeFactory
     {
         private readonly IServiceProvider _sp;
+
         public QuestionTypeFactory(IServiceProvider sp) => _sp = sp;
 
         public IQuestionType Create(QuestionResultQueueModel request)
