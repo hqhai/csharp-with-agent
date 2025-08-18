@@ -8,8 +8,6 @@ using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Identity.Application.Commands.AdminCmd;
 using Fsel.Identity.Application.Commands.AuthCmd;
-using Fsel.Identity.Application.Commands.UserCmd;
-using Fsel.Identity.Application.Queries.AdminQuery;
 using Fsel.Identity.Application.Commands.StudentCmd;
 using Fsel.Identity.Application.Queries.AdminQuery;
 using Fsel.Identity.Application.Queries.UserQuery;
@@ -56,7 +54,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("create-user/lms-admin")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.Add)]
         public async Task<IActionResult> CreateToLmsAdminPlat([FromBody] CreateUserToLmsAdminPlatCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -69,7 +67,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPut("update-user/{id}/lms-admin")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.Update)]
         public async Task<IActionResult> UpdateInLmsAdminPlat([FromRoute] Guid id, [FromBody] UpdateUserInLmsAdminCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
@@ -84,7 +82,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.View)]
         public async Task<IActionResult> GetUserInPlat([FromRoute] Guid id)
         {
             var commandResult = await _mediator.Send(new GetUserInPlatformByUserIdQuery() { Id = id }).ConfigureAwait(false);
@@ -97,7 +95,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
         [Permission(UserManagement.Update)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateUserCommand command)
         {
@@ -126,7 +123,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("delete-user")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.Delete)]
         public async Task<IActionResult> DeleteList([FromBody] DeleteListUsersCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -153,7 +150,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("search-user/lms-admin")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.View)]
         public async Task<IActionResult> SearchUserInLmsPlat([FromQuery] SearchUsersQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -166,7 +163,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("users-by-roles")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.View)]
         public async Task<IActionResult> GetUsersByRoles([FromQuery] SearchUsersByRolesQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -215,7 +212,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("token/{id}")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+        [Permission(UserManagement.View)]
         public async Task<IActionResult> GetJWT([FromRoute] Guid id)
         {
             MethodResult<TokenModel> queryResult = await _mediator.Send(new GenerateTokenCommand { Id = id }).ConfigureAwait(false);
@@ -348,7 +345,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+        [Permission(UserManagement.Update)]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordUserCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -363,7 +360,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("tool-get-otp")]
         [ProducesResponseType(typeof(MethodResult<UserOtpCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+        [Permission(UserManagement.View)]
         public async Task<IActionResult> ToolGetOtp([FromQuery] ToolGetOtpQuery query)
         {
             MethodResult<UserOtpCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -376,7 +373,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("import-account-admin-school")]
         [ProducesResponseType(typeof(MethodResult<ImportAccountAdminSchoolModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.Add)]
         public async Task<IActionResult> ImportAccountDashboard([FromForm] ImportAccountAdminSchoolCommand command)
         {
             MethodResult<ImportAccountAdminSchoolModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -387,14 +384,13 @@ namespace Fsel.Identity.Api.Controllers.Admin
             return File(commandResult.Result.Stream, Settings.Excels.ContentType, "Template_ErrorTaikhoan_AdminSchool.xlsx");
         }
 
-
         /// <summary>
         /// Get Account Admin School
         /// </summary>
         [HttpGet("get-account-admin-school")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<AccountAdminSchoolModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.View)]
         public async Task<IActionResult> GetAccountDashboard([FromQuery] GetAccountAdminSchoolCommand query)
         {
             MethodResult<PagingItemsModel<AccountAdminSchoolModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -407,7 +403,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("export-account-admin-school")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.Export)]
         public async Task<IActionResult> ExportAccountDashboard([FromQuery] ExportAcountAdminSchoolCommand command)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -418,14 +414,13 @@ namespace Fsel.Identity.Api.Controllers.Admin
             return File(commandResult.Result, Settings.Excels.ContentType, "Template_Taikhoan_ExportAccount.xlsx");
         }
 
-
         /// <summary>
         /// Active users
         /// </summary>
         [HttpPost("active-users")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Admin))]
+        [Permission(UserManagement.Update)]
         public async Task<IActionResult> ActiveUsers([FromBody] UpdateStatusUsersCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
