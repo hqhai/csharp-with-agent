@@ -8,7 +8,9 @@ namespace Fsel.Course.Application.Commands.TestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -46,6 +48,13 @@ namespace Fsel.Course.Application.Commands.TestCmd
             if (test == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(test));
+                return methodResult;
+            }
+
+            var isActive = await _testRepository.IsUsingByClient(test.OriginalId);
+            if (isActive)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumTestErrorCode.TestIsActive), nameof(isActive), isActive);
                 return methodResult;
             }
 
