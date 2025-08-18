@@ -23,6 +23,7 @@
         </div>
 
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        <div class="item-title">@Localizer["i18n_update_info"].Value?.ToUpper()</div>
         <form id="form-ExternalLogin" asp-route="ExternalLoginConfirmation">
             <input type="hidden" asp-for="ReturnUrl" />
             <input type="hidden" asp-for="IsEmailReadonly" />
@@ -118,7 +119,7 @@
                 @Localizer["i18n_next"]
             </button>
 
-            <div class="text-footer">@Localizer["i18n_back"] <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">Login</a></div>
+            <div class="text-footer">@Localizer["i18n_back"] <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">@Localizer["i18n_login"]</a></div>
         </form>
     </div>
 

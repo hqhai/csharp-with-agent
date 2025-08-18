@@ -7,6 +7,12 @@
       e.preventDefault();
     }
   });
+
+  $('#form-Forgot').validate({
+    onkeyup: true,  
+    onfocusout: true 
+  });
+
   $.validator.methods.required = function (value, element, param) {
     if (typeof value === "string") {
       value = $.trim(value);
@@ -18,25 +24,53 @@
   identityInput.on("input", validateEmail);
 
   function validateEmail() {
-    $('input[name="Identity"]').valid();
     const identity = identityInput.val();
     const emailPattern = /^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
     const phonePattern = /^\+?\d{7,15}$/;
 
-    if (identity !== "") {
+    if (!isNullOrWhiteSpace(identity)) {
       if (phonePattern.test(identity)) {
         identityInput.removeClass("content-border-danger");
+        $('span[data-valmsg-for="Identity"] #identity-error').remove();
         return true;
       }
       if (emailPattern.test(identity)) {
         identityInput.removeClass("content-border-danger");
+        $('span[data-valmsg-for="Identity"] #identity-error').remove();
         return true;
       }
+      identityInput.addClass("content-border-danger");
+      let invalidMessage = $("#invalidEmailOrPhoneNumber").attr("data-value")
+      addInvalidMessage(invalidMessage);
     }
-    identityInput.addClass("content-border-danger");
+    else {
+      let emptyMessage = $('div.validation-message-text[data-field="Identity"][data-validate="data-val-required"]').text();
+      addInvalidMessage(emptyMessage);
+      /*$('input[name="Identity"]').valid();*/
+    }
+
     return false;
   }
 
+  function addInvalidMessage(message) {
+    const $parentSpan = $('span[data-valmsg-for="Identity"]');
+
+    // Tìm span con #identity-error bên trong
+    let $errorSpan = $parentSpan.find("#identity-error");
+
+    if ($errorSpan.length > 0) {
+      // Nếu đã có thì đổi nội dung
+      $errorSpan.text(message);
+    } else {
+      // Nếu chưa có thì thêm span con vào
+      $parentSpan.append('<span id="identity-error">' + message + '</span>');
+    }
+  }
+
+
+  function isNullOrWhiteSpace(input) {
+    return !((input ?? "").trim());
+  }
   function validateAll() {
     let isDoneAllValidate = true;
 
