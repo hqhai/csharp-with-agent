@@ -33,11 +33,11 @@
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
         @if (Model.Identity.IsValidEmail())
         {
-            <h1 class="title">@Localizer["i18n_verify_account"]</h1>
+            <h1 class="title">@Localizer["i18n_verify_account"].Value?.ToUpper()</h1>
         }
         else
         {
-            <h1 class="title">@Localizer["i18n_verify_phone_number"]</h1>
+            <h1 class="title">@Localizer["i18n_verify_phone_number"].Value?.ToUpper()</h1>
         }
 
         <form id="form-VerifyOtp" asp-route="VerifyOtp">  
@@ -135,18 +135,24 @@
                             @Localizer["i18n_resend_verification_code"]:
                             @if (Model.Identity.IsValidEmail())
                             {
-                                <button id="email" type="submit" name="button" value="resend">Email</button>
+                                <button class="resend-btn" id="email" type="submit" name="button" value="resend">
+                                    <img class="icon" src="~/assets/icons/refresh.png" /><span> @Localizer["i18n_resend"]</span>
+                                </button>
                             }
                             else
                             {
-                                <button id="zalo" type="submit" name="button" value="resend">
-                                    <img src="~/assets/icons/refresh.png" /> @Localizer["i18n_resend_zalo"]
+                                <button class="resend-btn" id="zalo" type="submit" name="button" value="resend">
+                                    <img class="icon" src="~/assets/icons/refresh.png" /><span> @Localizer["i18n_resend_zalo"]</span>
                                 </button>
                             }
                         </div>
-                        <div class="resend-otp-3">
-                            <p>@Localizer["i18n_or_resend"] <button id="sms" type="submit" name="button" value="resend">@Localizer["i18n_resend_sms"]</button></p>
-                        </div>
+                        @if (!Model.Identity.IsValidEmail())
+                        {
+                            <div class="resend-otp-3">
+                                <p>@Localizer["i18n_or_resend"] <button id="sms" type="submit" name="button" value="resend">@Localizer["i18n_resend_sms"]</button></p>
+                            </div>
+                        }
+                        
                     </div>
                     @Html.Raw($"<button id='submit-otp' type='submit' class='btn' disabled>{Localizer["i18n_verify"]}</button>")
                 }
@@ -175,18 +181,23 @@
                         <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
                             @if (Model.Identity.IsValidEmail())
                             {
-                                <button id="email" type="submit" name="button" value="resend">Email</button>
+                                <button class="resend-btn" id="email" type="submit" name="button" value="resend">
+                                    <img class="icon" src="~/assets/icons/refresh.png" /><span> @Localizer["i18n_resend"]</span>
+                                </button>
                             }
                             else
                             {
-                                <button id="zalo" type="submit" name="button" value="resend">
-                                    <img src="~/assets/icons/refresh.png" /> @Localizer["i18n_resend_zalo"]
+                                <button class="resend-btn" id="zalo" type="submit" name="button" value="resend">
+                                    <img class="icon" src="~/assets/icons/refresh.png" /><span> @Localizer["i18n_resend_zalo"]</span>
                                 </button>
                             }
                         </div>
-                        <div class="resend-otp-3">
-                            <p>@Localizer["i18n_or_resend"] <button id="sms" type="submit" name="button" value="resend">@Localizer["i18n_resend_sms"]</button></p>
-                        </div>
+                        @if (!Model.Identity.IsValidEmail())
+                        {
+                            <div class="resend-otp-3">
+                                <p>@Localizer["i18n_or_resend"] <button id="sms" type="submit" name="button" value="resend">@Localizer["i18n_resend_sms"]</button></p>
+                            </div>
+                        }
                     </div>
                     if (isOtpExpired.HasValue && isOtpExpired.Value)
                     {
@@ -207,10 +218,8 @@
                 <a href="@Url.Action("Forgot", "Account", new { Model.ReturnUrl })">@Localizer["i18n_change_email_or_phone_number"]</a>
             </div>
          }
-         else
-         {
-            <div class="text-footer">@Localizer["i18n_did_not_a_code"]</div>
-         }
+
+        <div class="text-footer">@Localizer["i18n_did_not_a_code"]</div>
         
     </div>
 
