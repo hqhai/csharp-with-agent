@@ -54,6 +54,7 @@ namespace Fsel.Identity.Application.Queries.UserSettingQuery
             if (userSetting != null)
             {
                 await SaveUserSenderSetting(userSetting);
+                userSetting.UserSenderSettings = userSetting.UserSenderSettings?.OrderBy(x => x.IsEdit).ToList();
             }
 
             methodResult.Result = userSetting;

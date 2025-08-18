@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.UserSettings;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -37,6 +38,12 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<UserSettingModel>();
+
+            if (request.UserSenderSettings == null || !request.UserSenderSettings.Any())
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumStudentErrorCode.UserSenderSettingNotNull), nameof(request.UserSenderSettings));
+                return methodResult;
+            }
 
             await _userSettingRepository.ExecuteTransactionAsync(async () =>
             {
