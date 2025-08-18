@@ -79,7 +79,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                              join um in _unitRepository.ReadOnlyDbContext.Set<UnitModule>().AsQueryable()
                                                  on l.OriginalId equals um.OriginalId
                                              join u in _unitRepository.ReadQueryable
-                                             .Where(u => u.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion && !u.IsArchive)
+                                             .Where(u => u.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
                                                 on um.UnitId equals u.Id
                                              select u;
 
@@ -116,7 +116,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     Program = unit.Program != null ? unit.Program.Name : "",
                     CourseLevel = unit.Level != null ? unit.Level.Name : unit.CourseLevel.ToString(),
                     OriginalId = unit.OriginalId,
-                    IsActive = unit.CourseUnitMockTests.Any(n => !n.IsDeleted),
+                    IsActive = unit.UnitResults.Any(n => !n.IsDeleted),
                     CreatedDate = unit.CreatedDate,
                     CreatedFullName = unit.CreatedFullName,
                     CreatedUserId = unit.CreatedUserId,
@@ -168,7 +168,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                     Program = unit.Program != null ? unit.Program.Name : "",
                     CourseLevel = unit.Level != null ? unit.Level.Name : unit.CourseLevel.ToString(),
                     OriginalId = unit.OriginalId,
-                    IsActive = unit.CourseUnitMockTests.Any(n => !n.IsDeleted),
+                    IsActive = unit.UnitResults.Any(n => !n.IsDeleted),
                     CreatedDate = unit.CreatedDate,
                     CreatedFullName = unit.CreatedFullName,
                     CreatedUserId = unit.CreatedUserId,
@@ -182,7 +182,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                   .Where(x => x.LessonConfigType == Domain.Enums.EnumLessonConfigType.Video)
                                      on l.Id equals lm.LessonId
                                   join v in _videoRepository.ReadQueryable
-                                  .Where(v => v.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion && !v.IsArchive)
+                                  .Where(v => v.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
                                      on lm.OriginalId equals v.OriginalId
                                   select v.TeacherId).Distinct().ToList()
                 });
