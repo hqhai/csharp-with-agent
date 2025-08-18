@@ -14,7 +14,6 @@ namespace Fsel.Course.Application.Commands.TestCmd
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Infrastructure.Common.TestHelper;
-    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
