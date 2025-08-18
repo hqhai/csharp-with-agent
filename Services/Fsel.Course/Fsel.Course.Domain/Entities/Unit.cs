@@ -149,7 +149,7 @@ namespace Fsel.Course.Domain.Entities
         public async Task<bool> ValidateDuplicateUnit(IUnitRepository unitRepository)
         {
             var isDuplicatedUnit = await unitRepository.Queryable
-                .AnyAsync(u => u.Code == Code && u.LevelId == LevelId)
+                .AnyAsync(u => u.Code == Code)
                 .ConfigureAwait(false);
             if (isDuplicatedUnit)
             {
@@ -158,7 +158,7 @@ namespace Fsel.Course.Domain.Entities
                     ErrorCode = nameof(EnumSystemErrorCode.DataAlreadyExist),
                     Errors = { new Error
                     {
-                        FieldName = $"{nameof(Code)} and {nameof(LevelId)}",
+                        FieldName = $"{nameof(Code)}",
                     } }
                 });
             }
