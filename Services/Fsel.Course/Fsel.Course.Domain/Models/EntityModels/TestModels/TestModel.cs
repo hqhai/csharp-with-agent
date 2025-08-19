@@ -12,6 +12,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestModels
         public Guid LevelId { get; set; }
         public CategoryModel? Program { get; set; }
         public LevelModel? Level { get; set; }
+        public bool IsActive { get; set; }
         public IList<TestSectionModel> TestSections { get; set; } = new List<TestSectionModel>();
     }
 }
