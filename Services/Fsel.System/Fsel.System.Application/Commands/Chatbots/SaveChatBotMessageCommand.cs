@@ -45,17 +45,25 @@ namespace Fsel.System.Application.Commands.Chatbots
         private readonly ChatBotPublisher _chatBotPublisher;
         private const int Number_Of_Config = 2;
         private readonly ILogger<object> _logger;
+        private readonly IMediator _mediator;
 
-        public SaveChatBotMessageCommandHandler(IMapper mapper, IChatBotRepository chatBotRepository, IStorageService storageService, ChatBotPublisher chatBotPublisher, IChatbotConfigRepository chatbotConfigRepository, IOpenAIService openAIService, ILogger<SaveChatBotMessageCommandHandler> logger)
+        public SaveChatBotMessageCommandHandler(IMapper mapper,
+            IChatBotRepository chatBotRepository,
+            IStorageService storageService,
+            ChatBotPublisher chatBotPublisher,
+            IChatbotConfigRepository chatbotConfigRepository,
+            IOpenAIService openAIService,
+            ILogger<SaveChatBotMessageCommandHandler> logger,
+            IMediator mediator)
         {
             _mapper = mapper;
             _chatBotRepository = chatBotRepository;
-
             _storageService = storageService;
             _chatBotPublisher = chatBotPublisher;
             _chatbotConfigRepository = chatbotConfigRepository;
             _openAIService = openAIService;
             _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<ChatBotModel>> Handle(SaveChatBotMessageCommand request, CancellationToken cancellationToken)
@@ -204,7 +212,8 @@ namespace Fsel.System.Application.Commands.Chatbots
                 });
                 filePath = audioResult?.Content?.Result!;
             }
-            return filePath;
+            var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
+            return reponse.Result ?? filePath;
         }
 
         /// <summary>
