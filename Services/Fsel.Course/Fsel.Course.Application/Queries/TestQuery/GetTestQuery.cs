@@ -89,6 +89,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
 
             // Mapping Test
             var testModel = _mapper.Map<TestModel>(test);
+            testModel.IsActive = await _testRepository.IsUsingByClient(test.OriginalId);
             testModel.TestSections = BuildSectionTree(allSections, questionDict, testAISettingDict);
 
             methodResult.Result = testModel;
