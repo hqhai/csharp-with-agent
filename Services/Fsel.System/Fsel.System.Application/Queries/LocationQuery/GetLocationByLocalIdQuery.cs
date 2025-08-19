@@ -35,6 +35,7 @@ namespace Fsel.System.Application.Queries.LocationQuery
             MethodResult<LocationModel> methodResult = new MethodResult<LocationModel>();
 
             var location = await _crmLocationRepository.Queryable
+                                                       .Include(x => x.Parent)
                                                        .FirstOrDefaultAsync(x => x.LocalId != null && x.LocalId.Trim() == request.LocalId.Trim(), cancellationToken);
 
             if (location == null)

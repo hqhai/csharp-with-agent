@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -82,7 +83,10 @@ namespace Fsel.Course.Lms.Application.Commands.ExtraPracticeCmd
             {
                 extraPracticeResult.Status = EnumResultStatus.New;
                 extraPracticeResult.CurrentVideoTimeCodeId = null;
-                _extraPracticeResultRepository.Update(extraPracticeResult);
+                await _extraPracticeResultRepository.BulkUpdateList(new List<ExtraPracticeResult> { extraPracticeResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ExtraPracticeId, c.StudentId };
+                });
                 await _extraPracticeResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 methodResult.Result = _mapper.Map<ExtraPracticeResultModel>(extraPracticeResult);
                 methodResult.StatusCode = StatusCodes.Status200OK;

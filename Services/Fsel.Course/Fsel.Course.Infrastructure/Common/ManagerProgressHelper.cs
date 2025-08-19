@@ -191,6 +191,8 @@ namespace Fsel.Course.Infrastructure.Common
             return (counts.Sum(), totalModules.Sum());
         }
 
+        #region
+
         public async Task<double> GetOverallCompleteAsync(IList<CourseResultModel>? courseResults, DateTime? arrivalDate = default)
         {
             var studentIds = courseResults != null && courseResults.Any() ? courseResults.Select(x => x.StudentId).ToList() : new List<Guid>();
@@ -456,7 +458,6 @@ namespace Fsel.Course.Infrastructure.Common
                             };
                 courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
             }
-            ;
             return courseCompletes;
         }
 
@@ -777,6 +778,230 @@ namespace Fsel.Course.Infrastructure.Common
                 learnCourseCompletes.Add(courseCompleteModule);
             });
             return learnCourseCompletes.ToList();
+        }
+
+        #endregion
+
+        public async Task<IList<CourseCompleteModel>> GetProgressCompleteLessonAsync(IList<CourseResultModel> courseResults, DateTime? arrivalDate = default)
+        {
+            if (courseResults == null || !courseResults.Any())
+            {
+                return new List<CourseCompleteModel>();
+            }
+
+            var learnCourseCompletes = new List<CourseCompleteModel>();
+            var courseCompleteModules = await GetCourseCompleteLessonsAsync(courseResults, arrivalDate: arrivalDate);
+            var courseCompleteTotalModules = await GetCourseTotalLessonsAsync(courseResults);
+            var completeModuleDict = courseCompleteModules.ToDictionary(x => (x.StudentId, x.CourseId));
+            var totalLessonDict = courseCompleteTotalModules.ToDictionary(x => x.CourseId);
+
+            courseResults.ForEach(courseResult =>
+            {
+                completeModuleDict.TryGetValue((courseResult.StudentId, courseResult.CourseId), out var courseCompleteModule);
+                totalLessonDict.TryGetValue(courseResult.CourseId, out var courseCompleteTotalModule);
+                courseCompleteModule ??= new CourseCompleteModel
+                {
+                    StudentId = courseResult.StudentId,
+                    CourseId = courseResult.CourseId,
+                };
+
+                courseCompleteModule.TotalLesson = courseCompleteTotalModule?.TotalLesson ?? default;
+                courseCompleteModule.UnitDisplayOrder = courseCompleteModule.UnitDisplayOrder != 0 ? courseCompleteModule.UnitDisplayOrder : ModuleDefault;
+                courseCompleteModule.LessonDisplayOrder = courseCompleteModule.LessonDisplayOrder != 0 ? courseCompleteModule.LessonDisplayOrder : ModuleDefault;
+                learnCourseCompletes.Add(courseCompleteModule);
+            });
+            return learnCourseCompletes;
+        }
+
+        public async Task<IList<CourseCompleteModel>> GetCourseCompleteLessonsAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default)
+        {
+            if (courseResults == null || !courseResults.Any())
+            {
+                return new List<CourseCompleteModel>();
+            }
+
+            var studentIds = courseResults.Select(x => x.StudentId).Distinct().ToList();
+
+            using var scope = _serviceProvider.CreateScope();
+            var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
+            var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
+            var unitResultRepository = scope.ServiceProvider.GetRequiredService<IUnitResultRepository>();
+            var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
+
+            // Lọc trước các dữ liệu cần thiết
+            var baseQs = await courseResultRepository.Queryable
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                .Select(x => new { x.StudentId, x.CourseId })
+                .Distinct()
+                .ToListAsync();
+
+            var unitResults = await unitResultRepository.Queryable.WhereBulkContains(baseQs, new[] { "StudentId", "CourseId" })
+                .Where(x => !arrivalDate.HasValue || (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                .Select(x => new
+                {
+                    x.StudentId,
+                    x.CourseId,
+                    x.UnitId,
+                    x.Status,
+                    x.UpdatedDate,
+                    x.CreatedDate,
+                    x.CompletionDate,
+                    DisplayOrder = x.Unit.CourseUnitMockTests
+                        .Where(c => c.CourseId == x.CourseId)
+                        .Select(c => c.Number).FirstOrDefault()
+                })
+                .ToListAsync();
+
+            var lessonResults = await lessonResultRepository.Queryable.WhereBulkContains(baseQs, new[] { "StudentId", "CourseId" })
+                .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                .Select(x => new
+                {
+                    x.StudentId,
+                    x.CourseId,
+                    x.UnitId,
+                    x.Status,
+                    x.UpdatedDate,
+                    x.CreatedDate,
+                    x.Id,
+                    DisplayOrder = x.Lesson.UnitLessons
+                        .Where(u => u.UnitId == x.UnitId)
+                        .Select(u => u.DisplayOrder).FirstOrDefault()
+                })
+                .ToListAsync();
+
+            // Gộp dữ liệu lại thành CourseCompleteModel
+            var result = baseQs.Select(q =>
+            {
+                var studentLessonResults = lessonResults
+                    .Where(x => x.StudentId == q.StudentId && x.CourseId == q.CourseId)
+                    .ToList();
+
+                var studentUnitResults = unitResults
+                    .Where(x => x.StudentId == q.StudentId && x.CourseId == q.CourseId)
+                    .ToList();
+
+                return new CourseCompleteModel
+                {
+                    StudentId = q.StudentId,
+                    CourseId = q.CourseId,
+                    TotalLessonDone = studentLessonResults
+                        .Where(x => x.Status == EnumResultStatus.Done)
+                        .Select(x => x.Id).Distinct().Count(),
+
+                    UnitDisplayOrder = studentUnitResults
+                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                        .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+                                      x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+                                      x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone :
+                                      ValueOrderIndex.OrderIndexOther)
+                        .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                        .Select(x => x.DisplayOrder).FirstOrDefault(),
+
+                    LessonDisplayOrder = studentLessonResults
+                        .Where(x => x.Status != EnumResultStatus.Unfinished)
+                        .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+                                      x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+                                      x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone :
+                                      ValueOrderIndex.OrderIndexOther)
+                        .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                        .Select(x => x.DisplayOrder).FirstOrDefault()
+                };
+            }).ToList();
+
+            return baseQuery != null && baseQuery.SortBy.Any()
+                ? result.AsQueryable().ApplySortAndPaging(baseQuery).ToList()
+                : result.AsQueryable().ApplySort(baseQuery).ToList();
+        }
+
+        public async Task<IList<CourseCompleteModel>> GetCourseCompletesFilterCountAsync(IList<CourseResultModel>? courseResults, BaseQueryModel? baseQuery = default, DateTime? arrivalDate = default, bool isSearchReport = false)
+        {
+            if (courseResults == null || !courseResults.Any())
+            {
+                return new List<CourseCompleteModel>();
+            }
+
+            var studentIds = courseResults.Select(x => x.StudentId).Distinct().ToList();
+
+            using var scope = _serviceProvider.CreateScope();
+            var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
+            var lessonResultRepository = scope.ServiceProvider.GetRequiredService<ILessonResultRepository>();
+
+            // Lọc các CourseResult đang active
+            var activeCourseResults = await courseResultRepository.Queryable
+                .WhereBulkContains(studentIds, x => x.StudentId)
+                .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
+                .Select(x => new { x.StudentId, x.CourseId })
+                .ToListAsync();
+
+            // Lọc LessonResult theo StudentId + CourseId + Status + ArrivalDate
+            var lessonResults = await lessonResultRepository.Queryable
+                .WhereBulkContains(activeCourseResults, new[] { "StudentId", "CourseId" })
+                .Where(x => x.Status == EnumResultStatus.Done)
+                .Where(x => !arrivalDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= arrivalDate.Value.Date)
+                .Select(x => new { x.StudentId, x.CourseId, x.Id })
+                .ToListAsync();
+
+            // Nhóm và tạo kết quả
+            var grouped = lessonResults
+                .GroupBy(x => new { x.StudentId, x.CourseId })
+                .Select(g => new CourseCompleteModel
+                {
+                    StudentId = g.Key.StudentId,
+                    CourseId = g.Key.CourseId,
+                    TotalLessonDone = g.Select(x => x.Id).Distinct().Count()
+                })
+                .ToList();
+
+            // Sắp xếp & phân trang nếu cần
+            return baseQuery != null && baseQuery.SortBy.Any() && isSearchReport
+                ? grouped.AsQueryable().ApplySortAndPaging(baseQuery).ToList()
+                : grouped.AsQueryable().ApplySort(baseQuery).ToList();
+        }
+
+        private async Task<List<CourseLessonModel>> GetCourseTotalLessonsAsync(IList<CourseResultModel>? courseResults)
+        {
+            if (courseResults == null || !courseResults.Any())
+            {
+                return new List<CourseLessonModel>();
+            }
+
+            var courseIds = courseResults
+                .Select(x => x.CourseId)
+                .Distinct()
+                .ToList();
+
+            using var scope = _serviceProvider.CreateScope();
+            var courseUnitMockTestRepository = scope.ServiceProvider.GetRequiredService<ICourseUnitMockTestRepository>();
+            var unitLessonRepository = scope.ServiceProvider.GetRequiredService<IUnitLessonRepository>();
+
+            // Lấy các UnitId từ các CourseId cần thiết
+            var unitMappings = await courseUnitMockTestRepository.Queryable
+                .WhereBulkContains(courseIds, x => x.CourseId)
+                .Select(x => new { x.CourseId, x.UnitId })
+                .Distinct()
+                .ToListAsync();
+
+            var unitIds = unitMappings.Select(x => x.UnitId).Distinct().ToList();
+
+            // Lấy tất cả UnitLesson liên quan
+            var unitLessons = await unitLessonRepository.Queryable
+                .WhereBulkContains(unitIds, x => x.UnitId)
+                .Select(x => new { x.Id, x.UnitId })
+                .ToListAsync();
+
+            // Ghép và đếm theo CourseId
+            var courseLessons = unitMappings
+                .Join(unitLessons, m => m.UnitId, l => l.UnitId, (m, l) => new { m.CourseId, l.Id })
+                .GroupBy(x => x.CourseId)
+                .Select(g => new CourseLessonModel
+                {
+                    CourseId = g.Key,
+                    TotalLesson = g.Count()
+                })
+                .ToList();
+
+            return courseLessons;
         }
     }
 }

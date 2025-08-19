@@ -48,5 +48,29 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// client
+        /// </summary>
+        [HttpGet("clients-event")]
+        [ProducesResponseType(typeof(MethodResult<ClientsIntegrationModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> ClientIntegrationByEvent([FromQuery] ClientIntegrationByEventQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// lead
+        /// </summary>
+        [HttpGet("leads-event")]
+        [ProducesResponseType(typeof(MethodResult<LeadsIntegrationModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> LeadsIntegrationByEvent([FromQuery] LeadsIntegrationByEventQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

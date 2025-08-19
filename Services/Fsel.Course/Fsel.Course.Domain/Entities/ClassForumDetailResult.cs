@@ -96,6 +96,8 @@ namespace Fsel.Course.Domain.Entities
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
 
+        public ICollection<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; } = new List<ClassForumDetailResultHistory>();
+
         public int RetryTime { get; set; }
 
         public bool IsForbiddenWork { get; set; }
