@@ -60,8 +60,9 @@ namespace Fsel.System.Application.Commands.Chatbots
                 _ = br.ReadUInt32();        // file size (skip)
                 var wave = ReadFourCC(br);  // WAVE
                 if (!((riff == "RIFF" || riff == "RF64" || riff == "RIFX") && wave == "WAVE"))
+                {
                     return false;
-
+                }
                 // scan đến "fmt "
                 while (fs.Position + 8 <= fs.Length)
                 {
@@ -79,8 +80,9 @@ namespace Fsel.System.Application.Commands.Chatbots
 
                         var remain = (int)chunkSize - 16;
                         if (remain > 0)
+                        {
                             fs.Position += remain;
-
+                        }
                         return true;
                     }
 
@@ -120,8 +122,9 @@ namespace Fsel.System.Application.Commands.Chatbots
             {
                 var ext = Path.GetExtension(uri.AbsolutePath);
                 if (string.IsNullOrWhiteSpace(ext))
+                {
                     ext = ".bin";
-
+                }
                 var tmp = Path.Combine(Path.GetTempPath(), $"audio_{Guid.NewGuid()}{ext}");
 
                 using var http = new HttpClient
@@ -143,7 +146,7 @@ namespace Fsel.System.Application.Commands.Chatbots
 
         // ==== FFMPEG availability check (fail sớm nếu không có ffmpeg) ====
 
-        private void EnsureFfmpegAvailable()
+        private static void EnsureFfmpegAvailable()
         {
             try
             {
@@ -215,17 +218,17 @@ namespace Fsel.System.Application.Commands.Chatbots
         }
 
         // ==== Upload and return URL ====
-
         private async Task<string> UploadWavAndGetUrlAsync(string localWavPath, CancellationToken ct = default)
         {
             await using var fs = File.OpenRead(localWavPath);
-            var filePart = new StreamPart(fs, Path.GetFileName(localWavPath), "audio/wav");
+            var filePart = new StreamPart(fs, Path.GetFileName(localWavPath), "application/octet-stream");
             var resp = await _storageService.UpLoadFile(EnumFolderType.Files, EnumBucketType.FselPublic, filePart);
             var url = resp.Content?.Result;
 
             if (string.IsNullOrEmpty(url))
+            {
                 throw new InvalidOperationException("Upload failed: empty URL");
-
+            }
             return url!;
         }
 
