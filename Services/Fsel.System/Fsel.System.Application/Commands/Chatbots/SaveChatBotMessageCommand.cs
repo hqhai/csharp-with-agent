@@ -44,7 +44,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         private readonly IStorageService _storageService;
         private readonly ChatBotPublisher _chatBotPublisher;
         private const int Number_Of_Config = 2;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<SaveChatBotMessageCommandHandler> _logger;
         private readonly IMediator _mediator;
 
         public SaveChatBotMessageCommandHandler(IMapper mapper,
@@ -215,10 +215,15 @@ namespace Fsel.System.Application.Commands.Chatbots
                 try
                 {
                     var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
+                    if (!reponse.IsOK)
+                    {
+                        _logger.LogError($"ConvertFileWavCommand : {filePath} => {reponse.Result}", reponse.ErrorMessages);
+                    }
                     filePath = reponse.Result ?? filePath;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    _logger.LogError($"ConvertFileWavCommand Exception : {filePath} ", ex.Message);
                 }
             }
             return filePath;
