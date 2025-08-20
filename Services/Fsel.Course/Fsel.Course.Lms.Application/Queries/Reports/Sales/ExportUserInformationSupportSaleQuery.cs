@@ -167,7 +167,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
                     District = item.District,
                     Province = item.Province,
 
-                    NotLoggedIn = featureAccessTime == null,
+                    NotLoggedIn = placementTestGroupResult == null && featureAccessTime == null,
                     LoggedInButNoPT = placementTestGroupResult != null && placementTestGroupResult.Status != EnumResultStatus.Done,
                     PTButNotStudied = placementTestGroupResult != null && placementTestGroupResult.Status == EnumResultStatus.Done && !placementTestGroupResult.ChooseLevel.HasValue && courseResult == null,
                     SelectedLessonButNotStudied = placementTestGroupResult != null && placementTestGroupResult.ChooseLevel.HasValue && courseResult == null,
