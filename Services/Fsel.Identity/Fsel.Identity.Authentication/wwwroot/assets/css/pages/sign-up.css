@@ -594,3 +594,6 @@ otp-request-form,
     font-weight: 600;
     line-height: 28px;
 }
+.text-input-place-holder::placeholder {
+  color: #6e7891;
+}

@@ -983,6 +983,14 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 }
                 else
                 {
+                    ViewData["IsLockedResendOtp"] = otpSessionInfo?.SendInfo?.IsBlockedByReachMaxSendCount ?? false;
+
+                    if (otpSessionInfo?.SendInfo?.IsBlockedByReachMaxSendCount == true)
+                    {
+                        var minutes = otpSessionInfo.SendInfo.WaitTimeDuration.Value < TimeSpan.FromMinutes(1) ? 1: otpSessionInfo.SendInfo.WaitTimeDuration.Value.Minutes;
+                        ModelState.AddModelError(string.Empty, _localizer["i18n_otp_wait_in_minute"].Value?.InjectParam(minutes.ToString()));
+                    }
+
                     verifyOtpModel.ExpiredTime = DateTime.UtcNow.Add(otpSessionInfo.SendInfo.WaitTimeDuration.Value);
                 }
             }

@@ -11,6 +11,7 @@
 
     var provider = ViewData["Provider"] as string;
     var isBlocked = ViewData["IsOtpBlocked"] as bool?;
+    var isLockedResendOtp = ViewData["IsLockedResendOtp"] as bool?;
     var isOtpExpired = ViewData["OtpExpired"] as bool?;
     
     var sentMessage = string.Empty;
@@ -58,6 +59,7 @@
                            maxlength="1"
                            id="otp-1"
                            autocomplete="off"
+                           value="@Model.Otp?.ElementAt(0)"
                            name="otp-1" />
                     <input 
                            id="otp-2"
@@ -65,6 +67,7 @@
                            type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
+                           value="@Model.Otp?.ElementAt(1)"
                            name="otp-2" />
                     <input 
                            id="otp-3"
@@ -73,6 +76,7 @@
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
                            autocomplete="off"
+                           value="@Model.Otp?.ElementAt(2)"
                            name="otp-3" />
                     <input 
                            id="otp-4"
@@ -81,6 +85,7 @@
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
                            autocomplete="off"
+                           value="@Model.Otp?.ElementAt(3)"
                            name="otp-4" />
                     <input 
                            id="otp-5"
@@ -89,6 +94,7 @@
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
                            autocomplete="off"
+                           value="@Model.Otp?.ElementAt(4)"
                            name="otp-5" />
                     <input 
                            id="otp-6"
@@ -97,6 +103,7 @@
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
                            autocomplete="off"
+                           value="@Model.Otp?.ElementAt(5)"
                            name="otp-6" />
                 </div>
                 <div class="mt-2">
@@ -112,6 +119,7 @@
             @{
                 <div class="hidden" id="countTimeInSecond" data-value="@Localizer["i18n_otp_wait_in_second"]"></div>
                 <div class="hidden" id="isOtpExpired" data-value="@isOtpExpired"></div>
+                <div class="hidden" id="isLockedResendOtp" data-value="@isLockedResendOtp"></div>
                 <div class="hidden" id="maxNumberOfVerify" data-value="@OtpSetting.MaxCountVerifyFail.ToString()"></div>
                 if (isBlocked.HasValue && isBlocked.Value)
                 {
@@ -132,7 +140,6 @@
                             }
                         </div>
                         <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
-                            @Localizer["i18n_resend_verification_code"]:
                             @if (Model.Identity.IsValidEmail())
                             {
                                 <button class="resend-btn" id="email" type="submit" name="button" value="resend">
