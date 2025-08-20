@@ -143,7 +143,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("convert-file")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ConvertFile([FromQuery] ConvertFileWavCommand command)
+        public async Task<IActionResult> ConvertFile([FromBody] ConvertFileWavCommand command)
         {
             MethodResult<string> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

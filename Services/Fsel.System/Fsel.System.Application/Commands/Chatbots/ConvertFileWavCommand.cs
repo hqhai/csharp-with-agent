@@ -21,7 +21,8 @@ namespace Fsel.System.Application.Commands.Chatbots
     public class ConvertFileWavCommandHandler : IRequestHandler<ConvertFileWavCommand, MethodResult<string>>
     {
         private readonly IStorageService _storageService;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<ConvertFileWavCommandHandler> _logger;
+        private const string _ffmpegPath = "ffmpeg";
 
         public ConvertFileWavCommandHandler(IStorageService storageService, ILogger<ConvertFileWavCommandHandler> logger)
         {
@@ -43,7 +44,8 @@ namespace Fsel.System.Application.Commands.Chatbots
             return b.Length == 4 ? Encoding.ASCII.GetString(b) : string.Empty;
         }
 
-        private static bool TryProbeWavHeader(string path,
+        private static bool TryProbeWavHeader(
+            string path,
             out ushort audioFormat, out ushort channels, out uint sampleRate, out ushort bitsPerSample)
         {
             audioFormat = channels = bitsPerSample = 0;
@@ -54,14 +56,13 @@ namespace Fsel.System.Application.Commands.Chatbots
                 using var fs = File.OpenRead(path);
                 using var br = new BinaryReader(fs);
 
-                var riff = ReadFourCC(br);        // RIFF/RF64/RIFX
-                _ = br.ReadUInt32();              // file size (skip)
-                var wave = ReadFourCC(br);        // WAVE
+                var riff = ReadFourCC(br);  // RIFF/RF64/RIFX
+                _ = br.ReadUInt32();        // file size (skip)
+                var wave = ReadFourCC(br);  // WAVE
                 if (!((riff == "RIFF" || riff == "RF64" || riff == "RIFX") && wave == "WAVE"))
-                {
                     return false;
-                }
-                // scan tới "fmt "
+
+                // scan đến "fmt "
                 while (fs.Position + 8 <= fs.Length)
                 {
                     var chunkId = ReadFourCC(br);
@@ -78,13 +79,13 @@ namespace Fsel.System.Application.Commands.Chatbots
 
                         var remain = (int)chunkSize - 16;
                         if (remain > 0)
-                        {
                             fs.Position += remain;
-                        }
+
                         return true;
                     }
 
-                    fs.Position += chunkSize + (chunkSize % 2); // skip + padding
+                    // skip + padding nếu chunkSize lẻ
+                    fs.Position += chunkSize + (chunkSize % 2);
                 }
 
                 return false;
@@ -98,7 +99,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         private static bool IsPcm16kMono16BitWav(string path)
         {
             return TryProbeWavHeader(path,
-                out var fmt, out var ch, out var sr, out var bps)
+                    out var fmt, out var ch, out var sr, out var bps)
                 && fmt == 1 && ch == 1 && sr == 16000 && bps == 16;
         }
 
@@ -109,20 +110,25 @@ namespace Fsel.System.Application.Commands.Chatbots
                    && IsPcm16kMono16BitWav(path);
         }
 
-        // 1) Nếu là URL -> tải về file tạm. Nếu là local path -> trả nguyên.
-        private static async Task<(string localPath, bool isTemp)> MaterializeLocalAsync(string pathOrUrl, CancellationToken ct = default)
+        // ==== Materialize URL/local path to a local file ====
+
+        private static async Task<(string localPath, bool isTemp)> MaterializeLocalAsync(
+            string pathOrUrl, CancellationToken ct = default)
         {
             if (Uri.TryCreate(pathOrUrl, UriKind.Absolute, out var uri)
                 && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
             {
                 var ext = Path.GetExtension(uri.AbsolutePath);
                 if (string.IsNullOrWhiteSpace(ext))
-                {
                     ext = ".bin";
-                }
+
                 var tmp = Path.Combine(Path.GetTempPath(), $"audio_{Guid.NewGuid()}{ext}");
 
-                using var http = new HttpClient();
+                using var http = new HttpClient
+                {
+                    Timeout = TimeSpan.FromSeconds(100)
+                };
+
                 using var resp = await http.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct);
                 resp.EnsureSuccessStatusCode();
 
@@ -131,20 +137,52 @@ namespace Fsel.System.Application.Commands.Chatbots
                 return (tmp, true);
             }
 
+            // local path: trả nguyên (không phải temp)
             return (pathOrUrl, false);
         }
 
-        // 2) Đảm bảo local file là WAV PCM 16k/mono/16-bit. Chỉ convert khi cần.
-        private static async Task<string> EnsurePcm16kMonoWavLocalAsync(string inputPath, CancellationToken ct = default)
+        // ==== FFMPEG availability check (fail sớm nếu không có ffmpeg) ====
+
+        private void EnsureFfmpegAvailable()
         {
+            try
+            {
+                using var p = new Process
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = _ffmpegPath,
+                        Arguments = "-version",
+                        UseShellExecute = false,
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        CreateNoWindow = true
+                    }
+                };
+                p.Start();
+                if (!p.WaitForExit(5000) || p.ExitCode != 0)
+                    throw new InvalidOperationException("ffmpeg not available");
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("ffmpeg is not installed or not in PATH.", ex);
+            }
+        }
+
+        // ==== Convert to WAV PCM 16k/mono/16-bit if needed ====
+
+        private async Task<string> EnsurePcm16kMonoWavLocalAsync(string inputPath, CancellationToken ct = default)
+        {
+            EnsureFfmpegAvailable(); // kiểm tra 1 lần trước khi chạy
             var outputPath = Path.Combine(Path.GetTempPath(), $"audio_{Guid.NewGuid()}.wav");
 
             using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = "ffmpeg",
-                    Arguments = $"-y -i \"{inputPath}\" -acodec pcm_s16le -ar 16000 -ac 1 \"{outputPath}\"",
+                    FileName = _ffmpegPath,
+                    // -vn: bỏ video track nếu có; -y: overwrite; -hide_banner: gọn stderr
+                    Arguments = $"-hide_banner -y -i \"{inputPath}\" -vn -acodec pcm_s16le -ar 16000 -ac 1 \"{outputPath}\"",
                     UseShellExecute = false,
                     RedirectStandardError = true,
                     CreateNoWindow = true,
@@ -167,13 +205,17 @@ namespace Fsel.System.Application.Commands.Chatbots
             }
 
             await process.WaitForExitAsync(ct);
-            if (process.ExitCode != 0)
+            if (process.ExitCode != 0 || !File.Exists(outputPath))
+            {
+                _logger.LogError("ffmpeg convert failed (exit {ExitCode}). Stderr: {Stderr}", process.ExitCode, err);
                 throw new InvalidOperationException($"ffmpeg convert failed: {err}");
+            }
 
             return outputPath;
         }
 
-        // 3) Upload lên storage và trả về URL
+        // ==== Upload and return URL ====
+
         private async Task<string> UploadWavAndGetUrlAsync(string localWavPath, CancellationToken ct = default)
         {
             await using var fs = File.OpenRead(localWavPath);
@@ -182,15 +224,14 @@ namespace Fsel.System.Application.Commands.Chatbots
             var url = resp.Content?.Result;
 
             if (string.IsNullOrEmpty(url))
-            {
                 throw new InvalidOperationException("Upload failed: empty URL");
-            }
 
             return url!;
         }
 
-        // Facade chính: nhận path/URL, đảm bảo WAV PCM 16k/mono/16-bit, upload và trả về URL.
-        private async Task<string> UpdateFileWav(string audioFilePath, CancellationToken ct = default)
+        // ==== Facade: nhận path/URL, đảm bảo WAV PCM 16k/mono/16-bit, upload và trả URL ====
+
+        public async Task<string> UpdateFileWav(string audioFilePath, CancellationToken ct = default)
         {
             string? materialized = null;
             string? ensured = null;
@@ -198,29 +239,36 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             try
             {
-                var url = string.Empty;
                 (materialized, isTempDownload) = await MaterializeLocalAsync(audioFilePath, ct);
+
+                // Nếu file đã là WAV chuẩn
                 if (IsTargetWav(materialized))
                 {
-                    url = audioFilePath;
-                }
-                else
-                {
-                    ensured = await EnsurePcm16kMonoWavLocalAsync(materialized, ct);
-                    url = await UploadWavAndGetUrlAsync(ensured, ct);
+                    if (isTempDownload)
+                    {
+                        // Input ban đầu là URL và sau khi materialize thấy đã chuẩn -> trả lại URL gốc
+                        return audioFilePath;
+                    }
+
+                    // Input là local path -> vẫn phải upload để trả URL hợp lệ cho client
+                    return await UploadWavAndGetUrlAsync(materialized, ct);
                 }
 
-                return url;
+                // Convert nếu chưa đúng chuẩn
+                ensured = await EnsurePcm16kMonoWavLocalAsync(materialized, ct);
+                return await UploadWavAndGetUrlAsync(ensured, ct);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi xử lý file âm thanh");
+                _logger.LogError(ex, "Lỗi khi xử lý file âm thanh (audioFilePath={AudioFilePath})", audioFilePath);
                 throw new InvalidOperationException("File âm thanh không hợp lệ hoặc không thể chuyển sang WAV PCM 16k/mono/16-bit.", ex);
             }
             finally
             {
-                // dọn dẹp: nếu có file tạm download hoặc file convert
+                // dọn dẹp file tạm: chỉ xóa materialized nếu nó là file tải về từ URL
                 TryDeleteIfTemp(isTempDownload ? materialized : null);
+
+                // xóa file convert nếu khác materialized
                 TryDeleteIfTemp(ensured != null && ensured != materialized ? ensured : null);
             }
 
@@ -237,7 +285,10 @@ namespace Fsel.System.Application.Commands.Chatbots
                         File.Delete(path);
                     }
                 }
-                catch { /* ignore */ }
+                catch
+                {
+                    // ignore
+                }
             }
         }
     }
