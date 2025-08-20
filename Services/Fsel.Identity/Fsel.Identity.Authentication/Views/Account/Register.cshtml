@@ -24,6 +24,7 @@
             @await Component.InvokeAsync("Languages")
         </div>
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        <div class="hidden" id="invalidBirthday" data-value="@Localizer["i18n_Invalid_birthday"]"></div>
         <div class="forms-contain">
             <div id="userInfoContain" class="user-info-form">
                 <div class="item-title">@Localizer["i18n_sign_up"].Value?.ToUpper()</div>
@@ -44,7 +45,7 @@
                                            autocomplete="on"
                                            required
                                            asp-for="LastName" />
-                                    <label for="LastName" class="input-label">@Localizer["i18nCommonSignUp"]</label>
+                                    <label for="LastName" class="input-label">@Localizer["i18nSignUpLabelLastName"]</label>
                                 </div>
                                 @Html.CustomValidationMessageFor(model => model.LastName, Localizer, "", new { @class = "content-text-danger" })
                             </div>
@@ -81,15 +82,18 @@
                         </div>
                         <div class="row">
                             <div class="col-sm-12">
+                                <p style="color: #cfd8e5;display: flex; align-items: center;gap: 8px;margin: 0 0 8px 4px;">
+                                    @Localizer["i18nSignUpLabelBirthday"]
+                                    <img src="~/assets/icons/question.png" alt="hỏi chấm" />
+                                </p>
                                 <div class="float-input float-input-validate">
                                     <input type="text"
-                                           placeholder=""
-                                           class="text-input text-input-date"
+                                           placeholder="@Localizer["i18n_date_ddmmyy"]"
+                                           class="text-input text-input-place-holder text-input-date"
                                            id="birthday"
                                            name="Birthday"
                                            asp-for="Birthday"
                                            autocomplete="off" />
-                                    <label for="Birthday" class="input-label">@Localizer["i18nSignUpLabelBirthday"]</label>
                                 </div>
                                 @Html.CustomValidationMessageFor(model => model.Birthday, Localizer, "", new { @class = "content-text-danger" })
                             </div>
@@ -167,6 +171,7 @@
                                    placeholder=""
                                    autocomplete="off"
                                    required
+                                   maxlength="30"
                                    asp-for="Password" />
                             <label for="Password" class="input-label">@Localizer["i18n_new_password"]</label>
                         </div>

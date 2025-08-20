@@ -9,7 +9,6 @@
   });
 
   $('#form-Forgot').validate({
-    onkeyup: true,  
     onfocusout: true 
   });
 
@@ -27,16 +26,14 @@
     const identity = identityInput.val();
     const emailPattern = /^(?=.{1,64}@)(?=.{1,255}$)[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+(?:\.[a-zA-Z0-9!#$%&'*+/=?^_{|}~-]+)*@(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
     const phonePattern = /^\+?\d{7,15}$/;
-
+    $('span[data-valmsg-for="Identity"]').empty();
     if (!isNullOrWhiteSpace(identity)) {
       if (phonePattern.test(identity)) {
         identityInput.removeClass("content-border-danger");
-        $('span[data-valmsg-for="Identity"] #identity-error').remove();
         return true;
       }
       if (emailPattern.test(identity)) {
         identityInput.removeClass("content-border-danger");
-        $('span[data-valmsg-for="Identity"] #identity-error').remove();
         return true;
       }
       identityInput.addClass("content-border-danger");
@@ -44,14 +41,13 @@
       addInvalidMessage(invalidMessage);
     }
     else {
+
       let emptyMessage = $('div.validation-message-text[data-field="Identity"][data-validate="data-val-required"]').text();
       addInvalidMessage(emptyMessage);
-      /*$('input[name="Identity"]').valid();*/
     }
 
     return false;
   }
-
   function addInvalidMessage(message) {
     const $parentSpan = $('span[data-valmsg-for="Identity"]');
 
