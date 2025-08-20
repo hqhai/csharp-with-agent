@@ -43,6 +43,12 @@ namespace Fsel.Course.Application.Queries.TestQuery
                 queryTestSection = queryTestSection.Where(m => m.LayoutType == request.LayoutType);
             }
 
+            var queryGroupTestSection = queryTestSection.GroupBy(x => x.TestId).Select(x => new
+            {
+                TestId = x.Key,
+                LayoutTypes = x.Where(x => x.LayoutType.HasValue).Select(x => x.LayoutType).ToList()
+            });
+
             var query = _testRepository.Queryable.Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).Where(p => !p.IsArchive);
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -66,8 +72,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                 query = query.Where(m => m.ProgramId == request.ProgramId);
             }
             var queryTest = from baseQ in query
-                            join testSection in queryTestSection on baseQ.Id equals testSection.TestId into testSections
-                            where !request.LayoutType.HasValue || testSections.Any()
+                            join testSection in queryGroupTestSection on baseQ.Id equals testSection.TestId
                             select new TestSearchModel
                             {
                                 Id = baseQ.Id,
@@ -84,7 +89,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                                 OriginalId = baseQ.OriginalId,
                                 LevelId = baseQ.LevelId,
                                 ProgramId = baseQ.ProgramId,
-                                LayoutTypes = testSections.Select(ts => ts.LayoutType).Distinct().ToList(),
+                                LayoutTypes = testSection.LayoutTypes,
                             };
 
             int totalItem = await queryTest.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
