@@ -211,9 +211,11 @@ namespace Fsel.System.Application.Commands.Chatbots
                     Voice = "nova",
                 });
                 filePath = audioResult?.Content?.Result!;
+
+                var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
+                filePath = reponse.Result ?? filePath;
             }
-            var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
-            return reponse.Result ?? filePath;
+            return filePath;
         }
 
         /// <summary>
