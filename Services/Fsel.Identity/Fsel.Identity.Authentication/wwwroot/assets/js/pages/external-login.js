@@ -69,6 +69,7 @@
     }
     return value.length > 0;
   }
+
   function validatePhoneNumber() {
     $('input[name="PhoneNumber"]').valid();
     const phone = $phoneNumberInput.val().trim();
@@ -132,19 +133,39 @@
   }
 
   function runValidateDateOfBirth() {
-
-    const isValid = validateDateOfBirth();
-    dateOfBirthInput.classList.remove("content-border-danger");
-    if (!isValid) {
-      dateOfBirthInput.classList.add("content-border-danger");
-      return false;
+    const value = dateOfBirthInput.value.trim();
+    if (isNullOrWhiteSpace(value)) {
+      let emptyMessage = $('div.validation-message-text[data-field="Birthday"][data-validate="data-val-required"]').text();
+      addInvalidMessage(emptyMessage);
     }
-    return true;
+    else {
+      const isValid = validateDateOfBirth()
+      dateOfBirthInput.classList.remove("content-border-danger");
+      if (!isValid) {
+        dateOfBirthInput.classList.add("content-border-danger");
+        let invalidMessage = $("#invalidBirthday").attr("data-value")
+        addInvalidMessage(invalidMessage);
+        return false;
+      }
+      $('span[data-valmsg-for="Birthday"] #birthday-error').remove();
+      return true;
+    }
   }
+  function addInvalidMessage(message) {
+    const $parentSpan = $('span[data-valmsg-for="Birthday"]');
+    let $errorSpan = $parentSpan.find("#birthday-error");
 
+    if ($errorSpan.length > 0) {
+      $errorSpan.text(message);
+    } else {
+      $parentSpan.append('<span id="birthday-error">' + message + '</span>');
+    }
+  }
+  function isNullOrWhiteSpace(input) {
+    return !((input ?? "").trim());
+  }
   function validateDateOfBirth() {
     const value = dateOfBirthInput.value.trim();
-    $('input[name="Birthday"]').valid();
     if (!value) {
       return false;
     }

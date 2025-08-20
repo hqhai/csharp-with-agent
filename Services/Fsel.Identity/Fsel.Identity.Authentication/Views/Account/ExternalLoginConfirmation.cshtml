@@ -21,8 +21,9 @@
         <div class="langs">
             @await Component.InvokeAsync("Languages")
         </div>
-
+        <div class="hidden" id="invalidBirthday" data-value="@Localizer["i18n_Invalid_birthday"]"></div>
         <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        <div class="item-title">@Localizer["i18n_update_info"].Value?.ToUpper()</div>
         <form id="form-ExternalLogin" asp-route="ExternalLoginConfirmation">
             <input type="hidden" asp-for="ReturnUrl" />
             <input type="hidden" asp-for="IsEmailReadonly" />
@@ -80,26 +81,25 @@
                                    autocomplete="off"
                                    required
                                    asp-for="PhoneNumber" />
-                            <label for="Email" class="input-label">@Localizer["i18n_phone_number"]</label>
+                            <label for="PhoneNumber" class="input-label">@Localizer["i18n_phone_number"]</label>
                         </div>
                         @Html.CustomValidationMessageFor(model => model.PhoneNumber, Localizer, "", new { @class = "content-text-danger" })
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
-                        <div class="float-input float-input-validate option-birthday">
-                            <div class="birthday">
-                                <div class="float-input float-input-validate">
-                                    <input type="text"
-                                           placeholder=""
-                                           class="text-input text-input-date"
-                                           id="birthday"
-                                           name="Birthday"
-                                           asp-for="Birthday"
-                                           autocomplete="off" />
-                                    <label for="Birthday" class="input-label">@Localizer["i18nSignUpLabelBirthday"]</label>
-                                </div>
-                            </div>
+                        <p style="color: #cfd8e5;display: flex; align-items: center;gap: 8px;margin: 0 0 8px 4px;">
+                            @Localizer["i18nSignUpLabelBirthday"]
+                            <img src="~/assets/icons/question.png" alt="hỏi chấm" />
+                        </p>
+                        <div class="float-input float-input-validate">
+                            <input type="text"
+                                   placeholder="@Localizer["i18n_date_ddmmyy"]"
+                                   class="text-input text-input-place-holder text-input-date"
+                                   id="birthday"
+                                   name="Birthday"
+                                   asp-for="Birthday"
+                                   autocomplete="off" />
                         </div>
                         @Html.CustomValidationMessageFor(model => model.Birthday, Localizer, "", new { @class = "content-text-danger" })
                     </div>
@@ -118,7 +118,7 @@
                 @Localizer["i18n_next"]
             </button>
 
-            <div class="text-footer">@Localizer["i18n_back"] <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">Login</a></div>
+            <div class="text-footer">@Localizer["i18n_back"] <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">@Localizer["i18n_login"]</a></div>
         </form>
     </div>
 

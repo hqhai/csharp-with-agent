@@ -21,13 +21,12 @@ form {
 .resend-otp-2 {
   padding-top: 8px;
   padding-bottom: 8px;
-  margin-bottom: 16px;
 }
 
 .resend-otp-3 {
   padding-top: 8px;
   padding-bottom: 8px;
-  margin-bottom: 32px;
+  margin-top: 16px;
 }
 
 .otps {
@@ -116,11 +115,32 @@ form {
   }
 }
 .text-footer {
-    padding-top: 12px;
-    padding-bottom: 12px;
-    margin-top: 16px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  margin-top: 16px;
+  margin-bottom: 0px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
 }
 .text-footer a{
     color: #fff
 }
-/*# sourceMappingURL=verify-otp.css.map */
+.resend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; 
+  background: none; 
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #4a90e2;
+}
+
+.resend-btn .icon {
+  object-fit: contain;
+}
+
+#submit-otp {
+    margin-top: 32px;
+}

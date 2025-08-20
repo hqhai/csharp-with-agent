@@ -61,6 +61,7 @@
   let countTimeInSecond = $("#countTimeInSecond").attr("data-value")
   let countTimeInMinutesSecond = $("#countTimeInMinutesSecond").attr("data-value")
   let isLocked = $("#isBlocked").attr("data-value") === 'true'
+  let isLockedResendOtp = $("#isLockedResendOtp").attr("data-value").toLowerCase() === 'true'
   let maxNumberOfVerify = $("#maxNumberOfVerify").attr("data-value")
   let startTime = Date.now();
   function formatString(template, ...values) {
@@ -93,14 +94,28 @@
         }
       }
 
-      text = "<p>" + displayText + "</p>";
-      $(".resend-otp-1").html(text);
-      $(".resend-otp-1").removeClass("hidden");
-      $(".resend-otp-2").addClass("hidden");
-      $("#sms").prop("disabled", true);
+      const text = "<p>" + displayText + "</p>";
+      if (isLocked) {
+        $(".resend-otp-1").html(text);
+        $(".resend-otp-1").removeClass("hidden");
+        $(".resend-otp-2").addClass("hidden");
+        $(".resend-otp-3").addClass("hidden");
+      }
+      else if (isLockedResendOtp) {
+        $(".resend-otp-1").addClass("hidden");
+        $(".resend-otp-2").removeClass("hidden");
+        $(".resend-otp-3").removeClass("hidden");
+        $("#sms").prop("disabled", false);
+      }
+      else {
+        $(".resend-otp-1").html(text);
+        $(".resend-otp-1").removeClass("hidden");
+        $(".resend-otp-2").addClass("hidden");
+      }
       timeoutId = setTimeout(updateCountdown, 1000);
     } else {
       $(".resend-otp-2").removeClass("hidden");
+      $(".resend-otp-3").removeClass("hidden");
       $(".resend-otp-1").addClass("hidden");
       $("#sms").prop("disabled", false);
       clearTimeout(timeoutId);
