@@ -212,8 +212,8 @@ namespace Fsel.System.Application.Commands.Chatbots
                 });
                 filePath = audioResult?.Content?.Result!;
 
-                var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
-                filePath = reponse.Result ?? filePath;
+                //var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
+                //filePath = reponse.Result ?? filePath;
             }
             return filePath;
         }
