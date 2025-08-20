@@ -109,6 +109,7 @@ namespace Fsel.Course.Application.Commands.TestCmd
             }
             else
             {
+                _mapper.Map(request, test);
                 var methodHelper = await _testHelper.UpdateSectionRecursive(request.TestSections, test: test);
                 if (!methodHelper.IsOK)
                 {
