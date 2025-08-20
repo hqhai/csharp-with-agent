@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Globalization;
 using Fsel.Common.ActionResults;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
@@ -55,137 +54,68 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            IQueryable<UnitSearchModel> unitQuery = null;
+
+            var filteredQuery = _unitRepository.ReadQueryable.Where(p => !p.IsArchive).Where(u => u.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
+
+            if (request.CourseLevel != null)
+            {
+                filteredQuery = filteredQuery.Where(m => m.LevelId == request.CourseLevel);
+            }
+
+            if (request.ProgramId != null)
+            {
+                filteredQuery = filteredQuery.Where(m => m.ProgramId == request.ProgramId);
+            }
+
+            filteredQuery = filteredQuery
+                .Include(x => x.Level)
+                .Include(x => x.Program)
+                .Include(x => x.UnitModules.Where(m => m.UnitConfigType == Domain.Enums.EnumUnitConfigType.Lesson).Where(y => !y.IsDeleted));
+
+            if (!string.IsNullOrEmpty(request.Keyword))
+            {
+                if (Guid.TryParse(request.Keyword, out var guid))
+                {
+                    filteredQuery = filteredQuery.Where(m => m.Id == guid);
+                }
+                else
+                {
+                    var unitCodeQuery = filteredQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    var unitNameQuery = filteredQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+                    filteredQuery = unitCodeQuery.Union(unitNameQuery);
+                }
+            }
+
+            var unitQuery = filteredQuery.Where(u => !u.IsArchive).Distinct().Select(unit => new UnitSearchModel
+            {
+                Id = unit.Id,
+                Name = unit.Name,
+                Code = unit.Code,
+                Program = unit.Program != null ? unit.Program.Name : "",
+                CourseLevel = unit.Level != null ? unit.Level.Name : unit.CourseLevel.ToString(),
+                OriginalId = unit.OriginalId,
+                IsActive = unit.UnitResults.Any(n => !n.IsDeleted),
+                CreatedDate = unit.CreatedDate,
+                CreatedFullName = unit.CreatedFullName,
+                CreatedUserId = unit.CreatedUserId,
+                UpdatedDate = unit.UpdatedDate,
+                UpdatedUserId = unit.UpdatedUserId,
+                UpdatedFullName = unit.UpdatedFullName,
+                TeacherIds = (from um in unit.UnitModules
+                              join l in _lessonRepository.ReadQueryable.Where(l => l.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
+                                 on um.OriginalId equals l.OriginalId
+                              join lm in _lessonRepository.ReadOnlyDbContext.Set<LessonModule>().AsQueryable()
+                              .Where(x => x.LessonConfigType == Domain.Enums.EnumLessonConfigType.Video)
+                                 on l.Id equals lm.LessonId
+                              join v in _videoRepository.ReadQueryable
+                              .Where(v => v.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
+                                 on lm.OriginalId equals v.OriginalId
+                              select v.TeacherId).Distinct().ToList()
+            });
+
             if (request.TeacherId.HasValue)
             {
-                var videoQueryable = _videoRepository.ReadQueryable.Where(x => x.TeacherId == request.TeacherId
-                && x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
-                if (request.ProgramId.HasValue)
-                {
-                    videoQueryable.Where(x => x.ProgramId == request.ProgramId);
-                }
-
-                if (request.CourseLevel.HasValue)
-                {
-                    videoQueryable.Where(x => x.LevelId == request.CourseLevel);
-                }
-
-                var lessonTeacherQueryable = from v in videoQueryable
-                                             join lm in _lessonRepository.ReadOnlyDbContext.Set<LessonModule>().AsQueryable()
-                                             .Where(l => l.LessonConfigType == Domain.Enums.EnumLessonConfigType.Video)
-                                                 on v.OriginalId equals lm.OriginalId
-                                             join l in _lessonRepository.ReadQueryable.Where(l => l.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
-                                                 on lm.LessonId equals l.Id
-                                             join um in _unitRepository.ReadOnlyDbContext.Set<UnitModule>().AsQueryable()
-                                                 on l.OriginalId equals um.OriginalId
-                                             join u in _unitRepository.ReadQueryable
-                                             .Where(u => u.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
-                                                on um.UnitId equals u.Id
-                                             select u;
-
-                if (request.ProgramId.HasValue)
-                {
-                    lessonTeacherQueryable.Where(x => x.ProgramId == request.ProgramId);
-                }
-
-                if (request.CourseLevel.HasValue)
-                {
-                    lessonTeacherQueryable.Where(x => x.LevelId == request.CourseLevel);
-                }
-
-                request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
-                if (!string.IsNullOrEmpty(request.Keyword))
-                {
-                    if (Guid.TryParse(request.Keyword, out var guid))
-                    {
-                        lessonTeacherQueryable = lessonTeacherQueryable.Where(m => m.Id == guid);
-                    }
-                    else
-                    {
-                        var unitCodeQuery = lessonTeacherQueryable.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
-                        var unitNameQuery = lessonTeacherQueryable.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
-                        lessonTeacherQueryable = unitCodeQuery.Union(unitNameQuery);
-                    }
-                }
-
-                unitQuery = lessonTeacherQueryable.Where(u => !u.IsArchive).Distinct().Select(unit => new UnitSearchModel
-                {
-                    Id = unit.Id,
-                    Name = unit.Name,
-                    Code = unit.Code,
-                    Program = unit.Program != null ? unit.Program.Name : "",
-                    CourseLevel = unit.Level != null ? unit.Level.Name : unit.CourseLevel.ToString(),
-                    OriginalId = unit.OriginalId,
-                    IsActive = unit.UnitResults.Any(n => !n.IsDeleted),
-                    CreatedDate = unit.CreatedDate,
-                    CreatedFullName = unit.CreatedFullName,
-                    CreatedUserId = unit.CreatedUserId,
-                    UpdatedDate = unit.UpdatedDate,
-                    UpdatedUserId = unit.UpdatedUserId,
-                    UpdatedFullName = unit.UpdatedFullName,
-                    TeacherIds = new List<Guid> { request.TeacherId.Value },
-                });
-            }
-            else
-            {
-                var baseQuery = _unitRepository.ReadQueryable.Where(p => !p.IsArchive).Where(u => u.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
-
-                var filteredQuery = baseQuery;
-
-                if (request.CourseLevel != null)
-                {
-                    filteredQuery = filteredQuery.Where(m => m.LevelId == request.CourseLevel);
-                }
-
-                if (request.ProgramId != null)
-                {
-                    filteredQuery = filteredQuery.Where(m => m.ProgramId == request.ProgramId);
-                }
-
-                filteredQuery = filteredQuery
-                    .Include(x => x.Level)
-                    .Include(x => x.Program)
-                    .Include(x => x.UnitModules.Where(m => m.UnitConfigType == Domain.Enums.EnumUnitConfigType.Lesson).Where(y => !y.IsDeleted));
-
-                if (!string.IsNullOrEmpty(request.Keyword))
-                {
-                    if (Guid.TryParse(request.Keyword, out var guid))
-                    {
-                        filteredQuery = filteredQuery.Where(m => m.Id == guid);
-                    }
-                    else
-                    {
-                        var unitCodeQuery = filteredQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
-                        var unitNameQuery = filteredQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
-                        filteredQuery = unitCodeQuery.Union(unitNameQuery);
-                    }
-                }
-                unitQuery = filteredQuery.Where(u => !u.IsArchive).Distinct().Select(unit => new UnitSearchModel
-                {
-                    Id = unit.Id,
-                    Name = unit.Name,
-                    Code = unit.Code,
-                    Program = unit.Program != null ? unit.Program.Name : "",
-                    CourseLevel = unit.Level != null ? unit.Level.Name : unit.CourseLevel.ToString(),
-                    OriginalId = unit.OriginalId,
-                    IsActive = unit.UnitResults.Any(n => !n.IsDeleted),
-                    CreatedDate = unit.CreatedDate,
-                    CreatedFullName = unit.CreatedFullName,
-                    CreatedUserId = unit.CreatedUserId,
-                    UpdatedDate = unit.UpdatedDate,
-                    UpdatedUserId = unit.UpdatedUserId,
-                    UpdatedFullName = unit.UpdatedFullName,
-                    TeacherIds = (from um in unit.UnitModules
-                                  join l in _lessonRepository.ReadQueryable.Where(l => l.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
-                                     on um.OriginalId equals l.OriginalId
-                                  join lm in _lessonRepository.ReadOnlyDbContext.Set<LessonModule>().AsQueryable()
-                                  .Where(x => x.LessonConfigType == Domain.Enums.EnumLessonConfigType.Video)
-                                     on l.Id equals lm.LessonId
-                                  join v in _videoRepository.ReadQueryable
-                                  .Where(v => v.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion)
-                                     on lm.OriginalId equals v.OriginalId
-                                  select v.TeacherId).Distinct().ToList()
-                });
+                unitQuery.Where(x => x.TeacherIds.Contains(request.TeacherId.Value));
             }
 
             int totalItem = await unitQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
