@@ -37,20 +37,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<TestSearchModel>> methodResult = new MethodResult<PagingItemsModel<TestSearchModel>>();
 
-            var queryTestSection = _testSectionRepository.Queryable.Where(x => !x.ParentId.HasValue);
-            if (request.LayoutType.HasValue)
-            {
-                queryTestSection = queryTestSection.Where(m => m.LayoutType == request.LayoutType);
-            }
-
-            var queryGroupTestSection = queryTestSection.GroupBy(x => x.TestId).Select(x => new
-            {
-                TestId = x.Key,
-                LayoutTypes = x.Where(x => x.LayoutType.HasValue).Select(x => x.LayoutType).ToList()
-            });
-
             var query = _testRepository.Queryable.Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).Where(p => !p.IsArchive);
-
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 if (Guid.TryParse(request.Keyword, out var guid))
@@ -59,7 +46,9 @@ namespace Fsel.Course.Application.Queries.TestQuery
                 }
                 else
                 {
-                    query = query.Where(m => (m.Name != null && m.Name.Contains(request.Keyword)) || (m.Code != null && m.Code.Contains(request.Keyword)));
+                    var queryCode = query.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
+                    var queryName = query.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
+                    query = queryCode.Union(queryName);
                 }
             }
 
@@ -71,8 +60,12 @@ namespace Fsel.Course.Application.Queries.TestQuery
             {
                 query = query.Where(m => m.ProgramId == request.ProgramId);
             }
+
+            if (request.LayoutType.HasValue)
+            {
+                query = query.Where(x => _testSectionRepository.Queryable.Any(y => y.TestId == x.Id && y.LayoutType == request.LayoutType && !y.ParentId.HasValue));
+            }
             var queryTest = from baseQ in query
-                            join testSection in queryGroupTestSection on baseQ.Id equals testSection.TestId
                             select new TestSearchModel
                             {
                                 Id = baseQ.Id,
@@ -89,7 +82,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
                                 OriginalId = baseQ.OriginalId,
                                 LevelId = baseQ.LevelId,
                                 ProgramId = baseQ.ProgramId,
-                                LayoutTypes = testSection.LayoutTypes,
+                                LayoutTypes = baseQ.TestSections.Select(x => x.LayoutType).Where(x => x.HasValue).ToList(),
                             };
 
             int totalItem = await queryTest.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
