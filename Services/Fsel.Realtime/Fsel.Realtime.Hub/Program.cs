@@ -6,7 +6,6 @@ using Fsel.Realtime.Application.Hubs;
 using Fsel.Realtime.Application.Queues.Consumers;
 using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Constants;
-using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +30,7 @@ builder.Services.AddScoped<TranscriptHub>();
 builder.Services.AddScoped<BuyBlindBoxHub>();
 builder.Services.AddScoped<DictionaryHub>();
 builder.Services.AddScoped<SetTimeExamPracticeHub>();
+builder.Services.AddScoped<SendStudentsFromFileHub>();
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>
