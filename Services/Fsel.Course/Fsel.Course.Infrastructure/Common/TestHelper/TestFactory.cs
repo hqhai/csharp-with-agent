@@ -80,7 +80,7 @@ namespace Fsel.Course.Infrastructure.Common.TestHelper
                     question = _questionConverter.HandleQuestion(question).Result;
                     if (question != null)
                     {
-                        var data = Enumerable.Range(configCounter.CountQuestion + 1, question.CorrectTotal).ToList();
+                        var data = Enumerable.Range(configCounter.CountQuestion + 1, question.CorrectTotal + configCounter.CountQuestion).ToList();
                         question.SubQuestionIndexs = data;
                         configCounter.CountQuestion += question.CorrectTotal;
                     }
