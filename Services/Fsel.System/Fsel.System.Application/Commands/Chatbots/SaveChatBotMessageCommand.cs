@@ -214,19 +214,19 @@ namespace Fsel.System.Application.Commands.Chatbots
                 });
                 filePath = audioResult?.Content?.Result!;
 
-                //try
-                //{
-                //    var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
-                //    if (!reponse.IsOK)
-                //    {
-                //        _logger.LogError($"ConvertFileWavCommand : {filePath} => {reponse.Result}", reponse.ErrorMessages);
-                //    }
-                //    filePath = reponse.Result ?? filePath;
-                //}
-                //catch (Exception ex)
-                //{
-                //    _logger.LogError($"ConvertFileWavCommand Exception : {filePath} ", ex.Message);
-                //}
+                try
+                {
+                    var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
+                    if (!reponse.IsOK)
+                    {
+                        _logger.LogError($"ConvertFileWavCommand : {filePath} => {reponse.Result}", reponse.ErrorMessages);
+                    }
+                    filePath = reponse.Result ?? filePath;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"ConvertFileWavCommand Exception : {filePath} ", ex.Message);
+                }
             }
             return filePath;
         }
