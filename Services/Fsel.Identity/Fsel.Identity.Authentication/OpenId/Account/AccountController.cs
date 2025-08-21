@@ -747,9 +747,15 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     if (!roles.Contains(EnumRole.Student.ToString()))
                     {
                         user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                        result = await _userManager.UpdateAsync(user);
-                        result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                        _ = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
                     }
+
+                    user.PhoneNumber = request.PhoneNumber;
+                    user.FirstName = request.FirstName;
+                    user.LastName = request.LastName;
+                    user.Birthday = request.Birthday;
+                    user.EmailConfirmed = true;
+                    _ = await _userManager.UpdateAsync(user);
                     if (!await ValidateLogin(user))
                     {
                         return View(request);
@@ -1001,7 +1007,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
                     if (otpSessionInfo?.SendInfo?.IsBlockedByReachMaxSendCount == true)
                     {
-                        var minutes = otpSessionInfo.SendInfo.WaitTimeDuration.Value < TimeSpan.FromMinutes(1) ? 1: otpSessionInfo.SendInfo.WaitTimeDuration.Value.Minutes;
+                        var minutes = otpSessionInfo.SendInfo.WaitTimeDuration.Value < TimeSpan.FromMinutes(1) ? 1 : otpSessionInfo.SendInfo.WaitTimeDuration.Value.Minutes;
                         ModelState.AddModelError(string.Empty, _localizer["i18n_otp_wait_in_minute"].Value?.InjectParam(minutes.ToString()));
                     }
 
