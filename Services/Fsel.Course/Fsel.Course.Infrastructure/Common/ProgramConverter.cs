@@ -189,6 +189,32 @@ namespace Fsel.Course.Infrastructure.Common
             await AddChildentCategory(competitionEvents.ToArray(), cancellationToken);
         }
 
+        public async Task AddChildentCategoryToActive(IList<CategoryTreeModel> parentCategories, CancellationToken cancellationToken)
+        {
+            var parentCategoryIds = parentCategories.Select(x => x.Data).ToList();
+            var childentCategories = await _categoryRepository.Queryable
+                                                              .WhereBulkContains(parentCategoryIds, x => x.ParentId)
+                                                              .Where(x => x.Status == EnumStatus.Active)
+                                                              .ToListAsync(cancellationToken);
+
+            if (childentCategories == null || !childentCategories.Any())
+            {
+                return;
+            }
+
+            ConcurrentStack<CategoryTreeModel> competitionEvents = new ConcurrentStack<CategoryTreeModel>();
+
+            Parallel.ForEach(parentCategories, parentCategory =>
+            {
+                var childentWithEventParents = childentCategories.Where(x => x.ParentId == parentCategory.Data).ToList();
+                var parentCategoryChildents = _mapper.Map<IList<CategoryTreeModel>>(childentWithEventParents);
+                parentCategory.Children = parentCategoryChildents.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).ToList();
+                competitionEvents.PushRange(parentCategoryChildents.ToArray());
+            });
+
+            await AddChildentCategoryToActive(competitionEvents.ToArray(), cancellationToken);
+        }
+
         public async Task<MethodResult<List<Flow>>> SaveFlowsAsync(IList<SaveFlowCommandModel>? requestFlows)
         {
             var methodResult = new MethodResult<List<Flow>>();

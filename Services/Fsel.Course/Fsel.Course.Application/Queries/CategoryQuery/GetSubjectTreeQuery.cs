@@ -39,7 +39,7 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                                                     .ToListAsync(cancellationToken);
 
             var categoryTrees = _mapper.Map<IList<CategoryTreeModel>>(subjects);
-            await _programConverter.AddChildentCategory(categoryTrees, cancellationToken);
+            await _programConverter.AddChildentCategoryToActive(categoryTrees, cancellationToken);
 
             methodResult.Result = categoryTrees.Where(x => x.Children != null && x.Children.Any()).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;

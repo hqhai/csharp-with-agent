@@ -12,6 +12,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Domain.Models.QueryModels.Test;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,12 +24,18 @@ namespace Fsel.Course.Application.Queries.TestQuery
     public class SearchTestConfigQueryHandler : IRequestHandler<SearchTestQuery, MethodResult<PagingItemsModel<TestSearchModel>>>
     {
         private readonly ITestRepository _testRepository;
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly ILevelRepository _levelRepository;
         private readonly ITestSectionRepository _testSectionRepository;
 
         public SearchTestConfigQueryHandler(ITestRepository testRepository,
+            ICategoryRepository categoryRepository,
+            ILevelRepository levelRepository,
             ITestSectionRepository testSectionRepository)
         {
             _testRepository = testRepository;
+            _categoryRepository = categoryRepository;
+            _levelRepository = levelRepository;
             _testSectionRepository = testSectionRepository;
         }
 
@@ -66,6 +73,8 @@ namespace Fsel.Course.Application.Queries.TestQuery
                 query = query.Where(x => _testSectionRepository.Queryable.Any(y => y.TestId == x.Id && y.LayoutType == request.LayoutType && !y.ParentId.HasValue));
             }
             var queryTest = from baseQ in query
+                            join program in _categoryRepository.Queryable.Where(x => x.Type == EnumTypeCategory.Program) on baseQ.ProgramId equals program.Id
+                            join level in _levelRepository.Queryable on baseQ.LevelId equals level.Id
                             select new TestSearchModel
                             {
                                 Id = baseQ.Id,
@@ -75,14 +84,14 @@ namespace Fsel.Course.Application.Queries.TestQuery
                                 UpdatedDate = baseQ.UpdatedDate,
                                 UpdatedFullName = baseQ.UpdatedFullName,
                                 UpdatedUserId = baseQ.UpdatedUserId,
-                                LevelName = baseQ.Level != null ? baseQ.Level.Name : string.Empty,
-                                ProgramName = baseQ.Program != null ? baseQ.Program.Name : string.Empty,
+                                LevelName = program.Name,
+                                ProgramName = level.Name,
                                 Name = baseQ.Name,
                                 Code = baseQ.Code,
                                 OriginalId = baseQ.OriginalId,
                                 LevelId = baseQ.LevelId,
                                 ProgramId = baseQ.ProgramId,
-                                LayoutTypes = baseQ.TestSections.Select(x => x.LayoutType).Where(x => x.HasValue).ToList(),
+                                LayoutTypes = baseQ.TestSections.Select(x => x.LayoutType).Where(x => x.HasValue).Distinct().ToList(),
                             };
 
             int totalItem = await queryTest.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
