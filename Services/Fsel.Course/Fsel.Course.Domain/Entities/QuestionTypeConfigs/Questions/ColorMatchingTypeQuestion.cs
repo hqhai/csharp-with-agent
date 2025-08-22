@@ -33,9 +33,9 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
         [RegularExpression(@"^[^<>]*$", ErrorMessage = "Câu hỏi không được chứa ký tự '<' hoặc '>'.")]
         [MaxLength(50, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Text { get; set; }
+        public string? Content { get; set; }
 
-        public string? ImageUrl { get; set; }
+        public string? FilePath { get; set; }
 
         [JsonRequired]
         public bool? IsCorrect { get; set; }
