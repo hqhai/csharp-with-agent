@@ -29,6 +29,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public Guid OriginalId { get; set; }
         public int Version { get; set; }
         public EnumVersionStatus VersionStatus { get; set; }
+        public EnumScoringFormulaType ScoringFormulaType { get; set; }
 
         public Guid ProgramId { get; set; }
         public Category? Program { get; set; }

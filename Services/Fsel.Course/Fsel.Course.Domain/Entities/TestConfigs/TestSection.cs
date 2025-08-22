@@ -46,6 +46,17 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             set { ConfigStr = ConvertHelper.Serialize(value); }
         }
 
+        public string? ScoringFormulaConfigsStr { get; set; }
+
+        [NotMapped]
+        public IList<ScoringFormulaConfig>? ScoringFormulaConfigs
+        {
+            get { return ConvertHelper.Deserialize<IList<ScoringFormulaConfig>?>(ScoringFormulaConfigsStr); }
+            set { ScoringFormulaConfigsStr = ConvertHelper.Serialize(value); }
+        }
+
+        public double? Percent { get; set; }
+
         public Skill? Skill { get; set; }
         public Guid? SkillId { get; set; }
 
@@ -75,5 +86,11 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public string? VideoFilePath { get; set; }
         public string? SubFilePath { get; set; }
         public float DisplayTime { get; set; }
+    }
+
+    public class ScoringFormulaConfig
+    {
+        public double From { get; set; }
+        public double Equal { get; set; }
     }
 }
