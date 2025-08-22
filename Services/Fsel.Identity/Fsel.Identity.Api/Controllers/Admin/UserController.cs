@@ -211,7 +211,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("token/{id}")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(UserManagement.View)]
+        [Permission(StudentProgressManagement.LoginAsUser)]
         public async Task<IActionResult> GetJWT([FromRoute] Guid id)
         {
             MethodResult<TokenModel> queryResult = await _mediator.Send(new GenerateTokenCommand { Id = id }).ConfigureAwait(false);
