@@ -15,7 +15,6 @@ using Fsel.Identity.Application.Queries.UserReferrals;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
-using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -150,7 +149,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("search-user/lms-admin")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(UserManagement.View)]
+        [Permission(permissionCodes: new[] { UserGroupManagement.View, UserManagement.View })]
         public async Task<IActionResult> SearchUserInLmsPlat([FromQuery] SearchUsersQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -163,7 +162,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("users-by-roles")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<UserModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(UserManagement.View)]
+        [Permission(permissionCodes: new[] { UserGroupManagement.View, UserManagement.View })]
         public async Task<IActionResult> GetUsersByRoles([FromQuery] SearchUsersByRolesQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);

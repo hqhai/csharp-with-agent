@@ -30,7 +30,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
     public class ChangeCourseLevelByAdminCommand : IRequest<MethodResult<CourseResultModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
-
         public Guid UserId { get; set; }
     }
 
