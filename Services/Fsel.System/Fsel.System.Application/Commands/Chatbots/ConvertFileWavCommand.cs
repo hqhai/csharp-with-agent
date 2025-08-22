@@ -40,11 +40,10 @@ namespace Fsel.System.Application.Commands.Chatbots
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<string>();
-            var result = new MethodResult<string>();
             request.File ??= string.Empty;
             if (string.IsNullOrWhiteSpace(request.File))
             {
-                result.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.File));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.File));
                 return methodResult;
             }
 
@@ -52,15 +51,15 @@ namespace Fsel.System.Application.Commands.Chatbots
             {
                 var formFile = await DownloadAsIFormFileAsync(request.File, cancellationToken);
                 var streamPart = ToStreamPart(formFile, forceWav: false);
-                var wavUrl = await ConvertAndUploadAsync(streamPart, cancellationToken);
+                var wavUrl = await ConvertAndUploadAsync(streamPart);
 
-                result.Result = wavUrl;
+                methodResult.Result = wavUrl;
                 return methodResult;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Convert WAV pipeline failed for {Url}", request.File);
-                result.AddErrorBadRequest(ex.Message);
+                methodResult.AddErrorBadRequest(ex.Message);
                 return methodResult;
             }
         }
@@ -68,7 +67,7 @@ namespace Fsel.System.Application.Commands.Chatbots
         /// <summary>
         /// Calls ffmpeg service to convert; streams from returned S3 URL straight into storage upload.
         /// </summary>
-        private async Task<string> ConvertAndUploadAsync(StreamPart sourceFile, CancellationToken ct)
+        private async Task<string> ConvertAndUploadAsync(StreamPart sourceFile)
         {
             // 1) Convert via ffmpeg service
             var ffmpegConvert = await _fFmpegServices.Convert(sourceFile);
