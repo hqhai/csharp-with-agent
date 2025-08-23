@@ -2,8 +2,9 @@
 
 namespace Fsel.ExamPractice.Domain.Entities.Configs
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums.ErrorCodes;
 
     public class SectionMediaConfig
     {
@@ -27,5 +28,17 @@ namespace Fsel.ExamPractice.Domain.Entities.Configs
 
         public int TotalQuestion { get; set; }
         public int TargetWord { get; set; }
+
+        [NotMapped]
+        public TimeSpan DisplayTimeSpan
+        {
+            get { return TimeSpan.FromSeconds(DisplayTime ?? default); }
+        }
+
+        [NotMapped]
+        public TimeSpan ExecutionTimeSpan
+        {
+            get { return TimeSpan.FromSeconds(ExecutionTime ?? default); }
+        }
     }
 }

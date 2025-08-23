@@ -94,5 +94,17 @@ namespace Fsel.ExamPractice.Api.Controllers
             MethodResult<PagingItemsModel<ExamPracticeSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get ExamPractice Histories
+        /// </summary>
+        [HttpGet("histories")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExamPracticeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitHistory([FromQuery] GetHistoryExamPracticeQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

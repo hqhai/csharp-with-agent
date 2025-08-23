@@ -13,10 +13,11 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
     {
         public ExamPracticeSectionProfile()
         {
+            CreateMap<ExamPracticeSection, ExamPracticeSection>().IgnoreAllNonExisting();
             CreateMap<ExamPracticeSection, ExamPracticeSectionModel>().IgnoreAllNonExisting();
             CreateMap<ExamPracticeSection, ExamPracticeSectionDetailModel>().ForMember(x => x.QuestionIds, x => x.MapFrom(y => y.Questions.OrderBy(x => x.CreatedDate).Select(x => x.Id)));
-            CreateMap<CreateExamPracticeSectionCommandModel, ExamPracticeSection>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).ForMember(m => m.Questions, opt => opt.Ignore()).IgnoreAllNonExisting();
-            CreateMap<UpdateExamPracticeSectionCommandModel, ExamPracticeSection>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).ForMember(m => m.Questions, opt => opt.Ignore()).IgnoreAllNonExisting();
+            CreateMap<CreateExamPracticeSectionCommandModel, ExamPracticeSection>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).ForMember(m => m.Questions, opt => opt.Ignore()).ForMember(m => m.ExamPracticeAISettings, opt => opt.Ignore()).IgnoreAllNonExisting();
+            CreateMap<UpdateExamPracticeSectionCommandModel, ExamPracticeSection>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).ForMember(m => m.Questions, opt => opt.Ignore()).ForMember(m => m.ExamPracticeAISettings, opt => opt.Ignore()).IgnoreAllNonExisting();
         }
     }
 }

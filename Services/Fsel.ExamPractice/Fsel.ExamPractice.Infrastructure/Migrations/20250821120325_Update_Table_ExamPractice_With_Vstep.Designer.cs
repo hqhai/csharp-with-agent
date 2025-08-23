@@ -4,6 +4,7 @@ using Fsel.ExamPractice.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.ExamPractice.Infrastructure.Migrations
 {
     [DbContext(typeof(ExamPracticesDBContext))]
-    partial class ExamPracticesDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250821120325_Update_Table_ExamPractice_With_Vstep")]
+    partial class Update_Table_ExamPractice_With_Vstep
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

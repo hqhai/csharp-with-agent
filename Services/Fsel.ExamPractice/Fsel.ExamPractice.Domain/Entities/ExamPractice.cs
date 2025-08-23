@@ -5,8 +5,9 @@ namespace Fsel.ExamPractice.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.ExamPractice.Domain.Enums;
+    using Fsel.ExamPractice.Domain.IEntities;
 
-    public class ExamPractice : Entity
+    public class ExamPractice : Entity, IVersionEntity
     {
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
@@ -46,6 +47,13 @@ namespace Fsel.ExamPractice.Domain.Entities
 
         public DateTime? ActivatedAt { get; set; }
         public Guid? ParentExamPracticeId { get; set; }
+
+        public Guid OriginalId { get; set; }
+
+        public int Version { get; set; }
+
+        public EnumVersionStatus VersionStatus { get; set; }
+
         public ExamPractice? ParentExamPractice { get; set; }
         public ICollection<ExamPracticeSection> ExamPracticeSections { get; set; } = new List<ExamPracticeSection>();
         public ICollection<ExamPracticeRetry> ExamPracticeRetrys { get; set; } = new List<ExamPracticeRetry>();

@@ -30,6 +30,21 @@ namespace Fsel.ExamPractice.Domain.Entities
             set { ConfigStr = ConvertHelper.Serialize(value); }
         }
 
+        public string? SubQuestionIndexsStr { get; set; }
+
+        [NotMapped]
+        public int SubQuestionNumber
+        {
+            get { return SubQuestionIndexs?.Count ?? default; }
+        }
+
+        [NotMapped]
+        public IList<int>? SubQuestionIndexs
+        {
+            get { return ConvertHelper.Deserialize<IList<int>>(SubQuestionIndexsStr); }
+            set { SubQuestionIndexsStr = ConvertHelper.Serialize(value); }
+        }
+
         public EnumSectionExamPracticeType? Type { get; set; }
         public int DisplayOrder { get; set; }
         public Guid? ExamPracticeId { get; set; }
