@@ -17,7 +17,6 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAISettings
         public double SettingPresence { get; set; }
         public string? Task { get; set; }
         public IList<ExamPracticePromptModel>? Prompts { get; set; }
-        public Guid? ExamPracticeSectionId { get; set; }
         public IList<ExamPracticeAICriteriaSettingCommandModel>? ExamPracticeAICriteriaSettings { get; set; }
     }
 }

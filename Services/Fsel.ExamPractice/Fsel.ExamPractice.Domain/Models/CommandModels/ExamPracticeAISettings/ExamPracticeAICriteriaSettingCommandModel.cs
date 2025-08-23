@@ -11,6 +11,5 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAISettings
         public string? SystemRoleAlConfig { get; set; }
         public IList<ExamPracticePromptModel>? Prompts { get; set; }
         public EnumMockTestAIType CriteriaName { get; set; }
-        public Guid? ExamPracticeAISettingId { get; set; }
     }
 }

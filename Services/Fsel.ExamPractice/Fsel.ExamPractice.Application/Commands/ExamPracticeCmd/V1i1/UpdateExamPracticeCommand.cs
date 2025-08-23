@@ -73,7 +73,7 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
 
                     if (!isUsingByClient)
                     {
-                        await _examPracticeConverter.HandlerChildents(newEntity.ExamPracticeSections, oldEntity.ExamPracticeSections, oldEntity.Id, null, cancellationToken);
+                        await _examPracticeConverter.HandlerChildents(request.ExamPracticeSections, oldEntity.ExamPracticeSections, oldEntity.Id, null, cancellationToken);
                         await _examPracticeConverter.DeleteObjectInstance();
                     }
 

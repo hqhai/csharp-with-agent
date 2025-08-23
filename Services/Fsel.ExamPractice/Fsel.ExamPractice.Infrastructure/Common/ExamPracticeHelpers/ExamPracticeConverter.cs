@@ -6,11 +6,14 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
     using AutoMapper;
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.IRepositories;
+    using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAISettings;
+    using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
+    using Fsel.ExamPractice.Domain.Models.CommandModels.Questions;
     using Microsoft.EntityFrameworkCore;
 
     public class ExamPracticeConverter
     {
-        private readonly IExamPracticeSectionRepository _examPracticeSection;
+        private readonly IExamPracticeSectionRepository _examPracticeSectionRepository;
         private readonly IExamPracticeAISettingRepository _examPracticeAISetting;
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
@@ -20,20 +23,20 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         private List<ExamPracticeSection> _examPracticeSections = new List<ExamPracticeSection>();
         private List<ExamPracticeAICriteriaSetting> _examPracticeAICriteriaSettings = new List<ExamPracticeAICriteriaSetting>();
 
-        public ExamPracticeConverter(IExamPracticeSectionRepository examPracticeSection,
+        public ExamPracticeConverter(IExamPracticeSectionRepository examPracticeSectionRepository,
                                      IExamPracticeAISettingRepository examPracticeAISetting,
                                      IQuestionRepository questionRepository,
                                      IMapper mapper,
                                      IExamPracticeAICriteriaSettingRepository examPracticeAICriteriaSettingRepository)
         {
-            _examPracticeSection = examPracticeSection;
+            _examPracticeSectionRepository = examPracticeSectionRepository;
             _examPracticeAISetting = examPracticeAISetting;
             _questionRepository = questionRepository;
             _mapper = mapper;
             _examPracticeAICriteriaSettingRepository = examPracticeAICriteriaSettingRepository;
         }
 
-        public async Task HandlerChildents(ICollection<ExamPracticeSection> newExamPracticeSections, ICollection<ExamPracticeSection> examPracticeSectionBelongParents, Guid? examPracticeId, Guid? examPracticeSectionParentId, CancellationToken cancellationToken)
+        public async Task HandlerChildents(IList<UpdateExamPracticeSectionCommandModel> newExamPracticeSections, ICollection<ExamPracticeSection> examPracticeSectionBelongParents, Guid? examPracticeId, Guid? examPracticeSectionParentId, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(newExamPracticeSections);
             ArgumentNullException.ThrowIfNull(examPracticeSectionBelongParents);
@@ -42,20 +45,15 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             if (oldExamPracticeSections != null && oldExamPracticeSections.Any())
             {
                 // xoá nhưng đối tượng không được update
-                var removedPracticeSections = oldExamPracticeSections.ExceptBy(newExamPracticeSections.Select(x => x.Id), u => u.Id).ToList();
-                removedPracticeSections.ForEach(item =>
-                {
-                    item.ParentExamPracticeSection = null;
-                });
-
+                var removedPracticeSections = oldExamPracticeSections.Where(x => x.Id != Guid.Empty).ExceptBy(newExamPracticeSections.Select(x => x.Id), u => u.Id).ToList();
                 _examPracticeSections.AddRange(removedPracticeSections);
             }
 
             foreach (var newExamPracticeSection in newExamPracticeSections)
             {
-                if (newExamPracticeSection.Id == Guid.Empty)
+                if (!newExamPracticeSection.Id.HasValue)
                 {
-                    examPracticeSectionBelongParents.Add(newExamPracticeSection);
+                    examPracticeSectionBelongParents.Add(_mapper.Map<ExamPracticeSection>(newExamPracticeSection));
                 }
                 else
                 {
@@ -69,21 +67,21 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                     QuestionHandler(oldExamPracticeSection.Questions, newExamPracticeSection.Questions);
                     ExamPracticeAISettingHandler(oldExamPracticeSection.ExamPracticeAISettings, newExamPracticeSection.ExamPracticeAISettings);
 
-                    if (newExamPracticeSection.ExamPracticeSections.Any())
+                    if (newExamPracticeSection.ChildrenExamPracticeSections.Any())
                     {
-                        await HandlerChildents(newExamPracticeSection.ExamPracticeSections, oldExamPracticeSection.ExamPracticeSections, null, oldExamPracticeSection.Id, cancellationToken);
+                        await HandlerChildents(newExamPracticeSection.ChildrenExamPracticeSections, oldExamPracticeSection.ExamPracticeSections, null, oldExamPracticeSection.Id, cancellationToken);
                     }
                 }
             }
         }
 
-        private void QuestionHandler(ICollection<Question> oldQuestions, ICollection<Question> newQuestions)
+        private void QuestionHandler(ICollection<Question> oldQuestions, IList<UpdateQuestionCommandModel> newQuestions)
         {
             foreach (var newQuestion in newQuestions)
             {
-                if (newQuestion.Id == Guid.Empty)
+                if (!newQuestion.Id.HasValue)
                 {
-                    oldQuestions.Add(newQuestion);
+                    oldQuestions.Add(_mapper.Map<Question>(newQuestion));
                 }
                 else
                 {
@@ -93,17 +91,17 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             }
 
             // xoá nhưng đối tượng không được update
-            var removedQuestions = oldQuestions.ExceptBy(newQuestions.Select(x => x.Id), u => u.Id).ToList();
+            var removedQuestions = oldQuestions.Where(x => x.Id != Guid.Empty).ExceptBy(newQuestions.Select(x => x.Id), u => u.Id).ToList();
             _questions.AddRange(removedQuestions ?? new List<Question>());
         }
 
-        private void ExamPracticeAISettingHandler(ICollection<ExamPracticeAISetting> oldExamPracticeAISettings, ICollection<ExamPracticeAISetting> newExamPracticeAISettings)
+        private void ExamPracticeAISettingHandler(ICollection<ExamPracticeAISetting> oldExamPracticeAISettings, IList<ExamPracticeAISettingCommandModel> newExamPracticeAISettings)
         {
             foreach (var newExamPracticeAISetting in newExamPracticeAISettings)
             {
-                if (newExamPracticeAISetting.Id == Guid.Empty)
+                if (!newExamPracticeAISetting.Id.HasValue)
                 {
-                    oldExamPracticeAISettings.Add(newExamPracticeAISetting);
+                    oldExamPracticeAISettings.Add(_mapper.Map<ExamPracticeAISetting>(newExamPracticeAISetting));
                 }
                 else
                 {
@@ -114,22 +112,25 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                     }
 
                     _mapper.Map(newExamPracticeAISetting, oldExamPracticeAISetting);
-                    ExamPracticeAICriteriaSettingHandler(oldExamPracticeAISetting.ExamPracticeAICriteriaSettings, newExamPracticeAISetting.ExamPracticeAICriteriaSettings);
+                    if (newExamPracticeAISetting.ExamPracticeAICriteriaSettings != null && newExamPracticeAISetting.ExamPracticeAICriteriaSettings.Any())
+                    {
+                        ExamPracticeAICriteriaSettingHandler(oldExamPracticeAISetting.ExamPracticeAICriteriaSettings, newExamPracticeAISetting.ExamPracticeAICriteriaSettings);
+                    }
                 }
             }
 
             // xoá nhưng đối tượng không được update
-            var removedExamPracticeAISettings = oldExamPracticeAISettings.ExceptBy(newExamPracticeAISettings.Select(x => x.Id), u => u.Id).ToList();
+            var removedExamPracticeAISettings = oldExamPracticeAISettings.Where(x => x.Id != Guid.Empty).ExceptBy(newExamPracticeAISettings.Select(x => x.Id), u => u.Id).ToList();
             _examPracticeAISettings.AddRange(removedExamPracticeAISettings ?? new List<ExamPracticeAISetting>());
         }
 
-        private void ExamPracticeAICriteriaSettingHandler(ICollection<ExamPracticeAICriteriaSetting> oldExamPracticeAICriteriaSettings, ICollection<ExamPracticeAICriteriaSetting> newExamPracticeAICriteriaSettings)
+        private void ExamPracticeAICriteriaSettingHandler(ICollection<ExamPracticeAICriteriaSetting> oldExamPracticeAICriteriaSettings, IList<ExamPracticeAICriteriaSettingCommandModel> newExamPracticeAICriteriaSettings)
         {
             foreach (var newExamPracticeAICriteriaSetting in newExamPracticeAICriteriaSettings)
             {
-                if (newExamPracticeAICriteriaSetting.Id == Guid.Empty)
+                if (!newExamPracticeAICriteriaSetting.Id.HasValue)
                 {
-                    oldExamPracticeAICriteriaSettings.Add(newExamPracticeAICriteriaSetting);
+                    oldExamPracticeAICriteriaSettings.Add(_mapper.Map<ExamPracticeAICriteriaSetting>(newExamPracticeAICriteriaSetting));
                 }
                 else
                 {
@@ -139,7 +140,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             }
 
             // xoá nhưng đối tượng không được update
-            var removedExamPracticeAICriteriaSettings = oldExamPracticeAICriteriaSettings.ExceptBy(newExamPracticeAICriteriaSettings.Select(x => x.Id), u => u.Id).ToList();
+            var removedExamPracticeAICriteriaSettings = oldExamPracticeAICriteriaSettings.Where(x => x.Id != Guid.Empty).ExceptBy(newExamPracticeAICriteriaSettings.Select(x => x.Id), u => u.Id).ToList();
             _examPracticeAICriteriaSettings.AddRange(removedExamPracticeAICriteriaSettings ?? new List<ExamPracticeAICriteriaSetting>());
         }
 
@@ -147,20 +148,22 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             if (examPracticeId.HasValue)
             {
-                return await _examPracticeSection.Queryable
-                                                 .Include(x => x.Questions)
-                                                 .Include(x => x.ExamPracticeAISettings)
-                                                 .Where(x => x.ExamPracticeId == examPracticeId && !x.ParentExamPracticeSectionId.HasValue)
-                                                 .ToListAsync(cancellationToken);
+                return await _examPracticeSectionRepository.Queryable
+                                                           .Include(x => x.Questions)
+                                                           .Include(x => x.ExamPracticeAISettings)
+                                                           .ThenInclude(x => x.ExamPracticeAICriteriaSettings)
+                                                           .Where(x => x.ExamPracticeId == examPracticeId && !x.ParentExamPracticeSectionId.HasValue)
+                                                           .ToListAsync(cancellationToken);
             }
 
             if (examPracticeSectionParentId.HasValue)
             {
-                return await _examPracticeSection.Queryable
-                                                 .Include(x => x.Questions)
-                                                 .Include(x => x.ExamPracticeAISettings)
-                                                 .Where(x => x.ParentExamPracticeSectionId == examPracticeSectionParentId)
-                                                 .ToListAsync(cancellationToken);
+                return await _examPracticeSectionRepository.Queryable
+                                                           .Include(x => x.Questions)
+                                                           .Include(x => x.ExamPracticeAISettings)
+                                                           .ThenInclude(x => x.ExamPracticeAICriteriaSettings)
+                                                           .Where(x => x.ParentExamPracticeSectionId == examPracticeSectionParentId)
+                                                           .ToListAsync(cancellationToken);
             }
 
             return new List<ExamPracticeSection>();
@@ -170,7 +173,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             await _questionRepository.DeleteListAsync(_questions);
             await _examPracticeAISetting.DeleteListAsync(_examPracticeAISettings);
-            await _examPracticeSection.DeleteListAsync(_examPracticeSections);
+            await _examPracticeSectionRepository.DeleteListAsync(_examPracticeSections);
             await _examPracticeAICriteriaSettingRepository.DeleteListAsync(_examPracticeAICriteriaSettings);
         }
     }

@@ -12,13 +12,11 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
     {
         public ExamPracticeAISettingProfile()
         {
-            CreateMap<ExamPracticeAISetting, ExamPracticeAISetting>().IgnoreAllNonExisting();
-            CreateMap<ExamPracticeAICriteriaSetting, ExamPracticeAICriteriaSetting>().IgnoreAllNonExisting();
             CreateMap<ExamPracticeAISetting, ExamPracticeAISettingModel>().IgnoreAllNonExisting();
             CreateMap<ExamPracticeAICriteriaSetting, ExamPracticeAICriteriaSettingModel>().IgnoreAllNonExisting();
             CreateMap<ExamPracticeAICriteriaSettingModel, ExamPracticeAICriteriaSetting>().IgnoreAllNonExisting();
             CreateMap<ExamPracticeAISettingModel, ExamPracticeAISetting>().IgnoreAllNonExisting();
-            CreateMap<ExamPracticeAISettingCommandModel, ExamPracticeAISetting>().IgnoreAllNonExisting();
+            CreateMap<ExamPracticeAISettingCommandModel, ExamPracticeAISetting>().ForMember(m => m.ExamPracticeAICriteriaSettings, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<ExamPracticeAICriteriaSettingCommandModel, ExamPracticeAICriteriaSetting>().IgnoreAllNonExisting();
         }
     }

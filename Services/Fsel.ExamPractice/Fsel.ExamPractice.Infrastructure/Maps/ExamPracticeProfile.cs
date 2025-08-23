@@ -16,7 +16,7 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
             CreateMap<ExamPractice, ExamPracticeSearchModel>().IgnoreAllNonExisting();
             CreateMap<ExamPractice, ExamPracticeDetailModel>().IgnoreAllNonExisting();
             CreateMap<CreateExamPracticeCommandModel, ExamPractice>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).IgnoreAllNonExisting();
-            CreateMap<UpdateExamPracticeCommandModel, ExamPractice>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).IgnoreAllNonExisting();
+            CreateMap<UpdateExamPracticeCommandModel, ExamPractice>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
         }
     }
 }

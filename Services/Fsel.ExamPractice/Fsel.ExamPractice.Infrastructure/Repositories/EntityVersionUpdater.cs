@@ -9,7 +9,6 @@ namespace Fsel.ExamPractice.Infrastructure.Repositories
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Core.Entities;
-    using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.IEntities;
     using Fsel.ExamPractice.Domain.IRepositories;

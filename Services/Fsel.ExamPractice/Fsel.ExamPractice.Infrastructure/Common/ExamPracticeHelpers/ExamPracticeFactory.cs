@@ -49,8 +49,11 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                     examPracticeSection.ExamPracticeAISettings = ExamPracticeAISettingClassification(examPracticeSectionRequest.ExamPracticeAISettings).ToList();
                     examPracticeSection.Questions = ExamPracticeQuestionClassification(examPracticeSectionRequest.Questions).ToList();
 
-                    var data = Enumerable.Range(numberQuestion++, _countQuestion).ToList();
-                    examPracticeSection.SubQuestionIndexs = data;
+                    if (examPracticeSection.Questions != null && examPracticeSection.Questions.Any())
+                    {
+                        var data = Enumerable.Range(numberQuestion++, _countQuestion).ToList();
+                        examPracticeSection.SubQuestionIndexs = data;
+                    }
 
                     yield return examPracticeSection;
                 }
