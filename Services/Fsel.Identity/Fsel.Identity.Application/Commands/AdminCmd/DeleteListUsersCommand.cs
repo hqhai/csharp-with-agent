@@ -42,11 +42,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
 
             var usersToDelete = await _userManager.Users
-                .Include(x => x.UserGroups)
                 .WhereBulkContains(request.UserIds, x => x.Id)
                 .ToListAsync(cancellationToken);
 
-            var userGroupMemberShips = usersToDelete.SelectMany(x => x.UserGroups).ToList();
 
             if (!usersToDelete.Any() || usersToDelete.Count != request.UserIds.Distinct().Count())
             {
@@ -56,8 +54,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             await _userGroupMemberShipRepository.ExecuteTransactionAsync(async () =>
             {
-                await _userGroupMemberShipRepository.DeleteListAsync(userGroupMemberShips);
-
                 await _userManager.Users
                     .Where(u => request.UserIds.Contains(u.Id))
                     .ExecuteUpdateAsync(setter => setter

@@ -77,8 +77,6 @@ namespace Fsel.Identity.Domain.Entities
 
         public virtual ICollection<UserDeletion> UserDeletions { get; set; } = new List<UserDeletion>();
 
-        public virtual ICollection<UserGroupMemberShip> UserGroups { get; set; } = new List<UserGroupMemberShip>();
-
         public virtual Parent? Parent { get; set; }
         public virtual CSO? CSO { get; set; }
         public virtual Student? Student { get; set; }

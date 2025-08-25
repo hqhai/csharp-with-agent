@@ -27,14 +27,17 @@ namespace Fsel.Identity.Application.Commands.UserCmd
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly IUserGroupRepository _userGroupRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
 
         public UpdateProfileUserCommandHandler(UserManager<User> userManager,
                                                IMapper mapper,
-                                               IUserGroupRepository userGroupRepository)
+                                               IUserGroupRepository userGroupRepository,
+                                               IUserRoleRepository userRoleRepository)
         {
             _userManager = userManager;
             _mapper = mapper;
             _userGroupRepository = userGroupRepository;
+            _userRoleRepository = userRoleRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateProfileUserCommand request, CancellationToken cancellationToken)
@@ -51,7 +54,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
 
             var user = await _userManager.Users
-                                         .Include(x => x.UserGroups)
                                          .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
@@ -88,17 +90,39 @@ namespace Fsel.Identity.Application.Commands.UserCmd
 
             if (request.GroupId.HasValue)
             {
-                var userGroup = user.UserGroups.FirstOrDefault();
-                if (userGroup != null)
+                // Lấy UserRole hiện tại
+                var currentUserRole = await _userRoleRepository.GetQuery()
+                    .FirstOrDefaultAsync(x => x.UserId == user.Id, cancellationToken);
+
+                if (currentUserRole != null)
                 {
-                    userGroup.GroupId = request.GroupId.Value;
+                    // Nếu RoleId khác với GroupId mới, cần xóa UserRole cũ và tạo mới
+                    // Vì RoleId là part of composite key, không thể update trực tiếp
+                    if (currentUserRole.RoleId != request.GroupId.Value)
+                    {
+                        // Xóa UserRole cũ
+                        await _userRoleRepository.DeleteAsync(currentUserRole);
+
+                        // Tạo UserRole mới với RoleId mới
+                        var newUserRole = new UserRole
+                        {
+                            UserId = user.Id,
+                            RoleId = request.GroupId.Value,
+                            IsActive = currentUserRole.IsActive // Giữ nguyên trạng thái IsActive
+                        };
+                        await _userRoleRepository.AddAsync(newUserRole);
+                    }
                 }
                 else
                 {
-                    user.UserGroups.Add(new UserGroupMemberShip
+                    // Nếu chưa có UserRole, tạo mới
+                    var newUserRole = new UserRole
                     {
-                        GroupId = request.GroupId.Value
-                    });
+                        UserId = user.Id,
+                        RoleId = request.GroupId.Value,
+                        IsActive = true
+                    };
+                    await _userRoleRepository.AddAsync(newUserRole);
                 }
             }
 
