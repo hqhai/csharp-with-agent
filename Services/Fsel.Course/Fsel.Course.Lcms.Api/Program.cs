@@ -101,6 +101,7 @@ builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionReposito
 builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
 builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
 builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
+builder.Services.AddScoped<IUnitModuleRepository, UnitModuleRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
