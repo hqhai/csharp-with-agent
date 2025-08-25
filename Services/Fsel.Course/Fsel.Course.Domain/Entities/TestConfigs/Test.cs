@@ -199,5 +199,61 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             }
             return exists;
         }
+
+        public async Task<bool> ValidateScoringFormula()
+        {
+            if (ScoringFormulaType == EnumScoringFormulaType.BandScore)
+            {
+                double totalPercent = 0;
+                TestSections.ForEach(p =>
+                {
+                    if (p.Percent.HasValue)
+                    {
+                        totalPercent += p.Percent.Value;
+                    }
+                });
+                if (totalPercent <= 99 || totalPercent > 100)
+                {
+                    AddErrorResults(new ErrorResult
+                    {
+                        ErrorCode = nameof(EnumSystemErrorCode.Min),
+                        Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(totalPercent),
+                                }
+                        },
+                    });
+                    return false;
+                }
+            }
+            else
+            {
+                double totalPercent = 0;
+                TestSections.ForEach(p =>
+                {
+                    if (p.Percent.HasValue)
+                    {
+                        totalPercent += p.Percent.Value;
+                    }
+                });
+                if (totalPercent <= 99 || totalPercent > 100)
+                {
+                    AddErrorResults(new ErrorResult
+                    {
+                        ErrorCode = nameof(EnumSystemErrorCode.Min),
+                        Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(totalPercent),
+                                }
+                        },
+                    });
+                }
+            }
+            return true;
+        }
     }
 }
