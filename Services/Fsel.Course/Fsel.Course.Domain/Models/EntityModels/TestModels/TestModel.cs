@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels.TestModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Shared.Enums;
 
     public class TestModel : BaseModel
     {
@@ -10,6 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestModels
         public string? Code { get; set; }
         public Guid ProgramId { get; set; }
         public Guid LevelId { get; set; }
+        public EnumScoringFormulaType ScoringFormulaType { get; set; }
         public CategoryModel? Program { get; set; }
         public LevelModel? Level { get; set; }
         public bool IsActive { get; set; }

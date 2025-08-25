@@ -7,6 +7,7 @@ namespace Fsel.Course.Infrastructure.Configs
     using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -31,6 +32,12 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumVersionStatus>());
+
+            builder.Property(e => e.ScoringFormulaType)
+               .HasMaxLength(20)
+               .HasConversion(
+                   v => v.ToString(),
+                   v => v.EnumParse<EnumScoringFormulaType>());
         }
     }
 }

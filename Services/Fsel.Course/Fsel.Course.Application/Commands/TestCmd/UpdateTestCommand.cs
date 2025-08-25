@@ -67,6 +67,11 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 return methodResult;
             }
             var isUsingByClient = await _testRepository.IsUsingByClient(test.OriginalId);
+            if (isUsingByClient && request.ScoringFormulaType != test.ScoringFormulaType)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.ScoringFormulaType));
+                return methodResult;
+            }
 
             var newVersionTest = TestFactory.Create(request, _mapper, _questionConverter).Build(test.OriginalId, true);
             if (await newVersionTest.ValidateDuplicateTest(_testRepository).ConfigureAwait(false))
@@ -81,6 +86,11 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 return methodResult;
             }
             if (!await test.ValidateProgram(_categoryRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                return methodResult;
+            }
+            if (!test.ValidateScoringFormula())
             {
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
