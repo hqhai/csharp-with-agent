@@ -51,6 +51,10 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 OtpProviderType = otpProviderType
             };
             await sendOtpPipeline.Handle(sendOtpContext);
+            if (sendOtpContext.OtpSessionInfo?.SendInfo != null)
+            {
+                sendOtpContext.OtpSessionInfo.SendInfo.IsJustSendLastTime = sendOtpContext.Status;
+            }
             return (sendOtpContext.Status, sendOtpContext.OtpSessionInfo);
         }
 

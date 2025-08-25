@@ -135,6 +135,7 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
 
     public class SendInfo
     {
+        public bool IsJustSendLastTime { get; set; }
         public bool IsBlockedByReachMaxSendCount { get; set; }
         public bool IsBlockedByGap { get; set; }
         public TimeSpan? WaitTimeDuration { get; set; }
