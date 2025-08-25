@@ -166,7 +166,6 @@ namespace Fsel.Identity.Authentication.Extensions
             .AddDeveloperSigningCredential()
             .AddProfileService<UserProfileService>();
 
-
             builder.Services.AddAuthentication()
                 .AddGoogle(options =>
                 {
@@ -232,7 +231,7 @@ namespace Fsel.Identity.Authentication.Extensions
                         },
                     };
                 })
-                .AddOAuth<OAuthOptions, ZaloOAuthHandler>(LoginProvider.Zalo, options =>
+                .AddOAuth<OAuthOptions, ZaloOAuthHandler>(LoginProvider.Zalo, LoginProvider.Zalo, options =>
                 {
                     options.UsePkce = true;
                     options.SignInScheme = IdentityConstants.ExternalScheme;
@@ -282,7 +281,6 @@ namespace Fsel.Identity.Authentication.Extensions
 
                             using var user = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
                             context.RunClaimActions(user.RootElement);
-                            context.Properties.Items[LoginProvider.Name] = context.Scheme.ToString();
                         },
                         OnRedirectToAuthorizationEndpoint = context =>
                         {
