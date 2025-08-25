@@ -158,10 +158,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 {
                     SetDataForViewByOtpSessionIfo(otpSessionInfo, request);
                 }
-                else
-                {
-                    request.ExpiredTime = DateTime.UtcNow.Add(OtpSetting.GapSendDuration);
-                }
             }
             else if (ModelState.IsValid)
             {
@@ -638,7 +634,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 {
                     RedirectUri = redirectUrl,
                 };
-                return Challenge(properties, LoginProvider.Zalo);
+                properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             }
 
             properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
@@ -692,21 +688,24 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     ReturnUrl = returnUrl
                 };
 
-                user = await _userManager.FindByEmailAsync(email ?? string.Empty);
-                if (user != null)
+                if (!string.IsNullOrEmpty(email))
                 {
-                    if (!string.IsNullOrEmpty(user.PhoneNumber))
+                    user = await _userManager.FindByEmailAsync(email);
+                    if (user != null)
                     {
-                        var result = await _userManager.AddLoginAsync(user, info);
-                        if (result.Succeeded)
+                        if (!string.IsNullOrEmpty(user.PhoneNumber))
                         {
-                            await _signInManager.SignInAsync(user, isPersistent: true);
-                            return Redirect(returnUrl);
+                            var result = await _userManager.AddLoginAsync(user, info);
+                            if (result.Succeeded)
+                            {
+                                await _signInManager.SignInAsync(user, isPersistent: true);
+                                return Redirect(returnUrl);
+                            }
                         }
-                    }
 
-                    externalLogin.FirstName = firstName;
-                    externalLogin.LastName = lastName;
+                        externalLogin.FirstName = firstName;
+                        externalLogin.LastName = lastName;
+                    }
                 }
 
                 TempData[nameof(ExternalLoginModel)] = externalLogin.Serialize();
@@ -736,8 +735,10 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             {
                 return View(request);
             }
+            var user = info.LoginProvider == LoginProvider.Zalo
+                ? await _userRepository.GetUserByIdentity(request.PhoneNumber ?? string.Empty)
+                : await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
 
-            var user = await _userManager.FindByEmailAsync(request.Email ?? string.Empty);
             if (user != null)
             {
                 var result = await _userManager.AddLoginAsync(user, info);
@@ -779,6 +780,13 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                         Birthday = request.Birthday,
                         EmailConfirmed = true,
                     };
+
+                    if (info.LoginProvider == LoginProvider.Zalo)
+                    {
+                        user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
+                        user.UserName = request.PhoneNumber;
+                        user.PhoneNumberConfirmed = true;
+                    }
 
                     user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
                     var result = await _userManager.CreateAsync(user);
@@ -1008,7 +1016,10 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     if (otpSessionInfo?.SendInfo?.IsBlockedByReachMaxSendCount == true)
                     {
                         var minutes = otpSessionInfo.SendInfo.WaitTimeDuration.Value < TimeSpan.FromMinutes(1) ? 1 : otpSessionInfo.SendInfo.WaitTimeDuration.Value.Minutes;
-                        ModelState.AddModelError(string.Empty, _localizer["i18n_otp_wait_in_minute"].Value?.InjectParam(minutes.ToString()));
+                        if (otpSessionInfo?.SendInfo?.IsJustSendLastTime != true)
+                        {
+                            ModelState.AddModelError(string.Empty, _localizer["i18n_otp_wait_in_minute"].Value?.InjectParam(minutes.ToString()));
+                        }
                     }
 
                     verifyOtpModel.ExpiredTime = DateTime.UtcNow.Add(otpSessionInfo.SendInfo.WaitTimeDuration.Value);
