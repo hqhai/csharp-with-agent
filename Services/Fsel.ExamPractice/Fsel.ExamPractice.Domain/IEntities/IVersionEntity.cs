@@ -2,7 +2,7 @@
 
 namespace Fsel.ExamPractice.Domain.IEntities
 {
-    using Fsel.ExamPractice.Domain.Enums;
+    using Fsel.Common.Enums;
 
     public interface IVersionEntity
     {

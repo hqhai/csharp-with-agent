@@ -106,5 +106,18 @@ namespace Fsel.ExamPractice.Api.Controllers
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Change Status ExamPractice
+        /// </summary>
+        [HttpPut("archive/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ApiVersion(ApiSettings.APIVersion1)]
+        public async Task<IActionResult> ArchiveExamPratice([FromRoute] Guid id)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(new ArchiveExamPraticeCommand { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

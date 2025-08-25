@@ -29,7 +29,7 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery
                 MethodResult<PagingItemsModel<ExamPracticeModel>> methodResult = new MethodResult<PagingItemsModel<ExamPracticeModel>>();
 
                 var query = _examPracticeRepository.Queryable
-                                                   .Where(x => x.OriginalId == request.OriginalId)
+                                                   .Where(x => x.OriginalId == request.OriginalId && !x.IsArchive)
                                                    .OrderByDescending(x => x.Version)
                                                    .AsNoTracking();
 

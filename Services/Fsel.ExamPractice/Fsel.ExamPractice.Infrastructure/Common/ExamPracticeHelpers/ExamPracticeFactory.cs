@@ -5,6 +5,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
     using System.Collections.Generic;
     using System.Linq;
     using AutoMapper;
+    using Fsel.Common.Enums;
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAISettings;
@@ -30,6 +31,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             examPractice.VersionStatus = EnumVersionStatus.LastVersion;
             examPractice.Version = version;
             examPractice.OriginalId = originalId.HasValue ? originalId.Value : examPractice.Id;
+            examPractice.Status = EnumExamPracticeStatus.Inactive;
             examPractice.ExamPracticeSections = ExamPracticeSectionClassification(_createRequest.ExamPracticeSections).ToList();
             return examPractice;
         }
