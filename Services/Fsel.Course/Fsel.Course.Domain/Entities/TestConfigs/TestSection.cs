@@ -55,6 +55,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             set { ScoringFormulaConfigsStr = ConvertHelper.Serialize(value); }
         }
 
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double? Percent { get; set; }
 
         public Skill? Skill { get; set; }
@@ -90,7 +91,10 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
     public class ScoringFormulaConfig
     {
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double From { get; set; }
+
+        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double Equal { get; set; }
     }
 }
