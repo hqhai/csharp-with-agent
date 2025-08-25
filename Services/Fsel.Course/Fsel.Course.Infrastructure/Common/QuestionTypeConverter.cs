@@ -275,8 +275,8 @@ namespace Fsel.Course.Infrastructure.Common
                     var colorMatchingTypeQuestion = config.Deserialize<ColorMatchingTypeQuestion>();
                     if (colorMatchingTypeQuestion != null)
                     {
-                        result = isDisableAnswers ? ClearAnswers(colorMatchingTypeQuestion) : colorMatchingTypeQuestion;
-                        totalCorrect = isShowCorrectTotal ? GetTotalCorrect(colorMatchingTypeQuestion) : ValueSettings.ValueDefault;
+                        result = colorMatchingTypeQuestion;
+                        totalCorrect = GetTotalCorrect(colorMatchingTypeQuestion);
                     }
                     break;
 
