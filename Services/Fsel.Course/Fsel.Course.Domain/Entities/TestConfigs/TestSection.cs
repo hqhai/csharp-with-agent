@@ -91,10 +91,8 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
     public class ScoringFormulaConfig
     {
-        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double From { get; set; }
+        public int From { get; set; }
 
-        [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public double Equal { get; set; }
+        public string? Equal { get; set; }
     }
 }

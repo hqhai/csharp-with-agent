@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Tests
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.CommandModels.TestSections;
+    using Fsel.Shared.Enums;
 
     public class UpdateTestCommandModel : BaseCommandModel
     {
@@ -11,6 +12,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Tests
         public string? Code { get; set; }
         public Guid LevelId { get; set; }
         public Guid ProgramId { get; set; }
+        public EnumScoringFormulaType ScoringFormulaType { get; set; }
         public IList<UpdateTestSectionCommandModel> TestSections { get; set; } = new List<UpdateTestSectionCommandModel>();
     }
 }

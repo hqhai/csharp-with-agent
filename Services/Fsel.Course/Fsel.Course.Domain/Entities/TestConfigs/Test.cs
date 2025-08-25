@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 {
     using System;
     using System.ComponentModel.DataAnnotations;
+    using System.Text.RegularExpressions;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Enums;
@@ -200,8 +201,9 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             return exists;
         }
 
-        public async Task<bool> ValidateScoringFormula()
+        public bool ValidateScoringFormula()
         {
+            bool result = true;
             if (ScoringFormulaType == EnumScoringFormulaType.BandScore)
             {
                 double totalPercent = 0;
@@ -211,31 +213,77 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                     {
                         totalPercent += p.Percent.Value;
                     }
-                });
-                if (totalPercent <= 99 || totalPercent > 100)
-                {
-                    AddErrorResults(new ErrorResult
+                    else
                     {
-                        ErrorCode = nameof(EnumSystemErrorCode.Min),
-                        Errors =
+                        AddErrorResults(new ErrorResult
+                        {
+                            ErrorCode = nameof(EnumSystemErrorCode.Required),
+                            Errors =
                         {
                             new Error
                                 {
-                                    FieldName = nameof(totalPercent),
+                                    FieldName = nameof(p.Percent),
                                 }
                         },
-                    });
-                    return false;
-                }
-            }
-            else
-            {
-                double totalPercent = 0;
-                TestSections.ForEach(p =>
-                {
-                    if (p.Percent.HasValue)
+                        });
+                        result = false;
+                    }
+
+                    if (p.LayoutType == EnumTestLayoutType.Basic && (p.ScoringFormulaConfigs == null || !p.ScoringFormulaConfigs.Any()))
                     {
-                        totalPercent += p.Percent.Value;
+                        AddErrorResults(new ErrorResult
+                        {
+                            ErrorCode = nameof(EnumSystemErrorCode.Required),
+                            Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(p.ScoringFormulaConfigs),
+                                }
+                        },
+                        });
+                        result = false;
+                    }
+
+                    if (p.LayoutType == EnumTestLayoutType.Basic && p.ScoringFormulaConfigs != null && p.ScoringFormulaConfigs.Any())
+                    {
+                        var froms = new List<int>();
+
+                        p.ScoringFormulaConfigs.ForEach(x =>
+                        {
+                            if (x.From < 0 || x.From > 100)
+                            {
+                                AddErrorResults(new ErrorResult
+                                {
+                                    ErrorCode = nameof(EnumSystemErrorCode.Min),
+                                    Errors =
+                            {
+                                new Error
+                                    {
+                                        FieldName = nameof(x.From),
+                                    }
+                            },
+                                });
+                                result = false;
+                            }
+                            string pattern = @"^[a-zA-Z0-9.]{1,5}$";
+                            bool isValid = Regex.IsMatch(x.Equal ?? string.Empty, pattern);
+                            if (!isValid)
+                            {
+                                AddErrorResults(new ErrorResult
+                                {
+                                    ErrorCode = nameof(EnumSystemErrorCode.InValidFormat),
+                                    Errors =
+                            {
+                                new Error
+                                    {
+                                        FieldName = nameof(x.Equal),
+                                    }
+                            },
+                                });
+                                result = false;
+                            }
+                        });
                     }
                 });
                 if (totalPercent <= 99 || totalPercent > 100)
@@ -251,9 +299,138 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                                 }
                         },
                     });
+                    result = false;
                 }
             }
-            return true;
+            else
+            {
+                double totalPercentSkill = 0;
+                TestSections.ForEach(p =>
+                {
+                    if (p.Percent.HasValue)
+                    {
+                        totalPercentSkill += p.Percent.Value;
+                    }
+                    else
+                    {
+                        AddErrorResults(new ErrorResult
+                        {
+                            ErrorCode = nameof(EnumSystemErrorCode.Required),
+                            Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(p.Percent),
+                                }
+                        },
+                        });
+                        result = false;
+                    }
+
+                    double totalPercentPart = 0;
+
+                    if (p.TestSections != null && p.TestSections.Any())
+                    {
+                        p.TestSections.ForEach(x =>
+                        {
+                            if (p.Percent.HasValue)
+                            {
+                                totalPercentPart += p.Percent.Value;
+                            }
+                            else
+                            {
+                                AddErrorResults(new ErrorResult
+                                {
+                                    ErrorCode = nameof(EnumSystemErrorCode.Required),
+                                    Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(p.Percent),
+                                }
+                        },
+                                });
+                                result = false;
+                            }
+                            double totalPercentExercise = 0;
+
+                            if (x.LayoutType == EnumTestLayoutType.Basic && x.TestSections != null && x.TestSections.Any())
+                            {
+                                x.TestSections.ForEach(n =>
+                                {
+                                    if (p.Percent.HasValue)
+                                    {
+                                        totalPercentExercise += p.Percent.Value;
+                                    }
+                                    else
+                                    {
+                                        AddErrorResults(new ErrorResult
+                                        {
+                                            ErrorCode = nameof(EnumSystemErrorCode.Required),
+                                            Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(p.Percent),
+                                }
+                        },
+                                        });
+                                        result = false;
+                                    }
+                                });
+
+                                if (totalPercentExercise <= 99 || totalPercentExercise > 100)
+                                {
+                                    AddErrorResults(new ErrorResult
+                                    {
+                                        ErrorCode = nameof(EnumSystemErrorCode.Min),
+                                        Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(totalPercentExercise),
+                                }
+                        },
+                                    });
+                                    result = false;
+                                }
+                            }
+                        });
+
+                        if (totalPercentPart <= 99 || totalPercentPart > 100)
+                        {
+                            AddErrorResults(new ErrorResult
+                            {
+                                ErrorCode = nameof(EnumSystemErrorCode.Min),
+                                Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(totalPercentPart),
+                                }
+                        },
+                            });
+                            result = false;
+                        }
+                    }
+                });
+                if (totalPercentSkill <= 99 || totalPercentSkill > 100)
+                {
+                    AddErrorResults(new ErrorResult
+                    {
+                        ErrorCode = nameof(EnumSystemErrorCode.Min),
+                        Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(totalPercentSkill),
+                                }
+                        },
+                    });
+                    result = false;
+                }
+            }
+            return result;
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Fsel.Course.Infrastructure.Common.TestHelper
     using Fsel.Course.Domain.Models.CommandModels.TestAiSettings;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.CommandModels.TestSections;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
 
     public class TestFactory
@@ -28,12 +29,51 @@ namespace Fsel.Course.Infrastructure.Common.TestHelper
 
         public Test Build(Guid? originalId = null, bool isUsingByClient = false)
         {
+            HandleRequestScoringFormula(_createRequest);
             var test = _mapper.Map<Test>(_createRequest);
             test.Id = Guid.Empty;
             test.OriginalId = originalId.HasValue ? originalId.Value : Guid.NewGuid();
             test.VersionStatus = Fsel.Common.Enums.EnumVersionStatus.LastVersion;
             test.TestSections = TestSectionClassification(_createRequest.TestSections, test, new ConfigCounter() { IsUsingByClient = isUsingByClient }).ToList();
             return test;
+        }
+
+        private static void HandleRequestScoringFormula(UpdateTestCommandModel request)
+        {
+            if (request.TestSections != null && request.TestSections.Any())
+            {
+                request.TestSections.ForEach(p =>
+                {
+                    if (request.ScoringFormulaType == EnumScoringFormulaType.Percent)
+                    {
+                        p.ScoringFormulaConfigs = null;
+                    }
+
+                    if (p.Childrens != null && p.Childrens.Any())
+                    {
+                        p.Childrens.ForEach(child =>
+                        {
+                            if (request.ScoringFormulaType == EnumScoringFormulaType.BandScore)
+                            {
+                                child.Percent = null;
+                            }
+                            p.ScoringFormulaConfigs = null;
+
+                            if (child.Childrens != null && child.Childrens.Any())
+                            {
+                                child.Childrens.ForEach(x =>
+                                {
+                                    if (request.ScoringFormulaType == EnumScoringFormulaType.BandScore)
+                                    {
+                                        x.Percent = null;
+                                    }
+                                    x.ScoringFormulaConfigs = null;
+                                });
+                            }
+                        });
+                    }
+                });
+            }
         }
 
         private IEnumerable<TestSection> TestSectionClassification(IList<UpdateTestSectionCommandModel>? testSectionRequests, Test test, ConfigCounter configCounter)
