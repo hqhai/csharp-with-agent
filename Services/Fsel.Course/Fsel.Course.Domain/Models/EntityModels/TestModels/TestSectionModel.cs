@@ -12,6 +12,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestModels
         public string? Name { get; set; }
         public int DisplayOrder { get; set; }
         public EnumTestLayoutType? LayoutType { get; set; }
+        public IList<ScoringFormulaConfig>? ScoringFormulaConfigs { get; set; }
+        public double? Percent { get; set; }
         public TestSectionConfig? Config { get; set; }
         public SkillModel? Skill { get; set; }
         public Guid? SkillId { get; set; }
