@@ -57,7 +57,7 @@ namespace Fsel.Course.Infrastructure.Common.TestHelper
                             {
                                 child.Percent = null;
                             }
-                            p.ScoringFormulaConfigs = null;
+                            child.ScoringFormulaConfigs = null;
 
                             if (child.Childrens != null && child.Childrens.Any())
                             {
