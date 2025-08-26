@@ -1,3 +1,4 @@
+
 // Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
@@ -7,6 +8,7 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPractices;
@@ -25,6 +27,7 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
         private readonly IMapper _mapper;
         private readonly IVersionEntityUpdater<ExamPractice> _versionEntityUpdater;
         private readonly ExamPracticeConverter _examPracticeConverter;
+        private ExamPracticeCommon _examPracticeCommon = new ExamPracticeCommon().Create();
 
         public UpdateExamPracticeCommandHandler(IExamPracticeRepository examPracticeRepository,
                                                 IMapper mapper,
@@ -58,6 +61,10 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
             }
 
             var isUsingByClient = await _examPracticeRepository.IsUsingByClient(examPractice.Id);
+
+            // tính lại tổng số question
+            _examPracticeCommon.HandlerTotalQuestion(request.ExamPracticeSections);
+            _examPracticeCommon.SetTotalQuestion(request.ExamPracticeSections);
 
             var newVersionExamPractice = ExamPracticeFactory.Create(request, _mapper).Build();
 

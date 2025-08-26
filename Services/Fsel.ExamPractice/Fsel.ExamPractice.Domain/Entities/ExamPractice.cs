@@ -2,10 +2,10 @@ namespace Fsel.ExamPractice.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.ExamPractice.Domain.Enums;
-    using Fsel.ExamPractice.Domain.IEntities;
 
     public class ExamPractice : Entity, IVersionEntity
     {
@@ -53,6 +53,8 @@ namespace Fsel.ExamPractice.Domain.Entities
         public int Version { get; set; }
 
         public EnumVersionStatus VersionStatus { get; set; }
+
+        public bool IsArchive { get; set; }
 
         public ExamPractice? ParentExamPractice { get; set; }
         public ICollection<ExamPracticeSection> ExamPracticeSections { get; set; } = new List<ExamPracticeSection>();

@@ -1,7 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Core.Base;
-using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Extensions;
 using Fsel.ExamPractice.Application.Services.SystemServices;
 using Fsel.ExamPractice.Domain.IRepositories;
@@ -28,13 +26,6 @@ builder.Services.AddScoped<IExamPracticeSectionResultRepository, ExamPracticeSec
 builder.Services.AddScoped<IExamPracticeAISettingRepository, ExamPracticeAISettingRepository>();
 builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IExamPracticeAICriteriaSettingRepository, ExamPracticeAICriteriaSettingRepository>();
-
-builder.Services.AddScoped(provider =>
-{
-    return provider.GetRequiredService<ExamPracticesDBContext>() as BaseDbContext;
-});
-builder.Services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
-builder.Services.AddScoped(typeof(IVersionEntityUpdater<>), typeof(EntityVersionUpdater<>));
 
 builder.Services.AddScoped<ExamPracticeHelper>();
 builder.Services.AddScoped<ExamPracticeConverter>();

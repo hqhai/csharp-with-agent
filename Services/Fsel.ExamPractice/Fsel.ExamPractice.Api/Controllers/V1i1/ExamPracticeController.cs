@@ -6,6 +6,7 @@ namespace Fsel.ExamPractice.Api.Controllers.V1i1
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1;
     using Fsel.ExamPractice.Application.Queries.ExamPracticeQuery.V1i1;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
@@ -63,6 +64,30 @@ namespace Fsel.ExamPractice.Api.Controllers.V1i1
         public async Task<IActionResult> Get([FromRoute] Guid originalId)
         {
             MethodResult<ExamPracticeModel> queryResult = await _mediator.Send(new GetExamPracticeQuery { OriginalId = originalId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search a ExamPractice
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExamPracticeSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchExamPracticeQuery query)
+        {
+            MethodResult<PagingItemsModel<ExamPracticeSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Change Status ExamPractice
+        /// </summary>
+        [HttpPut("change-status")]
+        [ProducesResponseType(typeof(MethodResult<ExamPracticeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChangeStatus([FromBody] ChangeStatusCommand command)
+        {
+            MethodResult<ExamPracticeModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

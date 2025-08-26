@@ -3,6 +3,7 @@
 namespace Fsel.ExamPractice.Infrastructure.Configs
 {
     using System;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Enums;
