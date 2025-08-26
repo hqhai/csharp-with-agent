@@ -48,17 +48,20 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
+        private readonly IExamPracticeAnswerRepository _examPracticeAnswerRepository;
         private const int TotalRetry = 20;
 
         public SearchExamPracticeQueryHandler(IExamPracticeRepository examPracticeRepository,
             IUserService userService,
             AuthContext authContext,
-            IMapper mapper)
+            IMapper mapper,
+            IExamPracticeAnswerRepository examPracticeAnswerRepository)
         {
             _examPracticeRepository = examPracticeRepository;
             _userService = userService;
             _authContext = authContext;
             _mapper = mapper;
+            _examPracticeAnswerRepository = examPracticeAnswerRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ExamPracticeGroupModel>>> Handle(SearchExamPracticeQuery request, CancellationToken cancellationToken)
@@ -115,8 +118,21 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
+            var examPracticeResultIds = lists.Where(x => x.ExamPractice.SubType == EnumExamPracticeSubType.SkillMockTest || x.ExamPractice.SubType == EnumExamPracticeSubType.SingleVstepSkill
+                                                || x.ExamPractice.Type == EnumExamPracticeType.ExamPractice)
+                                       .Where(x => x.ExamPracticeResult != null)
+                                       .Select(x => x.ExamPracticeResult!.Id)
+                                       .ToList();
 
-            var data = lists.Select(x => BuildExamPracticeGroupModel(x, x.ExamPractice, x.ExamPracticeSections, x.ExamPracticeResult)).ToList();
+            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.AsNoTracking().Where(x => x.QuestionId.HasValue)
+                                                                         .WhereBulkContains(examPracticeResultIds, x => x.ExamPracticeResultId)
+                                                                         .ToListAsync(cancellationToken);
+            var examPracticeAnswerGroups = examPracticeAnswers.GroupBy(x => x.ExamPracticeResultId).ToDictionary(g => g.Key, g => g.ToList());
+            var data = lists.Select(x =>
+            {
+                examPracticeAnswerGroups.TryGetValue(x.ExamPracticeResult?.Id ?? Guid.Empty, out var answers);
+                return BuildExamPracticeGroupModel(x, x.ExamPractice, x.ExamPracticeSections, x.ExamPracticeResult, answers?.Count ?? default);
+            }).ToList();
             methodResult.Result = new PagingItemsModel<ExamPracticeGroupModel>(data, request, totalItem);
             return methodResult;
         }
@@ -139,7 +155,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
             return student;
         }
 
-        private ExamPracticeGroupModel BuildExamPracticeGroupModel(dynamic x, ExamPractice examPractice, IList<ExamPracticeSection>? examPracticeSections, ExamPracticeResult? examPracticeResult)
+        private ExamPracticeGroupModel BuildExamPracticeGroupModel(dynamic x, ExamPractice examPractice, IList<ExamPracticeSection>? examPracticeSections, ExamPracticeResult? examPracticeResult, double countAnswer)
         {
             var examPracticeModel = _mapper.Map<ExamPracticeGroupModel>(examPractice);
             var courseSkills = examPracticeSections?.Where(x => x.CourseSkill.HasValue).Select(x => x.CourseSkill!.Value).Distinct().ToList() ?? new List<EnumCourseSkill>();
@@ -176,7 +192,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                     {
                         if (skillScore != null && courseSkills.Any(x => x == EnumCourseSkill.Reading || x == EnumCourseSkill.Listening))
                         {
-                            examPracticeModel.ProgressPercent = NumberHelper.GetPercent(skillScore.CountQuestion, skillScore.TotalQuestion);
+                            examPracticeModel.ProgressPercent = NumberHelper.GetPercent(countAnswer, examPracticeModel.TotalQuestion);
                         }
                         else
                         {
@@ -187,7 +203,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                 }
                 else if (skillScore != null)
                 {
-                    examPracticeModel.ProgressPercent = NumberHelper.GetPercent(skillScore.CountQuestion, skillScore.TotalQuestion);
+                    examPracticeModel.ProgressPercent = NumberHelper.GetPercent(countAnswer, examPracticeModel.TotalQuestion);
                 }
 
                 #endregion ProgressPercent

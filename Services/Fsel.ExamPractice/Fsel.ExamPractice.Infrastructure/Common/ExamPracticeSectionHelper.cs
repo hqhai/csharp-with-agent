@@ -143,27 +143,55 @@ namespace Fsel.ExamPractice.Infrastructure.Common
 
         public async Task UpdateExamPracticeSectionResultsAsync(ExamPracticeResult examPracticeResult)
         {
-            var examPracticeSectionResults = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
-                                                                                               .ToListAsync();
-            var examPracticeSectionIds = examPracticeSectionResults.Select(x => x.ExamPracticeSectionId).ToList();
+            // Get all section results for the exam
+            var examPracticeSectionResults = await _examPracticeSectionResultRepository.Queryable
+                .Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
+                .ToListAsync();
 
-            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeResult.Id).ToListAsync();
-            var questions = await _questionRepository.Queryable.WhereBulkContains(examPracticeSectionIds, x => x.ExamPracticeSectionId).ToListAsync();
-
-            foreach (var item in examPracticeSectionResults)
+            if (!examPracticeSectionResults.Any())
             {
-                var listQuestion = questions.Where(x => x.ExamPracticeSectionId == item.ExamPracticeSectionId).ToList();
-                var answers = examPracticeAnswers.Where(x => x.QuestionId.HasValue && listQuestion.Select(x => x.Id).Contains(x.QuestionId.Value)).ToList();
-                var countQuestion = 0;
+                return;
+            }
+            // Get all answers for the exam, grouped by QuestionId for fast lookup
+            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable
+                .Where(x => x.ExamPracticeResultId == examPracticeResult.Id && x.QuestionId.HasValue)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var answersByQuestionId = examPracticeAnswers
+                .GroupBy(x => x.QuestionId!.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // Get all questions for the sections, grouped by SectionId for fast lookup
+            var examPracticeSectionIds = examPracticeSectionResults.Select(x => x.ExamPracticeSectionId).Distinct().ToList();
+
+            var questions = await _questionRepository.Queryable
+                .WhereBulkContains(examPracticeSectionIds, x => x.ExamPracticeSectionId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var questionsBySectionId = questions
+                .GroupBy(q => q.ExamPracticeSectionId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var sectionResult in examPracticeSectionResults)
+            {
+                var listQuestion = questionsBySectionId.TryGetValue(sectionResult.ExamPracticeSectionId, out var qs) ? qs : new List<Question>();
+                var questionIds = listQuestion.Select(q => q.Id).ToHashSet();
+
+                // Get answers for questions in this section
+                var answers = questionIds.SelectMany(qid => answersByQuestionId.TryGetValue(qid, out var ans) ? ans : Enumerable.Empty<ExamPracticeAnswer>()).ToList();
+
+                int countQuestion = 0;
                 foreach (var answer in answers)
                 {
                     var question = listQuestion.FirstOrDefault(x => x.Id == answer.QuestionId);
                     countQuestion += AnswerTypeHelper.GetTotalCorrectByAnswerType(question, answer?.Answer);
                 }
 
-                item.CorrectCount = answers.Sum(x => x.CorrectCount);
-                item.CorrectTotal = listQuestion.Sum(x => x.CorrectTotal);
-                item.Status = EnumResultStatus.Done;
+                sectionResult.CorrectCount = answers.Sum(x => x.CorrectCount);
+                sectionResult.CorrectTotal = listQuestion.Sum(x => x.CorrectTotal);
+                sectionResult.Status = EnumResultStatus.Done;
             }
 
             _examPracticeSectionResultRepository.UpdateList(examPracticeSectionResults);

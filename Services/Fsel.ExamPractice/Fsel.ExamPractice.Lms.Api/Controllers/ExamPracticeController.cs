@@ -3,6 +3,7 @@
 namespace Fsel.ExamPractice.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
@@ -57,20 +58,8 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
         /// <summary>
         /// Search ExamPractice
         /// </summary>
-        [HttpGet("v1i1")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExamPracticeGroupModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] Application.Queries.ExamPracticeQuery.V1i1.SearchExamPracticeQuery query)
-        {
-            SetQuery(query);
-            MethodResult<PagingItemsModel<ExamPracticeGroupModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Search ExamPractice
-        /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<IList<ExamPracticeGroupTypeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchExamPracticeQuery query)
