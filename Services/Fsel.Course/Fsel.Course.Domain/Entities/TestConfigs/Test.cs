@@ -305,6 +305,9 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             else
             {
                 double totalPercentSkill = 0;
+                double totalPercentPart = 0;
+                double totalPercentExercise = 0;
+
                 TestSections.ForEach(p =>
                 {
                     if (p.Percent.HasValue)
@@ -327,15 +330,13 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                         result = false;
                     }
 
-                    double totalPercentPart = 0;
-
                     if (p.TestSections != null && p.TestSections.Any())
                     {
                         p.TestSections.ForEach(x =>
                         {
-                            if (p.Percent.HasValue)
+                            if (x.Percent.HasValue)
                             {
-                                totalPercentPart += p.Percent.Value;
+                                totalPercentPart += x.Percent.Value;
                             }
                             else
                             {
@@ -352,15 +353,14 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                                 });
                                 result = false;
                             }
-                            double totalPercentExercise = 0;
 
                             if (x.LayoutType == EnumTestLayoutType.Basic && x.TestSections != null && x.TestSections.Any())
                             {
                                 x.TestSections.ForEach(n =>
                                 {
-                                    if (p.Percent.HasValue)
+                                    if (n.Percent.HasValue)
                                     {
-                                        totalPercentExercise += p.Percent.Value;
+                                        totalPercentExercise += n.Percent.Value;
                                     }
                                     else
                                     {
@@ -378,42 +378,41 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                                         result = false;
                                     }
                                 });
-
-                                if (totalPercentExercise <= 99 || totalPercentExercise > 100)
-                                {
-                                    AddErrorResults(new ErrorResult
-                                    {
-                                        ErrorCode = nameof(EnumSystemErrorCode.Min),
-                                        Errors =
+                            }
+                        });
+                    }
+                });
+                if (totalPercentExercise <= 99 || totalPercentExercise > 100)
+                {
+                    AddErrorResults(new ErrorResult
+                    {
+                        ErrorCode = nameof(EnumSystemErrorCode.Min),
+                        Errors =
                         {
                             new Error
                                 {
                                     FieldName = nameof(totalPercentExercise),
                                 }
                         },
-                                    });
-                                    result = false;
-                                }
-                            }
-                        });
+                    });
+                    result = false;
+                }
 
-                        if (totalPercentPart <= 99 || totalPercentPart > 100)
-                        {
-                            AddErrorResults(new ErrorResult
-                            {
-                                ErrorCode = nameof(EnumSystemErrorCode.Min),
-                                Errors =
+                if (totalPercentPart <= 99 || totalPercentPart > 100)
+                {
+                    AddErrorResults(new ErrorResult
+                    {
+                        ErrorCode = nameof(EnumSystemErrorCode.Min),
+                        Errors =
                         {
                             new Error
                                 {
                                     FieldName = nameof(totalPercentPart),
                                 }
                         },
-                            });
-                            result = false;
-                        }
-                    }
-                });
+                    });
+                    result = false;
+                }
                 if (totalPercentSkill <= 99 || totalPercentSkill > 100)
                 {
                     AddErrorResults(new ErrorResult
