@@ -92,7 +92,7 @@ namespace Fsel.Course.Application.Commands.TestCmd
             }
             if (!newVersionTest.ValidateScoringFormula())
             {
-                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
                 return methodResult;
             }
             var method = _testConverter.IsValidateQuestion(request.TestSections);
