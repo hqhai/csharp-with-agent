@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Handlers.Implementations
 {
     using System.Threading.Tasks;
+    using System.Transactions;
     using AutoMapper;
     using Fsel.Common.Caching;
     using Fsel.Identity.Application.Handlers.Interfaces;
@@ -11,6 +12,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using Fsel.Identity.Domain.Models.CommandModels.OpenId;
     using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
     public class UserRegisterHandler : IUserRegisterHandler
@@ -97,26 +99,31 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 return false;
             }
 
-            var user = _mapper.Map<User>(cachedRegisterInfo);
-            user.PhoneNumber = phoneNumber;
-            user.UserName = phoneNumber;
-            user.Id = Guid.NewGuid();
-            user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
-            user.PhoneNumberConfirmed = true;
-            user.EmailConfirmed = true;
-            await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-            await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
-            await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
-
-            var userOtpCode = new UserOtpCode
+            await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
             {
-                UserId = user.Id,
-                OtpCode = otp,
-                Type = EnumUserOtpCodeType.Zalo,
-            };
-            _userOtpRepository.Add(userOtpCode);
-            await _userOtpRepository.UnitOfWork.SaveChangesAsync();
+                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                var user = _mapper.Map<User>(cachedRegisterInfo);
+                user.PhoneNumber = phoneNumber;
+                user.UserName = phoneNumber;
+                user.Id = Guid.NewGuid();
+                user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
+                user.PhoneNumberConfirmed = true;
+                user.EmailConfirmed = true;
 
+                user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
+                var result = await _userManager.CreateAsync(user);
+                result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+
+                var userOtpCode = new UserOtpCode
+                {
+                    UserId = user.Id,
+                    OtpCode = otp,
+                    Type = EnumUserOtpCodeType.Zalo,
+                };
+                _userOtpRepository.Add(userOtpCode);
+                scope.Complete();
+                return new ViewResult();
+            });
             return true;
         }
 
