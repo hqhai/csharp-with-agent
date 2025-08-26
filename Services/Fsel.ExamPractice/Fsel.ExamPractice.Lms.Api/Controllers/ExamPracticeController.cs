@@ -6,6 +6,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd;
     using Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery;
@@ -15,7 +16,6 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
@@ -51,6 +51,19 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
         public async Task<IActionResult> StartExamPractice([FromBody] StartExamPracticeCommand command)
         {
             MethodResult<ExamPracticeResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search ExamPractice
+        /// </summary>
+        [HttpGet("v1i1")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExamPracticeGroupModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] Application.Queries.ExamPracticeQuery.V1i1.SearchExamPracticeQuery query)
+        {
+            SetQuery(query);
+            MethodResult<PagingItemsModel<ExamPracticeGroupModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

@@ -13,6 +13,9 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
         public ExamPracticeProfile()
         {
             CreateMap<ExamPractice, ExamPracticeModel>().IgnoreAllNonExisting();
+            CreateMap<ExamPractice, ExamPracticeGroupModel>()
+                .ForMember(p => p.IsNew, x => x.MapFrom(n => n.ActivatedAt.HasValue && DateTime.UtcNow <= n.ActivatedAt.Value.AddDays(7)))
+                .ForMember(p => p.ExamPracticeStatus, x => x.MapFrom(n => n.Status));
             CreateMap<ExamPractice, ExamPracticeSearchModel>().IgnoreAllNonExisting();
             CreateMap<ExamPractice, ExamPracticeDetailModel>().IgnoreAllNonExisting();
             CreateMap<CreateExamPracticeCommandModel, ExamPractice>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).IgnoreAllNonExisting();
