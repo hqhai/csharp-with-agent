@@ -77,6 +77,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                                     on l.OriginalId equals um.OriginalId
                                 join u in _unitRepository.ReadQueryable
                                     on um.UnitId equals u.Id
+                                where u.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion
                                 select u;
                 unitQuery = unitQuery.Distinct();
                 unitQuery = unitQuery.Include(x => x.UnitResults)
