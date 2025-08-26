@@ -77,6 +77,9 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery.V1i1
                 CourseSkills = x.ExamPracticeSections.Where(x => x.CourseSkill.HasValue).Select(x => x.CourseSkill.GetValueOrDefault()).Distinct().ToList(),
                 CourseSubType = x.SubType,
                 TotalAttempts = x.ExamPracticeResults.Count,
+                OriginalId = x.OriginalId,
+                Version = x.Version,
+                VersionStatus = x.VersionStatus
             });
             int totalItem = await queryData.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await queryData.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
