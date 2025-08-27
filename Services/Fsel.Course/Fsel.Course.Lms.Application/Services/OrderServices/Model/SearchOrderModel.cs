@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Ordering.Domain.Models.EntityModels.V1i2
+namespace Fsel.Course.Lms.Application.Services.OrderServices.Model
 {
     using System;
     using Fsel.Core.Base.BaseModels;
@@ -18,15 +18,14 @@ namespace Fsel.Ordering.Domain.Models.EntityModels.V1i2
         public EnumOrderStatus Status { get; set; }
         public Guid UserId { get; set; }
         public Guid? PackageId { get; set; }
-        public string? PackageName { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public EnumPaymentRevenueType? RevenueType { get; set; }
+        public int? CountOrder { get; set; }
         public decimal TotalPrice { get; set; }
         public decimal DiscountPrice { get; set; }
         public decimal Price { get; set; }
         public string? StudentCode { get; set; }
-        public int? CountOrder { get; set; }
         public string? StudentEmail { get; set; }
         public string? StudentFullName { get; set; }
         public string? StudentPhoneNumber { get; set; }
