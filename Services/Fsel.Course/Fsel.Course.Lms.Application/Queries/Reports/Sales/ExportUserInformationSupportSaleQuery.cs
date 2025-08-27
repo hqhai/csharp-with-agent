@@ -30,6 +30,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
     using MassTransit;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
     using Refit;
@@ -51,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IStorageService _storageService;
+        private readonly ILogger<ExportUserInformationSupportSaleQueryHandler> _logger;
         private const double DaysPerWeek = 7.0;
         private const int RequiredLessonsPerWeek = 2;
         private const string StatusAchieved = "Đạt";
@@ -67,7 +69,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
             ILessonResultRepository lessonResultRepository,
             IUnitResultRepository unitResultRepository,
             IMockTestResultRepository mockTestResultRepository,
-            IStorageService storageService)
+            IStorageService storageService,
+            ILogger<ExportUserInformationSupportSaleQueryHandler> logger)
         {
             _orderService = orderService;
             _userService = userService;
@@ -79,6 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
             _unitResultRepository = unitResultRepository;
             _mockTestResultRepository = mockTestResultRepository;
             _storageService = storageService;
+            _logger = logger;
         }
 
         public async Task<MethodResult<Stream>> Handle(ExportUserInformationSupportSaleQuery request, CancellationToken cancellationToken)
@@ -98,6 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
              );
 
             var students = await GetStudentsAsync(userIds);
+
             var placementTestGroupResults = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
                                                                                      .ToDictionaryAsync(x => x.StudentId, cancellationToken);
 
@@ -199,6 +204,13 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
             }
 
             methodResult.Result = ExportExcelTemplate(studentReports);
+            _logger.LoggerRequest(new
+            {
+                FileName = request.FileName,
+                TotalStudentOrder = userIds.Count,
+                TotalStudent = students.Count,
+                StudentExport = studentReports.Count,
+            });
             await UploadFileExcel(methodResult.Result, request.FileName);
             return methodResult;
         }
