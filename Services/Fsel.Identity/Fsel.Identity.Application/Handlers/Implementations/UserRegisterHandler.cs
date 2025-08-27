@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Handlers.Implementations
 {
     using System.Threading.Tasks;
+    using System.Transactions;
     using AutoMapper;
     using Fsel.Common.Caching;
     using Fsel.Common.Enums.ErrorCodes;
@@ -13,6 +14,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
     public class UserRegisterHandler : IUserRegisterHandler
@@ -92,6 +94,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
 
         public async Task<IdentityResult> CreateUserAsync(string phoneNumber, string otp)
         {
+            var identityResult = IdentityResult.Success;
             var cacheKey = GetKeyToCacheRegisterInfo(phoneNumber);
             var cachedRegisterInfo = await _cacheService.GetAsync(cacheKey);
             if (cachedRegisterInfo == null)
@@ -102,33 +105,41 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 });
             }
 
-            var user = _mapper.Map<User>(cachedRegisterInfo);
-            user.PhoneNumber = phoneNumber;
-            user.UserName = phoneNumber;
-            user.Id = Guid.NewGuid();
-            user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
-            user.PhoneNumberConfirmed = true;
-            user.EmailConfirmed = true;
-            await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-            var identityResult = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
-            if (!identityResult.Succeeded)
+            await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IdentityResult>(async () =>
             {
-                return identityResult;
-            }
-            identityResult = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
-            if (!identityResult.Succeeded)
-            {
-                return identityResult;
-            }
+                using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+                var user = _mapper.Map<User>(cachedRegisterInfo);
+                user.PhoneNumber = phoneNumber;
+                user.UserName = phoneNumber;
+                user.Id = Guid.NewGuid();
+                user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
+                user.PhoneNumberConfirmed = true;
+                user.EmailConfirmed = true;
 
-            var userOtpCode = new UserOtpCode
-            {
-                UserId = user.Id,
-                OtpCode = otp,
-                Type = EnumUserOtpCodeType.Zalo,
-            };
-            _userOtpRepository.Add(userOtpCode);
-            await _userOtpRepository.UnitOfWork.SaveChangesAsync();
+                user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
+                identityResult = await _userManager.CreateAsync(user);
+                if (!identityResult.Succeeded)
+                {
+                    scope.Dispose();
+                    return identityResult;
+                }
+                if (!identityResult.Succeeded)
+                {
+                    scope.Dispose();
+                    return identityResult;
+                }
+                identityResult = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+
+                var userOtpCode = new UserOtpCode
+                {
+                    UserId = user.Id,
+                    OtpCode = otp,
+                    Type = EnumUserOtpCodeType.Zalo,
+                };
+                _userOtpRepository.Add(userOtpCode);
+                scope.Complete();
+                return identityResult;
+            });
 
             return identityResult;
         }
