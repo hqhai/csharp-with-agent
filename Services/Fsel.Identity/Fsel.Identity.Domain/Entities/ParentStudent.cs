@@ -10,6 +10,6 @@ namespace Fsel.Identity.Domain.Entities
         public Parent? Parent { get; set; }
         public Guid? ParentId { get; set; }
         public Student? Student { get; set; }
-        public Guid? StudentId { get; set; }
+        public Guid StudentId { get; set; }
     }
 }
