@@ -147,7 +147,6 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     });
                 }
                 await _examPracticeSectionHelper.UpdateExamPracticeToIsSubmit(examPracticeSection, examPracticeSectionResult, request.IsSubmit);
-
                 if (examPracticeSection.CourseSkill == EnumCourseSkill.Writing && request.IsSubmit)
                 {
                     var answers = request.Answers;
@@ -172,12 +171,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                         }
                     }
                 }
-
                 if (request.IsSubmit)
                 {
                     await UpdateExamPracticeResultAsync(examPracticeResult, isSkillTest, cancellationToken);
                 }
-
                 if (examPracticeSection.CourseSkill == EnumCourseSkill.Speaking && request.IsSubmit)
                 {
                     try
@@ -189,7 +186,8 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                         };
                         await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
                     }
-                    catch { }
+                    catch
+                    { }
                 }
             }
             else

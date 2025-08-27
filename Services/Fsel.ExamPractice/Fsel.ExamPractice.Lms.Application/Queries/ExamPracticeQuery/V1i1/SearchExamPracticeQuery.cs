@@ -100,7 +100,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                 query = query.Where(x => x.SubType == request.SubType);
             }
 
-            if (request.Type == EnumExamPracticeType.IELTS && request.CourseSkill.HasValue)
+            if (request.CourseSkill.HasValue)
             {
                 query = query.Where(x => x.ExamPracticeSections.Any(y => y.CourseSkill == request.CourseSkill.Value));
             }
@@ -162,7 +162,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
             examPracticeModel.CourseSkills = courseSkills;
             if (examPracticeSections != null)
             {
-                if (examPractice.Type is not (EnumExamPracticeType.Vstep or EnumExamPracticeType.IELTS))
+                if (examPractice.Type is (EnumExamPracticeType.Vstep or EnumExamPracticeType.IELTS))
                 {
                     examPracticeModel.ExecutionTime = examPracticeSections.Sum(x => x.Config?.ExecutionTime ?? default);
                 }
@@ -180,7 +180,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                 #region ProgressPercent
 
                 var skillScore = examPracticeResult.SkillScores?.FirstOrDefault();
-                if (examPractice.Type is not (EnumExamPracticeType.Vstep or EnumExamPracticeType.IELTS))
+                if (examPractice.Type is (EnumExamPracticeType.Vstep or EnumExamPracticeType.IELTS))
                 {
                     if (examPractice.SubType is EnumExamPracticeSubType.FullMockTest or EnumExamPracticeSubType.FullVstepSkill)
                     {
@@ -201,7 +201,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                         }
                     }
                 }
-                else if (skillScore != null)
+                else
                 {
                     examPracticeModel.ProgressPercent = NumberHelper.GetPercent(countAnswer, examPracticeModel.TotalQuestion);
                 }

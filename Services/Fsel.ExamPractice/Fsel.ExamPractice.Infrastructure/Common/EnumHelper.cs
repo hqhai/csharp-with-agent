@@ -185,6 +185,34 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             {
                 SubType = EnumExamPracticeSubType.Practice,
                 Description = EnumExamPracticeSubType.Practice.GetDescription()
+            }), new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep, new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.FullVstepSkill,
+                Description = EnumExamPracticeSubType.FullVstepSkill.GetDescription()
+            }),
+            new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep,new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.SingleVstepSkill,
+                Description = EnumExamPracticeSubType.SingleVstepSkill.GetDescription(),
+                CourseSkill = EnumCourseSkill.Reading
+            }),
+            new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep,new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.SingleVstepSkill,
+                Description = EnumExamPracticeSubType.SingleVstepSkill.GetDescription(),
+                CourseSkill = EnumCourseSkill.Listening
+            }),
+            new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep,new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.SingleVstepSkill,
+                Description = EnumExamPracticeSubType.SingleVstepSkill.GetDescription(),
+                CourseSkill = EnumCourseSkill.Writing
+            }),
+            new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep,new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.SingleVstepSkill,
+                Description = EnumExamPracticeSubType.SingleVstepSkill.GetDescription(),
+                CourseSkill = EnumCourseSkill.Speaking
             }),
         };
 

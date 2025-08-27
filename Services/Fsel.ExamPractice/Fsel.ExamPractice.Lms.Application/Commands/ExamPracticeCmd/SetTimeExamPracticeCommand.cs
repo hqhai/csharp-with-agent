@@ -75,8 +75,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             }
 
             double executionTime = GetExecutionTimeForIelts(examPracticeResult, examPracticeSectionResult);
-            examPracticeSectionResult.ExamPracticeSectionResult.WorkingTime =
-                DateTimeHelper.SetWorkingTime(
+            examPracticeSectionResult.ExamPracticeSectionResult.WorkingTime = DateTimeHelper.SetWorkingTime(
                     examPracticeSectionResult.ExamPracticeSectionResult.WorkingTime,
                     request.AccessTime,
                     executionTime);
@@ -108,14 +107,9 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
 
             double executionTime = GetExecutionTimeForOther(examPracticeResult);
 
-            examPracticeResult.ExamPracticeResult.WorkingTime =
-                DateTimeHelper.SetWorkingTime(
-                    examPracticeResult.ExamPracticeResult.WorkingTime,
-                    request.AccessTime,
-                    executionTime);
+            examPracticeResult.ExamPracticeResult.WorkingTime = DateTimeHelper.SetWorkingTime(examPracticeResult.ExamPracticeResult.WorkingTime, request.AccessTime, executionTime);
 
-            await _examPracticeResultRepository.BulkUpdateList(
-                new List<ExamPracticeResult> { examPracticeResult.ExamPracticeResult },
+            await _examPracticeResultRepository.BulkUpdateList(new List<ExamPracticeResult> { examPracticeResult.ExamPracticeResult },
                 bulk =>
                 {
                     bulk.ColumnInputExpression = entity => new { entity.WorkingTime };
@@ -129,7 +123,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         {
             if (examPracticeResult.ExamPractice.SubType == EnumExamPracticeSubType.SkillMockTest &&
                 examPracticeResult.ExamPracticeResult.PracticeMode != null &&
-                examPracticeResult.ExamPracticeResult.PracticeMode.Value == EnumPracticeMode.Practice)
+                examPracticeResult.ExamPracticeResult.PracticeMode == EnumPracticeMode.Practice)
             {
                 return examPracticeResult.ExamPracticeResult.Config?.ExecutionTime ?? default;
             }
@@ -141,8 +135,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
 
         private static double GetExecutionTimeForOther(dynamic examPracticeResult)
         {
-            if (examPracticeResult.ExamPracticeResult.PracticeMode != null &&
-                examPracticeResult.ExamPracticeResult.PracticeMode.Value == EnumPracticeMode.Practice)
+            if (examPracticeResult.ExamPracticeResult.PracticeMode != null && examPracticeResult.ExamPracticeResult.PracticeMode == EnumPracticeMode.Practice)
             {
                 return examPracticeResult.ExamPracticeResult.Config?.ExecutionTime ?? default;
             }
