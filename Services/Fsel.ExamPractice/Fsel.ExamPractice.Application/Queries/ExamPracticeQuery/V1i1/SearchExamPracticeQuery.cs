@@ -61,6 +61,12 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery.V1i1
             {
                 query = query.Where(x => request.SubTypes.Contains(x.SubType));
             }
+
+            if (request.Skill.HasValue)
+            {
+                query = query.Where(x => x.ExamPracticeSections.Any(c => c.CourseSkill == request.Skill));
+            }
+
             var queryData = query.Select(x => new ExamPracticeSearchModel
             {
                 Id = x.Id,

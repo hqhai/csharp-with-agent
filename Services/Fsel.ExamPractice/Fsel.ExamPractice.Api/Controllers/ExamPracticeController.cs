@@ -119,5 +119,18 @@ namespace Fsel.ExamPractice.Api.Controllers
             MethodResult<bool> queryResult = await _mediator.Send(new ArchiveExamPraticeCommand { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Change Status ExamPractice
+        /// </summary>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ApiVersion(ApiSettings.APIVersion1)]
+        public async Task<IActionResult> DeleteExamPratice([FromRoute] Guid id)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(new DeleteExamPraticeCommand { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
