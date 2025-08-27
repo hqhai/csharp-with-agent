@@ -218,7 +218,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-school-class")]
         [ProducesResponseType(typeof(MethodResult<IList<string>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> Gets([FromQuery] GetSchoolClassBySchoolGradeQuery query)
         {
             MethodResult<IList<string>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -257,7 +257,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-school-grades-classes")]
         [ProducesResponseType(typeof(MethodResult<StudentSearchAdminModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> GetSchoolGradeClass()
         {
             var queryResult = await _mediator.Send(new GetSchoolGradesAndClassesQuery()).ConfigureAwait(false);
