@@ -344,7 +344,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(permissionCodes: new[] { UserManagement.Update, StudentManagement.Update })]
+        [Permission(permissionCodes: new[] { UserManagement.Update, StudentManagement.Update, SchoolStudentManagement.Update })]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordUserCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
