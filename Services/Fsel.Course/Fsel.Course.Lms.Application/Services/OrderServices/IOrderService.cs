@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Services.OrderServices
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Lms.Application.Services.OrderServices.Model;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
@@ -30,5 +31,8 @@ namespace Fsel.Course.Lms.Application.Services.OrderServices
 
         [Post("/v1.2/order/get-users-has-order-payment")]
         Task<IApiResponse<MethodResult<IList<Guid>>>> GetUsersHasOrderPayment([Body] GetUsersHasOrderPaymentModel model);
+
+        [Get("/v1.2/order/get-order-revenue")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<SearchOrderModel>>>> GetOrderRevenuesAsync();
     }
 }
