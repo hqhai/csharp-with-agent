@@ -24,6 +24,8 @@ namespace Fsel.ExamPractice.Domain.Entities
             set { PromptStr = ConvertHelper.Serialize(value); }
         }
 
+        public string? JsonSchema { get; set; }
+
         public EnumMockTestAIType CriteriaName { get; set; }
 
         public Guid? ExamPracticeAISettingId { get; set; }
