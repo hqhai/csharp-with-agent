@@ -100,7 +100,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("survey/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentSurveyQuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> GetSurveyStudent([FromRoute] Guid studentId)
         {
             MethodResult<IList<StudentSurveyQuestionModel>> queryResult = await _mediator.Send(new GetStudentSurveyQuestionQuery { StudentId = studentId }).ConfigureAwait(false);
