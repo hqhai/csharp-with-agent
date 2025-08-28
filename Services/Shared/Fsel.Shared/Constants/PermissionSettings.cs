@@ -195,5 +195,7 @@ namespace Fsel.Shared.Constants
         public const string View = $"{ClaimType}.View";
         public const string Update = $"{ClaimType}.Update";
         public const string Export = $"{ClaimType}.Export";
+        public const string LoginAsUser = $"{ClaimType}.LoginAsUser";
+        public const string ViewProgress = $"{ClaimType}.ViewProgress";
     }
 }
