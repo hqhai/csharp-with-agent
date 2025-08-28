@@ -30,7 +30,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<UpdateTestAICriteriaSettingCommandModel, TestAICriteriaSetting>().IgnoreAllNonExisting();
             CreateMap<UpdateTestAISettingCommandModel, TestAISetting>().ForMember(dest => dest.TestAICriteriaSettings, opt => opt.Ignore()).IgnoreAllNonExisting();
 
-            CreateMap<TestAISetting, TestAISettingModel>().IgnoreAllNonExisting();
+            CreateMap<TestAISetting, TestAISettingModel>()
+                .ForMember(x => x.TestAICriteriaSettings, p => p.MapFrom(o => o.TestAICriteriaSettings.OrderBy(x => x.CreatedDate)));
             CreateMap<TestAICriteriaSetting, TestAICriteriaSettingModel>().IgnoreAllNonExisting();
         }
     }
