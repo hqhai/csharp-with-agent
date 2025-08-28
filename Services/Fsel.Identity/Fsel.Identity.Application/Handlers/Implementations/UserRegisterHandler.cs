@@ -111,7 +111,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 user.EmailConfirmed = true;
 
                 user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
                 result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
 
                 var userOtpCode = new UserOtpCode
