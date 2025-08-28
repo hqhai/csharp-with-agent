@@ -1204,6 +1204,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (!isTryAgain && isSubmit)
             {
+                dataAnswer.Answers = new List<ColorMatchingTypeAnswers>();
                 dataAnswer.CountFail = ValueDefault;
             }
             configAnswer = dataAnswer;
