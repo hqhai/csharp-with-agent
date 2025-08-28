@@ -71,7 +71,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPut("{studentId}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.Update)]
+        [Permission(permissionCodes: new[] { StudentManagement.Update, SchoolStudentManagement.Update })]
         public async Task<IActionResult> UpdateStudent([FromRoute] Guid studentId, [FromBody] UpdateStudentByAdminCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
@@ -87,7 +87,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [EncryptResponse]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> GetProfileStudent([FromRoute] Guid studentId)
         {
             MethodResult<StudentModel> queryResult = await _mediator.Send(new GetStudentProfileQuery { StudentId = studentId }).ConfigureAwait(false);
@@ -100,7 +100,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("survey/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentSurveyQuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> GetSurveyStudent([FromRoute] Guid studentId)
         {
             MethodResult<IList<StudentSurveyQuestionModel>> queryResult = await _mediator.Send(new GetStudentSurveyQuestionQuery { StudentId = studentId }).ConfigureAwait(false);
@@ -113,7 +113,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("course")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentCourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> SearchStudentCourse([FromQuery] SearchStudentCourseQuery query)
         {
             MethodResult<PagingItemsModel<StudentCourseModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -126,7 +126,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("lesson-comment")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentLessonCommentModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> SearchStudentLessonComment([FromQuery] SearchStudentLessonCommentQuery query)
         {
             MethodResult<PagingItemsModel<StudentLessonCommentModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -139,7 +139,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("management")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(SchoolStudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         [EncryptResponse]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsQuery query)
         {
@@ -166,7 +166,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-by-user-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByUserIdQuery { Id = id }).ConfigureAwait(false);
@@ -192,7 +192,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("search")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentDtoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> Gets([FromQuery] SearchStudentQuery query)
         {
             MethodResult<PagingItemsModel<StudentDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -205,7 +205,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("gets")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentDtoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> Gets([FromQuery] GetStudentsQuery query)
         {
             MethodResult<IList<StudentDtoModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -218,7 +218,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-school-class")]
         [ProducesResponseType(typeof(MethodResult<IList<string>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> Gets([FromQuery] GetSchoolClassBySchoolGradeQuery query)
         {
             MethodResult<IList<string>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -257,7 +257,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-school-grades-classes")]
         [ProducesResponseType(typeof(MethodResult<StudentSearchAdminModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> GetSchoolGradeClass()
         {
             var queryResult = await _mediator.Send(new GetSchoolGradesAndClassesQuery()).ConfigureAwait(false);
@@ -296,7 +296,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-parent-by-student-id/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<ParentProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> GetParentByStudentId([FromRoute] Guid studentId)
         {
             var queryResult = await _mediator.Send(new GetParentByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
@@ -309,7 +309,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-otp-for-student")]
         [ProducesResponseType(typeof(MethodResult<OTPModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
         public async Task<IActionResult> GetOTPForStudent([FromQuery] GetOTPForStudentQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
