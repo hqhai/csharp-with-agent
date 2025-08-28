@@ -102,6 +102,12 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
              );
 
             var students = await GetStudentsAsync(userIds);
+            _logger.LoggerRequest(new
+            {
+                FileName = request.FileName,
+                TotalStudentOrder = userIds.Count,
+                TotalStudent = students.Count,
+            });
 
             var placementTestGroupResults = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
                                                                                      .ToDictionaryAsync(x => x.StudentId, cancellationToken);
@@ -228,6 +234,21 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
         private async Task<Dictionary<Guid, SearchOrderModel?>> GetLatestOrdersByUserAsync()
         {
             var orderResults = await _orderService.GetOrderRevenuesAsync();
+            if (!orderResults.IsSuccessStatusCode)
+            {
+                _logger.LoggerRequest(new
+                {
+                    Type = nameof(orderResults),
+                    StatusCode = orderResults.StatusCode,
+                    Message = orderResults.Error?.Message,
+                });
+            }
+            _logger.LoggerRequest(new
+            {
+                Type = nameof(orderResults),
+                TotalItem = orderResults.Content?.Result?.Items?.Count ?? default,
+            });
+
             return (orderResults.Content?.Result?.Items ?? new List<SearchOrderModel>())
                     .GroupBy(x => x.UserId)
                     .Select(x => new { UserId = x.Key, Order = x.OrderByDescending(x => x.ExpiredDate).FirstOrDefault() })
@@ -237,6 +258,21 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
         private async Task<IList<StudentModel>> GetStudentsAsync(List<Guid> userIds)
         {
             var studentResults = await _userService.GetStudentExportByIds(userIds);
+            if (!studentResults.IsSuccessStatusCode)
+            {
+                _logger.LoggerRequest(new
+                {
+                    Type = nameof(studentResults),
+                    StatusCode = studentResults.StatusCode,
+                    Message = studentResults.Error?.Message,
+                });
+            }
+            _logger.LoggerRequest(new
+            {
+                Type = nameof(studentResults),
+                TotalItem = studentResults.Content?.Result?.Count ?? default,
+            });
+
             return studentResults.Content?.Result ?? new List<StudentModel>();
         }
 
@@ -299,10 +335,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
             {
                 var maxWeek = studentEventLearnProcesses?.Max(x => x.WeeklyResults?.Count) ?? default;
                 ExportTemplateForSheetOne(package.Workbook.Worksheets[0], studentEventLearnProcesses, maxWeek);
-                GC.Collect();
-
                 ExportTemplateForSheetTwo(package.Workbook.Worksheets[1], studentEventLearnProcesses);
-                GC.Collect();
 
                 package.SaveAs(memoryStream);
             }
@@ -364,7 +397,9 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
 
                 // (tuỳ chọn) set độ rộng cột
                 for (int j = 0; j < width; j++)
+                {
                     ws.Column(col0 + j).Width = 12; // chỉnh theo ý bạn
+                }
             }
 
             static void ApplyBorder(ExcelRange rng)
@@ -466,8 +501,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
                         }
                         startRow++;
                     }
-
-                    GC.Collect();
                 }
             }
         }
@@ -553,8 +586,6 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
                         }
                         startRow++;
                     }
-
-                    GC.Collect();
                 }
             }
         }
