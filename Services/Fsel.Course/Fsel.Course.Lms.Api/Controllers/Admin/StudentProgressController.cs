@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/student-progress")]
     [ApiController]
-    [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
+    [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.ViewProgress })]
     public class StudentProgressController : ControllerBase
     {
         private readonly IMediator _mediator;

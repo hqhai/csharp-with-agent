@@ -648,6 +648,15 @@
     "createdDate": "2025-08-27"
   },
   {
+    "id": "fe9af0ba-2ae1-4e4a-bbb9-b6975234afe8",
+    "claimValue": "SchoolStudentManagement.ViewProgress",
+    "name": "Xem tiến độ học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-08-27"
+  },
+  {
     "id": "6df0f361-0d99-4a38-b5be-706225b7f22b",
     "claimValue": "ReportManagementByAdminSchool.ViewPTResultsReport",
     "name": "Xem báo cáo kết quả đánh giá đầu vào",
