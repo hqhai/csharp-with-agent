@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -13,10 +13,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Menus_PermissionGroups_Id",
-                table: "Menus");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_UserGroupMemberShips_AspNetUsers_UserId",
                 table: "UserGroupMemberShips");
@@ -68,21 +64,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 table: "UserGroupMemberShips",
                 column: "UserGroupId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PermissionGroups_MenuId",
-                table: "PermissionGroups",
-                column: "MenuId",
-                unique: true,
-                filter: "[MenuId] IS NOT NULL");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_PermissionGroups_Menus_MenuId",
-                table: "PermissionGroups",
-                column: "MenuId",
-                principalTable: "Menus",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
             migrationBuilder.AddForeignKey(
                 name: "FK_UserGroupMemberShips_UserGroups_UserGroupId",
                 table: "UserGroupMemberShips",
@@ -95,20 +76,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_PermissionGroups_Menus_MenuId",
-                table: "PermissionGroups");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_UserGroupMemberShips_UserGroups_UserGroupId",
                 table: "UserGroupMemberShips");
 
             migrationBuilder.DropIndex(
                 name: "IX_UserGroupMemberShips_UserGroupId",
                 table: "UserGroupMemberShips");
-
-            migrationBuilder.DropIndex(
-                name: "IX_PermissionGroups_MenuId",
-                table: "PermissionGroups");
 
             migrationBuilder.DeleteData(
                 table: "Permissions",
@@ -150,14 +123,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 name: "IX_UserGroupMemberShips_UserId_GroupId_IsActive",
                 table: "UserGroupMemberShips",
                 columns: new[] { "UserId", "GroupId", "IsActive" });
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Menus_PermissionGroups_Id",
-                table: "Menus",
-                column: "Id",
-                principalTable: "PermissionGroups",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_UserGroupMemberShips_AspNetUsers_UserId",
