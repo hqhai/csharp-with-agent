@@ -117,18 +117,18 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 user.EmailConfirmed = true;
 
                 user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                identityResult = await _userManager.CreateAsync(user);
-                if (!identityResult.Succeeded)
-                {
-                    scope.Dispose();
-                    return identityResult;
-                }
+                identityResult = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
                 if (!identityResult.Succeeded)
                 {
                     scope.Dispose();
                     return identityResult;
                 }
                 identityResult = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                if (!identityResult.Succeeded)
+                {
+                    scope.Dispose();
+                    return identityResult;
+                }
 
                 var userOtpCode = new UserOtpCode
                 {
