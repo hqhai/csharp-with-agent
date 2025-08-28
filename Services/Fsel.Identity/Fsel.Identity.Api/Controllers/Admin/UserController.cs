@@ -211,7 +211,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("token/{id}")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentProgressManagement.LoginAsUser)]
+        [Permission(permissionCodes: new[] { StudentProgressManagement.LoginAsUser, SchoolStudentManagement.LoginAsUser })]
         public async Task<IActionResult> GetJWT([FromRoute] Guid id)
         {
             MethodResult<TokenModel> queryResult = await _mediator.Send(new GenerateTokenCommand { Id = id }).ConfigureAwait(false);
@@ -344,7 +344,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("reset-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(permissionCodes: new[] { UserManagement.Update, StudentManagement.Update })]
+        [Permission(permissionCodes: new[] { UserManagement.Update, StudentManagement.Update, SchoolStudentManagement.Update })]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordUserCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
