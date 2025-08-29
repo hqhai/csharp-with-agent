@@ -55,7 +55,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
             var course = await _courseRepository.Queryable
                                                 .Where(x => x.Id == request.Id)
                                                 .Include(x => x.CourseTeachers)
-                                                .Include(x => x.CourseModules)
+                                                .Include(x => x.CourseModules.OrderBy(x => x.DisplayOrder))
                                                 .AsNoTracking()
                                                 .FirstOrDefaultAsync(cancellationToken);
             if (course == null)
