@@ -13,6 +13,7 @@ using Fsel.ExamPractice.Lms.Application.Services.AiService;
 using Fsel.ExamPractice.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService.Interface;
+using Fsel.ExamPractice.Lms.Application.Services.FFmpegServices;
 using Fsel.ExamPractice.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
 using Refit;
@@ -38,6 +39,7 @@ builder.Services.AddScoped<IExamPracticeAISettingRepository, ExamPracticeAISetti
 builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
+builder.Services.AddScoped<IPronuciationAssessmentService, PronuciationAssessmentService>();
 
 builder.Services.AddScoped<ExamPracticeHelper>();
 builder.Services.AddScoped<ExamPracticeSectionHelper>();
@@ -50,6 +52,7 @@ builder.Services.AddScoped<SubmitExamPracticeAnswerPublisher>();
 builder.Services.AddScoped<SubmitAiSpeakingAnswerPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
+builder.AddRefitClients(typeof(IFFmpegServices), appSetting?.Services?.FFmpegApiUrl);
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);

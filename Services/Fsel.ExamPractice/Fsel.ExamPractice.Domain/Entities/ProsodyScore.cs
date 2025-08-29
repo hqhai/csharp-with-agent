@@ -3,9 +3,12 @@
 namespace Fsel.ExamPractice.Domain.Entities
 {
     using Fsel.Core.Entities;
+    using Fsel.ExamPractice.Domain.Enums;
 
     public class ProsodyScore : Entity
     {
+        public EnumExamPracticeAIType AIType { get; set; }
+        public EnumExamPracticeModuleAIType ModuleAIType { get; set; }
         public double MinScore { get; set; }
 
         public double MaxScore { get; set; }

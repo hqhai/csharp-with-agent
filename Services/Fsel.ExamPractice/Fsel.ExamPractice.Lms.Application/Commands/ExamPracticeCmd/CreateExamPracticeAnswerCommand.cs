@@ -38,10 +38,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         private readonly IExamPracticeSectionResultRepository _examPracticeSectionResultRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExamPracticeAnswerRepository _examPracticeAnswerRepository;
-        private readonly ISpeakingEvaluationAIService _speakingEvaluationAIService;
         private readonly SubmitSpeakingAIPublisher _submitSpeakingAIPublisher;
         private readonly SubmitExamPracticeAnswerPublisher _submitExamPracticeAnswerPublisher;
         private readonly ExamPracticeSectionHelper _examPracticeSectionHelper;
+        private readonly IPronuciationAssessmentService _pronuciationAssessmentService;
         private readonly IMapper _mapper;
 
         public CreateExamPracticeAnswerCommandHandler(
@@ -53,10 +53,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             IExamPracticeSectionResultRepository examPracticeSectionResultRepository,
             IQuestionRepository questionRepository,
             IExamPracticeAnswerRepository examPracticeAnswerRepository,
-            ISpeakingEvaluationAIService speakingEvaluationAIService,
             SubmitSpeakingAIPublisher submitSpeakingAIPublisher,
             SubmitExamPracticeAnswerPublisher submitExamPracticeAnswerPublisher,
             ExamPracticeSectionHelper examPracticeSectionHelper,
+            IPronuciationAssessmentService pronuciationAssessmentService,
             IMapper mapper)
         {
             _examPracticeRepository = examPracticeRepository;
@@ -67,10 +67,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             _examPracticeSectionResultRepository = examPracticeSectionResultRepository;
             _questionRepository = questionRepository;
             _examPracticeAnswerRepository = examPracticeAnswerRepository;
-            _speakingEvaluationAIService = speakingEvaluationAIService;
             _submitSpeakingAIPublisher = submitSpeakingAIPublisher;
             _submitExamPracticeAnswerPublisher = submitExamPracticeAnswerPublisher;
             _examPracticeSectionHelper = examPracticeSectionHelper;
+            _pronuciationAssessmentService = pronuciationAssessmentService;
             _mapper = mapper;
         }
 
@@ -518,7 +518,8 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     continue;
                 }
                 var answer = answers.FirstOrDefault(x => x.ExamPracticeResultId == request.ExamPracticeResultId && x.ExamPracticeSectionId == section.Id);
-                double pronScore = await _speakingEvaluationAIService.EvaluationSpeaking(section.Name, item?.Answer?.ToString() ?? default);
+                var pronunciationAssessment = await _pronuciationAssessmentService.AssessPronunciationFromFileAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
+                double pronScore = pronunciationAssessment.PronunciationScore;
                 if (answer == null)
                 {
                     answer = GetExamPracticeAnswer(sectionResult, section.Id);
@@ -540,6 +541,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     }
                     updateAnswers.Add(answer);
                 }
+                answer.PronunciationAssessmentAnswer = pronunciationAssessment;
             }
             methodResult.Result = (createAnswers, updateAnswers);
             return methodResult;

@@ -8,6 +8,7 @@ namespace Fsel.ExamPractice.Domain.Entities
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.ExamPractice.Domain.Models.EntityModels;
     using Fsel.Shared.Helpers;
     using Newtonsoft.Json;
 
@@ -66,6 +67,20 @@ namespace Fsel.ExamPractice.Domain.Entities
         public string? SpeechTextAnswer { get; set; }
 
         public double? PronunciationScore { get; set; }
+        public string? PronunciationAssessmentStr { get; set; }
+
+        [NotMapped]
+        public PronunciationAssessmentModel? PronunciationAssessmentAnswer
+        {
+            get { return ConvertHelper.Deserialize<PronunciationAssessmentModel>(PronunciationAssessmentStr); }
+            set
+            {
+                if (value != null)
+                {
+                    PronunciationAssessmentStr = ConvertHelper.Serialize(value);
+                }
+            }
+        }
 
         public int RetryTime { get; set; }
         public ExamPracticeResult? ExamPracticeResult { get; set; }
