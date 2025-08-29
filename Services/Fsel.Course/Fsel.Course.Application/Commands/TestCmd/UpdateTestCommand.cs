@@ -90,9 +90,9 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(test.ErrorMessages);
                 return methodResult;
             }
-            if (!test.ValidateScoringFormula())
+            if (!newVersionTest.ValidateScoringFormula())
             {
-                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
                 return methodResult;
             }
             var method = _testConverter.IsValidateQuestion(request.TestSections);

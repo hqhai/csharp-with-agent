@@ -1202,8 +1202,10 @@ namespace Fsel.Course.Infrastructure.Common
                 item.IsExact = isCorrect;
                 number = isCorrect ? ++number : --number;
             }
-            if (!isTryAgain && isSubmit)
+            var correctQuestion = dataQuestion.Contents.Where(x => x.IsCorrect.HasValue && x.IsCorrect.Value).Count();
+            if (!isTryAgain && isSubmit && number != correctQuestion)
             {
+                dataAnswer.Answers = new List<ColorMatchingTypeAnswers>();
                 dataAnswer.CountFail = ValueDefault;
             }
             configAnswer = dataAnswer;
