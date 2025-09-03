@@ -31,7 +31,7 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .HasFilter("[NormalizedUserName] IS NOT NULL AND [IsDeleted] = 0");
 
             builder.Property(x => x.FullName)
-                .HasComputedColumnSql($"[{nameof(User.LastName)}] + ' ' + [{nameof(User.FirstName)}]", stored: true);
+                .HasComputedColumnSql($"CONCAT_WS(' ', [{nameof(User.LastName)}], [{nameof(User.FirstName)}])", stored: true);
 
             builder.HasIndex(x => new { x.IsDeleted, x.UserName });
             builder.HasIndex(x => new { x.IsDeleted, x.Email });

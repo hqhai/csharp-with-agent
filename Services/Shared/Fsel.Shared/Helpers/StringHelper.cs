@@ -454,18 +454,18 @@ namespace Fsel.Shared.Helpers
         {
             if (string.IsNullOrWhiteSpace(fullName))
             {
-                return (string.Empty, string.Empty);
+                return (string.Empty, null);
             }
 
             int firstSpaceIndex = fullName.IndexOf(' ', StringComparison.InvariantCulture);
 
             if (firstSpaceIndex == -1)
             {
-                return (fullName, fullName);
+                return (fullName.Trim(), null);
             }
 
-            string lastName = fullName[..firstSpaceIndex];
-            string firstName = fullName[(firstSpaceIndex + 1)..];
+            string lastName = fullName[..firstSpaceIndex].Trim();
+            string firstName = fullName[(firstSpaceIndex + 1)..].Trim();
 
             return (firstName, lastName);
         }

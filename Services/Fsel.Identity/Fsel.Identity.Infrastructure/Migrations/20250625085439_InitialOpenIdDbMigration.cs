@@ -104,19 +104,31 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 defaultValue: "");
 
             migrationBuilder.AddColumn<string>(
+                name: "LastName",
+                table: "AspNetUsers",
+                type: "nvarchar(250)",
+                maxLength: 250,
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
                 name: "Gender",
                 table: "AspNetUsers",
                 type: "nvarchar(100)",
                 maxLength: 100,
                 nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "LastName",
+            migrationBuilder.AddColumn<Guid>(
+                name: "ManageUserId",
                 table: "AspNetUsers",
-                type: "nvarchar(250)",
-                maxLength: 250,
-                nullable: false,
-                defaultValue: "");
+                type: "uniqueidentifier",
+                nullable: true);
+
+            migrationBuilder.AddColumn<string>(
+                name: "Position",
+                table: "AspNetUsers",
+                type: "nvarchar(1000)",
+                maxLength: 1000,
+                nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "DataProtectionKeys",
@@ -163,6 +175,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Gender,
                     ManageUserId,
                     Position,
+                    FullName,
                     FirstName,
                     LastName,
                     CreatedDate,
@@ -185,9 +198,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     H.Gender,
                     H.ManageUserId,
                     H.Position,
+                    H.FullName,
                     -- FirstName
                     TRIM(
-                        CASE 
+                        CASE
                             WHEN CHARINDEX(' ', H.FullName) = 0 THEN H.FullName
                             ELSE STUFF(H.FullName, 1, CHARINDEX(' ', H.FullName), '')
                         END
@@ -195,7 +209,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     -- LastName
                     TRIM(
                         CASE 
-                            WHEN CHARINDEX(' ', H.FullName) = 0 THEN H.FullName
+                            WHEN CHARINDEX(' ', H.FullName) = 0 THEN NULL
                             ELSE LEFT(H.FullName, CHARINDEX(' ', H.FullName) - 1)
                         END
                     ),
@@ -206,13 +220,13 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     0, 0, 0, 0, 0
                 )
                 OUTPUT INSERTED.Id, H.Id INTO #NewUsers (NewUserId, HumanId);
-
+            
                 -- Bước 4: Cập nhật Humans với UserId mới
                 UPDATE H
                 SET H.UserId = N.NewUserId
                 FROM Humans H
                 JOIN #NewUsers N ON H.Id = N.HumanId;
-
+            
                 -- Bước 5: Đồng bộ lại dữ liệu User từ Humans (cho toàn bộ Users)
                 UPDATE U
                 SET 
@@ -224,23 +238,26 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Gender      = ISNULL(H.Gender, U.Gender),
                     ManageUserId= ISNULL(H.ManageUserId, U.ManageUserId),
                     Position    = ISNULL(H.Position, U.Position),
+                    FullName    = ISNULL(U.FullName, H.FullName),
                     -- FirstName
-                    FirstName    = TRIM(
+                    FirstName = TRIM(
                         CASE 
-                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 THEN ISNULL(H.FullName, U.FullName)
+                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 
+                                THEN ISNULL(H.FullName, U.FullName)
                             ELSE STUFF(ISNULL(H.FullName, U.FullName), 1, CHARINDEX(' ', ISNULL(H.FullName, U.FullName)), '')
                         END
                     ),
                     -- LastName
-                    LastName   = TRIM(
+                    LastName = TRIM(
                         CASE 
-                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 THEN ISNULL(H.FullName, U.FullName)
+                            WHEN CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) = 0 
+                                THEN NULL
                             ELSE LEFT(ISNULL(H.FullName, U.FullName), CHARINDEX(' ', ISNULL(H.FullName, U.FullName)) - 1)
                         END
                     )
                 FROM AspNetUsers U
                 LEFT JOIN Humans H ON U.Id = H.UserId;
-
+            
                 -- Bước 6: Cập nhật các bảng liên quan
                 -- CSOs
                 UPDATE CSOs 
@@ -248,43 +265,52 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 FROM CSOs C
                 JOIN Humans H ON C.HumanId = H.Id
                 JOIN AspNetUsers U ON H.UserId = U.Id;
-
+            
                 -- Parents
                 UPDATE Parents 
                 SET HumanId = U.Id
                 FROM Parents C
                 JOIN Humans H ON C.HumanId = H.Id
                 JOIN AspNetUsers U ON H.UserId = U.Id;
-
+            
                 -- Students
                 UPDATE Students 
                 SET HumanId = U.Id
                 FROM Students C
                 JOIN Humans H ON C.HumanId = H.Id
                 JOIN AspNetUsers U ON H.UserId = U.Id;
-
+            
                 -- Teachers
                 UPDATE Teachers 
                 SET HumanId = U.Id
                 FROM Teachers C
                 JOIN Humans H ON C.HumanId = H.Id
                 JOIN AspNetUsers U ON H.UserId = U.Id;
-
+            
                 -- Bước 7: Xóa bảng tạm (nếu không cần dùng nữa)
                 DROP TABLE #NewUsers;
                 DROP TABLE #HumansWithoutUser;
             ");
+
+            migrationBuilder.Sql("DROP FULLTEXT INDEX ON AspNetUsers;", suppressTransaction: true);
+            migrationBuilder.Sql("DROP FULLTEXT CATALOG ftCatalog_AspNetUsers;", suppressTransaction: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "FullName",
                 table: "AspNetUsers",
                 type: "nvarchar(max)",
                 nullable: true,
-                computedColumnSql: "[LastName] + ' ' + [FirstName]",
+                computedColumnSql: "CONCAT_WS(' ', [LastName], [FirstName])",
                 stored: true,
                 oldClrType: typeof(string),
                 oldType: "nvarchar(100)",
                 oldMaxLength: 100);
+
+            migrationBuilder.Sql("CREATE FULLTEXT CATALOG ftCatalog_AspNetUsers AS DEFAULT;", suppressTransaction: true);
+            migrationBuilder.Sql(@"CREATE FULLTEXT INDEX ON AspNetUsers(FullName)
+                KEY INDEX PK_AspNetUsers
+                ON ftCatalog_AspNetUsers;",
+                suppressTransaction: true);
 
             migrationBuilder.RenameColumn(
                 name: "HumanId",
@@ -439,7 +465,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 oldClrType: typeof(string),
                 oldType: "nvarchar(max)",
                 oldNullable: true,
-                oldComputedColumnSql: "[LastName] + ' ' + [FirstName]");
+                oldComputedColumnSql: "CONCAT_WS(' ', [LastName], [FirstName])");
 
             migrationBuilder.CreateTable(
                 name: "Humans",
@@ -570,11 +596,19 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 table: "AspNetUsers");
 
             migrationBuilder.DropColumn(
+                name: "LastName",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
                 name: "Gender",
                 table: "AspNetUsers");
 
             migrationBuilder.DropColumn(
-                name: "LastName",
+                name: "ManageUserId",
+                table: "AspNetUsers");
+
+            migrationBuilder.DropColumn(
+                name: "Position",
                 table: "AspNetUsers");
 
             migrationBuilder.RenameColumn(
