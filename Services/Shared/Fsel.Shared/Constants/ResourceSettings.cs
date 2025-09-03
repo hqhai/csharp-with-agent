@@ -130,5 +130,8 @@ namespace Fsel.Shared.Constants
         public const string ProductFileName = "Resources//Products.json";
         public const string ExamScoringLevel = "Resources//ExamScoringLevel.json";
         public const string ExamBandScores = "Resources//ExamBandScores.json";
+
+        public const string TranslateAiInstruction = "Resources//AIPrompt//Instruction//TranslateAiInstruction.txt";
+        public const string TranslateAiRole = "Resources//AIPrompt//Role//TranslateAiRole.txt";
     }
 }

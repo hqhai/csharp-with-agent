@@ -146,19 +146,17 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             // If config null or IsAllPart = true -> lấy tất cả phần con
             if (examPracticeResult.Config == null || examPracticeResult.Config.IsAllPart)
             {
-                return await baseQuery.ToListAsync(ct);
+                return await baseQuery.OrderBy(x => x.CreatedDate).ToListAsync(ct);
             }
 
             // Nếu có danh sách phần cụ thể
             if (examPracticeResult.Config.ExamPracticeSectionIds is { Count: > 0 })
             {
-                return await baseQuery
-                    .WhereBulkContains(examPracticeResult.Config.ExamPracticeSectionIds, x => x.Id)
-                    .ToListAsync(ct);
+                baseQuery = baseQuery.WhereBulkContains(examPracticeResult.Config.ExamPracticeSectionIds, x => x.Id);
             }
 
             // Config có nhưng rỗng => không có phần nào
-            return new List<ExamPracticeSection>();
+            return await baseQuery.OrderBy(x => x.CreatedDate).ToListAsync(ct);
         }
 
         private async Task<List<ExamPracticeAnswer>> GetAnswersAsync(Guid examPracticeResultId, CancellationToken ct)
@@ -173,35 +171,51 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         {
             // Try read existing (no tracking is fine here)
             var examPracticeSectionResult = await _examPracticeSectionResultRepository.Queryable
-                                                                     .AsNoTracking()
-                                                                     .Where(x => x.ExamPracticeSectionId == examPracticeSection.Id)
-                                                                     .FirstOrDefaultAsync(x => x.ExamPracticeResultId == examPracticeResult.Id);
+                                                                                      .Where(x => x.ExamPracticeSectionId == examPracticeSection.Id)
+                                                                                      .FirstOrDefaultAsync(x => x.ExamPracticeResultId == examPracticeResult.Id);
 
-            if (examPracticeSectionResult != null)
+            if (examPracticeSectionResult == null)
             {
-                return examPracticeSectionResult;
-            }
-            // Insert idempotently via BulkMerge on natural key
-            examPracticeSectionResult = new ExamPracticeSectionResult
-            {
-                ExamPracticeSectionId = examPracticeSection.Id,
-                StudentId = examPracticeResult.StudentId,
-                ExamPracticeResultId = examPracticeResult.Id,
-                Status = EnumResultStatus.New
-            };
-            try
-            {
-                await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
+                // Insert idempotently via BulkMerge on natural key
+                examPracticeSectionResult = new ExamPracticeSectionResult
                 {
-                    await _examPracticeSectionResultRepository.BulkMergeAsync(new List<ExamPracticeSectionResult> { examPracticeSectionResult },
-                        bulk => bulk.ColumnPrimaryKeyExpression = e => new { e.StudentId, e.ExamPracticeSectionId, e.ExamPracticeResultId }
-                    );
-                    return methodResult;
-                });
+                    ExamPracticeSectionId = examPracticeSection.Id,
+                    StudentId = examPracticeResult.StudentId,
+                    ExamPracticeResultId = examPracticeResult.Id,
+                    Status = EnumResultStatus.New
+                };
+                try
+                {
+                    await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
+                    {
+                        await _examPracticeSectionResultRepository.BulkMergeAsync(new List<ExamPracticeSectionResult> { examPracticeSectionResult },
+                            bulk => bulk.ColumnPrimaryKeyExpression = e => new { e.StudentId, e.ExamPracticeSectionId, e.ExamPracticeResultId }
+                        );
+                        return methodResult;
+                    });
+                }
+                catch
+                {
+                }
             }
-            catch
+            else if (examPracticeSectionResult.Status == EnumResultStatus.New)
             {
+                try
+                {
+                    examPracticeSectionResult.Status = EnumResultStatus.Process;
+                    await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
+                    {
+                        await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult },
+                            bulk => bulk.ColumnInputExpression = entity => new { entity.Status }
+                        );
+                        return methodResult;
+                    });
+                }
+                catch
+                {
+                }
             }
+
             return examPracticeSectionResult;
         }
 

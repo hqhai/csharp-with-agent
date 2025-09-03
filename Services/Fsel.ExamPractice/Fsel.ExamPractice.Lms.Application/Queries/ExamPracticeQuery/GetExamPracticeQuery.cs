@@ -18,6 +18,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
     using Fsel.ExamPractice.Infrastructure.Common;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
 
@@ -28,7 +29,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 
     public class GetExamPracticeQueryHandler : IRequestHandler<GetExamPracticeQuery, MethodResult<ExamPracticeDetailModel>>
     {
-        private readonly IExamPracticeRepository _examPracticeRepository;
         private readonly IExamPracticeSectionRepository _examPracticeSectionRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
@@ -36,7 +36,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         private readonly IExamPracticeAnswerRepository _examPracticeAnswerRepository;
         private readonly IMapper _mapper;
 
-        public GetExamPracticeQueryHandler(IExamPracticeRepository examPracticeRepository,
+        public GetExamPracticeQueryHandler(
             IExamPracticeSectionRepository examPracticeSectionRepository,
             AuthContext authContext,
             IUserService userService,
@@ -44,7 +44,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             IExamPracticeAnswerRepository examPracticeAnswerRepository,
             IMapper mapper)
         {
-            _examPracticeRepository = examPracticeRepository;
             _examPracticeSectionRepository = examPracticeSectionRepository;
             _authContext = authContext;
             _userService = userService;
@@ -68,7 +67,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 
             var examPracticeResult = await _examPracticeResultRepository.Queryable.Include(x => x.ExamPractice)
                                                                         .Where(x => x.ExamPracticeId == request.Id && x.StudentId == student.Id)
-                                                                        .Where(x => x.WorkingStatus == Shared.Enums.EnumWorkingStatus.Active)
+                                                                        .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
                                                                         .AsNoTracking()
                                                                         .FirstOrDefaultAsync(cancellationToken);
             if (examPracticeResult == null)

@@ -102,7 +102,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
 
             if (request.CourseSkill.HasValue)
             {
-                query = query.Where(x => x.ExamPracticeSections.Any(y => y.CourseSkill == request.CourseSkill.Value));
+                query = query.Where(x => x.ExamPracticeSections.Any(y => y.CourseSkill.HasValue && y.CourseSkill == request.CourseSkill.Value));
             }
             var queryTest = query.Select(x => new
             {

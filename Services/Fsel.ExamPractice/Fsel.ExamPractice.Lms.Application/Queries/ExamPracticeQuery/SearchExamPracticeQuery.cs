@@ -65,7 +65,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             {
                 return methodResult;
             }
-            var query = _examPracticeRepository.Queryable.Where(x => x.Type == request.Type)
+            var query = _examPracticeRepository.Queryable.Where(x => x.Type == request.Type && !x.IsArchive)
                     .Where(x => x.Status == EnumExamPracticeStatus.Active || x.ExamPracticeResults.Any(y => y.StudentId == student.Id));
             if (!string.IsNullOrEmpty(request.Keyword))
             {

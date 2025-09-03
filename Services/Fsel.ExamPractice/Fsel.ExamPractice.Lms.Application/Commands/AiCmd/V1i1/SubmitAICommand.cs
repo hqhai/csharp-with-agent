@@ -51,7 +51,6 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd.V1i1
                 {
                     Format = request.Format
                 },
-                Temperature = request.SettingTemperature,
                 TopP = request.SettingTopP
             });
 

@@ -15,6 +15,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FeedBack { get; set; }
 
+        public string? GradingAlFeedback { get; set; }
         public long Score { get; set; }
         public ExamPracticeSection? ExamPracticeSection { get; set; }
         public Guid ExamPracticeSectionId { get; set; }

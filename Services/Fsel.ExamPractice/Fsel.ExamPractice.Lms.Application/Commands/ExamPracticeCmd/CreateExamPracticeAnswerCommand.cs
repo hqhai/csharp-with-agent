@@ -208,7 +208,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 }
             }
 
-            var examPracticeSectionResultDto = _mapper.Map<ExamPracticeSectionResultModel>(await _examPracticeSectionResultRepository.GetByIdAsync(examPracticeSectionResult.Id));
+            var examPracticeSectionResultDto = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
             examPracticeSectionResultDto.IsTestDone = examPracticeResult.Status == EnumResultStatus.Done;
             methodResult.Result = examPracticeSectionResultDto;
             return methodResult;
