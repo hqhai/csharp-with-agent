@@ -491,5 +491,10 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             }
             return result;
         }
+
+        public bool ValidateReportContentBankConfigs()
+        {
+            return true;
+        }
     }
 }

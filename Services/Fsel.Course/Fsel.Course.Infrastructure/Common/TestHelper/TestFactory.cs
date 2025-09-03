@@ -29,7 +29,7 @@ namespace Fsel.Course.Infrastructure.Common.TestHelper
 
         public Test Build(Guid? originalId = null, bool isUsingByClient = false)
         {
-            HandleRequestScoringFormula(_createRequest);
+            HandleRequest(_createRequest);
             var test = _mapper.Map<Test>(_createRequest);
             test.Id = Guid.Empty;
             test.OriginalId = originalId.HasValue ? originalId.Value : Guid.NewGuid();
@@ -38,7 +38,7 @@ namespace Fsel.Course.Infrastructure.Common.TestHelper
             return test;
         }
 
-        private static void HandleRequestScoringFormula(UpdateTestCommandModel request)
+        private static void HandleRequest(UpdateTestCommandModel request)
         {
             if (request.TestSections != null && request.TestSections.Any())
             {
@@ -54,6 +54,7 @@ namespace Fsel.Course.Infrastructure.Common.TestHelper
                         p.Childrens.ForEach(child =>
                         {
                             child.ScoringFormulaConfigs = null;
+                            child.ReportContentBankConfigs = null;
 
                             if (child.Childrens != null && child.Childrens.Any())
                             {
@@ -64,6 +65,7 @@ namespace Fsel.Course.Infrastructure.Common.TestHelper
                                         x.Percent = null;
                                     }
                                     x.ScoringFormulaConfigs = null;
+                                    x.ReportContentBankConfigs = null;
                                 });
                             }
                         });
