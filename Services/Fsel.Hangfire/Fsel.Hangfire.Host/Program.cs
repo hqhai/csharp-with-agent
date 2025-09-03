@@ -8,7 +8,6 @@ using Fsel.Hangfire.Application.Queues.Publishers;
 using Fsel.Hangfire.Host.Jobs;
 using Fsel.Shared.Constants;
 using Hangfire;
-using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +16,7 @@ builder.AddServices(appSetting);
 builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 
+builder.AddTenantMasterDbContexts();
 builder.Services.AddHangfire(x => x.UseSqlServerStorage(builder.Configuration.GetConnectionString(Settings.DefaultConnection)));
 builder.Services.AddHangfireServer();
 
@@ -41,6 +41,7 @@ builder.Services.AddScoped<CheckUserDeletionPublisher>();
 builder.Services.AddScoped<WeeklyNoticePublisher>();
 builder.Services.AddScoped<ChooseDailyQuizWinnersPublisher>();
 builder.Services.AddScoped<AggregateDataStudentsInEventPublisher>();
+builder.Services.AddScoped<PushNoticePublisher>();
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
 {

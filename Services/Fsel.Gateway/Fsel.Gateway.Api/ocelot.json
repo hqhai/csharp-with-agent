@@ -183,6 +183,34 @@
           "Port": 80
         }
       ]
+    },
+    // ExamPractice Service
+    {
+      "SwaggerKey": "exam-practice",
+      "UpstreamPathTemplate": "/exam-practice-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5503
+        }
+      ]
+    },
+    // ExamPracticeLms Service
+    {
+      "SwaggerKey": "exam-practice-lms",
+      "UpstreamPathTemplate": "/exam-practice-lms-gateway/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5504
+        }
+      ]
     }
   ],
   "SwaggerEndPoints": [
@@ -423,6 +451,46 @@
           "Name": "Notification API",
           "Version": "v1.2",
           "Url": "http://localhost:5502/swagger/v1.2/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "exam-practice",
+      "Config": [
+        {
+          "Name": "ExamPractice API",
+          "Version": "v1",
+          "Url": "http://localhost:5503/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "ExamPractice API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5503/swagger/v1.1/swagger.json"
+        },
+        {
+          "Name": "ExamPractice API",
+          "Version": "v1.2",
+          "Url": "http://localhost:5503/swagger/v1.2/swagger.json"
+        }
+      ]
+    },
+    {
+      "Key": "exam-practice-lms",
+      "Config": [
+        {
+          "Name": "ExamPracticeLms API",
+          "Version": "v1",
+          "Url": "http://localhost:5504/swagger/v1/swagger.json"
+        },
+        {
+          "Name": "ExamPracticeLms API",
+          "Version": "v1.1",
+          "Url": "http://localhost:5504/swagger/v1.1/swagger.json"
+        },
+        {
+          "Name": "ExamPracticeLms API",
+          "Version": "v1.2",
+          "Url": "http://localhost:5504/swagger/v1.2/swagger.json"
         }
       ]
     }

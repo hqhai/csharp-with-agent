@@ -38,29 +38,33 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
+                SchoolClass = request.SchoolClass,
                 SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
                 StartDate = request.StartDate,
                 CourseType = request.CourseType,
                 LearningStatus = request.LearningStatus,
-                SchoolClass = request.SchoolClass,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportStudentAssiduityQuery
             {
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                Keyword = request.Keyword,
-                StartDate = request.StartDate,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+
+                SchoolGrade = request.SchoolGrade,
+                SchoolClass = request.SchoolClass,
+                Keyword = request.Keyword,
+                StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 LearningStatus = request.LearningStatus,
-                SchoolClass = request.SchoolClass,
                 CourseType = request.CourseType,
             }, cancellationToken);
             var userResult = await _userService.GetUserProfileAsync();
@@ -97,8 +101,8 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                     {
                         excelWorksheet.Cells[startRow, 1].Value = item.FullName;
                         excelWorksheet.Cells[startRow, 2].Value = item.UserName;
-                        excelWorksheet.Cells[startRow, 3].Value = item.Email;
-                        excelWorksheet.Cells[startRow, 4].Value = item.SchoolName;
+                        excelWorksheet.Cells[startRow, 3].Value = item.PhoneNumber;
+                        excelWorksheet.Cells[startRow, 4].Value = item.Email;
                         excelWorksheet.Cells[startRow, 5].Value = item.SchoolGrade;
                         excelWorksheet.Cells[startRow, 6].Value = item.SchoolClass;
                         excelWorksheet.Cells[startRow, 7].Value = item.CourseLevel.HasValue ? item.CourseLevel.Value.GetDescription() : null;

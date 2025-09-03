@@ -4,6 +4,8 @@ namespace IdentityServer4.AspNetIdentity
 {
     using System;
     using System.Threading.Tasks;
+    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Entities;
     using IdentityServer4.Models;
     using IdentityServer4.Validation;
     using Microsoft.AspNetCore.Identity;
@@ -16,10 +18,11 @@ namespace IdentityServer4.AspNetIdentity
     /// <typeparam name="TUser">The type of the user.</typeparam>
     /// <seealso cref="IExtensionGrantValidator" />
     public class ImpersonationGrantValidator<TUser> : IExtensionGrantValidator
-        where TUser : class
+        where TUser : UserEntity
     {
-        private readonly UserManager<TUser> _userManager;
+        private UserManager<TUser> _userManager;
         private readonly SignInManager<TUser> _signInManager;
+        private readonly ITenantProvider _tenantProvider;
         private readonly ILogger<ImpersonationGrantValidator<TUser>> _logger;
 
         /// <summary>
@@ -28,10 +31,11 @@ namespace IdentityServer4.AspNetIdentity
         /// <param name="userManager">The user manager.</param>
         /// <param name="signInManager">The sign in manager.</param>
         /// <param name="logger">The logger.</param>
-        public ImpersonationGrantValidator(UserManager<TUser> userManager, SignInManager<TUser> signInManager, ILogger<ImpersonationGrantValidator<TUser>> logger)
+        public ImpersonationGrantValidator(UserManager<TUser> userManager, SignInManager<TUser> signInManager, ITenantProvider tenantProvider, ILogger<ImpersonationGrantValidator<TUser>> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _tenantProvider = tenantProvider;
             _logger = logger;
         }
 
@@ -50,6 +54,8 @@ namespace IdentityServer4.AspNetIdentity
             ArgumentNullException.ThrowIfNull(context);
 
             var userName = context.Request.Raw.Get(nameof(ExtensionGrantValidationContext.Request.UserName));
+
+            _userManager = await _tenantProvider.CreateUserManagerAsync<TUser>(userName ?? string.Empty) ?? _userManager;
             var user = await _userManager.FindByNameAsync(userName ?? string.Empty);
             if (user != null)
             {

@@ -236,13 +236,82 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("ClassForumResultId", "SubmissionCount")
                         .IsUnique()
-                        .HasFilter("[SubmissionCount] IS NOT NULL");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("IsDeleted", "ClassForumResultId");
 
                     b.HasIndex("IsDeleted", "Status", "ClassForumResultId");
 
                     b.ToTable("ClassForumDetailResults");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumDetailResultHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<Guid>("ClassForumDetailResultId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .HasMaxLength(10000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<string>("WordContent")
+                        .HasMaxLength(10000)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClassForumDetailResultId");
+
+                    b.ToTable("ClassForumDetailResultHistories");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumFile", b =>
@@ -436,7 +505,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("IsDeleted", "StudentId");
 
                     b.HasIndex("LessonResultId", "ClassForumId", "StudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("IsDeleted", "Status", "ClassForumId", "Id");
 
@@ -451,6 +521,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
+
+                    b.Property<Guid?>("ClassForumDetailResultHistoryId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("ClassForumDetailResultId")
                         .HasColumnType("uniqueidentifier");
@@ -510,6 +583,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ClassForumDetailResultHistoryId");
 
                     b.HasIndex("ClassForumDetailResultId");
 
@@ -747,7 +822,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("ParentCourseId", "Priority")
                         .IsUnique()
-                        .HasFilter("[ParentCourseId] IS NOT NULL");
+                        .HasFilter("ParentCourseId IS NOT NULL AND [IsDeleted] = 0");
 
                     b.ToTable("Courses");
                 });
@@ -831,7 +906,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "Status", "CourseId" });
 
                     b.HasIndex("CourseId", "StudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("IsDeleted", "WorkingStatus");
 
@@ -1772,7 +1848,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("FinalTestResultId", "SectionQuestionId", "SectionGroupResultId")
                         .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("FinalTestAnswers");
                 });
@@ -1860,7 +1936,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("StudentId", "CourseId");
 
                     b.HasIndex("CourseId", "FinalTestId", "StudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("FinalTestResults");
                 });
@@ -2065,7 +2142,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("HomeWorkResultId");
 
                     b.HasIndex("HomeWorkQuestionId", "HomeWorkResultId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("HomeWorkAnswers");
                 });
@@ -2219,7 +2297,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("StudentId"), new[] { "CorrectCount", "CorrectTotal", "CreatedDate", "CreatedFullName", "CreatedUserId", "HomeWorkId", "IsDeleted", "LessonResultId", "Percent", "SkillScoresStr", "Status", "SubmissionCount", "TokenFirstTime", "TokenLastTime", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
                     b.HasIndex("LessonResultId", "HomeWorkId", "StudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("HomeWorkResults");
                 });
@@ -2664,7 +2743,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("CreatedUserId", "Status", "UnitId");
 
                     b.HasIndex("CourseId", "UnitId", "LessonId", "StudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("LessonResults");
                 });
@@ -3056,15 +3136,15 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("MockTestResultId", "SectionGroupResultId", "SectionId")
                         .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL AND [SectionId] IS NOT NULL");
+                        .HasFilter("SectionId IS NOT NULL AND [IsDeleted] = 0");
 
                     b.HasIndex("MockTestResultId", "SectionGroupResultId", "SectionQuestionId")
                         .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL AND [SectionQuestionId] IS NOT NULL");
+                        .HasFilter("SectionQuestionId IS NOT NULL AND [IsDeleted] = 0");
 
                     b.HasIndex("MockTestResultId", "SectionGroupResultId", "SectionTimeCodeId")
                         .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL AND [SectionTimeCodeId] IS NOT NULL");
+                        .HasFilter("SectionTimeCodeId IS NOT NULL AND [IsDeleted] = 0");
 
                     b.ToTable("MockTestAnswers");
                 });
@@ -3167,11 +3247,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("CourseId", "MockTestId", "StudentId")
                         .IsUnique()
-                        .HasFilter("[UnitId] IS NULL");
+                        .HasFilter("[UnitId] IS NULL AND [IsDeleted] = 0");
 
                     b.HasIndex("CourseId", "MockTestId", "UnitId", "StudentId")
                         .IsUnique()
-                        .HasFilter("[UnitId] IS NOT NULL");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("MockTestResults");
                 });
@@ -3455,7 +3535,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("PlacementTestResultId", "SectionGroupResultId", "SectionQuestionId")
                         .IsUnique()
-                        .HasFilter("[SectionGroupResultId] IS NOT NULL");
+                        .HasFilter("SectionGroupResultId IS NOT NULL AND [IsDeleted] = 0");
 
                     b.ToTable("PlacementTestAnswers");
                 });
@@ -3558,7 +3638,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedDate"), new[] { "StudentId" });
 
                     b.HasIndex("StudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.HasIndex("IsDeleted", "Status");
 
@@ -3656,7 +3737,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("PlacementTestId", "StudentId")
                         .IsUnique()
-                        .HasFilter("[PlacementTestId] IS NOT NULL");
+                        .HasFilter("PlacementTestId IS NOT NULL AND [IsDeleted] = 0");
 
                     b.HasIndex("Status", "StudentId");
 
@@ -4166,7 +4247,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("QuestionId");
 
                     b.HasIndex("StudentId", "QuestionId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("QuestionShuffles");
                 });
@@ -4422,15 +4504,15 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("SectionGroupId", "FinalTestResultId")
                         .IsUnique()
-                        .HasFilter("[FinalTestResultId] IS NOT NULL");
+                        .HasFilter("FinalTestResultId IS NOT NULL AND [IsDeleted] = 0");
 
                     b.HasIndex("SectionGroupId", "MockTestResultId")
                         .IsUnique()
-                        .HasFilter("[MockTestResultId] IS NOT NULL");
+                        .HasFilter("MockTestResultId IS NOT NULL AND [IsDeleted] = 0");
 
                     b.HasIndex("SectionGroupId", "PlacementTestResultId")
                         .IsUnique()
-                        .HasFilter("[PlacementTestResultId] IS NOT NULL");
+                        .HasFilter("PlacementTestResultId IS NOT NULL AND [IsDeleted] = 0");
 
                     b.ToTable("SectionGroupResults");
                 });
@@ -5027,7 +5109,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("StudentId", "Status");
 
                     b.HasIndex("CourseId", "UnitId", "StudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("UnitResults");
                 });
@@ -5214,8 +5297,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Feedback")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
 
                     b.Property<int?>("HighestStreak")
                         .HasColumnType("int");
@@ -5288,7 +5371,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("Status", "StudentId");
 
                     b.HasIndex("LessonResultId", "VideoId", "StudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("VideoResults");
                 });
@@ -5416,8 +5500,12 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("TokenReceived")
+                        .HasColumnType("int");
+
 
                     b.Property<Guid?>("VideoResultId")
                         .HasColumnType("uniqueidentifier");
@@ -5442,7 +5530,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("VideoResultId", "QuestionId", "VideoTimeCodeResultId")
                         .IsUnique()
-                        .HasFilter("[VideoResultId] IS NOT NULL AND [VideoTimeCodeResultId] IS NOT NULL");
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("VideoTimeCodeAnswers");
                 });
@@ -5549,7 +5637,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("VideoResultId", "Status");
 
                     b.HasIndex("VideoResultId", "VideoTimeCodeId", "StudentId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("VideoTimeCodeResults");
                 });
@@ -5646,6 +5735,17 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("ClassForumResult");
                 });
 
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumDetailResultHistory", b =>
+                {
+                    b.HasOne("Fsel.Course.Domain.Entities.ClassForumDetailResult", "ClassForumDetailResult")
+                        .WithMany("ClassForumDetailResultHistories")
+                        .HasForeignKey("ClassForumDetailResultId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClassForumDetailResult");
+                });
+
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumFile", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.ClassForum", "ClassForum")
@@ -5677,6 +5777,11 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumResultFile", b =>
                 {
+                    b.HasOne("Fsel.Course.Domain.Entities.ClassForumDetailResultHistory", "ClassForumDetailResultHistory")
+                        .WithMany("ClassForumResultFiles")
+                        .HasForeignKey("ClassForumDetailResultHistoryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Fsel.Course.Domain.Entities.ClassForumDetailResult", "ClassForumDetailResult")
                         .WithMany("ClassForumResultFiles")
                         .HasForeignKey("ClassForumDetailResultId")
@@ -5688,6 +5793,8 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("ClassForumDetailResult");
+
+                    b.Navigation("ClassForumDetailResultHistory");
 
                     b.Navigation("ClassForumResult");
                 });
@@ -6660,6 +6767,13 @@ namespace Fsel.Course.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumDetailResult", b =>
+                {
+                    b.Navigation("ClassForumDetailResultHistories");
+
+                    b.Navigation("ClassForumResultFiles");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.ClassForumDetailResultHistory", b =>
                 {
                     b.Navigation("ClassForumResultFiles");
                 });

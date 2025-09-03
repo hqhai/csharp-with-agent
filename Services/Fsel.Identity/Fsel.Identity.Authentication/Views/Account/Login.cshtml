@@ -29,14 +29,14 @@
                     <div class="float-input float-input-validate">
                         <input class="text-input"
                                type="text"
-                               name="Username"
+                               name="UserName"
                                id="username"
                                placeholder=""
                                autocomplete="off"
-                               asp-for="Username" autofocus />
-                        <label for="username" class="input-label">@Localizer["i18n_login_name"]</label>
+                               asp-for="UserName" autofocus />
+                        <label for="UserName" class="input-label">@Localizer["i18n_login_name"]</label>
                     </div>
-                    @Html.CustomValidationMessageFor(model => model.Username, Localizer, "", new { @class = "content-text-danger" })
+                    @Html.CustomValidationMessageFor(model => model.UserName, Localizer, "", new { @class = "content-text-danger" })
                 </div>
 
                 <div>

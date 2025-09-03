@@ -6,10 +6,13 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Core.Base.Managers;
+    using Fsel.Core.Entities;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Infrastructure;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -21,25 +24,29 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
 
     public class CreateUserReferralCommandHandler : IRequestHandler<CreateUserReferralCommand, MethodResult<VoidMethodResult>>
     {
-        private readonly IUserReferralRepository _userReferralRepository;
-        private readonly UserManager<User> _userManager;
+        private IUserReferralRepository _userReferralRepository;
+        private UserManager<User> _userManager;
         private readonly AuthContext _authContext;
+        private readonly ITenantProvider _tenantProvider;
         private const int MaxUserCoinRewarded = 10;
 
-        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager, AuthContext authContext)
+        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager, AuthContext authContext, ITenantProvider tenantProvider)
         {
             _userReferralRepository = userReferralRepository;
             _userManager = userManager;
             _authContext = authContext;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<MethodResult<VoidMethodResult>> Handle(CreateUserReferralCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: request.ReceiverId) ?? _userManager;
+            _userReferralRepository = await _tenantProvider.CreateRepositoryAsync<IUserReferralRepository>(userId: request.ReceiverId) ?? _userReferralRepository;
+
             var methodResult = new MethodResult<VoidMethodResult>();
 
             var receiverId = request.ReceiverId ?? _authContext.CurrentUserId;
-
             request.ReferralCode = request.ReferralCode?.Trim() ?? string.Empty;
             var sender = await _userManager.Users.FirstOrDefaultAsync(p => p.Code != null && p.Code == request.ReferralCode, cancellationToken);
             if (sender == null)

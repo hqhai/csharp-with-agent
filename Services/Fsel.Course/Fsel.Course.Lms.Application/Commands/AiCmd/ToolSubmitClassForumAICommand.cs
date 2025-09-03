@@ -8,8 +8,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Shared.Helpers;
     using MassTransit.Initializers;
@@ -81,17 +83,14 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
             {
                 var classForumDetailResult = await _classForumDetailResultRepository.Queryable.FirstOrDefaultAsync(x => x.ClassForumResultId == classForumResultNeedUpdate.Id, cancellationToken);
-
                 if (classForumDetailResult != null)
                 {
                     classForumDetailResult.GradingAlFeedback = classForumAIs != null ? ConvertHelper.Serialize(GetClassForumAIs(classForumAIs)) : default;
-                    _classForumDetailResultRepository.Update(classForumDetailResult, false
-                    , x => x.WordContent, x => x.Content
-                    , x => x.WordCount, x => x.SubmissionCount
-                    , x => x.ProcessDate, x => x.CompletionDate, x => x.Status, x => x.ClassForumResultId, x => x.SubmissionCount);
-                    await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.WordContent, c.Content, c.WordCount, c.SubmissionCount, c.ProcessDate, c.CompletionDate, c.Status, c.ClassForumResultId };
+                    });
                 }
-
                 return result;
             });
 

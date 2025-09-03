@@ -5,7 +5,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
     using System.ComponentModel.DataAnnotations;
     using Fsel.Identity.Domain.Constants;
 
-    public class ResetPasswordModel
+    public class ResetPasswordModel : IRequestBodyTenantAware
     {
         [Required]
         public string? Identity { get; set; }
@@ -19,5 +19,9 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
         public string Token { get; set; }
 
         public string? ReturnUrl { get; set; }
+
+        public string? UserName { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 }

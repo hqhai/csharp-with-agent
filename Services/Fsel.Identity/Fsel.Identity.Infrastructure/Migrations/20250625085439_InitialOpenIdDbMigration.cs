@@ -161,6 +161,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Code,
                     PhoneNumber,
                     Gender,
+                    ManageUserId,
+                    Position,
                     FirstName,
                     LastName,
                     CreatedDate,
@@ -181,6 +183,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     H.Code,
                     H.PhoneNumber,
                     H.Gender,
+                    H.ManageUserId,
+                    H.Position,
                     -- FirstName
                     TRIM(
                         CASE 
@@ -218,6 +222,8 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Code        = ISNULL(H.Code, U.Code),
                     PhoneNumber = ISNULL(H.PhoneNumber, U.PhoneNumber),
                     Gender      = ISNULL(H.Gender, U.Gender),
+                    ManageUserId= ISNULL(H.ManageUserId, U.ManageUserId),
+                    Position    = ISNULL(H.Position, U.Position),
                     -- FirstName
                     FirstName    = TRIM(
                         CASE 

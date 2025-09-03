@@ -6,12 +6,14 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using System.Transactions;
     using AutoMapper;
     using Fsel.Common.Caching;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Identity.Application.Handlers.Interfaces;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.OpenId;
     using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
@@ -90,16 +92,20 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             return (sendOtpContext.Status, sendOtpContext.OtpSessionInfo);
         }
 
-        public async Task<bool> CreateUserAsync(string phoneNumber, string otp)
+        public async Task<IdentityResult> CreateUserAsync(string phoneNumber, string otp)
         {
+            var identityResult = IdentityResult.Success;
             var cacheKey = GetKeyToCacheRegisterInfo(phoneNumber);
             var cachedRegisterInfo = await _cacheService.GetAsync(cacheKey);
             if (cachedRegisterInfo == null)
             {
-                return false;
+                return IdentityResult.Failed(new IdentityError
+                {
+                    Code = EnumSystemErrorCode.ServerError.ToString(),
+                });
             }
 
-            await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
+            await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IdentityResult>(async () =>
             {
                 using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
                 var user = _mapper.Map<User>(cachedRegisterInfo);
@@ -111,8 +117,18 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 user.EmailConfirmed = true;
 
                 user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                var result = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
-                result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                identityResult = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
+                if (!identityResult.Succeeded)
+                {
+                    scope.Dispose();
+                    return identityResult;
+                }
+                identityResult = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                if (!identityResult.Succeeded)
+                {
+                    scope.Dispose();
+                    return identityResult;
+                }
 
                 var userOtpCode = new UserOtpCode
                 {
@@ -122,9 +138,10 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 };
                 _userOtpRepository.Add(userOtpCode);
                 scope.Complete();
-                return new ViewResult();
+                return identityResult;
             });
-            return true;
+
+            return identityResult;
         }
 
         private static string GetKeyToCacheRegisterInfo(string indentity)

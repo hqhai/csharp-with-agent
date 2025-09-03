@@ -62,5 +62,8 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/v1/admin/order/create-order-students-event")]
         Task<IApiResponse<MethodResult<bool>>> CreateOrderEventByStudent([Body] CreateOrderForStudentEventCommandModel command);
+
+        [Post("/v1.2/admin/order/get-users-has-order-revenue")]
+        Task<IApiResponse<MethodResult<IList<OrderModel>>>> GetUserHasOrderRevenue([Body] GetUserHasOrderRevenueModel query);
     }
 }
