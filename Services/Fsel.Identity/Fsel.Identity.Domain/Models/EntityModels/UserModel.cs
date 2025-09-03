@@ -20,5 +20,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid? CourseId { get; set; }
         public string? UserName { get; set; }
         public bool EmailConfirmed { get; set; }
+        public EnumUserStatus? Status { get; set; }
     }
 }
