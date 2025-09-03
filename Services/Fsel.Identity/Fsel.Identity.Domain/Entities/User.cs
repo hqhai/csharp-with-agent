@@ -34,7 +34,6 @@ namespace Fsel.Identity.Domain.Entities
         public string? FirstName { get; set; }
 
         [MaxLength(250)]
-        [Required]
         public string? LastName { get; set; }
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
