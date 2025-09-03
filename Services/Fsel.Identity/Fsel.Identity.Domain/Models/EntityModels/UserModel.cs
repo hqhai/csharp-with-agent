@@ -22,9 +22,9 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? UserGroupName { get; set; }
         public Guid? CourseId { get; set; }
         public bool EmailConfirmed { get; set; }
+        public EnumUserStatus? Status { get; set; }
         public Guid? ManageUserId { get; set; }
         public string? ManageUserName { get; set; }
         public string? Position { get; set; }
-
     }
 }
