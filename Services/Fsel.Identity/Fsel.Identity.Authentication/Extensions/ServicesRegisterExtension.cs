@@ -14,6 +14,7 @@ namespace Fsel.Identity.Authentication.Extensions
     using Fsel.Authentication.Infrastructure.Configs;
     using Fsel.Common.Constants;
     using Fsel.Core.Extensions;
+    using Fsel.Core.Infrastructure.Tenants;
     using Fsel.Identity.Application.Events;
     using Fsel.Identity.Application.Handlers.Implementations;
     using Fsel.Identity.Application.Handlers.Interfaces;
@@ -104,8 +105,15 @@ namespace Fsel.Identity.Authentication.Extensions
             builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
             builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
             builder.Services.AddScoped<ISchoolImportHistoryRepository, SchoolImportHistoryRepository>();
+            builder.Services.AddScoped<IPermissionGroupRepository, PermissionGroupRepository>();
+            builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+            builder.Services.AddScoped<IRoleClaimRepository, RoleClaimRepository>();
+            builder.Services.AddScoped<IUserGroupRepository, UserGroupRepository>();
+            builder.Services.AddScoped<IUserGroupMemberShipRepository, UserGroupMemberShipRepository>();
             builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
             builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
+            builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
+            builder.Services.AddScoped<IMenuRepository, MenuRepository>();
             return builder;
         }
 
@@ -137,8 +145,9 @@ namespace Fsel.Identity.Authentication.Extensions
         public static WebApplicationBuilder AddOIDC(this WebApplicationBuilder builder, AppSetting appSetting)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            var defaultConnString = builder.Configuration.GetConnectionString(Settings.DefaultConnection);
-            var assembly = typeof(UserDbContext).Assembly.GetName().Name;
+            var assembly = typeof(TenantMasterDbContext).Assembly.GetName().Name;
+            var tenantMasterConnection = builder.Configuration.GetConnectionString(Settings.TenantMasterConnection);
+
             builder.AddConfigureIdentityOptions();
             builder.Services.AddDataProtection().PersistKeysToDbContext<UserDbContext>();
             builder.Services.AddAntiforgery();
@@ -155,11 +164,11 @@ namespace Fsel.Identity.Authentication.Extensions
             .AddInMemoryApiResources(Config.ApiResources)
             .AddInMemoryClients(Config.Clients)
             .AddAspNetIdentity<User>()
-            .AddConfigurationStore(options => options.ConfigureDbContext = b => b.UseSqlServer(defaultConnString, opt => opt.MigrationsAssembly(assembly)))
+            .AddConfigurationStore(options => options.ConfigureDbContext = b => b.UseSqlServer(tenantMasterConnection, opt => opt.MigrationsAssembly(assembly)))
             .AddConfigurationStoreCache()
             .AddOperationalStore(options =>
             {
-                options.ConfigureDbContext = b => b.UseSqlServer(defaultConnString, opt => opt.MigrationsAssembly(assembly));
+                options.ConfigureDbContext = b => b.UseSqlServer(tenantMasterConnection, opt => opt.MigrationsAssembly(assembly));
                 options.EnableTokenCleanup = true;
                 options.TokenCleanupInterval = 3600;
             })

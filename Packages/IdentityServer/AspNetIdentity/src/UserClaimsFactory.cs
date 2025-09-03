@@ -8,19 +8,23 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using IdentityModel;
+using Fsel.Core.Base.Interfaces;
+using Fsel.Core.Entities;
 
 namespace IdentityServer4.AspNetIdentity
 {
     internal class UserClaimsFactory<TUser> : IUserClaimsPrincipalFactory<TUser>
-        where TUser : class
+        where TUser : UserEntity
     {
         private readonly Decorator<IUserClaimsPrincipalFactory<TUser>> _inner;
         private UserManager<TUser> _userManager;
+        private readonly ITenantProvider _tenantProvider;
 
-        public UserClaimsFactory(Decorator<IUserClaimsPrincipalFactory<TUser>> inner, UserManager<TUser> userManager)
+        public UserClaimsFactory(Decorator<IUserClaimsPrincipalFactory<TUser>> inner, UserManager<TUser> userManager, ITenantProvider tenantProvider)
         {
             _inner = inner;
             _userManager = userManager;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<ClaimsPrincipal> CreateAsync(TUser user)
@@ -28,6 +32,7 @@ namespace IdentityServer4.AspNetIdentity
             var principal = await _inner.Instance.CreateAsync(user);
             var identity = principal.Identities.First();
 
+            _userManager = await _tenantProvider.CreateUserManagerAsync<TUser>(user.UserName) ?? _userManager;
             if (!identity.HasClaim(x => x.Type == JwtClaimTypes.Subject))
             {
                 var sub = await _userManager.GetUserIdAsync(user);

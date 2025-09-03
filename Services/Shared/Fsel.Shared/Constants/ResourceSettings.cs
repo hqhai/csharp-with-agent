@@ -22,6 +22,10 @@ namespace Fsel.Shared.Constants
         public const string IeltsStudentsStagingName = "Resources//IeltsStudents.Staging.json";
 
         public const string RoleFileName = "Resources//Role.json";
+        public const string PermissionGroupName = "Resources//PermissionGroup.json";
+        public const string PermissionName = "Resources//Permission.json";
+        public const string RoleClaimName = "Resources//RoleClaim.json";
+        public const string MenuName = "Resources//Menu.json";
         public const string UserFileName = "Resources//User.json";
         public const string UserRoleFileName = "Resources//UserRole.json";
 
@@ -90,10 +94,12 @@ namespace Fsel.Shared.Constants
 
         public const string ManagerReportPlacementTestExcel = "Resources//ManagerReports//BaoCaoPlacmentTest.xlsx";
         public const string ManagerReportLearningProgressAcaExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapAca.xlsx";
+        public const string ManagerReportLearningProgressExcel = "Resources//ManagerReports//BaoCaoTienDoV1.xlsx";
         public const string ManagerReportLearningProgressIELTSExcel = "Resources//ManagerReports//BaoCaoTienDoHocTapIELTS.xlsx";
         public const string ManagerReportStudentAssiduityExcel = "Resources//ManagerReports//BaoCaoChuyenCan.xlsx";
         public const string ManagerReportLearningResultAcaExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapAca.xlsx";
         public const string ManagerReportLearningResultIELTSExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapIELTS.xlsx";
+        public const string ManagerReportLearningResultEFExcel = "Resources//ManagerReports//BaoCaoKetQuaHocTapEF.xlsx";
         public const string ReportPTEvent = "Resources//ExportExcelTemplates//ReportPTEvent.xlsx";
         public const string ReportPTEventSchool = "Resources//ExportExcelTemplates//ReportPTEventSchool.xlsx";
         public const string ReportPTEventDistrictSchool = "Resources//ExportExcelTemplates//ReportPTEventDistrictSchool.xlsx";

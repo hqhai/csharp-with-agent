@@ -48,5 +48,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public IList<string>? FilePaths
         { get { return ClassForumResultFiles?.Select(x => x.FilePath ?? string.Empty).ToList(); } }
+
+        public IList<ClassForumDetailResultHistoryModel>? ClassForumDetailResultHistories { get; set; }
     }
 }

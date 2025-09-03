@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.Models.CommandModels.PlacementTestAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Infrastructure.ValueSettings;
     using Fsel.Course.Lms.Application.Commands.SenderCmd;
     using Fsel.Course.Lms.Application.Commands.StudentCmd;
@@ -234,7 +235,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 if (createPlacementTestAnswers != null && createPlacementTestAnswers.Any())
                 {
-                    await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers);
+                    await _placementTestAnswerRepository.BulkMergeAsync(createPlacementTestAnswers, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.SectionGroupResultId, entity.SectionQuestionId, entity.PlacementTestResultId, entity.IsDeleted };
+                    });
                 }
                 if (updatePlacementTestAnswers != null && updatePlacementTestAnswers.Any())
                 {
@@ -329,8 +333,11 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestGroupResult.CurrentLevel = SendMailHelper.GetPreviousEnumValue(level ?? default);
             placementTestGroupResult.Status = EnumResultStatus.Done;
             placementTestGroupResult.Percent = placementTestResult.Percent;
-            _placementTestGroupResultRepository.Update(placementTestGroupResult, false, x => x.StudentId);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+
+            await _placementTestGroupResultRepository.BulkUpdateList(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId };
+            });
         }
 
         private async Task<PlacementTestResultModel> GetPlacementTestResult(PlacementTestResult placementTestResult, bool isLockPT)
@@ -366,8 +373,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                             BaseCourseLevel = currentLevel.Value
                         }).ConfigureAwait(false);
                     }
-                    _placementTestResultRepository.Update(placementTestResult, false, x => x.StudentId, x => x.PlacementTestId);
-                    await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    await _placementTestResultRepository.BulkUpdateList(new List<PlacementTestResult> { placementTestResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.PlacementTestId };
+                    });
+
                     if (isLockPT)
                     {
                         await UpdatePlacementGroupResultDoneAsync(placementTestResult, currentLevel);

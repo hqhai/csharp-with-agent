@@ -4,6 +4,7 @@ using System.Globalization;
 using AutoMapper;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Domain.Entities;
+using Fsel.Identity.Domain.Models.CommandModels.Admins;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.CommandModels.Parents;
 using Fsel.Identity.Domain.Models.CommandModels.OpenId;
@@ -72,24 +73,30 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<UserRegisterModel, User>()
                 .AfterMap<ParseFullNameMappingAction<UserRegisterModel>>()
                 .IgnoreAllNonExisting();
-        }
-    }
 
-    public class ParseFullNameMappingAction<TSource> : IMappingAction<TSource, User>
-    where TSource : class
-    {
-        public void Process(TSource source, User? destination, ResolutionContext context)
+            CreateMap<UpdateStudentProfileCommandModel, User>().AfterMap<ParseFullNameMappingAction<UpdateStudentProfileCommandModel>>().IgnoreAllNonExisting();
+            CreateMap<UpdateProfileStudentCommandModel, User>().AfterMap<ParseFullNameMappingAction<UpdateProfileStudentCommandModel>>().IgnoreAllNonExisting();
+            CreateMap<GetAccountDashboardQueryModel, ExportAccountDashboardCommandModel>().IgnoreAllNonExisting();
+            CreateMap<CreateUserToLmsAdminPlatCommandModel, User>().AfterMap<ParseFullNameMappingAction<CreateUserToLmsAdminPlatCommandModel>>().IgnoreAllNonExisting();
+            CreateMap<UpdateUserInLmsAdminPlatCommandModel, User>().AfterMap<ParseFullNameMappingAction<UpdateUserInLmsAdminPlatCommandModel>>().IgnoreAllNonExisting();
+        }
+
+        public class ParseFullNameMappingAction<TSource> : IMappingAction<TSource, User>
+            where TSource : class
         {
-            // Kiểm tra nếu source có FullName
-            var fullNameProp = typeof(TSource).GetProperty(nameof(User.FullName));
-            if (destination != null && fullNameProp != null)
+            public void Process(TSource source, User? destination, ResolutionContext context)
             {
-                var fullNameValue = fullNameProp.GetValue(source) as string;
-                if (!string.IsNullOrEmpty(fullNameValue))
+                // Kiểm tra nếu source có FullName
+                var fullNameProp = typeof(TSource).GetProperty(nameof(User.FullName));
+                if (destination != null && fullNameProp != null)
                 {
-                    var parsed = fullNameValue.ParseFullName();
-                    destination.FirstName = parsed.FirstName;
-                    destination.LastName = parsed.LastName;
+                    var fullNameValue = fullNameProp.GetValue(source) as string;
+                    if (!string.IsNullOrEmpty(fullNameValue))
+                    {
+                        var parsed = fullNameValue.ParseFullName();
+                        destination.FirstName = parsed.FirstName;
+                        destination.LastName = parsed.LastName;
+                    }
                 }
             }
         }

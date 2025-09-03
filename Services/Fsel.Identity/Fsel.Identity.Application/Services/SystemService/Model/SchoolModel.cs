@@ -34,8 +34,12 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
 
         public string? ShortPath { get; set; }
         public Guid? LocationId { get; set; }
-        public string? LocalId { get; set; }
         public bool IsActive { get; set; }
+
+        public string? LocalId { get; set; }
+
+        public Guid? ParentId { get; set; }
+
         public LocationModel? Location { get; set; }
     }
 }

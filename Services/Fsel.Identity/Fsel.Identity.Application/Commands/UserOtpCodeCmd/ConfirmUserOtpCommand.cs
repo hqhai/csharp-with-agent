@@ -11,6 +11,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Core.Base.Interfaces;
 
     public class ConfirmUserOtpCommand : IRequest<MethodResult<bool>>
     {
@@ -23,16 +24,20 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
     public class ConfirmUserOtpCommandHandler : IRequestHandler<ConfirmUserOtpCommand, MethodResult<bool>>
     {
-        private readonly IUserOtpCodeRepository _userOtpRepository;
+        private IUserOtpCodeRepository _userOtpRepository;
+        private readonly ITenantProvider _tenantProvider;
 
-        public ConfirmUserOtpCommandHandler(IUserOtpCodeRepository userOtpRepository)
+        public ConfirmUserOtpCommandHandler(IUserOtpCodeRepository userOtpRepository, ITenantProvider tenantProvider)
         {
             _userOtpRepository = userOtpRepository;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<MethodResult<bool>> Handle(ConfirmUserOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            _userOtpRepository = await _tenantProvider.CreateRepositoryAsync<IUserOtpCodeRepository>(userId: request.UserId) ?? _userOtpRepository;
+
             var methodResult = new MethodResult<bool>();
 
             var query = _userOtpRepository.Queryable.Where(x => x.Status == EnumOtpCodeStatus.New && x.OtpCode == request.Otp);

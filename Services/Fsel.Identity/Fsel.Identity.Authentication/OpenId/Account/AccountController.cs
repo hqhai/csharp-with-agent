@@ -1,12 +1,15 @@
 // Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
+using System.Globalization;
 using System.Security.Claims;
 using System.Text.Json;
 using System.Transactions;
 using Fsel.Common.Constants;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
+using Fsel.Core.Base.Interfaces;
+using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Attributes;
 using Fsel.Identity.Application.Commands.UserDeletionCmd;
 using Fsel.Identity.Application.Handlers.Implementations;
@@ -40,6 +43,7 @@ using static IdentityServer4.IdentityServerConstants;
 namespace Fsel.Identity.Authentication.OpenId.Account
 {
     [AllowAnonymous]
+    [TenantAware]
     public class AccountController : BaseController
     {
         protected IUserSession UserSession { get; private set; }
@@ -48,8 +52,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
-        private readonly Core.Base.Managers.SignInManager<User> _signInManager;
-        private readonly Core.Base.Managers.UserManager<User> _userManager;
+        private Core.Base.Managers.SignInManager<User> _signInManager;
+        private Core.Base.Managers.UserManager<User> _userManager;
         private readonly ILogger<AccountController> _logger;
         private readonly IPlatformRepository _platformRepository;
         private readonly IUserRegisterHandler _userRegisterHandler;
@@ -62,6 +66,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly IStringLocalizer _localizer;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly ITenantProvider _tenantProvider;
 
         public AccountController(
             IMediator mediator,
@@ -83,7 +88,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             IOptions<IdentityOptions> identityOptions,
             IStudentRepository studentRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-            ICompetitionEventsRepository competitionEventsRepository)
+            ICompetitionEventsRepository competitionEventsRepository,
+            ITenantProvider tenantProvider)
         {
             UserSession = userSession;
             _mediator = mediator;
@@ -105,6 +111,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _studentRepository = studentRepository;
             _competitionEventsRepository = competitionEventsRepository;
+            _tenantProvider = tenantProvider;
         }
 
         /// <summary>
@@ -163,7 +170,14 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     var (isSuccessfully, otpSessionInfo) = await _userRegisterHandler.VerifyUserAsync(request.Identity ?? string.Empty, request.Otp);
                     if (isSuccessfully)
                     {
-                        await _userRegisterHandler.CreateUserAsync(request.Identity, request.Otp);
+                        var identityResult = await _userRegisterHandler.CreateUserAsync(request.Identity, request.Otp);
+                        if (!identityResult.Succeeded)
+                        {
+                            foreach (var error in identityResult.Errors.Select(x => x.Code))
+                            {
+                                ModelState.TryAddModelError(error, _localizer[error]);
+                            }
+                        }
                         return await LoginWithoutPassword(request.Identity, request.ReturnUrl);
                     }
                     else
@@ -397,11 +411,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         public async Task<IActionResult> Impersonation(string? returnUrl)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            var clientSecret = context?.Parameters[RequestHeaderSetting.ImpersonationClientSecret]?.ToString();
+            var clientSecret = context?.Parameters[RequestHeaderSetting.ImpersonationClientSecret]?.ToString(CultureInfo.InvariantCulture);
             if (context != null && !string.IsNullOrEmpty(clientSecret) && context.Client.ClientSecrets.Any(x => x.Value == clientSecret.ToSha256()))
             {
-                var userId = context.Parameters[RequestHeaderSetting.UserId]?.ToString();
-                var user = await _userManager.FindByIdAsync(userId ?? string.Empty);
+                var userId = Guid.TryParse(context.Parameters[RequestHeaderSetting.UserId]?.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture, out var userIdParsed) ? userIdParsed : default(Guid?);
+                var user = await _userManager.FindByIdAsync(userId?.ToString() ?? string.Empty);
                 return await LoginWithoutPassword(user, returnUrl);
             }
             return RedirectToAction(nameof(Login), new { returnUrl });
@@ -433,13 +447,12 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         public async Task<IActionResult> Login(LoginInputModel model)
         {
             ArgumentNullException.ThrowIfNull(model);
-
             var vm = await BuildLoginViewModelAsync(model);
             var context = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
 
             if (ModelState.IsValid)
             {
-                var user = await _signInManager.UserManager.FindByNameAsync(model.Username.ToSafeString());
+                var user = await _signInManager.UserManager.FindByNameAsync(model.UserName.ToSafeString());
                 if (user is not null)
                 {
                     if (await ValidateLogin(user))
@@ -509,7 +522,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     ModelState.AddModelError(string.Empty, _localizer["ERROR_CODE.UserNameAndPasswordIncorrect"]);
                 }
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, _localizer["i18n_Invalid_Credentials"], clientId: context?.Client.ClientId));
+                await _events.RaiseAsync(new UserLoginFailureEvent(model.UserName, _localizer["i18n_Invalid_Credentials"], clientId: context?.Client.ClientId));
             }
 
             return View(vm);
@@ -517,9 +530,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
         private async Task<IActionResult> LoginWithoutPassword(string phoneNumber, string? returnUrl)
         {
-            var user = await _userRepository.DbContext.Set<User>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
+            var user = await _userManager.Users.AsNoTracking().FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
             return await LoginWithoutPassword(user, returnUrl);
         }
 
@@ -581,7 +592,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
             ArgumentNullException.ThrowIfNull(model);
-
             // build a model so the logged out page knows what to display
             var vm = await BuildLoggedOutViewModelAsync(model.LogoutId ?? string.Empty);
 
@@ -613,7 +623,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             return Redirect(vm.PostLogoutRedirectUri);
         }
 
-        public IActionResult ExternalLogin(string provider, string? returnUrl = null)
+        public async Task<IActionResult> ExternalLoginAsync(string provider, string? returnUrl = null)
         {
             var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), new { returnUrl });
 
@@ -641,6 +651,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             {
                 return RedirectToAction(nameof(Login), new { returnUrl });
             }
+
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(email ?? string.Empty) ?? _userManager;
+            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User>(email ?? string.Empty) ?? _signInManager;
+
             var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
             if (user != null && !await ValidateLogin(user))
             {
@@ -657,7 +672,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             }
             else
             {
-                var email = info.Principal.FindFirstValue(ClaimTypes.Email);
                 var firstName = info.Principal.FindFirstValue(ClaimTypes.GivenName);
                 var lastName = info.Principal.FindFirstValue(ClaimTypes.Surname);
                 var birthday = info.Principal.FindFirstValue(ClaimTypes.DateOfBirth)?.ConvertDateTimeFormat("MM/dd/yyyy");
@@ -856,7 +870,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             var vm = new LoginViewModel
             {
                 ReturnUrl = returnUrl,
-                Username = context?.LoginHint,
+                UserName = context?.LoginHint,
                 UiLocales = context?.UiLocales,
                 OSName = context?.Parameters[Settings.RequestHeader.OSName],
                 DeviceId = context?.Parameters[Settings.RequestHeader.DeviceId],
@@ -912,7 +926,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private async Task<LoginViewModel> BuildLoginViewModelAsync(LoginInputModel model)
         {
             var vm = await BuildLoginViewModelAsync(model.ReturnUrl ?? string.Empty);
-            vm.Username = model.Username;
+            vm.UserName = model.UserName;
             vm.RememberLogin = model.RememberLogin;
             return vm;
         }

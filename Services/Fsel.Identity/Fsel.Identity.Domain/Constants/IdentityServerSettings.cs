@@ -13,6 +13,7 @@ namespace Fsel.Identity.Domain.Constants
         public static class JwtApiClaimNames
         {
             public const string Code = "code";
+            public const string Status = "status";
             public const string ClassId = "class_id";
             public const string ClassCode = "class_code";
             public const string IsPlacementTest = "is_placement_test";

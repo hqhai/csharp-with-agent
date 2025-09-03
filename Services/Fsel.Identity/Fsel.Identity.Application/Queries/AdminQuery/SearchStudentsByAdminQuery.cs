@@ -215,7 +215,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             var orders = ordersByUserIds?.Users?.FirstOrDefault(p => p.UserId == user.Id)?.Orders;
 
             var dataStudent = aggregateDataStudents?.Students?.FirstOrDefault(p => p.StudentId == user.StudentId);
-
+            user.IsLearnStudent = dataStudent?.IsLearnStudent ?? default;
             user.TotalLesson = dataStudent?.TotalLesson == 0 ? null : dataStudent?.TotalLesson;
             user.TotalLessonDone = user.TotalLesson == null ? null : dataStudent?.TotalLessonDone;
 

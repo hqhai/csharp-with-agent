@@ -74,7 +74,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingCmd
                 return methodResult;
             }
             var dailyStreaks = _studentDailyStreakRepository.Queryable
-                                .Where(s => studentIds.Contains(s.StudentId))
+                                .WhereBulkContains(studentIds, s => (s.StudentId))
                                 .OrderBy(s => s.StudentId)
                                 .ThenByDescending(s => s.DailyDate)
                                 .ToList();

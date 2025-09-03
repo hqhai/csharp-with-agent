@@ -1,5 +1,6 @@
 using System.Net;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Ordering.Application.Commands.Products;
@@ -16,7 +17,6 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/admin/product")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class ProductController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -32,6 +32,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpPost("save")]
         [ProducesResponseType(typeof(MethodResult<ProductModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(new[] { GiftManagement.Add, GiftManagement.Update })]
         public async Task<IActionResult> Create([FromBody] SaveProductCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -44,6 +45,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("get-by-id")]
         [ProducesResponseType(typeof(MethodResult<ProductModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(GiftManagement.View)]
         public async Task<IActionResult> Get([FromQuery] GetProductByIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -56,6 +58,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("search")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<OrderSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(GiftManagement.View)]
         public async Task<IActionResult> Search([FromQuery] SearchProductQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -68,6 +71,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpPost("delete")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(GiftManagement.Delete)]
         public async Task<IActionResult> Delete([FromBody] DeleteProductsCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -80,6 +84,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("search-history-redeem")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(GiftManagement.View)]
         public async Task<IActionResult> SearchHistoryRedeem([FromQuery] SearchHistoryRedeemByAdminQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -92,6 +97,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("export-history-redeem")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(GiftManagement.Export)]
         public async Task<IActionResult> ExportHistoryRedeem([FromQuery] ExportHistoryRedeemProductCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);

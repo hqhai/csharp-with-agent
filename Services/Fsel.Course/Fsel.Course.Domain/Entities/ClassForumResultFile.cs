@@ -34,7 +34,12 @@ namespace Fsel.Course.Domain.Entities
 
         public Guid? ClassForumResultId { get; set; }
 
+        public Guid? ClassForumDetailResultHistoryId { get; set; }
+
         public ClassForumDetailResult? ClassForumDetailResult { get; set; }
+
         public ClassForumResult? ClassForumResult { get; set; }
+
+        public ClassForumDetailResultHistory? ClassForumDetailResultHistory { get; set; }
     }
 }

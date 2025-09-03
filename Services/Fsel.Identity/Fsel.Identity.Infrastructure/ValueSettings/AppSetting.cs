@@ -16,6 +16,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public UserReferralConfig? UserReferralConfig { get; set; }
         public UserDeletionConfig? UserDeletionConfig { get; set; }
         public CacheConfig? CacheConfig { get; set; }
+        public CRMConfig? CRMConfig { get; set; }
     }
 
     public class UserReferralConfig
@@ -86,6 +87,11 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     {
         public bool TurnOnCaching { get; set; }
         public int CachingDuration { get; set; }
+    }
+
+    public class CRMConfig
+    {
+        public string? SecretKey { get; set; }
     }
 
     public class Authentication

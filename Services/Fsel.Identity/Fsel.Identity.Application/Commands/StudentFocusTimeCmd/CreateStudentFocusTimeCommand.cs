@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
     using Fsel.Identity.Application.Queues.Publishers;
@@ -39,6 +40,7 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
         private readonly ISystemService _systemService;
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ITrainingService _trainingService;
+        private const int Near_Day_Filter = -2;
 
         public CreateStudentFocusTimeCommandHandler(IMediator mediator, IMapper mapper, ILmsCourseService lmsCourseService, IStudentFocusTimeRepository studentFocusTimeRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService, QuestBoardPublisher questBoardPublisher,
             ITrainingService trainingService)
@@ -69,9 +71,19 @@ namespace Fsel.Identity.Application.Commands.StudentFocusTimeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(_authContext.CurrentUserId), _authContext.CurrentUserId);
                 return methodResult;
             }
-            var studentFocusTime = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date);
 
-            var studentFocusTimeNeareast = _studentFocusTimeRepository.Queryable.FirstOrDefault(x => x.StudentId == student.Id && x.CreatedDate.Date == DateTime.UtcNow.Date.AddDays(-1));
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            // Load recent student focus time records and filter in memory
+            var recentStudentFocusTimes = _studentFocusTimeRepository.Queryable
+                .Where(x => x.StudentId == student.Id && x.CreatedDate >= DateTime.UtcNow.AddDays(Near_Day_Filter))
+                .ToList();
+
+            var studentFocusTime = recentStudentFocusTimes
+                .FirstOrDefault(x => x.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date == currentDate.Date);
+
+            var studentFocusTimeNeareast = recentStudentFocusTimes
+                .FirstOrDefault(x => x.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date == currentDate.Date.AddDays(-1));
 
             var systemConfig = await _systemService.GetFocusTimeConfig();
             var systemConfigResult = systemConfig?.Content?.Result;
