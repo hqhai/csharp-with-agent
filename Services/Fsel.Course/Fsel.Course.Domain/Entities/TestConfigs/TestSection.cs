@@ -55,6 +55,18 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             set { ScoringFormulaConfigsStr = ConvertHelper.Serialize(value); }
         }
 
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? I18nSkillDescription { get; set; }
+
+        public string? ReportContentBankConfigsStr { get; set; }
+
+        [NotMapped]
+        public IList<ReportContentBankConfig>? ReportContentBankConfigs
+        {
+            get { return ConvertHelper.Deserialize<IList<ReportContentBankConfig>?>(ReportContentBankConfigsStr); }
+            set { ReportContentBankConfigsStr = ConvertHelper.Serialize(value); }
+        }
+
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public double? Percent { get; set; }
 
@@ -94,5 +106,13 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public int From { get; set; }
 
         public string? Equal { get; set; }
+    }
+
+    public class ReportContentBankConfig
+    {
+        public double From { get; set; }
+        public double? To { get; set; }
+        public string? SkillLevel { get; set; }
+        public string? KeyI18n { get; set; }
     }
 }

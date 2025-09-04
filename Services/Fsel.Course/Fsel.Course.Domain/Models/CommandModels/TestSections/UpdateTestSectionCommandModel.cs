@@ -15,8 +15,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.TestSections
         public EnumTestLayoutType? LayoutType { get; set; }
         public Guid? SkillId { get; set; }
         public IList<ScoringFormulaConfig>? ScoringFormulaConfigs { get; set; }
+        public string? I18nSkillDescription { get; set; }
+        public IList<ReportContentBankConfig>? ReportContentBankConfigs { get; set; }
         public double? Percent { get; set; }
-
         public IList<UpdateTestAISettingCommandModel> TestAISettings { get; set; } = new List<UpdateTestAISettingCommandModel>();
         public IList<UpdateQuestionCommandModel> Questions { get; set; } = new List<UpdateQuestionCommandModel>();
         public IList<UpdateTestSectionCommandModel> Childrens { get; set; } = new List<UpdateTestSectionCommandModel>();
