@@ -494,6 +494,58 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public bool ValidateReportContentBankConfigs()
         {
+            if (TestSections != null && TestSections.Any())
+            {
+                foreach (var item in TestSections)
+                {
+                    if (item.ReportContentBankConfigs != null && item.ReportContentBankConfigs.Any())
+                    {
+                        var sorted = item.ReportContentBankConfigs.OrderBy(c => c.From).ToList();
+
+                        for (int i = 0; i < sorted.Count - 1; i++)
+                        {
+                            var current = sorted[i];
+                            var currentTo = current.To ?? current.From;
+
+                            if (current.From < currentTo)
+                            {
+                                AddErrorResults(new ErrorResult
+                                {
+                                    ErrorCode = nameof(EnumSystemErrorCode.Min),
+                                    Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(current.From),
+                                }
+                        },
+                                });
+                                return false;
+                            }
+
+                            var next = sorted[i + 1];
+
+                            if (next.From <= currentTo)
+                            {
+                                AddErrorResults(new ErrorResult
+                                {
+                                    ErrorCode = nameof(EnumSystemErrorCode.Min),
+                                    Errors =
+                        {
+                            new Error
+                                {
+                                    FieldName = nameof(current.From),
+                                }
+                        },
+                                });
+                                return false;
+                            }
+                        }
+
+                        continue;
+                    }
+                }
+            }
             return true;
         }
     }

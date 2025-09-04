@@ -95,6 +95,11 @@ namespace Fsel.Course.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
                 return methodResult;
             }
+            if (!newVersionTest.ValidateReportContentBankConfigs())
+            {
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                return methodResult;
+            }
             var method = _testConverter.IsValidateQuestion(request.TestSections);
             if (!method.IsOK)
             {

@@ -60,7 +60,7 @@ namespace Fsel.Course.Infrastructure.Common.TestHelper
                             {
                                 child.Childrens.ForEach(x =>
                                 {
-                                    if (request.ScoringFormulaType == EnumScoringFormulaType.BandScore)
+                                    if (request.ScoringFormulaType == EnumScoringFormulaType.BandScore || p.LayoutType != EnumTestLayoutType.Basic)
                                     {
                                         x.Percent = null;
                                     }

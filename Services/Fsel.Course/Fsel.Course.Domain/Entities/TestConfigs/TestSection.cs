@@ -55,6 +55,9 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
             set { ScoringFormulaConfigsStr = ConvertHelper.Serialize(value); }
         }
 
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? I18nSkillDescription { get; set; }
+
         public string? ReportContentBankConfigsStr { get; set; }
 
         [NotMapped]
