@@ -64,7 +64,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 
             var examPracticeSectionDetail = _mapper.Map<ExamPracticeSectionDetailModel>(examPracticeSection);
             var examPracticeSectionResultModel = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
-            examPracticeSectionResultModel.RemainingTime = CalculateRemainingTime(examPracticeResult, examPracticeSectionResult);
+            examPracticeSectionResultModel.RemainingTime = CalculateRemainingTime(examPracticeResult, examPracticeSectionResult, examPracticeSection);
 
             var examPracticeSectionDetails = MapChildSectionDetails(examPracticeSections, examPracticeAnswers, isResultDone: examPracticeResult.Status == EnumResultStatus.Done);
             var executionTime = CalculateExecutionTime(examPracticeResult, examPracticeSection);
@@ -112,18 +112,19 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 .ToList();
         }
 
-        private static double CalculateRemainingTime(ExamPracticeResult examPracticeResult, ExamPracticeSectionResult sectionResult)
+        private static double CalculateRemainingTime(ExamPracticeResult examPracticeResult, ExamPracticeSectionResult sectionResult, ExamPracticeSection examPracticeSection)
         {
-            // Practice mode and NOT ExamBased => dùng time limit từ Result.Config
-            if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice &&
-                examPracticeResult.Config?.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
+            double totalExecutionTime = 0;
+            if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice && examPracticeResult.Config?.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
             {
-                var total = examPracticeResult.Config?.ExecutionTime ?? default;
-                var remain = total - sectionResult.WorkingTime;
-                return remain > 0 ? remain : default;
+                totalExecutionTime = examPracticeResult.Config?.ExecutionTime ?? default;
             }
-
-            return default;
+            else
+            {
+                totalExecutionTime = examPracticeSection.Config?.ExecutionTime ?? default;
+            }
+            var remain = totalExecutionTime - sectionResult.WorkingTime;
+            return remain > 0 ? remain : default;
         }
 
         private static double CalculateExecutionTime(ExamPracticeResult examPracticeResult, ExamPracticeSection section)
@@ -171,8 +172,10 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         {
             // Try read existing (no tracking is fine here)
             var examPracticeSectionResult = await _examPracticeSectionResultRepository.Queryable
-                                                                                      .Where(x => x.ExamPracticeSectionId == examPracticeSection.Id)
-                                                                                      .FirstOrDefaultAsync(x => x.ExamPracticeResultId == examPracticeResult.Id);
+                                                  .Where(x => x.ExamPracticeSectionId == examPracticeSection.Id)
+                                                  .Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
+                                                  .AsNoTracking()
+                                                  .FirstOrDefaultAsync();
 
             if (examPracticeSectionResult == null)
             {
@@ -190,23 +193,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                     {
                         await _examPracticeSectionResultRepository.BulkMergeAsync(new List<ExamPracticeSectionResult> { examPracticeSectionResult },
                             bulk => bulk.ColumnPrimaryKeyExpression = e => new { e.StudentId, e.ExamPracticeSectionId, e.ExamPracticeResultId }
-                        );
-                        return methodResult;
-                    });
-                }
-                catch
-                {
-                }
-            }
-            else if (examPracticeSectionResult.Status == EnumResultStatus.New)
-            {
-                try
-                {
-                    examPracticeSectionResult.Status = EnumResultStatus.Process;
-                    await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
-                    {
-                        await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult },
-                            bulk => bulk.ColumnInputExpression = entity => new { entity.Status }
                         );
                         return methodResult;
                     });

@@ -158,7 +158,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
         private ExamPracticeGroupModel BuildExamPracticeGroupModel(dynamic x, ExamPractice examPractice, IList<ExamPracticeSection>? examPracticeSections, ExamPracticeResult? examPracticeResult, double countAnswer)
         {
             var examPracticeModel = _mapper.Map<ExamPracticeGroupModel>(examPractice);
-            var courseSkills = examPracticeSections?.Where(x => x.CourseSkill.HasValue).Select(x => x.CourseSkill!.Value).Distinct().ToList() ?? new List<EnumCourseSkill>();
+            var courseSkills = examPracticeSections?.OrderBy(x => x.DisplayOrder).Where(x => x.CourseSkill.HasValue).Select(x => x.CourseSkill!.Value).Distinct().ToList() ?? new List<EnumCourseSkill>();
             examPracticeModel.CourseSkills = courseSkills;
             if (examPracticeSections != null)
             {

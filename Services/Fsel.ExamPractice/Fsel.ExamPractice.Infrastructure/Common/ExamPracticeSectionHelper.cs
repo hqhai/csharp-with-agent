@@ -423,7 +423,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             {
                 await _examPracticeAnswerRepository.BulkMergeAsync(examPracticeAnswers, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.ExamPracticeSectionId, c.ExamPracticeResultId, c.ExamPracticeSectionResultId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.ExamPracticeSectionId, c.ExamPracticeResultId, c.ExamPracticeSectionResultId, c.QuestionId };
                 });
             }
             catch (Exception ex)

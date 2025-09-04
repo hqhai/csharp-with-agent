@@ -99,15 +99,15 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             .GroupBy(x => new
             {
                 x.ExamPractice.SubType,
-                CourseSkillsKey = string.Join(",", x.ExamPracticeSections
+                CourseSkillsKey = string.Join(",", x.ExamPracticeSections.OrderBy(x => x.DisplayOrder)
                                                      .Where(s => s.CourseSkill.HasValue)
                                                      .Select(s => s.CourseSkill!.Value)
-                                                     .OrderBy(s => s)) // Quan trọng: sắp xếp để key nhất quán
+                                                     ) // Quan trọng: sắp xếp để key nhất quán
             })
             .Select(g => new ExamPracticeGroupTypeModel
             {
                 SubType = g.Key.SubType,
-                CourseSkills = g.SelectMany(x => x.ExamPracticeSections)
+                CourseSkills = g.SelectMany(x => x.ExamPracticeSections).OrderBy(x => x.DisplayOrder)
                                 .Where(x => x.CourseSkill.HasValue)
                                 .Select(x => x.CourseSkill!.Value)
                                 .Distinct()

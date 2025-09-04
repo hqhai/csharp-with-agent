@@ -96,7 +96,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 return methodResult;
             }
 
-            var examPracticeRetry = await GetOrCreateExamPracticeRetryAsync(student.Id, examPractice.Id, methodResult, cancellationToken);
+            var examPracticeRetry = await GetOrCreateExamPracticeRetryAsync(student.Id, examPractice, methodResult, cancellationToken);
             if (examPracticeRetry == null)
             {
                 return methodResult;
@@ -249,16 +249,16 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             return true;
         }
 
-        private async Task<ExamPracticeRetry?> GetOrCreateExamPracticeRetryAsync(Guid studentId, Guid examPracticeId, MethodResult<ExamPracticeResultModel> methodResult, CancellationToken cancellationToken)
+        private async Task<ExamPracticeRetry?> GetOrCreateExamPracticeRetryAsync(Guid studentId, ExamPractice examPractice, MethodResult<ExamPracticeResultModel> methodResult, CancellationToken cancellationToken)
         {
-            var examPracticeRetry = await _examPracticeRetryRepository.Queryable.AsQueryable().FirstOrDefaultAsync(x => x.ExamPracticeId == examPracticeId && x.StudentId == studentId, cancellationToken);
+            var examPracticeRetry = await _examPracticeRetryRepository.Queryable.AsQueryable().FirstOrDefaultAsync(x => x.ExamPracticeId == examPractice.Id && x.StudentId == studentId, cancellationToken);
             if (examPracticeRetry == null)
             {
                 examPracticeRetry = new ExamPracticeRetry
                 {
-                    RetryCount = MaxRetryAttempts,
+                    RetryCount = MaxRetryAttempts,// examPractice.Type == EnumExamPracticeType.Vstep ? default : MaxRetryAttempts,
                     StudentId = studentId,
-                    ExamPracticeId = examPracticeId,
+                    ExamPracticeId = examPractice.Id,
                 };
                 await _examPracticeRetryRepository.ExecuteTransactionAsync(async () =>
                 {

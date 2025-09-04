@@ -207,11 +207,30 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     await UpdateExamPracticeResultAsync(examPracticeResult, examPractice, cancellationToken);
                 }
             }
-
+            await UpdateExamPracticeSectionResultNewAsync(examPracticeSectionResult);
             var examPracticeSectionResultDto = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
             examPracticeSectionResultDto.IsTestDone = examPracticeResult.Status == EnumResultStatus.Done;
             methodResult.Result = examPracticeSectionResultDto;
             return methodResult;
+        }
+
+        private async Task UpdateExamPracticeSectionResultNewAsync(ExamPracticeSectionResult examPracticeSectionResult)
+        {
+            if (examPracticeSectionResult.Status != EnumResultStatus.New)
+            {
+                return;
+            }
+
+            try
+            {
+                examPracticeSectionResult.Status = EnumResultStatus.Process;
+                await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult },
+                        bulk => bulk.ColumnInputExpression = entity => new { entity.Status }
+                );
+            }
+            catch
+            {
+            }
         }
 
         private async Task SendToChatGpt(Guid examPracticeSectionId, Guid examPracticeSectionResultId, string? answer, CancellationToken cancellationToken)
@@ -227,11 +246,12 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         private async Task UpdateExamPracticeResultAsync(ExamPracticeResult examPracticeResult, bool isSkillTest, CancellationToken cancellationToken)
         {
             var sectionResults = await _examPracticeSectionResultRepository.Queryable.AsNoTracking()
+                                                                           .Where(x => x.ParentExamPracticeSectionResultId == null)
                                                                            .Where(s => s.ExamPracticeResultId == examPracticeResult.Id && s.CreatedDate >= examPracticeResult.CreatedDate)
                                                                            .OrderBy(x => x.CreatedDate)
                                                                            .ToListAsync(cancellationToken);
             var numberOfDone = await _examPracticeSectionRepository.Queryable.AsNoTracking()
-                                                                   .Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId)
+                                                                   .Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId && !x.ParentExamPracticeSectionId.HasValue)
                                                                    .CountAsync(cancellationToken);
             if (sectionResults != null && (isSkillTest || sectionResults.Count == numberOfDone) && sectionResults.All(x => x.Status == EnumResultStatus.Done))
             {
