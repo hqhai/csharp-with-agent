@@ -230,5 +230,21 @@ namespace Fsel.Identity.Api.Controllers
             MethodResult<UserOtpCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Disconnect external connect
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPost("disconnect-external-provider")]
+        [Common.Attributes.Permission]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ToolGetOtp([FromQuery] DisconnectExternalAccountCommand command)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(command?.Provider);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

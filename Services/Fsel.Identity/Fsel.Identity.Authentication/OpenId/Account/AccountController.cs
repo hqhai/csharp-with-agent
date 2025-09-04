@@ -517,9 +517,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
         private async Task<IActionResult> LoginWithoutPassword(string phoneNumber, string? returnUrl)
         {
-            var user = await _userRepository.DbContext.Set<User>()
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.PhoneNumber == phoneNumber);
+            var user = await _userRepository.GetUserByIdentity(phoneNumber);
             return await LoginWithoutPassword(user, returnUrl);
         }
 
@@ -629,6 +627,80 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
             return Challenge(properties, provider);
+        }
+
+        public IActionResult ExternalConnect(string provider, string? returnUrl = null)
+        {
+            ArgumentNullException.ThrowIfNull(provider);
+
+            var redirectUrl = Url.Action(nameof(ExternalConnectHandle), new { returnUrl });
+
+            AuthenticationProperties properties;
+            if (provider == LoginProvider.Zalo)
+            {
+                properties = new AuthenticationProperties
+                {
+                    RedirectUri = redirectUrl,
+                };
+                properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            }
+
+            properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            return Challenge(properties, provider);
+        }
+
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> ExternalConnectHandle(string? returnUrl = null)
+        {
+            if (!User.IsAuthenticated())
+            {
+                return Unauthorized();
+            }
+            returnUrl ??= "~/";
+
+            var info = await _signInManager.GetExternalLoginInfoAsync();
+            if (info == null)
+            {
+                return this.RedirectWithQuery(returnUrl, new { error = _localizer["i18n_connect_account_fail"] });
+            }
+            var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+            if (user != null)
+            {
+                return this.RedirectWithQuery(returnUrl, new { error = _localizer["i18n_connect_to_connected_account"].Value.InjectParam(info.ProviderKey) });
+            }
+
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (!string.IsNullOrEmpty(email))
+            {
+                user = await _userRepository.GetUserByIdentity(email ?? string.Empty);
+
+                var canConnect = user?.UserName == User.Identity.Name;
+
+                if (canConnect)
+                {
+                    var result = await _userManager.AddLoginAsync(user, info);
+                    if (result.Succeeded)
+                    {
+                        return Redirect(returnUrl ?? string.Empty);
+                    }
+                }
+
+                return this.RedirectWithQuery(returnUrl, new { error = _localizer["i18n_connect_account_invalid"] });
+            }
+            else
+            {
+                user = await _userManager.GetUserAsync(User);
+                var result = await _userManager.AddLoginAsync(user, info);
+                if (result.Succeeded)
+                {
+                    return Redirect(returnUrl ?? string.Empty);
+                }
+                else
+                {
+                    return this.RedirectWithQuery(returnUrl, new { error = _localizer["i18n_connect_account_fail"] });
+                }
+            }
         }
 
         [HttpGet]
