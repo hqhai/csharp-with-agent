@@ -24,6 +24,33 @@
   dateOfBirthInput.addEventListener("change", runValidateDateOfBirth);
   $policyCheckbox.on("change", () => isValidPolicy());
 
+  const birthday = $("#birthday");
+  if (birthday.val()) {
+    birthday.val(convertDateOfBirth(birthday.val()));
+  }
+  function convertDateOfBirth(dateOfBirth) {
+    if (!dateOfBirth) {
+      return null;
+    }
+
+    try {
+      const date = new Date(dateOfBirth);
+
+      if (isNaN(date.getTime())) {
+        return null;
+      }
+
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error('Lỗi khi convert date:', error);
+      return null;
+    }
+  }
+
   $("#form-Register").on("submit", function (e) {
     if (validateRegisterForm() && this.checkValidity()) {
       $("#userInfoContain").addClass("hidden-form");
