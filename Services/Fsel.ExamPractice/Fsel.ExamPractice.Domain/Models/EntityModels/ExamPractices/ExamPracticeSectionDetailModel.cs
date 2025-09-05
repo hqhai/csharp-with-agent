@@ -20,5 +20,6 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public ExamPracticeSectionResultModel? ExamPracticeSectionResult { get; set; }
         public IList<Guid> QuestionIds { get; set; } = new List<Guid>();
         public IList<QuestionCorrectStatusModel> QuestionTests { get; set; } = new List<QuestionCorrectStatusModel>();
+        public object? Answer { get; set; }
     }
 }

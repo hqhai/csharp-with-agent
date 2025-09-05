@@ -146,7 +146,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                         entity.CurrentExamPracticeSectionId
                     });
                 }
-                await _examPracticeSectionHelper.UpdateExamPracticeToIsSubmit(examPracticeSection, examPracticeSectionResult, request.IsSubmit);
+                await _examPracticeSectionHelper.UpdateExamPracticeToIsSubmit(examPractice, examPracticeSection, examPracticeSectionResult, request.IsSubmit);
                 if (examPracticeSection.CourseSkill == EnumCourseSkill.Writing && request.IsSubmit)
                 {
                     var answers = request.Answers;

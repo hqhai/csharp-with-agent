@@ -114,7 +114,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 
         private static double CalculateRemainingTime(ExamPracticeResult examPracticeResult, ExamPracticeSectionResult sectionResult, ExamPracticeSection examPracticeSection)
         {
-            double totalExecutionTime = 0;
+            double totalExecutionTime;
             if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice && examPracticeResult.Config?.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
             {
                 totalExecutionTime = examPracticeResult.Config?.ExecutionTime ?? default;
@@ -141,6 +141,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         {
             var baseQuery = _examPracticeSectionRepository.Queryable
                 .Include(x => x.Questions)
+                .Include(x => x.ExamPracticeAnswers)
                 .Where(x => x.ParentExamPracticeSectionId == parentSectionId)
                 .AsNoTracking();
 
