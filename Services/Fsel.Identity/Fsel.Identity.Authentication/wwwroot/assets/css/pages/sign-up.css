@@ -406,6 +406,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   position: relative;
   display: flex;
   overflow: hidden;
+  min-height: fit-content;
 }
 
 .user-info-form,
