@@ -88,6 +88,32 @@
 
     if (value.length > 8) value = value.slice(0, 8);
 
+    if (value.length >= 1) {
+      let day = value.slice(0, 2);
+
+      if (day.length === 1 && parseInt(day) > 3) {
+        day = "0" + day;
+        value = day + value.slice(1);
+      } else if (day.length === 2) {
+        if (parseInt(day) === 0) day = "01";
+        else if (parseInt(day) > 31) day = "31";
+        value = day + value.slice(2);
+      }
+    }
+
+    if (value.length >= 3) {
+      let month = value.slice(2, 4);
+
+      if (month.length === 1 && parseInt(month) > 1) {
+        month = "0" + month;
+        value = value.slice(0, 2) + month + value.slice(3);
+      } else if (month.length === 2) {
+        if (parseInt(month) === 0) month = "01";
+        else if (parseInt(month) > 12) month = "12";
+        value = value.slice(0, 2) + month + value.slice(4);
+      }
+    }
+
     if (value.length >= 4) {
       value = value.replace(/^(\d{2})(\d{2})(\d{0,4})$/, "$1/$2/$3");
     } else if (value.length >= 2) {

@@ -7,7 +7,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 
     public class UserRegisterModel
     {
-        [RegularExpression("^(?:\\+|(?=\\d{10}))\\d{11,15}$", ErrorMessage = "i18n_number_phone_invalid")]
+        [RegularExpression("^(?:\\+|(?=\\d{10}))\\d{10,15}$", ErrorMessage = "i18n_number_phone_invalid")]
         [Required(ErrorMessage = "i18n_Phone_number_cannot_empty")]
         public string? PhoneNumber { get; set; }
 
