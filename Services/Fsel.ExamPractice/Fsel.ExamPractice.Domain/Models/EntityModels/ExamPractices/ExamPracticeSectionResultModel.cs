@@ -13,7 +13,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
     {
         public int CorrectCount { get; set; }
         public int CorrectTotal { get; set; }
-        public virtual double Percent { get; set; }
+        public double Percent { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public int? HighestStreak { get; set; }
         public double WorkingTime { get; set; }

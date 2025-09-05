@@ -295,8 +295,8 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             CancellationToken cancellationToken)
         {
             var resultPosition = await _examPracticeResultRepository.Queryable
-                .Where(x => x.ExamPracticeId == examPracticeRetry.Id)
-                .CountAsync(cancellationToken);
+                                        .Where(x => x.ExamPracticeRetryId == examPracticeRetry.Id)
+                                        .CountAsync(cancellationToken);
 
             var examPracticeResult = new ExamPracticeResult
             {

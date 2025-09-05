@@ -22,7 +22,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         /// <summary>
         /// Bậc (VSTEP Level) tương ứng với điểm trung bình.
         /// </summary>
-        public double AverageLevel { get; set; }
+        public string? AverageLevel { get; set; }
 
         /// <summary>
         /// Điểm overall (có thể = điểm gần nhất hoặc tính riêng).
@@ -32,6 +32,6 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         /// <summary>
         /// Bậc tương ứng với overall score.
         /// </summary>
-        public double OverallLevel { get; set; }
+        public string? OverallLevel { get; set; }
     }
 }

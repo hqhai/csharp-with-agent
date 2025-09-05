@@ -2,22 +2,25 @@
 
 namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
 {
+    using System.IO;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.IRepositories;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.Configs;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetDashboardReportByTypeQuery : BaseQueryModel, IRequest<MethodResult<ExamDashboardModel>>
+    public class GetDashboardReportByTypeQuery : IRequest<MethodResult<ExamDashboardModel>>
     {
         public EnumExamPracticeType Type { get; set; }
     }
@@ -62,17 +65,41 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                                              join ep in _examPracticeRepository.Queryable on epr.ExamPracticeId equals ep.Id
                                              where epr.StudentId == student.Id && ep.Type == request.Type
                                              && epr.WorkingStatus == EnumWorkingStatus.Active && epr.Status == EnumResultStatus.Done
-                                             select epr).ToListAsync(cancellationToken);
+                                             select epr).AsNoTracking().ToListAsync(cancellationToken);
+            var totalExamPractice = await (from ep in _examPracticeRepository.Queryable
+                                           where ep.Type == request.Type && !ep.IsArchive && ep.Status == EnumExamPracticeStatus.Active
+                                           select ep).AsNoTracking().CountAsync(cancellationToken);
 
             examDashboard.CompletedCount = examPracticeResults.Count;
-            examDashboard.TotalCount = await (from ep in _examPracticeRepository.Queryable
-                                              where ep.Type == request.Type && !ep.IsArchive && ep.Status == EnumExamPracticeStatus.Active
-                                              select ep).CountAsync(cancellationToken);
+            examDashboard.TotalCount = totalExamPractice;
             var examPracticeResultModels = _mapper.Map<IList<ExamPracticeResultModel>>(examPracticeResults);
 
-            examDashboard.AverageLevel = examPracticeResultModels.Average(x => x.Score);
+            var examBandScores = GetSkillScoreDescriptors();
+            var score = examPracticeResultModels.Any() ? examPracticeResultModels.Average(x => x.Score) : default;
+            var scoreOvrall = examPracticeResultModels.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.Score ?? 0;
 
+            examDashboard.AverageScore = score;
+            examDashboard.AverageLevel = MapScoreToLevel(examBandScores, score);
+            examDashboard.OverallScore = scoreOvrall;
+            examDashboard.OverallLevel = MapScoreToLevel(examBandScores, scoreOvrall);
+            methodResult.Result = examDashboard;
             return methodResult;
+        }
+
+        private static IList<SkillScoreDescriptorModel>? GetSkillScoreDescriptors()
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ExamBandScores);
+            return ConvertHelper.DeserializeFromFilePath<IList<SkillScoreDescriptorModel>>(path);
+        }
+
+        private static string? MapScoreToLevel(IList<SkillScoreDescriptorModel>? bands, double score)
+        {
+            if (bands?.Count == 0)
+            {
+                return null;
+            }
+            var band = bands?.FirstOrDefault(b => score >= b.MinInclusive && score <= b.MaxInclusive);
+            return band?.Level;
         }
 
         private async Task<MethodResult<StudentModel>> GetStudentAsync()

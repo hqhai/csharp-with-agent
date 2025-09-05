@@ -263,13 +263,52 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             return skillScore;
         }
 
-        public SkillScores GetSkillScore(ExamPractice examPractice, ExamPracticeSection examPracticeSection, IList<BaseAnswer>? baseAnswers)
+        #region BuildSkillScores
+
+        public SkillScores GetSkillScore(
+            ExamPractice examPractice,
+            ExamPracticeSection examPracticeSection,
+            IList<BaseAnswer>? baseAnswers)
         {
             ArgumentNullException.ThrowIfNull(examPracticeSection);
             ArgumentNullException.ThrowIfNull(examPractice);
-            var skill = examPracticeSection.CourseSkill ?? default;
-            var correctCount = baseAnswers?.Sum(x => x.CorrectCount) ?? default;
-            var score = examPractice.Type == EnumExamPracticeType.Vstep ? GetBandScore(examPractice.Type, skill, correctCount) : correctCount.GetIeltsScore(skill);
+
+            var skill = GetSkill(examPracticeSection);
+            var correctCount = GetCorrectCount(baseAnswers);
+            var score = CalculateScore(examPractice, skill, correctCount);
+
+            return BuildSkillScores(skill, correctCount, baseAnswers, score);
+        }
+
+        private static EnumCourseSkill GetSkill(ExamPracticeSection examPracticeSection)
+        {
+            return examPracticeSection.CourseSkill ?? default;
+        }
+
+        private static int GetCorrectCount(IList<BaseAnswer>? baseAnswers)
+        {
+            return baseAnswers?.Sum(x => x.CorrectCount) ?? default;
+        }
+
+        private static double CalculateScore(ExamPractice examPractice, EnumCourseSkill skill, int correctCount)
+        {
+            if (examPractice.Type == EnumExamPracticeType.Vstep)
+            {
+                return GetBandScore(examPractice.Type, skill, correctCount);
+            }
+            else if (examPractice.Type == EnumExamPracticeType.IELTS)
+            {
+                return correctCount.GetIeltsScore(skill);
+            }
+            return default;
+        }
+
+        private static SkillScores BuildSkillScores(
+            EnumCourseSkill skill,
+            int correctCount,
+            IList<BaseAnswer>? baseAnswers,
+            double score)
+        {
             return new SkillScores
             {
                 CorrectCount = correctCount,
@@ -279,9 +318,11 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             };
         }
 
-        private double GetBandScore(EnumExamPracticeType type, EnumCourseSkill courseSkill, double correctCount)
+        #endregion BuildSkillScores
+
+        private static double GetBandScore(EnumExamPracticeType type, EnumCourseSkill courseSkill, double correctCount)
         {
-            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ExamBandScores);
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ExamScoringSkill);
             var examBandScores = ConvertHelper.DeserializeFromFilePath<IList<ExamBandScoreSkill>>(path);
 
             return examBandScores?.FirstOrDefault(x => x.Type == type && x.CourseSkill == courseSkill)?.BandScores
@@ -338,6 +379,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
 
         public async Task UpdateExamPracticeSectionResultAsync(ExamPractice examPractice, ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult)
         {
+            ArgumentNullException.ThrowIfNull(examPractice);
             ArgumentNullException.ThrowIfNull(examPracticeSection);
             ArgumentNullException.ThrowIfNull(examPracticeSectionResult);
             var skillScore = await GetSkillScores(examPractice, examPracticeSection, examPracticeSectionResult);
