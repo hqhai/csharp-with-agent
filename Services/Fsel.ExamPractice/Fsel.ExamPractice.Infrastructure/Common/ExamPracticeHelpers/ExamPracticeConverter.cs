@@ -51,25 +51,27 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
 
             foreach (var newExamPracticeSection in newExamPracticeSections)
             {
+                ExamPracticeSection? examPracticeSection = null;
+
                 if (!newExamPracticeSection.Id.HasValue)
                 {
-                    examPracticeSectionBelongParents.Add(_mapper.Map<ExamPracticeSection>(newExamPracticeSection));
+                    examPracticeSection = _mapper.Map<ExamPracticeSection>(newExamPracticeSection);
+                    examPracticeSectionBelongParents.Add(examPracticeSection);
                 }
                 else
                 {
-                    var oldExamPracticeSection = oldExamPracticeSections?.FirstOrDefault(x => x.Id == newExamPracticeSection.Id);
-                    _mapper.Map(newExamPracticeSection, oldExamPracticeSection);
-                    if (oldExamPracticeSection == null)
-                    {
-                        continue;
-                    }
+                    examPracticeSection = oldExamPracticeSections?.FirstOrDefault(x => x.Id == newExamPracticeSection.Id);
+                    _mapper.Map(newExamPracticeSection, examPracticeSection);
+                }
 
-                    QuestionHandler(oldExamPracticeSection.Questions, newExamPracticeSection.Questions);
-                    ExamPracticeAISettingHandler(oldExamPracticeSection.ExamPracticeAISettings, newExamPracticeSection.ExamPracticeAISettings);
+                if (examPracticeSection != null)
+                {
+                    QuestionHandler(examPracticeSection.Questions, newExamPracticeSection.Questions);
+                    ExamPracticeAISettingHandler(examPracticeSection.ExamPracticeAISettings, newExamPracticeSection.ExamPracticeAISettings);
 
                     if (newExamPracticeSection.ChildrenExamPracticeSections.Any())
                     {
-                        await HandlerChildents(newExamPracticeSection.ChildrenExamPracticeSections, oldExamPracticeSection.ExamPracticeSections, null, oldExamPracticeSection.Id, cancellationToken);
+                        await HandlerChildents(newExamPracticeSection.ChildrenExamPracticeSections, examPracticeSection.ExamPracticeSections, null, examPracticeSection.Id, cancellationToken);
                     }
                 }
             }
@@ -79,14 +81,22 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             foreach (var newQuestion in newQuestions)
             {
+                Question? question = null;
+
                 if (!newQuestion.Id.HasValue)
                 {
-                    oldQuestions.Add(_mapper.Map<Question>(newQuestion));
+                    question = _mapper.Map<Question>(newQuestion);
+                    oldQuestions.Add(question);
                 }
                 else
                 {
-                    var oldQuestion = oldQuestions.FirstOrDefault(x => x.Id == newQuestion.Id);
-                    _mapper.Map(newQuestion, oldQuestion);
+                    question = oldQuestions.FirstOrDefault(x => x.Id == newQuestion.Id);
+                    _mapper.Map(newQuestion, question);
+                }
+
+                if (question != null)
+                {
+                    question = QuestionHelper.HandleQuestion(question).Result;
                 }
             }
 
@@ -99,23 +109,22 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             foreach (var newExamPracticeAISetting in newExamPracticeAISettings)
             {
+                ExamPracticeAISetting? examPracticeAISetting = null;
+
                 if (!newExamPracticeAISetting.Id.HasValue)
                 {
-                    oldExamPracticeAISettings.Add(_mapper.Map<ExamPracticeAISetting>(newExamPracticeAISetting));
+                    examPracticeAISetting = _mapper.Map<ExamPracticeAISetting>(newExamPracticeAISetting);
+                    oldExamPracticeAISettings.Add(examPracticeAISetting);
                 }
                 else
                 {
-                    var oldExamPracticeAISetting = oldExamPracticeAISettings.FirstOrDefault(x => x.Id == newExamPracticeAISetting.Id);
-                    if (oldExamPracticeAISetting == null)
-                    {
-                        continue;
-                    }
+                    examPracticeAISetting = oldExamPracticeAISettings.FirstOrDefault(x => x.Id == newExamPracticeAISetting.Id);
+                    _mapper.Map(newExamPracticeAISetting, examPracticeAISetting);
+                }
 
-                    _mapper.Map(newExamPracticeAISetting, oldExamPracticeAISetting);
-                    if (newExamPracticeAISetting.ExamPracticeAICriteriaSettings != null && newExamPracticeAISetting.ExamPracticeAICriteriaSettings.Any())
-                    {
-                        ExamPracticeAICriteriaSettingHandler(oldExamPracticeAISetting.ExamPracticeAICriteriaSettings, newExamPracticeAISetting.ExamPracticeAICriteriaSettings);
-                    }
+                if (newExamPracticeAISetting.ExamPracticeAICriteriaSettings != null && newExamPracticeAISetting.ExamPracticeAICriteriaSettings.Any() && examPracticeAISetting != null)
+                {
+                    ExamPracticeAICriteriaSettingHandler(examPracticeAISetting.ExamPracticeAICriteriaSettings, newExamPracticeAISetting.ExamPracticeAICriteriaSettings);
                 }
             }
 
@@ -128,14 +137,17 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             foreach (var newExamPracticeAICriteriaSetting in newExamPracticeAICriteriaSettings)
             {
+                ExamPracticeAICriteriaSetting? examPracticeAICriteriaSetting = null;
+
                 if (!newExamPracticeAICriteriaSetting.Id.HasValue)
                 {
-                    oldExamPracticeAICriteriaSettings.Add(_mapper.Map<ExamPracticeAICriteriaSetting>(newExamPracticeAICriteriaSetting));
+                    examPracticeAICriteriaSetting = _mapper.Map<ExamPracticeAICriteriaSetting>(newExamPracticeAICriteriaSetting);
+                    oldExamPracticeAICriteriaSettings.Add(examPracticeAICriteriaSetting);
                 }
                 else
                 {
-                    var oldExamPracticeAICriteriaSetting = oldExamPracticeAICriteriaSettings.FirstOrDefault(x => x.Id == newExamPracticeAICriteriaSetting.Id);
-                    _mapper.Map(newExamPracticeAICriteriaSetting, oldExamPracticeAICriteriaSetting);
+                    examPracticeAICriteriaSetting = oldExamPracticeAICriteriaSettings.FirstOrDefault(x => x.Id == newExamPracticeAICriteriaSetting.Id);
+                    _mapper.Map(newExamPracticeAICriteriaSetting, examPracticeAICriteriaSetting);
                 }
             }
 

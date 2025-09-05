@@ -28,7 +28,6 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
         private readonly IMapper _mapper;
         private readonly ExamPracticeHelper _examPracticeHelper;
         private readonly ISystemService _systemService;
-        private ExamPracticeCommon _examPracticeCommon = new ExamPracticeCommon().Create();
 
         public CreateExamPracticeCommandHandler(
             IExamPracticeRepository examPracticeRepository,
@@ -69,9 +68,12 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
                 return methodResult;
             }
 
-            // tính lại tổng số question
-            _examPracticeCommon.HandlerTotalQuestion(request.ExamPracticeSections);
-            _examPracticeCommon.SetTotalQuestion(request.ExamPracticeSections);
+            var validate = ExamPracticeValidateBuilder.Create(request, _examPracticeRepository).IsValidateQuestion(request.ExamPracticeSections, _mapper).GetResult();
+            if (!validate.IsOK)
+            {
+                methodResult.AddErrorBadRequest(validate.ErrorMessages);
+                return methodResult;
+            }
 
             var examPractice = ExamPracticeFactory.Create(request, _mapper).Build(version: 0, originalId: Guid.NewGuid());
             if (!examPractice.IsValid())

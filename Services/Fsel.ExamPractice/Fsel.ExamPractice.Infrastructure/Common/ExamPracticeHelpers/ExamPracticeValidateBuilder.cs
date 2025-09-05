@@ -3,12 +3,15 @@
 namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
 {
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.Enums.ErrorCodes;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPractices;
+    using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
@@ -31,11 +34,6 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         public static ExamPracticeValidateBuilder Create(UpdateExamPracticeCommandModel request, IExamPracticeRepository examPracticeRepository)
         {
             return new ExamPracticeValidateBuilder(request, examPracticeRepository);
-        }
-
-        public ExamPracticeValidateBuilder ValidateRequestData()
-        {
-            return this;
         }
 
         public async Task<ExamPracticeValidateBuilder> ValidateChangeStatus(EnumExamPracticeType type, IExamPracticeSectionRepository examPracticeSectionRepository, Guid examPracticeId)
@@ -85,6 +83,43 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                 if (item.Config != null && item.Config.TotalQuestion < _totalListenningQuestionVstep && item.CourseSkill == EnumCourseSkill.Listening)
                 {
                     _errorResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.InvalidListenningQuestionCount), nameof(item.Config.TotalQuestion));
+                }
+            }
+
+            return this;
+        }
+
+        public ExamPracticeValidateBuilder IsValidateQuestion(IEnumerable<UpdateExamPracticeSectionCommandModel> examPracticeSections, IMapper mapper)
+        {
+            ArgumentNullException.ThrowIfNull(mapper);
+
+            if (examPracticeSections == null || !examPracticeSections.Any())
+            {
+                return this;
+            }
+
+            foreach (var examPracticeSection in examPracticeSections)
+            {
+                if (examPracticeSection.Questions != null && examPracticeSection.Questions.Any())
+                {
+                    foreach (var questionRequest in examPracticeSection.Questions)
+                    {
+                        var question = mapper.Map<Question>(questionRequest);
+                        if (!question.IsValid())
+                        {
+                            _errorResult.AddErrorBadRequest(question.ErrorMessages);
+                        }
+                        var method = QuestionHelper.HandleQuestion(question);
+                        if (!method.IsOK)
+                        {
+                            _errorResult.AddErrorBadRequest(method.ErrorMessages);
+                        }
+                    }
+                }
+
+                if (examPracticeSection.ChildrenExamPracticeSections != null && examPracticeSection.ChildrenExamPracticeSections.Any())
+                {
+                    IsValidateQuestion(examPracticeSection.ChildrenExamPracticeSections, mapper);
                 }
             }
 
