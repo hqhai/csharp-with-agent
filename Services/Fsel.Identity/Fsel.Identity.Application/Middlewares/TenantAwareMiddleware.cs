@@ -10,6 +10,7 @@ namespace Fsel.Identity.Application.Middlewares
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Attributes;
     using Fsel.Identity.Domain.Models.CommandModels.OpenId;
     using Microsoft.AspNetCore.Builder;
@@ -54,8 +55,8 @@ namespace Fsel.Identity.Application.Middlewares
             var tenant = await tenantProvider.GetTenantAsync(username, userId);
             if (tenant != null)
             {
-                var tenantByDomain = await tenantProvider.GetTenantAsync(isCheckDefault: false);
-                if (tenant.IsMultiLogin || (tenantByDomain != null && tenant.Id == tenantByDomain.Id))
+                var tenantByDomain = await tenantProvider.GetTenantByDomainUrlAsync();
+                if (tenantByDomain != null && (tenantByDomain.IsMultiLogin || tenant.Id == tenantByDomain.Id))
                 {
                     var authContext = context.RequestServices.GetService<AuthContext>();
                     if (authContext != null)
