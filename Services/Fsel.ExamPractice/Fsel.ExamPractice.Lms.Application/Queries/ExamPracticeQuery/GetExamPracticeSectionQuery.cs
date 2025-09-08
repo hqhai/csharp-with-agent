@@ -140,11 +140,12 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         private async Task<List<ExamPracticeSection>> GetChildSectionsAsync(ExamPracticeResult examPracticeResult, Guid parentSectionId, CancellationToken ct)
         {
             var baseQuery = _examPracticeSectionRepository.Queryable
-                .Include(x => x.Questions)
-                .Include(x => x.ExamPracticeAnswers.Where(x => x.ExamPracticeResultId == examPracticeResult.Id))
-                .Include(x => x.ExamPracticeSections)
-                .Where(x => x.ParentExamPracticeSectionId == parentSectionId)
-                .AsNoTracking();
+                                .Include(x => x.Questions)
+                                .Include(x => x.ExamPracticeAnswers.Where(x => x.ExamPracticeResultId == examPracticeResult.Id))
+                                .Include(x => x.ExamPracticeSections)
+                                .ThenInclude(x => x.ExamPracticeAnswers.Where(x => x.ExamPracticeResultId == examPracticeResult.Id))
+                                .Where(x => x.ParentExamPracticeSectionId == parentSectionId)
+                                .AsNoTracking();
 
             // If config null or IsAllPart = true -> lấy tất cả phần con
             if (examPracticeResult.Config == null || examPracticeResult.Config.IsAllPart)
