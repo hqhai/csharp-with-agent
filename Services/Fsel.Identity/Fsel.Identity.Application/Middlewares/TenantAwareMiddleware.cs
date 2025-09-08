@@ -56,7 +56,7 @@ namespace Fsel.Identity.Application.Middlewares
             if (tenant != null)
             {
                 var tenantByDomain = await tenantProvider.GetTenantByDomainUrlAsync();
-                if (tenantByDomain != null && (tenantByDomain.IsMultiLogin || tenant.Id == tenantByDomain.Id))
+                if (tenantByDomain != null && (tenantByDomain.IsMultiLogin || tenant.Id == tenantByDomain.Tenant?.Id))
                 {
                     var authContext = context.RequestServices.GetService<AuthContext>();
                     if (authContext != null)

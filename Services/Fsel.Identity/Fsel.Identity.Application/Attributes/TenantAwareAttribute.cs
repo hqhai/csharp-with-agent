@@ -51,7 +51,7 @@ namespace Fsel.Identity.Application.Attributes
                 }
 
                 var tenantByDomain = await _tenantProvider.GetTenantByDomainUrlAsync();
-                if (tenantByDomain != null && (tenantByDomain.IsMultiLogin || tenant.Id == tenantByDomain.Id))
+                if (tenantByDomain != null && (tenantByDomain.IsMultiLogin || tenant.Id == tenantByDomain.Tenant?.Id))
                 {
                     context.HttpContext.SetHeader(JwtClaimNames.TenantId, tenant.Id.ToString());
                 }

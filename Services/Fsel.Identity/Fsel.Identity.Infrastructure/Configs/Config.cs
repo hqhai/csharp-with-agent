@@ -123,14 +123,18 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://localhost:4200",
                         "http://localhost:4200",
                         "http://lcms-web-dev.fsel.edu.vn",
-                        "https://lcms-web-dev.fsel.edu.vn"
+                        "https://lcms-web-dev.fsel.edu.vn",
+                        "http://lcms-web-dev-tenant-1.fsel.edu.vn",
+                        "https://lcms-web-dev-tenant-1.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
                         "https://localhost:4200",
                         "http://localhost:4200",
                         "http://lcms-web-dev.fsel.edu.vn",
-                        "https://lcms-web-dev.fsel.edu.vn"
+                        "https://lcms-web-dev.fsel.edu.vn",
+                        "http://lcms-web-dev-tenant-1.fsel.edu.vn",
+                        "https://lcms-web-dev-tenant-1.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
@@ -169,14 +173,18 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://localhost:4300",
                         "http://localhost:4300",
                         "http://lms-admin-dev.fsel.edu.vn",
-                        "https://lms-admin-dev.fsel.edu.vn"
+                        "https://lms-admin-dev.fsel.edu.vn",
+                        "http://lms-admin-dev-tenant-1.fsel.edu.vn",
+                        "https://lms-admin-dev-tenant-1.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
                         "https://localhost:4300",
                         "http://localhost:4300",
                         "http://lms-admin-dev.fsel.edu.vn",
-                        "https://lms-admin-dev.fsel.edu.vn"
+                        "https://lms-admin-dev.fsel.edu.vn",
+                        "http://lms-admin-dev-tenant-1.fsel.edu.vn",
+                        "https://lms-admin-dev-tenant-1.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
