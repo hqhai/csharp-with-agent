@@ -159,6 +159,11 @@
       $label.addClass("content-border-danger");
       $policy.addClass("content-text-danger");
     }
+    else {
+      const $label = $('label[for="policy"]');
+      $label.removeClass("content-border-danger");
+      $policy.removeClass("content-text-danger");
+    }
     return isPolicyChecked;
   }
 
