@@ -22,6 +22,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public Guid StudentId { get; set; }
         public Guid ExamPracticeResultId { get; set; }
         public bool IsTestDone { get; set; }
+        public string? Note { get; set; }
         public BandScoresReport? BandScoresReport { get; set; }
         public double TargetBandScore { get; set; }
         public bool IsCheckScoreColor { get; set; }

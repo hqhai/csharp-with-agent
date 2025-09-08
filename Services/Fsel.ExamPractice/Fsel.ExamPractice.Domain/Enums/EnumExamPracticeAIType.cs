@@ -13,6 +13,11 @@ namespace Fsel.ExamPractice.Domain.Enums
         Organization,
         Vocabulary,
         Grammar,
+
+        // Mới thêm
+        Pronunciation,
+
+        Fluency,
         DiscourseManagement
     }
 }

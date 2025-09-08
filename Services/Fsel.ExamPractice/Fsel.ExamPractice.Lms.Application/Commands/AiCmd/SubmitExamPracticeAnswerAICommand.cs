@@ -285,7 +285,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                 {
                     continue;
                 }
-                var userAiConfig = BuildUserAiConfig(aiConfig.Task, item.Prompts.Single().PromptContent, request.WordContent ?? string.Empty);
+                var userAiConfig = BuildUserAiConfig(aiConfig.Task, item.Prompts.First().PromptContent ?? string.Empty, request.WordContent ?? string.Empty);
                 if (userAiConfig == null)
                 {
                     continue;
@@ -374,8 +374,8 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
 
         private async Task<string> GetTranslateAIResponse(string gradingAlFeedback, CancellationToken cancellationToken)
         {
-            var translateAiRole = File.ReadAllText(ResourceSettings.TranslateAiRole);
-            var translateAiInstruction = File.ReadAllText(ResourceSettings.TranslateAiInstruction);
+            var translateAiRole = await File.ReadAllTextAsync(ResourceSettings.TranslateAiRole, cancellationToken);
+            var translateAiInstruction = await File.ReadAllTextAsync(ResourceSettings.TranslateAiInstruction, cancellationToken);
             translateAiInstruction = string.Format(CultureInfo.InvariantCulture, translateAiInstruction ?? string.Empty, gradingAlFeedback);
 
             var aIResponse = await _mediator.Send(new SubmitAICommand
@@ -417,10 +417,9 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             }
         }
 
-        private static string? BuildUserAiConfig(string? task, string? promptContent, string wordContent)
+        private static string? BuildUserAiConfig(string? task, string promptContent, string wordContent)
         {
-            var answer = string.Concat(new string[] { task ?? string.Empty, Environment.NewLine, promptContent ?? string.Empty });
-            return answer?.Replace("{0}", wordContent, StringComparison.CurrentCulture);
+            return string.Format(CultureInfo.InvariantCulture, promptContent, new[] { task, wordContent });
         }
 
         private async Task<ExamPracticeResult?> GetExamPracticeResult(ExamPracticeSectionResult examPracticeSectionResult, CancellationToken cancellationToken)
@@ -471,18 +470,14 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             var skillScores = examPracticeSectionResult.SkillScores?.ToList() ?? new List<SkillScores>();
             var correctTotal = examPracticeResult.ExamPractice?.Type == EnumExamPracticeType.IELTS ? CorrectTotal_IELTS_Writing : CorrectTotal_Vstep_Writing;
 
-            if (skillScore == null)
+            if (skillScore?.TotalCount == default)
             {
-                skillScore = new SkillScores
-                {
-                    CorrectCount = totalScore,
-                    Skill = EnumCourseSkill.Writing,
-                    Scores = averageScore,
-                    TotalQuestion = MaxSection,
-                    CountQuestion = MaxSection,
-                    TotalCount = correctTotal,
-                };
-                skillScores.Add(skillScore);
+                skillScores.Single().CorrectCount = totalScore;
+                skillScores.Single().Skill = EnumCourseSkill.Writing;
+                skillScores.Single().Scores = averageScore;
+                skillScores.Single().TotalQuestion = MaxSection;
+                skillScores.Single().CountQuestion = MaxSection;
+                skillScores.Single().TotalCount = correctTotal;
             }
             else
             {

@@ -9,6 +9,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers.V1i1
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
+    using Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd;
     using Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1;
     using Fsel.ExamPractice.Lms.Application.Queries.ReportQuery;
     using Fsel.Shared.Attributes;
@@ -76,6 +77,18 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers.V1i1
         public async Task<IActionResult> ReportView([FromQuery] GetReportResultQuery query)
         {
             MethodResult<ExamPracticeReportViewModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Start ExamPractice
+        /// </summary>
+        [HttpPost("save-note")]
+        [ProducesResponseType(typeof(MethodResult<ExamPracticeSectionResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SaveNote([FromBody] SaveResultNoteCommand command)
+        {
+            MethodResult<ExamPracticeSectionResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

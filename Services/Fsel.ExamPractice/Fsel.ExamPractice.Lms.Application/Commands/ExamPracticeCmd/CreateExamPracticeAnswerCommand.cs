@@ -24,6 +24,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class CreateExamPracticeAnswerCommand : CreateExamPracticeAnswerCommandModel, IRequest<MethodResult<ExamPracticeSectionResultModel>>
     { }
@@ -350,9 +351,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             else
             {
                 var sectionIds = request.Answers.Where(x => x.ExamPracticeSectionId.HasValue).Select(x => x.ExamPracticeSectionId!.Value).ToList();
-                var sections = await _examPracticeSectionRepository.Queryable.AsNoTracking()
+                var sections = await _examPracticeSectionRepository.Queryable.Where(x => sectionIds.Contains(x.Id))
+                                                                   //.WhereBulkContains(sectionIds, x => x.Id)
                                                                    .Include(x => x.ParentExamPracticeSection)
-                                                                   .WhereBulkContains(sectionIds, x => x.Id)
+                                                                   .AsNoTracking()
                                                                    .ToListAsync();
                 if (sections == null || !sections.Any())
                 {
@@ -471,6 +473,18 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     if (section == null)
                     {
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
+                        return methodResult;
+                    }
+
+                    int answerLength = item.Answer?.ToString()?.Length ?? default;
+                    if (section.DisplayOrder == AnswerLength.Section0 && answerLength > AnswerLength.MaxLengthDisplayOrder0)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(item.Answer), item.Answer ?? new(), answerLength);
+                        return methodResult;
+                    }
+                    if (section.DisplayOrder == AnswerLength.Section1 && answerLength > AnswerLength.MaxLengthDisplayOrder1)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(item.Answer), item.Answer ?? new(), answerLength);
                         return methodResult;
                     }
                     var answer = answers.FirstOrDefault(x => x.ExamPracticeResultId == request.ExamPracticeResultId && x.ExamPracticeSectionId == section.Id);

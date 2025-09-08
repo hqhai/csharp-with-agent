@@ -30,7 +30,10 @@ namespace Fsel.ExamPractice.Domain.Entities
                 _answerStr = value;
                 if (!string.IsNullOrEmpty(value) && !value.Contains(answerStr, StringComparison.InvariantCulture))
                 {
-                    TimeCount = MediaHelper.GetMediaDurationAsync(value);
+                    if (MediaHelper.IsProbablyFileUrl(answerStr))
+                    {
+                        TimeCount = MediaHelper.GetMediaDurationAsync(value);
+                    }
                     if (TimeCount == null)
                     {
                         WordCount = Shared.Helpers.StringHelper.CountWords(value);
@@ -50,7 +53,14 @@ namespace Fsel.ExamPractice.Domain.Entities
 
         public int? TimeCount
         {
-            get { return _timeCount == null && !string.IsNullOrEmpty(AnswerStr) && !AnswerStr.Contains(answerStr, StringComparison.InvariantCulture) ? MediaHelper.GetMediaDurationAsync(AnswerStr) : _timeCount; }
+            get
+            {
+                if (_timeCount == null && !string.IsNullOrEmpty(AnswerStr) && !AnswerStr.Contains(answerStr, StringComparison.InvariantCulture) && MediaHelper.IsProbablyFileUrl(answerStr))
+                {
+                    return MediaHelper.GetMediaDurationAsync(AnswerStr);
+                }
+                return _timeCount;
+            }
             set { _timeCount = value; }
         }
 

@@ -7,8 +7,10 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.Models.EntityModels.Bases;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels;
 
     public class ExamPracticeResultProfile : Profile
     {
@@ -29,6 +31,7 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
                 n.ExamPractice != null && n.ExamPractice.ExecutionTime - n.WorkingTime > 0 ? n.ExamPractice.ExecutionTime - n.WorkingTime : default)
             );
             CreateMap<ExamPracticeAnswer, AnswerModel>().IgnoreAllNonExisting();
+            CreateMap<ExamPracticeAnswerResponseModel, SetTimeRetryExamPracticeModel>().IgnoreAllNonExisting();
         }
     }
 }

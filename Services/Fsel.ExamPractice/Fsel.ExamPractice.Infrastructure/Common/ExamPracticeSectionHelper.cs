@@ -387,16 +387,13 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             examPracticeSectionResult.CorrectTotal = (int)skillScore.TotalCount;
             examPracticeSectionResult.Status = EnumResultStatus.Done;
             examPracticeSectionResult.HighestStreak = await GetHighestStreak(examPracticeSection, examPracticeSectionResult);
-            if (examPracticeSection.CourseSkill != EnumCourseSkill.Writing)
+            if (examPracticeSectionResult.SkillScores != null && examPracticeSectionResult.SkillScores.Any())
             {
-                if (examPracticeSectionResult.SkillScores != null && examPracticeSectionResult.SkillScores.Any())
-                {
-                    examPracticeSectionResult.SkillScores.Add(skillScore);
-                }
-                else
-                {
-                    examPracticeSectionResult.SkillScores = new List<SkillScores> { skillScore };
-                }
+                examPracticeSectionResult.SkillScores.Add(skillScore);
+            }
+            else
+            {
+                examPracticeSectionResult.SkillScores = new List<SkillScores> { skillScore };
             }
 
             await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
