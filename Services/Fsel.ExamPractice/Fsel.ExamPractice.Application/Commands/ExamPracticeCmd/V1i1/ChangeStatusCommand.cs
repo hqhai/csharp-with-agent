@@ -81,7 +81,7 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
                 return methodResult;
             });
 
-            await _examPracticeHelper.UpdateExamPracticeSectionScoreAsync(examPractice).ConfigureAwait(false);
+            //await _examPracticeHelper.UpdateExamPracticeSectionScoreAsync(examPractice).ConfigureAwait(false);
             return methodResult;
         }
     }
