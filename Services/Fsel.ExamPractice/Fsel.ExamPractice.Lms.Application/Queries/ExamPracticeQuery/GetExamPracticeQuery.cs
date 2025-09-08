@@ -107,7 +107,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         {
             var examPracticeSectionDetails = new List<ExamPracticeSectionDetailModel>();
             var examPracticeSections = await GetSectionsAsync(examPractice, examPracticeResult.Id);
-            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.AsNoTracking()
+            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable
                                                                          .Where(x => x.ExamPracticeResultId == examPracticeResult.Id && x.QuestionId.HasValue)
                                                                          .ToListAsync();
             var examPracticeAnswerDict = examPracticeAnswers.GroupBy(x => x.QuestionId!.Value).ToDictionary(g => g.Key, g => g.FirstOrDefault());

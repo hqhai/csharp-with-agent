@@ -118,6 +118,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                     (averageScore, totalScore, checkSkillMockTest, gradingAiFeedBack) = await HandleVstepAsync(examPracticeAnswer, request, resultDictionary, examPracticeResult, cancellationToken);
                     break;
             }
+            await UpdateExamPracticeSectionResultAsync(examPracticeSectionResult, examPracticeSection.Id, averageScore, totalScore);
 
             var skillScores = UpdateSkillScores(examPracticeSectionResult, examPracticeSection, averageScore, totalScore, checkSkillMockTest, examPracticeResult);
             examPracticeSectionResult.SkillScores = skillScores;
@@ -193,6 +194,21 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                 grammaticalRangeGradings);
 
             return (averageScore, totalScore, checkSingleVstepSkill, gradingAiFeedBack);
+        }
+
+        private async Task UpdateExamPracticeSectionResultAsync(ExamPracticeSectionResult examPracticeSectionResult, Guid examPracticeSectionId, double score, double totalScore)
+        {
+            var sectionResult = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeSectionResult.ExamPracticeResultId)
+                                                                          .Where(x => x.ExamPracticeSectionId == examPracticeSectionId)
+                                                                          .FirstOrDefaultAsync();
+            if (sectionResult == null || sectionResult.SkillScores == null)
+            {
+                return;
+            }
+            sectionResult.SkillScores.Single().Scores = score;
+            sectionResult.SkillScores.Single().CorrectCount = totalScore;
+            _examPracticeSectionResultRepository.Update(sectionResult, false, x => x.WorkingTime);
+            await _examPracticeSectionResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
         }
 
         private async Task<ExamPracticeAnswer?> GetExamPracticeAnswer(SubmitExamPracticeAnswerAICommand request, CancellationToken cancellationToken)
@@ -385,8 +401,9 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             CancellationToken cancellationToken)
         {
             if (aiConfig.Prompts == null || aiConfig.Prompts.Count == 0)
+            {
                 return;
-
+            }
             foreach (var item in aiConfig.Prompts)
             {
                 var userAiConfig = BuildUserAiConfig(aiConfig.Task, item.PromptContent, request.WordContent ?? string.Empty);

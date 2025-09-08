@@ -141,7 +141,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         {
             var baseQuery = _examPracticeSectionRepository.Queryable
                 .Include(x => x.Questions)
-                .Include(x => x.ExamPracticeAnswers)
+                .Include(x => x.ExamPracticeAnswers.Where(x => x.ExamPracticeResultId == examPracticeResult.Id))
                 .Include(x => x.ExamPracticeSections)
                 .Where(x => x.ParentExamPracticeSectionId == parentSectionId)
                 .AsNoTracking();
