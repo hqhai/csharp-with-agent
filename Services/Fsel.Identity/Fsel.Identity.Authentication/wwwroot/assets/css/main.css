@@ -225,35 +225,33 @@ strong {
   overflow-x: hidden;
 }
 
-  .content form {
-    /* height: 100%; */
-    overflow-x: hidden;
-    padding-top: 10px;
+.content form {
+  padding-top: 10px;
+}
+
+.content form section,
+.sign-up-btn {
+  margin-left: 24px;
+  margin-right: 24px;
+}
+
+.content form .sign-up-btn {
+  margin: auto;
+}
+
+.content form::-webkit-scrollbar {
+  width: 2px;
+  border-radius: 999px;
+  height: 2px;
+}
+
+.content form::-webkit-scrollbar-thumb {
+  background: #c0d9ff;
+}
+
+.content form::-webkit-scrollbar-thumb:hover {
+      background: #555;
   }
-
-    .content form section,
-    .sign-up-btn {
-      margin-left: 24px;
-      margin-right: 24px;
-    }
-
-    .content form .sign-up-btn {
-      margin: auto;
-    }
-
-    .content form::-webkit-scrollbar {
-      width: 2px;
-      border-radius: 999px;
-      height: 2px;
-    }
-
-    .content form::-webkit-scrollbar-thumb {
-      background: #c0d9ff;
-    }
-
-      .content form::-webkit-scrollbar-thumb:hover {
-        background: #555;
-      }
 
 .logo {
   margin-bottom: 32px;

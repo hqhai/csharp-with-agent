@@ -403,51 +403,59 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   transform: translateX(100%);
 }
 .forms-contain {
+  width: 100%;
   position: relative;
   display: flex;
-  overflow: hidden;
   min-height: fit-content;
 }
 
 .user-info-form,
 .email-contain {
   position: relative;
+  width: 100%;
 }
 
 .user-info-form.show-form,
 .email-contain.show-form {
   animation: slideFromLeftToCenter 0.6s ease-in-out forwards;
+  display: flex !important;
 }
 
 .user-info-form.hidden-form,
 .email-contain.hidden-form {
   animation: slideToLeft 0.6s ease-in-out forwards;
+  display: none !important;
 }
-otp-request-form,
+
+.otp-request-form,
 .create-account-contain {
   position: absolute;
   width: 100%;
   transform: translateX(100%);
+  display: none !important;
 }
 
 .otp-request-form.show-form,
 .create-account-contain.show-form {
   animation: slideFromRightToCenter 0.6s ease-in-out forwards;
+  display: flex !important;
 }
 
 .otp-request-form.hidden-form,
 .create-account-contain.hidden-form {
   animation: slideToLeft 0.6s ease-in-out forwards;
+  display: none !important;
 }
 
 .otp-request-form.back-form {
   animation: slideToRight 0.6s ease-in-out forwards;
+  display: flex !important;
 }
 
 .content form {
   /* height: 100%; */
   max-width: 586px;
-  padding-top: 24px;
+  padding: 24px 0;
 }
 
   /* .content form section,
