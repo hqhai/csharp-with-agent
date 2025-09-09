@@ -12,7 +12,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 
         public bool IsEmailReadonly { get; set; } = true;
 
-        [RegularExpression(Common.Helpers.RegexHelper.PhoneNumberValid, ErrorMessage = "i18n_number_phone_invalid")]
+        [RegularExpression(RegexSettings.PhoneNumberValid, ErrorMessage = "i18n_number_phone_invalid")]
         [Required(ErrorMessage = "i18n_Phone_number_cannot_empty")]
         public string? PhoneNumber { get; set; }
 
