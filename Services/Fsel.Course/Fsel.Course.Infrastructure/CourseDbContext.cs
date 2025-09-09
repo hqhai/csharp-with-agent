@@ -87,6 +87,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
+        public DbSet<CurriculumConfig> CurriculumConfigs { get; set; }
+        public DbSet<CurriculumStudent> CurriculumStudents { get; set; }
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
@@ -141,6 +143,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ExtraPracticeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CurriculumEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CurriculumStudentTypeConfiguration());
 
             modelBuilder.ApplyConfiguration(new HomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());

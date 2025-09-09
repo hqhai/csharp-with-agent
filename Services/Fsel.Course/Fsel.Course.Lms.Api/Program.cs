@@ -56,6 +56,7 @@ builder.Services.AddScoped<IExtraPracticeExerciseResultRepository, ExtraPractice
 builder.Services.AddScoped<IExtraPracticeResultRepository, ExtraPracticeResultRepository>();
 builder.Services.AddScoped<IExtraPracticeAnswerRepository, ExtraPracticeAnswerRepository>();
 builder.Services.AddScoped<IExtraPracticeChapterRepository, ExtraPracticeChapterRepository>();
+builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
 builder.Services.AddScoped<BaseInternalUnitResultEventHandler>();
 builder.Services.AddScoped<BaseInternalEventHandler>();
 builder.Services.AddScoped<MockTestResultInputThenUpdateUnitResultHandler>();
