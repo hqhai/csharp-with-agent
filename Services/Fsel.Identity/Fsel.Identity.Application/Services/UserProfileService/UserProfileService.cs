@@ -73,7 +73,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                     if (roleEntity != null)
                     {
                         var roleClaims = await _roleManager.GetClaimsAsync(roleEntity);
-                        claims.AddRange(roleClaims.Where(m => context.RequestedClaimTypes.Any(x => x.Equals(m.Type, StringComparison.Ordinal))));
+                        claims.AddRange(roleClaims);
                     }
                 }
 
