@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Identity.Api.Controllers
 {
+    using Application.Queries.AuthQuery;
+
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/user")]
@@ -240,11 +242,25 @@ namespace Fsel.Identity.Api.Controllers
         [Common.Attributes.Permission]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ToolGetOtp([FromQuery] DisconnectExternalAccountCommand command)
+        public async Task<IActionResult> DisconnectExternalProvider([FromBody] DisconnectExternalAccountCommand command)
         {
             ArgumentException.ThrowIfNullOrEmpty(command?.Provider);
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get external provider connects
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("get-external-provider-connects")]
+        [Common.Attributes.Permission]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetExternalProviderConnects([FromQuery] GetExternalConnectsQuery query)
+        {
+            var result = await _mediator.Send(query).ConfigureAwait(false);
+            return result.GetActionResult();
         }
     }
 }
