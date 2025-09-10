@@ -5,6 +5,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using MediatR;
@@ -38,7 +39,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSectionResult), request.ExamPracticeSectionResultId);
                 return methodResult;
             }
-            //examPracticeSectionResult.Note = request.Note;
+            examPracticeSectionResult.Note = request.Note;
             if (!examPracticeSectionResult.IsValid())
             {
                 methodResult.AddErrorBadRequest(examPracticeSectionResult.ErrorMessages);
@@ -47,8 +48,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
 
             await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _examPracticeSectionResultRepository.Update(examPracticeSectionResult);
-                await _examPracticeSectionResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.Note };
+                });
 
                 methodResult.Result = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
                 return methodResult;

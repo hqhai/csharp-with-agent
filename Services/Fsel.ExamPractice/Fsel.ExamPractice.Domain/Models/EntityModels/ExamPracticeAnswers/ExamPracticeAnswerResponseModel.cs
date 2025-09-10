@@ -3,7 +3,6 @@
 namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers
 {
     using System.Text.Json.Serialization;
-    using Refit;
 
     public class ExamPracticeAnswerResponseModel
     {
@@ -23,12 +22,18 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers
     {
         public string? BandScore { get; set; }
         public string? BandDescriptorText { get; set; }
+        public string? Explanation { get; set; }
+        public string? SuggestionsForImprovement { get; set; }
+    }
 
-        [AliasAs("explanation")]
+    public class ExamPracticeAIGradingDataModel
+    {
+        [JsonPropertyName("band_score")]
+        public double? BandScore { get; set; }
+
         [JsonPropertyName("explanation")]
         public string? Explanation { get; set; }
 
-        [AliasAs("suggestions_for_improvement")]
         [JsonPropertyName("suggestions_for_improvement")]
         public string? SuggestionsForImprovement { get; set; }
     }

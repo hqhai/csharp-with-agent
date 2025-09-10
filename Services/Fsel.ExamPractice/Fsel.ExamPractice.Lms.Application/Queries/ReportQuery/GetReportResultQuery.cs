@@ -60,6 +60,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
                                                                   ParentExamPracticeSectionResultId = sr.ParentExamPracticeSectionResultId,
                                                                   SkillScores = sr.SkillScores
                                                               })
+                                                              .OrderBy(x => x.CreatedDate)
                                                               .AsNoTracking()
                                                               .ToListAsync(cancellationToken);
 

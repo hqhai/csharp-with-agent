@@ -86,6 +86,9 @@ namespace Fsel.ExamPractice.Domain.Entities
         /// </summary>
         public EnumResultStatus Status { get; set; }
 
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Note { get; set; }
+
         public Guid? CurrentExamPracticeSectionId { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

@@ -9,6 +9,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.ExamPractice.Domain.Entities;
+    using Fsel.ExamPractice.Domain.Entities.SkillScoreConfigs;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.Enums.ErrorCodes;
     using Fsel.ExamPractice.Domain.IRepositories;
@@ -637,7 +638,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExamPracticeSectionResult>();
-            if (examPractice.Type == EnumExamPracticeType.IELTS)
+            if (examPractice.Type != EnumExamPracticeType.ExamPractice)
             {
                 var sectionResult = await _examPracticeSectionResultRepository.Queryable
                     .Where(x => x.ExamPracticeSectionId == request.ExamPracticeSectionId && x.ExamPracticeResultId == examPracticeResult.Id)
@@ -656,9 +657,9 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 var listSkill = new[] { EnumCourseSkill.Reading, EnumCourseSkill.Listening };
                 var questionIds = request.Answers.Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
                 var listSectionId = await _examPracticeSectionResultRepository.Queryable.AsNoTracking()
-                                                .Where(x => x.ParentExamPracticeSectionResultId == sectionResult.Id)
-                                                .Select(x => x.ExamPracticeSectionId)
-                                                .ToListAsync();
+                                                                               .Where(x => x.ParentExamPracticeSectionResultId == sectionResult.Id)
+                                                                               .Select(x => x.ExamPracticeSectionId)
+                                                                               .ToListAsync();
 
                 if (listSkill.Contains(examPracticeSection.CourseSkill.Value) && questionIds.Any())
                 {
@@ -708,6 +709,15 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                         StudentId = examPracticeResult.StudentId,
                         ExamPracticeResultId = examPracticeResult.Id,
                         Status = EnumResultStatus.New,
+                        SkillScores = new List<SkillScores>
+                        {
+                            new SkillScores
+                            {
+                                Skill = EnumCourseSkill.Speaking,
+                                TotalCount = sections.Count(),
+                                CorrectCount = 0
+                            }
+                        }
                     };
                     await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
                     {

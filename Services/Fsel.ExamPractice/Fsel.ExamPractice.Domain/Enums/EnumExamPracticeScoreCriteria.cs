@@ -22,6 +22,6 @@ namespace Fsel.ExamPractice.Domain.Enums
         DiscourseManagement,
 
         [Description("Vocabulary")]
-        Vocabulary
+        Vocabulary,
     }
 }

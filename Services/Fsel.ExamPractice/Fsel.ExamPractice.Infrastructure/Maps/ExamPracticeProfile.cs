@@ -7,6 +7,7 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Entities.BandScoresConfigs;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPractices;
+    using Fsel.ExamPractice.Domain.Models.EntityModels;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
 
     public class ExamPracticeProfile : Profile
@@ -25,6 +26,7 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
                                                                      .ForMember(m => m.Id, opt => opt.Ignore()).IgnoreAllNonExisting();
 
             CreateMap<BandScores, BandScoresReport>().IgnoreAllNonExisting();
+            CreateMap<ExamPracticeAnswer, ExamPracticeAnswerModel>().IgnoreAllNonExisting();
         }
     }
 }

@@ -2,9 +2,11 @@
 
 namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
 {
+    using System;
     using System.Globalization;
     using System.IO;
     using System.Text;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.ExamPractice.Domain.Entities;
@@ -34,7 +36,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
         private readonly IExamPracticeSectionRepository _examPracticeSectionRepository;
         private readonly IExamPracticeSectionResultRepository _examPracticeSectionResultRepository;
         private readonly IExamPracticeAISettingRepository _examPracticeAISettingRepository;
-
+        private readonly IMapper _mapper;
         private const int MaxScoreAI = 10;
 
         public SpeakingAIService(IMediator mediator, IExamPracticeResultRepository examPracticeResultRepository,
@@ -43,7 +45,8 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             SubmitAiSpeakingAnswerPublisher submitAiSpeakingAnswerPublisher,
             IExamPracticeSectionRepository examPracticeSectionRepository,
             IExamPracticeSectionResultRepository examPracticeSectionResultRepository,
-            IExamPracticeAISettingRepository examPracticeAISettingRepository)
+            IExamPracticeAISettingRepository examPracticeAISettingRepository,
+            IMapper mapper)
         {
             _mediator = mediator;
             _examPracticeResultRepository = examPracticeResultRepository;
@@ -53,6 +56,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             _examPracticeSectionRepository = examPracticeSectionRepository;
             _examPracticeSectionResultRepository = examPracticeSectionResultRepository;
             _examPracticeAISettingRepository = examPracticeAISettingRepository;
+            _mapper = mapper;
         }
 
         #region Handle
@@ -68,7 +72,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             var type = examPracticeResult.ExamPractice.Type;
             var (questionArray, answerArray, avgPronScore, avgFluencyScore, count) = ExtractQuestionAnswerAndPronunciationScores(examPracticeResult);
             var scoreRanges = await _prosodyScoreRepository.Queryable
-                                                .Where(x => x.ModuleAIType == EnumExamPracticeModuleAIType.Spearking)
+                                                .Where(x => x.ModuleAIType == EnumExamPracticeModuleAIType.Speaking)
                                                 .ToListAsync(cancellationToken);
 
             var examPracticeSection = await _examPracticeSectionRepository.Queryable.AsNoTracking().Include(x => x.ExamPracticeSections)
@@ -88,25 +92,28 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             {
                 case EnumExamPracticeType.IELTS:
                 {
-                    var (bandScore, feedBack) = GetBandScore(avgFluencyScore, scoreRanges);
+                    var (bandScore, feedBackUs, feedBack) = GetBandScore(avgFluencyScore, scoreRanges);
                     criteria = GetEvaluationCriteria();
 
-                    examPracticeScores = CreatePronunciationScoreList(bandScore, feedBack, examPracticeSectionId, examPracticeResultId);
-                    await AddAIScoresToExamPracticeScores(criteria, questionArray, answerArray, skillScoreChirldren, examPracticeScores, examPracticeSectionResult, cancellationToken);
+                    var examPracticeScorePronun = CreateExamPracticeScore(EnumExamPracticeScoreCriteria.Pronunciation, bandScore, feedBackUs ?? string.Empty, string.Empty, examPracticeSectionId, examPracticeResultId);
+                    examPracticeScores.Add(examPracticeScorePronun);
 
+                    await AddAIScoresToExamPracticeScores(criteria, questionArray, answerArray, skillScoreChirldren, scoreRanges, examPracticeScores, examPracticeSection, examPracticeSectionResult, cancellationToken);
                     totalScore = examPracticeScores.Sum(x => x.Score);
                     skillScores = UpdateSkillScoresIelts(examPracticeSectionResult.SkillScores, examPracticeSection?.CourseSkill, totalScore);
                     break;
                 }
                 default:
                 {
-                    var (bandScorePron, feedBackPron) = GetBandScore(avgPronScore, scoreRanges);
-                    var (bandScoreFluency, feedBackFluency) = GetBandScore(avgFluencyScore, scoreRanges);
+                    var (proResponse, bandScorePron, commentPron) = GetExamPracticeAIGradingLanguages(avgPronScore, EnumExamPracticeAIType.Pronunciation, scoreRanges);
+                    var (fluencyResponse, bandScoreFluency, commentFluency) = GetExamPracticeAIGradingLanguages(avgFluencyScore, EnumExamPracticeAIType.Fluency, scoreRanges);
+
+                    var examPracticeScorePronun = CreateExamPracticeScore(EnumExamPracticeScoreCriteria.Pronunciation, bandScorePron, commentPron, proResponse.Serialize(), examPracticeSectionId, examPracticeResultId);
+                    var examPracticeScoreFluency = CreateExamPracticeScore(EnumExamPracticeScoreCriteria.FluencyAndCoherence, bandScoreFluency, commentFluency, fluencyResponse.Serialize(), examPracticeSectionId, examPracticeResultId);
+                    examPracticeScores.AddRange(new[] { examPracticeScorePronun, examPracticeScoreFluency });
 
                     criteria = GetEvaluationVstepCriteria();
-
-                    examPracticeScores = CreatePronunciationAndFluencyScoreList(bandScorePron, feedBackPron, bandScoreFluency, feedBackFluency, examPracticeSectionId, examPracticeResultId);
-                    await AddAIScoresToExamPracticeScores(criteria, questionArray, answerArray, skillScoreChirldren, examPracticeScores, examPracticeSectionResult, cancellationToken);
+                    await AddAIScoresToExamPracticeScores(criteria, questionArray, answerArray, skillScoreChirldren, scoreRanges, examPracticeScores, examPracticeSection, examPracticeSectionResult, cancellationToken);
 
                     totalScore = examPracticeScores.Sum(x => x.Score);
                     skillScores = UpdateSkillScoreVsteps(examPracticeSectionResult.SkillScores, examPracticeSection?.CourseSkill, totalScore);
@@ -120,10 +127,9 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             UpdateExamPracticeResultSkillScores(examPracticeResult, skillScores);
             await UpdateExamPracticeSectionResultAsync(examPracticeSection, examPracticeResult, skillScores, cancellationToken);
             await SendToWebSocket(examPracticeScores, cancellationToken);
-            await SaveExamPracticeScoresToDatabase(examPracticeScores, cancellationToken);
-            await SaveExamPracticeSectionResultToDatabase(examPracticeSectionResult, cancellationToken);
-            await SaveExamPracticeResultAsync(examPracticeResult, cancellationToken);
-
+            await SaveExamPracticeScoresToDatabase(examPracticeScores);
+            await SaveExamPracticeSectionResultToDatabase(examPracticeSectionResult);
+            await SaveExamPracticeResultAsync(examPracticeResult);
             return true;
         }
 
@@ -159,49 +165,13 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             };
         }
 
-        private async Task UpdateExamPracticeSectionResultAsync(ExamPracticeSection? examPracticeSection, ExamPracticeResult examPracticeResult, IList<SkillScores> skillScores, CancellationToken cancellationToken)
-        {
-            var examPracticeSectionChirldren = examPracticeSection?.ExamPracticeSections.FirstOrDefault();
-            if (examPracticeSectionChirldren == null || examPracticeSection == null)
-            {
-                return;
-            }
-
-            var examPracticeSectionResult = await GetExamPracticeSectionResult(examPracticeSection.Id, examPracticeResult.Id, cancellationToken);
-            if (examPracticeSectionResult != null)
-            {
-                examPracticeSectionResult.SkillScores = skillScores;
-                _examPracticeSectionResultRepository.Update(examPracticeSectionResult, false, x => x.WorkingTime);
-                await _examPracticeSectionResultRepository.UnitOfWork.SaveChangesAsync(CancellationToken.None).ConfigureAwait(false);
-            }
-        }
-
-        private static List<ExamPracticeScore> CreatePronunciationScoreList(long bandScore, string? feedBack, Guid examPracticeSectionId, Guid examPracticeResultId)
-        {
-            return new()
-            {
-                CreateExamPracticeScore(EnumExamPracticeScoreCriteria.Pronunciation, bandScore, feedBack ?? string.Empty, string.Empty,examPracticeSectionId, examPracticeResultId)
-            };
-        }
-
-        private static List<ExamPracticeScore> CreatePronunciationAndFluencyScoreList(
-            long bandScorePron, string? feedBackPron,
-            long bandScoreFluency, string? feedBackFluency,
-            Guid examPracticeSectionId, Guid examPracticeResultId)
-        {
-            return new()
-            {
-                CreateExamPracticeScore(EnumExamPracticeScoreCriteria.Pronunciation, bandScorePron, feedBackPron ?? string.Empty,  string.Empty, examPracticeSectionId, examPracticeResultId),
-                CreateExamPracticeScore(EnumExamPracticeScoreCriteria.FluencyAndCoherence, bandScoreFluency, feedBackFluency ?? string.Empty, string.Empty, examPracticeSectionId, examPracticeResultId)
-            };
-        }
-
         private async Task<ExamPracticeResult?> GetExamPracticeResultWithDetails(Guid examPracticeResultId, CancellationToken cancellationToken)
         {
             return await _examPracticeResultRepository.Queryable
                 .Include(x => x.ExamPracticeAnswers)
                 .ThenInclude(x => x.ExamPracticeSection)
                 .Include(x => x.ExamPracticeSectionResults)
+                .Include(x => x.ExamPractice)
                 .FirstOrDefaultAsync(x => x.Id == examPracticeResultId, cancellationToken);
         }
 
@@ -221,7 +191,6 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             {
                 EnumExamPracticeScoreCriteria.GrammaticalRangeAndAccuracy,
                 EnumExamPracticeScoreCriteria.DiscourseManagement,
-                EnumExamPracticeScoreCriteria.GrammaticalRangeAndAccuracy,
                 EnumExamPracticeScoreCriteria.Vocabulary,
             };
         }
@@ -251,17 +220,16 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             List<string> questionArray,
             List<string> answerArray,
             List<SkillScores> skillScores,
+            List<ProsodyScore> prosodyScores,
             List<ExamPracticeScore> examPracticeScores,
+            ExamPracticeSection? examPracticeSection,
             ExamPracticeSectionResult examPracticeSectionResult,
             CancellationToken cancellationToken)
         {
-            var prosodyScores = await _prosodyScoreRepository.Queryable
-                    .Where(x => x.ModuleAIType == EnumExamPracticeModuleAIType.Spearking)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken);
+            var examPracticeSectionId = examPracticeSection?.ExamPracticeSections.FirstOrDefault()?.Id ?? examPracticeSectionResult.ExamPracticeSectionId;
 
-            var examPracticeAISetting = await _examPracticeAISettingRepository.Queryable.Include(x => x.ExamPracticeAICriteriaSettings)
-                                                                              .FirstOrDefaultAsync(x => x.ExamPracticeSectionId == examPracticeSectionResult.ExamPracticeSectionId, cancellationToken);
+            var examPracticeAISetting = await _examPracticeAISettingRepository.Queryable.AsNoTracking().Include(x => x.ExamPracticeAICriteriaSettings)
+                                                                              .FirstOrDefaultAsync(x => x.ExamPracticeSectionId == examPracticeSectionId, cancellationToken);
 
             if (examPracticeAISetting == null)
             {
@@ -280,7 +248,8 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                     string userAiConfig = CustomAnswerConfigToSendGPT(questionArray, answerArray, aICriteriaSetting);
                     var aIResponse = await SendChatGPTSchema(examPracticeAISetting, aICriteriaSetting.SystemRoleAlConfig ?? string.Empty, userAiConfig, aICriteriaSetting.JsonSchema ?? string.Empty, cancellationToken);
 
-                    var responseModel = ConvertHelper.Deserialize<ExamPracticeAIGradingModel>(aIResponse);
+                    var responseDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aIResponse);
+                    var responseModel = _mapper.Map<ExamPracticeAIGradingModel>(responseDataModel);
                     if (long.TryParse(responseModel!.BandScore, out long bandScoreValue))
                     {
                         skillScores.Add(new SkillScores
@@ -294,7 +263,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
 
                         var relevantProsodyScores = prosodyScores.Where(x => x.AIType == ConvertScoreCriteriaToAIType(item)).ToList();
                         var gradingModels = new List<ExamPracticeAIGradingModel>() { responseModel };
-                        var matchedScores = relevantProsodyScores.Where(x => x.MinScore <= bandScoreValue && x.MaxScore >= bandScoreValue).ToList();
+                        var matchedScores = relevantProsodyScores.Where(x => x.MinScore <= bandScoreValue && x.MaxScore >= bandScoreValue && x.AIType == ConvertScoreCriteriaToAIType(item)).OrderBy(x => x.Language).ToList();
                         if (matchedScores.Count > 0)
                         {
                             var mainComment = matchedScores[0].BandComment ?? string.Empty;
@@ -305,7 +274,9 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                                 model.BandDescriptorText = mainComment;
                             }
                             var aIResponseTranslate = await GetTranslateAIResponse(aIResponse, cancellationToken);
-                            var responseTranslateModel = ConvertHelper.Deserialize<ExamPracticeAIGradingModel>(aIResponseTranslate);
+
+                            var responseTranslateDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aIResponseTranslate);
+                            var responseTranslateModel = _mapper.Map<ExamPracticeAIGradingModel>(responseTranslateDataModel);
 
                             var altData = new List<ExamPracticeAIGradingModel>
                             {
@@ -332,7 +303,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                                 aIResponse = languageModels.Serialize();
                             }
                         }
-                        examPracticeScores.Add(CreateExamPracticeScore(item, bandScoreValue, responseModel.BandDescriptorText ?? string.Empty, aIResponse, examPracticeSectionResult.ExamPracticeSectionId, examPracticeSectionResult.ExamPracticeResultId));
+                        examPracticeScores.Add(CreateExamPracticeScore(item, bandScoreValue, matchedScores[0]?.BandComment ?? string.Empty, aIResponse, examPracticeSectionResult.ExamPracticeSectionId, examPracticeSectionResult.ExamPracticeResultId));
                     }
                 }
             }
@@ -409,20 +380,17 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
 
                     var skillScoreToAdd = skillScores.Single();
                     clonedSkillScores.Add(skillScoreToAdd);
+                    examPracticeResult.CorrectCount += (int)skillScoreToAdd.CorrectCount;
                     examPracticeResult.SkillScores = clonedSkillScores;
                 }
             }
             else
             {
+                examPracticeResult.CorrectCount = (int)skillScores[0].CorrectCount;
                 examPracticeResult.SkillScores = skillScores;
             }
         }
 
-        /// <summary>
-        /// Tạo question, answer và averageScore tương ứng
-        /// </summary>
-        /// <param name="examPracticeResult"></param>
-        /// <returns></returns>
         private static (List<string>, List<string>, double, double, int) ExtractQuestionAnswerAndPronunciationScores(ExamPracticeResult examPracticeResult)
         {
             IList<string> questionArray = new List<string>();
@@ -450,15 +418,6 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             return (questionArray.ToList(), answerArray.ToList(), averagePronScore, averageFluencyScore, count);
         }
 
-        /// <summary>
-        /// Tạo model ExamPracticeScore tương ứng
-        /// </summary>
-        /// <param name="criteria"></param>
-        /// <param name="score"></param>
-        /// <param name="feedback"></param>
-        /// <param name="examPracticeSectionId"></param>
-        /// <param name="examPracticeResultId"></param>
-        /// <returns></returns>
         private static ExamPracticeScore CreateExamPracticeScore(EnumExamPracticeScoreCriteria criteria, long score, string feedback, string gradingAlFeedback, Guid examPracticeSectionId, Guid examPracticeResultId)
         {
             return new ExamPracticeScore
@@ -472,12 +431,6 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             };
         }
 
-        /// <summary>
-        /// Lấy dữ liệu AI
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
         private async Task<string> GetAIResponse(EnumExamPracticeScoreCriteria item, string userAiConfig, CancellationToken cancellationToken)
         {
             var aIResponse = await _mediator.Send(new SubmitAICommand
@@ -529,7 +482,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                 SettingFrequecy = aiConfig.SettingFrequecy,
                 SettingWordMaxLength = aiConfig.SettingWordMaxLength,
                 SettingPresence = aiConfig.SettingPresence,
-                SettingTopP = aiConfig.SettingTopP,
+                SettingTopP = 1,
                 SystemRoleAlConfig = systemRole,
                 UserAIConfig = userAiConfig,
                 Format = jsonSchema
@@ -542,41 +495,63 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse);
         }
 
-        /// <summary>
-        /// Lưu xuống db
-        /// </summary>
-        /// <param name="mockTestScores"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        private async Task SaveExamPracticeScoresToDatabase(List<ExamPracticeScore> examPracticeScores, CancellationToken cancellationToken)
+        #region SaveData To DB
+
+        private async Task UpdateExamPracticeSectionResultAsync(ExamPracticeSection? examPracticeSection, ExamPracticeResult examPracticeResult, IList<SkillScores> skillScores, CancellationToken cancellationToken)
+        {
+            var examPracticeSectionChirldren = examPracticeSection?.ExamPracticeSections.FirstOrDefault();
+            if (examPracticeSectionChirldren == null || examPracticeSection == null)
+            {
+                return;
+            }
+
+            var examPracticeSectionResult = await GetExamPracticeSectionResult(examPracticeSectionChirldren.Id, examPracticeResult.Id, cancellationToken);
+            if (examPracticeSectionResult != null)
+            {
+                examPracticeSectionResult.Status = EnumResultStatus.Done;
+                examPracticeSectionResult.CorrectCount = (int)skillScores[0].CorrectCount;
+                examPracticeSectionResult.SkillScores = skillScores;
+                await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.SkillScoresStr, entity.Status, entity.Percent };
+                });
+            }
+        }
+
+        private async Task SaveExamPracticeScoresToDatabase(List<ExamPracticeScore> examPracticeScores)
         {
             await _examPracticeScoreRepository.ExecuteTransactionAsync(async () =>
             {
-                await _examPracticeScoreRepository.AddList(examPracticeScores);
-                await _examPracticeScoreRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _examPracticeScoreRepository.BulkMergeAsync(examPracticeScores);
                 return new MethodResult<bool>();
             });
         }
 
-        private async Task SaveExamPracticeSectionResultToDatabase(ExamPracticeSectionResult examPracticeSectionResult, CancellationToken cancellationToken)
+        private async Task SaveExamPracticeSectionResultToDatabase(ExamPracticeSectionResult examPracticeSectionResult)
         {
             try
             {
-                _examPracticeSectionResultRepository.Update(examPracticeSectionResult, false, x => x.WorkingTime);
-                await _examPracticeSectionResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.CorrectTotal, entity.Percent, entity.SkillScoresStr };
+                });
             }
             catch { }
         }
 
-        private async Task SaveExamPracticeResultAsync(ExamPracticeResult examPracticeResult, CancellationToken cancellationToken)
+        private async Task SaveExamPracticeResultAsync(ExamPracticeResult examPracticeResult)
         {
             try
             {
-                _examPracticeResultRepository.Update(examPracticeResult);
-                await _examPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _examPracticeResultRepository.BulkUpdateList(new List<ExamPracticeResult> { examPracticeResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.CorrectTotal, entity.Percent, entity.SkillScoresStr };
+                });
             }
             catch { }
         }
+
+        #endregion SaveData To DB
 
         #endregion Handle
 
@@ -609,21 +584,61 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
         /// <param name="averagePronScore"></param>
         /// <param name="scoreRanges"></param>
         /// <returns></returns>
-        public static (long bandScore, string? comment) GetBandScore(double averagePronScore, IList<ProsodyScore>? scoreRanges)
+        public static (long bandScore, string? commentUs, string? comment) GetBandScore(double averagePronScore, IList<ProsodyScore>? scoreRanges)
         {
             if (scoreRanges == null || scoreRanges.Count == 0)
             {
-                return (0, string.Empty);
+                return (0, string.Empty, string.Empty);
+            }
+            var scoreDatas = scoreRanges.Where(x => x.MinScore <= averagePronScore && x.MaxScore >= averagePronScore).OrderBy(x => x.Language).ToList();
+            if (scoreDatas.Any())
+            {
+                return ((long)scoreDatas[0].BandScore, scoreDatas[0].BandComment, scoreDatas[1].BandComment);
             }
 
-            foreach (var range in scoreRanges)
+            return (0, string.Empty, string.Empty); // Hoặc giá trị mặc định nếu không tìm thấy khoảng phù hợp
+        }
+
+        public static (IList<ExamPracticeAIGradingLanguageModel>, long, string) GetExamPracticeAIGradingLanguages(double averagePronScore, EnumExamPracticeAIType practiceAIType, IList<ProsodyScore>? scoreRanges)
+        {
+            if (scoreRanges == null || scoreRanges.Count == 0)
             {
-                if (averagePronScore >= range.MinScore && averagePronScore <= range.MaxScore)
-                {
-                    return ((long)range.BandScore, range.BandComment);
-                }
+                return (new List<ExamPracticeAIGradingLanguageModel>(), default, string.Empty);
             }
-            return (0, string.Empty); // Hoặc giá trị mặc định nếu không tìm thấy khoảng phù hợp
+            var scoreDatas = scoreRanges.Where(x => x.MinScore <= averagePronScore && x.MaxScore >= averagePronScore && x.AIType == practiceAIType).OrderBy(x => x.Language).ToList();
+            if (scoreDatas.Any())
+            {
+                var aIGradingLanguages = new List<ExamPracticeAIGradingLanguageModel>
+                {
+                    new ExamPracticeAIGradingLanguageModel
+                    {
+                        Language = scoreDatas[0].Language,
+                        ExamPracticeAIGradings = new List<ExamPracticeAIGradingModel>
+                        {
+                            new ExamPracticeAIGradingModel
+                            {
+                                BandScore =  scoreDatas[0].BandScore.ToString(CultureInfo.InvariantCulture),
+                                BandDescriptorText = scoreDatas[0].BandComment ,
+                            }
+                        }
+                    },
+                    new ExamPracticeAIGradingLanguageModel
+                    {
+                       Language = scoreDatas[1].Language,
+                       ExamPracticeAIGradings = new List<ExamPracticeAIGradingModel>
+                       {
+                           new ExamPracticeAIGradingModel
+                           {
+                               BandScore =  scoreDatas[1].BandScore.ToString(CultureInfo.InvariantCulture),
+                               BandDescriptorText = scoreDatas[1].BandComment ,
+                           }
+                       }
+                    }
+                };
+
+                return (aIGradingLanguages, (long)scoreDatas[0].BandScore, scoreDatas[0].BandComment ?? string.Empty);
+            }
+            return (new List<ExamPracticeAIGradingLanguageModel>(), default, string.Empty);
         }
 
         /// <summary>

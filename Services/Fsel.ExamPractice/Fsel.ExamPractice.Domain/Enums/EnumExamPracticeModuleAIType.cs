@@ -6,6 +6,6 @@ namespace Fsel.ExamPractice.Domain.Enums
     {
         WritingTask1 = 1,
         WritingTask2 = 2,
-        Spearking
+        Speaking
     }
 }

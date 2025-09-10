@@ -14,6 +14,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
+    using Fsel.ExamPractice.Infrastructure;
     using Fsel.ExamPractice.Lms.Application.Queues.Publishers;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
@@ -40,11 +41,12 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
         private readonly SetTimeRetryExamPracticePublisher _setTimeRetryExamPracticePublisher;
         private readonly IMediator _mediator;
         private readonly IProsodyScoreRepository _prosodyScoreRepository;
+        private readonly ExamPracticesDBContext _examPracticesDBContext;
         private readonly IMapper _mapper;
         private const int CorrectTotal_IELTS_Writing = 36;
         private const int CorrectTotal_Vstep_Writing = 40;
         private const int MaxSection = 2;
-        private const int Last_DisplayOrder = 1;
+        private const int Last_DisplayOrder = 2;
         private const int Max_Times_Retry = 3;
 
         public SubmitExamPracticeAnswerAICommandHandler(IExamPracticeAnswerRepository examPracticeAnswerRepository,
@@ -57,6 +59,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             SetTimeRetryExamPracticePublisher setTimeRetryExamPracticePublisher,
             IMediator mediator,
             IProsodyScoreRepository prosodyScoreRepository,
+            ExamPracticesDBContext examPracticesDBContext,
             IMapper mapper)
         {
             _examPracticeAnswerRepository = examPracticeAnswerRepository;
@@ -69,6 +72,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             _setTimeRetryExamPracticePublisher = setTimeRetryExamPracticePublisher;
             _mediator = mediator;
             _prosodyScoreRepository = prosodyScoreRepository;
+            _examPracticesDBContext = examPracticesDBContext;
             _mapper = mapper;
         }
 
@@ -120,7 +124,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             }
             await UpdateExamPracticeSectionResultAsync(examPracticeSectionResult, examPracticeSection.Id, averageScore, totalScore);
 
-            var skillScores = UpdateSkillScores(examPracticeSectionResult, examPracticeSection, averageScore, totalScore, checkSkillMockTest, examPracticeResult);
+            var skillScores = await UpdateSkillScores(examPracticeSectionResult, examPracticeSection, averageScore, totalScore, checkSkillMockTest, examPracticeResult);
             examPracticeSectionResult.SkillScores = skillScores;
 
             await UpdateEntities(examPracticeAnswer, gradingAiFeedBack, examPracticeSectionResult, examPracticeResult, checkSkillMockTest, cancellationToken);
@@ -168,30 +172,30 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
 
             var gradingAiFeedBackResult = new
             {
-                TaskResponse = GetResult(EnumMockTestAIType.TaskResponse, EnumMockTestAIType.TaskAchievement),
-                Coherence = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Coherence),
-                LexicalResource = resultDictionary.GetValueOrDefault(EnumMockTestAIType.LexicalResource),
-                GrammaticalRange = resultDictionary.GetValueOrDefault(EnumMockTestAIType.GrammaticalRange)
+                TaskResponse = GetResult(EnumMockTestAIType.TaskResponse, EnumMockTestAIType.TaskFulfillment),
+                Organization = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Organization),
+                Vocabulary = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Vocabulary),
+                Grammar = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Grammar)
             };
             string gradingAiFeedBack = gradingAiFeedBackResult.Serialize();
             var taskResponse = GetGrading(gradingAiFeedBackResult.TaskResponse);
-            var coherence = GetGrading(gradingAiFeedBackResult.Coherence);
-            var lexicalResource = GetGrading(gradingAiFeedBackResult.LexicalResource);
-            var grammaticalRange = GetGrading(gradingAiFeedBackResult.GrammaticalRange);
+            var organization = GetGrading(gradingAiFeedBackResult.Organization);
+            var vocabulary = GetGrading(gradingAiFeedBackResult.Vocabulary);
+            var grammar = GetGrading(gradingAiFeedBackResult.Grammar);
 
             var taskResponseGradings = GetAIGradings(taskResponse);
-            var coherenceGradings = GetAIGradings(coherence);
-            var lexicalResourceGradings = GetAIGradings(lexicalResource);
-            var grammaticalRangeGradings = GetAIGradings(grammaticalRange);
+            var coherenceGradings = GetAIGradings(organization);
+            var vocabularyGradings = GetAIGradings(vocabulary);
+            var grammarGradings = GetAIGradings(grammar);
 
-            await HandleRetryIfNeeded(examPracticeAnswer, request, taskResponseGradings, coherenceGradings, lexicalResourceGradings, grammaticalRangeGradings, cancellationToken);
+            await HandleRetryIfNeeded(examPracticeAnswer, request, taskResponseGradings, coherenceGradings, vocabularyGradings, grammarGradings, cancellationToken);
 
             bool checkSingleVstepSkill = examPracticeResult.ExamPractice?.SubType == EnumExamPracticeSubType.SingleVstepSkill;
-            (double averageScore, double totalScore) = CalculateOverallAverage(
+            (double averageScore, double totalScore) = CalculateOverallAverageVstep(
                 taskResponseGradings,
                 coherenceGradings,
-                lexicalResourceGradings,
-                grammaticalRangeGradings);
+                vocabularyGradings,
+                grammarGradings);
 
             return (averageScore, totalScore, checkSingleVstepSkill, gradingAiFeedBack);
         }
@@ -201,14 +205,37 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             var sectionResult = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeSectionResult.ExamPracticeResultId)
                                                                           .Where(x => x.ExamPracticeSectionId == examPracticeSectionId)
                                                                           .FirstOrDefaultAsync();
-            if (sectionResult == null || sectionResult.SkillScores == null)
+            if (sectionResult == null)
             {
                 return;
             }
-            sectionResult.SkillScores.Single().Scores = score;
-            sectionResult.SkillScores.Single().CorrectCount = totalScore;
-            _examPracticeSectionResultRepository.Update(sectionResult, false, x => x.WorkingTime);
-            await _examPracticeSectionResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            if (sectionResult.SkillScores == null || sectionResult.SkillScores.Count == 0)
+            {
+                sectionResult.SkillScores = new List<SkillScores>
+                {
+                    new SkillScores
+                    {
+                        CorrectCount = totalScore,
+                        CountQuestion = MaxSection,
+                        TotalQuestion = MaxSection,
+                        Scores = score,
+                        Skill = EnumCourseSkill.Writing,
+                        TotalCount = CorrectTotal_Vstep_Writing,
+                    }
+                };
+            }
+            else
+            {
+                sectionResult.SkillScores.Single().Scores = score;
+                sectionResult.SkillScores.Single().CorrectCount = totalScore;
+            }
+            sectionResult.CorrectCount = (int)totalScore;
+            sectionResult.CorrectTotal = CorrectTotal_Vstep_Writing;
+            sectionResult.Status = EnumResultStatus.Done;
+            await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { sectionResult }, bulk =>
+            {
+                bulk.ColumnInputExpression = entity => new { entity.SkillScoresStr, entity.CorrectTotal, entity.CorrectCount, entity.Status };
+            });
         }
 
         private async Task<ExamPracticeAnswer?> GetExamPracticeAnswer(SubmitExamPracticeAnswerAICommand request, CancellationToken cancellationToken)
@@ -323,12 +350,14 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                 .Where(x => x.AIType == criteriaSetting.CriteriaName)
                 .ToList();
 
-            var gradingModels = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(aiResponse) ?? new List<ExamPracticeAIGradingModel>();
+            var gradingDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aiResponse) ?? new ExamPracticeAIGradingDataModel();
+            var gradingModel = _mapper.Map<ExamPracticeAIGradingModel>(gradingDataModel);
 
-            if (gradingModels.Count > 0 && double.TryParse(gradingModels[0].BandScore, out double bandScore))
+            if (double.TryParse(gradingModel.BandScore, out double bandScore))
             {
                 var matchedScores = relevantProsodyScores
                     .Where(x => x.MinScore <= bandScore && x.MaxScore >= bandScore)
+                    .OrderBy(x => x.Language)
                     .ToList();
 
                 if (matchedScores.Count > 0)
@@ -336,18 +365,15 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                     var mainComment = matchedScores[0].BandComment ?? string.Empty;
                     var altComment = matchedScores.Count > 1 ? matchedScores[1].BandComment ?? string.Empty : mainComment;
 
-                    foreach (var model in gradingModels)
-                    {
-                        model.BandDescriptorText = mainComment;
-                    }
+                    gradingModel.BandDescriptorText = mainComment;
                     var aIResponseTranslate = await GetTranslateAIResponse(aiResponse, cancellationToken);
-                    var responseTranslateModel = ConvertHelper.Deserialize<ExamPracticeAIGradingModel>(aIResponseTranslate);
-
+                    var responseTranslateDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aIResponseTranslate);
+                    var responseTranslateModel = _mapper.Map<ExamPracticeAIGradingModel>(responseTranslateDataModel);
                     var altData = new List<ExamPracticeAIGradingModel>
                     {
                         new ExamPracticeAIGradingModel
                         {
-                            BandScore = gradingModels[0].BandScore,
+                            BandScore = gradingModel.BandScore,
                             BandDescriptorText = altComment,
                             Explanation = responseTranslateModel?.Explanation ?? string.Empty,
                             SuggestionsForImprovement = responseTranslateModel?.SuggestionsForImprovement ?? string.Empty
@@ -359,7 +385,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                         .Select(x => new ExamPracticeAIGradingLanguageModel
                         {
                             Language = x.Language,
-                            ExamPracticeAIGradings = x.Language == LanguageAIModule.English ? gradingModels : altData,
+                            ExamPracticeAIGradings = x.Language == LanguageAIModule.English ? new List<ExamPracticeAIGradingModel>
+                            {
+                                gradingModel
+                            } : altData,
                         })
                         .ToList();
 
@@ -406,7 +435,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             }
             foreach (var item in aiConfig.Prompts)
             {
-                var userAiConfig = BuildUserAiConfig(aiConfig.Task, item.PromptContent, request.WordContent ?? string.Empty);
+                var userAiConfig = BuildUserAiConfig(aiConfig.Task, item.PromptContent ?? string.Empty, request.WordContent ?? string.Empty);
                 if (userAiConfig == null)
                 {
                     continue;
@@ -458,7 +487,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             }
         }
 
-        private static List<SkillScores> UpdateSkillScores(
+        private async Task<List<SkillScores>> UpdateSkillScores(
             ExamPracticeSectionResult examPracticeSectionResult,
             ExamPracticeSection examPracticeSection,
             double averageScore,
@@ -466,11 +495,14 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             bool checkSkillMockTest,
             ExamPracticeResult examPracticeResult)
         {
+            await _examPracticesDBContext.Entry(examPracticeSectionResult).ReloadAsync();
+            await _examPracticesDBContext.Entry(examPracticeResult).ReloadAsync();
+
             var skillScore = examPracticeSectionResult.SkillScores?.FirstOrDefault(x => x.Skill == EnumCourseSkill.Writing);
             var skillScores = examPracticeSectionResult.SkillScores?.ToList() ?? new List<SkillScores>();
             var correctTotal = examPracticeResult.ExamPractice?.Type == EnumExamPracticeType.IELTS ? CorrectTotal_IELTS_Writing : CorrectTotal_Vstep_Writing;
 
-            if (skillScore?.TotalCount == default)
+            if (skillScore?.TotalCount == ValueDefault)
             {
                 skillScores.Single().CorrectCount = totalScore;
                 skillScores.Single().Skill = EnumCourseSkill.Writing;
@@ -484,15 +516,27 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                 skillScore = skillScores.Single();
                 int correcCount = (int)CaculateAverageScoreWritingSection(skillScore!.CorrectCount, totalScore, examPracticeSection.DisplayOrder);
                 averageScore = CaculateAverageScoreWritingSection(skillScore!.Scores, averageScore, examPracticeSection.DisplayOrder);
-                skillScores.Single().CorrectCount = correcCount;
-                skillScores.Single().Scores = averageScore;
+                skillScore.CorrectCount = correcCount;
+                skillScore.Scores = averageScore;
                 examPracticeSectionResult.CorrectCount = correcCount;
+
+                var skillScoreResults = examPracticeResult.SkillScores ?? new List<SkillScores>();
+                var skillScoreResult = skillScoreResults.Single(x => x.Skill == EnumCourseSkill.Writing);
 
                 if (checkSkillMockTest)
                 {
                     examPracticeResult.CorrectCount = correcCount;
                     examPracticeResult.SkillScores = skillScores;
                     examPracticeResult.CorrectTotal = correctTotal;
+                }
+                else if (skillScoreResult.TotalCount == ValueDefault)
+                {
+                    skillScoreResult.TotalCount = correctTotal;
+                    skillScoreResult.CorrectCount = correcCount;
+                    skillScoreResult.Scores = averageScore;
+
+                    examPracticeResult.CorrectCount += correcCount;
+                    examPracticeResult.SkillScores = skillScoreResults;
                 }
             }
 
@@ -513,13 +557,17 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                 _examPracticeAnswerRepository.Update(examPracticeAnswer);
                 await _examPracticeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                _examPracticeSectionResultRepository.Update(examPracticeSectionResult, false, x => x.WorkingTime);
-                await _examPracticeSectionResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.CorrectTotal, entity.SkillScoresStr };
+                });
 
                 if (checkSkillMockTest)
                 {
-                    _examPracticeResultRepository.Update(examPracticeResult);
-                    await _examPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _examPracticeResultRepository.BulkUpdateList(new List<ExamPracticeResult> { examPracticeResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.SkillScoresStr };
+                    });
                 }
             }
         }
@@ -558,6 +606,19 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
 
             double average = totalScore / bandScoreDescriptions.Length;
             return (NumberHelper.RoundReduceNumber(average), totalScore);
+        }
+
+        private static (double average, double totalScore) CalculateOverallAverageVstep(params List<ExamPracticeAIGradingModel>?[] bandScoreDescriptions)
+        {
+            double totalScore = 0;
+
+            foreach (var bandScoreDescription in bandScoreDescriptions)
+            {
+                totalScore += CaculateAverageScore(bandScoreDescription);
+            }
+
+            double average = totalScore / bandScoreDescriptions.Length;
+            return (NumberHelper.RoundNumberDouble(average), totalScore);
         }
 
         private static double CaculateAverageScoreWritingSection(double firstScore, double average, int displayOrder)

@@ -46,7 +46,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         public override object? Answer
         {
             get { return ConvertHelper.Deserialize<object>(AnswerStr); }
-            set { AnswerStr = value != null ? ConvertHelper.Serialize(value) : null; }
+            set { AnswerStr = value != null ? ConvertHelper.Serialize(value) : string.Empty; }
         }
 
         private int? _timeCount;

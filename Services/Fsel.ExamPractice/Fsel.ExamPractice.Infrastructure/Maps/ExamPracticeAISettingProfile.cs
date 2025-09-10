@@ -7,6 +7,7 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAISettings;
     using Fsel.ExamPractice.Domain.Models.EntityModels;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
 
     public class ExamPracticeAISettingProfile : Profile
     {
@@ -18,6 +19,8 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
             CreateMap<ExamPracticeAISettingModel, ExamPracticeAISetting>().IgnoreAllNonExisting();
             CreateMap<ExamPracticeAISettingCommandModel, ExamPracticeAISetting>().ForMember(m => m.ExamPracticeAICriteriaSettings, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<ExamPracticeAICriteriaSettingCommandModel, ExamPracticeAICriteriaSetting>().IgnoreAllNonExisting();
+
+            CreateMap<ExamPracticeAIGradingDataModel, ExamPracticeAIGradingModel>().ForMember(x => x.BandScore, x => x.MapFrom(y => y.BandScore));
         }
     }
 }

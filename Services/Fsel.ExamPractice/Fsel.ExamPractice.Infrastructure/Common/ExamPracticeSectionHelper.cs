@@ -355,6 +355,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
         public async Task<int> GetHighestStreak(ExamPracticeResult examPracticeResult, ExamPractice examPractice)
         {
             ArgumentNullException.ThrowIfNull(examPracticeResult);
+            ArgumentNullException.ThrowIfNull(examPractice);
             var isHighestStreaks = new List<bool>();
             var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.CreatedDate >= examPracticeResult.CreatedDate)
                                                                      .Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
@@ -387,13 +388,28 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             examPracticeSectionResult.CorrectTotal = (int)skillScore.TotalCount;
             examPracticeSectionResult.Status = EnumResultStatus.Done;
             examPracticeSectionResult.HighestStreak = await GetHighestStreak(examPracticeSection, examPracticeSectionResult);
-            if (examPracticeSectionResult.SkillScores != null && examPracticeSectionResult.SkillScores.Any())
+
+            if (examPracticeSection.CourseSkill == EnumCourseSkill.Writing)
             {
-                examPracticeSectionResult.SkillScores.Add(skillScore);
+                examPracticeSectionResult.SkillScores = new List<SkillScores> {
+                    new SkillScores
+                    {
+                       Skill = EnumCourseSkill.Writing,
+                       CountQuestion = skillScore.CountQuestion,
+                       TotalQuestion = skillScore.TotalQuestion,
+                    }
+                };
             }
             else
             {
-                examPracticeSectionResult.SkillScores = new List<SkillScores> { skillScore };
+                if (examPracticeSectionResult.SkillScores != null && examPracticeSectionResult.SkillScores.Any())
+                {
+                    examPracticeSectionResult.SkillScores.Add(skillScore);
+                }
+                else
+                {
+                    examPracticeSectionResult.SkillScores = new List<SkillScores> { skillScore };
+                }
             }
 
             await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
