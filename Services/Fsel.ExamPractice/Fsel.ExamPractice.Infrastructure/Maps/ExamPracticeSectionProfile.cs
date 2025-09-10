@@ -17,8 +17,10 @@ namespace Fsel.ExamPractice.Infrastructure.Maps
             CreateMap<ExamPracticeSection, ExamPracticeSectionDetailModel>()
                 .ForMember(x => x.QuestionIds, x => x.MapFrom(y => y.Questions.OrderBy(x => x.CreatedDate).Select(x => x.Id)))
                 .ForMember(x => x.ExamPracticeSections, x => x.MapFrom(y => y.ExamPracticeSections.OrderBy(x => x.Config != null ? x.Config.DisplayTime : x.DisplayOrder)))
-                .ForMember(p => p.Answer, x => x.MapFrom(n => n.ExamPracticeAnswers.Select(x => x.Answer).FirstOrDefault()));
+                .ForMember(p => p.Answer, x => x.MapFrom(n => n.ExamPracticeAnswers.Select(x => x.Answer).FirstOrDefault()))
+                .ForMember(p => p.ExamPracticeAnswer, x => x.MapFrom(n => n.ExamPracticeAnswers.FirstOrDefault()));
 
+            CreateMap<ExamPracticeScore, ExamPracticeScoreModel>().IgnoreAllNonExisting();
             CreateMap<CreateExamPracticeSectionCommandModel, ExamPracticeSection>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).ForMember(m => m.Questions, opt => opt.Ignore()).ForMember(m => m.ExamPracticeAISettings, opt => opt.Ignore()).IgnoreAllNonExisting();
             CreateMap<UpdateExamPracticeSectionCommandModel, ExamPracticeSection>().ForMember(m => m.ExamPracticeSections, opt => opt.Ignore()).ForMember(m => m.Questions, opt => opt.Ignore()).ForMember(m => m.ExamPracticeAISettings, opt => opt.Ignore()).IgnoreAllNonExisting();
         }

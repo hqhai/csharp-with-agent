@@ -405,16 +405,16 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             {
                 questionArray.Add(item?.ExamPracticeSection?.Name ?? string.Empty);
                 answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);
-                pronScore += item != null && item.PronunciationScore.HasValue ? item.PronunciationScore.Value : default;
+                pronScore += item != null && item.PronunciationScore.HasValue ? item.PronunciationScore.Value : ValueDefault;
                 fluencyScore += item != null && item.PronunciationAssessmentAnswer != null && item.PronunciationAssessmentAnswer.FluencyScore.HasValue ? item.PronunciationAssessmentAnswer.FluencyScore.Value : default;
-                if (item != null && item.PronunciationScore.HasValue && item.PronunciationScore.Value != default)
+                if (item != null && item.PronunciationScore.HasValue && item.PronunciationScore.Value != ValueDefault)
                 {
                     count++;
                 }
             }
 
-            double averagePronScore = Math.Round(count > 0 ? (double)pronScore / count : 0);
-            double averageFluencyScore = Math.Round(count > 0 ? (double)fluencyScore / count : 0);
+            double averagePronScore = Math.Round(count > ValueDefault ? (double)pronScore / count : ValueDefault);
+            double averageFluencyScore = Math.Round(count > ValueDefault ? (double)fluencyScore / count : ValueDefault);
             return (questionArray.ToList(), answerArray.ToList(), averagePronScore, averageFluencyScore, count);
         }
 
@@ -510,6 +510,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             {
                 examPracticeSectionResult.Status = EnumResultStatus.Done;
                 examPracticeSectionResult.CorrectCount = (int)skillScores[0].CorrectCount;
+                examPracticeSectionResult.CorrectTotal = (int)skillScores[0].TotalCount;
                 examPracticeSectionResult.SkillScores = examPracticeScores.Select(x => new SkillScores
                 {
                     Skill = EnumCourseSkill.Speaking,

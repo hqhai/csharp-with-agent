@@ -52,7 +52,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 return methodResult;
             }
 
-            var examPracticeSection = await GetExamPracticeSectionAsync(request.ExamPracticeSectionId, methodResult);
+            var examPracticeSection = await GetExamPracticeSectionAsync(request.ExamPracticeSectionId, request.ExamPracticeResultId, methodResult);
             if (examPracticeSection == null)
             {
                 return methodResult;
@@ -218,9 +218,10 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             return examPracticeResult;
         }
 
-        private async Task<ExamPracticeSection?> GetExamPracticeSectionAsync(Guid id, MethodResult<ExamPracticeSectionDetailModel> result)
+        private async Task<ExamPracticeSection?> GetExamPracticeSectionAsync(Guid id, Guid examPracticeResultId, MethodResult<ExamPracticeSectionDetailModel> result)
         {
-            var examPracticeSection = await _examPracticeSectionRepository.GetByIdAsync(id);
+            var examPracticeSection = await _examPracticeSectionRepository.Queryable.AsNoTracking().Include(x => x.ExamPracticeScores.Where(x => x.ExamPracticeResultId == examPracticeResultId))
+                                                                          .FirstOrDefaultAsync(x => x.Id == id);
             if (examPracticeSection == null)
             {
                 result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(ExamPracticeSection), id);
