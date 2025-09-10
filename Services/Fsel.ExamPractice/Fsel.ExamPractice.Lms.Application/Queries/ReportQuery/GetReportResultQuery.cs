@@ -56,6 +56,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
                                                               .Select(sr => new ExamPracticeSectionResult
                                                               {
                                                                   Id = sr.Id,
+                                                                  CreatedDate = sr.CreatedDate,
                                                                   ExamPracticeSectionId = sr.ExamPracticeSectionId,
                                                                   ParentExamPracticeSectionResultId = sr.ParentExamPracticeSectionResultId,
                                                                   SkillScores = sr.SkillScores

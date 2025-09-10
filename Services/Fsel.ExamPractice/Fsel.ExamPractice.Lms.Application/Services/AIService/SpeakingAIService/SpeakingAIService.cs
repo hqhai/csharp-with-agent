@@ -125,7 +125,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             examPracticeSectionResult.CorrectCount += (int)totalScore;
 
             UpdateExamPracticeResultSkillScores(examPracticeResult, skillScores);
-            await UpdateExamPracticeSectionResultAsync(examPracticeSection, examPracticeResult, skillScores, cancellationToken);
+            await UpdateExamPracticeSectionResultAsync(examPracticeSection, examPracticeScores, examPracticeResult, skillScores, cancellationToken);
             await SendToWebSocket(examPracticeScores, cancellationToken);
             await SaveExamPracticeScoresToDatabase(examPracticeScores);
             await SaveExamPracticeSectionResultToDatabase(examPracticeSectionResult);
@@ -497,7 +497,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
 
         #region SaveData To DB
 
-        private async Task UpdateExamPracticeSectionResultAsync(ExamPracticeSection? examPracticeSection, ExamPracticeResult examPracticeResult, IList<SkillScores> skillScores, CancellationToken cancellationToken)
+        private async Task UpdateExamPracticeSectionResultAsync(ExamPracticeSection? examPracticeSection, IList<ExamPracticeScore> examPracticeScores, ExamPracticeResult examPracticeResult, IList<SkillScores> skillScores, CancellationToken cancellationToken)
         {
             var examPracticeSectionChirldren = examPracticeSection?.ExamPracticeSections.FirstOrDefault();
             if (examPracticeSectionChirldren == null || examPracticeSection == null)
@@ -510,7 +510,16 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             {
                 examPracticeSectionResult.Status = EnumResultStatus.Done;
                 examPracticeSectionResult.CorrectCount = (int)skillScores[0].CorrectCount;
-                examPracticeSectionResult.SkillScores = skillScores;
+                examPracticeSectionResult.SkillScores = examPracticeScores.Select(x => new SkillScores
+                {
+                    Skill = EnumCourseSkill.Speaking,
+                    CorrectCount = x.Score,
+                    CountQuestion = skillScores[0].CountQuestion,
+                    ScoreCriteria = x.Criteria,
+                    TotalCount = MaxScoreAI,
+                    TotalQuestion = skillScores[0].TotalQuestion,
+                    Scores = x.Score
+                }).ToList();
                 await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
                 {
                     bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.SkillScoresStr, entity.Status, entity.Percent };
