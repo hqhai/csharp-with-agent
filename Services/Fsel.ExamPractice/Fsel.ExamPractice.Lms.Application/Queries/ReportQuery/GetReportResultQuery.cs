@@ -40,7 +40,8 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
                                                                         .Select(epr => new
                                                                         {
                                                                             epr.Id,
-                                                                            ExamName = epr.ExamPractice != null ? epr.ExamPractice.Name : null
+                                                                            ExamPracticeId = epr.ExamPracticeId,
+                                                                            ExamName = epr.ExamPractice != null ? epr.ExamPractice.Code : null
                                                                         })
                                                                         .AsNoTracking()
                                                                         .FirstOrDefaultAsync(cancellationToken);
@@ -85,6 +86,8 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
                                                 .ToDictionary(g => g.Key, g => g.OrderBy(x => x.DisplayOrder).Select(x => x.ExamPracticeSectionResult).ToList());
 
             ExamPracticeReportViewModel examPracticeReportView = new ExamPracticeReportViewModel();
+
+            examPracticeReportView.Id = examPracticeResult.ExamPracticeId;
             examPracticeReportView.Name = examPracticeResult.ExamName;
             examPracticeReportView.ExamPracticeResultId = examPracticeResult.Id;
             foreach (var item in examPracticeSectionResults)

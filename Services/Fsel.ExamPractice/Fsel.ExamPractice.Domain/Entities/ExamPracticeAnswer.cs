@@ -9,6 +9,7 @@ namespace Fsel.ExamPractice.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.ExamPractice.Domain.Models.EntityModels;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.Shared.Helpers;
     using Newtonsoft.Json;
 
@@ -88,6 +89,19 @@ namespace Fsel.ExamPractice.Domain.Entities
                 if (value != null)
                 {
                     PronunciationAssessmentStr = ConvertHelper.Serialize(value);
+                }
+            }
+        }
+
+        [NotMapped]
+        public IList<AiFeedbackItemModel>? GradingAlFeedbacks
+        {
+            get { return ConvertHelper.Deserialize<IList<AiFeedbackItemModel>>(GradingAlFeedback); }
+            set
+            {
+                if (value != null)
+                {
+                    GradingAlFeedback = ConvertHelper.Serialize(value);
                 }
             }
         }

@@ -14,6 +14,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Infrastructure;
     using Fsel.ExamPractice.Lms.Application.Queues.Publishers;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
@@ -134,23 +135,39 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
         private async Task<(double averageScore, double totalScore, bool checkSkillMockTest, string gradingAiFeedBack)> HandleIELTSAsync(
             ExamPracticeAnswer? examPracticeAnswer,
             SubmitExamPracticeAnswerAICommand request,
-            Dictionary<EnumMockTestAIType, string> resultDictionary,
+            Dictionary<EnumMockTestAIType, IList<ExamPracticeAIGradingLanguageModel>> resultDictionary,
             ExamPracticeResult examPracticeResult,
             CancellationToken cancellationToken)
         {
-            var gradingAiFeedBackResult = new
+            var gradingAiFeedBackResult = new List<AiFeedbackItemModel>
             {
-                TaskResponse = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse) ? resultDictionary[EnumMockTestAIType.TaskResponse] : resultDictionary[EnumMockTestAIType.TaskAchievement],
-                Coherence = resultDictionary[EnumMockTestAIType.Coherence],
-                LexicalResource = resultDictionary[EnumMockTestAIType.LexicalResource],
-                GrammaticalRange = resultDictionary[EnumMockTestAIType.GrammaticalRange]
+                new AiFeedbackItemModel
+                {
+                    Criteria = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse)?  EnumMockTestAIType.TaskResponse.ToString() :EnumMockTestAIType.TaskAchievement.ToString(),
+                    GradingAlFeedback = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse) ? resultDictionary[EnumMockTestAIType.TaskResponse] : resultDictionary[EnumMockTestAIType.TaskAchievement]
+                },
+                new AiFeedbackItemModel
+                {
+                    Criteria = EnumMockTestAIType.Coherence.ToString(),
+                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Coherence)
+                },
+                new AiFeedbackItemModel
+                {
+                    Criteria = EnumMockTestAIType.LexicalResource.ToString(),
+                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.LexicalResource)
+                },
+                new AiFeedbackItemModel
+                {
+                    Criteria = EnumMockTestAIType.GrammaticalRange.ToString(),
+                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.GrammaticalRange)
+                }
             };
             string? gradingAiFeedBack = gradingAiFeedBackResult.Serialize();
 
-            var taskResponse = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult.TaskResponse);
-            var coherence = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult.Coherence);
-            var lexicalResource = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult.LexicalResource);
-            var grammaticalRange = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult.GrammaticalRange);
+            var taskResponse = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[0].GradingAlFeedback);
+            var coherence = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[1].GradingAlFeedback);
+            var lexicalResource = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[2].GradingAlFeedback);
+            var grammaticalRange = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[3].GradingAlFeedback);
 
             await HandleRetryIfNeeded(examPracticeAnswer, request, taskResponse, coherence, lexicalResource, grammaticalRange, cancellationToken);
             bool checkSkillMockTest = examPracticeResult.ExamPractice != null && examPracticeResult.ExamPractice.SubType == EnumExamPracticeSubType.SkillMockTest;
@@ -161,39 +178,47 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
         private async Task<(double averageScore, double totalScore, bool checkSkillMockTest, string gradingAiFeedBack)> HandleVstepAsync(
             ExamPracticeAnswer? examPracticeAnswer,
             SubmitExamPracticeAnswerAICommand request,
-            Dictionary<EnumMockTestAIType, string> resultDictionary,
+            Dictionary<EnumMockTestAIType, IList<ExamPracticeAIGradingLanguageModel>> resultDictionary,
             ExamPracticeResult examPracticeResult,
             CancellationToken cancellationToken)
         {
-            string GetResult(EnumMockTestAIType type, EnumMockTestAIType fallback) => resultDictionary.TryGetValue(type, out var value) ? value
-                                                                                    : resultDictionary.GetValueOrDefault(fallback) ?? string.Empty;
-            List<ExamPracticeAIGradingLanguageModel>? GetGrading(string? json) => ConvertHelper.Deserialize<List<ExamPracticeAIGradingLanguageModel>>(json);
             List<ExamPracticeAIGradingModel>? GetAIGradings(List<ExamPracticeAIGradingLanguageModel>? list) => list != null && list.Count > 0 ? list[0].ExamPracticeAIGradings?.ToList() : null;
-
-            var gradingAiFeedBackResult = new
+            var gradingAiFeedBackResult = new List<AiFeedbackItemModel>
             {
-                TaskResponse = GetResult(EnumMockTestAIType.TaskResponse, EnumMockTestAIType.TaskFulfillment),
-                Organization = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Organization),
-                Vocabulary = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Vocabulary),
-                Grammar = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Grammar)
+                new AiFeedbackItemModel
+                {
+                    Criteria =  EnumMockTestAIType.TaskFulfillment.ToString(),
+                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.TaskFulfillment)
+                },
+                new AiFeedbackItemModel
+                {
+                    Criteria = EnumMockTestAIType.Organization.ToString(),
+                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Organization)
+                },
+                new AiFeedbackItemModel
+                {
+                    Criteria = EnumMockTestAIType.Vocabulary.ToString(),
+                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Vocabulary)
+                },
+                new AiFeedbackItemModel
+                {
+                    Criteria = EnumMockTestAIType.Grammar.ToString(),
+                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Grammar)
+                }
             };
-            string gradingAiFeedBack = gradingAiFeedBackResult.Serialize();
-            var taskResponse = GetGrading(gradingAiFeedBackResult.TaskResponse);
-            var organization = GetGrading(gradingAiFeedBackResult.Organization);
-            var vocabulary = GetGrading(gradingAiFeedBackResult.Vocabulary);
-            var grammar = GetGrading(gradingAiFeedBackResult.Grammar);
+            string? gradingAiFeedBack = gradingAiFeedBackResult.Serialize();
 
-            var taskResponseGradings = GetAIGradings(taskResponse);
-            var coherenceGradings = GetAIGradings(organization);
-            var vocabularyGradings = GetAIGradings(vocabulary);
-            var grammarGradings = GetAIGradings(grammar);
+            var taskResponseGradings = GetAIGradings(gradingAiFeedBackResult[0].GradingAlFeedback?.ToList());
+            var organizationGradings = GetAIGradings(gradingAiFeedBackResult[1].GradingAlFeedback?.ToList());
+            var vocabularyGradings = GetAIGradings(gradingAiFeedBackResult[2].GradingAlFeedback?.ToList());
+            var grammarGradings = GetAIGradings(gradingAiFeedBackResult[3].GradingAlFeedback?.ToList());
 
-            await HandleRetryIfNeeded(examPracticeAnswer, request, taskResponseGradings, coherenceGradings, vocabularyGradings, grammarGradings, cancellationToken);
+            await HandleRetryIfNeeded(examPracticeAnswer, request, taskResponseGradings, organizationGradings, vocabularyGradings, grammarGradings, cancellationToken);
 
             bool checkSingleVstepSkill = examPracticeResult.ExamPractice?.SubType == EnumExamPracticeSubType.SingleVstepSkill;
             (double averageScore, double totalScore) = CalculateOverallAverageVstep(
                 taskResponseGradings,
-                coherenceGradings,
+                organizationGradings,
                 vocabularyGradings,
                 grammarGradings);
 
@@ -266,14 +291,14 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             return true;
         }
 
-        private async Task<Dictionary<EnumMockTestAIType, string>> GetAIResponses(
+        private async Task<Dictionary<EnumMockTestAIType, IList<ExamPracticeAIGradingLanguageModel>>> GetAIResponses(
             ExamPracticeAISetting aiConfig,
             SubmitExamPracticeAnswerAICommand request,
             ExamPracticeSection examPracticeSection,
             ExamPracticeSectionResult examPracticeSectionResult,
             CancellationToken cancellationToken)
         {
-            var resultDictionary = new Dictionary<EnumMockTestAIType, string>();
+            var resultDictionary = new Dictionary<EnumMockTestAIType, IList<ExamPracticeAIGradingLanguageModel>>();
 
             if (IsCriteriaSettingsMode(aiConfig))
             {
@@ -297,7 +322,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             SubmitExamPracticeAnswerAICommand request,
             ExamPracticeSection examPracticeSection,
             ExamPracticeSectionResult examPracticeSectionResult,
-            Dictionary<EnumMockTestAIType, string> resultDictionary,
+            Dictionary<EnumMockTestAIType, IList<ExamPracticeAIGradingLanguageModel>> resultDictionary,
             CancellationToken cancellationToken)
         {
             var moduleAIType = examPracticeSection.DisplayOrder == 0 ? EnumExamPracticeModuleAIType.WritingTask1 : EnumExamPracticeModuleAIType.WritingTask2;
@@ -327,7 +352,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                     aIResponse = await SendChatGPT(aiConfig, item.SystemRoleAlConfig ?? string.Empty, userAiConfig, cancellationToken);
                 }
 
-                resultDictionary[item.Prompts[0].Type] = aIResponse;
+                resultDictionary[item.Prompts[0].Type] = ConvertHelper.Deserialize<List<ExamPracticeAIGradingLanguageModel>>(aIResponse) ?? new List<ExamPracticeAIGradingLanguageModel>();
                 await SendWebSocket(aIResponse, item.Prompts![0].Type.ToString(), examPracticeSection.DisplayOrder, examPracticeSectionResult.ExamPracticeResultId, cancellationToken);
             }
         }
@@ -426,7 +451,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             SubmitExamPracticeAnswerAICommand request,
             ExamPracticeSection examPracticeSection,
             ExamPracticeSectionResult examPracticeSectionResult,
-            Dictionary<EnumMockTestAIType, string> resultDictionary,
+            Dictionary<EnumMockTestAIType, IList<ExamPracticeAIGradingLanguageModel>> resultDictionary,
             CancellationToken cancellationToken)
         {
             if (aiConfig.Prompts == null || aiConfig.Prompts.Count == 0)
@@ -441,7 +466,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                     continue;
                 }
                 var aIResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig ?? string.Empty, userAiConfig, cancellationToken) ?? string.Empty;
-                resultDictionary[item.Type] = aIResponse;
+                resultDictionary[item.Type] = ConvertHelper.Deserialize<List<ExamPracticeAIGradingLanguageModel>>(aIResponse) ?? new List<ExamPracticeAIGradingLanguageModel>();
                 await SendWebSocket(aIResponse, item.Type.ToString(), examPracticeSection.DisplayOrder, examPracticeSectionResult.ExamPracticeResultId, cancellationToken);
             }
         }

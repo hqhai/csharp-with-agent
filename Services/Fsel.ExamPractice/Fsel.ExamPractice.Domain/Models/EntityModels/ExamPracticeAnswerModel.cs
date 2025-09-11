@@ -3,6 +3,7 @@
 namespace Fsel.ExamPractice.Domain.Models.EntityModels
 {
     using Fsel.ExamPractice.Domain.Models.EntityModels.Bases;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
 
     public class ExamPracticeAnswerModel : BaseAnswerModel
     {
@@ -11,6 +12,6 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels
         public int? TimeCount { get; set; }
         public int? WordCount { get; set; }
         public string? SpeechTextAnswer { get; set; }
-        public string? GradingAlFeedback { get; set; }
+        public IList<AiFeedbackItemModel>? GradingAlFeedbacks { get; set; } = new List<AiFeedbackItemModel>();
     }
 }

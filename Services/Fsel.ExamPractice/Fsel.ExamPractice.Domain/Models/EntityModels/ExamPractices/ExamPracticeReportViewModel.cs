@@ -6,6 +6,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
 
     public class ExamPracticeReportViewModel
     {
+        public Guid Id { get; set; }
         public string? Name { get; set; }
         public Guid ExamPracticeResultId { get; set; }
         public IList<ExamPracticeReportSkillViewModel> Sections { get; set; } = new List<ExamPracticeReportSkillViewModel>();
