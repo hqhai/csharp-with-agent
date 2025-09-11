@@ -504,7 +504,6 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
             {
                 return;
             }
-
             var examPracticeSectionResult = await GetExamPracticeSectionResult(examPracticeSectionChirldren.Id, examPracticeResult.Id, cancellationToken);
             if (examPracticeSectionResult != null)
             {
@@ -523,7 +522,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                 }).ToList();
                 await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
                 {
-                    bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.SkillScoresStr, entity.Status, entity.Percent };
+                    bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.CorrectTotal, entity.SkillScoresStr, entity.Status, entity.Percent };
                 });
             }
         }
