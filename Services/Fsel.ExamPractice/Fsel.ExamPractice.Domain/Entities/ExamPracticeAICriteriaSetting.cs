@@ -30,8 +30,6 @@ namespace Fsel.ExamPractice.Domain.Entities
 
         public Guid? ExamPracticeAISettingId { get; set; }
 
-        public string? JsonSchema { get; set; }
-
         public ExamPracticeAISetting? ExamPracticeAISetting { get; set; }
     }
 }
