@@ -44,18 +44,26 @@ namespace Fsel.System.Application.Commands.Chatbots
         private readonly IStorageService _storageService;
         private readonly ChatBotPublisher _chatBotPublisher;
         private const int Number_Of_Config = 2;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<SaveChatBotMessageCommandHandler> _logger;
+        private readonly IMediator _mediator;
 
-        public SaveChatBotMessageCommandHandler(IMapper mapper, IChatBotRepository chatBotRepository, IStorageService storageService, ChatBotPublisher chatBotPublisher, IChatbotConfigRepository chatbotConfigRepository, IOpenAIService openAIService, ILogger<SaveChatBotMessageCommandHandler> logger)
+        public SaveChatBotMessageCommandHandler(IMapper mapper,
+            IChatBotRepository chatBotRepository,
+            IStorageService storageService,
+            ChatBotPublisher chatBotPublisher,
+            IChatbotConfigRepository chatbotConfigRepository,
+            IOpenAIService openAIService,
+            ILogger<SaveChatBotMessageCommandHandler> logger,
+            IMediator mediator)
         {
             _mapper = mapper;
             _chatBotRepository = chatBotRepository;
-
             _storageService = storageService;
             _chatBotPublisher = chatBotPublisher;
             _chatbotConfigRepository = chatbotConfigRepository;
             _openAIService = openAIService;
             _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<ChatBotModel>> Handle(SaveChatBotMessageCommand request, CancellationToken cancellationToken)
@@ -104,6 +112,8 @@ namespace Fsel.System.Application.Commands.Chatbots
             });
 
             string response = chatGptResponse?.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault() ?? string.Empty;
+            response = Shared.Helpers.StringHelper.TextCleaner.NormalizeListeningContent(response);
+
             string tokenInUse = chatGptResponse?.Content?.Usage?.ToString() ?? string.Empty;
             var totalTokenUse = ConvertHelper.Deserialize<TokenAIModel>(tokenInUse);
             bool isContainAudioScript = response.Contains("Click to listen", StringComparison.OrdinalIgnoreCase);
@@ -203,6 +213,20 @@ namespace Fsel.System.Application.Commands.Chatbots
                     Voice = "nova",
                 });
                 filePath = audioResult?.Content?.Result!;
+
+                try
+                {
+                    var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
+                    if (!reponse.IsOK)
+                    {
+                        _logger.LogError($"ConvertFileWavCommand : {filePath} => {reponse.Result}", reponse.ErrorMessages);
+                    }
+                    filePath = reponse.Result ?? filePath;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"ConvertFileWavCommand Exception : {filePath} ", ex.Message);
+                }
             }
             return filePath;
         }
