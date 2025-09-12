@@ -144,30 +144,30 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                 new AiFeedbackItemModel
                 {
                     Criteria = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse)?  EnumMockTestAIType.TaskResponse.ToString() :EnumMockTestAIType.TaskAchievement.ToString(),
-                    GradingAlFeedback = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse) ? resultDictionary[EnumMockTestAIType.TaskResponse] : resultDictionary[EnumMockTestAIType.TaskAchievement]
+                    GradingAlFeedbacks = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse) ? resultDictionary[EnumMockTestAIType.TaskResponse] : resultDictionary[EnumMockTestAIType.TaskAchievement]
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.Coherence.ToString(),
-                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Coherence)
+                    GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Coherence)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.LexicalResource.ToString(),
-                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.LexicalResource)
+                    GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.LexicalResource)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.GrammaticalRange.ToString(),
-                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.GrammaticalRange)
+                    GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.GrammaticalRange)
                 }
             };
             string? gradingAiFeedBack = gradingAiFeedBackResult.Serialize();
 
-            var taskResponse = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[0].GradingAlFeedback);
-            var coherence = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[1].GradingAlFeedback);
-            var lexicalResource = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[2].GradingAlFeedback);
-            var grammaticalRange = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[3].GradingAlFeedback);
+            var taskResponse = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[0].GradingAlFeedbacks);
+            var coherence = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[1].GradingAlFeedbacks);
+            var lexicalResource = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[2].GradingAlFeedbacks);
+            var grammaticalRange = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult[3].GradingAlFeedbacks);
 
             await HandleRetryIfNeeded(examPracticeAnswer, request, taskResponse, coherence, lexicalResource, grammaticalRange, cancellationToken);
             bool checkSkillMockTest = examPracticeResult.ExamPractice != null && examPracticeResult.ExamPractice.SubType == EnumExamPracticeSubType.SkillMockTest;
@@ -188,30 +188,30 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                 new AiFeedbackItemModel
                 {
                     Criteria =  EnumMockTestAIType.TaskFulfillment.ToString(),
-                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.TaskFulfillment)
+                    GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.TaskFulfillment)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.Organization.ToString(),
-                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Organization)
+                    GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Organization)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.Vocabulary.ToString(),
-                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Vocabulary)
+                    GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Vocabulary)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.Grammar.ToString(),
-                    GradingAlFeedback = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Grammar)
+                    GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Grammar)
                 }
             };
             string? gradingAiFeedBack = gradingAiFeedBackResult.Serialize();
 
-            var taskResponseGradings = GetAIGradings(gradingAiFeedBackResult[0].GradingAlFeedback?.ToList());
-            var organizationGradings = GetAIGradings(gradingAiFeedBackResult[1].GradingAlFeedback?.ToList());
-            var vocabularyGradings = GetAIGradings(gradingAiFeedBackResult[2].GradingAlFeedback?.ToList());
-            var grammarGradings = GetAIGradings(gradingAiFeedBackResult[3].GradingAlFeedback?.ToList());
+            var taskResponseGradings = GetAIGradings(gradingAiFeedBackResult[0].GradingAlFeedbacks?.ToList());
+            var organizationGradings = GetAIGradings(gradingAiFeedBackResult[1].GradingAlFeedbacks?.ToList());
+            var vocabularyGradings = GetAIGradings(gradingAiFeedBackResult[2].GradingAlFeedbacks?.ToList());
+            var grammarGradings = GetAIGradings(gradingAiFeedBackResult[3].GradingAlFeedbacks?.ToList());
 
             await HandleRetryIfNeeded(examPracticeAnswer, request, taskResponseGradings, organizationGradings, vocabularyGradings, grammarGradings, cancellationToken);
 

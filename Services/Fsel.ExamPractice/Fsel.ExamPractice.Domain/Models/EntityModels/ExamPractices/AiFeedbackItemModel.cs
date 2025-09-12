@@ -7,6 +7,6 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
     public class AiFeedbackItemModel
     {
         public string? Criteria { get; set; }
-        public IList<ExamPracticeAIGradingLanguageModel>? GradingAlFeedback { get; set; }
+        public IList<ExamPracticeAIGradingLanguageModel>? GradingAlFeedbacks { get; set; }
     }
 }
