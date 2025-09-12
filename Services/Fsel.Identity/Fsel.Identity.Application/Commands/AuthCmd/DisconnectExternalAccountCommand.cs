@@ -41,8 +41,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 var loginNeedToDisconnect = logins?.FirstOrDefault(x => x.LoginProvider == request.Provider);
                 if (loginNeedToDisconnect != null)
                 {
-                    var result = _userManager.RemoveLoginAsync(user, loginNeedToDisconnect.LoginProvider, loginNeedToDisconnect.ProviderKey);
-                    return new MethodResult<bool>(result.IsCompletedSuccessfully);
+                    var result = await _userManager.RemoveLoginAsync(user, loginNeedToDisconnect.LoginProvider, loginNeedToDisconnect.ProviderKey);
+                    return new MethodResult<bool>(result.Succeeded);
                 }
             }
 
