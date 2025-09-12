@@ -31,7 +31,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                 CountQuestion(examPracticeSection.CourseSkill, examPracticeSection.Questions);
                 if (examPracticeSection.ExamPracticeSections != null && examPracticeSection.ExamPracticeSections.Any())
                 {
-                    HanderSubQuestionIndexSection(examPracticeSection.ExamPracticeSections);
+                    HanderSubQuestionIndexSection(examPracticeSection.ExamPracticeSections.OrderBy(x => x.DisplayOrder).ToList());
                 }
             }
 
@@ -50,9 +50,8 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                 CountQuestion(examPracticeSection.CourseSkill, examPracticeSection.Questions);
                 if (examPracticeSection.ExamPracticeSections != null && examPracticeSection.ExamPracticeSections.Any())
                 {
-                    HanderSubQuestionIndexSection(examPracticeSection.ExamPracticeSections);
+                    HanderSubQuestionIndexSection(examPracticeSection.ExamPracticeSections.OrderBy(x => x.DisplayOrder).ToList());
                 }
-
                 if (examPracticeSection.Questions != null && examPracticeSection.Questions.Any())
                 {
                     HanderSubQuestionIndexQuestion(examPracticeSection.Questions);

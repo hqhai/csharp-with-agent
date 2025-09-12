@@ -75,9 +75,9 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
 
                     if (!isUsingByClient)
                     {
-                        await _examPracticeConverter.HandlerChildents(request.ExamPracticeSections, oldEntity.ExamPracticeSections, oldEntity.Id, null, cancellationToken);
+                        await _examPracticeConverter.HandlerExamPracticeSections(request.ExamPracticeSections, oldEntity.ExamPracticeSections.OrderBy(x => x.DisplayOrder).ToList(), oldEntity.Id, null, cancellationToken);
                         await _examPracticeConverter.DeleteObjectInstance();
-                        _examPracticeCommon.HanderQuestionIndexSection(oldEntity.ExamPracticeSections);
+                        _examPracticeCommon.HanderQuestionIndexSection(oldEntity.ExamPracticeSections.OrderBy(x => x.DisplayOrder).ToList());
                     }
 
                     await Task.Yield();
