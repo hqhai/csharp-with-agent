@@ -13,7 +13,7 @@ namespace Fsel.ExamPractice.Domain.Entities
 
     public class ExamPracticeSection : Entity
     {
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(750, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         public EnumCourseSkill? CourseSkill { get; set; }

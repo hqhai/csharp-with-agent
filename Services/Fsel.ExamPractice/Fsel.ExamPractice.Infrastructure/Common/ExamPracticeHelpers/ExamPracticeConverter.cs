@@ -42,17 +42,16 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             ArgumentNullException.ThrowIfNull(examPracticeSectionBelongParents);
 
             var oldExamPracticeSections = await GetExamPracticeSectionSectionAsync(examPracticeId, examPracticeSectionParentId, cancellationToken);
-            if (oldExamPracticeSections != null && oldExamPracticeSections.Any())
-            {
-                // xoá nhưng đối tượng không được update
-                var removedPracticeSections = oldExamPracticeSections.Where(x => x.Id != Guid.Empty).ExceptBy(newExamPracticeSections.Select(x => x.Id), u => u.Id).ToList();
-                _examPracticeSections.AddRange(removedPracticeSections);
-            }
+
+            // xoá nhưng đối tượng không được update
+            var removedPracticeSections = oldExamPracticeSections.Where(x => x.Id != Guid.Empty).ExceptBy(newExamPracticeSections.Select(x => x.Id), u => u.Id).ToList();
+            _examPracticeSections.AddRange(removedPracticeSections);
 
             foreach (var newExamPracticeSection in newExamPracticeSections)
             {
-                ExamPracticeSection? examPracticeSection = null;
+                var countQuestion = 0;
 
+                ExamPracticeSection? examPracticeSection = null;
                 if (!newExamPracticeSection.Id.HasValue)
                 {
                     examPracticeSection = _mapper.Map<ExamPracticeSection>(newExamPracticeSection);
@@ -60,13 +59,17 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                 }
                 else
                 {
-                    examPracticeSection = oldExamPracticeSections?.FirstOrDefault(x => x.Id == newExamPracticeSection.Id);
+                    examPracticeSection = oldExamPracticeSections.FirstOrDefault(x => x.Id == newExamPracticeSection.Id);
                     _mapper.Map(newExamPracticeSection, examPracticeSection);
                 }
 
                 if (examPracticeSection != null)
                 {
-                    QuestionHandler(examPracticeSection.Questions, newExamPracticeSection.Questions);
+                    examPracticeSection.DisplayOrder = newExamPracticeSections.IndexOf(newExamPracticeSection) + 1;
+
+                    QuestionHandler(examPracticeSection.Questions, newExamPracticeSection.Questions, countQuestion);
+                    countQuestion += newExamPracticeSection.Questions.Count;
+
                     ExamPracticeAISettingHandler(examPracticeSection.ExamPracticeAISettings, newExamPracticeSection.ExamPracticeAISettings);
 
                     if (newExamPracticeSection.ChildrenExamPracticeSections.Any())
@@ -77,7 +80,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             }
         }
 
-        private void QuestionHandler(ICollection<Question> oldQuestions, IList<UpdateQuestionCommandModel> newQuestions)
+        private void QuestionHandler(ICollection<Question> oldQuestions, IList<UpdateQuestionCommandModel> newQuestions, int countQuestion)
         {
             foreach (var newQuestion in newQuestions)
             {
@@ -96,6 +99,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
 
                 if (question != null)
                 {
+                    question.DisplayOrder = newQuestions.IndexOf(newQuestion) + countQuestion;
                     question = QuestionHelper.HandleQuestion(question).Result;
                 }
             }

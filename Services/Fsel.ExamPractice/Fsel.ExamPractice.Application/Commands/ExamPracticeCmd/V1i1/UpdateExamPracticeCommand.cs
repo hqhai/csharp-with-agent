@@ -1,4 +1,3 @@
-
 // Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
@@ -78,7 +77,7 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
                     {
                         await _examPracticeConverter.HandlerChildents(request.ExamPracticeSections, oldEntity.ExamPracticeSections, oldEntity.Id, null, cancellationToken);
                         await _examPracticeConverter.DeleteObjectInstance();
-                        _examPracticeCommon.HanderSubQuestionIndexSection(oldEntity.ExamPracticeSections);
+                        _examPracticeCommon.HanderQuestionIndexSection(oldEntity.ExamPracticeSections);
                     }
 
                     await Task.Yield();

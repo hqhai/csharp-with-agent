@@ -14,12 +14,28 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
 
         public ExamPracticeCommon()
         {
-
         }
 
         public ExamPracticeCommon Create()
         {
             return new ExamPracticeCommon();
+        }
+
+        public void HanderQuestionIndexSection(ICollection<ExamPracticeSection> examPracticeSections)
+        {
+            ArgumentNullException.ThrowIfNull(examPracticeSections);
+
+            foreach (var examPracticeSection in examPracticeSections)
+            {
+                _countQuestion = 0;
+                CountQuestion(examPracticeSection.CourseSkill, examPracticeSection.Questions);
+                if (examPracticeSection.ExamPracticeSections != null && examPracticeSection.ExamPracticeSections.Any())
+                {
+                    HanderSubQuestionIndexSection(examPracticeSection.ExamPracticeSections);
+                }
+            }
+
+            SetTotalQuestion(examPracticeSections);
         }
 
         public void HanderSubQuestionIndexSection(ICollection<ExamPracticeSection> examPracticeSections)
@@ -32,7 +48,6 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                 numberQuestion++;
 
                 CountQuestion(examPracticeSection.CourseSkill, examPracticeSection.Questions);
-
                 if (examPracticeSection.ExamPracticeSections != null && examPracticeSection.ExamPracticeSections.Any())
                 {
                     HanderSubQuestionIndexSection(examPracticeSection.ExamPracticeSections);
@@ -44,8 +59,6 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                     examPracticeSection.SubQuestionIndexs = RangeInclusive(numberQuestion, _countQuestion);
                 }
             }
-
-            SetTotalQuestion(examPracticeSections);
         }
 
         private void CountQuestion(EnumCourseSkill? courseSkill, ICollection<Question>? questions)
@@ -57,9 +70,11 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                     case EnumCourseSkill.Reading:
                         _positionCourseSkill = EnumCourseSkill.Reading;
                         break;
+
                     case EnumCourseSkill.Listening:
                         _positionCourseSkill = EnumCourseSkill.Listening;
                         break;
+
                     default:
                         _positionCourseSkill = null;
                         break;
@@ -73,6 +88,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                     case EnumCourseSkill.Reading:
                         _countReadingQuestion += questions.Sum(x => x.CorrectTotal);
                         break;
+
                     case EnumCourseSkill.Listening:
                         _countListenningQuestion += questions.Sum(x => x.CorrectTotal);
                         break;
@@ -95,6 +111,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                             configReading.TotalQuestion = _countReadingQuestion;
                             examPracticeSection.Config = configReading;
                             break;
+
                         case EnumCourseSkill.Listening:
                             var configListening = examPracticeSection.Config;
                             configListening.TotalQuestion = _countListenningQuestion;

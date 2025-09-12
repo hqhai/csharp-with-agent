@@ -42,6 +42,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             if (examPracticeSectionRequests != null && examPracticeSectionRequests.Any())
             {
+                var countQuestion = 0;
                 for (var i = 0; i < examPracticeSectionRequests.Count; i++)
                 {
                     var examPracticeSectionRequest = examPracticeSectionRequests[i];
@@ -50,14 +51,15 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                     examPracticeSection.DisplayOrder = i + 1;
                     examPracticeSection.ExamPracticeSections = ExamPracticeSectionClassification(examPracticeSectionRequest.ChildrenExamPracticeSections).ToList();
                     examPracticeSection.ExamPracticeAISettings = ExamPracticeAISettingClassification(examPracticeSectionRequest.ExamPracticeAISettings).ToList();
-                    examPracticeSection.Questions = ExamPracticeQuestionClassification(examPracticeSectionRequest.Questions).ToList();
+                    examPracticeSection.Questions = ExamPracticeQuestionClassification(examPracticeSectionRequest.Questions, countQuestion).ToList();
 
+                    countQuestion += examPracticeSectionRequest.Questions.Count;
                     yield return examPracticeSection;
                 }
             }
         }
 
-        private IEnumerable<Question> ExamPracticeQuestionClassification(IList<UpdateQuestionCommandModel>? questionRequests)
+        private IEnumerable<Question> ExamPracticeQuestionClassification(IList<UpdateQuestionCommandModel>? questionRequests, int countQuestion)
         {
             if (questionRequests != null && questionRequests.Any())
             {
@@ -65,6 +67,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                 {
                     var questionRequest = questionRequests[i];
                     var question = _mapper.Map<Question>(questionRequest);
+                    question.DisplayOrder = countQuestion + i;
                     question = QuestionHelper.HandleQuestion(question).Result;
 
                     yield return question ?? new Question();

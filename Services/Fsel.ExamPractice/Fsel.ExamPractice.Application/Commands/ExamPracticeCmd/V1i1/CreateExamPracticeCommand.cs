@@ -46,23 +46,13 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExamPracticeModel>();
 
-            if (string.IsNullOrEmpty(request.Code))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code), request.Code);
-                return methodResult;
-            }
             var existCode = await _examPracticeRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken);
             if (existCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
-            if (request.Type == EnumExamPracticeType.IELTS && !request.Type.GetSubTypes().Any(x => x == request.SubType))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.SubType);
-                return methodResult;
-            }
-            if (request.Type == EnumExamPracticeType.ExamPractice && !request.Type.GetSubTypes().Any(x => x == request.SubType))
+            if (!request.Type.GetSubTypes().Any(x => x == request.SubType))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.SubType);
                 return methodResult;

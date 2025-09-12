@@ -2,6 +2,7 @@
 
 namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
 {
+    using System.Linq.Dynamic.Core;
     using System.Text.Json.Serialization;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -70,7 +71,8 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
             }
             var questions = await _questionRepository.Queryable.AsNoTracking()
                                         .WhereBulkContains(request.ListQuestionIds, x => x.Id)
-                                        .OrderBy(x => x.CreatedDate)
+                                        .OrderBy(x => x.DisplayOrder)
+                                        .ThenBy(x => x.CreatedDate)
                                         .ToListAsync();
             if (questions == null || !questions.Any())
             {
