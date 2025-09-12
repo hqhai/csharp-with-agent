@@ -7,7 +7,7 @@
 }
 
 @section styles {
-    <link rel="stylesheet" href="~/assets/css/pages/login.css" />
+<link rel="stylesheet" href="~/assets/css/pages/login.css" />
 }
 
 
@@ -16,8 +16,9 @@
         <div class="langs">
             @await Component.InvokeAsync("Languages")
         </div>
-
-        <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        <div>
+            @await Component.InvokeAsync("Logos")
+        </div>
         <div class="item-title">@Localizer["i18n_login"].Value?.ToUpper()</div>
         @if (Model.EnableLocalLogin)
         {

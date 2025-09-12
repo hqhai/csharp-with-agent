@@ -23,7 +23,7 @@
         <div class="langs">
             @await Component.InvokeAsync("Languages")
         </div>
-        <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        @await Component.InvokeAsync("Logos")
         <div class="hidden" id="invalidBirthday" data-value="@Localizer["i18n_Invalid_birthday"]"></div>
         <div class="forms-contain">
             <div id="userInfoContain" class="user-info-form">

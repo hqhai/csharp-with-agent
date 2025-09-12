@@ -16,7 +16,7 @@
             @await Component.InvokeAsync("Languages")
         </div>
 
-        <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        @await Component.InvokeAsync("Logos")
         <p class="form-title">@Localizer["i18n_forgot_password"].Value?.ToUpper()</p>
         <p class="form-subtitle">
             @Localizer["i18n_input_emai_or_phone_number_message"]
