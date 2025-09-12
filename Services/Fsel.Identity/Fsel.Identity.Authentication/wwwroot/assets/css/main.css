@@ -256,6 +256,8 @@ strong {
 .logo {
   margin-bottom: 32px;
   margin-top: 60px;
+  height: 85px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .title {

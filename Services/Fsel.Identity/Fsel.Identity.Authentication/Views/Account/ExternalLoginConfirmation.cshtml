@@ -22,7 +22,7 @@
             @await Component.InvokeAsync("Languages")
         </div>
         <div class="hidden" id="invalidBirthday" data-value="@Localizer["i18n_Invalid_birthday"]"></div>
-        <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        @await Component.InvokeAsync("Logos")
         <div class="item-title">@Localizer["i18n_update_info"].Value?.ToUpper()</div>
         <form id="form-ExternalLogin" asp-route="ExternalLoginConfirmation">
             <input type="hidden" asp-for="ReturnUrl" />

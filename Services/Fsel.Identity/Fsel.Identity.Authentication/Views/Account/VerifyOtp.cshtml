@@ -31,7 +31,7 @@
             @await Component.InvokeAsync("Languages")
         </div>
 
-        <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo" />
+        @await Component.InvokeAsync("Logos")
         @if (Model.Identity.IsValidEmail())
         {
             <h1 class="title">@Localizer["i18n_verify_account"].Value?.ToUpper()</h1>
