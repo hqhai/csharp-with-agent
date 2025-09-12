@@ -139,26 +139,32 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             ExamPracticeResult examPracticeResult,
             CancellationToken cancellationToken)
         {
+            double ConverBandScore(IList<ExamPracticeAIGradingLanguageModel>? examPracticeAIGradingLanguages) => double.TryParse(examPracticeAIGradingLanguages?[0]?.ExamPracticeAIGradings?[0]?.BandScore, out double bandScore) ? bandScore : ValueDefault;
+
             var gradingAiFeedBackResult = new List<AiFeedbackItemModel>
             {
                 new AiFeedbackItemModel
                 {
                     Criteria = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse)?  EnumMockTestAIType.TaskResponse.ToString() :EnumMockTestAIType.TaskAchievement.ToString(),
+                    BandScore = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse) ? ConverBandScore(resultDictionary[EnumMockTestAIType.TaskResponse]) : ConverBandScore(resultDictionary[EnumMockTestAIType.TaskAchievement]),
                     GradingAlFeedbacks = resultDictionary.ContainsKey(EnumMockTestAIType.TaskResponse) ? resultDictionary[EnumMockTestAIType.TaskResponse] : resultDictionary[EnumMockTestAIType.TaskAchievement]
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.Coherence.ToString(),
+                    BandScore = ConverBandScore(resultDictionary.GetValueOrDefault(EnumMockTestAIType.Coherence)),
                     GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Coherence)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.LexicalResource.ToString(),
+                    BandScore = ConverBandScore(resultDictionary.GetValueOrDefault(EnumMockTestAIType.LexicalResource)),
                     GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.LexicalResource)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.GrammaticalRange.ToString(),
+                    BandScore = ConverBandScore(resultDictionary.GetValueOrDefault(EnumMockTestAIType.GrammaticalRange)),
                     GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.GrammaticalRange)
                 }
             };
@@ -182,27 +188,32 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             ExamPracticeResult examPracticeResult,
             CancellationToken cancellationToken)
         {
+            double ConverBandScore(IList<ExamPracticeAIGradingLanguageModel>? examPracticeAIGradingLanguages) => double.TryParse(examPracticeAIGradingLanguages?[0]?.ExamPracticeAIGradings?[0]?.BandScore, out double bandScore) ? bandScore : ValueDefault;
             List<ExamPracticeAIGradingModel>? GetAIGradings(List<ExamPracticeAIGradingLanguageModel>? list) => list != null && list.Count > 0 ? list[0].ExamPracticeAIGradings?.ToList() : null;
             var gradingAiFeedBackResult = new List<AiFeedbackItemModel>
             {
                 new AiFeedbackItemModel
                 {
                     Criteria =  EnumMockTestAIType.TaskFulfillment.ToString(),
+                    BandScore = ConverBandScore(resultDictionary.GetValueOrDefault(EnumMockTestAIType.TaskFulfillment)),
                     GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.TaskFulfillment)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.Organization.ToString(),
+                    BandScore = ConverBandScore(resultDictionary.GetValueOrDefault(EnumMockTestAIType.Organization)),
                     GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Organization)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.Vocabulary.ToString(),
+                    BandScore = ConverBandScore(resultDictionary.GetValueOrDefault(EnumMockTestAIType.Vocabulary)),
                     GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Vocabulary)
                 },
                 new AiFeedbackItemModel
                 {
                     Criteria = EnumMockTestAIType.Grammar.ToString(),
+                    BandScore = ConverBandScore(resultDictionary.GetValueOrDefault(EnumMockTestAIType.Grammar)),
                     GradingAlFeedbacks = resultDictionary.GetValueOrDefault(EnumMockTestAIType.Grammar)
                 }
             };
