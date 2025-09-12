@@ -11,11 +11,11 @@ namespace Fsel.Identity.Application.Queries.AuthQuery
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.EntityFrameworkCore;
 
-    public abstract class GetExternalConnectsQuery : IRequest<MethodResult<Dictionary<string, bool>>>
+    public class GetExternalConnectsQuery : IRequest<MethodResult<IEnumerable<string>>>
     {
     }
 
-    public class GetExternalConnectsQueryHandler : IRequestHandler<GetExternalConnectsQuery, MethodResult<Dictionary<string, bool>>>
+    public class GetExternalConnectsQueryHandler : IRequestHandler<GetExternalConnectsQuery, MethodResult<IEnumerable<string>>>
     {
         private readonly AuthContext _authContext;
         private readonly UserManager<User> _userManager;
@@ -33,19 +33,17 @@ namespace Fsel.Identity.Application.Queries.AuthQuery
             _authenticationSchemeProvider = authenticationSchemeProvider;
         }
 
-        public async Task<MethodResult<Dictionary<string, bool>>> Handle(GetExternalConnectsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IEnumerable<string>>> Handle(GetExternalConnectsQuery request, CancellationToken cancellationToken)
         {
             var user = await _userRepository.Queryable.FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             if (user != null)
             {
                 var externalLogins = await _userManager.GetLoginsAsync(user);
                 var schemes = await _authenticationSchemeProvider.GetAllSchemesAsync();
-                var externalProviders = schemes.Where(s => !string.IsNullOrEmpty(s.DisplayName))
-                    .ToDictionary(x => x.Name, x => externalLogins.FirstOrDefault(l => l.LoginProvider == x.Name) != null);
-                return new MethodResult<Dictionary<string, bool>>(externalProviders) { StatusCode = 200 };
+                return new MethodResult<IEnumerable<string>>(externalLogins.Select(x => x.ProviderDisplayName)) { StatusCode = 200 };
             }
 
-            return new MethodResult<Dictionary<string, bool>>() { StatusCode = 400 };
+            return new MethodResult<IEnumerable<string>>() { StatusCode = 400 };
         }
     }
 }
