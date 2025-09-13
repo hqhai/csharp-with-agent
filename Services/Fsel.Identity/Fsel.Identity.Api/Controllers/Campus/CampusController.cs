@@ -5,6 +5,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using System.Net;
     using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.Campus;
@@ -34,6 +35,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
         [HttpPost("update-expired-date-for-students")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.Update)]
         public async Task<IActionResult> UpdateExpiredDateForStudentsCampus([FromBody] UpdateExpiredDateForStudentsCampusCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -46,6 +48,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
         [HttpPost("search-students-by-student-ids")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentCampusModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
         public async Task<IActionResult> SearchStudentByStudentIds([FromBody] SearchStudentsByStudentIdsQuery command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -58,6 +61,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
         [HttpPost("add-course-id-for-students")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.Update)]
         public async Task<IActionResult> AddCourseIdForStudents([FromBody] AddCourseIdForStudentsCampusCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);

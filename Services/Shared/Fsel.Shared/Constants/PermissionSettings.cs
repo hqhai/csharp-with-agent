@@ -198,4 +198,15 @@ namespace Fsel.Shared.Constants
         public const string LoginAsUser = $"{ClaimType}.LoginAsUser";
         public const string ViewProgress = $"{ClaimType}.ViewProgress";
     }
+
+    public static class CurriculumManagement
+    {
+        public const string ClaimType = nameof(CurriculumManagement);
+        public const string Add = $"{ClaimType}.Add";
+        public const string View = $"{ClaimType}.View";
+        public const string Update = $"{ClaimType}.Update";
+        public const string Delete = $"{ClaimType}.Delete";
+        public const string AddStudents = $"{ClaimType}.AddStudents";
+        public const string DeleteStudents = $"{ClaimType}.DeleteStudents";
+    }
 }

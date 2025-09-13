@@ -727,5 +727,59 @@
     "status": true,
     "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
     "createdDate": "2025-07-01"
+  },
+  {
+    "id": "b2f659ab-38cf-4dc7-8c0e-d4c9311becd9",
+    "claimValue": "CurriculumManagement.View",
+    "name": "Xem thông tin giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "be4ef82b-ef95-42a0-a15d-e9f9ab36905e",
+    "claimValue": "CurriculumManagement.Add",
+    "name": "Thêm giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "6ea0c374-f82d-4479-ad16-18d70acf92f8",
+    "claimValue": "CurriculumManagement.Update",
+    "name": "Cập nhật giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "68905ab5-68ce-4cc1-a52a-e5ab46879460",
+    "claimValue": "CurriculumManagement.Delete",
+    "name": "Xóa giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "5535786d-216c-4f3e-b25f-e533a1a7ea3b",
+    "claimValue": "CurriculumManagement.AddStudents",
+    "name": "Thêm học sinh vào giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "324bb73f-6459-4d16-b33a-8db6b100e525",
+    "claimValue": "CurriculumManagement.DeleteStudents",
+    "name": "Xóa học sinh khỏi giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
   }
 ]

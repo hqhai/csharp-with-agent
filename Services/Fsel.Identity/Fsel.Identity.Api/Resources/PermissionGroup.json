@@ -220,5 +220,14 @@
     "status": true,
     "menuId": "68365a87-73fa-4926-acb6-24f1403f77ad",
     "createdDate": "2025-07-01"
+  },
+  {
+    "id": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "claimType": "CurriculumManagement",
+    "name": "Quản lý giáo trình",
+    "description": null,
+    "status": true,
+    "menuId": "40217f52-0b4b-4c95-b5f8-c1317deba995",
+    "createdDate": "2025-09-13"
   }
 ]

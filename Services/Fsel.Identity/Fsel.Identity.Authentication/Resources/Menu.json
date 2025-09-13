@@ -653,5 +653,22 @@
       "children": []
     },
     "createdDate": "2025-06-15"
+  },
+  {
+    "id": "40217f52-0b4b-4c95-b5f8-c1317deba995",
+    "name": "Curriculum Management",
+    "category": "LMSAdmin",
+    "index": 33,
+    "config": {
+      "id": 28,
+      "code_title": "Quản lý giáo trình",
+      "link": "/curriculum-management",
+      "icon": "Star.png",
+      "parentId": 0,
+      "code": "",
+      "permission": "Admin,CSO,AdminSchool",
+      "children": []
+    },
+    "createdDate": "2025-09-13"
   }
 ]
