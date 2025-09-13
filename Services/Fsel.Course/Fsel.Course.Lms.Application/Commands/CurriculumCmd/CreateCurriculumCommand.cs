@@ -1,16 +1,17 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Commands.CurriculumCmd
+namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Curriculums;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
+    using Fsel.Course.Lms.Application.Commands.CourseCmd;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -23,22 +24,39 @@ namespace Fsel.Course.Application.Commands.CurriculumCmd
     {
         private readonly ICurriculumRepository _curriculumRepository;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
-        public CreateCurriculumCommandHandler(ICurriculumRepository curriculumRepository, IMapper mapper)
+        public CreateCurriculumCommandHandler(ICurriculumRepository curriculumRepository, IMapper mapper, IMediator mediator)
         {
             _curriculumRepository = curriculumRepository;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<CurriculumModel>> Handle(CreateCurriculumCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<CurriculumModel> methodResult = new MethodResult<CurriculumModel>();
+            var methodResult = new MethodResult<CurriculumModel>();
 
             #region validation
+
             if (string.IsNullOrWhiteSpace(request.CurriculumName))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.CurriculumName), request.CurriculumName);
+                return methodResult;
+            }
+
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            if (currentDate < request.StartDate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCurriculumErrorCode.StartDateCannotBeInThePast), nameof(request.StartDate), request.StartDate);
+                return methodResult;
+            }
+
+            if (request.EndDate < request.StartDate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCurriculumErrorCode.InvalidDateRange), nameof(request.StartDate), request.StartDate);
                 return methodResult;
             }
 
@@ -48,23 +66,45 @@ namespace Fsel.Course.Application.Commands.CurriculumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumCurriculumErrorCode.AlreadyExistCurriculumName), nameof(request.CurriculumName), request.CurriculumName);
                 return methodResult;
             }
-            #endregion
 
-            var curriculums = _mapper.Map<CurriculumConfig>(request);
-            curriculums.CurriculumStatus = EnumCurriculumStatus.NotProgress;
+            #endregion validation
 
             await _curriculumRepository.ExecuteTransactionAsync(async () =>
             {
-                _curriculumRepository.Add(curriculums);
+                var cloneCourseResult = await _mediator.Send(new CloneCourseCommand() { CourseId = request.CourseId });
+                if (!cloneCourseResult.IsOK)
+                {
+                    methodResult.AddError(cloneCourseResult.ErrorMessages);
+                    return methodResult;
+                }
+
+                var cloneCourse = cloneCourseResult.Result;
+
+                if (cloneCourse == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(cloneCourse));
+                    return methodResult;
+                }
+
+                var curriculum = _mapper.Map<CurriculumConfig>(request);
+                curriculum.CourseId = request.CourseId;
+                curriculum.CourseCloneId = cloneCourse.Id;
+
+                if (!curriculum.IsValid())
+                {
+                    methodResult.AddError(curriculum.ErrorMessages);
+                    return methodResult;
+                }
+
+                _curriculumRepository.Add(curriculum);
                 await _curriculumRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                methodResult.Result = _mapper.Map<CurriculumModel>(curriculums);
+                methodResult.Result = _mapper.Map<CurriculumModel>(curriculum);
                 return methodResult;
             });
 
             return methodResult;
         }
     }
-
 }

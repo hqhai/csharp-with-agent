@@ -3,8 +3,10 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Attributes;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
 
@@ -14,28 +16,49 @@ namespace Fsel.Course.Domain.Entities
         /// Tên giáo trình
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [MinLength(1, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [MinLength(2, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        [RegexValid(Regex = "^[A-Za-z0-9,-]{1,100}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [RegexValid(Regex = @"^[\p{L}\p{N}\s,-]{2,100}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? CurriculumName { get; set; }
 
         /// <summary>
         /// Id giáo trình gốc
         /// </summary>
-        public Guid? CourseId { get; set; }
+        public Guid CourseId { get; set; }
+
+        /// <summary>
+        /// Id giáo trình clone
+        /// </summary>
+        public Guid CourseCloneId { get; set; }
 
         /// <summary>
         /// Ngày bắt đầu
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public DateTime? StartDate { get; set; }
+        public DateTime StartDate { get; set; }
 
         /// <summary>
         /// Ngày kết thúc
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public DateTime? EndDate { get; set; }
-        public EnumCurriculumStatus CurriculumStatus { get; set; }
+        public DateTime EndDate { get; set; }
+
+        [NotMapped]
+        public EnumCurriculumStatus CurriculumStatus
+        {
+            get
+            {
+                var now = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+                if (now < StartDate)
+                {
+                    return EnumCurriculumStatus.NotProgress;
+                }
+                else if (now > EndDate)
+                {
+                    return EnumCurriculumStatus.Expired;
+                }
+                return EnumCurriculumStatus.Progress;
+            }
+        }
+
         public ICollection<CurriculumStudent> CurriculumStudent { get; set; } = new List<CurriculumStudent>();
     }
 }

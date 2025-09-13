@@ -80,6 +80,8 @@ builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanatio
 builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
 builder.Services.AddScoped<IClassforumDetailResultHistoryRepository, ClassforumDetailResultHistoryRepository>();
+builder.Services.AddScoped<ICurriculumStudentRepository, CurriculumStudentRepository>();
+builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();

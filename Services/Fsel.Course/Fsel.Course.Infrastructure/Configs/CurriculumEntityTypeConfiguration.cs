@@ -13,11 +13,6 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<CurriculumConfig> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.Property(e => e.CurriculumStatus)
-               .HasMaxLength(100)
-               .HasConversion(
-                   v => v.ToString(),
-                   v => v.EnumParse<EnumCurriculumStatus>());
         }
     }
 }

@@ -2,10 +2,12 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.Curriculums
 {
-    public class CreateCurriculumCommandModel
+    using System;
+
+    public class UpdateCurriculumCommandModel
     {
+        public Guid Id { get; set; }
         public string? CurriculumName { get; set; }
-        public Guid CourseId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
     }

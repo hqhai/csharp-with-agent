@@ -17,12 +17,6 @@ namespace Fsel.Course.Infrastructure.Configs
                 .WithMany(c => c.CurriculumStudent)
                 .HasForeignKey(e => e.CurriculumId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            builder.Property(e => e.CurriculumStudentStatus)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumCurriculumStudent>());
         }
     }
 }

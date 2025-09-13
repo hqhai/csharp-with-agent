@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -85,5 +86,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/course-integration/info-course-integration")]
         Task<IApiResponse<MethodResult<IList<InfoCourseIntegrationModel>>>> GetInfoCourseIntegration([FromBody] CourseIntegrationQueryModel query);
+
+        [Post("/v1/curriculum/add-students-to-curriculum")]
+        Task<IApiResponse<MethodResult<bool>>> AddStudentToCurriculum([FromBody] AddStudentsToCurriculumCommandModel query);
     }
 }
