@@ -20,7 +20,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/course")]
     [ApiController]
-    [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+    [Permission]
     public class CourseController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -36,6 +36,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> GetCoursesByIds([FromBody] IList<Guid> courseIds)
         {
             MethodResult<IList<CourseModel>> queryResult = await _mediator.Send(new GetCoursesByIdsQuery { CourseIds = courseIds }).ConfigureAwait(false);
@@ -48,6 +49,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> Search([FromQuery] SearchCourseTimeQuery query)
         {
             MethodResult<PagingItemsModel<CourseSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -60,6 +62,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("get-course-by-code/{code}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> GetCourseByCode([FromRoute] string code)
         {
             MethodResult<CourseModel> queryResult = await _mediator.Send(new GetCourseByCodeQuery { CourseCode = code }).ConfigureAwait(false);
@@ -72,6 +75,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> GetCourseById([FromRoute] Guid id)
         {
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseLevelQuery { CourseId = id }).ConfigureAwait(false);
@@ -84,6 +88,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpPost("change-course-level")]
         [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(StudentManagement.Update)]
         public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelByAdminCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -96,6 +101,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpPost("retake-course")]
         [ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(StudentManagement.Update)]
         public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultByAdminCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -108,6 +114,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpPost("get-course-ids-by-class-forum-result-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<CourseClassForumResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> GetCourseIdsByClassForumResultIds([FromBody] GetCourseIdsByClassForumResultIdsQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
