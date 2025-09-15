@@ -150,7 +150,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             // Base query
             var query = _examPracticeSectionRepository.Queryable
                 .AsNoTracking()
-                .Where(x => x.ExamPracticeId == examPractice.Id);
+                .Where(x => x.ExamPracticeId == examPractice.Id && !x.ParentExamPracticeSectionId.HasValue);
 
             if (examPractice.Type != EnumExamPracticeType.ExamPractice)
             {
