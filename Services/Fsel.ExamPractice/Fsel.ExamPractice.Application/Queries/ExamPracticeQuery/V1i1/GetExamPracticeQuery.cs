@@ -39,7 +39,7 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery.V1i1
             var examPractice = await _examPracticeRepository.Queryable.Where(x => x.OriginalId == request.OriginalId && x.VersionStatus == EnumVersionStatus.LastVersion && !x.IsArchive).Select(x => new
             {
                 ExamPractice = x,
-                ExamPracticeSections = x.ExamPracticeSections.OrderBy(x => x.DisplayOrder).ToList(),
+                ExamPracticeSections = x.ExamPracticeSections.Where(x => !x.ParentExamPracticeSectionId.HasValue).OrderBy(x => x.DisplayOrder).ToList(),
                 TotalAttempts = x.ExamPracticeResults.Count()
             }).FirstOrDefaultAsync(cancellationToken);
             if (examPractice == null)
