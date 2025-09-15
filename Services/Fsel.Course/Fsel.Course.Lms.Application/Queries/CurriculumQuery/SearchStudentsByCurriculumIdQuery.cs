@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -71,16 +72,54 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                 return methodResult;
             }
 
-            var lessonResults = await _lessonResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Where(p => p.CourseId == curriculum.CourseCloneId && p.Status == EnumResultStatus.Done).ToListAsync(cancellationToken);
+            var lessonResults = await _lessonResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Where(p => p.CourseId == curriculum.CourseCloneId).ToListAsync(cancellationToken);
 
-            var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests).ThenInclude(p => p.Unit).ThenInclude(p => p.UnitLessons).FirstOrDefaultAsync(p => p.Id == curriculum.CourseCloneId, cancellationToken);
+            var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests).ThenInclude(p => p.Unit).ThenInclude(p => p.UnitLessons).ThenInclude(p => p.Lesson).FirstOrDefaultAsync(p => p.Id == curriculum.CourseCloneId, cancellationToken);
+
+            var courseResults = await _courseResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Where(p => p.CourseId == curriculum.CourseCloneId).ToListAsync(cancellationToken);
 
             var totalLesson = course?.CourseUnitMockTests.Select(p => p.Unit).SelectMany(p => p.UnitLessons).Count();
 
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
             students.Items.ForEach(p =>
             {
-                p.TotalLessonDone = lessonResults.Where(x => x.StudentId == p.StudentId).Count();
-                p.TotalLesson = totalLesson ?? 0;
+                var studentCampusLearningModel = new StudentCampusLearningModel()
+                {
+                    CourseLevel = curriculum.CourseLevel,
+                    CourseType = curriculum.CourseType,
+                    CourseName = curriculum.CourseName
+                };
+
+                var courseResult = courseResults.FirstOrDefault(x => x.StudentId == p.StudentId);
+                var lessonResult = lessonResults.Where(x => x.Status != EnumResultStatus.Unfinished).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
+
+                if (curriculum.StartDate > currentDate)
+                {
+                    studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.NotStarted;
+                }
+                else if (courseResult == null)
+                {
+                    studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.NotJoined;
+                }
+                else
+                {
+                    if (courseResult.Status == EnumResultStatus.Done)
+                    {
+                        studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.Completed;
+                    }
+                    else
+                    {
+                        var lesson = course?.CourseUnitMockTests.Select(u => u.Unit).SelectMany(ul => ul.UnitLessons).FirstOrDefault(x => x.LessonId == lessonResult?.LessonId)?.Lesson;
+                        studentCampusLearningModel.LessonName = lesson?.Name;
+                        studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.InProgress;
+                    }
+                }
+
+                studentCampusLearningModel.TotalLessonDone = lessonResults.Where(x => x.StudentId == p.StudentId && x.Status == EnumResultStatus.Done).Count();
+                studentCampusLearningModel.TotalLesson = totalLesson ?? 0;
+
+                p.Students = new List<StudentCampusLearningModel>() { studentCampusLearningModel };
             });
 
             methodResult.Result = students;
