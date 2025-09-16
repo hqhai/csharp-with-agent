@@ -9,6 +9,7 @@ using Fsel.System.Application.Queues.Publisher;
 using Fsel.System.Application.Services.AIServices;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.DictionaryServices;
+using Fsel.System.Application.Services.FFmpegServices;
 using Fsel.System.Application.Services.GoogleSheetServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.SenderServices;
@@ -112,13 +113,13 @@ builder.Services.AddSingleton<IGoogleSheetService>(provider =>
     return new GoogleSheetService(ResourceSettings.I18NCredentialsFilePath);
 });
 
-
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IDictionaryService), appSetting?.Services?.DictionaryApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
+builder.AddRefitClients(typeof(IFFmpegServices), appSetting?.Services?.FFmpegApiUrl);
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
@@ -127,8 +128,6 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
         httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {appSetting?.OpenAiConfig?.ApiKey}");
     }
 });
-
-
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>
