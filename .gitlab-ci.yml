@@ -1600,7 +1600,7 @@ build-main-ufm-realtime:
     - Services/Fsel.Realtime/**/*
     - Services/Shared/**/*
     refs:
-    - main-
+    - main-ufm
 
 build-prod-realtime:
   stage: build-image
