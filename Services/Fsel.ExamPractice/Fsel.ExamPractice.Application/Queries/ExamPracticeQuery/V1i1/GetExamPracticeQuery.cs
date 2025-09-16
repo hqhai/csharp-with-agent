@@ -73,7 +73,7 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery.V1i1
                     sub.Questions = sub.Questions.OrderBy(q => q.CreatedDate).ToList();
                     sub.ExamPracticeAISettings = sub.ExamPracticeAISettings.OrderBy(ai => ai.CreatedDate).ToList();
                 }
-                if (subSections.Any() && section.ExamPracticeId.HasValue)
+                if (subSections.Any() && !section.ParentExamPracticeSectionId.HasValue)
                 {
                     result.Add(section);
 
@@ -82,7 +82,7 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery.V1i1
                 }
             }
 
-            if (!result.Any() && sections.Any() && sections.All(x => x.ExamPracticeId.HasValue))
+            if (!result.Any() && sections.Any() && sections.All(x => !x.ParentExamPracticeSectionId.HasValue))
             {
                 result = await _examPracticeSectionRepository.Queryable.Include(x => x.Questions)
                     .Include(x => x.ExamPracticeAISettings)
