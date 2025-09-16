@@ -25,7 +25,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             ArgumentNullException.ThrowIfNull(examPracticeSections);
 
-            foreach (var examPracticeSection in examPracticeSections)
+            foreach (var examPracticeSection in examPracticeSections.Where(x => !x.ParentExamPracticeSectionId.HasValue))
             {
                 _countQuestion = 0;
                 CountQuestion(examPracticeSection.CourseSkill, examPracticeSection.Questions);
@@ -99,7 +99,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             ArgumentNullException.ThrowIfNull(examPracticeSections);
 
-            foreach (var examPracticeSection in examPracticeSections)
+            sforeach(var examPracticeSection in examPracticeSections)
             {
                 if (examPracticeSection.CourseSkill.HasValue && examPracticeSection.Config != null)
                 {

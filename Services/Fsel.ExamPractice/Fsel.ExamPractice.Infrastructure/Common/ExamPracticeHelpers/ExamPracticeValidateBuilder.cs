@@ -47,7 +47,6 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             return this;
         }
 
-
         public async Task<ExamPracticeValidateBuilder> ValidateDuplicateTestAsync(Guid originalId)
         {
             var isDuplicatedExamPractice = await _examPracticeRepository.Queryable.AsQueryable().AnyAsync(u => u.Code == _request.Code && u.OriginalId != originalId).ConfigureAwait(false);
@@ -64,7 +63,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             ArgumentNullException.ThrowIfNull(examPracticeSectionRepository);
 
             var examPracticeSections = await examPracticeSectionRepository.Queryable
-                                                                          .Where(x => x.ExamPracticeId == examPracticeId)
+                                                                          .Where(x => x.ExamPracticeId == examPracticeId && !x.ParentExamPracticeSectionId.HasValue)
                                                                           .AsQueryable()
                                                                           .ToListAsync();
 
