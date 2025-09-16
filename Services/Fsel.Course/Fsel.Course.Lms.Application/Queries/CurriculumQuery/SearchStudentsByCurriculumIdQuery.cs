@@ -72,54 +72,15 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                 return methodResult;
             }
 
-            var lessonResults = await _lessonResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Where(p => p.CourseId == curriculum.CourseCloneId).ToListAsync(cancellationToken);
+            studentIds = students.Items?.Select(x => x.StudentId).ToList();
 
-            var course = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests).ThenInclude(p => p.Unit).ThenInclude(p => p.UnitLessons).ThenInclude(p => p.Lesson).FirstOrDefaultAsync(p => p.Id == curriculum.CourseCloneId, cancellationToken);
+            var studentsLearningProgress = await _mediator.Send(new GetStudentsLearningProgressQuery() { StudentIds = studentIds }, cancellationToken);
 
-            var courseResults = await _courseResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Where(p => p.CourseId == curriculum.CourseCloneId).ToListAsync(cancellationToken);
-
-            var totalLesson = course?.CourseUnitMockTests.Select(p => p.Unit).SelectMany(p => p.UnitLessons).Count();
-
-            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            var studentsLearningProgressModel = studentsLearningProgress.Result;
 
             students.Items.ForEach(p =>
             {
-                var studentCampusLearningModel = new StudentCampusLearningModel()
-                {
-                    CourseLevel = curriculum.CourseLevel,
-                    CourseType = curriculum.CourseType,
-                    CourseName = curriculum.CourseName
-                };
-
-                var courseResult = courseResults.FirstOrDefault(x => x.StudentId == p.StudentId);
-                var lessonResult = lessonResults.Where(x => x.Status != EnumResultStatus.Unfinished).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
-
-                if (curriculum.StartDate > currentDate)
-                {
-                    studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.NotStarted;
-                }
-                else if (courseResult == null)
-                {
-                    studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.NotJoined;
-                }
-                else
-                {
-                    if (courseResult.Status == EnumResultStatus.Done)
-                    {
-                        studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.Completed;
-                    }
-                    else
-                    {
-                        var lesson = course?.CourseUnitMockTests.Select(u => u.Unit).SelectMany(ul => ul.UnitLessons).FirstOrDefault(x => x.LessonId == lessonResult?.LessonId)?.Lesson;
-                        studentCampusLearningModel.LessonName = lesson?.Name;
-                        studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.InProgress;
-                    }
-                }
-
-                studentCampusLearningModel.TotalLessonDone = lessonResults.Where(x => x.StudentId == p.StudentId && x.Status == EnumResultStatus.Done).Count();
-                studentCampusLearningModel.TotalLesson = totalLesson ?? 0;
-
-                p.Students = new List<StudentCampusLearningModel>() { studentCampusLearningModel };
+                p.Students = studentsLearningProgressModel?.Where(x => x.StudentId == p.StudentId).ToList();
             });
 
             methodResult.Result = students;

@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Refit;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/curriculum")]
@@ -105,7 +106,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         }
 
         /// <summary>
-        /// search
+        /// get by id
         /// </summary>
         [HttpGet("get-by-id")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
@@ -125,6 +126,19 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(CurriculumManagement.View)]
         public async Task<IActionResult> SearchStudents([FromQuery] SearchStudentsByCurriculumIdQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get students learning progress
+        /// </summary>
+        [HttpPost("get-students-learning-progress")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
+        public async Task<IActionResult> GetStudentsLearningProgress([FromBody] GetStudentsLearningProgressQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

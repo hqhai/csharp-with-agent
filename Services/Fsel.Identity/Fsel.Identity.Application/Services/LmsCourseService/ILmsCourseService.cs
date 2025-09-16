@@ -89,5 +89,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/curriculum/add-students-to-curriculum")]
         Task<IApiResponse<MethodResult<bool>>> AddStudentToCurriculum([FromBody] AddStudentsToCurriculumCommandModel query);
+
+        [Post("/v1/curriculum/get-students-learning-progress")]
+        Task<IApiResponse<MethodResult<IList<StudentCampusLearningProgressModel>>>> GetStudentsLearningProgress([FromBody] GetStudentsLearningProgressQueryModel query);
     }
 }
