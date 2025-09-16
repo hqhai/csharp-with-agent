@@ -285,23 +285,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
                             {
                                 froms.Add(x.From);
                             }
-                            string pattern = @"^[a-zA-Z0-9.]{1,5}$";
-                            bool isValid = Regex.IsMatch(x.Equal ?? string.Empty, pattern);
-                            if (!isValid)
-                            {
-                                AddErrorResults(new ErrorResult
-                                {
-                                    ErrorCode = nameof(EnumSystemErrorCode.InValidFormat),
-                                    Errors =
-                            {
-                                new Error
-                                    {
-                                        FieldName = nameof(x.Equal),
-                                    }
-                            },
-                                });
-                                result = false;
-                            }
                         });
                     }
                     if (p.TestSections != null && p.TestSections.Any())

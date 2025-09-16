@@ -105,7 +105,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
     {
         public int From { get; set; }
 
-        public string? Equal { get; set; }
+        public int? Equal { get; set; }
     }
 
     public class ReportContentBankConfig
