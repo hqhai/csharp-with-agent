@@ -3,7 +3,15 @@
 namespace Fsel.Course.Lms.Api.Controllers.Campus
 {
     using System.Net;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
+    using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
+    using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
