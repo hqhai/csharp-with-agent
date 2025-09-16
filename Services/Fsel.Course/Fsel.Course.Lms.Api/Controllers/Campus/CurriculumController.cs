@@ -145,18 +145,5 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
-        /// <summary>
-        /// search
-        /// </summary>
-        [HttpGet("search-course")]
-        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseSearchModel>>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(CurriculumManagement.View)]
-        public async Task<IActionResult> Search([FromQuery] SearchCourseQuery query)
-        {
-            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
     }
 }
