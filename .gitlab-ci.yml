@@ -518,6 +518,7 @@ build-pre-prod-hangfire:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-hangfire:
   stage: build-image
   tags:
@@ -695,6 +696,7 @@ build-pre-prod-interaction:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-interaction:
   stage: build-image
   tags:
@@ -872,6 +874,7 @@ build-pre-prod-lcmsapi:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-lcmsapi:
   stage: build-image
   tags:
@@ -1049,6 +1052,7 @@ build-pre-prod-lmsapi:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-lmsapi:
   stage: build-image
   tags:
@@ -1226,6 +1230,7 @@ build-pre-prod-notification:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-notification:
   stage: build-image
   tags:
@@ -1403,6 +1408,7 @@ build-pre-prod-ordering:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-ordering:
   stage: build-image
   tags:
@@ -1580,6 +1586,7 @@ build-pre-prod-realtime:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-realtime:
   stage: build-image
   tags:
@@ -1757,6 +1764,7 @@ build-pre-prod-sender:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-sender:
   stage: build-image
   tags:
@@ -1934,6 +1942,7 @@ build-pre-prod-storage:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-storage:
   stage: build-image
   tags:
@@ -2466,6 +2475,7 @@ build-pre-prod-identity:
     - Services/Shared/**/*
     refs:
     - pre-production
+
 build-main-ufm-identity:
   stage: build-image
   tags:
@@ -2733,6 +2743,7 @@ build-staging-exam-practice:
     - Services/Shared/**/*
     refs:
     - staging
+
 build-main-ufm-exam-practice:
   stage: build-image
   tags:
