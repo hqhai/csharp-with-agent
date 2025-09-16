@@ -31,6 +31,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         }
 
         /// <summary>
+        /// search
+        /// </summary>
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchCourseQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get List Courses by ids
         /// </summary>
         [HttpPost]
