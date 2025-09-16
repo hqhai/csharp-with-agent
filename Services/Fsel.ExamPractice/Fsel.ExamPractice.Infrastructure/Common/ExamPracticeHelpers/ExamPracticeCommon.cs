@@ -99,7 +99,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             ArgumentNullException.ThrowIfNull(examPracticeSections);
 
-            sforeach(var examPracticeSection in examPracticeSections)
+            foreach (var examPracticeSection in examPracticeSections)
             {
                 if (examPracticeSection.CourseSkill.HasValue && examPracticeSection.Config != null)
                 {
