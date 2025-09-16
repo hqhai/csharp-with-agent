@@ -6,8 +6,10 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.CurriculumCmd;
+    using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
     using Fsel.Course.Lms.Application.Queries.CurriculumQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
@@ -139,6 +141,19 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(CurriculumManagement.View)]
         public async Task<IActionResult> GetStudentsLearningProgress([FromBody] GetStudentsLearningProgressQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// search
+        /// </summary>
+        [HttpGet("search-course")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
+        public async Task<IActionResult> Search([FromQuery] SearchCourseQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
