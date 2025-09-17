@@ -66,17 +66,17 @@ namespace Fsel.Identity.Application.Commands.Campus
 
             Action<ExcelWorksheet, Dictionary<string, int?>?, IList<ValidateExcelModel>> errorHandlerAction = (worksheet, columnIndexes, errors) =>
             {
-                worksheet.Cells[1, 7].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 7].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 7].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 7].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 7].Value = ErrorMessage;
-                worksheet.Cells[1, 7].Style.Font.Bold = true;
+                worksheet.Cells[1, 3].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 3].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 3].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 3].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 3].Value = ErrorMessage;
+                worksheet.Cells[1, 3].Style.Font.Bold = true;
                 foreach (var error in errors.GroupBy(x => x.RowIndex).Select(x => x).OrderBy(x => x.Key))
                 {
                     var row = error.Key;
 
-                    int lastColumn = 7;
+                    int lastColumn = 3;
 
                     // Tạo biến lưu trữ dữ liệu dòng hiện tại
                     List<object?> rowData = new List<object?>();
