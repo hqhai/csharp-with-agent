@@ -77,7 +77,8 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                             CourseLevel = c.CourseClone.CourseLevel,
                             CourseType = c.CourseClone.CourseType,
                             CourseName = c.CourseClone.Name,
-                            StudentId = p
+                            StudentId = p,
+                            CurriculumId = c.Curriculum.Id
                         };
 
                         var lessonResults = lessonResultEntities.Where(x => x.StudentId == p && x.CourseId == c.Curriculum.CourseCloneId).ToList();
@@ -115,7 +116,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                     });
                 }
             });
-
+            methodResult.Result = studentCampusLearningModels;
             return methodResult;
         }
     }
