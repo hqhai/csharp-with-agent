@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             students.Items.ForEach(p =>
             {
-                p.Students = studentsLearningProgressModel?.Where(x => x.StudentId == p.StudentId && x.CurriculumId == curriculum.Id).ToList();
+                p.LearningProgresses = studentsLearningProgressModel?.Where(x => x.StudentId == p.StudentId && x.CurriculumId == curriculum.Id).ToList();
             });
 
             methodResult.Result = students;
