@@ -43,6 +43,18 @@ namespace Fsel.System.Api.Controllers.Student
         /// <summary>
         /// get quest boards
         /// </summary>
+        [HttpGet("dash-board/quest-boards")]
+        [ProducesResponseType(typeof(MethodResult<QuestBoardModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets()
+        {
+            var commandResult = await _mediator.Send(new GetQuestBoardStudentQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get quest boards
+        /// </summary>
         [HttpPost("receive-tokens")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

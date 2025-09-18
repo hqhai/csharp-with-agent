@@ -1,0 +1,42 @@
+{
+  "periodMinutes": 60,
+  "rules": [
+    {
+      "min": 0,
+      "max": 30,
+      "messages": [
+        "i18nProgressChartStart",
+        "i18nProgressChartSmallSteps",
+        "i18nProgressChartJustStarted",
+        "i18nProgressChartEveryStep"
+      ]
+    },
+    {
+      "min": 30,
+      "max": 50,
+      "messages": [
+        "i18nProgressChartRightDirection",
+        "i18nProgressChartProgressing",
+        "i18nProgressChartKeepPace",
+        "i18nProgressChartFoundation"
+      ]
+    },
+    {
+      "min": 51,
+      "max": 75,
+      "messages": [
+        "i18nProgressChartSkillImproving",
+        "i18nProgressChartFastProgress",
+        "i18nProgressChartSpeedingUp"
+      ]
+    },
+    {
+      "min": 75,
+      "messages": [
+        "i18nProgressChartHighLevel",
+        "i18nProgressChartTopNotch",
+        "i18nProgressChartAlmostExpert"
+      ]
+    }
+  ]
+}

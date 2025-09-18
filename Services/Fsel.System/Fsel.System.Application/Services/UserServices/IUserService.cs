@@ -100,5 +100,9 @@ namespace Fsel.System.Application.Services.UserServices
 
         [Post("/v1/student/get-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentsByUserIds([Body] IList<Guid> ids);
+
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        [Get("/v1/student/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdWithCacheAsync([FromRoute] Guid id);
     }
 }

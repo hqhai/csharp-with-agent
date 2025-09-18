@@ -25,6 +25,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? ParentEmail { get; set; }
         public string? ParentPhoneNumber { get; set; }
         public long NumberOfToken { get; set; }
+        public long NumberOfTokenReceived { get; set; }
         public string? Province { get; set; }
         public string? District { get; set; }
         public Guid? ProvinceId { get; set; }
