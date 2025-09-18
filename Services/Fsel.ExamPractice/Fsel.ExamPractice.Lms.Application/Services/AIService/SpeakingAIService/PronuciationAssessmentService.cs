@@ -130,6 +130,15 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                 // Đảm bảo sử dụng IPA
                 pronunciationConfig.PhonemeAlphabet = "IPA";
 
+                if (string.IsNullOrWhiteSpace(localFilePath) || !File.Exists(localFilePath))
+                {
+                    _logger.LogInformation($"Audio file not found: {localFilePath}");
+                }
+                else
+                {
+                    _logger.LogInformation($"Audio file : {localFilePath}");
+                }
+
                 using var audioConfig = AudioConfig.FromWavFileInput(localFilePath);
                 using var recognizer = new SpeechRecognizer(_speechConfig, audioConfig);
 
@@ -151,6 +160,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                 {
                     if (localFilePath != audioFilePath && File.Exists(localFilePath))
                     {
+                        _logger.LogInformation($"Đã xóa File Audio file : {localFilePath}");
                         File.Delete(localFilePath);
                     }
                 }
