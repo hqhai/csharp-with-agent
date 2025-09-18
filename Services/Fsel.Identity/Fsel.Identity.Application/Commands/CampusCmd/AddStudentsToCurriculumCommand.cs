@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.Campus
+namespace Fsel.Identity.Application.Commands.CampusCmd
 {
     using System.Drawing;
     using System.Globalization;
@@ -16,10 +16,10 @@ namespace Fsel.Identity.Application.Commands.Campus
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Campus;
-    using Fsel.Shared.Models.ShareModels;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using Kros.Extensions;
     using MediatR;
+    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
@@ -203,7 +203,8 @@ namespace Fsel.Identity.Application.Commands.Campus
 
             if (result.Stream != null)
             {
-                methodResult.AddErrorBadRequest(DataError);
+                methodResult.Result = result.Stream;
+                methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
 
@@ -228,6 +229,7 @@ namespace Fsel.Identity.Application.Commands.Campus
                 return methodResult;
             }
 
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

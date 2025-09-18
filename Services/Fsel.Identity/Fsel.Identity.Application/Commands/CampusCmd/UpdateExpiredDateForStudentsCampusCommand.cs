@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.Campus
+namespace Fsel.Identity.Application.Commands.CampusCmd
 {
     using System.Collections.Concurrent;
     using System.Threading;

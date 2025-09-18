@@ -8,7 +8,6 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Identity.Application.Commands.Campus;
     using Fsel.Identity.Application.Commands.CampusCmd;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.CampusQuery;
@@ -79,7 +78,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
         public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] AddStudentsToCurriculumCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            MethodResult<Stream> commandResult = await _mediator.Send(new AddStudentsToCurriculumCommand { FormFile = command.FormFile }).ConfigureAwait(false);
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             if (!commandResult.IsOK || commandResult.Result == null)
             {
                 return commandResult.GetActionResult();
