@@ -17,33 +17,30 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
-    public class ClassForumPronunciationCommand : IRequest<MethodResult<bool>>
+    public class ClassForumPronunciationContinuousCommand : IRequest<MethodResult<bool>>
     {
         public Guid ClassForumDetailResultId { get; set; }
     }
 
-    public class ClassForumPronunciationCommandHandler : IRequestHandler<ClassForumPronunciationCommand, MethodResult<bool>>
+    public class ClassForumPronunciationContinuousCommandHandler : IRequestHandler<ClassForumPronunciationContinuousCommand, MethodResult<bool>>
     {
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
-        private readonly IPronuciationAssessmentService _pronuciationService;
         private readonly IContinuousPronunciationAssessmentService _continuousPronuciationService;
-        private readonly ILogger<ClassForumPronunciationCommand> _logger;
+        private readonly ILogger<ClassForumPronunciationContinuousCommand> _logger;
         private readonly SubmitAIResponsePublisher _submitAIResponsePublisher;
 
-        public ClassForumPronunciationCommandHandler(IClassForumDetailResultRepository classForumDetailResultRepository,
-                                                     IPronuciationAssessmentService pronuciationService,
-                                                     ILogger<ClassForumPronunciationCommand> logger,
-                                                     SubmitAIResponsePublisher submitAIResponsePublisher,
-                                                     IContinuousPronunciationAssessmentService continuousPronuciationService)
+        public ClassForumPronunciationContinuousCommandHandler(IClassForumDetailResultRepository classForumDetailResultRepository,
+                                                     IContinuousPronunciationAssessmentService continuousPronuciationService,
+                                                     ILogger<ClassForumPronunciationContinuousCommand> logger,
+                                                     SubmitAIResponsePublisher submitAIResponsePublisher)
         {
             _classForumDetailResultRepository = classForumDetailResultRepository;
-            _pronuciationService = pronuciationService;
+            _continuousPronuciationService = continuousPronuciationService;
             _logger = logger;
             _submitAIResponsePublisher = submitAIResponsePublisher;
-            _continuousPronuciationService = continuousPronuciationService;
         }
 
-        public async Task<MethodResult<bool>> Handle(ClassForumPronunciationCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(ClassForumPronunciationContinuousCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
@@ -68,17 +65,16 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
 
             try
             {
-
                 // Kiểm tra định dạng file và chuyển đổi nếu cần
                 string extension = Path.GetExtension(filePath).ToLower(CultureInfo.InvariantCulture);
                 try
                 {
-                    _logger.LogInformation("Đang đánh giá phát âm cho file: {FilePath}", filePath);
-                    var response = await _continuousPronuciationService.AssessPronunciationFromFileContinuousAsync(filePath, workContent);
+                    _logger.LogInformation("Đang đánh giá phát âm với continuous recognition cho file: {FilePath}", filePath);
+                    var response = await _continuousPronuciationService.AssessPronunciationFromFileContinuousAsync(filePath, workContent, cancellationToken: cancellationToken);
 
                     if (!string.IsNullOrEmpty(response.ErrorMessage))
                     {
-                        _logger.LogError("Lỗi đánh giá phát âm: {Error}", response.ErrorMessage);
+                        _logger.LogError("Lỗi đánh giá phát âm continuous: {Error}", response.ErrorMessage);
                     }
 
                     await _classForumDetailResultRepository.ExecuteTransactionAsync(async () =>
@@ -127,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Lỗi khi đánh giá phát âm: {Message}", ex.Message);
+                _logger.LogError(ex, "Lỗi khi đánh giá phát âm continuous: {Message}", ex.Message);
             }
 
             return methodResult;
