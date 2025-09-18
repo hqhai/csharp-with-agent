@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.DashboardModels
         public Guid? UnitId { get; set; }
         public Guid? VideoId { get; set; }
         public Guid? ObjectId { get; set; }
+        public Guid CourseId { get; set; }
         public EnumLessonOverviewStatus? Status { get; set; }
         public bool IsUnitFirst { get; set; }
         public string? Type { get; set; }

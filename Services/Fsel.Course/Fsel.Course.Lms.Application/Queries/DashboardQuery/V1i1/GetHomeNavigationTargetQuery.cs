@@ -206,12 +206,12 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 .ThenBy(x => x.CreatedDate)
                 .ToList();
 
-            var firstMockTest = orderedMockTests.FirstOrDefault();
-            var firstUnitId = firstMockTest?.UnitId;
+            var firstUnitMockTest = orderedMockTests.FirstOrDefault();
+            var firstUnitId = firstUnitMockTest?.UnitId;
 
             Guid? unitId = lessonResult?.UnitId ?? firstUnitId;
 
-            CourseUnitMockTest? currentMockTest = firstMockTest;
+            CourseUnitMockTest? currentMockTest = firstUnitMockTest;
 
             // Nếu unit hiện tại đã Done => lấy unit tiếp theo
             if (lessonResult != null && await _unitResultRepository.IsDoneAsync(lessonResult))
@@ -223,6 +223,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             var overview = new LessonHomeModel
             {
                 UnitId = unitId,
+                CourseId = course.Id,
                 IsUnitFirst = unitId == firstUnitId
             };
 

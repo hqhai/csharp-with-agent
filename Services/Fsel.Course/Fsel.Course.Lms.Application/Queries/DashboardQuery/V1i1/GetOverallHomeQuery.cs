@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             overallHome.ProgressPercent = NumberHelper.GetPercent(currentProgress, progress);
 
             // 4) UnitResult mới nhất
-            var unitResult = await _unitResultRepository.Queryable
+            var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit)
                 .Where(x => x.StudentId == student.Id && x.CourseId == courseResult.CourseId)
                 .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                 .AsNoTracking()
@@ -100,6 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
+            overallHome.Name = unitResult.Unit?.Name;
 
             // 5) Lấy song song các status của LessonResult & MockTestResult trong Unit hiện tại
             var lessonStatuses = await _lessonResultRepository.Queryable
@@ -122,8 +123,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             var allStatuses = lessonStatuses.Concat(mockStatuses).ToList();
             var total = allStatuses.Count;
             var done = allStatuses.Count(s => s == EnumResultStatus.Done);
-            overallHome.Percent = NumberHelper.GetPercent(done, total);
-
+            overallHome.ProgressUnitPercent = NumberHelper.GetPercent(done, total);
             // 7) Trả kết quả
             methodResult.Result = overallHome;
             methodResult.StatusCode = StatusCodes.Status200OK;

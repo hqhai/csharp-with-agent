@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// <summary>
         /// Lấy biểu đồ radar năng lực (competency radar) của học viên.
         /// </summary>
-        [HttpGet("ovarall-home")]
+        [HttpGet("overall-home")]
         [ProducesResponseType(typeof(MethodResult<OverallHomeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetOverallHome()
