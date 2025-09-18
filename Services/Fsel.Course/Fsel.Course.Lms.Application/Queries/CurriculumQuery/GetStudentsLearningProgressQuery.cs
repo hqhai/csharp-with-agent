@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                         var lessonResult = lessonResults.Where(x => x.Status != EnumResultStatus.Unfinished).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
                         var course = courses.FirstOrDefault(x => x.Id == c.Curriculum.CourseCloneId);
                         var courseResult = courseResultEntities.FirstOrDefault(x => x.StudentId == p && x.CourseId == c.Curriculum.CourseId);
-                        var totalLesson = course?.CourseUnitMockTests.Select(p => p.Unit).SelectMany(p => p.UnitLessons).Count();
+                        var totalLesson = course?.CourseUnitMockTests.Where(p => p.Unit != null).Select(p => p.Unit).Where(p => p.UnitLessons != null && p.UnitLessons.Any()).SelectMany(p => p.UnitLessons).Count();
 
                         if (c.Curriculum.StartDate > currentDate)
                         {
