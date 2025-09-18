@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             var courseResults = await _courseResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Where(p => p.CourseId == curriculum.CourseCloneId).ToListAsync(cancellationToken);
 
-            var totalLesson = course?.CourseUnitMockTests.Select(p => p.Unit).SelectMany(p => p.UnitLessons).Count();
+            var totalLesson = course?.CourseUnitMockTests.Where(p => p.Unit != null).Select(p => p.Unit).Where(p => p.UnitLessons != null && p.UnitLessons.Any()).SelectMany(p => p.UnitLessons).Count();
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
