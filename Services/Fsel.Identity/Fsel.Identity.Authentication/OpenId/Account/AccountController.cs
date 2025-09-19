@@ -38,6 +38,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
+using PhoneNumbers;
 using static IdentityServer4.IdentityServerConstants;
 
 namespace Fsel.Identity.Authentication.OpenId.Account
@@ -177,6 +178,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                             {
                                 ModelState.TryAddModelError(error, _localizer[error]);
                             }
+                            return View(request);
                         }
                         return await LoginWithoutPassword(request.Identity, request.ReturnUrl);
                     }
