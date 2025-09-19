@@ -136,7 +136,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// </summary>
         /// <param name="referenceText">Văn bản tham chiếu</param>
         /// <returns>Kết quả đánh giá phát âm</returns>
-        public async Task<PronunciationAssessmentModel> AssessPronunciationFromMicrophoneAsync(string referenceText)
+        public async Task<PronunciationAssessmentModel> AssessPronunciationFromMicrophoneAsync(string referenceText, Guid unitId = default)
         {
             if (string.IsNullOrEmpty(referenceText))
             {
@@ -247,7 +247,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// <param name="audioFilePath">Đường dẫn đến file âm thanh</param>
         /// <param name="referenceText">Văn bản tham chiếu</param>
         /// <returns>Kết quả đánh giá phát âm</returns>
-        public async Task<PronunciationAssessmentModel> AssessPronunciationFromFileAsync(string audioFilePath, string referenceText)
+        public async Task<PronunciationAssessmentModel> AssessPronunciationFromFileAsync(string audioFilePath, string referenceText, Guid unitId = default)
         {
             if (string.IsNullOrEmpty(audioFilePath))
                 throw new ArgumentNullException(nameof(audioFilePath), "Đường dẫn file âm thanh không được để trống");
