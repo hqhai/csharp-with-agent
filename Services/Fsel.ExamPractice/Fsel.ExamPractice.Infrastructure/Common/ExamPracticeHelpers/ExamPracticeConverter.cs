@@ -69,7 +69,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                     if (examPracticeSection.Config != null && examPracticeSection.CourseSkill.HasValue)
                     {
                         var config = examPracticeSection.Config;
-                        var executionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath);
+                        var executionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath ?? examPracticeSection.Config.VideoFilePath);
                         config.ExecutionTime = executionTime;
                         examPracticeSection.Config = config;
                     }
