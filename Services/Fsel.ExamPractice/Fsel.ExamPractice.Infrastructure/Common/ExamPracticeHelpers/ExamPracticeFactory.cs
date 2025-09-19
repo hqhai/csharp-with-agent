@@ -12,6 +12,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPractices;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
     using Fsel.ExamPractice.Domain.Models.CommandModels.Questions;
+    using Fsel.Shared.Helpers;
 
     public class ExamPracticeFactory
     {
@@ -48,6 +49,10 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                     var examPracticeSectionRequest = examPracticeSectionRequests[i];
                     var examPracticeSection = _mapper.Map<ExamPracticeSection>(examPracticeSectionRequest);
 
+                    if (examPracticeSection.Config != null && examPracticeSection.CourseSkill.HasValue)
+                    {
+                        examPracticeSection.Config.ExecutionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath);
+                    }
                     examPracticeSection.DisplayOrder = i + 1;
                     examPracticeSection.ExamPracticeSections = ExamPracticeSectionClassification(examPracticeSectionRequest.ChildrenExamPracticeSections).ToList();
                     examPracticeSection.ExamPracticeAISettings = ExamPracticeAISettingClassification(examPracticeSectionRequest.ExamPracticeAISettings).ToList();
