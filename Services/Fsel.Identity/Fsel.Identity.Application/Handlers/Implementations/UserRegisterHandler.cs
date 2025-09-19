@@ -11,7 +11,6 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.OpenId;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
@@ -47,7 +46,8 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             ArgumentNullException.ThrowIfNull(userRegisterModel.PhoneNumber, nameof(userRegisterModel.PhoneNumber));
 
             var isExist = await _userRepository.DbContext.Set<User>().AsQueryable().AsNoTracking()
-               .AnyAsync(x => x.PhoneNumber == userRegisterModel.PhoneNumber && x.PhoneNumberConfirmed);
+               .AnyAsync(x => (x.PhoneNumber == userRegisterModel.PhoneNumber && x.PhoneNumberConfirmed)
+               || (x.UserName == userRegisterModel.PhoneNumber && x.PhoneNumberConfirmed));
 
             if (isExist)
             {
@@ -105,29 +105,56 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 });
             }
 
+            var user = await _userRepository.DbContext.Set<User>().AsQueryable().FirstOrDefaultAsync(x => x.UserName == cachedRegisterInfo.PhoneNumber);
             await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IdentityResult>(async () =>
             {
                 using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-                var user = _mapper.Map<User>(cachedRegisterInfo);
-                user.PhoneNumber = phoneNumber;
+                var isExist = user != null && !user.PhoneNumberConfirmed;
+
+                if (isExist)
+                {
+                    user = _mapper.Map(cachedRegisterInfo, user);
+                }
+                else
+                {
+                    user = _mapper.Map<User>(cachedRegisterInfo);
+                    user.Id = Guid.NewGuid();
+                }
+
+                user!.PhoneNumber = phoneNumber;
                 user.UserName = phoneNumber;
-                user.Id = Guid.NewGuid();
                 user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
                 user.PhoneNumberConfirmed = true;
                 user.EmailConfirmed = true;
-
                 user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                identityResult = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
-                if (!identityResult.Succeeded)
+
+                if (isExist)
                 {
-                    scope.Dispose();
-                    return identityResult;
+                    user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, cachedRegisterInfo.Password ?? string.Empty);
+                    identityResult = await _userManager.UpdateAsync(user);
+                    if (!identityResult.Succeeded)
+                    {
+                        scope.Dispose();
+                        return identityResult;
+                    }
                 }
-                identityResult = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
-                if (!identityResult.Succeeded)
+                else
                 {
-                    scope.Dispose();
-                    return identityResult;
+                    identityResult = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
+                    if (!identityResult.Succeeded)
+                    {
+                        scope.Dispose();
+                        return identityResult;
+                    }
+                }
+                if (!await _userManager.IsInRoleAsync(user, EnumRole.Student.ToString()))
+                {
+                    identityResult = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                    if (!identityResult.Succeeded)
+                    {
+                        scope.Dispose();
+                        return identityResult;
+                    }
                 }
 
                 var userOtpCode = new UserOtpCode
