@@ -9,6 +9,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAISettings;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
     using Fsel.ExamPractice.Domain.Models.CommandModels.Questions;
+    using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
     public class ExamPracticeConverter
@@ -65,6 +66,10 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
 
                 if (examPracticeSection != null)
                 {
+                    if (examPracticeSection.Config != null && examPracticeSection.CourseSkill.HasValue)
+                    {
+                        examPracticeSection.Config.ExecutionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath);
+                    }
                     examPracticeSection.ExamPracticeId = examPracticeId;
                     examPracticeSection.DisplayOrder = newExamPracticeSections.IndexOf(newExamPracticeSection) + 1;
                     if (newExamPracticeSection.ChildrenExamPracticeSections.Any())
