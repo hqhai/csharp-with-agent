@@ -119,7 +119,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 return methodResult;
             }
             var overall = MapLessonOverview(lesson, lessonResult, lessonOverview);
-
+            overall.CourseId = course.Id;
             methodResult.Result = overall;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
@@ -223,7 +223,6 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             var overview = new LessonHomeModel
             {
                 UnitId = unitId,
-                CourseId = course.Id,
                 IsUnitFirst = unitId == firstUnitId
             };
 

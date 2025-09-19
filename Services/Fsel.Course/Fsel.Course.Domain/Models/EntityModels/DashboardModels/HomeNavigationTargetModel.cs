@@ -8,8 +8,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.DashboardModels
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }
-        public string? Thurmbnail { get; set; }
-        public string? Desctiption { get; set; }
+        public string? Thumbnail { get; set; }
+        public string? Description { get; set; }
         public string? InstructionContent { get; set; }
         public EnumLessonOverviewStatus? Status { get; set; }
         public string? Type { get; set; }
