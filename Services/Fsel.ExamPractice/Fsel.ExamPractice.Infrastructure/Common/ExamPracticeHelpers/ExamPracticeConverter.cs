@@ -68,7 +68,10 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                 {
                     if (examPracticeSection.Config != null && examPracticeSection.CourseSkill.HasValue)
                     {
-                        examPracticeSection.Config.ExecutionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath);
+                        var config = examPracticeSection.Config;
+                        var executionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath);
+                        config.ExecutionTime = executionTime;
+                        examPracticeSection.Config = config;
                     }
                     examPracticeSection.ExamPracticeId = examPracticeId;
                     examPracticeSection.DisplayOrder = newExamPracticeSections.IndexOf(newExamPracticeSection) + 1;

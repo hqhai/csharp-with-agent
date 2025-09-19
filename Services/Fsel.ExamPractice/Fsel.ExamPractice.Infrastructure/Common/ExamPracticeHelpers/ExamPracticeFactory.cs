@@ -34,8 +34,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             examPractice.OriginalId = originalId.HasValue ? originalId.Value : examPractice.Id;
             examPractice.Status = EnumExamPracticeStatus.Inactive;
             examPractice.ExamPracticeSections = ExamPracticeSectionClassification(_createRequest.ExamPracticeSections).ToList();
-            _examPracticeCommon.HanderSubQuestionIndexSection(examPractice.ExamPracticeSections);
-
+            _examPracticeCommon.HanderQuestionIndexSection(examPractice.ExamPracticeSections);
             return examPractice;
         }
 
@@ -51,7 +50,10 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
 
                     if (examPracticeSection.Config != null && examPracticeSection.CourseSkill.HasValue)
                     {
-                        examPracticeSection.Config.ExecutionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath);
+                        var config = examPracticeSection.Config;
+                        var executionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath);
+                        config.ExecutionTime = executionTime;
+                        examPracticeSection.Config = config;
                     }
                     examPracticeSection.DisplayOrder = i + 1;
                     examPracticeSection.ExamPracticeSections = ExamPracticeSectionClassification(examPracticeSectionRequest.ChildrenExamPracticeSections).ToList();
