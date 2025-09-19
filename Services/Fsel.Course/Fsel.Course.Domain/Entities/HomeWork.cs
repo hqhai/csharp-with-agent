@@ -3,6 +3,7 @@
 using System.ComponentModel.DataAnnotations;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Core.Entities;
+using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
@@ -33,6 +34,11 @@ namespace Fsel.Course.Domain.Entities
         /// Trình độ Level
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }
+
+        /// <summary>
+        /// Loại
+        /// </summary>
+        public EnumHomeWorkType Type { get; set; }
 
         /// <summary>
         /// Loại kỹ năng

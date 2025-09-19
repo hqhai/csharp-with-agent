@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class HomeWorkSearchModel : BaseModel
@@ -14,9 +15,8 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? MediaPost { get; set; }
 
         public bool IsActive { get; set; }
-
+        public EnumHomeWorkType Type { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
-
         public EnumCourseSkill CourseSkill { get; set; }
     }
 }
