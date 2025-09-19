@@ -13,7 +13,12 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Class { get; set; }
+        public string? School { get; set; }
+        public EnumGender? Gender { get; set; }
+        public DateTime? Birthday { get; set; }
         public Guid StudentId { get; set; }
+        public Guid? SchoolId { get; set; }
+        public Guid? SchoolClassId { get; set; }
         public IList<StudentCampusLearningProgressModel>? Students { get; set; }
     }
 

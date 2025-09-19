@@ -5,9 +5,12 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Claims;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
@@ -28,12 +31,14 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
         private readonly ICourseRepository _courseRepository;
         private readonly ICurriculumRepository _curriculumRepository;
         private readonly ICurriculumStudentRepository _curriculumStudentRepository;
+        private readonly AuthContext _authContext;
 
-        public SearchCurriculumQueryHandler(ICourseRepository courseRepository, ICurriculumRepository curriculumRepository, ICurriculumStudentRepository curriculumStudentRepository)
+        public SearchCurriculumQueryHandler(ICourseRepository courseRepository, ICurriculumRepository curriculumRepository, ICurriculumStudentRepository curriculumStudentRepository, AuthContext authContext)
         {
             _courseRepository = courseRepository;
             _curriculumRepository = curriculumRepository;
             _curriculumStudentRepository = curriculumStudentRepository;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<CurriculumModel>>> Handle(SearchCurriculumQuery request, CancellationToken cancellationToken)
@@ -41,9 +46,18 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<CurriculumModel>>();
 
+            var schoolIdStr = _authContext.ClaimsPrincipal?.FindFirstValue("SchoolId");
+
+            if (!string.IsNullOrEmpty(schoolIdStr) || !Guid.TryParse(schoolIdStr, out Guid schoolId))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(schoolId), _authContext.CurrentUserId);
+                return methodResult;
+            }
+
             var query = await (from baseQuery in _curriculumRepository.Queryable
                                join c in _courseRepository.Queryable on baseQuery.CourseId equals c.Id
                                join cc in _courseRepository.Queryable on baseQuery.CourseCloneId equals cc.Id
+                               where baseQuery.SchoolId == schoolId
                                select new
                                {
                                    Curriculum = baseQuery,

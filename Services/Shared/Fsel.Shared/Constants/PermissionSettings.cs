@@ -209,4 +209,21 @@ namespace Fsel.Shared.Constants
         public const string AddStudents = $"{ClaimType}.AddStudents";
         public const string DeleteStudents = $"{ClaimType}.DeleteStudents";
     }
+
+    public static class StudentCampusManagement
+    {
+        public const string ClaimType = nameof(StudentCampusManagement);
+        public const string View = $"{ClaimType}.View";
+    }
+
+    public static class SchoolClassCampusManagement
+    {
+        public const string ClaimType = nameof(SchoolClassCampusManagement);
+        public const string Add = $"{ClaimType}.Add";
+        public const string View = $"{ClaimType}.View";
+        public const string Update = $"{ClaimType}.Update";
+        public const string Delete = $"{ClaimType}.Delete";
+        public const string AddStudents = $"{ClaimType}.AddStudents";
+        public const string DeleteStudents = $"{ClaimType}.DeleteStudents";
+    }
 }

@@ -92,5 +92,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/curriculum/get-students-learning-progress")]
         Task<IApiResponse<MethodResult<IList<StudentCampusLearningProgressModel>>>> GetStudentsLearningProgress([FromBody] GetStudentsLearningProgressQueryModel query);
+
+        [Post("/v1/curriculum/delete-curriculums-by-student-ids")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteCurriculumsByStudentIds([FromBody] DeleteCurriculumsByStudentIdsCommandModel model);
     }
 }

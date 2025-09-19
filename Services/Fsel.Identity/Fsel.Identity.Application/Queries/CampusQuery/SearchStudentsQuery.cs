@@ -2,10 +2,13 @@
 
 namespace Fsel.Identity.Application.Queries.CampusQuery
 {
+    using System.Security.Claims;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
@@ -20,6 +23,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
     public class SearchStudentsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentCampusModel>>>
     {
         public EnumStudentCampusLearningStatus? LearningStatus { get; set; }
+        public Guid? SchoolClassId { get; set; }
     }
 
     public class SearchStudentsQueryHandler : IRequestHandler<SearchStudentsQuery, MethodResult<PagingItemsModel<StudentCampusModel>>>
@@ -28,13 +32,19 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
         private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
+        private readonly ISchoolClassRepository _schoolClassRepository;
+        private readonly IUserSchoolRepository _userSchoolRepository;
+        private readonly AuthContext _authContext;
 
-        public SearchStudentsQueryHandler(UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService)
+        public SearchStudentsQueryHandler(UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, ISchoolClassRepository schoolClassRepository, AuthContext authContext, IUserSchoolRepository userSchoolRepository)
         {
             _userManager = userManager;
             _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _lmsCourseService = lmsCourseService;
+            _schoolClassRepository = schoolClassRepository;
+            _authContext = authContext;
+            _userSchoolRepository = userSchoolRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentCampusModel>>> Handle(SearchStudentsQuery request, CancellationToken cancellationToken)
@@ -42,9 +52,18 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<StudentCampusModel>>();
 
+            var schoolIdStr = _authContext.ClaimsPrincipal?.FindFirstValue("SchoolId");
+
+            if (!string.IsNullOrEmpty(schoolIdStr) || !Guid.TryParse(schoolIdStr, out Guid schoolId))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(schoolId), _authContext.CurrentUserId);
+                return methodResult;
+            }
+
             var query = from u in _userManager.Users
                         join h in _humanRepository.Queryable on u.Id equals h.UserId
                         join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                        where s.SchoolId == schoolId
                         select new StudentCampusModel()
                         {
                             Id = u.Id,
@@ -55,6 +74,11 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                             UserName = u.UserName,
                             PhoneNumber = u.PhoneNumber,
                             StudentId = s.Id,
+                            SchoolClassId = s.SchoolClassId,
+                            SchoolId = s.SchoolId,
+                            Gender = h.Gender,
+                            School = s.School,
+                            Birthday = h.Birthday
                         };
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -73,6 +97,14 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                 }
             }
 
+            if (request.SchoolClassId.HasValue)
+            {
+                query = query.Where(p => p.SchoolClassId == request.SchoolClassId);
+            }
+
+            var lists = new List<StudentCampusModel>();
+            int totalItem = 0;
+
             if (request.LearningStatus.HasValue)
             {
                 var students = await query.ToListAsync(cancellationToken);
@@ -88,18 +120,16 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
                 students = students.Where(p => p.Students != null && p.Students.Any(x => x.ProgressStatus == request.LearningStatus)).ToList();
 
-                int totalItem = students.Count;
-                var lists = students.ApplySortAndPaging(request).ToList();
-
-                methodResult.Result = new PagingItemsModel<StudentCampusModel>(lists, request, totalItem);
+                totalItem = students.Count;
+                lists = students.ApplySortAndPaging(request).ToList();
             }
             else
             {
-                int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                var lists = await query.ApplySortAndPaging(request)
-                                            .AsNoTracking()
-                                            .ToListAsync(cancellationToken: cancellationToken)
-                                            .ConfigureAwait(false);
+                totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+                lists = await query.ApplySortAndPaging(request)
+                                           .AsNoTracking()
+                                           .ToListAsync(cancellationToken: cancellationToken)
+                                           .ConfigureAwait(false);
 
                 var studentIds = lists.Select(p => p.StudentId).ToList();
 
@@ -110,10 +140,16 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                 {
                     p.Students = learningProgress?.Where(x => x.StudentId == p.StudentId).ToList();
                 });
-
-                methodResult.Result = new PagingItemsModel<StudentCampusModel>(lists, request, totalItem);
             }
 
+            var schoolClassIds = lists.Where(p => p.SchoolClassId.HasValue).Select(p => p.SchoolClassId).Distinct().ToList();
+            var schoolClasses = await _schoolClassRepository.Queryable.WhereBulkContains(schoolClassIds, p => p.Id).ToListAsync(cancellationToken);
+            lists.ForEach(p =>
+            {
+                p.Class = schoolClasses.FirstOrDefault(x => x.Id == p.SchoolClassId)?.Name;
+            });
+
+            methodResult.Result = new PagingItemsModel<StudentCampusModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

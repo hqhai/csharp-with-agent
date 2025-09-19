@@ -781,5 +781,68 @@
     "status": true,
     "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
     "createdDate": "2025-09-13"
+  },
+  {
+    "id": "2e7ab492-59cf-4b14-a2ce-5cf2a2692427",
+    "claimValue": "StudentCampusManagement.View",
+    "name": "Xem thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "642f9c9c-c338-48fa-a42a-6d22e766bfca",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "ec393b2d-0a9f-45e8-a1a0-13e8fb66ecd9",
+    "claimValue": "SchoolClassCampusManagement.Add",
+    "name": "Thêm mới lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "2638eed4-5578-4e3b-98c2-b493ee8b5aef",
+    "claimValue": "SchoolClassCampusManagement.Update",
+    "name": "Cập nhật lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "1d7feea3-a183-4a24-a9fa-bc6fa77847c7",
+    "claimValue": "SchoolClassCampusManagement.View",
+    "name": "Xem thông tin lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "a1a48ab9-8502-4d3b-8346-f267d8d8c680",
+    "claimValue": "SchoolClassCampusManagement.Delete",
+    "name": "Xóa lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "da8ac310-dd13-4386-9c49-2fe376d33a0d",
+    "claimValue": "SchoolClassCampusManagement.AddStudents",
+    "name": "Thêm học sinh vào lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "873f2abd-1de2-41a9-8ab8-ce49de12ca60",
+    "claimValue": "SchoolClassCampusManagement.DeleteStudents",
+    "name": "Xóa học sinh khỏi lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
   }
 ]

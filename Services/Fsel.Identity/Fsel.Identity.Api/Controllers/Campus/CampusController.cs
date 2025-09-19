@@ -48,8 +48,8 @@ namespace Fsel.Identity.Api.Controllers.Campus
         [HttpPost("search-students-by-student-ids")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentCampusModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(CurriculumManagement.View)]
-        public async Task<IActionResult> SearchStudentByStudentIds([FromBody] SearchStudentsByStudentIdsQuery command)
+        [Permission(StudentCampusManagement.View)]
+        public async Task<IActionResult> SearchStudentsByStudentIds([FromBody] SearchStudentsByStudentIdsQuery command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -65,6 +65,19 @@ namespace Fsel.Identity.Api.Controllers.Campus
         public async Task<IActionResult> AddCourseIdForStudents([FromBody] AddCourseIdForStudentsCampusCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Search students by student ids
+        /// </summary>
+        [HttpGet("search-students")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentCampusModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(StudentCampusManagement.View)]
+        public async Task<IActionResult> SearchStudents([FromQuery] SearchStudentsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

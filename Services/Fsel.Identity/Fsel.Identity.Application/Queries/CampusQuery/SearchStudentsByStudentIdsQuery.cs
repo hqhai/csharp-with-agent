@@ -24,12 +24,14 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
         private readonly Core.Base.Managers.UserManager<User> _userManager;
         private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
+        private readonly ISchoolClassRepository _schoolClassRepository;
 
-        public SearchStudentsByStudentIdsQueryHandler(Core.Base.Managers.UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository)
+        public SearchStudentsByStudentIdsQueryHandler(Core.Base.Managers.UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, ISchoolClassRepository schoolClassRepository)
         {
             _userManager = userManager;
             _humanRepository = humanRepository;
             _studentRepository = studentRepository;
+            _schoolClassRepository = schoolClassRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentCampusModel>>> Handle(SearchStudentsByStudentIdsQuery request, CancellationToken cancellationToken)
@@ -50,6 +52,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                             UserName = u.UserName,
                             PhoneNumber = u.PhoneNumber,
                             StudentId = s.Id,
+                            SchoolClassId = s.SchoolClassId,
                         };
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -77,6 +80,13 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                                         .AsNoTracking()
                                         .ToListAsync(cancellationToken: cancellationToken)
                                         .ConfigureAwait(false);
+
+            var schoolClassIds = lists.Where(p => p.SchoolClassId.HasValue).Select(p => p.SchoolClassId).Distinct().ToList();
+            var schoolClasses = await _schoolClassRepository.Queryable.WhereBulkContains(schoolClassIds, p => p.Id).ToListAsync(cancellationToken);
+            lists.ForEach(p =>
+            {
+                p.Class = schoolClasses.FirstOrDefault(x => x.Id == p.SchoolClassId)?.Name;
+            });
 
             methodResult.Result = new PagingItemsModel<StudentCampusModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

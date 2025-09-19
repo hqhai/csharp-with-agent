@@ -145,5 +145,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// delete curriculums by student ids
+        /// </summary>
+        [HttpPost("delete-curriculums-by-student-ids")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.Delete)]
+        public async Task<IActionResult> DeleteCurriculumsByStudentIds([FromBody] DeleteCurriculumsByStudentIdsCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

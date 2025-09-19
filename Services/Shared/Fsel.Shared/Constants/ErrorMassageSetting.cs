@@ -4,6 +4,7 @@ namespace Fsel.Shared.Constants
 {
     public static class ErrorMassageSetting
     {
+        public const string ErrorMessage = "Thông báo lỗi";
         public const string EmptyFullNameVN = "Chưa nhập họ và tên";
         public const string InvalidFullNameVN = "Họ và tên không đúng định dạng";
         public const string EmptyPhoneNumberVN = "Chưa nhập số điện thoại";
@@ -20,5 +21,7 @@ namespace Fsel.Shared.Constants
         public const string PhoneNumberAlreadyExistInListVN = "Số điện thoại đã tồn tại trong danh sách này";
         public const string DataAlreadyExistInListVN = "Đã tồn tại tài khoản này trong danh sách này";
         public const string DataAlreadyExistVN = "Đã tồn tại tài khoản này trong hệ thống";
+        public const string ErrorTemplate = "Sai định dạng file mẫu";
+        public const string ErrorData = "Dữ liệu bị rỗng hoặc sai định dạng";
     }
 }

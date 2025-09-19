@@ -2,10 +2,12 @@
 
 namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 {
+    using System.Security.Claims;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -25,12 +27,14 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
         private readonly ICurriculumRepository _curriculumRepository;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
+        private readonly AuthContext _authContext;
 
-        public CreateCurriculumCommandHandler(ICurriculumRepository curriculumRepository, IMapper mapper, IMediator mediator)
+        public CreateCurriculumCommandHandler(ICurriculumRepository curriculumRepository, IMapper mapper, IMediator mediator, AuthContext authContext)
         {
             _curriculumRepository = curriculumRepository;
             _mapper = mapper;
             _mediator = mediator;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<CurriculumModel>> Handle(CreateCurriculumCommand request, CancellationToken cancellationToken)
@@ -39,6 +43,14 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
             var methodResult = new MethodResult<CurriculumModel>();
 
             #region validation
+
+            var schoolIdStr = _authContext.ClaimsPrincipal?.FindFirstValue("SchoolId");
+
+            if (!string.IsNullOrEmpty(schoolIdStr) || !Guid.TryParse(schoolIdStr, out Guid schoolId))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(schoolId), _authContext.CurrentUserId);
+                return methodResult;
+            }
 
             if (string.IsNullOrWhiteSpace(request.CurriculumName))
             {
@@ -89,6 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 var curriculum = _mapper.Map<CurriculumConfig>(request);
                 curriculum.CourseId = request.CourseId;
                 curriculum.CourseCloneId = cloneCourse.Id;
+                curriculum.SchoolId = schoolId;
 
                 if (!curriculum.IsValid())
                 {
