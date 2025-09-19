@@ -54,7 +54,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
             var schoolIdStr = _authContext.ClaimsPrincipal?.FindFirstValue("SchoolId");
 
-            if (!string.IsNullOrEmpty(schoolIdStr) || !Guid.TryParse(schoolIdStr, out Guid schoolId))
+            if (string.IsNullOrEmpty(schoolIdStr) || !Guid.TryParse(schoolIdStr, out Guid schoolId))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(schoolId), _authContext.CurrentUserId);
                 return methodResult;
