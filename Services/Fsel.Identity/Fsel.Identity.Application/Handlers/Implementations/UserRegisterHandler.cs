@@ -10,7 +10,6 @@ namespace Fsel.Identity.Application.Handlers.Implementations
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.OpenId;
-    using Fsel.Identity.Infrastructure.Repositories;
     using Fsel.Shared.Enums;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
@@ -45,7 +44,8 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             ArgumentNullException.ThrowIfNull(userRegisterModel.PhoneNumber, nameof(userRegisterModel.PhoneNumber));
 
             var isExist = await _userRepository.DbContext.Set<User>().AsQueryable().AsNoTracking()
-               .AnyAsync(x => x.PhoneNumber == userRegisterModel.PhoneNumber && x.PhoneNumberConfirmed);
+               .AnyAsync(x => (x.PhoneNumber == userRegisterModel.PhoneNumber && x.PhoneNumberConfirmed)
+               || (x.UserName == userRegisterModel.PhoneNumber && x.PhoneNumberConfirmed));
 
             if (isExist)
             {
@@ -98,21 +98,35 @@ namespace Fsel.Identity.Application.Handlers.Implementations
             {
                 return false;
             }
-
+            var user = await _userRepository.DbContext.Set<User>().AsQueryable().FirstOrDefaultAsync(x => x.UserName == cachedRegisterInfo.PhoneNumber);
             await _userRepository.DbContext.Database.CreateExecutionStrategy().ExecuteAsync<IActionResult>(async () =>
             {
                 using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-                var user = _mapper.Map<User>(cachedRegisterInfo);
-                user.PhoneNumber = phoneNumber;
-                user.UserName = phoneNumber;
-                user.Id = Guid.NewGuid();
-                user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
-                user.PhoneNumberConfirmed = true;
-                user.EmailConfirmed = true;
 
-                user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
-                var result = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
-                result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                if (user != null)
+                {
+                    user.PhoneNumber = phoneNumber;
+                    user.PhoneNumberConfirmed = true;
+                    user.EmailConfirmed = true;
+                    user.FirstName = cachedRegisterInfo.FirstName;
+                    user.LastName = cachedRegisterInfo.LastName;
+                    await _userManager.UpdateAsync(user);
+                    await _userManager.AddPasswordAsync(user, cachedRegisterInfo.Password);
+                }
+                else
+                {
+                    user = _mapper.Map<User>(cachedRegisterInfo);
+                    user.PhoneNumber = phoneNumber;
+                    user.UserName = phoneNumber;
+                    user.Id = Guid.NewGuid();
+                    user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
+                    user.PhoneNumberConfirmed = true;
+                    user.EmailConfirmed = true;
+
+                    user = await _userRepository.GenerateUserDataAsync(user, EnumRoleRegister.Student);
+                    var result = await _userManager.CreateAsync(user, cachedRegisterInfo.Password ?? string.Empty);
+                    result = await _userManager.AddToRoleAsync(user, EnumRoleRegister.Student.ToString());
+                }
 
                 var userOtpCode = new UserOtpCode
                 {
@@ -124,6 +138,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                 scope.Complete();
                 return new ViewResult();
             });
+
             return true;
         }
 
