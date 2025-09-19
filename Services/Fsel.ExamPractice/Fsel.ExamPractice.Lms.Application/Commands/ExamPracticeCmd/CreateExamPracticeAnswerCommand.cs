@@ -9,7 +9,6 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.ExamPractice.Domain.Entities;
-    using Fsel.ExamPractice.Domain.Entities.SkillScoreConfigs;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.Enums.ErrorCodes;
     using Fsel.ExamPractice.Domain.IRepositories;
@@ -708,16 +707,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                         ParentExamPracticeSectionResultId = sectionResult.Id,
                         StudentId = examPracticeResult.StudentId,
                         ExamPracticeResultId = examPracticeResult.Id,
-                        Status = EnumResultStatus.New,
-                        SkillScores = new List<SkillScores>
-                        {
-                            new SkillScores
-                            {
-                                Skill = EnumCourseSkill.Speaking,
-                                TotalCount = sections.Count(),
-                                CorrectCount = 0
-                            }
-                        }
+                        Status = EnumResultStatus.New
                     };
                     await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
                     {
