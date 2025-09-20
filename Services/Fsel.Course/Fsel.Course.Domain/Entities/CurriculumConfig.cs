@@ -62,5 +62,6 @@ namespace Fsel.Course.Domain.Entities
         public Guid SchoolId { get; set; }
 
         public ICollection<CurriculumStudent> CurriculumStudent { get; set; } = new List<CurriculumStudent>();
+        public ICollection<HomeWorkConfig> HomeWorkConfigs { get; set; } = new List<HomeWorkConfig>();
     }
 }

@@ -8,14 +8,16 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.QueryModels.HomeWorkConfigs;
     using Fsel.Course.Lms.Application.Commands.CurriculumCmd;
-    using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
+    using Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd;
     using Fsel.Course.Lms.Application.Queries.CurriculumQuery;
+    using Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Refit;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/curriculum")]
@@ -156,6 +158,59 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         public async Task<IActionResult> DeleteCurriculumsByStudentIds([FromBody] DeleteCurriculumsByStudentIdsCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// save homework config
+        /// </summary>
+        [HttpPost("save-homework-config")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.Add)]
+        [Permission(CurriculumManagement.Update)]
+        public async Task<IActionResult> SaveHomeWorkConfig([FromBody] SaveHomeWorkConfigCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// delete homework configs
+        /// </summary>
+        [HttpPost("delete-homework-configs")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.Delete)]
+        public async Task<IActionResult> DeleteHomeWorkConfigs([FromBody] DeleteHomeWorkConfigsCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// search students in curriculum
+        /// </summary>
+        [HttpGet("search-homework-config")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<HomeWorkConfigModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
+        public async Task<IActionResult> SearchHomeWorkConfig([FromQuery] SearchHomeWorkConfigQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// search create users info homeWork config
+        /// </summary>
+        [HttpGet("search-created-users-info-homework-config")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<EntityModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
+        public async Task<IActionResult> SearchCreateUsersInfoHomeWorkConfig([FromQuery] SearchCreateUsersInfoHomeWorkConfigQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

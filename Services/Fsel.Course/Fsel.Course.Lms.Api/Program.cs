@@ -122,6 +122,8 @@ builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionReposito
 builder.Services.AddScoped<IClassforumDetailResultHistoryRepository, ClassforumDetailResultHistoryRepository>();
 builder.Services.AddScoped<ICurriculumStudentRepository, CurriculumStudentRepository>();
 builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
+builder.Services.AddScoped<IHomeWorkConfigRepository, HomeWorkConfigRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

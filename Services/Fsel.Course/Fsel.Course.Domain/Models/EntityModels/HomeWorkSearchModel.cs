@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
 
     public class HomeWorkSearchModel : BaseModel
     {
@@ -18,5 +19,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
 
         public EnumCourseSkill CourseSkill { get; set; }
+
+        public EnumCourseType CourseType
+        {
+            get { return EnumCourseLevelHelper.GetEnumCourseType(CourseLevel); }
+        }
     }
 }
