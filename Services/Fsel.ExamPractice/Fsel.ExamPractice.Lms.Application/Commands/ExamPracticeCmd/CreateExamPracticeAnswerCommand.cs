@@ -13,6 +13,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
     using Fsel.ExamPractice.Domain.Enums.ErrorCodes;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAnswers;
+    using Fsel.ExamPractice.Domain.Models.EntityModels;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Infrastructure.Common;
@@ -552,8 +553,12 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     continue;
                 }
                 var answer = answers.FirstOrDefault(x => x.ExamPracticeResultId == request.ExamPracticeResultId && x.ExamPracticeSectionId == section.Id);
-                var pronunciationAssessment = await _pronuciationAssessmentService.AssessPronunciationFromFileAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
-                double pronScore = pronunciationAssessment.PronunciationScore;
+                PronunciationAssessmentModel? pronunciationAssessment = default;
+                if (item.Answer != null && !string.IsNullOrEmpty(item.SpeechTextAnswer))
+                {
+                    pronunciationAssessment = await _pronuciationAssessmentService.AssessPronunciationFromFileAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer);
+                }
+                double pronScore = pronunciationAssessment?.PronunciationScore ?? default;
                 if (answer == null)
                 {
                     answer = GetExamPracticeAnswer(sectionResult, section.Id);
