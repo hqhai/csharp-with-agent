@@ -111,5 +111,18 @@ namespace Fsel.Identity.Api.Controllers.Campus
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Add_Students_To_Class_Error.xlsx");
         }
+
+        /// <summary>
+        /// search teacher campus
+        /// </summary>
+        [HttpGet("search-teacher-campus")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(SchoolClassCampusManagement.View)]
+        public async Task<IActionResult> SearchTeacher([FromQuery] SearchTeacherCampusQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
