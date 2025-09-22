@@ -753,8 +753,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 // Kết hợp transcription từ tất cả results
                 response.Transcription = string.Join(" ", results
                     .Where(r => r.Reason == ResultReason.RecognizedSpeech && !string.IsNullOrEmpty(r.Text))
-                    .Select(r => r.Text.Trim())
-                    .Distinct());
+                    .Select(r => r.Text.Trim()));
 
                 response.AccuracyScore = pronunciationResult.AccuracyScore;
                 response.FluencyScore = pronunciationResult.FluencyScore;
@@ -774,8 +773,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                     response.PronunciationScore = (int)(response.AccuracyScore * 0.5 + response.FluencyScore * 0.3 + response.ProsodyScore * 0.2);
                 }
 
-                // Tập hợp tất cả từ từ tất cả kết quả và loại bỏ trùng lặp
-                var allWords = new Dictionary<string, SpokenWord>();
+                // Tập hợp tất cả từ từ tất cả kết quả
+                var allWords = new List<SpokenWord>();
 
                 foreach (var result in results.Where(r => r.Reason == ResultReason.RecognizedSpeech))
                 {
@@ -788,10 +787,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
                     foreach (var word in words)
                     {
-                        var wordKey = word.Word.ToLower().Trim();
-
-                        // Nếu từ chưa tồn tại hoặc từ hiện tại có điểm chính xác cao hơn
-                        if (!allWords.ContainsKey(wordKey) || word.AccuracyScore > allWords[wordKey].AccuracyScore)
                         {
                             var accuracyScoreWord = word.AccuracyScore;
                             var colorWord = GetColorBasedOnAccuracy(accuracyScoreWord);
@@ -841,13 +836,13 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                                 }
                             }
 
-                            allWords[wordKey] = wordImprovement;
+                            allWords.Add(wordImprovement);
                         }
                     }
                 }
 
                 // Thêm tất cả từ đã tập hợp vào response
-                response.SpokenWords.AddRange(allWords.Values);
+                response.SpokenWords.AddRange(allWords);
             }
             else
             {
