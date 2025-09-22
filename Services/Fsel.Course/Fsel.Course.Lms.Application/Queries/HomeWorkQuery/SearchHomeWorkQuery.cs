@@ -10,9 +10,11 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.HomeWorks;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -41,19 +43,17 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var homeWorkQuery = await (_homeWorkRepository.Queryable.Where(p => !p.IsArchive)
-                                   .Include(x => x.LessonHomeWorks)
-                                   .Select(x => new HomeWorkSearchModel
-                                   {
-                                       Id = x.Id,
-                                       Code = x.Code,
-                                       Name = x.Name,
-                                       CreatedFullName = x.CreatedFullName,
-                                       CreatedDate = x.CreatedDate,
-                                       IsActive = x.LessonHomeWorks.Any(),
-                                       CourseLevel = x.CourseLevel,
-                                       CourseSkill = x.CourseSkill,
-                                   })).ToListAsync(cancellationToken);
+            var query = _homeWorkRepository.Queryable.Where(p => !p.IsArchive && p.Type == EnumHomeWorkType.HomeworkExtra)
+                                           .Select(x => new HomeWorkSearchModel
+                                           {
+                                               Id = x.Id,
+                                               Code = x.Code,
+                                               Name = x.Name,
+                                               CreatedFullName = x.CreatedFullName,
+                                               CreatedDate = x.CreatedDate,
+                                               CourseLevel = x.CourseLevel,
+                                               CourseSkill = x.CourseSkill,
+                                           });
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
 
@@ -61,34 +61,34 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             {
                 if (Guid.TryParse(request.Keyword, out var guid))
                 {
-                    homeWorkQuery = homeWorkQuery.Where(m => m.Id == guid).ToList();
+                    query = query.Where(m => m.Id == guid);
                 }
                 else
                 {
-                    homeWorkQuery = homeWorkQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                    query = query.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
                 }
             }
 
             if (request.CourseType.HasValue)
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.CourseType == request.CourseType).ToList();
+                var courseLevels = request.CourseType.Value.GetEnumCourseLevels();
+                query = query.Where(m => courseLevels.Contains(m.CourseLevel));
             }
 
             if (request.CourseLevel.HasValue)
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.CourseLevel == request.CourseLevel).ToList();
+                query = query.Where(m => m.CourseLevel == request.CourseLevel);
             }
 
             if (request.CourseSkill.HasValue)
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.CourseSkill == request.CourseSkill).ToList();
+                query = query.Where(m => m.CourseSkill == request.CourseSkill);
             }
 
-            int totalItem = homeWorkQuery.Count;
-
-            var lists = homeWorkQuery
-                    .ApplySortAndPaging(request)
-                    .ToList();
+            int totalItem = await query.CountAsync(cancellationToken);
+            var lists = await query.ApplySortAndPaging(request)
+                                   .AsNoTracking()
+                                   .ToListAsync(cancellationToken);
 
             methodResult.Result = new PagingItemsModel<HomeWorkSearchModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

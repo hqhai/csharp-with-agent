@@ -20,4 +20,11 @@ namespace Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers
         public Guid QuestionId { get; set; }
         public object? Answer { get; set; }
     }
+
+    public class CreateHomeWorkExamPracticeAnswerCommandModel
+    {
+        public Guid HomeWorkExamPracticeResultId { get; set; }
+        public bool IsSubmit { get; set; }
+        public IList<HomeWorkAnswerQuestionModel>? Answers { get; set; }
+    }
 }
