@@ -24,6 +24,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
     {
         public EnumStudentCampusLearningStatus? LearningStatus { get; set; }
         public Guid? SchoolClassId { get; set; }
+        public IList<Guid>? StudentIds { get; set; }
     }
 
     public class SearchStudentsQueryHandler : IRequestHandler<SearchStudentsQuery, MethodResult<PagingItemsModel<StudentCampusModel>>>
@@ -100,6 +101,11 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             if (request.SchoolClassId.HasValue)
             {
                 query = query.Where(p => p.SchoolClassId == request.SchoolClassId);
+            }
+
+            if (request.StudentIds != null && request.StudentIds.Any())
+            {
+                query = query.Where(p => request.StudentIds.Contains(p.StudentId));
             }
 
             var lists = new List<StudentCampusModel>();

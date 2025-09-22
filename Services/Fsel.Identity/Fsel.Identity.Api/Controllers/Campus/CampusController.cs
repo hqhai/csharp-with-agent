@@ -80,5 +80,21 @@ namespace Fsel.Identity.Api.Controllers.Campus
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Export students
+        /// </summary>
+        [HttpPost("export-students")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ExportStudents([FromBody] ExportStudentsInfoQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, "Thông tin học sinh.xlsx");
+        }
     }
 }
