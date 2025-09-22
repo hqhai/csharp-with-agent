@@ -31,6 +31,11 @@ namespace Fsel.Course.Infrastructure.Configs
                .HasConversion(
                    v => v.ToString(),
                    v => v.EnumParse<EnumHomeWorkType>());
+
+            builder.HasOne(a => a.Topic)
+                   .WithMany(b => b.HomeWorks)
+                   .HasForeignKey(b => b.TopicId)
+                   .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
