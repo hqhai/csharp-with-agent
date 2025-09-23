@@ -95,6 +95,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
         public DbSet<HomeWorkConfig> HomeWorkConfigs { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
+        public DbSet<Topic> Topics { get; set; }
 
         #region Report
 
@@ -206,6 +207,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new HomeWorkExtraPracticeAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkExtraPracticeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkRetryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
 
             modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

@@ -127,6 +127,7 @@ builder.Services.AddScoped<IHomeWorkExtraPracticeAnswerRepository, HomeWorkExtra
 builder.Services.AddScoped<IHomeWorkExtraPracticeResultRepository, HomeWorkExtraPracticeResultRepository>();
 builder.Services.AddScoped<IHomeWorkRetryRepository, HomeWorkRetryRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<ITopicRepository, TopicRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
