@@ -261,7 +261,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
             await Parallel.ForEachAsync(students, parallelOptions, async (student, cancellationToken) =>
             {
-                if (!string.IsNullOrEmpty(student.PhoneNumber?.Trim()))
+                if (!string.IsNullOrEmpty(student.Email?.Trim()))
                 {
                     try
                     {
@@ -278,7 +278,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                                 UserName = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                 Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                 FullName = student.FullName?.Trim() ?? string.Empty,
-                                PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
+                                PhoneNumber = !string.IsNullOrEmpty(student.PhoneNumber) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()) : null,
                                 EmailConfirmed = false,
                                 PhoneNumberConfirmed = false,
                                 Status = EnumUserStatus.Active,
@@ -286,7 +286,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                                 Human = new Human()
                                 {
                                     FullName = student.FullName?.Trim(),
-                                    PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
+                                    PhoneNumber = !string.IsNullOrEmpty(student.PhoneNumber) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()) : null,
                                     Birthday = student.DateOfBirth,
                                     Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                     Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth, null),
