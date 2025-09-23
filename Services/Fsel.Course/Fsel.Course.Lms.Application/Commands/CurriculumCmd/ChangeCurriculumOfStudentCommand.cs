@@ -201,13 +201,6 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 return methodResult;
             }
 
-            var updateResult = await _userService.UpdateCourseToStudentAsync(course.Id);
-            if (!updateResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(updateResult.Error);
-                return methodResult;
-            }
-
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
