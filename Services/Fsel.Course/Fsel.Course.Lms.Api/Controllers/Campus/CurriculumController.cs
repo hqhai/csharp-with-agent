@@ -8,13 +8,13 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.QueryModels.HomeWorkConfigs;
     using Fsel.Course.Lms.Application.Commands.CurriculumCmd;
     using Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd;
     using Fsel.Course.Lms.Application.Queries.CurriculumQuery;
     using Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;

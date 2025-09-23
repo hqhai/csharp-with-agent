@@ -8,6 +8,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.Curriculums
     public class SearchStudentsByCurriculumIdQueryModel : BaseQueryModel
     {
         public Guid CurriculumId { get; set; }
-        public string? Class { get; set; }
+        public Guid? SchoolClassId { get; set; }
     }
 }

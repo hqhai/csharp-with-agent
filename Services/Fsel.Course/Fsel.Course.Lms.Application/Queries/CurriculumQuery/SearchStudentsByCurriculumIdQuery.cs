@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             var studentResults = await _userService.SearchStudentsByStudentIds(new SearchStudentsCampusByStudentIdsQueryModel()
             {
-                Class = request.Class,
+                SchoolClassId = request.SchoolClassId,
                 Keyword = request.Keyword,
                 StudentIds = studentIds
             });

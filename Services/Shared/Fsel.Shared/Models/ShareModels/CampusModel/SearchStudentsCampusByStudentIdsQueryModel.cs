@@ -8,7 +8,7 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
 
     public class SearchStudentsCampusByStudentIdsQueryModel : BaseQueryModel
     {
-        public string? Class { get; set; }
+        public Guid? SchoolClassId { get; set; }
         public IList<Guid>? StudentIds { get; set; }
     }
 }
