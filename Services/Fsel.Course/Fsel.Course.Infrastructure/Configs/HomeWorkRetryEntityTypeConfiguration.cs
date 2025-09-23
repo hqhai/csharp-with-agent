@@ -16,7 +16,12 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.HomeWork)
                    .WithMany(b => b.HomeWorkRetrys)
                    .HasForeignKey(b => b.HomeWorkId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Curriculum)
+                   .WithMany(b => b.HomeWorkRetrys)
+                   .HasForeignKey(b => b.CurriculumId)
+                   .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

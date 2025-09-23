@@ -20,11 +20,11 @@ namespace Fsel.Course.Domain.Entities
             set { _submissionCount = value; }
         }
 
+        public EnumWorkingStatus WorkingStatus { get; set; }
         public HomeWork? HomeWork { get; set; }
         public Guid HomeWorkId { get; set; }
         public HomeWorkRetry? HomeWorkRetry { get; set; }
         public Guid HomeWorkRetryId { get; set; }
-
         public ICollection<HomeWorkExtraPracticeAnswer> HomeWorkExtraPracticeAnswers { get; set; } = new List<HomeWorkExtraPracticeAnswer>();
     }
 }

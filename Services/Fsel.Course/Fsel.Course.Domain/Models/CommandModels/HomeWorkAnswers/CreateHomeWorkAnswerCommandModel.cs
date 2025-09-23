@@ -21,9 +21,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers
         public object? Answer { get; set; }
     }
 
-    public class CreateHomeWorkExamPracticeAnswerCommandModel
+    public class CreateHomeWorkExtraPracticeAnswerCommandModel
     {
-        public Guid HomeWorkExamPracticeResultId { get; set; }
+        public Guid HomeWorkExtraPracticeResultId { get; set; }
         public bool IsSubmit { get; set; }
         public IList<HomeWorkAnswerQuestionModel>? Answers { get; set; }
     }

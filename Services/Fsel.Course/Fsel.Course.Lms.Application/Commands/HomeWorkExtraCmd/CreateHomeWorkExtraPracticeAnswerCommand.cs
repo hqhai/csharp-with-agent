@@ -13,8 +13,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkAnswers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery;
     using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -22,11 +22,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
-    public class CreateHomeWorkExamPracticeAnswerCommand : CreateHomeWorkExamPracticeAnswerCommandModel, IRequest<MethodResult<HomeWorkModel>>
+    public class CreateHomeWorkExtraPracticeAnswerCommand : CreateHomeWorkExtraPracticeAnswerCommandModel, IRequest<MethodResult<HomeWorkExtraDtoModel>>
     {
     }
 
-    public class CreateHomeWorkExamPracticeAnswerCommandHandler : IRequestHandler<CreateHomeWorkExamPracticeAnswerCommand, MethodResult<HomeWorkModel>>
+    public class CreateHomeWorkExtraPracticeAnswerCommandHandler : IRequestHandler<CreateHomeWorkExtraPracticeAnswerCommand, MethodResult<HomeWorkExtraDtoModel>>
     {
         private readonly IHomeWorkExtraPracticeResultRepository _homeWorkExtraPracticeResultRepository;
         private readonly QuestionConverter _questionConverter;
@@ -36,10 +36,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IQuestionRepository _questionRepository;
-        private readonly ILogger<CreateHomeWorkExamPracticeAnswerCommand> _logger;
+        private readonly ILogger<CreateHomeWorkExtraPracticeAnswerCommand> _logger;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
 
-        public CreateHomeWorkExamPracticeAnswerCommandHandler(IHomeWorkExtraPracticeResultRepository homeWorkExtraPracticeResultRepository,
+        public CreateHomeWorkExtraPracticeAnswerCommandHandler(IHomeWorkExtraPracticeResultRepository homeWorkExtraPracticeResultRepository,
             QuestionConverter questionConverter,
             IHomeWorkExtraPracticeAnswerRepository homeWorkExtraPracticeAnswerRepository,
             IHomeWorkRepository homeWorkRepository,
@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             IUserService userService,
             AuthContext authContext,
             IQuestionRepository questionRepository,
-            ILogger<CreateHomeWorkExamPracticeAnswerCommand> logger,
+            ILogger<CreateHomeWorkExtraPracticeAnswerCommand> logger,
             IHomeWorkQuestionRepository homeWorkQuestionRepository)
         {
             _homeWorkExtraPracticeResultRepository = homeWorkExtraPracticeResultRepository;
@@ -62,20 +62,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
         }
 
-        public async Task<MethodResult<HomeWorkModel>> Handle(CreateHomeWorkExamPracticeAnswerCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<HomeWorkExtraDtoModel>> Handle(CreateHomeWorkExtraPracticeAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<HomeWorkModel>();
+            var methodResult = new MethodResult<HomeWorkExtraDtoModel>();
 
-            var studentResult = await GetStudentAsync();
-            if (!studentResult.IsOK)
-            {
-                methodResult.AddErrorBadRequest(studentResult.ErrorMessages);
-                return methodResult;
-            }
-            var student = studentResult.Result!;
-
-            var moduleResult = await GetHomeWorkExamPracticeResultAsync(request.HomeWorkExamPracticeResultId);
+            var moduleResult = await GetHomeWorkExtraPracticeResultAsync(request.HomeWorkExtraPracticeResultId);
             if (!moduleResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(moduleResult.ErrorMessages);
@@ -107,36 +99,18 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 methodResult.AddErrorBadRequest(methodHomeWork.ErrorMessages);
                 return methodResult;
             }
+
+            methodResult = await _mediator.Send(new GetHomeWorkExtraQuery { HomeWorkId = homeWorkExamPracticeResult.HomeWorkId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
             return methodResult;
         }
 
-        private async Task<MethodResult<StudentModel>> GetStudentAsync()
-        {
-            var methodResult = new MethodResult<StudentModel>();
-            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
-                return methodResult;
-            }
-
-            var student = studentResult?.Content?.Result;
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
-            methodResult.Result = student;
-            return methodResult;
-        }
-
-        private async Task<MethodResult<HomeWorkExtraPracticeResult>> GetHomeWorkExamPracticeResultAsync(Guid homeWorkExamPracticeResultId)
+        private async Task<MethodResult<HomeWorkExtraPracticeResult>> GetHomeWorkExtraPracticeResultAsync(Guid homeWorkExtraPracticeResultId)
         {
             var methodResult = new MethodResult<HomeWorkExtraPracticeResult>();
-            var homeWorkExtraPracticeResult = await _homeWorkExtraPracticeResultRepository.GetByIdAsync(homeWorkExamPracticeResultId);
+            var homeWorkExtraPracticeResult = await _homeWorkExtraPracticeResultRepository.GetByIdAsync(homeWorkExtraPracticeResultId);
             if (homeWorkExtraPracticeResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkExtraPracticeResult), homeWorkExamPracticeResultId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkExtraPracticeResult), homeWorkExtraPracticeResultId);
                 return methodResult;
             }
             if (homeWorkExtraPracticeResult.Status == EnumResultStatus.Done)
@@ -149,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             return methodResult;
         }
 
-        public async Task<MethodResult<List<Question>>> ValidateQuestionsAsync(CreateHomeWorkExamPracticeAnswerCommand request, Guid homeworkId)
+        public async Task<MethodResult<List<Question>>> ValidateQuestionsAsync(CreateHomeWorkExtraPracticeAnswerCommand request, Guid homeworkId)
         {
             ArgumentNullException.ThrowIfNull(request);
             var result = new MethodResult<List<Question>>();
@@ -204,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                                                                .ToListAsync();
         }
 
-        private async Task<MethodResult<bool>> SaveAnswerAsync(HomeWorkExtraPracticeResult homeWorkExtraPracticeResult, IList<Question>? questions, CreateHomeWorkExamPracticeAnswerCommand request, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> SaveAnswerAsync(HomeWorkExtraPracticeResult homeWorkExtraPracticeResult, IList<Question>? questions, CreateHomeWorkExtraPracticeAnswerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
