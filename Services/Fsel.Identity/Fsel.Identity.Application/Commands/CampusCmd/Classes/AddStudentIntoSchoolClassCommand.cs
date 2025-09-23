@@ -101,17 +101,17 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
             Action<ExcelWorksheet, Dictionary<string, int?>?, IList<ValidateExcelModel>> errorHandlerAction = (worksheet, columnIndexes, errors) =>
             {
-                worksheet.Cells[1, 7].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 7].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 7].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 7].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 7].Value = ErrorMassageSetting.ErrorMessage;
-                worksheet.Cells[1, 7].Style.Font.Bold = true;
+                worksheet.Cells[1, 5].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 5].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 5].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 5].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 5].Value = ErrorMassageSetting.ErrorMessage;
+                worksheet.Cells[1, 5].Style.Font.Bold = true;
                 foreach (var error in errors.GroupBy(x => x.RowIndex).Select(x => x).OrderBy(x => x.Key))
                 {
                     var row = error.Key;
 
-                    int lastColumn = 7;
+                    int lastColumn = 5;
 
                     // Tạo biến lưu trữ dữ liệu dòng hiện tại
                     List<object?> rowData = new List<object?>();
@@ -205,6 +205,8 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                     {
                         FullName = x.FullName,
                         Email = x.Email,
+                        PhoneNumber = x.PhoneNumber,
+                        DateOfBirth = x.DateOfBirth,
                     });
                 }
 
