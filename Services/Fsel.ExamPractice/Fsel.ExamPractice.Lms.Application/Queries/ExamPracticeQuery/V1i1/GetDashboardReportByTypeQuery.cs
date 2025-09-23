@@ -17,6 +17,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -75,8 +76,8 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
             var examPracticeResultModels = _mapper.Map<IList<ExamPracticeResultModel>>(examPracticeResults);
 
             var examBandScores = GetSkillScoreDescriptors();
-            var score = examPracticeResultModels.Any() ? examPracticeResultModels.Average(x => x.Score) : default;
-            var scoreOvrall = examPracticeResultModels.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.Score ?? 0;
+            var score = examPracticeResultModels.Any() ? NumberHelper.RoundNumberDouble(examPracticeResultModels.Average(x => x.Score)) : default;
+            var scoreOvrall = examPracticeResultModels.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.Score ?? default;
 
             examDashboard.AverageScore = score;
             examDashboard.AverageLevel = MapScoreToLevel(examBandScores, score);
