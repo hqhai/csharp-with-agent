@@ -19,6 +19,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models;
     using Fsel.Identity.Domain.Models.CommandModels.Campus;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -32,12 +33,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
 
-    public class AddStudentIntoSchoolClassCommand : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class AddStudentIntoSchoolClassCommand : BaseImportCommandModel, IRequest<MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
         public Guid SchoolClassId { get; set; }
     }
 
-    public class AddStudentIntoSchoolClassCommandHandler : IRequestHandler<AddStudentIntoSchoolClassCommand, MethodResult<Stream>>
+    public class AddStudentIntoSchoolClassCommandHandler : IRequestHandler<AddStudentIntoSchoolClassCommand, MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
         private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
@@ -65,10 +66,10 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
             _systemService = systemService;
         }
 
-        public async Task<MethodResult<Stream>> Handle(AddStudentIntoSchoolClassCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<AddStudentIntoSchoolClassCommandModel>> Handle(AddStudentIntoSchoolClassCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<Stream>();
+            var methodResult = new MethodResult<AddStudentIntoSchoolClassCommandModel>();
 
             var schoolIdStr = _authContext.ClaimsPrincipal?.FindFirstValue("SchoolId");
 
@@ -242,7 +243,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
             if (result.Stream != null)
             {
-                methodResult.Result = result.Stream;
+                methodResult.Result = new AddStudentIntoSchoolClassCommandModel() { Stream = result.Stream };
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
@@ -344,6 +345,8 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
             {
                 Students = createOrdersForStudentCampusModel.ToList()
             });
+
+            methodResult.Result = new AddStudentIntoSchoolClassCommandModel() { NumberOfStudent = createOrdersForStudentCampusModel.Count };
 
             methodResult.StatusCode = StatusCodes.Status200OK;
 
