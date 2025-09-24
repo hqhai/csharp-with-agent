@@ -24,6 +24,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
     using static Fsel.Shared.Constants.ValueSettings;
 
     public class SubmitExamPracticeAnswerAICommand : ExamPracticeAnswerResponseModel, IRequest<bool>
@@ -44,6 +45,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
         private readonly IProsodyScoreRepository _prosodyScoreRepository;
         private readonly ExamPracticesDBContext _examPracticesDBContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<SubmitExamPracticeAnswerAICommandHandler> _logger;
         private const int CorrectTotal_IELTS_Writing = 36;
         private const int CorrectTotal_Vstep_Writing = 40;
         private const int MaxSection = 2;
@@ -61,7 +63,8 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             IMediator mediator,
             IProsodyScoreRepository prosodyScoreRepository,
             ExamPracticesDBContext examPracticesDBContext,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger<SubmitExamPracticeAnswerAICommandHandler> logger)
         {
             _examPracticeAnswerRepository = examPracticeAnswerRepository;
             _submitExamPracticeCriteria = submitExamPracticeCriteria;
@@ -75,11 +78,13 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             _prosodyScoreRepository = prosodyScoreRepository;
             _examPracticesDBContext = examPracticesDBContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<bool> Handle(SubmitExamPracticeAnswerAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            _logger.LoggerRequest(request);
 
             var examPracticeSectionResult = await _examPracticeSectionResultRepository.GetByIdAsync(request.ExamPracticeSectionResultId);
             if (examPracticeSectionResult == null)
@@ -139,7 +144,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             ExamPracticeResult examPracticeResult,
             CancellationToken cancellationToken)
         {
-            double ConverBandScore(IList<ExamPracticeAIGradingLanguageModel>? examPracticeAIGradingLanguages) => double.TryParse(examPracticeAIGradingLanguages?[0]?.ExamPracticeAIGradings?[0]?.BandScore, out double bandScore) ? bandScore : ValueDefault;
+            static double ConverBandScore(IList<ExamPracticeAIGradingLanguageModel>? examPracticeAIGradingLanguages) => double.TryParse(examPracticeAIGradingLanguages?[0]?.ExamPracticeAIGradings?[0]?.BandScore, out double bandScore) ? bandScore : ValueDefault;
 
             var gradingAiFeedBackResult = new List<AiFeedbackItemModel>
             {
