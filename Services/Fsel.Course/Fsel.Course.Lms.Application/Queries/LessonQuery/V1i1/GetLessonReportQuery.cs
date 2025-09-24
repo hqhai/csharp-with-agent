@@ -4,16 +4,14 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 {
     using System;
     using System.Threading;
+    using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i1;
-    using Fsel.Course.Infrastructure.Repositories;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -28,18 +26,18 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
     {
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly IVideoRepository _videoRepository;
-        private readonly IMediator _mediator;
+        private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
+        private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
 
         public GetLessonReportQueryHandler(ILessonResultRepository lessonResultRepository
             , IVideoResultRepository videoResultRepository
-            , IVideoRepository videoRepository
-            , IMediator mediator)
+            , IVideoTimeCodeRepository videoTimeCodeRepository
+            , IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
         {
             _lessonResultRepository = lessonResultRepository;
             _videoResultRepository = videoResultRepository;
-            _videoRepository = videoRepository;
-            _mediator = mediator;
+            _videoTimeCodeRepository = videoTimeCodeRepository;
+            _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
         }
 
         public async Task<MethodResult<LessonReportModel>> Handle(GetLessonReportQuery request, CancellationToken cancellationToken)
@@ -57,29 +55,25 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
             {
                 return methodResult;
             }
-            var video = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                       .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id))
-                                                       .Include(y => y.VideoTimeCodes)
-                                                       .ThenInclude(x => x.TimeCodeExercises)
-                                                       .ThenInclude(x => x.Exercise)
-                                                       .ThenInclude(x => x!.ExerciseQuestions)
-                                                       .ThenInclude(x => x.Question)
-                                                       .Where(x => x.Id == videoResult.VideoId)
-                                                       .AsNoTracking()
-                                                       .FirstOrDefaultAsync(cancellationToken);
-            if (video == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
-                return methodResult;
-            }
-            methodResult.Result = GetLessonReport(video, videoResult);
+
+            methodResult.Result = await GetLessonReportAsync(videoResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
+        private async Task<double> GetAnswerTimeAsync(VideoResult videoResult)
+        {
+            var videoTimeLenght = GetMediaDurationAsync(videoResult.Video?.VideoFilePath);
+            var totalTime = await (from baseQ in _videoTimeCodeRepository.Queryable
+                                   join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoTimeCodeId
+                                   where vtcr.VideoResultId == videoResult.Id && baseQ.TimeCodeType == EnumTimeCodeType.Standalone
+                                   select vtcr).SumAsync(x => x.WorkingTime + x.RetryWorkingTime);
+            return totalTime + (videoTimeLenght ?? 0);
+        }
+
         private async Task<VideoResult?> GetVideoResultAsync(GetLessonReportQuery request, CancellationToken cancellationToken)
         {
-            var videoResult = await _videoResultRepository.Queryable.FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
+            var videoResult = await _videoResultRepository.Queryable.Include(x => x.Video).FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken);
             if (videoResult == null)
             {
                 return videoResult;
@@ -89,27 +83,26 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
                 videoResult.IsShowToken = true;
                 await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
                 {
-                    bulk.IgnoreOnUpdateExpression = c => new { c.LessonResultId, c.StudentId, c.VideoId };
+                    bulk.ColumnInputExpression = c => new { c.IsShowToken };
                 });
             }
             return videoResult;
         }
 
-        private static LessonReportModel GetLessonReport(Video video, VideoResult videoResult)
+        private async Task<LessonReportModel> GetLessonReportAsync(VideoResult videoResult)
         {
-            LessonReportModel lessonReport = new LessonReportModel();
-            var videoTimeCodes = video.VideoTimeCodes.Where(x => x.TimeCodeType == EnumTimeCodeType.Standalone);
-            var questions = videoTimeCodes.SelectMany(x => x.TimeCodeExercises).Select(x => x.Exercise).SelectMany(x => x!.ExerciseQuestions).Select(x => x.Question);
-            var videoTimeLenght = GetMediaDurationAsync(video.VideoFilePath);
-            lessonReport.AnswerTime = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.WorkingTime + x.RetryWorkingTime) + (videoTimeLenght ?? 0);
-            lessonReport.CorrectCount = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Sum(x => x.CorrectCount);
-            lessonReport.CorrectTotal = questions.Where(x => !x!.Ungraded).Sum(x => x!.CorrectTotal);
-            lessonReport.Percent = NumberHelper.GetPercent(lessonReport.CorrectCount, lessonReport.CorrectTotal);
-            lessonReport.HighestStreak = videoResult.HighestStreak;
-            lessonReport.TimeCodeHighestStreak = videoResult.TimeCodeHighestStreak;
-            lessonReport.StatusVideoResult = videoResult.Status;
-            lessonReport.IsShowToken = videoResult.IsShowToken;
-            lessonReport.TotalToken = videoResult.TotalToken;
+            LessonReportModel lessonReport = new LessonReportModel
+            {
+                CorrectCount = videoResult.CorrectCount,
+                CorrectTotal = videoResult.CorrectTotal,
+                HighestStreak = videoResult.HighestStreak,
+                TimeCodeHighestStreak = videoResult.TimeCodeHighestStreak,
+                StatusVideoResult = videoResult.Status,
+                IsShowToken = videoResult.IsShowToken,
+                TotalToken = videoResult.TotalToken,
+                Percent = videoResult.Percent
+            };
+            lessonReport.AnswerTime = await GetAnswerTimeAsync(videoResult);
             lessonReport.Badge = GetBadgeName(lessonReport.Percent);
             lessonReport.BadgeDescription = lessonReport.Badge.GetDescription();
             return lessonReport;
