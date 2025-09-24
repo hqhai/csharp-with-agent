@@ -4,22 +4,26 @@ namespace Fsel.Course.Infrastructure.Maps
 {
     using AutoMapper;
     using Fsel.Core.Extensions;
-    using Fsel.Course.Domain.Models.CommandModels.RubyText;
+    using Fsel.Course.Domain.Models.CommandModels.RubyAnnotation;
     using Fsel.Course.Domain.Models.EntityModels;
-    using EntityRubyText = Fsel.Course.Domain.Entities.RubyText;
+    using EntityRubyText = Fsel.Course.Domain.Entities.RubyAnnotation;
 
     public class RubyTextProfile : Profile
     {
         public RubyTextProfile()
         {
-            CreateMap<EntityRubyText, RubyTextModel>().IgnoreAllNonExisting();
+            CreateMap<EntityRubyText, RubyAnnotationModel>().IgnoreAllNonExisting();
             CreateMap<EntityRubyText, EntityRubyText>()
-                .ForMember(m => m.BaseText, opt => opt.Ignore())
+                .ForMember(m => m.SelectedText, opt => opt.Ignore())
                 .ForMember(m => m.Phonetic, opt => opt.Ignore())
                 .ForMember(m => m.LanguageType, opt => opt.Ignore())
+                .ForMember(m => m.StartGraphemeIndex, opt => opt.Ignore())
+                .ForMember(m => m.LengthGraphemes, opt => opt.Ignore())
+                .ForMember(m => m.PrefixContext, opt => opt.Ignore())
+                .ForMember(m => m.SuffixContext, opt => opt.Ignore())
                 .IgnoreAllNonExisting();
-            CreateMap<CreateRubyTextCommandModel, EntityRubyText>().IgnoreAllNonExisting();
-            CreateMap<UpdateRubyTextCommandModel, EntityRubyText>().IgnoreAllNonExisting();
+            CreateMap<CreateRubyAnnotationCommandModel, EntityRubyText>().IgnoreAllNonExisting();
+            CreateMap<UpdateRubyAnnotationCommandModel, EntityRubyText>().IgnoreAllNonExisting();
         }
     }
 }
