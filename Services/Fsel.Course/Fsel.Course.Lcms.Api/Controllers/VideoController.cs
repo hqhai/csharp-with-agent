@@ -1,16 +1,16 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Core.Base.BaseModels;
 using Fsel.Course.Application.Commands.VideoCmd;
 using Fsel.Course.Application.Queries.VideoQuery;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
-using Asp.Versioning;
-using Fsel.Shared.Constants;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lcms.Api.Controllers
@@ -112,6 +112,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         public async Task<IActionResult> GetVideoByOriginal([FromRoute] Guid originalId)
         {
             MethodResult<VideoModel> queryResult = await _mediator.Send(new GetVideoByOriginalIdQuery { OriginalId = originalId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get detail Video By OriginalId
+        /// </summary>
+        [HttpGet("detail/{originalId}")]
+        [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetDetail([FromRoute] Guid originalId)
+        {
+            MethodResult<VideoModel> queryResult = await _mediator.Send(new GetVideoDetailByOriginalIdQuery { OriginalId = originalId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -102,5 +102,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             MethodResult<HomeWorkModel> queryResult = await _mediator.Send(new GetHomeWorkByOriginalIdQuery { OriginalId = originalId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get detail Home Work By OriginalId
+        /// </summary>
+        [HttpGet("detail/{originalId}")]
+        [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetDetail([FromRoute] Guid originalId)
+        {
+            MethodResult<HomeWorkModel> queryResult = await _mediator.Send(new GetHomeWorkDetailByOriginalIdQuery { OriginalId = originalId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }
