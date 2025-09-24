@@ -2,13 +2,13 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
-    public class HomeWorkExtraPracticeResultModel
+    public class HomeWorkExtraPracticeResultModel : BaseModel
     {
-        public Guid Id { get; set; }
         public int CorrectCount { get; set; }
         public int CorrectTotal { get; set; }
         public double Percent { get; set; }

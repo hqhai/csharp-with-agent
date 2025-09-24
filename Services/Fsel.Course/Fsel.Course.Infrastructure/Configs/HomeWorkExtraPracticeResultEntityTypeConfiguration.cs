@@ -27,6 +27,12 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumSubmissionCount>());
 
+            builder.Property(e => e.WorkingStatus)
+                .HasMaxLength(20)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumWorkingStatus>());
+
             builder.HasOne(a => a.HomeWorkRetry)
                    .WithMany(b => b.HomeWorkExtraPracticeResults)
                    .HasForeignKey(b => b.HomeWorkRetryId)

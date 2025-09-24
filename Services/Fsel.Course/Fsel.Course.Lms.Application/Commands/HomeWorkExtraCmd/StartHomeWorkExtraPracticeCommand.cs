@@ -85,11 +85,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
 
         private async Task<Guid?> GetCurriculumConfigIdAsync(StudentModel student, CancellationToken cancellationToken)
         {
-            var curriculumId = await (from baseQ in _curriculumRepository.Queryable
-                                      join cs in _curriculumStudentRepository.Queryable on baseQ.Id equals cs.CurriculumId
-                                      where baseQ.CourseCloneId == student.CourseId && cs.StudentId == student.Id
-                                      select baseQ.Id).FirstOrDefaultAsync(cancellationToken);
-            return curriculumId;
+            Guid? curriculumId = await (from baseQ in _curriculumRepository.Queryable
+                                        join cs in _curriculumStudentRepository.Queryable on baseQ.Id equals cs.CurriculumId
+                                        where baseQ.CourseCloneId == student.CourseId && cs.StudentId == student.Id
+                                        select baseQ.Id).FirstOrDefaultAsync(cancellationToken);
+
+            return curriculumId.HasValue && curriculumId.Value != Guid.Empty ? curriculumId.Value : null;
         }
 
         private async Task SaveHomeWorkExtraPracticeResultAsync(HomeWorkRetry homeWorkRetry)

@@ -18,6 +18,15 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int CorrectTotal { get; set; }
         public string? TopicName { get; set; }
         public int NumberRetry { get; set; }
+        public bool IsHomeWorkInActice { get; set; }
+        public EnumExpiryState ExpiryState { get; set; }
         public HomeWorkExtraPracticeResultModel? HomeWorkExtraPracticeResult { get; set; }
+    }
+
+    public enum EnumExpiryState
+    {
+        NotExpired = 0,          // chưa hết hạn
+        ExpiredMetTarget = 1,    // hết hạn nhưng ĐÃ đạt chỉ tiêu
+        ExpiredUnmetTarget = 2   // hết hạn và CHƯA đạt chỉ tiêu
     }
 }

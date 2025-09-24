@@ -9,17 +9,7 @@ namespace Fsel.Course.Domain.Entities
 
     public class HomeWorkExtraPracticeResult : BaseScoreResult, ISubmissionCount
     {
-        private EnumSubmissionCount? _submissionCount;
-
-        public EnumSubmissionCount? SubmissionCount
-        {
-            get
-            {
-                return _submissionCount.HasValue ? _submissionCount : EnumSubmissionCount.FirstSubmit;
-            }
-            set { _submissionCount = value; }
-        }
-
+        public EnumSubmissionCount? SubmissionCount { get; set; }
         public EnumWorkingStatus WorkingStatus { get; set; }
         public HomeWork? HomeWork { get; set; }
         public Guid HomeWorkId { get; set; }

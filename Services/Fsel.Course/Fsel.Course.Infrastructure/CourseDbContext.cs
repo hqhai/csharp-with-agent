@@ -100,35 +100,35 @@ namespace Fsel.Course.Infrastructure
         public DbSet<HomeWorkRetry> HomeWorkRetries { get; set; }
         public DbSet<Topic> Topics { get; set; }
 
-        //#region Report
+        #region Report
 
-        //public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
-        //public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
-        //public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
-        //public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
-        //public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
-        //public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
-        //public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
-        //public DbSet<UnitDoneLearningProgressIeltsModel> UnitDoneLearningProgressIelts { get; set; }
-        //public DbSet<UnitDoneLearningProgressAcademicModel> UnitDoneLearningProgressAcademics { get; set; }
-        //public DbSet<LessonDoneLearningProgressIeltsModel> LessonDoneLearningProgressIelts { get; set; }
-        //public DbSet<LessonDoneLearningProgressAcademicModel> LessonDoneLearningProgressAcademics { get; set; }
-        //public DbSet<TotalLearningModel> TotalLearnings { get; set; }
-        //public DbSet<RateLearningModel> RateLearnings { get; set; }
-        //public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
-        //public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
-        //public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
-        //public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
-        //public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
-        //public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
-        //public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
-        //public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
-        //public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
-        //public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
-        //public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
-        //public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
+        public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
+        public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
+        public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
+        public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
+        public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
+        public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
+        public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
+        public DbSet<UnitDoneLearningProgressIeltsModel> UnitDoneLearningProgressIelts { get; set; }
+        public DbSet<UnitDoneLearningProgressAcademicModel> UnitDoneLearningProgressAcademics { get; set; }
+        public DbSet<LessonDoneLearningProgressIeltsModel> LessonDoneLearningProgressIelts { get; set; }
+        public DbSet<LessonDoneLearningProgressAcademicModel> LessonDoneLearningProgressAcademics { get; set; }
+        public DbSet<TotalLearningModel> TotalLearnings { get; set; }
+        public DbSet<RateLearningModel> RateLearnings { get; set; }
+        public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
+        public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
+        public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
+        public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
+        public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
+        public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
+        public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
+        public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
+        public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
+        public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
+        public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
+        public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
 
-        //#endregion Report
+        #endregion Report
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -212,31 +212,31 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new HomeWorkRetryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
 
-            modelBuilder.Ignore<TotalEvaluateInputResultModel>();
-            modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
-            modelBuilder.Ignore<PercentEvaluateInputResultModel>();
-            modelBuilder.Ignore<LevelEvaluateInputResultModel>();
-            modelBuilder.Ignore<SchoolSummaryModel>();
-            modelBuilder.Ignore<TotalLearningProgressModel>();
-            modelBuilder.Ignore<AverageLearningProgressModel>();
-            modelBuilder.Ignore<UnitDoneLearningProgressIeltsModel>();
-            modelBuilder.Ignore<UnitDoneLearningProgressAcademicModel>();
-            modelBuilder.Ignore<LessonDoneLearningProgressIeltsModel>();
-            modelBuilder.Ignore<LessonDoneLearningProgressAcademicModel>();
-            modelBuilder.Ignore<TotalLearningModel>();
-            modelBuilder.Ignore<RateLearningModel>();
-            modelBuilder.Ignore<TotalLearningQualityModel>();
-            modelBuilder.Ignore<TotalDetailLearningQualityModel>();
-            modelBuilder.Ignore<SchoolInfoModel>();
-            modelBuilder.Ignore<CourseCompleteReportModel>();
-            modelBuilder.Ignore<SchoolInfoFilterModel>();
-            modelBuilder.Ignore<DistrictInfoModel>();
-            modelBuilder.Ignore<ReportLearningProcessModel>();
-            modelBuilder.Ignore<ReportLearningResultModel>();
-            modelBuilder.Ignore<ExportSchoolEventModel>();
-            modelBuilder.Ignore<ExportStudentEventModel>();
-            modelBuilder.Ignore<ExportSummaryReportCommandModel>();
-            modelBuilder.Ignore<ExportDistrictEventModel>();
+            //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
+            //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
+            //modelBuilder.Ignore<PercentEvaluateInputResultModel>();
+            //modelBuilder.Ignore<LevelEvaluateInputResultModel>();
+            //modelBuilder.Ignore<SchoolSummaryModel>();
+            //modelBuilder.Ignore<TotalLearningProgressModel>();
+            //modelBuilder.Ignore<AverageLearningProgressModel>();
+            //modelBuilder.Ignore<UnitDoneLearningProgressIeltsModel>();
+            //modelBuilder.Ignore<UnitDoneLearningProgressAcademicModel>();
+            //modelBuilder.Ignore<LessonDoneLearningProgressIeltsModel>();
+            //modelBuilder.Ignore<LessonDoneLearningProgressAcademicModel>();
+            //modelBuilder.Ignore<TotalLearningModel>();
+            //modelBuilder.Ignore<RateLearningModel>();
+            //modelBuilder.Ignore<TotalLearningQualityModel>();
+            //modelBuilder.Ignore<TotalDetailLearningQualityModel>();
+            //modelBuilder.Ignore<SchoolInfoModel>();
+            //modelBuilder.Ignore<CourseCompleteReportModel>();
+            //modelBuilder.Ignore<SchoolInfoFilterModel>();
+            //modelBuilder.Ignore<DistrictInfoModel>();
+            //modelBuilder.Ignore<ReportLearningProcessModel>();
+            //modelBuilder.Ignore<ReportLearningResultModel>();
+            //modelBuilder.Ignore<ExportSchoolEventModel>();
+            //modelBuilder.Ignore<ExportStudentEventModel>();
+            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
+            //modelBuilder.Ignore<ExportDistrictEventModel>();
 
             base.OnModelCreating(modelBuilder);
         }

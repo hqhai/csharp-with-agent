@@ -15,7 +15,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumHomeWorkType Type { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
-
         public string? MediaPostContent => StringHelper.ProcessHtml(MediaPost, false);
         public IEnumerable<string>? AudioPaths => StringHelper.GetIframeUrls(MediaPost, true);
         public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false);
