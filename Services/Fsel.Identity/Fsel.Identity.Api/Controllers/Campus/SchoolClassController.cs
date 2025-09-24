@@ -133,7 +133,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
         /// <summary>
         /// search create users info school class
         /// </summary>
-        [HttpGet("search-created-users-info-homework")]
+        [HttpGet("search-created-users-info-school-class")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<EntityModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> SearchCreateUsersInfoSchoolClass([FromQuery] SearchCreateUsersInfoSchoolClassQuery query)
