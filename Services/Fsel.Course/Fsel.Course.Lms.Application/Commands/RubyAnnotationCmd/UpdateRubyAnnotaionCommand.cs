@@ -29,30 +29,32 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
         public async Task<MethodResult<RubyAnnotationModel>> Handle(UpdateRubyAnnotationCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<RubyAnnotationModel>();
+            MethodResult<RubyAnnotationModel> methodResult = new MethodResult<RubyAnnotationModel>();
 
-            var rubyText = await _rubyAnnotaionRepository.GetByIdAsync(request.Id);
+            var rubyAnnotation = await _rubyAnnotaionRepository.GetByIdAsync(request.Id);
 
-            if (rubyText == null)
+            if (rubyAnnotation == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(rubyText));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(rubyAnnotation));
                 return methodResult;
             }
 
-            _mapper.Map(request, rubyText);
+            _mapper.Map(request, rubyAnnotation);
 
-            if (!rubyText.IsValid())
+            if (!rubyAnnotation.IsValid())
             {
-                methodResult.AddErrorBadRequest(rubyText.ErrorMessages);
+                methodResult.AddErrorBadRequest(rubyAnnotation.ErrorMessages);
                 return methodResult;
             }
 
             await _rubyAnnotaionRepository.ExecuteTransactionAsync(async () =>
             {
-                rubyText = _rubyAnnotaionRepository.Update(rubyText);
+                rubyAnnotation = _rubyAnnotaionRepository.Update(rubyAnnotation);
                 await _rubyAnnotaionRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<RubyAnnotationModel>(rubyText);
+                methodResult.Result = _mapper.Map<RubyAnnotationModel>(rubyAnnotation);
+
                 return methodResult;
             });
 

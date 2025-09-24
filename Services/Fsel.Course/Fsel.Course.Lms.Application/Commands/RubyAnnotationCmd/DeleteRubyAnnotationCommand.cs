@@ -39,8 +39,10 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
             {
                 var result = await _rubyAnnotationRepository.DeleteAsync(rubyText);
                 await _rubyAnnotationRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = result;
+
                 return methodResult;
             });
 

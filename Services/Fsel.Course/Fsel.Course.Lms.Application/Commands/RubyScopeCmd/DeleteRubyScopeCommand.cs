@@ -41,8 +41,10 @@ namespace Fsel.Course.Lms.Application.Commands.RubyScopeCmd
             {
                 var result = await _rubyScopeRepository.DeleteAsync(rubyText);
                 await _rubyScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = result;
+
                 return methodResult;
             });
 

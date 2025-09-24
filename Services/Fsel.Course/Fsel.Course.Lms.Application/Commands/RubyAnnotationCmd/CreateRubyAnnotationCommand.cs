@@ -63,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
 
             #region Validation
             var scope = await _rubyScopeRepository.Queryable
+                .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.HostType == request.HostType && x.HostId == request.HostId && x.FieldKey == request.FieldKey, cancellationToken);
 
             if (scope == null)
@@ -101,6 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
                 await _rubyAnnotationRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 var ruby = await _rubyAnnotationRepository.Queryable
+                    .AsNoTracking()
                     .Where(x => x.RubyScopeId == scope.Id && !x.IsDeleted)
                     .OrderBy(x => x.StartGraphemeIndex)
                     .ToListAsync(cancellationToken);
@@ -116,6 +118,7 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
                 if (request.RubyReturn?.Annotations == true)
                 {
                     result.Annotations = await _rubyAnnotationRepository.Queryable
+                    .AsNoTracking()
                     .Where(x => x.RubyScopeId == scope.Id && !x.IsDeleted)
                     .OrderBy(x => x.StartGraphemeIndex)
                     .Select(x => new RubyAnnotaionModel

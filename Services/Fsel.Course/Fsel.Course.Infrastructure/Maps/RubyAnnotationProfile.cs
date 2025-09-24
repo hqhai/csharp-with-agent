@@ -8,9 +8,9 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Models.EntityModels;
     using EntityRubyText = Fsel.Course.Domain.Entities.RubyAnnotation;
 
-    public class RubyTextProfile : Profile
+    public class RubyAnnotationProfile : Profile
     {
-        public RubyTextProfile()
+        public RubyAnnotationProfile()
         {
             CreateMap<EntityRubyText, RubyAnnotationModel>().IgnoreAllNonExisting();
             CreateMap<EntityRubyText, EntityRubyText>()

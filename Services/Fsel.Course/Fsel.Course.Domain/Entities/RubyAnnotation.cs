@@ -40,7 +40,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Độ dài
         /// </summary>
-        [MaxLength(20, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [Range(1, 5, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int LengthGraphemes { get; set; }
 
         /// <summary>

@@ -7,55 +7,70 @@ namespace Fsel.Course.Lms.Application.Queries.RubyQuery
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.QueryModels.Ruby;
     using Fsel.Course.Infrastructure.Common.RubyHelpers;
     using Fsel.Course.Lms.Application.Services.RubyService;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class RenderRubyCommand : IRequest<MethodResult<object>>
+    public class RenderRubyQuery : RubyRenderModel, IRequest<MethodResult<object>>
     {
-        public string HostType { get; set; }
-        public Guid HostId { get; set; }
-        public string FieldKey { get; set; }
-        public string BaseText { get; set; }
     }
 
-    public class RenderRubyCommandHandler : IRequestHandler<RenderRubyCommand, MethodResult<object>>
+    public class RenderRubyQueryv1Handler : IRequestHandler<RenderRubyQuery, MethodResult<object>>
     {
         private readonly IRubyScopeRepository _rubyScopeRepository;
         private readonly IRubyService _rubyService;
 
-        public RenderRubyCommandHandler(IRubyScopeRepository rubyScopeRepository, IRubyService rubyService)
+        public RenderRubyQueryv1Handler(IRubyScopeRepository rubyScopeRepository, IRubyService rubyService)
         {
             _rubyScopeRepository = rubyScopeRepository;
             _rubyService = rubyService;
         }
 
-        public async Task<MethodResult<object>> Handle(RenderRubyCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<object>> Handle(RenderRubyQuery request, CancellationToken cancellationToken)
         {
-            var nfc = RubyTextNormalization.ToNfc(request.BaseText);
+            var (found, nfc) = await _rubyScopeRepository.TryGetBaseTextAsync(request.HostType, request.HostId, request.FieldKey, cancellationToken);
             MethodResult<object> methodResult = new MethodResult<object>();
-            var scope = await _rubyScopeRepository.Queryable.Include(x => x.RubyAnnotations)
-                .FirstOrDefaultAsync(x => x.HostType == request.HostType && x.HostId == request.HostId && x.FieldKey == request.FieldKey, cancellationToken);
-            if (scope != null && scope.Text != RubyTextNormalization.Sha256Hex(nfc))
-            {
-                foreach (var item in scope.RubyAnnotations.Where(x => !x.IsDeleted))
-                {
-                    var newStart = _rubyService.TryReAnchor(nfc, item);
-                    if (newStart.HasValue) 
-                    {
-                        item.StartGraphemeIndex = newStart.Value;
-                    }
-                }
 
-                (scope.Text, scope.BaseLengthGraphemes) = _rubyService.Snapshot(nfc);
-                await _rubyScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            if (!found || string.IsNullOrEmpty(nfc))
+            {
+                methodResult.AddErrorBadRequest("Scope not found");
+                return methodResult;
             }
 
-            var rubies = scope?.RubyAnnotations ?? Enumerable.Empty<RubyAnnotation>();
+            var baseNfc = RubyTextNormalization.ToNfc(nfc!);
 
-            methodResult.Result = _rubyService.RenderHtml(nfc, rubies);
+            var scope = await _rubyScopeRepository.Queryable.Include(x => x.RubyAnnotations)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.HostType == request.HostType && x.HostId == request.HostId && x.FieldKey == request.FieldKey, cancellationToken);
+            if (scope == null || scope.RubyAnnotations.All(r => r.IsDeleted))
+            {
+                var rawHtml = _rubyService.RenderHtml(baseNfc, Enumerable.Empty<RubyAnnotation>());
+
+                methodResult.Result = rawHtml;
+                methodResult.StatusCode = StatusCodes.Status200OK;
+
+                return methodResult;
+            }
+
+            foreach (var item in scope.RubyAnnotations.Where(x => !x.IsDeleted))
+            {
+                var newStart = _rubyService.TryReAnchor(baseNfc, item);
+                if (newStart.HasValue)
+                {
+                    item.StartGraphemeIndex = newStart.Value;
+                }
+            }
+
+            (scope.Text, scope.BaseLengthGraphemes) = _rubyService.Snapshot(nfc);
+            await _rubyScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+            var rubies = scope?.RubyAnnotations ?? Enumerable.Empty<RubyAnnotation>();
+            var htmlResult = _rubyService.RenderHtml(baseNfc, rubies);
+
+            methodResult.Result = htmlResult;
             methodResult.StatusCode = StatusCodes.Status200OK;
 
             return methodResult;

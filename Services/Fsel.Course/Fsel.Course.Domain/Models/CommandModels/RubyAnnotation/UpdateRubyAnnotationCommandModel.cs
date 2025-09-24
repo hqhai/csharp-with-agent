@@ -7,10 +7,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.RubyAnnotation
 
     public class UpdateRubyAnnotationCommandModel : BaseCommandModel
     {
-        public Guid Id { get; set; }
-        public string? SelectedText { get; set; }
         public string? Phonetic { get; set; }
-        public string? PrefixContext { get; set; }
-        public string? SuffixContext { get; set; }
     }
 }
