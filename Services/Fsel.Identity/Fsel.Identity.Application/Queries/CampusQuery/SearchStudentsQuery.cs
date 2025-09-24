@@ -93,7 +93,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                 }
                 else
                 {
-                    query = query.Where(p => !string.IsNullOrEmpty(p.FullName) && p.FullName.Contains(request.Keyword, StringComparison.CurrentCultureIgnoreCase));
+                    query = query.Where(p => !string.IsNullOrEmpty(p.FullName) && p.FullName.Contains(request.Keyword));
                 }
             }
 
