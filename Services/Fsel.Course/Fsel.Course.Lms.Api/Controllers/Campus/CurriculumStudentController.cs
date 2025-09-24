@@ -65,5 +65,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// change curriculum
+        /// </summary>
+        [HttpPost("reset-curriculum")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.StudentCampus) })]
+        public async Task<IActionResult> ResetCurriculumOfStudent([FromBody] ResetCurriculumByStudentCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
