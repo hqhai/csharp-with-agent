@@ -12,6 +12,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Identity.Application.Queries.CampusQuery.Classes;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -127,6 +128,18 @@ namespace Fsel.Identity.Api.Controllers.Campus
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Template_Add_Student_To_Class.xlsx");
+        }
+
+        /// <summary>
+        /// search create users info school class
+        /// </summary>
+        [HttpGet("search-created-users-info-homework")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<EntityModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchCreateUsersInfoSchoolClass([FromQuery] SearchCreateUsersInfoSchoolClassQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
