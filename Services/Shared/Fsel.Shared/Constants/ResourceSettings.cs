@@ -129,5 +129,6 @@ namespace Fsel.Shared.Constants
         public const string ForbiddenClassForumSchema = "Resources//AIPrompt//JsonSchemas//ForbiddenClassForumSchema.json";
 
         public const string ProductFileName = "Resources//Products.json";
+        public const string StudentsCampusInfo = "Resources//Campus//StudentsInfo.xlsx";
     }
 }

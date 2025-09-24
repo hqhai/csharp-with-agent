@@ -183,7 +183,7 @@ namespace Fsel.Identity.Api.Controllers
         /// get user referrals
         /// </summary>
         [HttpGet("get-user-referrals")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<UserReferralsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUserReferral([FromQuery] GetUserReferralsByUserQuery query)
@@ -208,7 +208,7 @@ namespace Fsel.Identity.Api.Controllers
         /// check user referral code
         /// </summary>
         [HttpGet("get-sender-by-code")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<SenderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetSenderByCode([FromQuery] GetSenderByCodeQuery query)

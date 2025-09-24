@@ -18,6 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public int NumberOfStudent { get; set; }
+        public bool IsDone { get; set; }
 
         public EnumCurriculumStatus CurriculumStatus
         {

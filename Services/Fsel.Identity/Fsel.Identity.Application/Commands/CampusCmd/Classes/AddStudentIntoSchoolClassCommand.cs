@@ -78,7 +78,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                 return methodResult;
             }
 
-            var schoolResult = await _systemService.GetLocationByLocalId(schoolIdStr);
+            var schoolResult = await _systemService.GetLocationByGlobalId(schoolIdStr);
             var school = schoolResult.Content?.Result;
             if (school == null)
             {

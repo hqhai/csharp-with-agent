@@ -111,5 +111,22 @@ namespace Fsel.Identity.Api.Controllers.Campus
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Add_Students_To_Class_Error.xlsx");
         }
+
+        /// <summary>
+        /// export template add students to curriculum
+        /// </summary>
+        [HttpPost("export-template-add-students-to-school-class")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(SchoolClassCampusManagement.AddStudents)]
+        public async Task<IActionResult> ExportTemplateAddStudentsToSchoolClass()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateAddStudentsToSchoolClassCommand { }).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Add_Student_To_Class.xlsx");
+        }
     }
 }
