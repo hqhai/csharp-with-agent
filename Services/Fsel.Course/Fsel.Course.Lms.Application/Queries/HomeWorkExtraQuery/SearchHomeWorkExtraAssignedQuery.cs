@@ -122,6 +122,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                                 StartDate = hwc.StartDate,
                                 TopicName = baseQ.Topic != null ? baseQ.Topic.Name : null,
                                 CorrectTotal = baseQ.HomeWorkQuestions.Sum(x => x.Question!.CorrectTotal),
+                                NumberRetry = baseQ.HomeWorkRetrys.FirstOrDefault(x => x.StudentId == student.Id) != null ? baseQ.HomeWorkRetrys.FirstOrDefault(x => x.StudentId == student.Id)!.NumberRetry : hwc.NumberRetry,
                                 HomeWorkExtraPracticeResult = _mapper.Map<HomeWorkExtraPracticeResultModel>(baseQ.HomeWorkExtraPracticeResults.FirstOrDefault(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id))
                             };
 

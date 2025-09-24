@@ -17,6 +17,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int CorrectCount { get; set; }
         public int CorrectTotal { get; set; }
         public string? TopicName { get; set; }
+        public int NumberRetry { get; set; }
         public HomeWorkExtraPracticeResultModel? HomeWorkExtraPracticeResult { get; set; }
     }
 }

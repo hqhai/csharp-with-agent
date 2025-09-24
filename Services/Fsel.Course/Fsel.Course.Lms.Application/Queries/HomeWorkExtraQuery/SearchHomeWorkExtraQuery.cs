@@ -37,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
         private readonly ICurriculumRepository _curriculumRepository;
         private readonly ICurriculumStudentRepository _curriculumStudentRepository;
         private readonly IHomeWorkConfigRepository _homeWorkConfigRepository;
+        private const int MaxRetry = 1;
 
         public SearchHomeWorkExtraQueryHandler(IHomeWorkRepository homeWorkRepository,
             IUserService userService,
@@ -138,6 +139,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 UpdatedDate = x.UpdatedDate,
                 CorrectTotal = x.HomeWorkQuestions.Sum(x => x.Question!.CorrectTotal),
                 TopicName = x.Topic != null ? x.Topic.Name : string.Empty,
+                NumberRetry = x.HomeWorkRetrys.FirstOrDefault(x => x.StudentId == student.Id) != null ? x.HomeWorkRetrys.FirstOrDefault(x => x.StudentId == student.Id)!.NumberRetry : MaxRetry,
                 HomeWorkExtraPracticeResult = _mapper.Map<HomeWorkExtraPracticeResultModel>(x.HomeWorkExtraPracticeResults.FirstOrDefault(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id))
             });
 
