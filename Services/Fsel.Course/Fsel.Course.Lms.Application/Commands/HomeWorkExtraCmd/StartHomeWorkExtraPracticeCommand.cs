@@ -146,7 +146,18 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             }
             else if (!homeWorkRetry.CurriculumId.HasValue && curriculumId.HasValue)
             {
+                homeWorkRetry.CurriculumId = curriculumId.Value;
                 homeWorkRetry.NumberRetry = retry;
+                try
+                {
+                    await _homeWorkRetryRepository.BulkUpdateList(new List<HomeWorkRetry> { homeWorkRetry }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.CurriculumId, c.NumberRetry };
+                    });
+                }
+                catch
+                {
+                }
             }
             return homeWorkRetry;
         }
