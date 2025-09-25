@@ -137,6 +137,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 Name = x.Name,
                 CreatedDate = x.CreatedDate,
                 UpdatedDate = x.UpdatedDate,
+                TotalQuestion = x.HomeWorkQuestions.Count(),
                 CorrectTotal = x.HomeWorkQuestions.Sum(x => x.Question!.CorrectTotal),
                 TopicName = x.Topic != null ? x.Topic.Name : string.Empty,
                 NumberRetry = x.HomeWorkRetrys.FirstOrDefault(x => x.StudentId == student.Id) != null ? x.HomeWorkRetrys.FirstOrDefault(x => x.StudentId == student.Id)!.NumberRetry : MaxRetry,
@@ -172,12 +173,18 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                                                         .WhereBulkContains(homeWorkExtraPracticeResultIds, x => x.HomeWorkExtraPracticeResultId)
                                                         .ToListAsync(cancellationToken);
                 var answers = homeWorkExtraAnswers.GroupBy(x => x.HomeWorkExtraPracticeResultId)
-                                                  .ToDictionary(x => x.Key, x => x.Sum(x => x.CorrectCount));
+                                                 .ToDictionary(x => x.Key, x => x.ToList());
 
                 foreach (var item in lists)
                 {
-                    answers.TryGetValue(item.Id, out var correctAnswer);
-                    item.CorrectCount = correctAnswer;
+                    answers.TryGetValue(item.Id, out var listAnswer);
+                    if (listAnswer == null || !listAnswer.Any())
+                    {
+                        continue;
+                    }
+                    item.CountQuestion = listAnswer.Count;
+                    item.CorrectCount = listAnswer.Sum(x => x.CorrectCount);
+                    item.ProgressPercent = NumberHelper.GetPercent(item.CountQuestion, item.TotalQuestion);
                 }
             }
         }

@@ -16,6 +16,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public DateTime? EndDate { get; set; }
         public int CorrectCount { get; set; }
         public int CorrectTotal { get; set; }
+        public int TotalQuestion { get; set; }
+        public int CountQuestion { get; set; }
+        public double ProgressPercent { get; set; }
         public string? TopicName { get; set; }
         public int NumberRetry { get; set; }
         public bool IsHomeWorkInActice { get; set; }
