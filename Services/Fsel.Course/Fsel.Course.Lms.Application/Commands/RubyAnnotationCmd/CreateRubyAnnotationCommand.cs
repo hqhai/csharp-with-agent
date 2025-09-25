@@ -90,11 +90,21 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.MaxLength));
                 return methodResult;
             }
+
+            var rubyAnnotaiton = await _rubyAnnotationRepository.Queryable
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.RubyScopeId == scope.Id && x.SelectedText == request.SelectedText && x.Phonetic == request.Phonetic, cancellationToken);
+            if (rubyAnnotaiton != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                return methodResult;
+            }
             #endregion
 
             var rubyText = _mapper.Map<EntityRubyAnnotation>(request);
             rubyText.SelectedText = RubyTextNormalization.ToNfc(request.SelectedText);
             rubyText.RubyScopeId = scope.Id;
+            rubyText.LanguageType = request.LangueType;
 
             if (rubyText == null)
             {
