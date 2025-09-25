@@ -36,6 +36,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? ConfirmOtpUrl { get; set; }
         public string? RegisterUrl { get; set; }
         public string? LinkResetProgress { get; set; }
+        public string? UpdateSenderSettingUrl { get; set; }
     }
 
     public class Services : BaseServices

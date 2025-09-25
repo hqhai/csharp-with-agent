@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.SenderService;
     using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
@@ -69,6 +70,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             var totalPrice = order.TotalPrice.ToString("C", numberFormat).Trim();
 
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = order.UserId,
+                Template = EnumSenderTemplate.StudentCompletePT
+            });
+
             await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
             {
                 ToEmails = new List<string> { order.Email ?? string.Empty },
@@ -84,7 +91,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     Package = GetPackageName(order.Package),
                     Price = price.ToString(CultureInfo.InvariantCulture),
                     TotalPrice = totalPrice.ToString(CultureInfo.InvariantCulture),
-                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                    AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, token?.Content?.Result ?? string.Empty)
                 },
                 Template = EnumSenderTemplate.MailPaymentForCustomer
             });
@@ -100,7 +108,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                         FullName = student.Human?.FullName,
                         OrderCode = order.Code,
                         ExpiredDate = expiredDate,
-                        ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                        ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                        AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, token?.Content?.Result ?? string.Empty)
                     },
                     Template = EnumSenderTemplate.MailPaymentForStudent
                 });
