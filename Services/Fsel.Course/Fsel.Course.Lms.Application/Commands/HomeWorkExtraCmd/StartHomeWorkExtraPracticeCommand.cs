@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
     public class StartHomeWorkExtraPracticeCommand : IRequest<MethodResult<bool>>
     {
         public Guid HomeWorkId { get; set; }
+        public Guid? HomeWorkConfigId { get; set; }
     }
 
     public class StartHomeWorkExtraPracticeCommandHandler : IRequestHandler<StartHomeWorkExtraPracticeCommand, MethodResult<bool>>
@@ -75,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             }
             var curriculumId = await GetCurriculumConfigIdAsync(student, cancellationToken);
 
-            var homeWorkRetry = await GetExamPracticeRetryAsync(homeWork, student, curriculumId, cancellationToken);
+            var homeWorkRetry = await GetExamPracticeRetryAsync(homeWork, student, request.HomeWorkConfigId, curriculumId, cancellationToken);
             await SaveHomeWorkExtraPracticeResultAsync(homeWorkRetry);
 
             methodResult.Result = true;
@@ -107,6 +108,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 StudentId = homeWorkRetry.StudentId,
                 HomeWorkId = homeWorkRetry.HomeWorkId,
                 WorkingStatus = EnumWorkingStatus.Active,
+                SubmissionCount = EnumSubmissionCount.FirstSubmit,
                 HomeWorkRetryId = homeWorkRetry.Id,
             };
             try
@@ -121,16 +123,17 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             }
         }
 
-        private async Task<HomeWorkRetry> GetExamPracticeRetryAsync(HomeWork homeWork, StudentModel student, Guid? curriculumId, CancellationToken cancellationToken)
+        private async Task<HomeWorkRetry> GetExamPracticeRetryAsync(HomeWork homeWork, StudentModel student, Guid? homeWorkConfigId, Guid? curriculumId, CancellationToken cancellationToken)
         {
-            var homeWorkRetry = await _homeWorkRetryRepository.Queryable.FirstOrDefaultAsync(x => x.HomeWorkId == homeWork.Id && x.StudentId == student.Id, cancellationToken);
-            var retry = await GetNumberRetryAsync(curriculumId, homeWorkRetry, cancellationToken);
+            var homeWorkRetry = await _homeWorkRetryRepository.Queryable.FirstOrDefaultAsync(x => x.HomeWorkId == homeWork.Id && x.HomeWorkConfigId == homeWorkConfigId && x.StudentId == student.Id, cancellationToken);
+            var retry = await GetNumberRetryAsync(curriculumId, homeWorkConfigId, cancellationToken);
             if (homeWorkRetry == null)
             {
                 homeWorkRetry = new HomeWorkRetry
                 {
                     StudentId = student.Id,
                     HomeWorkId = homeWork.Id,
+                    HomeWorkConfigId = homeWorkConfigId,
                     CurriculumId = curriculumId,
                     NumberRetry = retry
                 };
@@ -138,22 +141,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 {
                     await _homeWorkRetryRepository.BulkMergeAsync(new List<HomeWorkRetry> { homeWorkRetry }, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.HomeWorkId, c.CurriculumId };
-                    });
-                }
-                catch
-                {
-                }
-            }
-            else if (!homeWorkRetry.CurriculumId.HasValue && curriculumId.HasValue)
-            {
-                homeWorkRetry.CurriculumId = curriculumId.Value;
-                homeWorkRetry.NumberRetry = retry;
-                try
-                {
-                    await _homeWorkRetryRepository.BulkUpdateList(new List<HomeWorkRetry> { homeWorkRetry }, bulk =>
-                    {
-                        bulk.ColumnInputExpression = c => new { c.CurriculumId, c.NumberRetry };
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.HomeWorkId, c.CurriculumId, c.HomeWorkConfigId };
                     });
                 }
                 catch
@@ -163,20 +151,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             return homeWorkRetry;
         }
 
-        private async Task<int> GetNumberRetryAsync(Guid? curriculumId, HomeWorkRetry? homeWorkRetry, CancellationToken cancellationToken)
+        private async Task<int> GetNumberRetryAsync(Guid? curriculumId, Guid? homeWorkConfigId, CancellationToken cancellationToken)
         {
-            var homeWorkConfig = await _homeWorkConfigRepository.Queryable.FirstOrDefaultAsync(x => x.CurriculumId == curriculumId, cancellationToken);
+            var homeWorkConfig = await _homeWorkConfigRepository.Queryable.FirstOrDefaultAsync(x => x.CurriculumId == curriculumId && x.Id == homeWorkConfigId, cancellationToken);
             if (homeWorkConfig == null)
             {
                 return MaxRetry;
             }
-            if (homeWorkRetry == null)
-            {
-                return homeWorkConfig.NumberRetry;
-            }
-            var countResult = await _homeWorkExtraPracticeResultRepository.Queryable.Where(x => x.HomeWorkRetryId == homeWorkRetry.Id && x.WorkingStatus != EnumWorkingStatus.Active).CountAsync(cancellationToken);
-            var retry = homeWorkConfig.NumberRetry - countResult;
-            return retry > 0 ? retry : default;
+            return homeWorkConfig.NumberRetry;
         }
 
         private async Task<MethodResult<StudentModel>> GetStudentAsync()

@@ -63,6 +63,6 @@ namespace Fsel.Course.Domain.Entities
 
         public ICollection<CurriculumStudent> CurriculumStudent { get; set; } = new List<CurriculumStudent>();
         public ICollection<HomeWorkConfig> HomeWorkConfigs { get; set; } = new List<HomeWorkConfig>();
-        public ICollection<HomeWorkRetry> HomeWorkRetrys { get; set; } = new List<HomeWorkRetry>();
+        public ICollection<HomeWorkRetry> HomeWorkRetries { get; set; } = new List<HomeWorkRetry>();
     }
 }

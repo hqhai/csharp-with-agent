@@ -22,6 +22,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
     public class GetHomeWorkExtraQuery : IRequest<MethodResult<HomeWorkExtraDtoModel>>
     {
         public Guid HomeWorkId { get; set; }
+        public Guid? HomeWorkConfigId { get; set; }
 
         [JsonIgnore]
         public bool IsShowSubStatus { get; set; }
@@ -37,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
         private readonly IUserService _userService;
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
         private readonly IQuestionExplanationErrorRepository _questionExplanationErrorRepository;
+        private readonly IHomeWorkRetryRepository _homeWorkRetryRepository;
         private readonly IHomeWorkExtraPracticeResultRepository _homeWorkExtraPracticeResultRepository;
 
         public GetHomeWorkExtraQueryHandler(IMapper mapper
@@ -47,7 +49,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             , IHomeWorkExtraPracticeResultRepository homeWorkExtraPracticeResult
             , IUserService userService
             , IQuestionShuffleRepository questionShuffleRepository
-            , IQuestionExplanationErrorRepository questionExplanationErrorRepository)
+            , IQuestionExplanationErrorRepository questionExplanationErrorRepository
+            , IHomeWorkRetryRepository homeWorkRetryRepository)
         {
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
@@ -57,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             _userService = userService;
             _questionShuffleRepository = questionShuffleRepository;
             _questionExplanationErrorRepository = questionExplanationErrorRepository;
+            _homeWorkRetryRepository = homeWorkRetryRepository;
             _homeWorkExtraPracticeResultRepository = homeWorkExtraPracticeResult;
         }
 
@@ -73,8 +77,17 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             }
             var student = studentResult.Result!;
 
-            var result = await _homeWorkExtraPracticeResultRepository.Queryable.Where(x => x.HomeWorkId == request.HomeWorkId && x.StudentId == student.Id)
-                                                                                          .FirstOrDefaultAsync(x => x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
+            var homeWorkRetry = await _homeWorkRetryRepository.Queryable.Where(x => x.HomeWorkId == request.HomeWorkId && x.StudentId == student.Id)
+                                                              .FirstOrDefaultAsync(x => x.HomeWorkConfigId == request.HomeWorkConfigId, cancellationToken);
+            if (homeWorkRetry == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkRetry));
+                return methodResult;
+            }
+
+            var result = await _homeWorkExtraPracticeResultRepository.Queryable.Where(x => x.HomeWorkRetryId == homeWorkRetry.Id)
+                                                            .Where(x => x.HomeWorkId == request.HomeWorkId && x.StudentId == student.Id)
+                                                            .FirstOrDefaultAsync(x => x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
             if (result == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(result));

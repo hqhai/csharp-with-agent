@@ -40,6 +40,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
         private readonly IHomeWorkExtraPracticeAnswerRepository _homeWorkExtraPracticeAnswerRepository;
         private readonly ICurriculumRepository _curriculumRepository;
         private readonly ICurriculumStudentRepository _curriculumStudentRepository;
+        private readonly IHomeWorkRetryRepository _homeWorkRetryRepository;
 
         public SearchHomeWorkExtraAssignedQueryHandler(IHomeWorkRepository homeWorkRepository,
             AuthContext authContext,
@@ -49,7 +50,8 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             IHomeWorkExtraPracticeResultRepository homeWorkExtraPracticeResultRepository,
             IHomeWorkExtraPracticeAnswerRepository homeWorkExtraPracticeAnswerRepository,
             ICurriculumRepository curriculumRepository,
-            ICurriculumStudentRepository curriculumStudentRepository)
+            ICurriculumStudentRepository curriculumStudentRepository,
+            IHomeWorkRetryRepository homeWorkRetryRepository)
         {
             _homeWorkRepository = homeWorkRepository;
             _authContext = authContext;
@@ -60,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             _homeWorkExtraPracticeAnswerRepository = homeWorkExtraPracticeAnswerRepository;
             _curriculumRepository = curriculumRepository;
             _curriculumStudentRepository = curriculumStudentRepository;
+            _homeWorkRetryRepository = homeWorkRetryRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<HomeWorkExtraModel>>> Handle(SearchHomeWorkExtraAssignedQuery request, CancellationToken cancellationToken)
@@ -77,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             var dateTime = DateTime.Now;
             var curriculumConfigId = await GetCurriculumConfigIdAsync(student, cancellationToken);
 
-            var query = _homeWorkRepository.Queryable.Where(x => x.Type == EnumHomeWorkType.HomeworkExtra);
+            var query = _homeWorkRepository.Queryable.Where(x => x.Type == EnumHomeWorkType.HomeworkExtra).Where(x => !x.IsArchive);
             if (!string.IsNullOrEmpty(request.WorkFilterStr))
             {
                 var workFilterStatuses = request.WorkFilterStr.ToList<EnumWorkFilterStatus>() ?? new List<EnumWorkFilterStatus>();
@@ -85,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 bool hasCompleted = workFilterStatuses.Contains(EnumWorkFilterStatus.Completed);
                 bool hasNotCompleted = workFilterStatuses.Contains(EnumWorkFilterStatus.NotCompleted);
                 bool hasOverdue = workFilterStatuses.Contains(EnumWorkFilterStatus.Overdue);
+
                 if (!hasCompleted && !hasOverdue && hasNotCompleted)
                 {
                     query = from baseQ in query
@@ -106,7 +110,6 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 }
                 else if (hasOverdue && !hasNotCompleted && !hasCompleted)
                 {
-                    // tạm fix cứng
                     query = from baseQ in query
                             join hwc in _homeWorkConfigRepository.Queryable on baseQ.Id equals hwc.HomeWorkId
                             join her in _homeWorkExtraPracticeResultRepository.Queryable on baseQ.Id equals her.HomeWorkId into herGroup
@@ -130,18 +133,17 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                                 UpdatedDate = baseQ.UpdatedDate,
                                 EndDate = hwc.EndDate,
                                 StartDate = hwc.StartDate,
+                                HomeWorkConfigId = hwc.Id,
                                 TopicName = baseQ.Topic != null ? baseQ.Topic.Name : null,
                                 TotalQuestion = baseQ.HomeWorkQuestions.Count,
                                 CorrectTotal = baseQ.HomeWorkQuestions.Sum(x => x.Question!.CorrectTotal),
-                                NumberRetry = baseQ.HomeWorkRetrys.FirstOrDefault(x => x.StudentId == student.Id) != null ? baseQ.HomeWorkRetrys.FirstOrDefault(x => x.StudentId == student.Id)!.NumberRetry : hwc.NumberRetry,
-                                HomeWorkExtraPracticeResult = _mapper.Map<HomeWorkExtraPracticeResultModel>(baseQ.HomeWorkExtraPracticeResults.FirstOrDefault(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id))
                             };
 
             int totalItem = await queryData.CountAsync(cancellationToken);
             var lists = await queryData.ApplySortAndPaging(request)
                                    .AsNoTracking()
                                    .ToListAsync(cancellationToken);
-            await SetCorrectCountsAsync(lists, cancellationToken);
+            await SetCorrectCountsAsync(lists, student, cancellationToken);
             foreach (var item in lists)
             {
                 item.ExpiryState = ComputeExpiryState(dateTime, item.EndDate, item.HomeWorkExtraPracticeResult?.UpdatedDate, item.HomeWorkExtraPracticeResult?.Status);
@@ -166,9 +168,25 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             return curriculumId.HasValue && curriculumId.Value != Guid.Empty ? curriculumId.Value : null;
         }
 
-        private async Task SetCorrectCountsAsync(IList<HomeWorkExtraModel> lists, CancellationToken cancellationToken)
+        private async Task SetCorrectCountsAsync(IList<HomeWorkExtraModel> lists, StudentModel student, CancellationToken cancellationToken)
         {
-            var homeWorkExtraPracticeResultIds = lists.Select(x => x.HomeWorkExtraPracticeResult).Where(x => x != null).Select(x => x!.Id).ToList();
+            var homeWorkExtraResults = await (from baseQ in _homeWorkExtraPracticeResultRepository.Queryable
+                                              join hwr in _homeWorkRetryRepository.Queryable on baseQ.HomeWorkRetryId equals hwr.Id
+                                              where baseQ.StudentId == student.Id && baseQ.WorkingStatus == EnumWorkingStatus.Active
+                                              select new
+                                              {
+                                                  hwr.HomeWorkId,
+                                                  hwr.HomeWorkConfigId,
+                                                  baseQ,
+                                                  hwr
+                                              }).AsNoTracking().ToListAsync(cancellationToken);
+            var homeWorkExtraResultDict = homeWorkExtraResults
+                                            .ToDictionary(k => (k.HomeWorkId, k.HomeWorkConfigId), x => x.baseQ);
+
+            var homeWorkExtraRetrytDict = homeWorkExtraResults
+                                            .ToDictionary(k => (k.HomeWorkId, k.HomeWorkConfigId), x => x.hwr.NumberRetry);
+
+            var homeWorkExtraPracticeResultIds = homeWorkExtraResults.Select(x => x.baseQ).Where(x => x != null).Select(x => x!.Id).ToList();
             if (homeWorkExtraPracticeResultIds.Any())
             {
                 var homeWorkExtraAnswers = await _homeWorkExtraPracticeAnswerRepository.Queryable
@@ -179,6 +197,14 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
 
                 foreach (var item in lists)
                 {
+                    var key = (item.Id, item.HomeWorkConfigId);
+
+                    homeWorkExtraResultDict.TryGetValue(key, out var result);
+                    item.HomeWorkExtraPracticeResult = _mapper.Map<HomeWorkExtraPracticeResultModel>(result);
+
+                    homeWorkExtraRetrytDict.TryGetValue(key, out var retry);
+                    item.NumberRetry = retry;
+
                     answers.TryGetValue(item.Id, out var listAnswer);
                     if (listAnswer == null || !listAnswer.Any())
                     {

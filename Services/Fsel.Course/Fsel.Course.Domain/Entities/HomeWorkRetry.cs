@@ -9,6 +9,8 @@ namespace Fsel.Course.Domain.Entities
         public int NumberRetry { get; set; }
         public CurriculumConfig? Curriculum { get; set; }
         public Guid? CurriculumId { get; set; }
+        public HomeWorkConfig? HomeWorkConfig { get; set; }
+        public Guid? HomeWorkConfigId { get; set; }
         public HomeWork? HomeWork { get; set; }
         public Guid HomeWorkId { get; set; }
         public Guid StudentId { get; set; }
