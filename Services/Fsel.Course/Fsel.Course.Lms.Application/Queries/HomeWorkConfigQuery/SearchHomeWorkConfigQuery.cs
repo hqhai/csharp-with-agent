@@ -36,6 +36,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
 
             var query = await (from hc in _homeWorkConfigRepository.Queryable
                                join h in _homeWorkRepository.Queryable on hc.HomeWorkId equals h.Id
+                               where hc.CurriculumId == request.CurriculumId
                                select new HomeWorkConfigModel()
                                {
                                    Id = hc.Id,
