@@ -11,6 +11,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Identity.Application.Commands.AdminCmd;
     using Fsel.Identity.Application.Commands.CampusCmd.Classes;
     using Fsel.Identity.Application.Queries.CampusQuery.Classes;
+    using Fsel.Identity.Domain.Models;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
@@ -100,18 +101,31 @@ namespace Fsel.Identity.Api.Controllers.Campus
         /// Add students to class
         /// </summary>
         [HttpPost("add-students-to-class")]
-        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<AddStudentIntoSchoolClassCommandModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(SchoolClassCampusManagement.AddStudents)]
         public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] AddStudentIntoSchoolClassCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            if (!commandResult.IsOK || commandResult.Result == null)
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null || commandResult.Result.Stream == null)
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Add_Students_To_Class_Error.xlsx");
+            return File(commandResult.Result.Stream, Settings.Excels.ContentType, "Add_Students_To_Class_Error.xlsx");
+        }
+
+        /// <summary>
+        /// search teacher campus
+        /// </summary>
+        [HttpGet("search-teacher-campus")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<TeacherModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(SchoolClassCampusManagement.View)]
+        public async Task<IActionResult> SearchTeacher([FromQuery] SearchTeacherCampusQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
