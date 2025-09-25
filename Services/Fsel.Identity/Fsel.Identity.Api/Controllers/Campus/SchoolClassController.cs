@@ -8,6 +8,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Identity.Application.Commands.AdminCmd;
     using Fsel.Identity.Application.Commands.CampusCmd.Classes;
     using Fsel.Identity.Application.Queries.CampusQuery.Classes;
     using Fsel.Identity.Domain.Models.EntityModels;
@@ -136,9 +137,38 @@ namespace Fsel.Identity.Api.Controllers.Campus
         [HttpGet("search-created-users-info-school-class")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<EntityModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(SchoolClassCampusManagement.View)]
         public async Task<IActionResult> SearchCreateUsersInfoSchoolClass([FromQuery] SearchCreateUsersInfoSchoolClassQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update Student
+        /// </summary>
+        [HttpPut("update-student-info/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(StudentCampusManagement.Update)]
+        public async Task<IActionResult> UpdateStudent([FromRoute] Guid studentId, [FromBody] UpdateStudentByAdminCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.Id = studentId;
+            MethodResult<StudentModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Change Password
+        /// </summary>
+        [HttpPost("reset-password")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(StudentCampusManagement.Update)]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordUserCommand command)
+        {
+            MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
