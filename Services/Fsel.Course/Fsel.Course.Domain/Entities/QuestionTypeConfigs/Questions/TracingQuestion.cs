@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     public class TracingQuestion
     {
         [JsonRequired]
-        public string? Question { get; set; }
+        public string? Name { get; set; }
 
         public string? Instruction { get; set; }
 
