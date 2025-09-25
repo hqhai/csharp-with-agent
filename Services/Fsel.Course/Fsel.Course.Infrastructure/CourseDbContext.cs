@@ -162,6 +162,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<TestAISetting> TestAISettings { get; set; }
         public DbSet<KeyboardLayout> KeyboardLayouts { get; set; }
         public DbSet<KeyboardText> KeyboardTexts { get; set; }
+        public DbSet<RubyAnnotation> RubyAnnotations { get; set; }
+        public DbSet<RubyScope> RubyScopes { get; set; }
 
         #region Report
 
@@ -293,7 +295,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new CourseModuleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new KeyboardLayoutEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new KeyboardTextEntityTypeConfiguration());
-
+            modelBuilder.ApplyConfiguration(new RubyAnnotationTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new RubyScopeTypeConfiguration());
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
             //modelBuilder.Ignore<PercentEvaluateInputResultModel>();
