@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20250924082153_Add_Table_Ruby")]
+    [Migration("20250925064701_Add_Table_Ruby")]
     partial class Add_Table_Ruby
     {
         /// <inheritdoc />
@@ -5147,7 +5147,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("nvarchar(50)");
 
                     b.Property<int>("LengthGraphemes")
-                        .HasMaxLength(20)
                         .HasColumnType("int");
 
                     b.Property<string>("Phonetic")

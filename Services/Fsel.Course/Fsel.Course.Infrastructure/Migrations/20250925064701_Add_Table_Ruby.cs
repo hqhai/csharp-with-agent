@@ -58,7 +58,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     SelectedText = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Phonetic = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     StartGraphemeIndex = table.Column<int>(type: "int", nullable: false),
-                    LengthGraphemes = table.Column<int>(type: "int", maxLength: 20, nullable: false),
+                    LengthGraphemes = table.Column<int>(type: "int", nullable: false),
                     RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
                     PrefixContext = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SuffixContext = table.Column<string>(type: "nvarchar(max)", nullable: true),

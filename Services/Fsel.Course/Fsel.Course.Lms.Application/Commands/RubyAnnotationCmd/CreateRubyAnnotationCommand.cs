@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<CreateRubyByScopeCommandModel> methodResult = new MethodResult<CreateRubyByScopeCommandModel>();
 
-            var baseNfc = "";
+            var baseNfc = string.Empty;
 
             if (!string.IsNullOrWhiteSpace(request.Text))
             {
@@ -56,32 +56,38 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
                 var (found, nfc) = await _rubyScopeRepository.TryGetBaseTextAsync(request.HostType, request.HostId, request.FieldKey, cancellationToken);
                 if (!found || string.IsNullOrEmpty(nfc))
                 {
-                    methodResult.AddErrorBadRequest("Host not found or base text empty");
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     baseNfc = RubyTextNormalization.ToNfc(nfc!);
                 }
             }
 
-            #region Validation
             var scope = await _rubyScopeRepository.Queryable
                 .AsNoTracking()
                 .FirstOrDefaultAsync(x => x.HostType == request.HostType && x.HostId == request.HostId && x.FieldKey == request.FieldKey, cancellationToken);
 
             if (scope == null)
             {
-                scope = new EntityRubyScope { Id = Guid.NewGuid(), FieldKey = request.FieldKey, HostId = request.HostId, HostType = request.HostType, Text = request.Text };
-                _rubyScopeRepository.Add(scope);
-                (scope.Text, scope.BaseLengthGraphemes) = _rubyService.Snapshot(baseNfc);
-                await _rubyScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _rubyScopeRepository.ExecuteTransactionAsync(async () =>
+                {
+                    scope = new EntityRubyScope { Id = Guid.NewGuid(), FieldKey = request.FieldKey, HostId = request.HostId, HostType = request.HostType, Text = request.Text };
+                    _rubyScopeRepository.Add(scope);
+                    (scope.Text, scope.BaseLengthGraphemes) = _rubyService.Snapshot(baseNfc);
+                    await _rubyScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    return methodResult;
+                });
             }
 
+            #region Validation
             if (request.LengthGraphemes is < 1 or > 5)
             {
-                methodResult.AddErrorBadRequest("Length 1-5");
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
             }
+
             if (request.StartGraphemeIndex < 0 || request.StartGraphemeIndex + request.LengthGraphemes > scope.BaseLengthGraphemes)
             {
-                methodResult.AddErrorBadRequest("Range out");
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.MaxLength));
                 return methodResult;
             }
             #endregion
@@ -133,7 +139,6 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
                 }
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
-                //methodResult.Result = _mapper.Map<RubyAnnotationModel>(rubyText);
                 methodResult.Result = result;
 
                 return methodResult;
