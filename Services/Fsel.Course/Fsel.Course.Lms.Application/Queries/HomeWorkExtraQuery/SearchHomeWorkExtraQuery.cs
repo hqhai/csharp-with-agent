@@ -132,63 +132,72 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 TotalQuestion = x.HomeWorkQuestions.Count(),
                 CorrectTotal = x.HomeWorkQuestions.Sum(x => x.Question!.CorrectTotal),
                 TopicName = x.Topic != null ? x.Topic.Name : string.Empty,
+                NumberRetry = MaxRetry,
             });
 
             int totalItem = await queryData.CountAsync(cancellationToken);
             var lists = await queryData.ApplySortAndPaging(request)
                                        .AsNoTracking()
                                        .ToListAsync(cancellationToken);
-            await SetCorrectCountsAsync(lists, student, cancellationToken);
+            await SetListAsync(lists, student, cancellationToken);
 
             methodResult.Result = new PagingItemsModel<HomeWorkExtraModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task SetCorrectCountsAsync(IList<HomeWorkExtraModel> lists, StudentModel student, CancellationToken cancellationToken)
+        private async Task SetListAsync(IList<HomeWorkExtraModel> lists, StudentModel student, CancellationToken cancellationToken)
         {
-            var homeWorkExtraResults = await (from baseQ in _homeWorkExtraPracticeResultRepository.Queryable
-                                              join hwr in _homeWorkRetryRepository.Queryable on baseQ.HomeWorkRetryId equals hwr.Id
-                                              where hwr.HomeWorkConfigId == null && baseQ.StudentId == student.Id && baseQ.WorkingStatus == EnumWorkingStatus.Active
-                                              select new
-                                              {
-                                                  hwr.HomeWorkId,
-                                                  baseQ,
-                                                  hwr
-                                              }).AsNoTracking().ToListAsync(cancellationToken);
+            var homeWorkIds = lists.Select(x => x.Id).ToList();
 
-            var homeWorkExtraResultDict = homeWorkExtraResults.GroupBy(x => x.HomeWorkId)
-                                                            .ToDictionary(x => x.Key, x => x.Select(x => x.baseQ).FirstOrDefault());
+            var homeWorkRetrys = await _homeWorkRetryRepository.Queryable.WhereBulkContains(homeWorkIds, x => x.HomeWorkId)
+                                                               .Where(x => x.StudentId == student.Id && !x.HomeWorkConfigId.HasValue)
+                                                               .AsNoTracking()
+                                                               .ToListAsync(cancellationToken);
 
-            var homeWorkExtraRetrytDict = homeWorkExtraResults.GroupBy(x => x.HomeWorkId)
-                                                          .ToDictionary(x => x.Key, x => x.Select(x => x.hwr).FirstOrDefault()?.NumberRetry ?? MaxRetry);
+            var homeWorkExtraResults = await (from baseQ in _homeWorkExtraPracticeResultRepository.Queryable.WhereBulkContains(homeWorkRetrys.Select(x => x.Id), x => x.HomeWorkRetryId)
+                                              where baseQ.WorkingStatus == EnumWorkingStatus.Active
+                                              select baseQ).AsNoTracking()
+                                              .ToListAsync(cancellationToken);
 
-            var homeWorkExtraPracticeResultIds = homeWorkExtraResults.Select(x => x.baseQ).Where(x => x != null).Select(x => x!.Id).ToList();
-            if (homeWorkExtraPracticeResultIds.Any())
+            var homeWorkExtraResultDict = homeWorkExtraResults
+                                  .ToDictionary(k => (k.HomeWorkId, k.HomeWorkRetryId), x => x);
+
+            var homeWorkExtraRetrytDict = homeWorkRetrys
+                                            .ToDictionary(k => (k.HomeWorkId, k.HomeWorkConfigId), x => x);
+
+            var homeWorkExtraPracticeResultIds = homeWorkExtraResults.Where(x => x != null).Select(x => x!.Id).ToList();
+            var homeWorkExtraAnswers = await _homeWorkExtraPracticeAnswerRepository.Queryable
+                                                           .WhereBulkContains(homeWorkExtraPracticeResultIds, x => x.HomeWorkExtraPracticeResultId)
+                                                           .ToListAsync(cancellationToken);
+            var answers = homeWorkExtraAnswers.GroupBy(x => x.HomeWorkExtraPracticeResultId)
+                                              .ToDictionary(x => x.Key, x => x.ToList());
+
+            foreach (var item in lists)
             {
-                var homeWorkExtraAnswers = await _homeWorkExtraPracticeAnswerRepository.Queryable
-                                                        .WhereBulkContains(homeWorkExtraPracticeResultIds, x => x.HomeWorkExtraPracticeResultId)
-                                                        .ToListAsync(cancellationToken);
-                var answers = homeWorkExtraAnswers.GroupBy(x => x.HomeWorkExtraPracticeResultId)
-                                                  .ToDictionary(x => x.Key, x => x.ToList());
-
-                foreach (var item in lists)
+                var key = (item.Id, item.HomeWorkConfigId);
+                homeWorkExtraRetrytDict.TryGetValue(key, out var retry);
+                if (retry == null)
                 {
-                    homeWorkExtraResultDict.TryGetValue(item.Id, out var result);
-                    item.HomeWorkExtraPracticeResult = _mapper.Map<HomeWorkExtraPracticeResultModel>(result);
-
-                    homeWorkExtraRetrytDict.TryGetValue(item.Id, out var retry);
-                    item.NumberRetry = retry;
-
-                    answers.TryGetValue(item.Id, out var listAnswer);
-                    if (listAnswer == null || !listAnswer.Any())
-                    {
-                        continue;
-                    }
-                    item.CountQuestion = listAnswer.Count;
-                    item.CorrectCount = listAnswer.Sum(x => x.CorrectCount);
-                    item.ProgressPercent = NumberHelper.GetPercent(item.CountQuestion, item.TotalQuestion);
+                    continue;
                 }
+                var keyRetry = (item.Id, HomeWorkConfigId: retry.Id);
+                homeWorkExtraResultDict.TryGetValue(keyRetry, out var result);
+
+                item.NumberRetry = retry.NumberRetry;
+                item.HomeWorkExtraPracticeResult = _mapper.Map<HomeWorkExtraPracticeResultModel>(result);
+                if (result == null)
+                {
+                    continue;
+                }
+                answers.TryGetValue(result.Id, out var listAnswer);
+                if (listAnswer == null || !listAnswer.Any())
+                {
+                    continue;
+                }
+                item.CountQuestion = listAnswer.Count;
+                item.CorrectCount = listAnswer.Sum(x => x.CorrectCount);
+                item.ProgressPercent = NumberHelper.GetPercent(item.CountQuestion, item.TotalQuestion);
             }
         }
 
