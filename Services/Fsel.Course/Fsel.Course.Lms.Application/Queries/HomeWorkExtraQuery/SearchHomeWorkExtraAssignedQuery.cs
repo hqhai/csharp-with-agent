@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
@@ -77,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 return methodResult;
             }
             var student = studentResult.Result!;
-            var dateTime = DateTime.Now;
+            var dateTime = DateTime.UtcNow.ConvertTimeToUtc(EnumCountryKey.Vietnam);
             var curriculumConfigId = await GetCurriculumConfigIdAsync(student, cancellationToken);
 
             var query = _homeWorkRepository.Queryable.Where(x => x.Type == EnumHomeWorkType.HomeworkExtra).Where(x => !x.IsArchive);
