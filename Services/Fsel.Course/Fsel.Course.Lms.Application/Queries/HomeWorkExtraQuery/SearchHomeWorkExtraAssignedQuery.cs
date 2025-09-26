@@ -171,7 +171,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
 
         private async Task SetCorrectCountsAsync(IList<HomeWorkExtraModel> lists, StudentModel student, CancellationToken cancellationToken)
         {
-            var keys = lists.Select(x => new { x.Id, x.HomeWorkConfigId }).ToList();
+            var keys = lists.Select(x => new { HomeWorkId = x.Id, x.HomeWorkConfigId }).ToList();
 
             var homeWorkRetrys = await _homeWorkRetryRepository.Queryable.WhereBulkContains(keys, x => new { x.HomeWorkId, x.HomeWorkConfigId })
                                                                .Where(x => x.StudentId == student.Id)
@@ -212,14 +212,19 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 {
                     continue;
                 }
+
                 answers.TryGetValue(result.Id, out var listAnswer);
                 if (listAnswer == null || !listAnswer.Any())
                 {
                     continue;
                 }
                 item.CountQuestion = listAnswer.Count;
-                item.CorrectCount = listAnswer.Sum(x => x.CorrectCount);
                 item.ProgressPercent = NumberHelper.GetPercent(item.CountQuestion, item.TotalQuestion);
+
+                if (result.Status == EnumResultStatus.Done)
+                {
+                    item.CorrectCount = listAnswer.Sum(x => x.CorrectCount);
+                }
             }
         }
 

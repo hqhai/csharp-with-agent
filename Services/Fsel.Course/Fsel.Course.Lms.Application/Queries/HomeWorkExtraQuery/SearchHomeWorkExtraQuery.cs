@@ -196,8 +196,12 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                     continue;
                 }
                 item.CountQuestion = listAnswer.Count;
-                item.CorrectCount = listAnswer.Sum(x => x.CorrectCount);
                 item.ProgressPercent = NumberHelper.GetPercent(item.CountQuestion, item.TotalQuestion);
+
+                if (result.Status == EnumResultStatus.Done)
+                {
+                    item.CorrectCount = listAnswer.Sum(x => x.CorrectCount);
+                }
             }
         }
 
