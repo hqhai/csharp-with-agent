@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         /// get current curriculum
         /// </summary>
         [HttpGet("get-current-curriculum")]
-        [ProducesResponseType(typeof(MethodResult<CurriculumModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<CurriculumModel?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetCurrentCurriculumOfStudent([FromQuery] GetCurrentCurriculumOfStudentQuery query)

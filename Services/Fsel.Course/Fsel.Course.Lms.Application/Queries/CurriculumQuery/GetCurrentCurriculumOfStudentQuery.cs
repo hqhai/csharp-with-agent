@@ -13,12 +13,12 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetCurrentCurriculumOfStudentQuery : IRequest<MethodResult<CurriculumModel>>
+    public class GetCurrentCurriculumOfStudentQuery : IRequest<MethodResult<CurriculumModel?>>
     {
         public Guid? UserId { get; set; }
     }
 
-    public class GetCurrentCurriculumOfStudentQueryHandler : IRequestHandler<GetCurrentCurriculumOfStudentQuery, MethodResult<CurriculumModel>>
+    public class GetCurrentCurriculumOfStudentQueryHandler : IRequestHandler<GetCurrentCurriculumOfStudentQuery, MethodResult<CurriculumModel?>>
     {
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
@@ -39,10 +39,10 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             _courseRepository = courseRepository;
         }
 
-        public async Task<MethodResult<CurriculumModel>> Handle(GetCurrentCurriculumOfStudentQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<CurriculumModel?>> Handle(GetCurrentCurriculumOfStudentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<CurriculumModel>();
+            var methodResult = new MethodResult<CurriculumModel?>();
 
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
@@ -50,11 +50,13 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             var student = studentResult.Content?.Result;
             if (student == null)
             {
+                methodResult.Result = null;
                 return methodResult;
             }
 
             if (!student.CourseId.HasValue)
             {
+                methodResult.Result = null;
                 return methodResult;
             }
 
@@ -73,6 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             if (curriculum == null)
             {
+                methodResult.Result = null;
                 return methodResult;
             }
 
