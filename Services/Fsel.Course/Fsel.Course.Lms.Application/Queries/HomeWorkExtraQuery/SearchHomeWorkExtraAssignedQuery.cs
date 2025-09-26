@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 return methodResult;
             }
             var student = studentResult.Result!;
-            var dateTime = DateTime.UtcNow.ConvertTimeToUtc(EnumCountryKey.Vietnam);
+            var dateTime = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
             var curriculumConfigId = await GetCurriculumConfigIdAsync(student, cancellationToken);
 
             var query = _homeWorkRepository.Queryable.Where(x => x.Type == EnumHomeWorkType.HomeworkExtra).Where(x => !x.IsArchive);
