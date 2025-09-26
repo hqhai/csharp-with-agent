@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            if (currentDate < request.StartDate)
+            if (request.StartDate < currentDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCurriculumErrorCode.StartDateCannotBeInThePast), nameof(request.StartDate), request.StartDate);
                 return methodResult;
