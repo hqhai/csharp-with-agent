@@ -73,7 +73,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
             {
                 UserId = order.UserId,
-                Template = EnumSenderTemplate.StudentCompletePT
+                Template = EnumSenderTemplate.MailPaymentForStudent
             });
 
             await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()

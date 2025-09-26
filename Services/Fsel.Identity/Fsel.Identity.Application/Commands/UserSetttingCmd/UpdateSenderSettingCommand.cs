@@ -49,7 +49,6 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
             ArgumentNullException.ThrowIfNull(request.Token);
             var methodResult = new MethodResult<bool>();
 
-
             var validate = ValidateToken(request.Token);
             if (!validate.IsOK)
             {
@@ -118,8 +117,8 @@ namespace Fsel.Identity.Application.Commands.UserSetttingCmd
             }
 
             var senderConfigs = senderConfigQuery.Content?.Result?.ToList();
-            var senderConfig = senderConfigs?.FirstOrDefault(x => x.TemplateEmails != null && x.TemplateEmails.Contains(request.Template));
-
+            //var senderConfig = senderConfigs?.FirstOrDefault(x => x.TemplateEmails != null && x.TemplateEmails.Contains(request.Template));
+            var senderConfig = senderConfigs?.FirstOrDefault(x => x.IsEdit);
             if (senderConfig != null && senderConfig.IsEdit)
             {
                 var userSenderSetting = userSetting.UserSenderSettings.FirstOrDefault(x => x.SenderConfigId == senderConfig.Id);
