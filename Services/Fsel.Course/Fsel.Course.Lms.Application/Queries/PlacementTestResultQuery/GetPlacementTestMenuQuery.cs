@@ -12,8 +12,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Helpers;
-    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class GetPlacementTestMenuQuery : IRequest<MethodResult<PlacementTestTreeModel>>
     {
@@ -81,8 +81,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             }
             else
             {
-                // Nếu không có PlacementTestResult, chỉ giữ lại Part 1 (các part khác chưa unlock)
-                tree.Parts = tree.Parts.Take(1).ToList();
+                // Nếu không có PlacementTestResult
+                tree.Parts = tree.Parts.Take(3).ToList();
+
+                // Gán dữ liệu SkillScores mặc định cho mỗi part
+                foreach (var part in tree.Parts)
+                {
+                    part.SkillScores = CreateDefaultSkillScores();
+                }
             }
 
             return tree;
@@ -107,6 +113,36 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             }
 
             return parts;
+        }
+
+        private static List<PlacementTestSkillScores> CreateDefaultSkillScores()
+        {
+            var defaultSkillScores = new List<PlacementTestSkillScores>();
+
+            // Tạo SkillScores mặc định chỉ cho Reading, Listening, Vocabulary, Grammar, PT hiện tại chỉ có những kỹ năng này
+            var defaultSkills = new[]
+            {
+                EnumCourseSkill.Reading,
+                EnumCourseSkill.Listening,
+                EnumCourseSkill.Vocabulary,
+                EnumCourseSkill.Grammar
+            };
+
+            foreach (var skill in defaultSkills)
+            {
+                defaultSkillScores.Add(new PlacementTestSkillScores
+                {
+                    Skill = skill,
+                    Scores = 0.0,
+                    TotalCount = 0,
+                    CorrectCount = 0,
+                    TotalQuestion = 0,
+                    CountQuestion = 0,
+                    Percent = 0.0
+                });
+            }
+
+            return defaultSkillScores;
         }
 
         private async Task LoadActualPlacementTestResultsIntoTree(PlacementTestTreeModel tree, List<PlacementTestResult> placementTestResults, Guid? studentId)
