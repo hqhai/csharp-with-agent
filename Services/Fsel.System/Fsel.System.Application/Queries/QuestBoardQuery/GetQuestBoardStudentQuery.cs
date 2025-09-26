@@ -82,7 +82,7 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
                 p.IsFinish = questBoardStudent != null && (p.CurrentValue >= p.TargetValue);
             });
 
-            methodResult.Result = questBoards.OrderByDescending(x => x.IsFinish).ThenBy(x => x.Type).ThenBy(p => p.Name).ToList();
+            methodResult.Result = questBoards.Where(x => x.Status != EnumQuestBoardStudentStatus.Received).OrderByDescending(x => x.IsFinish).ThenBy(x => x.Type).ThenBy(p => p.Name).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
@@ -122,7 +122,6 @@ namespace Fsel.System.Application.Queries.QuestBoardQuery
             var query = from baseQ in _questBoardRepository.Queryable
                         join qbs in _questBoardStudentRepository.Queryable on baseQ.Id equals qbs.QuestBoardId
                         where baseQ.IsActive && qbs.StudentId == studentId
-                        && qbs.Status == EnumQuestBoardStudentStatus.NotReceived
                         select new
                         {
                             QuestBoardStudent = qbs,
