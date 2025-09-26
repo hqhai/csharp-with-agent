@@ -53,7 +53,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<VideoModel>(video);
+            methodResult.Result = _mapper.Map<VideoModel>(videoModel);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

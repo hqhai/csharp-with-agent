@@ -88,64 +88,54 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<VideoModel?> GetIncludeAllAsync(Guid? id)
         {
-            var video = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
-            _logger.LogError("Invalid column name QuestionName", video);
-            try
-            {
-                return await Queryable
-                                .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
-                                .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                .ThenInclude(x => x.Exercise)
-                                .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                .ThenInclude(x => x.Question)
-                                .Where(x => x.Id == id)
-                                .Select(i => new VideoModel
+            return await Queryable
+                            .Include(i => i.VideoTimeCodes.Where(x => !x.IsDeleted))
+                            .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
+                            .ThenInclude(x => x.Exercise)
+                            .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
+                            .ThenInclude(x => x.Question)
+                            .Where(x => x.Id == id)
+                            .Select(i => new VideoModel
+                            {
+                                Id = i.Id,
+                                Name = i.Name,
+                                VideoFilePath = i.VideoFilePath,
+                                TeacherId = i.TeacherId,
+                                SubFilePath = i.SubFilePath,
+                                Type = i.Type,
+                                CourseLevel = i.CourseLevel,
+                                VersionStatus = i.VersionStatus,
+                                Version = i.Version,
+                                Program = _mapper.Map<ProgramModel>(i.Program),
+                                Level = _mapper.Map<LevelModel>(i.Level),
+                                IsUseStudent = i.VideoResults.Any(),
+                                VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                                 {
-                                    Id = i.Id,
-                                    Name = i.Name,
-                                    VideoFilePath = i.VideoFilePath,
-                                    TeacherId = i.TeacherId,
-                                    SubFilePath = i.SubFilePath,
-                                    Type = i.Type,
-                                    CourseLevel = i.CourseLevel,
-                                    VersionStatus = i.VersionStatus,
-                                    Version = i.Version,
-                                    Program = _mapper.Map<ProgramModel>(i.Program),
-                                    Level = _mapper.Map<LevelModel>(i.Level),
-                                    IsUseStudent = i.VideoResults.Any(),
-                                    VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
+                                    Id = x.Id,
+                                    DisplayTime = x.DisplayTime,
+                                    ExecutionTime = x.ExecutionTime,
+                                    TimeCodeType = x.TimeCodeType,
+                                    VideoId = x.VideoId,
+                                    Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null && !n.IsDeleted).Select(n => n.Exercise).OrderBy(x => x!.CreatedDate).Select(n => new ExerciseModel
                                     {
-                                        Id = x.Id,
-                                        DisplayTime = x.DisplayTime,
-                                        ExecutionTime = x.ExecutionTime,
-                                        TimeCodeType = x.TimeCodeType,
-                                        VideoId = x.VideoId,
-                                        Exercises = x.TimeCodeExercises.Where(n => n.Exercise != null && !n.IsDeleted).Select(n => n.Exercise).OrderBy(x => x!.CreatedDate).Select(n => new ExerciseModel
+                                        Id = n!.Id,
+                                        Name = n.Name,
+                                        MediaPost = n.MediaPost,
+                                        CourseSkill = n.CourseSkill,
+                                        SkillId = n.SkillId,
+                                        SkillName = n.Skill != null ? n.Skill.Name : null,
+                                        Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                                         {
-                                            Id = n!.Id,
-                                            Name = n.Name,
-                                            MediaPost = n.MediaPost,
-                                            CourseSkill = n.CourseSkill,
-                                            SkillId = n.SkillId,
-                                            SkillName = n.Skill != null ? n.Skill.Name : null,
-                                            Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
-                                            {
-                                                Id = m!.Id,
-                                                QuestionType = m.QuestionType,
-                                                Explanation = m.Explanation,
-                                                Ungraded = m.Ungraded,
-                                                CorrectTotal = m.CorrectTotal,
-                                                Config = m.Config
-                                            }).ToList()
-                                        }).ToList(),
+                                            Id = m!.Id,
+                                            QuestionType = m.QuestionType,
+                                            Explanation = m.Explanation,
+                                            Ungraded = m.Ungraded,
+                                            CorrectTotal = m.CorrectTotal,
+                                            Config = m.Config
+                                        }).ToList()
                                     }).ToList(),
-                                }).FirstOrDefaultAsync();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError("Invalid column name QuestionName", e);
-                throw;
-            }
+                                }).ToList(),
+                            }).FirstOrDefaultAsync();
         }
 
         public IQueryable<VideoSearchModel> SearchAsync(EnumTimeCodeType? codeType, Guid? teacherId, EnumCourseLevel? courseLevel)
