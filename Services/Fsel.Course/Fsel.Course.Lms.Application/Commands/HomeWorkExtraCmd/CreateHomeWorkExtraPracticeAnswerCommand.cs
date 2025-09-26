@@ -38,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
         private readonly IQuestionRepository _questionRepository;
         private readonly ILogger<CreateHomeWorkExtraPracticeAnswerCommand> _logger;
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
+        private readonly IHomeWorkRetryRepository _homeWorkRetryRepository;
 
         public CreateHomeWorkExtraPracticeAnswerCommandHandler(IHomeWorkExtraPracticeResultRepository homeWorkExtraPracticeResultRepository,
             QuestionConverter questionConverter,
@@ -48,7 +49,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             AuthContext authContext,
             IQuestionRepository questionRepository,
             ILogger<CreateHomeWorkExtraPracticeAnswerCommand> logger,
-            IHomeWorkQuestionRepository homeWorkQuestionRepository)
+            IHomeWorkQuestionRepository homeWorkQuestionRepository,
+            IHomeWorkRetryRepository homeWorkRetryRepository)
         {
             _homeWorkExtraPracticeResultRepository = homeWorkExtraPracticeResultRepository;
             _homeWorkExtraPracticeAnswerRepository = homeWorkExtraPracticeAnswerRepository;
@@ -60,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             _questionRepository = questionRepository;
             _logger = logger;
             _homeWorkQuestionRepository = homeWorkQuestionRepository;
+            _homeWorkRetryRepository = homeWorkRetryRepository;
         }
 
         public async Task<MethodResult<HomeWorkExtraDtoModel>> Handle(CreateHomeWorkExtraPracticeAnswerCommand request, CancellationToken cancellationToken)
@@ -74,6 +77,14 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 return methodResult;
             }
             var homeWorkExamPracticeResult = moduleResult.Result!;
+
+            var moduleResultRetry = await GetHomeWorkRetryAsync(homeWorkExamPracticeResult.HomeWorkRetryId);
+            if (!moduleResultRetry.IsOK)
+            {
+                methodResult.AddErrorBadRequest(moduleResultRetry.ErrorMessages);
+                return methodResult;
+            }
+            var homeWorkRetry = moduleResultRetry.Result!;
 
             if (request.Answers != null && request.Answers.Any())
             {
@@ -100,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 return methodResult;
             }
 
-            methodResult = await _mediator.Send(new GetHomeWorkExtraQuery { Id = homeWorkExamPracticeResult.HomeWorkId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
+            methodResult = await _mediator.Send(new GetHomeWorkExtraQuery { Id = homeWorkExamPracticeResult.HomeWorkId, IsShowSubStatus = request.IsSubmit, HomeWorkConfigId = homeWorkRetry.HomeWorkConfigId }, cancellationToken);
             return methodResult;
         }
 
@@ -120,6 +131,20 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             }
 
             methodResult.Result = homeWorkExtraPracticeResult;
+            return methodResult;
+        }
+
+        private async Task<MethodResult<HomeWorkRetry>> GetHomeWorkRetryAsync(Guid homeWorkRetryId)
+        {
+            var methodResult = new MethodResult<HomeWorkRetry>();
+            var homeWorkRetry = await _homeWorkRetryRepository.GetByIdAsync(homeWorkRetryId);
+            if (homeWorkRetry == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkRetry), homeWorkRetryId);
+                return methodResult;
+            }
+
+            methodResult.Result = homeWorkRetry;
             return methodResult;
         }
 

@@ -154,10 +154,28 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             return methodResult;
         }
 
-        public static EnumExpiryState ComputeExpiryState(DateTime now, DateTime? endDate, DateTime? updatedDate, EnumResultStatus? status) =>
-             endDate is null || now <= endDate.Value ? EnumExpiryState.NotExpired
-            : (status == EnumResultStatus.Done && updatedDate.HasValue && updatedDate <= endDate ? EnumExpiryState.ExpiredMetTarget
-            : EnumExpiryState.ExpiredUnmetTarget);
+        public static EnumExpiryState ComputeExpiryState(DateTime now, DateTime? endDate, DateTime? updatedDate, EnumResultStatus? status)
+        {
+            if (!endDate.HasValue)
+            {
+                return EnumExpiryState.NotExpired;
+            }
+            var deadline = endDate.Value;
+            var isDone = status == EnumResultStatus.Done;
+
+            // Đã hoàn thành và có thời điểm cập nhật
+            if (isDone && updatedDate is DateTime doneAt)
+            {
+                return doneAt.AddHours(7) <= deadline ? EnumExpiryState.ExpiredMetTarget : EnumExpiryState.ExpiredUnmetTarget;  // Hoàn thành muộn
+            }
+
+            // Chưa hoàn thành (hoặc status null/khác Done) và đã quá hạn
+            if (!isDone && now >= deadline)
+            {
+                return EnumExpiryState.ExpiredUnmetTarget;
+            }
+            return EnumExpiryState.NotExpired;
+        }
 
         private async Task<Guid?> GetCurriculumConfigIdAsync(StudentModel student, CancellationToken cancellationToken)
         {
