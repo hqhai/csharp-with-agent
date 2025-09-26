@@ -279,7 +279,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                                 Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                 FullName = student.FullName?.Trim() ?? string.Empty,
                                 PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
-                                EmailConfirmed = false,
+                                EmailConfirmed = true,
                                 PhoneNumberConfirmed = false,
                                 Status = EnumUserStatus.Active,
                                 DefaultPassword = password,
