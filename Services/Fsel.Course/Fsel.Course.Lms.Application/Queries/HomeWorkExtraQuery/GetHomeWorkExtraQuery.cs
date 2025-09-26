@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
 
     public class GetHomeWorkExtraQuery : IRequest<MethodResult<HomeWorkExtraDtoModel>>
     {
-        public Guid HomeWorkId { get; set; }
+        public Guid Id { get; set; }
         public Guid? HomeWorkConfigId { get; set; }
 
         [JsonIgnore]
@@ -77,7 +77,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             }
             var student = studentResult.Result!;
 
-            var homeWorkRetry = await _homeWorkRetryRepository.Queryable.Where(x => x.HomeWorkId == request.HomeWorkId && x.StudentId == student.Id)
+            var homeWorkRetry = await _homeWorkRetryRepository.Queryable.Where(x => x.HomeWorkId == request.Id && x.StudentId == student.Id)
                                                               .FirstOrDefaultAsync(x => x.HomeWorkConfigId == request.HomeWorkConfigId, cancellationToken);
             if (homeWorkRetry == null)
             {
@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             }
 
             var result = await _homeWorkExtraPracticeResultRepository.Queryable.Where(x => x.HomeWorkRetryId == homeWorkRetry.Id)
-                                                            .Where(x => x.HomeWorkId == request.HomeWorkId && x.StudentId == student.Id)
+                                                            .Where(x => x.HomeWorkId == request.Id && x.StudentId == student.Id)
                                                             .FirstOrDefaultAsync(x => x.WorkingStatus == EnumWorkingStatus.Active, cancellationToken);
             if (result == null)
             {

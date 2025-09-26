@@ -32,12 +32,13 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get Home Work Extra
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet("detail")]
         [ProducesResponseType(typeof(MethodResult<HomeWorkExtraDtoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid id)
+        public async Task<IActionResult> Get([FromQuery] GetHomeWorkExtraQuery query)
         {
-            MethodResult<HomeWorkExtraDtoModel> queryResult = await _mediator.Send(new GetHomeWorkExtraQuery { HomeWorkId = id }).ConfigureAwait(false);
+            ArgumentNullException.ThrowIfNull(query);
+            MethodResult<HomeWorkExtraDtoModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 

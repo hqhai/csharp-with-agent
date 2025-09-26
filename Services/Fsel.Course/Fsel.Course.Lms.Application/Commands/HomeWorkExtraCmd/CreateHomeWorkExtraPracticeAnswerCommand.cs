@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 return methodResult;
             }
 
-            methodResult = await _mediator.Send(new GetHomeWorkExtraQuery { HomeWorkId = homeWorkExamPracticeResult.HomeWorkId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
+            methodResult = await _mediator.Send(new GetHomeWorkExtraQuery { Id = homeWorkExamPracticeResult.HomeWorkId, IsShowSubStatus = request.IsSubmit }, cancellationToken);
             return methodResult;
         }
 
