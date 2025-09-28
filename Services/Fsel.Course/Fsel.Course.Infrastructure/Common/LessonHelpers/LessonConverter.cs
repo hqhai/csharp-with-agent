@@ -226,35 +226,11 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
                 }
             }
 
-            if (!isUpdate)
+            var document = await _documentRepository.Queryable
+                                        .Where(x => x.OriginalId == request.OriginalId && x.VersionStatus == EnumVersionStatus.LastVersion)
+                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            if (document != null)
             {
-                var document = DocumentFactory.Create(request.Document).Build(version: 0, originalId: Guid.NewGuid());
-                if (!document.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(document.ErrorMessages);
-                    return methodResult;
-                }
-
-                await _documentRepository.ExecuteTransactionAsync(async () =>
-                {
-                    _documentRepository.Add(document);
-                    await _documentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                    request.OriginalId = document.OriginalId;
-                    return methodResult;
-                });
-            }
-            else
-            {
-                var document = await _documentRepository.Queryable
-                                                        .Where(x => x.OriginalId == request.OriginalId && x.VersionStatus == EnumVersionStatus.LastVersion)
-                                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                if (document == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(document));
-                    return methodResult;
-                }
-
                 var newVersionDocument = DocumentFactory.Create(request.Document).Build(version: 0, originalId: Guid.NewGuid());
                 if (!newVersionDocument.IsValid())
                 {
@@ -271,6 +247,24 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
                 });
 
                 request.OriginalId = document.OriginalId;
+            }
+            else
+            {
+                document = DocumentFactory.Create(request.Document).Build(version: 0, originalId: Guid.NewGuid());
+                if (!document.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(document.ErrorMessages);
+                    return methodResult;
+                }
+
+                await _documentRepository.ExecuteTransactionAsync(async () =>
+                {
+                    _documentRepository.Add(document);
+                    await _documentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    request.OriginalId = document.OriginalId;
+                    return methodResult;
+                });
             }
 
             return methodResult;
