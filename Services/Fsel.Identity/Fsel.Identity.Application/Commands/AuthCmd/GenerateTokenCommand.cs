@@ -143,7 +143,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Code = user.Human?.Code
             };
 
-            if (userRoles.Contains(EnumRole.Student.ToString()))
+            if (userRoles.Contains(EnumRole.Student.ToString()) || userRoles.Contains(EnumRole.StudentCampus.ToString()))
             {
                 var student = user.Human?.Student;
                 tokenLogin.IsOrder = false;
