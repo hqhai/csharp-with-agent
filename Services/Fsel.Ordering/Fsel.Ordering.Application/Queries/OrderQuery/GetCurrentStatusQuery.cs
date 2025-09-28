@@ -35,7 +35,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<EnumTrialRegistrationStatus?> methodResult = new MethodResult<EnumTrialRegistrationStatus?>();
 
-            var role = _authContext.Roles?.FirstOrDefault();
+            var roleResult = await _userService.GetRoleByUserId(request.UserId.ToString());
+
+            var role = roleResult.Content?.Result;
+
             if (!string.IsNullOrEmpty(role) && role == EnumRole.StudentCampus.ToString())
             {
                 methodResult.Result = EnumTrialRegistrationStatus.Payment;
