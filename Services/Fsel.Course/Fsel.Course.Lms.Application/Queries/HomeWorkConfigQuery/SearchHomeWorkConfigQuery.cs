@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
             if (request.CourseType.HasValue)
             {
                 var courseLevels = request.CourseType.Value.GetEnumCourseLevels();
-                query = query.Where(m => m.CourseLevel.HasValue && courseLevels.Contains(m.CourseLevel.Value));
+                query = query.Where(m => courseLevels.Contains(m.CourseLevel));
             }
 
             if (request.CourseLevel.HasValue)
