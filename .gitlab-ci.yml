@@ -48,7 +48,7 @@ build-multi-subject-prod-auth:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
-    DOCKERFILE: "./Environments/Staging/Auth.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Auth.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -70,7 +70,7 @@ build-multi-subject-prod-gateway:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
-    DOCKERFILE: "./Environments/Staging/Gateway.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Gateway.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -92,7 +92,7 @@ build-multi-subject-prod-hangfire:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
-    DOCKERFILE: "./Environments/Staging/Hangfire.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Hangfire.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -114,7 +114,7 @@ build-multi-subject-prod-interaction:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
-    DOCKERFILE: "./Environments/Staging/Interaction.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Interaction.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -136,7 +136,7 @@ build-multi-subject-prod-lcmsapi:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
-    DOCKERFILE: "./Environments/Staging/Lcms.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Lcms.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -158,7 +158,7 @@ build-multi-subject-prod-lmsapi:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
-    DOCKERFILE: "./Environments/Staging/Lms.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Lms.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -180,7 +180,7 @@ build-multi-subject-prod-notification:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
-    DOCKERFILE: "./Environments/Staging/Notification.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Notification.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -202,7 +202,7 @@ build-multi-subject-prod-ordering:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
-    DOCKERFILE: "./Environments/Staging/Ordering.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Ordering.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -224,7 +224,7 @@ build-multi-subject-prod-realtime:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
-    DOCKERFILE: "./Environments/Staging/Realtime.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Realtime.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -246,7 +246,7 @@ build-multi-subject-prod-sender:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
-    DOCKERFILE: "./Environments/Staging/Sender.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Sender.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -268,7 +268,7 @@ build-multi-subject-prod-storage:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
-    DOCKERFILE: "./Environments/Staging/Storage.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Storage.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -290,7 +290,7 @@ build-multi-subject-prod-system:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
-    DOCKERFILE: "./Environments/Staging/System.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/System.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -312,7 +312,7 @@ build-multi-subject-prod-training:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
-    DOCKERFILE: "./Environments/Staging/Training.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Training.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -334,7 +334,7 @@ build-multi-subject-prod-identity:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
-    DOCKERFILE: "./Environments/Staging/User.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/User.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -356,7 +356,7 @@ build-multi-subject-prod-cms-planetdefender:
     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
-    DOCKERFILE: "./Environments/Staging/Cms.PlanetDefender.Staging.Dockerfile"
+    DOCKERFILE: "./Environments/Testing/Cms.PlanetDefender.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
@@ -378,7 +378,7 @@ build-multi-subject-prod-cms-planetdefender:
 #     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
 #   variables:
 #     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
-#     DOCKERFILE: "./Environments/Staging/ExamPractice.Staging.Dockerfile"
+#     DOCKERFILE: "./Environments/Testing/ExamPractice.Testing.Dockerfile"
 #   extends: ".build-image-gitlab-registry"
 #   only:
 #     changes:
@@ -400,7 +400,7 @@ build-multi-subject-prod-cms-planetdefender:
 #     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
 #   variables:
 #     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice-lms
-#     DOCKERFILE: "./Environments/Staging/ExamPracticeLms.Staging.Dockerfile"
+#     DOCKERFILE: "./Environments/Testing/ExamPracticeLms.Testing.Dockerfile"
 #   extends: ".build-image-gitlab-registry"
 #   only:
 #     changes:
