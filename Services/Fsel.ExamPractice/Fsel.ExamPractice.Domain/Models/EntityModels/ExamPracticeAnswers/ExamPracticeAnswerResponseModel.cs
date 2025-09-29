@@ -12,20 +12,6 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers
         public bool IsRetry { get; set; }
     }
 
-    public class ExamPracticeAIGradingLanguageModel
-    {
-        public string? Language { get; set; }
-        public IList<ExamPracticeAIGradingModel>? ExamPracticeAIGradings { get; set; }
-    }
-
-    public class ExamPracticeAIGradingModel
-    {
-        public string? BandScore { get; set; }
-        public string? BandDescriptorText { get; set; }
-        public string? Explanation { get; set; }
-        public string? SuggestionsForImprovement { get; set; }
-    }
-
     public class ExamPracticeAIGradingDataModel
     {
         [JsonPropertyName("band_score")]

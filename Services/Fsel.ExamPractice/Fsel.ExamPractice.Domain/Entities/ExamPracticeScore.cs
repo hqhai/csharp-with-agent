@@ -9,7 +9,7 @@ namespace Fsel.ExamPractice.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.ExamPractice.Domain.Enums;
-    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
+    using Fsel.Shared.Models.ShareModels;
 
     public class ExamPracticeScore : Entity
     {
