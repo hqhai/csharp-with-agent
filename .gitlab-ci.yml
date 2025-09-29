@@ -21,7 +21,7 @@ before_script:
 stages:
 - build-image
 - deploy
-- build-multi-subject-prod
+- build-multi-subject-testing
 
 ".build-image-gitlab-registry":
   stage: build-image
@@ -32,11 +32,11 @@ stages:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
 
-build-multi-subject-prod-auth:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-auth:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -44,8 +44,8 @@ build-multi-subject-prod-auth:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
     DOCKERFILE: "./Environments/Testing/Auth.Testing.Dockerfile"
@@ -57,8 +57,8 @@ build-multi-subject-prod-auth:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-gateway:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-gateway:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -66,8 +66,8 @@ build-multi-subject-prod-gateway:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
     DOCKERFILE: "./Environments/Testing/Gateway.Testing.Dockerfile"
@@ -79,8 +79,8 @@ build-multi-subject-prod-gateway:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-hangfire:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-hangfire:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -88,8 +88,8 @@ build-multi-subject-prod-hangfire:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
     DOCKERFILE: "./Environments/Testing/Hangfire.Testing.Dockerfile"
@@ -101,8 +101,8 @@ build-multi-subject-prod-hangfire:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-interaction:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-interaction:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -110,8 +110,8 @@ build-multi-subject-prod-interaction:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
     DOCKERFILE: "./Environments/Testing/Interaction.Testing.Dockerfile"
@@ -123,8 +123,8 @@ build-multi-subject-prod-interaction:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-lcmsapi:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-lcmsapi:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -132,8 +132,8 @@ build-multi-subject-prod-lcmsapi:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
     DOCKERFILE: "./Environments/Testing/Lcms.Testing.Dockerfile"
@@ -145,8 +145,8 @@ build-multi-subject-prod-lcmsapi:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-lmsapi:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-lmsapi:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -154,8 +154,8 @@ build-multi-subject-prod-lmsapi:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
     DOCKERFILE: "./Environments/Testing/Lms.Testing.Dockerfile"
@@ -167,8 +167,8 @@ build-multi-subject-prod-lmsapi:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-notification:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-notification:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -176,8 +176,8 @@ build-multi-subject-prod-notification:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
     DOCKERFILE: "./Environments/Testing/Notification.Testing.Dockerfile"
@@ -189,8 +189,8 @@ build-multi-subject-prod-notification:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-ordering:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-ordering:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -198,8 +198,8 @@ build-multi-subject-prod-ordering:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
     DOCKERFILE: "./Environments/Testing/Ordering.Testing.Dockerfile"
@@ -211,8 +211,8 @@ build-multi-subject-prod-ordering:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-realtime:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-realtime:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -220,8 +220,8 @@ build-multi-subject-prod-realtime:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
     DOCKERFILE: "./Environments/Testing/Realtime.Testing.Dockerfile"
@@ -233,8 +233,8 @@ build-multi-subject-prod-realtime:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-sender:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-sender:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -242,8 +242,8 @@ build-multi-subject-prod-sender:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
     DOCKERFILE: "./Environments/Testing/Sender.Testing.Dockerfile"
@@ -255,8 +255,8 @@ build-multi-subject-prod-sender:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-storage:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-storage:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -264,8 +264,8 @@ build-multi-subject-prod-storage:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
     DOCKERFILE: "./Environments/Testing/Storage.Testing.Dockerfile"
@@ -277,8 +277,8 @@ build-multi-subject-prod-storage:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-system:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-system:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -286,8 +286,8 @@ build-multi-subject-prod-system:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
     DOCKERFILE: "./Environments/Testing/System.Testing.Dockerfile"
@@ -299,8 +299,8 @@ build-multi-subject-prod-system:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-training:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-training:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -308,8 +308,8 @@ build-multi-subject-prod-training:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
     DOCKERFILE: "./Environments/Testing/Training.Testing.Dockerfile"
@@ -321,8 +321,8 @@ build-multi-subject-prod-training:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-identity:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-identity:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -330,8 +330,8 @@ build-multi-subject-prod-identity:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
     DOCKERFILE: "./Environments/Testing/User.Testing.Dockerfile"
@@ -343,8 +343,8 @@ build-multi-subject-prod-identity:
     refs:
     - main-multiple-subject
 
-build-multi-subject-prod-cms-planetdefender:
-  stage: build-multi-subject-prod
+build-multi-subject-testing-cms-planetdefender:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
@@ -352,8 +352,8 @@ build-multi-subject-prod-cms-planetdefender:
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
     DOCKERFILE: "./Environments/Testing/Cms.PlanetDefender.Testing.Dockerfile"
@@ -365,8 +365,8 @@ build-multi-subject-prod-cms-planetdefender:
     refs:
     - main-multiple-subject
 
-# build-multi-subject-prod-exam-practice:
-#   stage: build-multi-subject-prod
+# build-multi-subject-testing-exam-practice:
+#   stage: build-multi-subject-testing
 #   tags:
 #   - docker-runner
 #   retry:
@@ -374,8 +374,8 @@ build-multi-subject-prod-cms-planetdefender:
 #   script:
 #     - apk add --update coreutils && rm -rf /var/cache/apk/*
 #     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-#     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-#     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+#     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+#     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
 #   variables:
 #     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
 #     DOCKERFILE: "./Environments/Testing/ExamPractice.Testing.Dockerfile"
@@ -387,8 +387,8 @@ build-multi-subject-prod-cms-planetdefender:
 #     refs:
 #     - main-multiple-subject
 
-# build-multi-subject-prod-exam-practice-lms:
-#   stage: build-multi-subject-prod
+# build-multi-subject-testing-exam-practice-lms:
+#   stage: build-multi-subject-testing
 #   tags:
 #   - docker-runner
 #   retry:
@@ -396,8 +396,8 @@ build-multi-subject-prod-cms-planetdefender:
 #   script:
 #     - apk add --update coreutils && rm -rf /var/cache/apk/*
 #     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-#     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES .
-#     - docker push $IMAGE_NAME:multi-subject-prod-$IMAGE_VALUES
+#     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+#     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
 #   variables:
 #     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice-lms
 #     DOCKERFILE: "./Environments/Testing/ExamPracticeLms.Testing.Dockerfile"
