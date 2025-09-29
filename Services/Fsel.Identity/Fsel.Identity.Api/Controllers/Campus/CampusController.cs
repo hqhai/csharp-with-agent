@@ -8,7 +8,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Identity.Application.Commands.Campus;
+    using Fsel.Identity.Application.Commands.CampusCmd;
     using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.CampusQuery;
     using Fsel.Shared.Constants;
@@ -95,6 +95,41 @@ namespace Fsel.Identity.Api.Controllers.Campus
                 return queryResult.GetActionResult();
             }
             return File(queryResult.Result, Settings.Excels.ContentType, "Thông tin học sinh.xlsx");
+        }
+
+        /// <summary>
+        /// Get list student by student ids
+        /// </summary>
+        [HttpPost("add-students-to-curriculum")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.AddStudents)]
+        public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] AddStudentsToCurriculumCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Add_Students_To_Curriculum_Error.xlsx");
+        }
+
+        /// <summary>
+        /// export template add students to curriculum
+        /// </summary>
+        [HttpPost("export-template-add-students-to-curriculum")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.AddStudents)]
+        public async Task<IActionResult> ExportTemplateAddStudentToCurriculum()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateAddStudentsToCurriculumCommand { }).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Add_Student_To_Curriculum.xlsx");
         }
     }
 }
