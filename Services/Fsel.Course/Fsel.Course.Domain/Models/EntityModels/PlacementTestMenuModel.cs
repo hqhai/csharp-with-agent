@@ -54,6 +54,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int TotalQuestion { get; set; }
         public int CountQuestion { get; set; }
         public double Percent { get; set; }
-        public Guid? SectionGroupResultId { get; set; }
+        public Guid? SectionGroupId { get; set; }
     }
 }

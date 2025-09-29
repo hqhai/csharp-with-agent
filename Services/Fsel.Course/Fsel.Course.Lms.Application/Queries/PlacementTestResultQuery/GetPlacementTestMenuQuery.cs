@@ -141,7 +141,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     TotalQuestion = 0,
                     CountQuestion = 0,
                     Percent = 0.0,
-                    SectionGroupResultId = null
+                    SectionGroupId = null
                 });
             }
 
@@ -211,13 +211,13 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                         Percent = skillScore.Percent
                     };
 
-                    // Map SectionGroupResultId theo skill từ SectionGroupResults
+                    // Map SectionGroupId theo skill từ SectionGroupResults
                     var sectionGroupResult = placementTestResult.SectionGroupResults?
                         .FirstOrDefault(sgr => sgr.SectionGroup?.CourseSkill == skillScore.Skill);
 
                     if (sectionGroupResult != null)
                     {
-                        placementTestSkillScore.SectionGroupResultId = sectionGroupResult.Id;
+                        placementTestSkillScore.SectionGroupId = sectionGroupResult.SectionGroupId;
                     }
 
                     return placementTestSkillScore;
@@ -230,7 +230,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 {
                     var skillScoresData = JsonSerializer.Deserialize<List<PlacementTestSkillScores>>(placementTestResult.SkillScoresStr);
 
-                    // Map SectionGroupResultId cho từng skill từ JSON data
+                    // Map SectionGroupId cho từng skill từ JSON data
                     if (skillScoresData != null)
                     {
                         foreach (var skillScore in skillScoresData)
@@ -240,7 +240,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
                             if (sectionGroupResult != null)
                             {
-                                skillScore.SectionGroupResultId = sectionGroupResult.Id;
+                                skillScore.SectionGroupId = sectionGroupResult.SectionGroupId;
                             }
                         }
                     }
