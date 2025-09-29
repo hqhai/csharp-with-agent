@@ -49,6 +49,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             {
                 // Query actual PlacementTestResults from database
                 var placementTestResults = await _placementTestResultRepository.Queryable
+                    .Include(x => x.SectionGroupResults)
+                        .ThenInclude(sgr => sgr.SectionGroup)
                     .Where(x => x.StudentId == request.StudentId)
                     .OrderBy(x => x.CreatedDate)
                     .ToListAsync(cancellationToken);
@@ -138,7 +140,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     CorrectCount = 0,
                     TotalQuestion = 0,
                     CountQuestion = 0,
-                    Percent = 0.0
+                    Percent = 0.0,
+                    SectionGroupResultId = null
                 });
             }
 
@@ -195,16 +198,29 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             if (placementTestResult.SkillScores != null && placementTestResult.SkillScores.Any())
             {
                 // Convert entity SkillScores to PlacementTestSkillScores for consistency
-                partNode.SkillScores = placementTestResult.SkillScores.Select(skillScore => new PlacementTestSkillScores
+                partNode.SkillScores = placementTestResult.SkillScores.Select(skillScore =>
                 {
-                    Skill = skillScore.Skill,
-                    Scores = skillScore.Scores,
-                    TotalCount = (int)skillScore.TotalCount,
-                    CorrectCount = (int)skillScore.CorrectCount,
-                    TotalQuestion = (int)skillScore.TotalQuestion,
-                    CountQuestion = (int)skillScore.CountQuestion,
-                    Percent = skillScore.Percent
+                    var placementTestSkillScore = new PlacementTestSkillScores
+                    {
+                        Skill = skillScore.Skill,
+                        Scores = skillScore.Scores,
+                        TotalCount = (int)skillScore.TotalCount,
+                        CorrectCount = (int)skillScore.CorrectCount,
+                        TotalQuestion = (int)skillScore.TotalQuestion,
+                        CountQuestion = (int)skillScore.CountQuestion,
+                        Percent = skillScore.Percent
+                    };
 
+                    // Map SectionGroupResultId theo skill từ SectionGroupResults
+                    var sectionGroupResult = placementTestResult.SectionGroupResults?
+                        .FirstOrDefault(sgr => sgr.SectionGroup?.CourseSkill == skillScore.Skill);
+
+                    if (sectionGroupResult != null)
+                    {
+                        placementTestSkillScore.SectionGroupResultId = sectionGroupResult.Id;
+                    }
+
+                    return placementTestSkillScore;
                 }).ToList();
             }
             else if (!string.IsNullOrEmpty(placementTestResult.SkillScoresStr))
@@ -213,9 +229,23 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 try
                 {
                     var skillScoresData = JsonSerializer.Deserialize<List<PlacementTestSkillScores>>(placementTestResult.SkillScoresStr);
+
+                    // Map SectionGroupResultId cho từng skill từ JSON data
+                    if (skillScoresData != null)
+                    {
+                        foreach (var skillScore in skillScoresData)
+                        {
+                            var sectionGroupResult = placementTestResult.SectionGroupResults?
+                                .FirstOrDefault(sgr => sgr.SectionGroup?.CourseSkill == skillScore.Skill);
+
+                            if (sectionGroupResult != null)
+                            {
+                                skillScore.SectionGroupResultId = sectionGroupResult.Id;
+                            }
+                        }
+                    }
+
                     partNode.SkillScores = skillScoresData;
-
-
                 }
                 catch (JsonException)
                 {
@@ -285,7 +315,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                     .FirstOrDefaultAsync();
 
                 // Calculate isLockPT using the same logic as in Command
-                var (currentLevel, isLockPT) = placementTest.PlacementTestLevel.GetLevelInScore(
+                var (currentLevel, isLockPT) = IeltsScoreHelper.GetLevelInScore(
+                    placementTest.PlacementTestLevel,
                     placementTestResult.Percent,
                     IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
 
