@@ -16,8 +16,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.RubyAnnotation
         public string? Phonetic { get; set; }
         public int StartGraphemeIndex { get; set; }
         public int LengthGraphemes { get; set; }
-        public string? PrefixContext { get; set; }
-        public string? SuffixContext { get; set; }
         public RubyReturn RubyReturn { get; set; } = new();
     }
 

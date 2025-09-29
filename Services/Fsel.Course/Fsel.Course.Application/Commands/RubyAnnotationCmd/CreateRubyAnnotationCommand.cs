@@ -1,16 +1,16 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
+namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Application.Services.RubyService;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.RubyAnnotation;
     using Fsel.Course.Domain.Models.CommandModels.RubyScope;
     using Fsel.Course.Domain.Models.QueryModels.Ruby;
     using Fsel.Course.Infrastructure.Common.RubyHelpers;
-    using Fsel.Course.Lms.Application.Services.RubyService;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -42,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
         public async Task<MethodResult<CreateRubyByScopeCommandModel>> Handle(CreateRubyAnnotationCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<CreateRubyByScopeCommandModel> methodResult = new MethodResult<CreateRubyByScopeCommandModel>();
+            var methodResult = new MethodResult<CreateRubyByScopeCommandModel>();
 
             var baseNfc = string.Empty;
 
@@ -120,8 +120,8 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
                 var ruby = await _rubyAnnotationRepository.Queryable
                     .AsNoTracking()
                     .Where(x => x.RubyScopeId == scope.Id && !x.IsDeleted)
-                    .OrderBy(x => x.StartGraphemeIndex)
                     .ToListAsync(cancellationToken);
+
                 var html = _rubyService.RenderHtml(baseNfc, ruby);
 
                 var result = new CreateRubyByScopeCommandModel
@@ -136,7 +136,6 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
                     result.Annotations = await _rubyAnnotationRepository.Queryable
                     .AsNoTracking()
                     .Where(x => x.RubyScopeId == scope.Id && !x.IsDeleted)
-                    .OrderBy(x => x.StartGraphemeIndex)
                     .Select(x => new RubyAnnotaionModel
                     {
                         Id = x.Id,

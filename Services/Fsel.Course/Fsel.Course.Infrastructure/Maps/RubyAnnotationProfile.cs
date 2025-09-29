@@ -19,8 +19,6 @@ namespace Fsel.Course.Infrastructure.Maps
                 .ForMember(m => m.LanguageType, opt => opt.Ignore())
                 .ForMember(m => m.StartGraphemeIndex, opt => opt.Ignore())
                 .ForMember(m => m.LengthGraphemes, opt => opt.Ignore())
-                .ForMember(m => m.PrefixContext, opt => opt.Ignore())
-                .ForMember(m => m.SuffixContext, opt => opt.Ignore())
                 .IgnoreAllNonExisting();
             CreateMap<CreateRubyAnnotationCommandModel, EntityRubyText>().IgnoreAllNonExisting();
             CreateMap<UpdateRubyAnnotationCommandModel, EntityRubyText>().IgnoreAllNonExisting();

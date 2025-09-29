@@ -1,15 +1,15 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.RubyQuery
+namespace Fsel.Course.Application.Queries.RubyQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Application.Services.RubyService;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.Ruby;
     using Fsel.Course.Infrastructure.Common.RubyHelpers;
-    using Fsel.Course.Lms.Application.Services.RubyService;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Queries.RubyQuery
         public async Task<MethodResult<object>> Handle(RenderRubyQuery request, CancellationToken cancellationToken)
         {
             var (found, nfc) = await _rubyScopeRepository.TryGetBaseTextAsync(request.HostType, request.HostId, request.FieldKey, cancellationToken);
-            MethodResult<object> methodResult = new MethodResult<object>();
+            var methodResult = new MethodResult<object>();
 
             if (!found || string.IsNullOrEmpty(nfc))
             {

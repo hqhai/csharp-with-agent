@@ -48,9 +48,6 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         [Timestamp]
         public byte[]? RowVersion { get; set; } = default!;
-        public string? PrefixContext { get; set; }
-        public string? SuffixContext { get; set; }
         public RubyScope Scope { get; set; } = default!;
-        public string Position { get; set; } = "Above";
     }
 }

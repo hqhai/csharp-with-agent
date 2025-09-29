@@ -10,19 +10,6 @@ namespace Fsel.Course.Infrastructure.Common.RubyHelpers
     {
         public static string ToNfc(string s) => s is null ? "" : s.Normalize(NormalizationForm.FormC);
 
-        public static string Sha256Hex(string s)
-        {
-            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(s));
-            var sb = new StringBuilder(bytes.Length * 2);
-
-            foreach (var b in bytes)
-            {
-                sb.Append(b.ToString("x2"));
-            }
-
-            return sb.ToString();
-        }
-
         public static (string[] elems, int[] charStarts) GraphemeMap(string nfc)
         {
             var si = new StringInfo(nfc);

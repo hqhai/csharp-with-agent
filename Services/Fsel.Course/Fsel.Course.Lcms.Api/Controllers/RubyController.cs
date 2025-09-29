@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers
+namespace Fsel.Course.Lcms.Api.Controllers
 {
     using System.Net;
     using Asp.Versioning;
@@ -8,19 +8,18 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.CommandModels.RubyScope;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.LessonNoteCmd;
-    using Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd;
-    using Fsel.Course.Lms.Application.Commands.RubyScopeCmd;
-    using Fsel.Course.Lms.Application.Queries.RubyQuery;
+    using Fsel.Course.Application.Commands.RubyAnnotationCmd;
+    using Fsel.Course.Application.Commands.RubyScopeCmd;
+    using Fsel.Course.Application.Queries.RubyQuery;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Fsel.Shared.Enums;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/ruby")]
     [ApiController]
-    //[Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
-    //[Common.Attributes.Permission(role: nameof(EnumRole.Teacher))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class RubyController : ControllerBase
     {
         private readonly IMediator _mediator;

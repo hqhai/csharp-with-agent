@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Services.RubyService
+namespace Fsel.Course.Application.Services.RubyService
 {
     using System;
     using System.Collections.Generic;
@@ -35,19 +35,19 @@ namespace Fsel.Course.Lms.Application.Services.RubyService
                 return RubyTextNormalization.CharOffsetToGrapheme(charIdx, map.charStarts);
             }
 
-            // nếu có Prefix/Suffix, tìm "Prefix + Selected + Suffix")
-            if (!string.IsNullOrEmpty(r.PrefixContext) && !string.IsNullOrEmpty(r.SuffixContext))
-            {
-                var needle = r.PrefixContext + sel + r.SuffixContext;
-                int idx = baseTextNfc.IndexOf(needle, StringComparison.Ordinal);
+            //// nếu có Prefix/Suffix, tìm "Prefix + Selected + Suffix")
+            //if (!string.IsNullOrEmpty(r.PrefixContext) && !string.IsNullOrEmpty(r.SuffixContext))
+            //{
+            //    var needle = r.PrefixContext + sel + r.SuffixContext;
+            //    int idx = baseTextNfc.IndexOf(needle, StringComparison.Ordinal);
 
-                if (idx >= 0)
-                {
-                    var map = RubyTextNormalization.GraphemeMap(baseTextNfc);
-                    int startChar = idx + r.PrefixContext.Length;
-                    return RubyTextNormalization.CharOffsetToGrapheme(startChar, map.charStarts);
-                }
-            }
+            //    if (idx >= 0)
+            //    {
+            //        var map = RubyTextNormalization.GraphemeMap(baseTextNfc);
+            //        int startChar = idx + r.PrefixContext.Length;
+            //        return RubyTextNormalization.CharOffsetToGrapheme(startChar, map.charStarts);
+            //    }
+            //}
 
             return null;
         }

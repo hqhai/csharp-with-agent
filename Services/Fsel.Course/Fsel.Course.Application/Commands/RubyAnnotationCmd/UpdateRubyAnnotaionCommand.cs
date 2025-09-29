@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
+namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
         public async Task<MethodResult<RubyAnnotationModel>> Handle(UpdateRubyAnnotationCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<RubyAnnotationModel> methodResult = new MethodResult<RubyAnnotationModel>();
+            var methodResult = new MethodResult<RubyAnnotationModel>();
 
             var rubyAnnotation = await _rubyAnnotaionRepository.GetByIdAsync(request.Id);
 
