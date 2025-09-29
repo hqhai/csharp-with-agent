@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                             }
                             else
                             {
-                                var lesson = course?.CourseUnitMockTests.Select(u => u.Unit).SelectMany(ul => ul.UnitLessons).FirstOrDefault(x => x.LessonId == lessonResult?.LessonId)?.Lesson;
+                                var lesson = course?.CourseUnitMockTests.Where(p => p.Unit != null).Select(u => u.Unit).SelectMany(ul => ul.UnitLessons).FirstOrDefault(x => x.LessonId == lessonResult?.LessonId)?.Lesson;
                                 studentCampusLearningModel.LessonName = lesson?.Name;
                                 studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.InProgress;
                             }

@@ -213,5 +213,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get homework config by id
+        /// </summary>
+        [HttpGet("get-homework-config-by-id")]
+        [ProducesResponseType(typeof(MethodResult<HomeWorkConfigModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
+        public async Task<IActionResult> GetHomeWorkConfigById([FromQuery] GetHomeWorkConfigByIdQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

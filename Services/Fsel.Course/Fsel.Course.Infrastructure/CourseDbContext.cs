@@ -93,6 +93,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
         public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
+        public DbSet<WeeklyReport> WeeklyReports { get; set; }
+        public DbSet<Topic> Topics { get; set; }
 
         #region Report
 
@@ -115,18 +117,15 @@ namespace Fsel.Course.Infrastructure
         public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
         public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
         public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
-
-        #endregion Report
-
         public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
-        public DbSet<WeeklyReport> WeeklyReports { get; set; }
         public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
         public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
-
         public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
         public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
         public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
         public DbSet<HomeWorkConfig> HomeWorkConfigs { get; set; }
+
+        #endregion Report
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -205,6 +204,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumDetailResultHistoryTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
 
             modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

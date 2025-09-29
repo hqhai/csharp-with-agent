@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.HomeWorks;
@@ -41,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var homeWorkQuery = await (_homeWorkRepository.Queryable.Where(p => !p.IsArchive)
+            var homeWorkQuery = await (_homeWorkRepository.Queryable.Where(p => !p.IsArchive && p.Type == EnumHomeWorkType.HomeworkExtra)
                                    .Include(x => x.LessonHomeWorks)
                                    .Select(x => new HomeWorkSearchModel
                                    {

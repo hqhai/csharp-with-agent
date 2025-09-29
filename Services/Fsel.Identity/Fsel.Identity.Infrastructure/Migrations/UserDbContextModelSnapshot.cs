@@ -2422,6 +2422,18 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("49019ea5-3e80-4f3f-bdaa-f5d807b1869f"),
+                            ClaimValue = "StudentCampusManagement.Update",
+                            CreatedDate = new DateTime(2025, 9, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Cập nhật thông tin học sinh",
+                            PermissionGroupId = new Guid("642f9c9c-c338-48fa-a42a-6d22e766bfca"),
+                            Status = true
+                        },
+                        new
+                        {
                             Id = new Guid("ec393b2d-0a9f-45e8-a1a0-13e8fb66ecd9"),
                             ClaimValue = "SchoolClassCampusManagement.Add",
                             CreatedDate = new DateTime(2025, 9, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -3303,6 +3315,19 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             IsDeleted = false,
                             Name = "TeacherCampus",
                             NormalizedName = "TEACHERCAMPUS"
+                        },
+                        new
+                        {
+                            Id = new Guid("a00e83f8-9fa3-4f4f-9d24-2a28cb6aeb79"),
+                            CreatedDate = new DateTime(2025, 9, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            Name = "AdminCampus",
+                            NormalizedName = "ADMINCAMPUS"
                         });
                 });
 

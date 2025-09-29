@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.HomeWorkConfigs;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -34,53 +35,54 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<HomeWorkConfigModel>>();
 
-            var query = await (from hc in _homeWorkConfigRepository.Queryable
-                               join h in _homeWorkRepository.Queryable on hc.HomeWorkId equals h.Id
-                               select new HomeWorkConfigModel()
-                               {
-                                   Id = hc.Id,
-                                   CreatedUserId = hc.CreatedUserId,
-                                   HomeWorkName = h.Name,
-                                   CreatedDate = hc.CreatedDate,
-                                   CurriculumId = hc.CurriculumId,
-                                   EndDate = hc.EndDate,
-                                   NumberRetry = hc.NumberRetry,
-                                   StartDate = hc.StartDate,
-                                   HomeWorkId = hc.HomeWorkId,
-                                   CourseLevel = h.CourseLevel,
-                                   CourseSkill = h.CourseSkill
-                               }).ToListAsync(cancellationToken);
+            var query = from hc in _homeWorkConfigRepository.Queryable
+                        join h in _homeWorkRepository.Queryable on hc.HomeWorkId equals h.Id
+                        where hc.CurriculumId == request.CurriculumId
+                        select new HomeWorkConfigModel()
+                        {
+                            Id = hc.Id,
+                            CreatedUserId = hc.CreatedUserId,
+                            HomeWorkName = h.Name,
+                            CreatedDate = hc.CreatedDate,
+                            CurriculumId = hc.CurriculumId,
+                            EndDate = hc.EndDate,
+                            NumberRetry = hc.NumberRetry,
+                            StartDate = hc.StartDate,
+                            HomeWorkId = hc.HomeWorkId,
+                            CourseLevel = h.CourseLevel,
+                            CourseSkill = h.CourseSkill
+                        };
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(p => !string.IsNullOrEmpty(p.HomeWorkName) && p.HomeWorkName.Contains(request.Keyword, StringComparison.CurrentCultureIgnoreCase)).ToList();
+                query = query.Where(p => !string.IsNullOrEmpty(p.HomeWorkName) && p.HomeWorkName.Contains(request.Keyword));
             }
 
             if (request.CreatedUserId.HasValue)
             {
-                query = query.Where(m => m.CreatedUserId == request.CreatedUserId).ToList();
+                query = query.Where(m => m.CreatedUserId == request.CreatedUserId);
             }
 
             if (request.CourseType.HasValue)
             {
-                query = query.Where(m => m.CourseType == request.CourseType).ToList();
+                var courseLevels = request.CourseType.Value.GetEnumCourseLevels();
+                query = query.Where(m => m.CourseLevel.HasValue && courseLevels.Contains(m.CourseLevel.Value));
             }
 
             if (request.CourseLevel.HasValue)
             {
-                query = query.Where(m => m.CourseLevel == request.CourseLevel).ToList();
+                query = query.Where(m => m.CourseLevel == request.CourseLevel);
             }
 
             if (request.CourseSkill.HasValue)
             {
-                query = query.Where(m => m.CourseSkill == request.CourseSkill).ToList();
+                query = query.Where(m => m.CourseSkill == request.CourseSkill);
             }
 
-            int totalItem = query.Count;
+            int totalItem = await query.CountAsync(cancellationToken);
 
-            var lists = query
-                    .ApplySortAndPaging(request)
-                    .ToList();
+            var lists = await query.ApplySortAndPaging(request).AsNoTracking()
+                                   .ToListAsync(cancellationToken);
 
             methodResult.Result = new PagingItemsModel<HomeWorkConfigModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
