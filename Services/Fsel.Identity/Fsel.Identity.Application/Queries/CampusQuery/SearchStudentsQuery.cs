@@ -15,6 +15,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -22,7 +23,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
     public class SearchStudentsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentCampusModel>>>
     {
-        public EnumStudentCampusLearningStatus? LearningStatus { get; set; }
+        public EnumCurriculumStatus? CurriculumStatus { get; set; }
         public Guid? SchoolClassId { get; set; }
         public IList<Guid>? StudentIds { get; set; }
     }
@@ -111,7 +112,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             var lists = new List<StudentCampusModel>();
             int totalItem = 0;
 
-            if (request.LearningStatus.HasValue)
+            if (request.CurriculumStatus.HasValue)
             {
                 var students = await query.ToListAsync(cancellationToken);
 
@@ -124,7 +125,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                     p.LearningProgresses = learningProgress?.Where(x => x.StudentId == p.StudentId).ToList();
                 });
 
-                students = students.Where(p => p.LearningProgresses != null && p.LearningProgresses.Any(x => x.ProgressStatus == request.LearningStatus)).ToList();
+                students = students.Where(p => p.LearningProgresses != null && p.LearningProgresses.Any(x => x.CurriculumStatus == request.CurriculumStatus)).ToList();
 
                 totalItem = students.Count;
                 lists = students.ApplySortAndPaging(request).ToList();

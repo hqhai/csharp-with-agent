@@ -66,7 +66,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
 
             var cultureInfo = CultureInfo.InvariantCulture;
-            using var excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ReportStudentsByAdminSchool));
+            using var excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.StudentsCampusInfo));
             var excelWorksheet = excelPackage.Workbook.Worksheets[0];
             int startRow = 2;
 

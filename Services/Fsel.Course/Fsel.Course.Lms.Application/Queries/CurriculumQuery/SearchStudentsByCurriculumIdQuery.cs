@@ -78,7 +78,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             var studentsLearningProgressModel = studentsLearningProgress.Result;
 
-            students.Items.ForEach(p =>
+            students.Items?.ForEach(p =>
             {
                 p.LearningProgresses = studentsLearningProgressModel?.Where(x => x.StudentId == p.StudentId && x.CurriculumId == curriculum.Id).ToList();
             });

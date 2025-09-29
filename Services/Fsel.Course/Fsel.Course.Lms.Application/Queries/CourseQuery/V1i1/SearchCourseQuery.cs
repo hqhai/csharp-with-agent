@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.Courses;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<CourseSearchModel>>();
 
-            var courseQuery = _courseRepository.Queryable.Where(p => !p.IsArchive && !p.ParentCourseId.HasValue)
+            var courseQuery = _courseRepository.Queryable.Where(p => !p.IsArchive && !p.ParentCourseId.HasValue && p.Status == EnumCourseStatus.Active)
                               .Select(course => new CourseSearchModel
                               {
                                   Id = course.Id,

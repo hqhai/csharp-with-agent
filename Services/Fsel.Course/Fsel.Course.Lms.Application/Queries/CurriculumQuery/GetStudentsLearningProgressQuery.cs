@@ -78,7 +78,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                             CourseType = c.CourseClone.CourseType,
                             CourseName = c.CourseClone.Name,
                             StudentId = p,
-                            CurriculumId = c.Curriculum.Id
+                            CurriculumId = c.Curriculum.Id,
+                            StartDate = c.Curriculum.StartDate,
+                            EndDate = c.Curriculum.EndDate
                         };
 
                         var lessonResults = lessonResultEntities.Where(x => x.StudentId == p && x.CourseId == c.Curriculum.CourseCloneId).ToList();
@@ -89,23 +91,24 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
                         if (c.Curriculum.StartDate > currentDate)
                         {
-                            studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.NotStarted;
-                        }
-                        else if (courseResult == null)
-                        {
-                            studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.NotJoined;
+                            studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.NotStarted;
                         }
                         else
                         {
-                            if (courseResult.Status == EnumResultStatus.Done)
+                            if (courseResult == null || lessonResult == null)
                             {
-                                studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.Completed;
+                                studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.InProgress;
+                                studentCampusLearningModel.LessonName = course?.CourseUnitMockTests.Where(p => p.Unit != null).OrderBy(p => p.Number).Select(p => p.Unit).FirstOrDefault()?.UnitLessons.OrderBy(p => p.DisplayOrder).FirstOrDefault()?.Lesson?.Name;
+                            }
+                            else if (courseResult.Status == EnumResultStatus.Done)
+                            {
+                                studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.Completed;
                             }
                             else
                             {
                                 var lesson = course?.CourseUnitMockTests.Where(p => p.Unit != null).Select(u => u.Unit).SelectMany(ul => ul.UnitLessons).FirstOrDefault(x => x.LessonId == lessonResult?.LessonId)?.Lesson;
                                 studentCampusLearningModel.LessonName = lesson?.Name;
-                                studentCampusLearningModel.ProgressStatus = EnumStudentCampusLearningStatus.InProgress;
+                                studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.InProgress;
                             }
                         }
 

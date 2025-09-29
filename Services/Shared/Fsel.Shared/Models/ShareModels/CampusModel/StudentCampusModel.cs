@@ -3,6 +3,7 @@
 namespace Fsel.Shared.Models.ShareModels.CampusModel
 {
     using System.ComponentModel;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -27,7 +28,47 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
         public Guid StudentId { get; set; }
         public int TotalLessonDone { get; set; }
         public int TotalLesson { get; set; }
-        public EnumStudentCampusLearningStatus ProgressStatus { get; set; }
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
+
+        public EnumCurriculumStatus CurriculumStatus
+        {
+            get
+            {
+                var now = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+                if (now < StartDate)
+                {
+                    return EnumCurriculumStatus.NotProgress;
+                }
+                else if (now > EndDate)
+                {
+                    return EnumCurriculumStatus.Expired;
+                }
+                return EnumCurriculumStatus.Progress;
+            }
+        }
+
+        public EnumStudentCampusLearningStatus Status { get; set; }
+
+        public string? ProgressStatus
+        {
+            get
+            {
+                if (Status == EnumStudentCampusLearningStatus.NotStarted)
+                {
+                    return EnumStudentCampusLearningStatus.NotStarted.GetDescription();
+                }
+                else if (Status == EnumStudentCampusLearningStatus.InProgress)
+                {
+                    return $"{EnumStudentCampusLearningStatus.InProgress.GetDescription()} - {LessonName}";
+                }
+                else
+                {
+                    return EnumStudentCampusLearningStatus.Completed.GetDescription();
+                }
+            }
+        }
+
         public string? LessonName { get; set; }
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
@@ -40,9 +81,6 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
     {
         [Description("Chưa triển khai")]
         NotStarted,
-
-        [Description("Chưa vào học")]
-        NotJoined,
 
         [Description("Đang học")]
         InProgress,
