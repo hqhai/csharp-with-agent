@@ -65,9 +65,14 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
             var students = studentsBag.ToList();
 
-            await _studentRepository.BulkUpdateList(students);
+            await _studentRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _studentRepository.BulkUpdateList(students);
+                await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.Result = true;
+                return methodResult;
+            });
 
-            methodResult.Result = true;
             return methodResult;
         }
     }
