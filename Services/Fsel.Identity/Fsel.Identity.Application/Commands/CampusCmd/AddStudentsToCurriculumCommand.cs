@@ -182,7 +182,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
                 emailsDoesNotExist.ForEach(user =>
                 {
                     var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Email.ToLower() == user));
-                    if (dataByEmail == null)
+                    if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Email), Message = DataNotExist });

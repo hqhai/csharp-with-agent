@@ -121,10 +121,10 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
                 students.ForEach(p =>
                 {
-                    p.Students = learningProgress?.Where(x => x.StudentId == p.StudentId).ToList();
+                    p.LearningProgresses = learningProgress?.Where(x => x.StudentId == p.StudentId).ToList();
                 });
 
-                students = students.Where(p => p.Students != null && p.Students.Any(x => x.ProgressStatus == request.LearningStatus)).ToList();
+                students = students.Where(p => p.LearningProgresses != null && p.LearningProgresses.Any(x => x.ProgressStatus == request.LearningStatus)).ToList();
 
                 totalItem = students.Count;
                 lists = students.ApplySortAndPaging(request).ToList();
@@ -144,7 +144,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
                 lists.ForEach(p =>
                 {
-                    p.Students = learningProgress?.Where(x => x.StudentId == p.StudentId).ToList();
+                    p.LearningProgresses = learningProgress?.Where(x => x.StudentId == p.StudentId).ToList();
                 });
             }
 

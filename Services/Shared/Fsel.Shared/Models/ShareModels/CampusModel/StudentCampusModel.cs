@@ -19,7 +19,7 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
         public Guid StudentId { get; set; }
         public Guid? SchoolId { get; set; }
         public Guid? SchoolClassId { get; set; }
-        public IList<StudentCampusLearningProgressModel>? Students { get; set; }
+        public IList<StudentCampusLearningProgressModel>? LearningProgresses { get; set; }
     }
 
     public class StudentCampusLearningProgressModel
@@ -33,6 +33,7 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
         public EnumCourseLevel CourseLevel { get; set; }
         public string? CourseName { get; set; }
         public string? CurriculumName { get; set; }
+        public Guid CurriculumId { get; set; }
     }
 
     public enum EnumStudentCampusLearningStatus
