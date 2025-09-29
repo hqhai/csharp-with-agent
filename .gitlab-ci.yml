@@ -55,7 +55,7 @@ build-multi-subject-testing-auth:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-gateway:
   stage: build-multi-subject-testing
@@ -77,7 +77,7 @@ build-multi-subject-testing-gateway:
     - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-hangfire:
   stage: build-multi-subject-testing
@@ -99,7 +99,7 @@ build-multi-subject-testing-hangfire:
     - Services/Fsel.Hangfire/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-interaction:
   stage: build-multi-subject-testing
@@ -121,7 +121,7 @@ build-multi-subject-testing-interaction:
     - Services/Fsel.Interaction/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-lcmsapi:
   stage: build-multi-subject-testing
@@ -143,7 +143,7 @@ build-multi-subject-testing-lcmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-lmsapi:
   stage: build-multi-subject-testing
@@ -165,7 +165,7 @@ build-multi-subject-testing-lmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-notification:
   stage: build-multi-subject-testing
@@ -187,7 +187,7 @@ build-multi-subject-testing-notification:
     - Services/Fsel.Notification/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-ordering:
   stage: build-multi-subject-testing
@@ -209,7 +209,7 @@ build-multi-subject-testing-ordering:
     - Services/Fsel.Ordering/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-realtime:
   stage: build-multi-subject-testing
@@ -231,7 +231,7 @@ build-multi-subject-testing-realtime:
     - Services/Fsel.Realtime/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-sender:
   stage: build-multi-subject-testing
@@ -253,7 +253,7 @@ build-multi-subject-testing-sender:
     - Services/Fsel.Sender/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-storage:
   stage: build-multi-subject-testing
@@ -275,7 +275,7 @@ build-multi-subject-testing-storage:
     - Services/Fsel.Storage/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-system:
   stage: build-multi-subject-testing
@@ -297,7 +297,7 @@ build-multi-subject-testing-system:
     - Services/Fsel.System/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-training:
   stage: build-multi-subject-testing
@@ -319,7 +319,7 @@ build-multi-subject-testing-training:
     - Services/Fsel.Training/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-identity:
   stage: build-multi-subject-testing
@@ -341,7 +341,7 @@ build-multi-subject-testing-identity:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 build-multi-subject-testing-cms-planetdefender:
   stage: build-multi-subject-testing
@@ -363,7 +363,7 @@ build-multi-subject-testing-cms-planetdefender:
     - Services/Fsel.Cms.PlanetDefender/**/*
     - Services/Shared/**/*
     refs:
-    - main-multiple-subject
+    - testing-multiple-subject
 
 # build-multi-subject-testing-exam-practice:
 #   stage: build-multi-subject-testing
@@ -385,7 +385,7 @@ build-multi-subject-testing-cms-planetdefender:
 #     - Services/Fsel.ExamPractice/**/*
 #     - Services/Shared/**/*
 #     refs:
-#     - main-multiple-subject
+#     - testing-multiple-subject
 
 # build-multi-subject-testing-exam-practice-lms:
 #   stage: build-multi-subject-testing
@@ -407,4 +407,4 @@ build-multi-subject-testing-cms-planetdefender:
 #     - Services/Fsel.ExamPractice/**/*
 #     - Services/Shared/**/*
 #     refs:
-#     - main-multiple-subject
+#     - testing-multiple-subject
