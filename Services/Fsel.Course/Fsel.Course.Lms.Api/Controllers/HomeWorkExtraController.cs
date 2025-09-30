@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/home-work-extra")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Student))]
+    [Permission(roles: new[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class HomeWorkExtraController : ControllerBase
     {
         private readonly IMediator _mediator;
