@@ -82,17 +82,32 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             var now = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
             var curriculumConfigId = await GetCurriculumConfigIdAsync(student, cancellationToken);
 
-            var hwcQ = _homeWorkConfigRepository.Queryable
-                .Where(x => x.CurriculumId == curriculumConfigId);
+            var hwcQ = _homeWorkConfigRepository.Queryable.Where(x => x.CurriculumId == curriculumConfigId);
 
-            var herQ = _homeWorkExtraPracticeResultRepository.Queryable
-                .Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id);
+            var herQ = from baseQResult in _homeWorkExtraPracticeResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id)
+                       join hwr in _homeWorkRetryRepository.Queryable on baseQResult.HomeWorkRetryId equals hwr.Id
+                       where hwr.HomeWorkConfigId != null
+                       select new
+                       {
+                           baseQResult.Status,
+                           baseQResult.UpdatedDate,
+                           baseQResult.CreatedDate,
+                           hwr.HomeWorkConfigId,
+                           hwr.HomeWorkId
+                       };
 
             var baseQ =
                 from hw in _homeWorkRepository.Queryable
                 where hw.Type == EnumHomeWorkType.HomeworkExtra && !hw.IsArchive
                 join hwc in hwcQ on hw.Id equals hwc.HomeWorkId
-                select new { hw, hwc };
+                select new
+                {
+                    hw,
+                    HomeWorkConfigId = hwc.Id,
+                    hwc.StartDate,
+                    hwc.EndDate,
+                    hwc.NumberRetry
+                };
 
             var statuses = request.WorkFilterStr.ToList<EnumWorkFilterStatus>() ?? new List<EnumWorkFilterStatus>();
             bool wantCompleted = statuses.Contains(EnumWorkFilterStatus.Completed);
@@ -102,12 +117,12 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             if (wantCompleted || wantNotCompleted || wantOverdue)
             {
                 baseQ = from x in baseQ
-                        let doneAny = herQ.Where(r => r.HomeWorkId == x.hw.Id)
+                        let doneAny = herQ.Where(r => r.HomeWorkId == x.hw.Id && r.HomeWorkConfigId == x.HomeWorkConfigId)
                                           .Any(r => r.Status == EnumResultStatus.Done)
                         // Hoàn thành đúng hạn: có bản Done và thời điểm hoàn thành <= EndDate
-                        let doneOnTime = herQ.Where(r => r.HomeWorkId == x.hw.Id && r.Status == EnumResultStatus.Done)
-                                             .Any(r => (r.UpdatedDate ?? r.CreatedDate).AddHours(7) <= x.hwc.EndDate)
-                        let isOverdue = now > x.hwc.EndDate && !doneOnTime
+                        let doneOnTime = herQ.Where(r => r.HomeWorkId == x.hw.Id && r.Status == EnumResultStatus.Done && r.HomeWorkConfigId == x.HomeWorkConfigId)
+                                             .Any(r => (r.UpdatedDate ?? r.CreatedDate).AddHours(7) <= x.EndDate)
+                        let isOverdue = now > x.EndDate && !doneOnTime
                         where
                             (wantCompleted && doneAny) ||
                             (wantNotCompleted && !doneAny) ||
@@ -125,13 +140,13 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                     CourseSkill = x.hw.CourseSkill,
                     CreatedDate = x.hw.CreatedDate,
                     UpdatedDate = x.hw.UpdatedDate,
-                    StartDate = x.hwc.StartDate,
-                    EndDate = x.hwc.EndDate,
-                    HomeWorkConfigId = x.hwc.Id,
+                    StartDate = x.StartDate,
+                    EndDate = x.EndDate,
+                    HomeWorkConfigId = x.HomeWorkConfigId,
                     TopicName = x.hw.Topic != null ? x.hw.Topic.Name : null,
                     TotalQuestion = x.hw.HomeWorkQuestions.Count,
                     CorrectTotal = x.hw.HomeWorkQuestions.Sum(q => q.Question!.CorrectTotal),
-                    NumberRetry = x.hwc.NumberRetry
+                    NumberRetry = x.NumberRetry
                 };
 
             int totalItem = await queryData.CountAsync(cancellationToken);
