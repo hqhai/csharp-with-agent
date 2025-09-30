@@ -5,6 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Dynamic.Core;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -78,68 +79,60 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 return methodResult;
             }
             var student = studentResult.Result!;
-            var dateTime = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            var now = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
             var curriculumConfigId = await GetCurriculumConfigIdAsync(student, cancellationToken);
 
-            var query = _homeWorkRepository.Queryable.Where(x => x.Type == EnumHomeWorkType.HomeworkExtra).Where(x => !x.IsArchive);
-            if (!string.IsNullOrEmpty(request.WorkFilterStr))
+            var hwcQ = _homeWorkConfigRepository.Queryable
+                .Where(x => x.CurriculumId == curriculumConfigId);
+
+            var herQ = _homeWorkExtraPracticeResultRepository.Queryable
+                .Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id);
+
+            var baseQ =
+                from hw in _homeWorkRepository.Queryable
+                where hw.Type == EnumHomeWorkType.HomeworkExtra && !hw.IsArchive
+                join hwc in hwcQ on hw.Id equals hwc.HomeWorkId
+                select new { hw, hwc };
+
+            var statuses = request.WorkFilterStr.ToList<EnumWorkFilterStatus>() ?? new List<EnumWorkFilterStatus>();
+            bool wantCompleted = statuses.Contains(EnumWorkFilterStatus.Completed);
+            bool wantNotCompleted = statuses.Contains(EnumWorkFilterStatus.NotCompleted);
+            bool wantOverdue = statuses.Contains(EnumWorkFilterStatus.Overdue);
+
+            if (wantCompleted || wantNotCompleted || wantOverdue)
             {
-                var workFilterStatuses = request.WorkFilterStr.ToList<EnumWorkFilterStatus>() ?? new List<EnumWorkFilterStatus>();
-
-                bool hasCompleted = workFilterStatuses.Contains(EnumWorkFilterStatus.Completed);
-                bool hasNotCompleted = workFilterStatuses.Contains(EnumWorkFilterStatus.NotCompleted);
-                bool hasOverdue = workFilterStatuses.Contains(EnumWorkFilterStatus.Overdue);
-
-                if (!hasCompleted && !hasOverdue && hasNotCompleted)
-                {
-                    query = from baseQ in query
-                            join hwc in _homeWorkConfigRepository.Queryable on baseQ.Id equals hwc.HomeWorkId
-                            join her in _homeWorkExtraPracticeResultRepository.Queryable on baseQ.Id equals her.HomeWorkId into herGroup
-                            from her in herGroup.DefaultIfEmpty()
-                            where her.WorkingStatus == EnumWorkingStatus.Active && her.StudentId == student.Id
-                            && (her == null || her.Status != EnumResultStatus.Done) && hwc.CurriculumId == curriculumConfigId
-                            select baseQ;
-                }
-                else if (hasCompleted && !hasOverdue && !hasNotCompleted)
-                {
-                    query = from baseQ in query
-                            join hwc in _homeWorkConfigRepository.Queryable on baseQ.Id equals hwc.HomeWorkId
-                            join her in _homeWorkExtraPracticeResultRepository.Queryable on baseQ.Id equals her.HomeWorkId
-                            where her.WorkingStatus == EnumWorkingStatus.Active && her.StudentId == student.Id
-                            && her.Status == EnumResultStatus.Done && hwc.CurriculumId == curriculumConfigId
-                            select baseQ;
-                }
-                else if (hasOverdue && !hasNotCompleted && !hasCompleted)
-                {
-                    query = from baseQ in query
-                            join hwc in _homeWorkConfigRepository.Queryable on baseQ.Id equals hwc.HomeWorkId
-                            join her in _homeWorkExtraPracticeResultRepository.Queryable on baseQ.Id equals her.HomeWorkId into herGroup
-                            from her in herGroup.DefaultIfEmpty()
-                            where dateTime >= hwc.StartDate && dateTime <= hwc.EndDate && hwc.CurriculumId == curriculumConfigId
-                            && (her == null || her.Status != EnumResultStatus.Done || (her.UpdatedDate ?? her.CreatedDate).AddHours(7) > hwc.EndDate)
-                            select baseQ;
-                }
+                baseQ = from x in baseQ
+                        let doneAny = herQ.Where(r => r.HomeWorkId == x.hw.Id)
+                                          .Any(r => r.Status == EnumResultStatus.Done)
+                        // Hoàn thành đúng hạn: có bản Done và thời điểm hoàn thành <= EndDate
+                        let doneOnTime = herQ.Where(r => r.HomeWorkId == x.hw.Id && r.Status == EnumResultStatus.Done)
+                                             .Any(r => (r.UpdatedDate ?? r.CreatedDate).AddHours(7) <= x.hwc.EndDate)
+                        let isOverdue = now > x.hwc.EndDate && !doneOnTime
+                        where
+                            (wantCompleted && doneAny) ||
+                            (wantNotCompleted && !doneAny) ||
+                            (wantOverdue && isOverdue)
+                        select x;
             }
 
-            var queryData = from baseQ in query
-                            join hwc in _homeWorkConfigRepository.Queryable on baseQ.Id equals hwc.HomeWorkId
-                            where hwc.CurriculumId == curriculumConfigId
-                            select new HomeWorkExtraModel
-                            {
-                                Id = baseQ.Id,
-                                Name = baseQ.Name,
-                                CourseLevel = baseQ.CourseLevel,
-                                CourseSkill = baseQ.CourseSkill,
-                                CreatedDate = baseQ.CreatedDate,
-                                UpdatedDate = baseQ.UpdatedDate,
-                                EndDate = hwc.EndDate,
-                                StartDate = hwc.StartDate,
-                                HomeWorkConfigId = hwc.Id,
-                                TopicName = baseQ.Topic != null ? baseQ.Topic.Name : null,
-                                TotalQuestion = baseQ.HomeWorkQuestions.Count,
-                                CorrectTotal = baseQ.HomeWorkQuestions.Sum(x => x.Question!.CorrectTotal),
-                                NumberRetry = hwc.NumberRetry,
-                            };
+            var queryData =
+                from x in baseQ
+                select new HomeWorkExtraModel
+                {
+                    Id = x.hw.Id,
+                    Name = x.hw.Name,
+                    CourseLevel = x.hw.CourseLevel,
+                    CourseSkill = x.hw.CourseSkill,
+                    CreatedDate = x.hw.CreatedDate,
+                    UpdatedDate = x.hw.UpdatedDate,
+                    StartDate = x.hwc.StartDate,
+                    EndDate = x.hwc.EndDate,
+                    HomeWorkConfigId = x.hwc.Id,
+                    TopicName = x.hw.Topic != null ? x.hw.Topic.Name : null,
+                    TotalQuestion = x.hw.HomeWorkQuestions.Count,
+                    CorrectTotal = x.hw.HomeWorkQuestions.Sum(q => q.Question!.CorrectTotal),
+                    NumberRetry = x.hwc.NumberRetry
+                };
 
             int totalItem = await queryData.CountAsync(cancellationToken);
             var lists = await queryData.ApplySortAndPaging(request)
@@ -148,7 +141,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             await SetCorrectCountsAsync(lists, student, cancellationToken);
             foreach (var item in lists)
             {
-                item.ExpiryState = ComputeExpiryState(dateTime, item.EndDate, item.HomeWorkExtraPracticeResult?.UpdatedDate, item.HomeWorkExtraPracticeResult?.Status);
+                item.ExpiryState = ComputeExpiryState(now, item.EndDate, item.HomeWorkExtraPracticeResult?.UpdatedDate, item.HomeWorkExtraPracticeResult?.Status);
             }
             methodResult.Result = new PagingItemsModel<HomeWorkExtraModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
