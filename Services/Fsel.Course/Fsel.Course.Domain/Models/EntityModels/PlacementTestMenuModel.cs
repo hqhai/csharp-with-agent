@@ -25,6 +25,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumPlacementTestLevel Level { get; set; }
         public Guid? PlacementTestId { get; set; }
         public Guid? PlacementTestGroupResultId { get; set; }
+        public Guid PlacementTestResultId { get; set; }
 
         // Từ BaseResult
         public int CorrectCount { get; set; }

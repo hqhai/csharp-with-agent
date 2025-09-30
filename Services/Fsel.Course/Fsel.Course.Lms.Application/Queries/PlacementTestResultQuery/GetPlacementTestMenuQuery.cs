@@ -187,6 +187,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             partNode.Level = placementTestResult.Level;
             partNode.PlacementTestId = placementTestResult.PlacementTestId;
             partNode.PlacementTestGroupResultId = placementTestResult.PlacementTestGroupResultId;
+            partNode.PlacementTestResultId = placementTestResult.Id;
 
             // Map BaseResult properties
             partNode.CorrectCount = placementTestResult.CorrectCount;
