@@ -38,12 +38,10 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
         private const string ErrorMessage = "Thông báo lỗi";
         private const string EmptyFullName = "Chưa nhập Họ và Tên";
-        private const string EmptyEmail = "Chưa nhập Email";
+        private const string EmptyUserName = "Chưa nhập tên tài khoản";
         private const string DuplicateData = "Tên tài khoản trùng lặp trong file tải lên";
         private const string DataNotExist = "Tên tài khoản không tồn tại trên hệ thống";
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
-        private const string DataError = "Dữ liệu bị trống hoặc sai định dạng";
-        private const string InvalidEmail = "Email sai định dạng";
 
         public AddStudentsToCurriculumCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService)
         {
@@ -148,24 +146,20 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = EmptyFullName });
                 }
-                if (string.IsNullOrEmpty(x.Email?.Trim()))
+                if (string.IsNullOrEmpty(x.Username?.Trim()))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = EmptyEmail });
-                }
-                else if (!x.Email.IsValidEmail())
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = InvalidEmail });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Username), Message = EmptyUserName });
                 }
                 if (students.Contains(x))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = DuplicateData });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Username), Message = DuplicateData });
                 }
                 else
                 {
                     students.Add(new AddStudentsToCurriculumModel()
                     {
                         FullName = x.FullName,
-                        Email = x.Email,
+                        Username = x.Username,
                     });
                 }
 
@@ -173,19 +167,19 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             },
             async (Dictionary<int, AddStudentsToCurriculumModel> datas, IList<ValidateExcelModel> errors) =>
             {
-                var emails = datas.Values.Where(p => p.Email != null && !string.IsNullOrEmpty(p.Email.Trim())).Select(n => n.Email!.Trim());
+                var emails = datas.Values.Where(p => p.Username != null && !string.IsNullOrEmpty(p.Username.Trim())).Select(n => n.Username?.Trim() ?? string.Empty);
 
-                var emailsAlreadyExist = _userManager.Users.Where(x => emails.Contains(x.UserName)).Select(p => p.UserName);
+                var usernamesAlreadyExist = await _userManager.Users.Where(x => emails.Contains(x.UserName)).Select(p => p.UserName).ToListAsync(cancellationToken);
 
-                var emailsDoesNotExist = emails.Where(p => !emailsAlreadyExist.Contains(p));
+                var usernamesDoesNotExist = emails.Where(p => !usernamesAlreadyExist.Contains(p)).ToList();
 
-                emailsDoesNotExist.ForEach(user =>
+                usernamesDoesNotExist.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Email.ToLower() == user));
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.ToLower(CultureInfo.CurrentCulture)));
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
-                        errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Email), Message = DataNotExist });
+                        errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Username), Message = DataNotExist });
                     }
                 });
 
@@ -208,9 +202,9 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
                 return methodResult;
             }
 
-            var emails = result.Datas.Where(p => p.Email != null && !string.IsNullOrEmpty(p.Email.Trim())).Select(n => n.Email!.Trim()).ToList();
+            var usernames = result.Datas.Where(p => p.Username != null && !string.IsNullOrEmpty(p.Username.Trim())).Select(n => n.Username!.Trim()).ToList();
 
-            var query = await (from u in _userManager.Users.WhereBulkContains(emails, p => p.UserName)
+            var query = await (from u in _userManager.Users.WhereBulkContains(usernames, p => p.UserName)
                                join h in _humanRepository.Queryable on u.Id equals h.UserId
                                join s in _studentRepository.Queryable on h.Id equals s.HumanId
                                select s).ToListAsync(cancellationToken);

@@ -9,7 +9,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Campus
         [EpplusTableColumn(Header = "Họ và tên")]
         public string? FullName { get; set; }
 
-        [EpplusTableColumn(Header = "Email")]
-        public string? Email { get; set; }
+        [EpplusTableColumn(Header = "Tên tài khoản")]
+        public string? Username { get; set; }
     }
 }
