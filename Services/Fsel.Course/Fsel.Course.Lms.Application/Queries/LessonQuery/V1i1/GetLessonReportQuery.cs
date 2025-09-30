@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i1
 
         private async Task<double> GetAnswerTimeAsync(VideoResult videoResult)
         {
-            var videoTimeLenght = GetMediaDurationAsync(videoResult.Video?.VideoFilePath);
+            var videoTimeLenght = videoResult.Video?.TimeCount;
             var totalTime = await (from baseQ in _videoTimeCodeRepository.Queryable
                                    join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoTimeCodeId
                                    where vtcr.VideoResultId == videoResult.Id && baseQ.TimeCodeType == EnumTimeCodeType.Standalone
