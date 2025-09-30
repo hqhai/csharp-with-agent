@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.RubyAnnotationCmd
+namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;

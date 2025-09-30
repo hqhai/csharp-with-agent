@@ -1,15 +1,15 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.RubyQuery
+namespace Fsel.Course.Application.Queries.RubyQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Course.Application.Services.RubyService;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.Ruby;
     using Fsel.Course.Infrastructure.Common.RubyHelpers;
-    using Fsel.Course.Lms.Application.Services.RubyService;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -31,8 +31,8 @@ namespace Fsel.Course.Lms.Application.Queries.RubyQuery
 
         public async Task<MethodResult<object>> Handle(RenderRubyQuery request, CancellationToken cancellationToken)
         {
-            var (found, nfc) = await _rubyScopeRepository.TryGetBaseTextAsync(request.HostType, request.HostId, request.FieldKey, cancellationToken);
-            MethodResult<object> methodResult = new MethodResult<object>();
+            var (found, nfc) = await _rubyScopeRepository.TryGetBaseTextAsync(request.ObjectType, request.ObjectId, cancellationToken);
+            var methodResult = new MethodResult<object>();
 
             if (!found || string.IsNullOrEmpty(nfc))
             {
@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.RubyQuery
 
             var scope = await _rubyScopeRepository.Queryable.Include(x => x.RubyAnnotations)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.HostType == request.HostType && x.HostId == request.HostId && x.FieldKey == request.FieldKey, cancellationToken);
+                .FirstOrDefaultAsync(x => x.ObjectType == request.ObjectType && x.ObjectId == request.ObjectId, cancellationToken);
             if (scope == null || scope.RubyAnnotations.All(r => r.IsDeleted))
             {
                 var rawHtml = _rubyService.RenderHtml(baseNfc, Enumerable.Empty<RubyAnnotation>());
@@ -60,11 +60,11 @@ namespace Fsel.Course.Lms.Application.Queries.RubyQuery
                 var newStart = _rubyService.TryReAnchor(baseNfc, item);
                 if (newStart.HasValue)
                 {
-                    item.StartGraphemeIndex = newStart.Value;
+                    item.StartGrapheme = newStart.Value;
                 }
             }
 
-            (scope.Text, scope.BaseLengthGraphemes) = _rubyService.Snapshot(nfc);
+            (scope.Text, scope.LengthGraphemes) = _rubyService.Snapshot(nfc);
             await _rubyScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
             var rubies = scope?.RubyAnnotations ?? Enumerable.Empty<RubyAnnotation>();

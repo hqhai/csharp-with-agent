@@ -17,11 +17,14 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumLanguageType>());
+            builder.Property(e => e.TextNote)
+                .HasMaxLength(100);
+            builder.Property(e => e.SelectedText)
+                .HasMaxLength(50);
             builder.HasOne(e => e.Scope).WithMany(s => s.RubyAnnotations)
                 .HasForeignKey(e => e.RubyScopeId)
                 .OnDelete(DeleteBehavior.Cascade);
-            builder.Property(e => e.RowVersion).IsRowVersion();
-            builder.HasIndex(e => new {e.RubyScopeId, e.StartGraphemeIndex});
+            builder.HasIndex(e => new {e.RubyScopeId, e.StartGrapheme});
             builder.HasIndex(e => new { e.RubyScopeId, e.SelectedText});
         }
     }

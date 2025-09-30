@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.RubyScopeCmd
+namespace Fsel.Course.Application.Commands.RubyScopeCmd
 {
     using System.Threading;
     using System.Threading.Tasks;

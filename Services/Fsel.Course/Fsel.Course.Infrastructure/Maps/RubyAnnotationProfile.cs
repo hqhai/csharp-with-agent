@@ -15,12 +15,10 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<EntityRubyText, RubyAnnotationModel>().IgnoreAllNonExisting();
             CreateMap<EntityRubyText, EntityRubyText>()
                 .ForMember(m => m.SelectedText, opt => opt.Ignore())
-                .ForMember(m => m.Phonetic, opt => opt.Ignore())
+                .ForMember(m => m.TextNote, opt => opt.Ignore())
                 .ForMember(m => m.LanguageType, opt => opt.Ignore())
-                .ForMember(m => m.StartGraphemeIndex, opt => opt.Ignore())
-                .ForMember(m => m.LengthGraphemes, opt => opt.Ignore())
-                .ForMember(m => m.PrefixContext, opt => opt.Ignore())
-                .ForMember(m => m.SuffixContext, opt => opt.Ignore())
+                .ForMember(m => m.StartGrapheme, opt => opt.Ignore())
+                .ForMember(m => m.LengthNote, opt => opt.Ignore())
                 .IgnoreAllNonExisting();
             CreateMap<CreateRubyAnnotationCommandModel, EntityRubyText>().IgnoreAllNonExisting();
             CreateMap<UpdateRubyAnnotationCommandModel, EntityRubyText>().IgnoreAllNonExisting();

@@ -20,7 +20,6 @@ using Fsel.Course.Lms.Application.Services.FFmpegServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
-using Fsel.Course.Lms.Application.Services.RubyService;
 using Fsel.Course.Lms.Application.Services.SenderService;
 using Fsel.Course.Lms.Application.Services.StorageServices;
 using Fsel.Course.Lms.Application.Services.SystemService;
@@ -139,9 +138,6 @@ builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionReposito
 builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
 builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
 builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
-builder.Services.AddScoped<IRubyAnnotationRepository, RubyAnnotationRepository>();
-builder.Services.AddScoped<IRubyScopeRepository, RubyScopeRepsitory>();
-builder.Services.AddScoped<IRubyService, RubyService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

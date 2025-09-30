@@ -2,10 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.QueryModels.Ruby
 {
+    using Fsel.Course.Domain.Enums;
+
     public class RubyRenderModel
     {
-        public string? HostType { get; set; }
-        public Guid HostId { get; set; }
-        public string? FieldKey { get; set; }
+        public EnumObjectType ObjectType { get; set; }
+        public Guid ObjectId { get; set; }
     }
 }

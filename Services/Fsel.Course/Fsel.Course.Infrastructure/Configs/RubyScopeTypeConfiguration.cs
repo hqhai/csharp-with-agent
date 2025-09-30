@@ -2,6 +2,9 @@
 
 namespace Fsel.Course.Infrastructure.Configs
 {
+    using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
     using EntityRubyDocument = Fsel.Course.Domain.Entities.RubyScope;
@@ -11,6 +14,11 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<EntityRubyDocument> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+            builder.Property(e => e.ObjectType)
+                .HasMaxLength(50)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumObjectType>());
         }
     }
 }

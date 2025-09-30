@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Course.Application.Services.RubyService;
 using Fsel.Course.Application.Services.StorageServices;
 using Fsel.Course.Application.Services.SystemServices;
 using Fsel.Course.Application.Services.UserServices;
@@ -102,6 +103,9 @@ builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRule
 builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
 builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
 builder.Services.AddScoped<IUnitModuleRepository, UnitModuleRepository>();
+builder.Services.AddScoped<IRubyAnnotationRepository, RubyAnnotationRepository>();
+builder.Services.AddScoped<IRubyScopeRepository, RubyScopeRepsitory>();
+builder.Services.AddScoped<IRubyService, RubyService>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();

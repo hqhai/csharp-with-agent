@@ -8,8 +8,8 @@ namespace Fsel.Course.Infrastructure.Repositories
     using AutoMapper;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Common.RubyHelpers;
     using Microsoft.EntityFrameworkCore;
 
     public class RubyScopeRepsitory : BaseRepository<RubyScope>, IRubyScopeRepository
@@ -20,9 +20,9 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         }
 
-        public async Task<(bool found, string? nfc)> TryGetBaseTextAsync(string hostType, Guid hostId, string fieldKey, CancellationToken ct)
+        public async Task<(bool found, string? nfc)> TryGetBaseTextAsync(EnumObjectType hostType, Guid hostId, CancellationToken ct)
         {
-            var result = await Queryable.FirstOrDefaultAsync(x => x.HostType == hostType && x.HostId == hostId && x.FieldKey == fieldKey, ct);
+            var result = await Queryable.FirstOrDefaultAsync(x => x.ObjectType == hostType && x.ObjectId == hostId, ct);
             if (result == null)
             {
                 return (false, null);
@@ -30,7 +30,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             return (true, result.Text);
         }
 
-        public Task<bool> TryUpdateBaseTextAsync(string hostType, Guid hostId, string fieldKey, string baseTextNfc, CancellationToken ct)
+        public Task<bool> TryUpdateBaseTextAsync(EnumObjectType hostType, Guid hostId, string baseTextNfc, CancellationToken ct)
             => Task.FromResult(false);
     }
 }
