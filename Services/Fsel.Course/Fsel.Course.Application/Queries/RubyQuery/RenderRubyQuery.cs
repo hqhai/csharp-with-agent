@@ -31,7 +31,7 @@ namespace Fsel.Course.Application.Queries.RubyQuery
 
         public async Task<MethodResult<object>> Handle(RenderRubyQuery request, CancellationToken cancellationToken)
         {
-            var (found, nfc) = await _rubyScopeRepository.TryGetBaseTextAsync(request.HostType, request.HostId, request.FieldKey, cancellationToken);
+            var (found, nfc) = await _rubyScopeRepository.TryGetBaseTextAsync(request.ObjectType, request.ObjectId, cancellationToken);
             var methodResult = new MethodResult<object>();
 
             if (!found || string.IsNullOrEmpty(nfc))
@@ -44,7 +44,7 @@ namespace Fsel.Course.Application.Queries.RubyQuery
 
             var scope = await _rubyScopeRepository.Queryable.Include(x => x.RubyAnnotations)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.HostType == request.HostType && x.HostId == request.HostId && x.FieldKey == request.FieldKey, cancellationToken);
+                .FirstOrDefaultAsync(x => x.ObjectType == request.ObjectType && x.ObjectId == request.ObjectId, cancellationToken);
             if (scope == null || scope.RubyAnnotations.All(r => r.IsDeleted))
             {
                 var rawHtml = _rubyService.RenderHtml(baseNfc, Enumerable.Empty<RubyAnnotation>());
@@ -60,11 +60,11 @@ namespace Fsel.Course.Application.Queries.RubyQuery
                 var newStart = _rubyService.TryReAnchor(baseNfc, item);
                 if (newStart.HasValue)
                 {
-                    item.StartGraphemeIndex = newStart.Value;
+                    item.StartGrapheme = newStart.Value;
                 }
             }
 
-            (scope.Text, scope.BaseLengthGraphemes) = _rubyService.Snapshot(nfc);
+            (scope.Text, scope.LengthGraphemes) = _rubyService.Snapshot(nfc);
             await _rubyScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
             var rubies = scope?.RubyAnnotations ?? Enumerable.Empty<RubyAnnotation>();

@@ -44,7 +44,7 @@ namespace Fsel.Course.Application.Services.RubyService
             //    if (idx >= 0)
             //    {
             //        var map = RubyTextNormalization.GraphemeMap(baseTextNfc);
-            //        int startChar = idx + r.PrefixContext.Length;
+            //        int startChar = idx + r.PrefixContext.LengthNote;
             //        return RubyTextNormalization.CharOffsetToGrapheme(startChar, map.charStarts);
             //    }
             //}
@@ -65,21 +65,21 @@ namespace Fsel.Course.Application.Services.RubyService
             }
 
             var ordered = rubies.Where(r => !r.IsDeleted)
-                                .OrderByDescending(r => r.StartGraphemeIndex)
+                                .OrderByDescending(r => r.StartGrapheme)
                                 .ToList();
 
             foreach (var r in ordered)
             {
-                int s = r.StartGraphemeIndex;
-                int e = s + r.LengthGraphemes;
+                int s = r.StartGrapheme;
+                int e = s + r.LengthNote;
 
                 if (s < 0 || s >= total || e > total)
                 {
                     continue;
                 }
 
-                string rb = string.Concat(Enumerable.Range(s, r.LengthGraphemes).Select(i => textEls[i]));
-                string rt = WebUtility.HtmlEncode(r.Phonetic);
+                string rb = string.Concat(Enumerable.Range(s, r.LengthNote).Select(i => textEls[i]));
+                string rt = WebUtility.HtmlEncode(r.TextNote);
 
                 string ruby = $"<ruby><rb>{rb}</rb><rt>{rt}</rt></ruby>";
                 textEls[s] = ruby;

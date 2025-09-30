@@ -49,11 +49,11 @@ namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
             if (!string.IsNullOrWhiteSpace(request.Text))
             {
                 baseNfc = RubyTextNormalization.ToNfc(request.Text);
-                _ = await _rubyScopeRepository.TryUpdateBaseTextAsync(request.HostType, request.HostId, request.FieldKey, baseNfc, cancellationToken);
+                _ = await _rubyScopeRepository.TryUpdateBaseTextAsync(request.ObjectType, request.ObjectId, baseNfc, cancellationToken);
             }
             else
             {
-                var (found, nfc) = await _rubyScopeRepository.TryGetBaseTextAsync(request.HostType, request.HostId, request.FieldKey, cancellationToken);
+                var (found, nfc) = await _rubyScopeRepository.TryGetBaseTextAsync(request.ObjectType, request.ObjectId, cancellationToken);
                 if (!found || string.IsNullOrEmpty(nfc))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -63,15 +63,15 @@ namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
 
             var scope = await _rubyScopeRepository.Queryable
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.HostType == request.HostType && x.HostId == request.HostId && x.FieldKey == request.FieldKey, cancellationToken);
+                .FirstOrDefaultAsync(x => x.ObjectType == request.ObjectType && x.ObjectId == request.ObjectId, cancellationToken);
 
             if (scope == null)
             {
                 await _rubyScopeRepository.ExecuteTransactionAsync(async () =>
                 {
-                    scope = new EntityRubyScope { Id = Guid.NewGuid(), FieldKey = request.FieldKey, HostId = request.HostId, HostType = request.HostType, Text = request.Text };
+                    scope = new EntityRubyScope { Id = Guid.NewGuid(), ObjectId = request.ObjectId, ObjectType = request.ObjectType, Text = request.Text };
                     _rubyScopeRepository.Add(scope);
-                    (scope.Text, scope.BaseLengthGraphemes) = _rubyService.Snapshot(baseNfc);
+                    (scope.Text, scope.LengthGraphemes) = _rubyService.Snapshot(baseNfc);
                     await _rubyScopeRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                     return methodResult;
@@ -79,13 +79,13 @@ namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
             }
 
             #region Validation
-            if (request.LengthGraphemes is < 1 or > 5)
+            if (request.LengthSelectedText is < 1 or > 5)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat));
                 return methodResult;
             }
 
-            if (request.StartGraphemeIndex < 0 || request.StartGraphemeIndex + request.LengthGraphemes > scope.BaseLengthGraphemes)
+            if (request.StartGrapheme < 0 || request.StartGrapheme + request.LengthSelectedText > scope.LengthGraphemes)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.MaxLength));
                 return methodResult;
@@ -93,7 +93,7 @@ namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
 
             var rubyAnnotaiton = await _rubyAnnotationRepository.Queryable
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.RubyScopeId == scope.Id && x.SelectedText == request.SelectedText && x.Phonetic == request.Phonetic, cancellationToken);
+                .FirstOrDefaultAsync(x => x.RubyScopeId == scope.Id && x.SelectedText == request.SelectedText && x.TextNote == request.TextNote, cancellationToken);
             if (rubyAnnotaiton != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
@@ -105,6 +105,7 @@ namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
             rubyText.SelectedText = RubyTextNormalization.ToNfc(request.SelectedText);
             rubyText.RubyScopeId = scope.Id;
             rubyText.LanguageType = request.LangueType;
+            rubyText.LengthNote = request.LengthSelectedText;
 
             if (rubyText == null)
             {
@@ -122,30 +123,30 @@ namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
                     .Where(x => x.RubyScopeId == scope.Id && !x.IsDeleted)
                     .ToListAsync(cancellationToken);
 
-                var html = _rubyService.RenderHtml(baseNfc, ruby);
+                //var html = _rubyService.RenderHtml(baseNfc, ruby);
 
                 var result = new CreateRubyByScopeCommandModel
                 {
                     RubyId = rubyText.Id,
                     ScopeId = scope.Id,
-                    Html = request.RubyReturn?.Html != false ? html : null,
+                    //Html = request.RubyReturn?.Html != false ? html : null,
                 };
 
-                if (request.RubyReturn?.Annotations == true)
+                //if (request.RubyReturn?.Annotations == true)
+                //{
+                result.Annotations = await _rubyAnnotationRepository.Queryable
+                .AsNoTracking()
+                .Where(x => x.RubyScopeId == scope.Id && !x.IsDeleted)
+                .Select(x => new RubyAnnotaionModel
                 {
-                    result.Annotations = await _rubyAnnotationRepository.Queryable
-                    .AsNoTracking()
-                    .Where(x => x.RubyScopeId == scope.Id && !x.IsDeleted)
-                    .Select(x => new RubyAnnotaionModel
-                    {
-                        Id = x.Id,
-                        StartGraphemeIndex = x.StartGraphemeIndex,
-                        LengthGraphemes = x.LengthGraphemes,
-                        SelectedText = x.SelectedText,
-                        Phonetic = x.Phonetic,
-                        LanguageType = x.LanguageType
-                    }).ToListAsync(cancellationToken);
-                }
+                    Id = x.Id,
+                    StartGrapheme = x.StartGrapheme,
+                    LengthNote = x.LengthNote,
+                    SelectedText = x.SelectedText,
+                    TextNote = x.TextNote,
+                    LanguageType = x.LanguageType
+                }).ToListAsync(cancellationToken);
+                //}
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = result;

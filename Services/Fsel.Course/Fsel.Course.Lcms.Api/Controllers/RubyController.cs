@@ -19,7 +19,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/ruby")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
+    //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class RubyController : ControllerBase
     {
         private readonly IMediator _mediator;

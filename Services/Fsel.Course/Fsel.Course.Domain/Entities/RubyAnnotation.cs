@@ -20,34 +20,34 @@ namespace Fsel.Course.Domain.Entities
         public EnumLanguageType LanguageType { get; set; }
 
         /// <summary>
-        /// Văn bản gốc cần note ruby text
+        /// Đoạn văn gốc cần note ruby text
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? SelectedText { get; set; }
 
         /// <summary>
-        /// Ruby text của văn bản gốc
+        /// Ruby text của đoạn văn gốc
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? Phonetic { get; set; }
+        public string? TextNote { get; set; }
 
         /// <summary>
         /// Vị trí bắt đầu nội dung cần gắn rubytext trong Document.Content
         /// </summary>
         [Range(0, 100000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int StartGraphemeIndex { get; set; }
+        public int StartGrapheme { get; set; }
 
         /// <summary>
         /// Độ dài
         /// </summary>
         [Range(1, 5, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int LengthGraphemes { get; set; }
+        public int LengthNote { get; set; }
 
         /// <summary>
         /// Tránh đồng bộ
         /// </summary>
-        [Timestamp]
-        public byte[]? RowVersion { get; set; } = default!;
+        //[Timestamp]
+        //public byte[]? RowVersion { get; set; } = default!;
         public RubyScope Scope { get; set; } = default!;
     }
 }
