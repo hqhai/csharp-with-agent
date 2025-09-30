@@ -41,16 +41,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                var now = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-                if (now < StartDate)
-                {
-                    return EnumCurriculumStatus.NotProgress.GetDescription();
-                }
-                else if (now > EndDate)
-                {
-                    return EnumCurriculumStatus.Expired.GetDescription();
-                }
-                return EnumCurriculumStatus.Progress.GetDescription();
+                return CurriculumStatus.GetDescription();
             }
         }
     }
