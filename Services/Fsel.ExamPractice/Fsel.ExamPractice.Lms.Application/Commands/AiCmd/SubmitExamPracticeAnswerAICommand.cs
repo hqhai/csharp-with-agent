@@ -393,51 +393,67 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             var gradingDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aiResponse) ?? new ExamPracticeAIGradingDataModel();
             var gradingModel = _mapper.Map<ExamPracticeAIGradingModel>(gradingDataModel);
 
+            if (gradingModel == null)
+            {
+                gradingModel = new ExamPracticeAIGradingModel();
+                gradingModel.ErrorMessage = "GradingModel is null";
+            }
+            var matchedScores = new List<ProsodyScore>();
             if (double.TryParse(gradingModel.BandScore, out double bandScore))
             {
-                var matchedScores = relevantProsodyScores
-                    .Where(x => x.MinScore <= bandScore && x.MaxScore >= bandScore)
-                    .OrderBy(x => x.Language)
-                    .ToList();
-
-                if (matchedScores.Count > 0)
-                {
-                    var mainComment = matchedScores[0].BandComment ?? string.Empty;
-                    var altComment = matchedScores.Count > 1 ? matchedScores[1].BandComment ?? string.Empty : mainComment;
-
-                    gradingModel.BandDescriptorText = mainComment;
-                    var aIResponseTranslate = await GetTranslateAIResponse(aiResponse, cancellationToken);
-                    var responseTranslateDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aIResponseTranslate);
-                    var responseTranslateModel = _mapper.Map<ExamPracticeAIGradingModel>(responseTranslateDataModel);
-                    var altData = new List<ExamPracticeAIGradingModel>
-                    {
-                        new ExamPracticeAIGradingModel
-                        {
-                            BandScore = gradingModel.BandScore,
-                            BandDescriptorText = altComment,
-                            Explanation = responseTranslateModel?.Explanation ?? string.Empty,
-                            SuggestionsForImprovement = responseTranslateModel?.SuggestionsForImprovement ?? string.Empty
-                        }
-                    };
-
-                    var languageModels = matchedScores
-                        .OrderBy(x => x.Language)
-                        .Select(x => new ExamPracticeAIGradingLanguageModel
-                        {
-                            Language = x.Language,
-                            ExamPracticeAIGradings = x.Language == LanguageAIModule.English ? new List<ExamPracticeAIGradingModel>
-                            {
-                                gradingModel
-                            } : altData,
-                        })
-                        .ToList();
-
-                    if (languageModels.Any())
-                    {
-                        aiResponse = languageModels.Serialize();
-                    }
-                }
+                matchedScores = relevantProsodyScores.Where(x => x.MinScore <= bandScore && x.MaxScore >= bandScore)
+                                                     .OrderBy(x => x.Language)
+                                                     .ToList();
             }
+            var mainComment = matchedScores[0].BandComment ?? string.Empty;
+            var altComment = matchedScores.Count > 1 ? matchedScores[1].BandComment ?? string.Empty : mainComment;
+            gradingModel.BandDescriptorText = mainComment;
+
+            var aIResponseTranslate = await GetTranslateAIResponse(aiResponse, cancellationToken);
+            var responseTranslateDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aIResponseTranslate);
+            var responseTranslateModel = _mapper.Map<ExamPracticeAIGradingModel>(responseTranslateDataModel);
+            var altData = new List<ExamPracticeAIGradingModel>
+            {
+                new ExamPracticeAIGradingModel
+                {
+                    BandScore = gradingModel.BandScore,
+                    BandDescriptorText = altComment,
+                    Explanation = responseTranslateModel?.Explanation ?? string.Empty,
+                    SuggestionsForImprovement = responseTranslateModel?.SuggestionsForImprovement ?? string.Empty
+                }
+            };
+
+            var languageModels = matchedScores
+                .OrderBy(x => x.Language)
+                .Select(x => new ExamPracticeAIGradingLanguageModel
+                {
+                    Language = x.Language,
+                    ExamPracticeAIGradings = x.Language == LanguageAIModule.English ? new List<ExamPracticeAIGradingModel>
+                    {
+                        gradingModel
+                    } : altData,
+                })
+                .ToList();
+
+            if (languageModels.Any())
+            {
+                aiResponse = languageModels.Serialize();
+            }
+            else
+            {
+                aiResponse = new List<ExamPracticeAIGradingLanguageModel>
+                {
+                    new ExamPracticeAIGradingLanguageModel
+                    {
+                        Language = LanguageAIModule.English,
+                        ExamPracticeAIGradings = new List<ExamPracticeAIGradingModel>
+                        {
+                            gradingModel
+                        }
+                    }
+                }.Serialize();
+            }
+
             return aiResponse;
         }
 

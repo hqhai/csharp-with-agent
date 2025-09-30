@@ -57,6 +57,7 @@ namespace Fsel.Shared.Models.ShareModels
 
     public class ExamPracticeAIGradingModel
     {
+        public string? ErrorMessage { get; set; }
         public string? BandScore { get; set; }
         public string? BandDescriptorText { get; set; }
         public string? Explanation { get; set; }
