@@ -15,6 +15,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models;
     using Fsel.Identity.Domain.Models.CommandModels.Campus;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using Kros.Extensions;
@@ -24,12 +25,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
 
-    public class AddStudentsToCurriculumCommand : BaseImportCommandModel, IRequest<MethodResult<Stream>>
+    public class AddStudentsToCurriculumCommand : BaseImportCommandModel, IRequest<MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
         public Guid CurriculumId { get; set; }
     }
 
-    public class AddStudentsToCurriculumCommandHandler : IRequestHandler<AddStudentsToCurriculumCommand, MethodResult<Stream>>
+    public class AddStudentsToCurriculumCommandHandler : IRequestHandler<AddStudentsToCurriculumCommand, MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
         private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
@@ -51,10 +52,10 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             _lmsCourseService = lmsCourseService;
         }
 
-        public async Task<MethodResult<Stream>> Handle(AddStudentsToCurriculumCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<AddStudentIntoSchoolClassCommandModel>> Handle(AddStudentsToCurriculumCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<Stream>();
+            var methodResult = new MethodResult<AddStudentIntoSchoolClassCommandModel>();
 
             if (request.FormFile == null)
             {
@@ -197,7 +198,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
             if (result.Stream != null)
             {
-                methodResult.Result = result.Stream;
+                methodResult.Result = new AddStudentIntoSchoolClassCommandModel() { Stream = result.Stream };
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
@@ -222,7 +223,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
                 methodResult.AddError(addStudentsResult.Error);
                 return methodResult;
             }
-
+            methodResult.Result = new AddStudentIntoSchoolClassCommandModel() { NumberOfStudent = studentIds.Count };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

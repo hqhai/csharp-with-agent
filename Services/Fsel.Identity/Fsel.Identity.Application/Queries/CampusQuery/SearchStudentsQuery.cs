@@ -110,6 +110,8 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                 query = query.Where(p => request.StudentIds.Contains(p.StudentId));
             }
 
+            query = query.OrderBy(p => p.FullName);
+
             var lists = new List<StudentCampusModel>();
             int totalItem = 0;
 
@@ -134,7 +136,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             else
             {
                 totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                lists = await query.ApplySortAndPaging(request)
+                lists = await query.ApplyPaging(request)
                                            .AsNoTracking()
                                            .ToListAsync(cancellationToken: cancellationToken)
                                            .ConfigureAwait(false);
