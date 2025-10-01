@@ -10,6 +10,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.CampusCmd;
     using Fsel.Identity.Application.Queries.CampusQuery;
+    using Fsel.Identity.Domain.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
@@ -100,18 +101,19 @@ namespace Fsel.Identity.Api.Controllers.Campus
         /// Get list student by student ids
         /// </summary>
         [HttpPost("add-students-to-curriculum")]
-        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<AddStudentIntoSchoolClassCommandModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(CurriculumManagement.AddStudents)]
         public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] AddStudentsToCurriculumCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            if (!commandResult.IsOK || commandResult.Result == null)
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+
+            if (!commandResult.IsOK || commandResult.Result == null || commandResult.Result.Stream == null)
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Add_Students_To_Curriculum_Error.xlsx");
+            return File(commandResult.Result.Stream, Settings.Excels.ContentType, "Add_Students_To_Curriculum_Error.xlsx");
         }
 
         /// <summary>
