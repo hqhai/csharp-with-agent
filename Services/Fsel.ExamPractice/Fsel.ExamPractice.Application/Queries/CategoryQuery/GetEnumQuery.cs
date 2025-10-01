@@ -44,7 +44,7 @@ namespace Fsel.ExamPractice.Application.Queries.CategoryQuery
                     break;
 
                 case Domain.Enums.EnumCourseSourceData.ExamPracticeType:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumExamPracticeType>();
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumExamPracticeType>().Where(x => x.Value == EnumExamPracticeType.Vstep.ToString()).ToList();
                     break;
 
                 case Domain.Enums.EnumCourseSourceData.SectionExamPracticeType:
