@@ -80,7 +80,8 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                     item.FullName ?? string.Empty,
                     item.UserName ?? string.Empty,
                     item.Email ?? string.Empty,
-                    item.PhoneNumber ?? string.Empty
+                    item.PhoneNumber ?? string.Empty,
+                    item.DefaultPassword ?? string.Empty,
                 };
 
                 // Lưu dữ liệu vào ConcurrentBag (thay vì ghi vào Excel ngay)

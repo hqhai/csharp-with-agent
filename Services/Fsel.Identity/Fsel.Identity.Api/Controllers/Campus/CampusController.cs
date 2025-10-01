@@ -9,7 +9,6 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.CampusCmd;
-    using Fsel.Identity.Application.Commands.StudentCmd;
     using Fsel.Identity.Application.Queries.CampusQuery;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels.CampusModel;
@@ -130,6 +129,19 @@ namespace Fsel.Identity.Api.Controllers.Campus
                 return commandResult.GetActionResult();
             }
             return File(commandResult.Result, Settings.Excels.ContentType, "Template_Add_Student_To_Curriculum.xlsx");
+        }
+
+        /// <summary>
+        /// update course id for student
+        /// </summary>
+        [HttpPost("update-course-id-for-students")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.DeleteStudents)]
+        public async Task<IActionResult> UpdateCourseIdOfStudents([FromBody] UpdateCourseIdOfStudentsCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
     public class SearchCurriculumQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<CurriculumModel>>>
     {
         public IList<Guid>? CourseIds { get; set; }
-        public EnumCurriculumStatus? Status { get; set; }
+        public IList<EnumCurriculumStatus>? Status { get; set; }
     }
 
     public class SearchCurriculumQueryHandler : IRequestHandler<SearchCurriculumQuery, MethodResult<PagingItemsModel<CurriculumModel>>>
@@ -75,9 +75,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                 query = query.Where(p => request.CourseIds.Contains(p.Course.Id)).ToList();
             }
 
-            if (request.Status.HasValue)
+            if (request.Status != null && request.Status.Any())
             {
-                query = query.Where(p => p.Curriculum.CurriculumStatus == request.Status).ToList();
+                query = query.Where(p => request.Status.Contains(p.Curriculum.CurriculumStatus)).ToList();
             }
 
             var curriculums = query.Select(p => new CurriculumModel()
@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             var curriculumIds = lists.Select(p => p.Id).ToList();
 
-            var curriculumStudents = await _curriculumStudentRepository.Queryable.WhereBulkContains(curriculumIds, p => p.Id).ToListAsync(cancellationToken);
+            var curriculumStudents = await _curriculumStudentRepository.Queryable.WhereBulkContains(curriculumIds, p => p.CurriculumId).ToListAsync(cancellationToken);
 
             lists.ForEach(p =>
             {

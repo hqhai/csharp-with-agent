@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         [HttpGet("get-curriculums-by-student-id")]
         [ProducesResponseType(typeof(MethodResult<IList<CurriculumModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+        [Permission(roles: new string[] { nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetCurriculumsByStudentId([FromQuery] GetCurriculumsByStudentIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         [HttpGet("get-current-curriculum")]
         [ProducesResponseType(typeof(MethodResult<CurriculumModel?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+        [Permission(roles: new string[] { nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetCurrentCurriculumOfStudent([FromQuery] GetCurrentCurriculumOfStudentQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);

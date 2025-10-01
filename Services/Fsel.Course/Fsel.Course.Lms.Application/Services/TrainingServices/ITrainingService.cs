@@ -51,5 +51,8 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 
         [Post("/v1/campus/add-students-into-class")]
         Task<IApiResponse<MethodResult<bool>>> AddStudentsCampusIntoClass([FromBody] AddStudentsCampusIntoClassCommandModel model);
+
+        [Post("/v1/campus/delete-class-students-from-curriculum")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteClassStudents([FromBody] DeleteClassStudentsFromCurriculumCommandModels model);
     }
 }

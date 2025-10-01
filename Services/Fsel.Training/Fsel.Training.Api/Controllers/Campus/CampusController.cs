@@ -35,5 +35,17 @@ namespace Fsel.Training.Api.Controllers.Campus
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Delete students from curriculum
+        /// </summary>
+        [HttpPost("delete-class-students-from-curriculum")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> DeleteStudentsCampusFromCurriculum([FromBody] DeleteClassStudentsFromCurriculumCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

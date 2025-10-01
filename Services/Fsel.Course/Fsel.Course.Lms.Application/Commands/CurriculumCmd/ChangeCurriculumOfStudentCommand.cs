@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -185,6 +186,24 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
             if (!classResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallTrainingServiceError), nameof(classResult));
+                return methodResult;
+            }
+
+            var updateExpiredDateResult = await _userService.UpdateExpiredDateForStudentsCampus(new UpdateExpiredDateForStudentsCampusCommandModels()
+            {
+                Students = new List<UpdateExpiredDateForStudentsCampusCommandModel>()
+                {
+                    new UpdateExpiredDateForStudentsCampusCommandModel()
+                    {
+                        StudentId = student.Id,
+                        ExpiredDate = curriculum.Curriculum.EndDate
+                    }
+                }
+            });
+
+            if (!updateExpiredDateResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(updateExpiredDateResult.Error);
                 return methodResult;
             }
 

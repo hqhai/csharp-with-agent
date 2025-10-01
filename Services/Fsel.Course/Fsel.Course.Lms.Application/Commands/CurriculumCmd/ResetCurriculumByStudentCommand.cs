@@ -17,6 +17,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     public class ResetCurriculumByStudentCommand : IRequest<MethodResult<bool>>
     {
         public Guid? UserId { get; set; }
+        public Guid? CourseId { get; set; }
     }
 
     public class ResetCurriculumByStudentCommandHandler : IRequestHandler<ResetCurriculumByStudentCommand, MethodResult<bool>>
@@ -65,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
-            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(userId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
 
             if (studentResult == null)
             {
@@ -79,6 +80,8 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+
+            student.CourseId = request.CourseId ?? student.CourseId;
 
             // delete final test answers
             var finalTestResults = await _finalTestResultRepository.Queryable.Include(x => x.SectionGroupResults)
@@ -202,6 +205,16 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
                 await _mockTestResultRepository.DeleteListAsync(mockTestResults);
                 await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
+            }
+
+            //delete course result
+            var courseResult = await _courseResultRepository.Queryable
+                                                            .Where(x => x.StudentId == student.Id && x.CourseId == student.CourseId)
+                                                            .ToListAsync(cancellationToken);
+            if (courseResult.Count != 0)
+            {
+                await _courseResultRepository.DeleteListAsync(courseResult);
+                await _courseResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -50,16 +50,8 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             {
                 if (studentDict.TryGetValue(p.Id, out var student))
                 {
-                    bool updateExpiredDate =
-                        !p.ExpiredDate.HasValue ||
-                        student.ExpiredDate.HasValue && p.ExpiredDate.Value < student.ExpiredDate ||
-                        !student.ExpiredDate.HasValue;
-
-                    if (updateExpiredDate)
-                    {
-                        p.ExpiredDate = student.ExpiredDate;
-                        studentsBag.Add(p);
-                    }
+                    p.ExpiredDate = student.ExpiredDate;
+                    studentsBag.Add(p);
                 }
             });
 

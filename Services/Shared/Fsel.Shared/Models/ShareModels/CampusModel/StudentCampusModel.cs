@@ -15,6 +15,7 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
         public string? PhoneNumber { get; set; }
         public string? Class { get; set; }
         public string? School { get; set; }
+        public string? DefaultPassword { get; set; }
         public EnumGender? Gender { get; set; }
         public DateTime? Birthday { get; set; }
         public Guid StudentId { get; set; }

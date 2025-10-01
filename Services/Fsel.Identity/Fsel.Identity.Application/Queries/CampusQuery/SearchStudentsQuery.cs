@@ -23,7 +23,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
     public class SearchStudentsQuery : BaseQueryModel, IRequest<MethodResult<PagingItemsModel<StudentCampusModel>>>
     {
-        public EnumCurriculumStatus? CurriculumStatus { get; set; }
+        public IList<EnumCurriculumStatus>? CurriculumStatus { get; set; }
         public Guid? SchoolClassId { get; set; }
         public IList<Guid>? StudentIds { get; set; }
     }
@@ -80,7 +80,8 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                             SchoolId = s.SchoolId,
                             Gender = h.Gender,
                             School = s.School,
-                            Birthday = h.Birthday
+                            Birthday = h.Birthday,
+                            DefaultPassword = u.DefaultPassword
                         };
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -112,7 +113,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             var lists = new List<StudentCampusModel>();
             int totalItem = 0;
 
-            if (request.CurriculumStatus.HasValue)
+            if (request.CurriculumStatus != null && request.CurriculumStatus.Any())
             {
                 var students = await query.ToListAsync(cancellationToken);
 
@@ -125,7 +126,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                     p.LearningProgresses = learningProgress?.Where(x => x.StudentId == p.StudentId).ToList();
                 });
 
-                students = students.Where(p => p.LearningProgresses != null && p.LearningProgresses.Any(x => x.CurriculumStatus == request.CurriculumStatus)).ToList();
+                students = students.Where(p => p.LearningProgresses != null && p.LearningProgresses.Any(x => request.CurriculumStatus.Contains(x.CurriculumStatus))).ToList();
 
                 totalItem = students.Count;
                 lists = students.ApplySortAndPaging(request).ToList();

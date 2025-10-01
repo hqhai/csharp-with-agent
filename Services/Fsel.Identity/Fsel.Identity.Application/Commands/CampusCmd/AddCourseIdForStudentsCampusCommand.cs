@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.StudentCmd
+namespace Fsel.Identity.Application.Commands.CampusCmd
 {
     using System;
     using System.Collections.Generic;
