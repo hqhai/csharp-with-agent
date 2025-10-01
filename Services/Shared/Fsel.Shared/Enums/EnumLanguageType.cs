@@ -13,7 +13,7 @@ namespace Fsel.Shared.Enums
         [Description("Tiếng Hàn")]
         Ko,
         [Description("Tiếng Latin")]
-        Latin,
+        Latn,
         [Description("Không xác định")]
         Unknow
     }
