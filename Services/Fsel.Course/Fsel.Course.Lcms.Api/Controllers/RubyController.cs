@@ -15,6 +15,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Fsel.Shared.Enums;
+    using Fsel.Course.Domain.Models.QueryModels.Ruby;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/ruby")]
@@ -54,6 +55,20 @@ namespace Fsel.Course.Lcms.Api.Controllers
         public async Task<IActionResult> Render([FromQuery] RenderRubyQuery command)
         {
             MethodResult<object> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get ruby by objectId
+        /// </summary>
+        /// <param name="objectId"></param>
+        /// <returns></returns>
+        [HttpGet("{objectId}")]
+        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Render([FromRoute] Guid objectId)
+        {
+            MethodResult<RubyResponseModel> commandResult = await _mediator.Send(new RubyResponseQuery { ObjectId = objectId}).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
