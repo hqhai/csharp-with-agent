@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Services.RubyService
+namespace Fsel.Course.Application.Services.RubyService
 {
     using Fsel.Course.Domain.Entities;
 

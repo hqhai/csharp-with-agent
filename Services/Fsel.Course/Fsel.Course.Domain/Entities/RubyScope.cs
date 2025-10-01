@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Enums;
 
     public class RubyScope : Entity
     {
@@ -12,17 +13,17 @@ namespace Fsel.Course.Domain.Entities
         /// Enity chứa nội dung
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? HostType { get; set; }
+        public EnumObjectType ObjectType { get; set; }
         /// <summary>
         /// Id của nội dung cần gán 
         /// </summary>
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid HostId { get; set; }
+        public Guid ObjectId { get; set; }
         /// <summary>
         /// Loại nội dung 
         /// </summary>
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public string? FieldKey { get; set; }
+        //[Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
+        //public string? FieldKey { get; set; }
         /// <summary>
         /// Nội dung cần gán
         /// </summary>
@@ -31,12 +32,12 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>
         /// Độ dài đoạn text
         /// </summary>
-        public int? BaseLengthGraphemes { get; set; }
+        public int? LengthGraphemes { get; set; }
         /// <summary>
         /// Tránh đồng bị khi nhiều người chỉnh sửa
         /// </summary>
-        [Timestamp]
-        public byte[] RowVersion { get; set; } = default!;
+        //[Timestamp]
+        //public byte[] RowVersion { get; set; } = default!;
         public ICollection<RubyAnnotation> RubyAnnotations { get; set; } = new List<RubyAnnotation>();
     }
 }

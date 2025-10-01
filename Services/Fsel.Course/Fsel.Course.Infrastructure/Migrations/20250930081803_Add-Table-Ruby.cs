@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Add_Table_Ruby : Migration
+    public partial class AddTableRuby : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,12 +26,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    HostType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    HostId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FieldKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ObjectType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    ObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Text = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BaseLengthGraphemes = table.Column<int>(type: "int", nullable: true),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: false)
+                    LengthGraphemes = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -55,14 +53,10 @@ namespace Fsel.Course.Infrastructure.Migrations
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     RubyScopeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     LanguageType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    SelectedText = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Phonetic = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StartGraphemeIndex = table.Column<int>(type: "int", nullable: false),
-                    LengthGraphemes = table.Column<int>(type: "int", nullable: false),
-                    RowVersion = table.Column<byte[]>(type: "rowversion", rowVersion: true, nullable: true),
-                    PrefixContext = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SuffixContext = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Position = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    SelectedText = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    TextNote = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    StartGrapheme = table.Column<int>(type: "int", nullable: false),
+                    LengthNote = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,9 +75,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                 columns: new[] { "RubyScopeId", "SelectedText" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_RubyAnnotations_RubyScopeId_StartGraphemeIndex",
+                name: "IX_RubyAnnotations_RubyScopeId_StartGrapheme",
                 table: "RubyAnnotations",
-                columns: new[] { "RubyScopeId", "StartGraphemeIndex" });
+                columns: new[] { "RubyScopeId", "StartGrapheme" });
         }
 
         /// <inheritdoc />

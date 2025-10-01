@@ -8,11 +8,10 @@ namespace Fsel.Course.Domain.Models.QueryModels.Ruby
     public class RubyAnnotaionModel
     {
         public Guid Id { get; set; }
-        public int StartGraphemeIndex { get; set; }
-        public int LengthGraphemes { get; set; }
+        public int StartGrapheme { get; set; }
+        public int LengthNote { get; set; }
         public string? SelectedText { get; set; }
-        public string? Phonetic { get; set; }
+        public string? TextNote { get; set; }
         public EnumLanguageType LanguageType { get; set; }
-        public byte Position { get; set; }
     }
 }
