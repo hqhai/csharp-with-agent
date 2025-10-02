@@ -293,9 +293,12 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
                 return methodResult;
             }
 
-            if (!isUpdate)
+            var classForum = await _classForumRepository.Queryable
+                                                        .Where(x => x.OriginalId == request.OriginalId && x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                        .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+            if (classForum == null)
             {
-                var classForum = ClassForumFactory.Create(request.ClassForum).Build(version: 0, originalId: Guid.NewGuid());
+                classForum = ClassForumFactory.Create(request.ClassForum).Build(version: 0, originalId: Guid.NewGuid());
                 if (!classForum.IsValid())
                 {
                     methodResult.AddErrorBadRequest(classForum.ErrorMessages);
@@ -313,15 +316,6 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
             }
             else
             {
-                var classForum = await _classForumRepository.Queryable
-                                                            .Where(x => x.OriginalId == request.OriginalId && x.VersionStatus == EnumVersionStatus.LastVersion)
-                                                            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
-                if (classForum == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
-                    return methodResult;
-                }
-
                 var newVersionClassForum = ClassForumFactory.Create(request.ClassForum).Build(version: 0, originalId: Guid.NewGuid());
                 if (!newVersionClassForum.IsValid())
                 {
@@ -333,24 +327,24 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
                 async (_, entity) => isNewVersion,
                 async (oldEntity, newEntity) =>
                 {
-                    oldEntity.PromptName = oldEntity.PromptName;
-                    oldEntity.GradingStyle = oldEntity.GradingStyle;
-                    oldEntity.TaggetWordLimit = oldEntity.TaggetWordLimit;
-                    oldEntity.TaggetTimeLimit = oldEntity.TaggetTimeLimit;
-                    oldEntity.MediaPost = oldEntity.MediaPost;
-                    oldEntity.IsAlFeedBack = oldEntity.IsAlFeedBack;
-                    oldEntity.SystemRoleAlConfig = oldEntity.SystemRoleAlConfig;
-                    oldEntity.UserAlConfig = oldEntity.UserAlConfig;
-                    oldEntity.SettingModel = oldEntity.SettingModel;
-                    oldEntity.Layout = oldEntity.Layout;
-                    oldEntity.SkillId = oldEntity.SkillId;
-                    oldEntity.ProgramId = oldEntity.ProgramId;
-                    oldEntity.SettingTemperature = oldEntity.SettingTemperature;
-                    oldEntity.SettingWordMaxLength = oldEntity.SettingWordMaxLength;
-                    oldEntity.SettingTopP = oldEntity.SettingTopP;
-                    oldEntity.SettingFrequecy = oldEntity.SettingFrequecy;
-                    oldEntity.SettingPresence = oldEntity.SettingPresence;
-                    oldEntity.ClassForumFiles = oldEntity.ClassForumFiles;
+                    oldEntity.PromptName = newEntity.PromptName;
+                    oldEntity.GradingStyle = newEntity.GradingStyle;
+                    oldEntity.TaggetWordLimit = newEntity.TaggetWordLimit;
+                    oldEntity.TaggetTimeLimit = newEntity.TaggetTimeLimit;
+                    oldEntity.MediaPost = newEntity.MediaPost;
+                    oldEntity.IsAlFeedBack = newEntity.IsAlFeedBack;
+                    oldEntity.SystemRoleAlConfig = newEntity.SystemRoleAlConfig;
+                    oldEntity.UserAlConfig = newEntity.UserAlConfig;
+                    oldEntity.SettingModel = newEntity.SettingModel;
+                    oldEntity.Layout = newEntity.Layout;
+                    oldEntity.SkillId = newEntity.SkillId;
+                    oldEntity.ProgramId = newEntity.ProgramId;
+                    oldEntity.SettingTemperature = newEntity.SettingTemperature;
+                    oldEntity.SettingWordMaxLength = newEntity.SettingWordMaxLength;
+                    oldEntity.SettingTopP = newEntity.SettingTopP;
+                    oldEntity.SettingFrequecy = newEntity.SettingFrequecy;
+                    oldEntity.SettingPresence = newEntity.SettingPresence;
+                    oldEntity.ClassForumFiles = newEntity.ClassForumFiles;
                     await Task.Yield();
                 });
 
