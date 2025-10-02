@@ -248,6 +248,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                 return methodResult;
             }
 
+            if (!students.Any())
+            {
+                methodResult.AddErrorBadRequest(ErrorMassageSetting.FileNull);
+                return methodResult;
+            }
+
             var platform = await _platformRepository.GetPlatformAsync(EnumPlatformCode.LMS, cancellationToken);
             if (platform == null)
             {

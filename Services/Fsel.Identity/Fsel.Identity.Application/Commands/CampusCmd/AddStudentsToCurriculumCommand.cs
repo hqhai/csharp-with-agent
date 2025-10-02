@@ -17,6 +17,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models;
     using Fsel.Identity.Domain.Models.CommandModels.Campus;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using Kros.Extensions;
     using MediatR;
@@ -200,6 +201,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             {
                 methodResult.Result = new AddStudentIntoSchoolClassCommandModel() { Stream = result.Stream };
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                return methodResult;
+            }
+
+            if (!students.Any())
+            {
+                methodResult.AddErrorBadRequest(ErrorMassageSetting.FileNull);
                 return methodResult;
             }
 
