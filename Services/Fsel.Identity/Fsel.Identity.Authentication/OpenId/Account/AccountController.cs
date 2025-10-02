@@ -3,6 +3,8 @@
 
 using System.Globalization;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Transactions;
 using Fsel.Common.Constants;
@@ -21,6 +23,7 @@ using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.OpenId;
+using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using Fsel.Shared.Helpers;
@@ -67,6 +70,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly IStringLocalizer _localizer;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly AppSetting _appSetting;
         private readonly ITenantProvider _tenantProvider;
 
         public AccountController(
@@ -90,6 +95,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             IStudentRepository studentRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
             ICompetitionEventsRepository competitionEventsRepository,
+            IHttpClientFactory httpClientFactory,
+            AppSetting appSetting,
             ITenantProvider tenantProvider)
         {
             UserSession = userSession;
@@ -112,6 +119,8 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _studentRepository = studentRepository;
             _competitionEventsRepository = competitionEventsRepository;
+            _httpClientFactory = httpClientFactory;
+            _appSetting = appSetting;
             _tenantProvider = tenantProvider;
         }
 
@@ -439,7 +448,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             if (vm.IsExternalLoginOnly)
             {
-                // we only have one option for logging in and it's an external provider
                 return RedirectToAction("Challenge", "External", new { scheme = vm.ExternalLoginScheme, returnUrl });
             }
             return View(vm);
@@ -627,20 +635,32 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
         public async Task<IActionResult> ExternalLoginAsync(string provider, string? returnUrl = null)
         {
-            var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), new { returnUrl });
-
-            AuthenticationProperties properties;
-            if (provider == LoginProvider.Zalo)
+            if (string.Equals(provider, LoginProvider.VnEdu, StringComparison.Ordinal))
             {
-                properties = new AuthenticationProperties
-                {
-                    RedirectUri = redirectUrl,
-                };
-                properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            }
+                var origin = Request.Host.Value;
+                var scheme = Request.Scheme;
+                var redirectUrl = $"{scheme}://{origin}{Url.Action(nameof(VnEduExternalLoginConfirmation), new { returnUrl })}";
 
-            properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
-            return Challenge(properties, provider);
+                return this.RedirectWithQuery(_appSetting.Authentication.VnEdu.Endpoint,
+                    new { app_id = _appSetting.Authentication.VnEdu.AppId, @continue = redirectUrl }, isEndcode: false);
+            }
+            else
+            {
+                var redirectUrl = Url.Action(nameof(ExternalLoginConfirmation), new { returnUrl });
+
+                AuthenticationProperties properties;
+                if (provider == LoginProvider.Zalo)
+                {
+                    properties = new AuthenticationProperties
+                    {
+                        RedirectUri = redirectUrl,
+                    };
+                    properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+                }
+
+                properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+                return Challenge(properties, provider);
+            }
         }
 
         public IActionResult ExternalConnect(string provider, string? returnUrl = null)
@@ -786,6 +806,68 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
                 TempData[nameof(ExternalLoginModel)] = externalLogin.Serialize();
                 return View(nameof(ExternalLoginConfirmation), externalLogin);
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VnEduExternalLoginConfirmation(string token, string info, string? returnUrl = null)
+        {
+            try
+            {
+                var salt = _appSetting?.Authentication?.VnEdu?.ClientSecret ?? "";
+                if (!string.Equals(token, (salt + info).GetMd5Hash(), StringComparison.OrdinalIgnoreCase))
+                {
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_auth_fail"]);
+                    return View("~/Views/Account/Login.cshtml", new LoginViewModel { EnableLocalLogin = true });
+                }
+
+                string infoString = Encoding.UTF8.GetString(Convert.FromBase64String(info));
+                using var doc = JsonDocument.Parse(infoString);
+                var keyLogin = doc.RootElement.GetProperty("key_login").GetString();
+
+                var httpClient = _httpClientFactory.CreateClient();
+                var response = await httpClient.GetAsync($"{_appSetting.Authentication.VnEdu.Endpoint}/?call=auth.getInfo&key_login={keyLogin}");
+                if (response?.IsSuccessStatusCode != true)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_auth_fail"]);
+                    return View("~/Views/Account/Login.cshtml", new LoginViewModel { EnableLocalLogin = true });
+                }
+
+                var contentString = await response.Content.ReadAsStringAsync();
+                var studentData = JsonSerializer.Deserialize<VnEduUserInfoResponse>(contentString)?.Data;
+
+                if (studentData?.UserName == null)
+                {
+                    ModelState.AddModelError(string.Empty, _localizer["i18n_auth_fail"]);
+                    return View("~/Views/Account/Login.cshtml", new LoginViewModel { EnableLocalLogin = true });
+                }
+
+                var signInResult = await _signInManager.ExternalLoginSignInAsync(LoginProvider.VnEdu, studentData.UserName, isPersistent: false, bypassTwoFactor: true);
+                if (signInResult.Succeeded)
+                {
+                    return Redirect(returnUrl.ToSafeString("~/"));
+                }
+
+                var user = await _userRepository.Queryable.FirstOrDefaultAsync(x => x.UserName == studentData.UserName);
+                if (user != null)
+                {
+                    var externalUserLoginInfo = new UserLoginInfo(LoginProvider.VnEdu, studentData.UserName, LoginProvider.VnEdu);
+
+                    var result = await _userManager.AddLoginAsync(user, externalUserLoginInfo);
+                    if (result.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: true);
+                        return Redirect(returnUrl.ToSafeString("~/"));
+                    }
+                }
+
+                ModelState.AddModelError(string.Empty, _localizer["i18n_user_not_exist"]);
+                return View("~/Views/Account/Login.cshtml", new LoginViewModel { EnableLocalLogin = true });
+            }
+            catch
+            {
+                ModelState.AddModelError(string.Empty, _localizer["i18n_auth_fail"]);
+                return View("~/Views/Account/Login.cshtml", new LoginViewModel { EnableLocalLogin = true });
             }
         }
 
