@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -57,9 +58,15 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            if (request.StartDate < currentDate || request.StartDate > request.EndDate || request.StartDate < curriculum.StartDate || request.EndDate > curriculum.EndDate)
+            if (request.StartDate < currentDate || request.StartDate > request.EndDate)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.StartDate), request.StartDate);
+                methodResult.AddErrorBadRequest(nameof(EnumCurriculumErrorCode.StartDateCannotBeInThePast), nameof(request.StartDate), request.StartDate);
+                return methodResult;
+            }
+
+            if (request.StartDate < curriculum.StartDate || request.EndDate > curriculum.EndDate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCurriculumErrorCode.TimeMustBeWithinCurriculumPeriod), nameof(request.StartDate), request.StartDate);
                 return methodResult;
             }
 
