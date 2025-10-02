@@ -22,12 +22,12 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
             migrationBuilder.Sql(@"
             UPDATE dbo.ExamPracticeScores
             SET Criteria = CASE Criteria
-                WHEN 1 THEN 'FluencyAndCoherence'
-                WHEN 2 THEN 'LexicalResource'
-                WHEN 3 THEN 'GrammaticalRangeAndAccuracy'
-                WHEN 4 THEN 'Pronunciation'
-                WHEN 5 THEN 'DiscourseManagement'
-                WHEN 6 THEN 'Vocabulary'
+                WHEN 0 THEN 'FluencyAndCoherence'
+                WHEN 1 THEN 'LexicalResource'
+                WHEN 2 THEN 'GrammaticalRangeAndAccuracy'
+                WHEN 3 THEN 'Pronunciation'
+                WHEN 4 THEN 'DiscourseManagement'
+                WHEN 5 THEN 'Vocabulary'
                 ELSE Criteria   -- nếu có dữ liệu ngoài dải, tạm giữ nguyên (có thể đổi thành giá trị mặc định nếu muốn)
             END");
         }
@@ -47,12 +47,12 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
             migrationBuilder.Sql(@"
             UPDATE dbo.ExamPracticeScores
             SET Criteria = CASE
-                WHEN Criteria = N'FluencyAndCoherence'          THEN N'1'
-                WHEN Criteria = N'LexicalResource'              THEN N'2'
-                WHEN Criteria = N'GrammaticalRangeAndAccuracy'  THEN N'3'
-                WHEN Criteria = N'Pronunciation'                THEN N'4'
-                WHEN Criteria = N'DiscourseManagement'          THEN N'5'
-                WHEN Criteria = N'Vocabulary'                   THEN N'6'
+                WHEN Criteria = N'FluencyAndCoherence'          THEN N'0'
+                WHEN Criteria = N'LexicalResource'              THEN N'1'
+                WHEN Criteria = N'GrammaticalRangeAndAccuracy'  THEN N'2'
+                WHEN Criteria = N'Pronunciation'                THEN N'3'
+                WHEN Criteria = N'DiscourseManagement'          THEN N'4'
+                WHEN Criteria = N'Vocabulary'                   THEN N'5'
                 ELSE Criteria
             END;");
         }
