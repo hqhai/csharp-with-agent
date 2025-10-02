@@ -9,7 +9,7 @@ namespace Fsel.Shared.Helpers
 
     public static class ControllerHelper
     {
-        public static RedirectResult RedirectWithQuery(this Controller controller, string url, object queryParams)
+        public static ActionResult RedirectWithQuery(this Controller controller, string url, object queryParams, bool isEndcode = true)
         {
             if (queryParams == null)
             {
@@ -27,12 +27,18 @@ namespace Fsel.Shared.Helpers
             }
 
             // Build query string
+
             var query = string.Join("&", queryDict.Select(kvp =>
                 $"{HttpUtility.UrlEncode(kvp.Key)}={HttpUtility.UrlEncode(kvp.Value)}"));
 
+            if (!isEndcode)
+            {
+                query = string.Join("&", queryDict.Select(kvp =>
+                $"{kvp.Key}={kvp.Value}"));
+            }
+
             var separator = url.Contains("?") ? "&" : "?";
             var finalUrl = $"{url}{separator}{query}";
-
             return controller.Redirect(finalUrl);
         }
     }
