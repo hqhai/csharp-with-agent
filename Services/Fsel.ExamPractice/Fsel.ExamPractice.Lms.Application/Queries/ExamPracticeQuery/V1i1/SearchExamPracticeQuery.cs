@@ -116,7 +116,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                 ExamPracticeResult = x.ExamPracticeResults.FirstOrDefault(y => y.StudentId == student.Id && y.ExamPracticeId == x.Id && y.WorkingStatus == EnumWorkingStatus.Active),
             });
             int totalItem = await queryTest.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await queryTest.OrderBy(x => x.ExamPractice.Name)
+            var lists = await queryTest.OrderBy(x => x.ExamPractice.Code)
                                        .ApplyPaging(request)
                                        .AsNoTracking()
                                        .ToListAsync(cancellationToken: cancellationToken)
