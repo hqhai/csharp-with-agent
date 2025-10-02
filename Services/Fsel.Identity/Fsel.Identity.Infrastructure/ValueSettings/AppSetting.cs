@@ -99,6 +99,8 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public Zalo? Zalo { get; set; }
 
         public Apple? Apple { get; set; }
+
+        public VnEdu? VnEdu { get; set; }
     }
 
     public class Google
@@ -149,5 +151,14 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? PrivateKey { get; set; }
 
         public string? Callback { get; set; }
+    }
+
+    public class VnEdu
+    {
+        public string? Endpoint { get; set; }
+
+        public string? AppId { get; set; }
+
+        public string? ClientSecret { get; set; }
     }
 }

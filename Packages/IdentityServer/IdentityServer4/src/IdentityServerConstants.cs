@@ -215,6 +215,7 @@ namespace IdentityServer4
             public const string Facebook = "Facebook";
             public const string Zalo = "Zalo";
             public const string Apple = "Apple";
+            public const string VnEdu = "VnEdu";
         }
     }
 }
