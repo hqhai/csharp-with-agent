@@ -61,7 +61,7 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
                 }
                 else if (Status == EnumStudentCampusLearningStatus.InProgress)
                 {
-                    return $"{EnumStudentCampusLearningStatus.InProgress.GetDescription()} - {LessonName}";
+                    return EnumStudentCampusLearningStatus.InProgress.GetDescription();
                 }
                 else
                 {
@@ -70,7 +70,6 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
             }
         }
 
-        public string? LessonName { get; set; }
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public string? CourseName { get; set; }

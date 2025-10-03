@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             var lessonResultEntities = await _lessonResultRepository.Queryable.WhereBulkContains(request.StudentIds, p => p.StudentId).ToListAsync(cancellationToken);
 
-            var courses = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests).ThenInclude(p => p.Unit).ThenInclude(p => p.UnitLessons).ThenInclude(p => p.Lesson).ToListAsync(cancellationToken);
+            var courses = await _courseRepository.Queryable.Include(p => p.CourseUnitMockTests).ThenInclude(p => p.Unit).ThenInclude(p => p.UnitLessons).ToListAsync(cancellationToken);
 
             var courseResultEntities = await _courseResultRepository.Queryable.WhereBulkContains(request.StudentIds, p => p.StudentId).ToListAsync(cancellationToken);
 
@@ -92,11 +92,6 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                             .Where(x => x.StudentId == p && x.CourseId == c.Curriculum.CourseCloneId)
                             .ToList();
 
-                        var lessonResult = lessonResults
-                            .Where(x => x.Status != EnumResultStatus.Unfinished)
-                            .OrderByDescending(r => r.CreatedDate)
-                            .FirstOrDefault();
-
                         var course = courses.FirstOrDefault(x => x.Id == c.Curriculum.CourseCloneId);
 
                         var courseResult = courseResultEntities
@@ -115,37 +110,17 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                         }
                         else
                         {
-                            if (courseResult == null || lessonResult == null)
-                            {
-                                studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.InProgress;
-                                studentCampusLearningModel.LessonName = course?.CourseUnitMockTests
-                                    .Where(u => u.Unit != null)
-                                    .OrderBy(u => u.Number)
-                                    .Select(u => u.Unit)
-                                    .FirstOrDefault()?
-                                    .UnitLessons.OrderBy(l => l.DisplayOrder)
-                                    .FirstOrDefault()?.Lesson?.Name;
-                            }
-                            else if (courseResult.Status == EnumResultStatus.Done)
+                            if (courseResult != null && courseResult.Status == EnumResultStatus.Done)
                             {
                                 studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.Completed;
                             }
                             else
                             {
-                                var lesson = course?.CourseUnitMockTests
-                                    .Where(u => u.Unit != null)
-                                    .Select(u => u.Unit)
-                                    .Where(u => u.UnitLessons.Any())
-                                    .SelectMany(u => u.UnitLessons)
-                                    .FirstOrDefault(x => x.LessonId == lessonResult.LessonId)?.Lesson;
-
-                                studentCampusLearningModel.LessonName = lesson?.Name;
                                 studentCampusLearningModel.Status = EnumStudentCampusLearningStatus.InProgress;
                             }
                         }
 
-                        studentCampusLearningModel.TotalLessonDone = lessonResults
-                            .Count(x => x.StudentId == p && x.Status == EnumResultStatus.Done);
+                        studentCampusLearningModel.TotalLessonDone = lessonResults.Count(x => x.Status == EnumResultStatus.Done);
 
                         studentCampusLearningModel.TotalLesson = totalLesson ?? 0;
 
