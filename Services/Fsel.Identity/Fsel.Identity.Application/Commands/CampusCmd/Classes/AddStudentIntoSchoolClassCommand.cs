@@ -196,7 +196,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
                 }
-                if (students.Contains(x))
+                if (students.Select(p => p.Email).Contains(x.Email))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.DataAlreadyExistInListVN });
                 }

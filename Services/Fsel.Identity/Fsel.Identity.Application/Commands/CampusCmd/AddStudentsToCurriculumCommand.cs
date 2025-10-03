@@ -153,7 +153,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Username), Message = EmptyUserName });
                 }
-                if (students.Contains(x))
+                if (students.Select(p => p.Username).Contains(x.Username))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Username), Message = DuplicateData });
                 }
