@@ -54,7 +54,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                 }
                 if (examPracticeSection.Questions != null && examPracticeSection.Questions.Any())
                 {
-                    HanderSubQuestionIndexQuestion(examPracticeSection.Questions);
+                    HanderSubQuestionIndexQuestion(examPracticeSection.Questions.OrderBy(x => x.DisplayOrder).ToList());
                     examPracticeSection.SubQuestionIndexs = RangeInclusive(numberQuestion, _countQuestion);
                 }
             }
