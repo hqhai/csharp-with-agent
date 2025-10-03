@@ -70,9 +70,9 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                     query = query.Where(p => !string.IsNullOrEmpty(p.FullName) && p.FullName.Contains(request.Keyword));
                 }
             }
-            if (request.SchoolClassId.HasValue)
+            if (request.SchoolClassIds != null && request.SchoolClassIds.Any())
             {
-                query = query.Where(p => p.SchoolClassId == request.SchoolClassId);
+                query = query.Where(p => p.SchoolClassId.HasValue && request.SchoolClassIds.Contains(p.SchoolClassId.Value));
             }
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
