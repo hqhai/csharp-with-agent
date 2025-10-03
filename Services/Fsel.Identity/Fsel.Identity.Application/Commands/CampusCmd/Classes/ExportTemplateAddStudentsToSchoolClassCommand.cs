@@ -49,8 +49,9 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
             int row = 2;
 
             worksheet.Cells[row, 1].Value = "Nguyễn Văn A";
-            worksheet.Cells[row, 2].Value = "nguyenvana@gmail.com";
-            worksheet.Cells[row, 3].Value = "01-01-2025";
+            worksheet.Cells[row, 2].Value = string.Empty;
+            worksheet.Cells[row, 3].Value = "nguyenvana@gmail.com";
+            worksheet.Cells[row, 4].Value = "01-01-2025";
 
             var output = new MemoryStream();
             package.SaveAs(output);
