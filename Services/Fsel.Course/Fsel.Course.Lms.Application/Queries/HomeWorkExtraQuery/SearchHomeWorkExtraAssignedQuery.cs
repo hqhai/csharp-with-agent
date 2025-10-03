@@ -173,7 +173,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             var isDone = status == EnumResultStatus.Done;
 
             // Đã hoàn thành và có thời điểm cập nhật
-            if (isDone && updatedDate is DateTime doneAt)
+            if (isDone && updatedDate is DateTime doneAt && now >= deadline)
             {
                 return doneAt.AddHours(7) <= deadline ? EnumExpiryState.ExpiredMetTarget : EnumExpiryState.ExpiredUnmetTarget;  // Hoàn thành muộn
             }
