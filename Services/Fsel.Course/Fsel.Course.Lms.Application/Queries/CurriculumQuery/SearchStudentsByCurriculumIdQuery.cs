@@ -54,7 +54,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             {
                 SchoolClassId = request.SchoolClassId,
                 Keyword = request.Keyword,
-                StudentIds = studentIds
+                StudentIds = studentIds,
+                Page = request.Page,
+                PageSize = request.PageSize
             });
 
             var students = studentResults.Content?.Result;
