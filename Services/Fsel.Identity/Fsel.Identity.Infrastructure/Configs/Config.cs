@@ -67,7 +67,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lms-dev.fsel.edu.vn",
                         "http://lms-dev.fsel.edu.vn",
                         "https://lms-dev-tenant-1.fsel.edu.vn",
-                        "http://lms-dev-tenant-1.fsel.edu.vn"
+                        "http://lms-dev-tenant-1.fsel.edu.vn",
                         "https://lms-dev-ufm.fsel.edu.vn",
                         "http://lms-dev-ufm.fsel.edu.vn"
                     },
@@ -84,7 +84,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lms-dev.fsel.edu.vn/auth/login",
                         "http://lms-dev.fsel.edu.vn/auth/login",
                         "https://lms-dev-tenant-1.fsel.edu.vn/auth/login",
-                        "http://lms-dev-tenant-1.fsel.edu.vn/auth/login"
+                        "http://lms-dev-tenant-1.fsel.edu.vn/auth/login",
                         "https://lms-dev-ufm.fsel.edu.vn/auth/login",
                         "http://lms-dev-ufm.fsel.edu.vn/auth/login"
                     },
@@ -131,7 +131,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-web-dev.fsel.edu.vn",
                         "https://lcms-web-dev.fsel.edu.vn",
                         "http://lcms-web-dev-tenant-1.fsel.edu.vn",
-                        "https://lcms-web-dev-tenant-1.fsel.edu.vn"
+                        "https://lcms-web-dev-tenant-1.fsel.edu.vn",
                         "http://lcms-web-dev-ufm.fsel.edu.vn",
                         "https://lcms-web-dev-ufm.fsel.edu.vn"
                     },
@@ -142,7 +142,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-web-dev.fsel.edu.vn",
                         "https://lcms-web-dev.fsel.edu.vn",
                         "http://lcms-web-dev-tenant-1.fsel.edu.vn",
-                        "https://lcms-web-dev-tenant-1.fsel.edu.vn"
+                        "https://lcms-web-dev-tenant-1.fsel.edu.vn",
                         "http://lcms-web-dev-ufm.fsel.edu.vn",
                         "https://lcms-web-dev-ufm.fsel.edu.vn"
                     },
@@ -185,7 +185,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-admin-dev.fsel.edu.vn",
                         "https://lms-admin-dev.fsel.edu.vn",
                         "http://lms-admin-dev-tenant-1.fsel.edu.vn",
-                        "https://lms-admin-dev-tenant-1.fsel.edu.vn"
+                        "https://lms-admin-dev-tenant-1.fsel.edu.vn",
                         "http://lms-admin-dev-ufm.fsel.edu.vn",
                         "https://lms-admin-dev-ufm.fsel.edu.vn"
                     },
@@ -196,7 +196,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-admin-dev.fsel.edu.vn",
                         "https://lms-admin-dev.fsel.edu.vn",
                         "http://lms-admin-dev-tenant-1.fsel.edu.vn",
-                        "https://lms-admin-dev-tenant-1.fsel.edu.vn"
+                        "https://lms-admin-dev-tenant-1.fsel.edu.vn",
                         "http://lms-admin-dev-ufm.fsel.edu.vn",
                         "https://lms-admin-dev-ufm.fsel.edu.vn"
                     },
