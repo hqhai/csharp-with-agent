@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                         var curriculumStudent = currentCurriculums.FirstOrDefault(x => x.CurriculumStudent.StudentId == p.Id);
                         if (curriculumStudent != null)
                         {
-                            var otherCurriculumStudent = query.Where(x => x.CurriculumStudent.Id != curriculumStudent.CurriculumStudent.Id && x.CurriculumStudent.StudentId == curriculumStudent.CurriculumStudent.StudentId).OrderByDescending(x => x.Curriculum.EndDate).FirstOrDefault();
+                            var otherCurriculumStudent = query.Where(x => x.CurriculumStudent.Id != curriculumStudent.CurriculumStudent.Id && x.CurriculumStudent.StudentId == curriculumStudent.CurriculumStudent.StudentId).OrderByDescending(x => x.CurriculumStudent.CreatedDate).FirstOrDefault();
 
                             updateExpiredDateModels.Add(new UpdateExpiredDateForStudentsCampusCommandModel()
                             {
