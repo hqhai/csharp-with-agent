@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
     public class GetCurriculumsByStudentIdQuery : IRequest<MethodResult<IList<CurriculumModel>>>
     {
         public Guid StudentId { get; set; }
-        public EnumCurriculumStatus? Status { get; set; }
+        public IList<EnumCurriculumStatus>? Status { get; set; }
         public bool? IsDone { get; set; }
         public bool? IsFilter { get; set; }
         public Guid? UserId { get; set; }
@@ -73,9 +73,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                                    CourseClone = cc
                                }).ToListAsync(cancellationToken);
 
-            if (request.Status.HasValue)
+            if (request.Status != null && request.Status.Any())
             {
-                query = query.Where(p => p.Curriculum.CurriculumStatus == request.Status).ToList();
+                query = query.Where(p => request.Status.Contains(p.Curriculum.CurriculumStatus)).ToList();
             }
 
             var courseIds = query.Select(p => p.CourseClone.Id).ToList();

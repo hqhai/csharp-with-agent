@@ -6,16 +6,16 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Campus
 
     public class AddStudentsToSchoolClassModel
     {
-        [EpplusTableColumn(Header = "Họ và tên")]
+        [EpplusTableColumn(Header = "Full Name\n(Họ và tên)")]
         public string? FullName { get; set; }
 
-        [EpplusTableColumn(Header = "Số điện thoại")]
+        [EpplusTableColumn(Header = "Phone Number\n(Số điện thoại)")]
         public string? PhoneNumber { get; set; }
 
-        [EpplusTableColumn(Header = "Email")]
+        [EpplusTableColumn(Header = "Email\n(Hòm thư điện tử)")]
         public string? Email { get; set; }
 
-        [EpplusTableColumn(Header = "Ngày sinh")]
+        [EpplusTableColumn(Header = "Date Of Birth\n(Ngày sinh)")]
         public DateTime DateOfBirth { get; set; }
     }
 }
