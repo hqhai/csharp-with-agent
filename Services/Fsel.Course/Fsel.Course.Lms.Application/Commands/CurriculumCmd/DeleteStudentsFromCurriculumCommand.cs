@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
             {
                 if (p.CourseId.HasValue)
                 {
-                    if (p.CourseId.Value == curriculum.Curriculum.CourseId)
+                    if (p.CourseId.Value == curriculum.Curriculum.CourseCloneId)
                     {
                         var curriculumStudent = currentCurriculums.FirstOrDefault(x => x.CurriculumStudent.StudentId == p.Id);
                         if (curriculumStudent != null)
@@ -115,7 +115,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                             updateCourseIdModels.Add(new DeleteClassStudentsFromCurriculumCommandModel()
                             {
                                 StudentId = p.Id,
-                                NewCourseId = otherCurriculumStudent != null ? otherCurriculumStudent.Curriculum.CourseId : null,
+                                NewCourseId = otherCurriculumStudent != null ? otherCurriculumStudent.Curriculum.CourseCloneId : null,
                                 CourseCode = otherCurriculumStudent != null ? otherCurriculumStudent.Course.Code : null,
                                 CourseLevel = otherCurriculumStudent != null ? otherCurriculumStudent.Course.CourseLevel : null,
                                 IsUpdateStudent = true,
@@ -169,15 +169,21 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 await _curriculumStudentRepository.DeleteListAsync(currentCurriculums.Select(p => p.CurriculumStudent).ToList());
                 await _curriculumRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                await _courseResultRepository.BulkMergeAsync(createCourseResults, bulk =>
+                if (createCourseResults.Any())
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
-                });
+                    await _courseResultRepository.BulkMergeAsync(createCourseResults, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
+                    });
+                }
 
-                await _courseResultRepository.BulkUpdateList(updateCourseResults, bulk =>
+                if (updateCourseResults.Any())
                 {
-                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
-                });
+                    await _courseResultRepository.BulkUpdateList(updateCourseResults, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                    });
+                }
 
                 var deleteClassesResults = await _trainingService.DeleteClassStudents(new DeleteClassStudentsFromCurriculumCommandModels()
                 {
