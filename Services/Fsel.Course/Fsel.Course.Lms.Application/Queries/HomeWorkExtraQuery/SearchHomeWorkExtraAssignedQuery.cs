@@ -239,6 +239,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 {
                     continue;
                 }
+                item.CorrectCount = result.CorrectCount;
 
                 answers.TryGetValue(result.Id, out var listAnswer);
                 if (listAnswer == null || !listAnswer.Any())
@@ -247,11 +248,6 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
                 }
                 item.CountQuestion = listAnswer.Count;
                 item.ProgressPercent = NumberHelper.GetPercent(item.CountQuestion, item.TotalQuestion);
-
-                if (result.Status == EnumResultStatus.Done)
-                {
-                    item.CorrectCount = listAnswer.Sum(x => x.CorrectCount);
-                }
             }
         }
 
