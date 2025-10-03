@@ -43,6 +43,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
         private const string EmptyUserName = "Chưa nhập tên tài khoản";
         private const string DuplicateData = "Tên tài khoản trùng lặp trong file tải lên";
         private const string DataNotExist = "Tên tài khoản không tồn tại trên hệ thống";
+        private const string MismatchedData = "Dữ liệu không trùng khớp";
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
 
         public AddStudentsToCurriculumCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService)
@@ -171,7 +172,9 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             {
                 var emails = datas.Values.Where(p => p.Username != null && !string.IsNullOrEmpty(p.Username.Trim())).Select(n => n.Username?.Trim() ?? string.Empty);
 
-                var usernamesAlreadyExist = await _userManager.Users.Where(x => emails.Contains(x.UserName)).Select(p => p.UserName).ToListAsync(cancellationToken);
+                var users = await _userManager.Users.Where(x => emails.Contains(x.UserName)).ToListAsync(cancellationToken);
+
+                var usernamesAlreadyExist = users.Select(p => p.UserName).ToList();
 
                 var usernamesDoesNotExist = emails.Where(p => !usernamesAlreadyExist.Contains(p)).ToList();
 
@@ -182,6 +185,16 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Username), Message = DataNotExist });
+                    }
+                });
+
+                users.ForEach(user =>
+                {
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user.UserName) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.UserName.ToLower(CultureInfo.CurrentCulture)));
+                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.CurrentCulture) != user.FullName?.ToLower(CultureInfo.CurrentCulture))
+                    {
+                        var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
+                        errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Username), Message = MismatchedData });
                     }
                 });
 

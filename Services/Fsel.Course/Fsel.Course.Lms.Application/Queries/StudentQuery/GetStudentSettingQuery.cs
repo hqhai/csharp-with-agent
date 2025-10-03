@@ -91,6 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             if (!string.IsNullOrEmpty(role) && role == EnumRole.StudentCampus.ToString())
             {
                 settingStudentModel.IsLockPT = true;
+                settingStudentModel.IsPlacementTest = true;
             }
             else
             {

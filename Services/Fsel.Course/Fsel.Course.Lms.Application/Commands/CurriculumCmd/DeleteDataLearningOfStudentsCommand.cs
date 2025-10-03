@@ -34,14 +34,15 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 return methodResult;
             }
 
-            foreach (var user in request.UserIds)
-            {
-                await _mediator.Send(new ResetCurriculumByStudentCommand()
-                {
-                    UserId = user,
-                    CourseId = request.CourseId
-                }, cancellationToken);
-            }
+            var tasks = request.UserIds.Select(user =>
+                                    _mediator.Send(new ResetCurriculumByStudentCommand
+                                    {
+                                        UserId = user,
+                                        CourseId = request.CourseId
+                                    }, cancellationToken)
+                                );
+
+            await Task.WhenAll(tasks);
 
             return methodResult;
         }

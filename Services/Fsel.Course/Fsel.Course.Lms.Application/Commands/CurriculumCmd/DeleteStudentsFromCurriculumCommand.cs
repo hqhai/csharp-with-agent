@@ -9,9 +9,12 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -30,9 +33,10 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
         private readonly IUserService _userService;
         private readonly ICourseRepository _courseRepository;
         private readonly ITrainingService _trainingService;
+        private readonly ICourseResultRepository _courseResultRepository;
         private readonly IMediator _mediator;
 
-        public DeleteStudentsFromCurriculumCommandHandler(ICurriculumRepository curriculumRepository, ICurriculumStudentRepository curriculumStudentRepository, IUserService userService, ICourseRepository courseRepository, ITrainingService trainingService, IMediator mediator)
+        public DeleteStudentsFromCurriculumCommandHandler(ICurriculumRepository curriculumRepository, ICurriculumStudentRepository curriculumStudentRepository, IUserService userService, ICourseRepository courseRepository, ITrainingService trainingService, IMediator mediator, ICourseResultRepository courseResultRepository)
         {
             _curriculumRepository = curriculumRepository;
             _curriculumStudentRepository = curriculumStudentRepository;
@@ -40,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
             _courseRepository = courseRepository;
             _trainingService = trainingService;
             _mediator = mediator;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteStudentsFromCurriculumCommand request, CancellationToken cancellationToken)
@@ -128,10 +133,51 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 }
             });
 
+            var studentIds = updateCourseIdModels.Where(p => p.IsUpdateStudent).Select(p => p.StudentId).ToList();
+
+            var courseResults = await _courseResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).ToListAsync(cancellationToken);
+
+            var createCourseResults = new List<CourseResult>();
+            var updateCourseResults = new List<CourseResult>();
+
+            updateCourseIdModels.Where(p => p.IsUpdateStudent).ForEach(p =>
+            {
+                if (p.NewCourseId.HasValue)
+                {
+                    var courseResult = courseResults.FirstOrDefault(x => x.StudentId == p.StudentId && x.CourseId == p.NewCourseId);
+                    if (courseResult == null)
+                    {
+                        courseResult = new CourseResult
+                        {
+                            CourseId = p.NewCourseId.Value,
+                            StudentId = p.StudentId,
+                            Status = EnumResultStatus.New,
+                            WorkingStatus = EnumWorkingStatus.Active
+                        };
+                        createCourseResults.Add(courseResult);
+                    }
+                    else
+                    {
+                        courseResult.WorkingStatus = EnumWorkingStatus.Active;
+                        updateCourseResults.Add(courseResult);
+                    }
+                }
+            });
+
             await _curriculumRepository.ExecuteTransactionAsync(async () =>
             {
                 await _curriculumStudentRepository.DeleteListAsync(currentCurriculums.Select(p => p.CurriculumStudent).ToList());
                 await _curriculumRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                await _courseResultRepository.BulkMergeAsync(createCourseResults, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.IsDeleted };
+                });
+
+                await _courseResultRepository.BulkUpdateList(updateCourseResults, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                });
 
                 var deleteClassesResults = await _trainingService.DeleteClassStudents(new DeleteClassStudentsFromCurriculumCommandModels()
                 {
