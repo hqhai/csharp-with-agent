@@ -52,7 +52,9 @@ namespace Fsel.ExamPractice.Application.Queries.CategoryQuery
 
                 case Domain.Enums.EnumCourseSourceData.ExamPracticeType:
                     var data = ConvertHelper.EnumToListModel<EnumExamPracticeType>().AsEnumerable();
-                    var activeSet = await _examPracticeRepository.Queryable.AsNoTracking().Where(x => x.Status == EnumExamPracticeStatus.Active && x.VersionStatus == EnumVersionStatus.LastVersion)
+                    var activeSet = await _examPracticeRepository.Queryable.AsNoTracking()
+                                                             .Where(x => x.Status == EnumExamPracticeStatus.Active && x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                             .Where(x => !x.IsArchive)
                                                              .Select(x => x.Type)
                                                              .Distinct()
                                                              .ToListAsync(cancellationToken);
