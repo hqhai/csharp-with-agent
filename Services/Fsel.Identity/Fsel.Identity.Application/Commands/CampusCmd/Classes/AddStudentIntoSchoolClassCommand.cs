@@ -51,6 +51,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
         private readonly ISchoolClassRepository _schoolClassRepository;
         private readonly ISystemService _systemService;
         private const string DefaultPassword = "Fsel@";
+        private const int MinYear = 1900;
 
         public AddStudentIntoSchoolClassCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserManager<User> userManager, IOrderService orderService, IServiceProvider serviceProvider, IPlatformRepository platformRepository, ILogger<AddStudentIntoSchoolClassCommand> logger, AuthContext authContext, ISchoolClassRepository schoolClassRepository, ISystemService systemService)
         {
@@ -178,6 +179,8 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
             var students = new List<AddStudentsToSchoolClassModel>();
 
+            int currentYear = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Year;
+
             var result = request.FormFile.ImportAndValidateExcel(async (AddStudentsToSchoolClassModel x, IList<AddStudentsToSchoolClassModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.FullName?.Trim()))
@@ -196,6 +199,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
                 }
+
+                if (x.DateOfBirth <= MinYear || x.DateOfBirth >= currentYear)
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                }
+
                 if (students.Select(p => p.Email).Contains(x.Email))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.DataAlreadyExistInListVN });
@@ -281,7 +290,11 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
                             var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                             Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
-                            int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
+
+                            DateTime dateOfBirth = new DateTime(student.DateOfBirth, 01, 01);
+
+                            int age = Shared.Helpers.DateTimeHelper.GetYearOld(dateOfBirth);
+
                             var user = new User()
                             {
                                 UserName = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
@@ -296,9 +309,9 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                                 {
                                     FullName = student.FullName?.Trim(),
                                     PhoneNumber = !string.IsNullOrEmpty(student.PhoneNumber) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()) : null,
-                                    Birthday = student.DateOfBirth,
+                                    Birthday = dateOfBirth,
                                     Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
-                                    Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth, null),
+                                    Code = GeneratorCodeAsync(studentRepository, dateOfBirth, null),
                                     Student = new Student()
                                     {
                                         CreatedByParent = false,
