@@ -78,5 +78,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get students id by curriculum id
+        /// </summary>
+        [HttpGet("get-student-ids-by-curriculum-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<IList<CurriculumModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
+        public async Task<IActionResult> GetCurriculumsByStudentId([FromRoute] Guid id)
+        {
+            var commandResult = await _mediator.Send(new GetStudentIdsByCurriculumIdQuery() { CurriculumId = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

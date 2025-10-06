@@ -45,6 +45,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
         private const string DataNotExist = "Tên tài khoản không tồn tại trên hệ thống";
         private const string MismatchedData = "Dữ liệu không trùng khớp";
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
+        private const string DataAlreadyExist = "Học sinh đã được thêm vào giáo trình này rồi";
 
         public AddStudentsToCurriculumCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService)
         {
@@ -143,6 +144,9 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
             var students = new List<AddStudentsToCurriculumModel>();
 
+            var studentIdsResult = await _lmsCourseService.GetStudentIdsByCurriculumId(request.CurriculumId);
+            var curriculumStudentIds = studentIdsResult.Content?.Result;
+
             var result = request.FormFile.ImportAndValidateExcel(async (AddStudentsToCurriculumModel x, IList<AddStudentsToCurriculumModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
                 if (string.IsNullOrEmpty(x.FullName?.Trim()))
@@ -172,7 +176,17 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             {
                 var emails = datas.Values.Where(p => p.Username != null && !string.IsNullOrEmpty(p.Username.Trim())).Select(n => n.Username?.Trim() ?? string.Empty);
 
-                var users = await _userManager.Users.Where(x => emails.Contains(x.UserName)).ToListAsync(cancellationToken);
+                var query = await (from u in _userManager.Users.WhereBulkContains(emails, p => p.UserName)
+                                   join h in _humanRepository.Queryable on u.Id equals h.UserId
+                                   join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                                   select new
+                                   {
+                                       User = u,
+                                       Human = h,
+                                       Student = s
+                                   }).ToListAsync(cancellationToken);
+
+                var users = query.Select(p => p.User).ToList();
 
                 var usernamesAlreadyExist = users.Select(p => p.UserName).ToList();
 
@@ -188,13 +202,18 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
                     }
                 });
 
-                users.ForEach(user =>
+                query.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user.UserName) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.UserName.ToLower(CultureInfo.CurrentCulture)));
-                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.CurrentCulture) != user.FullName?.ToLower(CultureInfo.CurrentCulture))
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user.User.UserName) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.User.UserName.ToLower(CultureInfo.CurrentCulture)));
+                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.CurrentCulture) != user.User.FullName?.ToLower(CultureInfo.CurrentCulture))
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Username), Message = MismatchedData });
+                    }
+                    else if (curriculumStudentIds != null && curriculumStudentIds.Any() && curriculumStudentIds.Contains(user.Student.Id))
+                    {
+                        var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
+                        errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Username), Message = DataAlreadyExist });
                     }
                 });
 
