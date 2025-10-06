@@ -19,5 +19,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public Guid? SchoolId { get; set; }
         public bool? IsPlacementTest { get; set; } = true;
         public EnumUserStatus? Status { get; set; }
+        public bool IsEnabledExtra { get; set; }
     }
 }

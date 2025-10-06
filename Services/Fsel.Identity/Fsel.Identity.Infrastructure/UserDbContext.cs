@@ -111,6 +111,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<UserGroupMemberShip> UserGroupMemberShips { get; set; }
         public DbSet<StudentEditHistory> StudentEditHistories { get; set; }
         public DbSet<Menu> Menus { get; set; }
+        public DbSet<SystemConfig> SystemConfigs { get; set; }
 
         #endregion Db Set
 

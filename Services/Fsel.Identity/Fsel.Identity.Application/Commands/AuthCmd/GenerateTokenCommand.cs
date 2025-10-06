@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
@@ -44,6 +45,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IRoleClaimRepository _roleClaimRepository;
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
+        private readonly ISystemConfigRepository _systemConfigRepository;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
             IInteractionService interactionService,
@@ -55,7 +57,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IHttpContextAccessor httpContextAccessor,
             IRoleClaimRepository roleClaimRepository,
             RoleManager<Role> roleManager,
-            IMapper mapper)
+            IMapper mapper,
+            ISystemConfigRepository systemConfigRepository)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -68,6 +71,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleClaimRepository = roleClaimRepository;
             _roleManager = roleManager;
             _mapper = mapper;
+            _systemConfigRepository = systemConfigRepository;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -133,6 +137,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 IpAddress = forwarded?.ToString()
             });
 
+            var isEnabledExtra = await _systemConfigRepository.Queryable.Select(x => x.IsEnabled).FirstOrDefaultAsync(cancellationToken);
             var tokenLogin = new TokenModel
             {
                 AccessToken = accessToken,
@@ -140,7 +145,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
-                Code = user.Human?.Code
+                Code = user.Human?.Code,
+                IsEnabledExtra = isEnabledExtra
             };
 
             if (userRoles.Contains(EnumRole.Student.ToString()))
