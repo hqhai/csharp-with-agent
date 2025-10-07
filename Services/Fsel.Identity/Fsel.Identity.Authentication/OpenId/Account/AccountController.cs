@@ -185,7 +185,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                         {
                             foreach (var error in identityResult.Errors.Select(x => x.Code))
                             {
-                                ModelState.TryAddModelError(error, _localizer[error]);
+                                ModelState.AddModelError(string.Empty, _localizer[error]);
                             }
                             return View(request);
                         }
