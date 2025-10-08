@@ -13,27 +13,29 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.QueryModels.HomeWorks;
+    using Fsel.Course.Domain.Models.QueryModels.Curriculums;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class SearchHomeWorkQuery : SearchHomeWorkModel, IRequest<MethodResult<PagingItemsModel<HomeWorkSearchModel>>>
+    public class SearchHomeWorkForCurriculumQuery : SearchHomeWorkForCurriculumQueryModel, IRequest<MethodResult<PagingItemsModel<HomeWorkSearchModel>>>
     {
     }
 
-    public class SearchHomeWorkQueryHandler : IRequestHandler<SearchHomeWorkQuery, MethodResult<PagingItemsModel<HomeWorkSearchModel>>>
+    public class SearchHomeWorkQueryHandler : IRequestHandler<SearchHomeWorkForCurriculumQuery, MethodResult<PagingItemsModel<HomeWorkSearchModel>>>
     {
         private readonly IHomeWorkRepository _homeWorkRepository;
+        private readonly IHomeWorkConfigRepository _homeWorkConfigRepository;
 
-        public SearchHomeWorkQueryHandler(IHomeWorkRepository homeWorkRepository)
+        public SearchHomeWorkQueryHandler(IHomeWorkRepository homeWorkRepository, IHomeWorkConfigRepository homeWorkConfigRepository)
         {
             _homeWorkRepository = homeWorkRepository;
+            _homeWorkConfigRepository = homeWorkConfigRepository;
         }
 
-        public async Task<MethodResult<PagingItemsModel<HomeWorkSearchModel>>> Handle(SearchHomeWorkQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PagingItemsModel<HomeWorkSearchModel>>> Handle(SearchHomeWorkForCurriculumQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<PagingItemsModel<HomeWorkSearchModel>> methodResult = new MethodResult<PagingItemsModel<HomeWorkSearchModel>>();
@@ -57,6 +59,10 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                        CourseSkill = x.CourseSkill,
                                        CreatedUserId = x.CreatedUserId,
                                    });
+
+            var homeworkIds = await _homeWorkConfigRepository.Queryable.Where(p => p.CurriculumId == request.CurriculumId).Select(x => x.HomeWorkId).ToListAsync(cancellationToken);
+
+            query = query.Where(x => !homeworkIds.Contains(x.Id));
 
             request.Keyword = request.Keyword?.Trim().ToLower(CultureInfo.CurrentCulture);
 
