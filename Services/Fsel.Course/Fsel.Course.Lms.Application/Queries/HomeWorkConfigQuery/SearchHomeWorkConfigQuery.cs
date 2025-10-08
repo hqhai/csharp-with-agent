@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
 {
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -10,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.HomeWorkConfigs;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -58,25 +60,31 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery
                 query = query.Where(p => !string.IsNullOrEmpty(p.HomeWorkName) && p.HomeWorkName.Contains(request.Keyword));
             }
 
-            if (request.CreatedUserId.HasValue)
+            if (request.CourseTypes != null && request.CourseTypes.Any())
             {
-                query = query.Where(m => m.CreatedUserId == request.CreatedUserId);
-            }
+                var courseLevels = new List<EnumCourseLevel>();
 
-            if (request.CourseType.HasValue)
-            {
-                var courseLevels = request.CourseType.Value.GetEnumCourseLevels();
+                request.CourseTypes.ForEach(courseLevel =>
+                {
+                    courseLevels.AddRange(courseLevel.GetEnumCourseLevels());
+                });
+
                 query = query.Where(m => courseLevels.Contains(m.CourseLevel));
             }
 
-            if (request.CourseLevel.HasValue)
+            if (request.CourseLevels != null && request.CourseLevels.Any())
             {
-                query = query.Where(m => m.CourseLevel == request.CourseLevel);
+                query = query.Where(m => request.CourseLevels.Contains(m.CourseLevel));
             }
 
-            if (request.CourseSkill.HasValue)
+            if (request.CourseSkills != null && request.CourseSkills.Any())
             {
-                query = query.Where(m => m.CourseSkill == request.CourseSkill);
+                query = query.Where(m => request.CourseSkills.Contains(m.CourseSkill));
+            }
+
+            if (request.CreatedUserIds != null && request.CreatedUserIds.Any())
+            {
+                query = query.Where(m => request.CreatedUserIds.Contains(m.CreatedUserId));
             }
 
             int totalItem = await query.CountAsync(cancellationToken);
