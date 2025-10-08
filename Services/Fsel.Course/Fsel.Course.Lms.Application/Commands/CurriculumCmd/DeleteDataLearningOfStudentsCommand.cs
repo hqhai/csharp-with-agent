@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using MediatR;
+    using Microsoft.Extensions.DependencyInjection;
 
     public class DeleteDataLearningOfStudentsCommand : IRequest<MethodResult<bool>>
     {
@@ -18,10 +19,12 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     public class DeleteDataLearningOfStudentsCommandHandler : IRequestHandler<DeleteDataLearningOfStudentsCommand, MethodResult<bool>>
     {
         private readonly IMediator _mediator;
+        private readonly IServiceProvider _serviceProvider;
 
-        public DeleteDataLearningOfStudentsCommandHandler(IMediator mediator)
+        public DeleteDataLearningOfStudentsCommandHandler(IMediator mediator, IServiceProvider serviceProvider)
         {
             _mediator = mediator;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteDataLearningOfStudentsCommand request, CancellationToken cancellationToken)
@@ -34,15 +37,18 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 return methodResult;
             }
 
-            var tasks = request.UserIds.Select(user =>
-                                    _mediator.Send(new ResetCurriculumByStudentCommand
-                                    {
-                                        UserId = user,
-                                        CourseId = request.CourseId
-                                    }, cancellationToken)
-                                );
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 5 };
+            await Parallel.ForEachAsync(request.UserIds, parallelOptions, async (userId, token) =>
+            {
+                using var scope = _serviceProvider.CreateScope();
+                var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            await Task.WhenAll(tasks);
+                await mediator.Send(new ResetCurriculumByStudentCommand
+                {
+                    UserId = userId,
+                    CourseId = request.CourseId
+                }, token);
+            });
 
             return methodResult;
         }
