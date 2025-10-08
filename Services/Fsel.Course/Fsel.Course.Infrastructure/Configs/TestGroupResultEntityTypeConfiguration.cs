@@ -56,7 +56,7 @@ namespace Fsel.Course.Infrastructure.Configs
                    .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(a => a.CurrentLevel)
-                   .WithMany(b => b.TestGroupResults)
+                   .WithMany(b => b.TestGroupResultsForCurrentLevel)
                    .HasForeignKey(p => p.CurrentLevelId)
                    .OnDelete(DeleteBehavior.NoAction);
 

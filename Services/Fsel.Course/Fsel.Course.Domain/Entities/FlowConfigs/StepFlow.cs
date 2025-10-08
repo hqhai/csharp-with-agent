@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
 {
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
 
     public class StepFlow : Entity

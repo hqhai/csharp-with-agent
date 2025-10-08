@@ -36,5 +36,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<HomeWork> HomeWorks { get; set; } = new List<HomeWork>();
 
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
+        public ICollection<TestGroupResult> TestGroupResultsForCurrentLevel { get; set; } = new List<TestGroupResult>();
     }
 }

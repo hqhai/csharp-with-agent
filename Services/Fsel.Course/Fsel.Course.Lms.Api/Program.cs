@@ -141,6 +141,7 @@ builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionReposito
 builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
 builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
 builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
+builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
