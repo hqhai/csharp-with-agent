@@ -276,6 +276,42 @@ namespace Fsel.Authentication.Infrastructure.Configs
                 },
                 new Client
                 {
+                    ClientId = "com.fsel.lmsapp.dev",
+                    AllowedGrantTypes = GrantTypes.Code,
+
+                    ClientSecrets =
+                    {
+                        new Secret("com.fsel.lmsapp.dev_secret".Sha256())
+                    },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
+                    },
+
+                    RequireClientSecret = false,
+                    RequirePkce = false,
+                    RedirectUris = { "https://lms-dev.fsel.edu.vn/auth/login", "http://lms-dev.fsel.edu.vn/auth/login", "fsel-dev://lms-dev.fsel.edu.vn" },
+                    PostLogoutRedirectUris = { "https://lms-dev.fsel.edu.vn/auth/login", "http://lms-dev.fsel.edu.vn/auth/login", "fsel-dev://lms-dev.fsel.edu.vn" },
+
+                    AllowOfflineAccess = true,
+                    AccessTokenLifetime = 3600,
+                    AllowAccessTokensViaBrowser = true,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly,
+                    RefreshTokenExpiration = TokenExpiration.Sliding,
+                    SlidingRefreshTokenLifetime = 1209600,
+                    AlwaysIncludeUserClaimsInIdToken = true,
+                },
+                new Client
+                {
                     ClientId = "test.fsel.password",
 
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
