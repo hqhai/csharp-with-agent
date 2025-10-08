@@ -66,10 +66,18 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
             await _studentRepository.ExecuteTransactionAsync(async () =>
             {
-                await _studentRepository.BulkDeleteList(students, true);
-                await _humanRepository.BulkDeleteList(humans, true);
-                await _studentRepository.DbContext.BulkDeleteAsync(users);
-                await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                if (students.Any())
+                {
+                    await _studentRepository.BulkDeleteList(students, true);
+                }
+                if (humans.Any())
+                {
+                    await _humanRepository.BulkDeleteList(humans, true);
+                }
+                if (users.Any())
+                {
+                    await _studentRepository.DbContext.BulkDeleteAsync(users);
+                }
 
                 var deleteResult = await _lmsCourseService.DeleteCurriculumsByStudentIds(new DeleteCurriculumsByStudentIdsCommandModel() { StudentIds = studentIds });
                 if (!deleteResult.IsSuccessStatusCode)
@@ -79,6 +87,11 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                 }
 
                 var deleteOrderResult = await _orderService.DeleteOrderOfStudentsCampus(new DeleteOrderOfStudentsCampusCommandModel() { UserIds = userIds });
+                if (!deleteOrderResult.IsSuccessStatusCode)
+                {
+                    methodResult.AddError(deleteOrderResult.Error);
+                    return methodResult;
+                }
 
                 methodResult.Result = true;
                 return methodResult;

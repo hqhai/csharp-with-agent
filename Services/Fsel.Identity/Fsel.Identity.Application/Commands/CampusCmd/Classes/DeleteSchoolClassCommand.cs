@@ -45,15 +45,15 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
             await _schoolClassRepository.ExecuteTransactionAsync(async () =>
             {
-                await _schoolClassRepository.DeleteAsync(schoolClass);
-                await _schoolClassRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
                 var deleteResult = await _mediator.Send(new DeleteStudentsInClassCommand() { StudentIds = studentIds, SchoolClassId = schoolClass.Id }, cancellationToken);
                 if (!deleteResult.IsOK)
                 {
                     methodResult.AddError(deleteResult.ErrorMessages);
                     return methodResult;
                 }
+
+                await _schoolClassRepository.DeleteAsync(schoolClass);
+                await _schoolClassRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.Result = true;
                 return methodResult;

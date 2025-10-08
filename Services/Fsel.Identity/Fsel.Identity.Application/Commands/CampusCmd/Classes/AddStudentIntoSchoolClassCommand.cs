@@ -195,6 +195,10 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
                 }
+                else if (x.Email.Length > 70)
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
+                }
                 if (!string.IsNullOrEmpty(x.PhoneNumber?.Trim()) && !Shared.Helpers.StringHelper.IsValidPhoneNumber(x.PhoneNumber?.Trim()))
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
@@ -205,20 +209,23 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
                 }
 
+                if (!string.IsNullOrEmpty(x.PhoneNumber) && students.Where(p => !string.IsNullOrEmpty(p.PhoneNumber)).Select(p => p.PhoneNumber).Contains(x.PhoneNumber))
+                {
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistInListVN });
+                }
+
                 if (students.Select(p => p.Email).Contains(x.Email))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.DataAlreadyExistInListVN });
+                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmailAlreadyExistInListVN });
                 }
-                else
+
+                students.Add(new AddStudentsToSchoolClassModel()
                 {
-                    students.Add(new AddStudentsToSchoolClassModel()
-                    {
-                        FullName = x.FullName,
-                        Email = x.Email,
-                        PhoneNumber = x.PhoneNumber,
-                        DateOfBirth = x.DateOfBirth,
-                    });
-                }
+                    FullName = x.FullName,
+                    Email = x.Email,
+                    PhoneNumber = x.PhoneNumber,
+                    DateOfBirth = x.DateOfBirth,
+                });
 
                 return await Task.FromResult(errors.Count == 0);
             },
@@ -226,15 +233,29 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
             {
                 var emails = datas.Values.Where(p => p.Email != null && !string.IsNullOrEmpty(p.Email.Trim())).Select(n => n.Email?.Trim() ?? string.Empty);
 
+                var phoneNumbers = datas.Values.Where(p => p.PhoneNumber != null && !string.IsNullOrEmpty(p.PhoneNumber.Trim())).Select(n => Shared.Helpers.StringHelper.NormalizeToDomesticFormat(n.PhoneNumber?.Trim()));
+
                 var emailsAlreadyExist = _userManager.Users.Where(x => emails.Contains(x.UserName)).Select(p => p.UserName);
+
+                var phoneNumbersAlreadyExist = _userManager.Users.Where(x => phoneNumbers.Contains(x.PhoneNumber)).Select(p => p.PhoneNumber);
 
                 emailsAlreadyExist.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Email.ToLower() == user));
+                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Email.ToLower().Trim() == user));
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Email), Message = ErrorMassageSetting.DataAlreadyExistVN });
+                    }
+                });
+
+                phoneNumbersAlreadyExist.ForEach(user =>
+                {
+                    var dataByPhoneNumber = datas.Values.Where(x => !x.PhoneNumber.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.PhoneNumber.ToLower().Trim() == user));
+                    if (dataByPhoneNumber != null)
+                    {
+                        var index = datas.FirstOrDefault(x => x.Value == dataByPhoneNumber).Key;
+                        errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByPhoneNumber.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistVN });
                     }
                 });
 
