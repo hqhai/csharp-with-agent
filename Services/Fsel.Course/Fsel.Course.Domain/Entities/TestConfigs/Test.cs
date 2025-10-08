@@ -4,7 +4,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 {
     using System;
     using System.ComponentModel.DataAnnotations;
-    using System.Text.RegularExpressions;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Enums;
@@ -39,6 +38,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public ICollection<TestSection> TestSections { get; set; } = new List<TestSection>();
         public ICollection<CategoryTestBank> CategoryTestBanks { get; set; } = new List<CategoryTestBank>();
+        public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
 
         public override async Task<bool> IsValid(IServiceProvider serviceProvider)
         {

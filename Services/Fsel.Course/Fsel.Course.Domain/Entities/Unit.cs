@@ -11,6 +11,7 @@ namespace Fsel.Course.Domain.Entities
     using Common.Helpers;
     using Enums.ErrorCodes;
     using Fsel.Common.Enums;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using IRepositories;
     using Microsoft.EntityFrameworkCore;
@@ -71,6 +72,7 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<UnitModule> UnitModules { get; set; } = new List<UnitModule>();
         public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
         public ICollection<MockTestResult> MockTestResults { get; set; } = new List<MockTestResult>();
+        public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
 
         #region behaviors
 

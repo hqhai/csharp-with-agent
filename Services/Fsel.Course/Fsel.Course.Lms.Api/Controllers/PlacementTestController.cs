@@ -142,5 +142,31 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<bool> queryResult = await _mediator.Send(new CheckDonePTByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        [HttpPost("select-pt-flow/{programId}")]
+        public async Task<IActionResult> SelectPTFlowByProgramId(Guid programId)
+        {
+            var chosePtFlowCommand = new ChosePTFlowCommand(programId);
+            var queryResult = await _mediator.Send(chosePtFlowCommand).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpPost("pt-flow/continue/{studentId}")]
+        public async Task<IActionResult> GetPTFlowForStudent(Guid studentId)
+        {
+            var continueCommand = new ContinuePTCommand
+            {
+                StudentId = studentId
+            };
+            var queryResult = await _mediator.Send(continueCommand).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("pt-submit-answer/{studentId}")]
+        public async Task<IActionResult> GetPtState([FromBody] SubmitAnswerCommand submitCommand)
+        {
+            var queryResult = await _mediator.Send(submitCommand).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

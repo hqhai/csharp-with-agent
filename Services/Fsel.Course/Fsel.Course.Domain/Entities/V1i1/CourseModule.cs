@@ -23,5 +23,7 @@ namespace Fsel.Course.Domain.Entities.V1i1
         public Guid CourseId { get; set; }
 
         public Guid OriginalId { get; set; }
+
+        public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
     }
 }

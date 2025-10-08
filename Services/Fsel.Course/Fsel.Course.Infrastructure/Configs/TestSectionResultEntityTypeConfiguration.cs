@@ -1,0 +1,29 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Infrastructure.Configs
+{
+    using Fsel.Course.Domain.Entities.TestConfigs;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+    public class TestSectionResultEntityTypeConfiguration : IEntityTypeConfiguration<TestSectionResult>
+    {
+        public void Configure(EntityTypeBuilder<TestSectionResult> builder)
+        {
+            builder.HasOne(a => a.TestResult)
+                   .WithMany(b => b.SectionResults)
+                   .HasForeignKey(p => p.TestResultId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.ParentTestSectionResult)
+                   .WithMany(b => b.SectionResults)
+                   .HasForeignKey(p => p.ParentTestSectionResultId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.TestSection)
+                   .WithMany(b => b.SectionResults)
+                   .HasForeignKey(p => p.TestSectionId)
+                   .OnDelete(DeleteBehavior.NoAction);
+        }
+    }
+}

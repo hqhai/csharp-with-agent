@@ -22,5 +22,6 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
         public ICollection<StepFlow> StepFlows { get; set; } = new List<StepFlow>();
         public ICollection<ActionFlow> ChildActionFlows { get; set; } = new List<ActionFlow>();
         public ICollection<ActionFlow> ParentActionFlows { get; set; } = new List<ActionFlow>();
+        public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
     }
 }
