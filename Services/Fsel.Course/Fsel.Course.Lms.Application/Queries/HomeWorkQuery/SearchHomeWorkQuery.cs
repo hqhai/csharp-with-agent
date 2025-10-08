@@ -43,8 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var homeWorkQuery = _homeWorkRepository.Queryable.Where(p => !p.IsArchive && p.Type == EnumHomeWorkType.HomeworkExtra)
-                                   .Include(x => x.LessonHomeWorks)
+            var query = _homeWorkRepository.Queryable.Where(p => !p.IsArchive && p.Type == EnumHomeWorkType.HomeworkExtra)
                                    .Select(x => new HomeWorkSearchModel
                                    {
                                        Id = x.Id,
@@ -52,7 +51,6 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                                        Name = x.Name,
                                        CreatedFullName = x.CreatedFullName,
                                        CreatedDate = x.CreatedDate,
-                                       IsActive = x.LessonHomeWorks.Any(),
                                        CourseLevel = x.CourseLevel,
                                        CourseSkill = x.CourseSkill,
                                    });
@@ -63,32 +61,32 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
             {
                 if (Guid.TryParse(request.Keyword, out var guid))
                 {
-                    homeWorkQuery = homeWorkQuery.Where(m => m.Id == guid);
+                    query = query.Where(m => m.Id == guid);
                 }
                 else
                 {
-                    homeWorkQuery = homeWorkQuery.Where(m => (m.Code != null && m.Code.Contains(request.Keyword)) || (m.Name != null && m.Name.Contains(request.Keyword)));
+                    query = query.Where(m => (m.Code != null && m.Code.Contains(request.Keyword)) || (m.Name != null && m.Name.Contains(request.Keyword)));
                 }
             }
 
             if (request.CourseType.HasValue)
             {
                 var courseLevels = request.CourseType.Value.GetEnumCourseLevels();
-                homeWorkQuery = homeWorkQuery.Where(m => courseLevels.Contains(m.CourseLevel));
+                query = query.Where(m => courseLevels.Contains(m.CourseLevel));
             }
 
             if (request.CourseLevel.HasValue)
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.CourseLevel == request.CourseLevel);
+                query = query.Where(m => m.CourseLevel == request.CourseLevel);
             }
 
             if (request.CourseSkill.HasValue)
             {
-                homeWorkQuery = homeWorkQuery.Where(m => m.CourseSkill == request.CourseSkill);
+                query = query.Where(m => m.CourseSkill == request.CourseSkill);
             }
 
-            int totalItem = await homeWorkQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await homeWorkQuery
+            int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            var lists = await query
                     .ApplySortAndPaging(request)
                     .AsNoTracking()
                     .ToListAsync(cancellationToken: cancellationToken)
