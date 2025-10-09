@@ -14,7 +14,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
     using Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;

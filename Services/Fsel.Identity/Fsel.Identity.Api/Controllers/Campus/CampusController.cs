@@ -87,6 +87,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
         [HttpPost("export-students")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(SchoolClassCampusManagement.View)]
         public async Task<IActionResult> ExportStudents([FromBody] ExportStudentsInfoQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
