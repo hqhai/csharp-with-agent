@@ -99,12 +99,12 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
             {
                 if (program.TestOriginalIds != null && program.TestOriginalIds.Any())
                 {
-                    var tests = await _testRepository.Queryable.WhereBulkContains(program.TestOriginalIds, x => x.Id).Select(x => new TestModel
+                    var tests = await _testRepository.Queryable.WhereBulkContains(program.TestOriginalIds, x => x.OriginalId).Select(x => new TestOriginalModel
                     {
-                        Id = x.Id,
-                        Name = x.Name,
+                        Id = x.OriginalId,
+                        Name = x.Code,
                     }).ToListAsync(cancellationToken);
-                    program.Tests = tests.OrderBy(x => program.TestOriginalIds.IndexOf(x.Id)).ToList();
+                    program.TestOriginals = tests.OrderBy(x => program.TestOriginalIds.IndexOf(x.Id)).ToList();
                 }
 
                 program.Flows = await GetFlowsAsync(program.Id, cancellationToken);
