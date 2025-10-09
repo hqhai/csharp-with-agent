@@ -7,14 +7,14 @@ namespace Fsel.Shared.Enums
     public enum EnumLanguageType
     {
         [Description("Tiếng Nhật")]
-        Ja,
+        ja,
         [Description("Tiếng Trung")]
-        Zh,
+        zh,
         [Description("Tiếng Hàn")]
-        Ko,
+        ko,
         [Description("Tiếng Latin")]
-        Latn,
+        latn,
         [Description("Không xác định")]
-        Unknow
+        unknow
     }
 }
