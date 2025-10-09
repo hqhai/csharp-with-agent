@@ -12,6 +12,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -32,8 +33,16 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly IOrderService _orderService;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISystemService _systemService;
+        private readonly ISystemConfigRepository _systemConfigRepository;
 
-        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager, ITrainingService trainingService, IOrderService orderService, ILmsCourseService lmsCourseService, ISystemService systemService)
+        public GetUserProfileQueryHandler(IMapper mapper,
+            AuthContext authContext,
+            UserManager<User> userManager,
+            ITrainingService trainingService,
+            IOrderService orderService,
+            ILmsCourseService lmsCourseService,
+            ISystemService systemService,
+            ISystemConfigRepository systemConfigRepository)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -42,6 +51,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             _orderService = orderService;
             _lmsCourseService = lmsCourseService;
             _systemService = systemService;
+            _systemConfigRepository = systemConfigRepository;
         }
 
         public async Task<MethodResult<UserProfileModel>> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
@@ -119,8 +129,10 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 userView = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             }
+            var isEnabledExtra = await _systemConfigRepository.Queryable.Select(x => x.IsEnabled).FirstOrDefaultAsync(cancellationToken);
 
             var userModel = _mapper.Map<UserProfileModel>(userView ?? user);
+            userModel.IsEnabledExtra = isEnabledExtra;
             _mapper.Map(userView?.Human, userModel);
 
             if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())

@@ -27,6 +27,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
             get { return _avatarPath.AddS3BaseUrl(); }
         }
 
+        public bool IsEnabledExtra { get; set; }
         public Guid? ClassId { get; set; }
         public string? CodeClass { get; set; }
         public IList<string>? Roles { get; set; }
