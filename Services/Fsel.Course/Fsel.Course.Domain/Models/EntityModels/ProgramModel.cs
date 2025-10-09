@@ -21,7 +21,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IList<LevelModel>? Levels { get; set; }
         public IList<FlowModel>? Flows { get; set; }
         public IList<Guid>? TestOriginalIds { get; set; }
-        public IList<TestOriginalModel>? TestOriginals { get; set; }
+        public IList<TestOriginalModel>? Tests { get; set; }
     }
 
     public class TestOriginalModel

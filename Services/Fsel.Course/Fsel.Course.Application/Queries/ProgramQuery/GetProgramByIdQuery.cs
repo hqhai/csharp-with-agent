@@ -104,7 +104,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                         Id = x.OriginalId,
                         Name = x.Code,
                     }).ToListAsync(cancellationToken);
-                    program.TestOriginals = tests.OrderBy(x => program.TestOriginalIds.IndexOf(x.Id)).ToList();
+                    program.Tests = tests.OrderBy(x => program.TestOriginalIds.IndexOf(x.Id)).ToList();
                 }
 
                 program.Flows = await GetFlowsAsync(program.Id, cancellationToken);
