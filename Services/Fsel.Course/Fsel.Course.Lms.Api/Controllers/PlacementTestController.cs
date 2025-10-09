@@ -143,7 +143,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpPost("select-pt-flow/{programId}")]
+        [HttpPost("select/{programId}")]
         public async Task<IActionResult> SelectPTFlowByProgramId(Guid programId)
         {
             var chosePtFlowCommand = new ChosePTFlowCommand(programId);
@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpPost("pt-flow/continue/{studentId}")]
+        [HttpPost("continue/{studentId}")]
         public async Task<IActionResult> GetPTFlowForStudent(Guid studentId)
         {
             var continueCommand = new ContinuePTCommand
@@ -162,7 +162,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpGet("pt-submit-answer/{studentId}")]
+        [HttpGet("submit-answer/{studentId}")]
         public async Task<IActionResult> GetPtState([FromBody] SubmitAnswerCommand submitCommand)
         {
             var queryResult = await _mediator.Send(submitCommand).ConfigureAwait(false);

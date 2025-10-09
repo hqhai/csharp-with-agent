@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 {
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
     using Newtonsoft.Json;
@@ -34,7 +35,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public EnumResultStatus Status { get; set; }
 
-        public List<SkillStateModel> Skills { get; set; } = new List<SkillStateModel>();
+        public List<SectionStateModel> Skills { get; set; } = new List<SectionStateModel>();
 
         [JsonIgnore]
         public int StartPercent { get; set; }
@@ -43,28 +44,15 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public int ToPercent { get; set; }
     }
 
-    public class SkillStateModel
+    public class SectionStateModel
     {
-        [JsonProperty("SkillId")]
         public Guid? SectionId { get; set; }
 
-        [JsonProperty("SkillResultId")]
         public Guid? SectionResultId { get; set; }
 
         public EnumResultStatus Status { get; set; }
 
-        public List<ExcerciseStateModel> Exercises { get; set; } = new List<ExcerciseStateModel>();
-    }
-
-    public class ExcerciseStateModel
-    {
-        [JsonProperty("ExerciseId")]
-        public Guid? SectionId { get; set; }
-
-        [JsonProperty("ExerciseResultId")]
-        public Guid? SectionResultId { get; set; }
-
-        public EnumResultStatus Status { get; set; }
+        public List<SectionStateModel> ChildSections { get; set; } = new List<SectionStateModel>();
 
         public List<QuestionStateModel> Questions { get; set; } = new List<QuestionStateModel>();
     }

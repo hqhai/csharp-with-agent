@@ -5,13 +5,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Microsoft.EntityFrameworkCore;
 
     public interface ITestService
@@ -20,9 +18,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate);
 
-        Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid studentId, EnumTestType enumTestType);
+        Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false);
 
-        Task<TestSectionModel> GetQuestionsOfTestSection(Guid testSectionResultId);
+        Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid studentId, EnumTestType enumTestType);
     }
 
     public class TestService : ITestService
@@ -35,7 +33,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly IRepository<TestGroupResult> _testGroupResultRepository;
         private readonly IRepository<TestSectionResult> _testSectionResultRepository;
         private readonly ITestSectionQuestionRepository _testSectionQuestionRepository;
-        private readonly IMapper _mapper;
 
         public TestService(ITestRepository testRepository,
              ICategoryTestBankRepository categoryTestBankRepository,
@@ -44,8 +41,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
              IRepository<TestResult> testResultRepository,
              IRepository<TestGroupResult> testGroupResultRepository,
              IRepository<TestSectionResult> testSectionResultRepository,
-             ITestSectionQuestionRepository testSectionQuestionRepository,
-             IMapper mapper)
+             ITestSectionQuestionRepository testSectionQuestionRepository)
         {
             _testRepository = testRepository;
             _categoryTestBankRepository = categoryTestBankRepository;
@@ -55,7 +51,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             _testGroupResultRepository = testGroupResultRepository;
             _testSectionResultRepository = testSectionResultRepository;
             _testSectionQuestionRepository = testSectionQuestionRepository;
-            _mapper = mapper;
         }
 
         public async Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate)
@@ -66,12 +61,26 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                  .OrderBy(x => x.CreatedDate)
                                  .FirstOrDefaultAsync();
 
+            var childSections = test.TestSections.Where(x => x.ParentId != null).ToList();
+            test.TestSections = test.TestSections.Where(x => x.ParentId == null).ToList();
+
             foreach (var section in test.TestSections)
             {
-                await LoadTestSectionTree(section);
+                LoadTestSectionTree(section, childSections);
             }
 
             return test;
+        }
+
+        private void LoadTestSectionTree(TestSection testSection, List<TestSection> inventory)
+        {
+            testSection.TestSections = inventory.Where(x => x.ParentId == testSection.Id).ToList();
+
+            inventory = inventory.Except(testSection.TestSections).ToList();
+            foreach (var child in testSection.TestSections)
+            {
+                LoadTestSectionTree(child, inventory);
+            }
         }
 
         public async Task<TestResult> InitTestForStepFlow(Guid studentId,
@@ -195,41 +204,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return testGroupResult;
         }
 
-        public async Task<TestSectionModel> GetQuestionsOfTestSection(Guid testSectionResultId)
-        {
-            var testSectionResult = await _testSectionResultRepository.ReadQueryable
-                                        .Where(x => x.Id == testSectionResultId)
-                                        .Include(x => x.SectionResults)
-                                        .Include(x => x.TestAnswers)
-                                        .FirstOrDefaultAsync();
-
-            if (testSectionResult?.SectionResults != null)
-            {
-                foreach (var sectionResult in testSectionResult.SectionResults)
-                {
-                    await LoadTestSectionResultTree(sectionResult);
-                }
-            }
-
-            var section = await _testSectionRepository.ReadQueryable.Where(x => x.Id == testSectionResult.TestSectionId)
-                .Include(x => x.TestSections)
-                .FirstOrDefaultAsync();
-
-            if (section.TestSections != null)
-            {
-                foreach (var child in section.TestSections)
-                {
-                    await LoadTestSectionTree(child);
-                }
-            }
-
-            await LoadQuestionForSection(section);
-
-            var testSection = new TestSectionModel();
-            _mapper.Map(section, testSection);
-            return testSection;
-        }
-
         private static void CreateTestSectionResultTree(TestSection parentTestSection, TestSectionResult parentSectionResult)
         {
             foreach (var child in parentTestSection.TestSections)
@@ -258,24 +232,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
         }
 
-        private async Task LoadQuestionForSection(TestSection testSection)
-        {
-            if (testSection.TestSections == null || !testSection.TestSections.Any())
-            {
-                var questions = await _testSectionQuestionRepository.ReadQueryable.Where(x => x.TestSectionId == testSection.Id)
-                    .Include(x => x.Question)
-                    .ToListAsync();
-                testSection.TestSectionQuestions = questions;
-            }
-            else
-            {
-                foreach (var child in testSection.TestSections)
-                {
-                    await LoadQuestionForSection(child);
-                }
-            }
-        }
-
         private async Task LoadTestSectionResultTree(TestSectionResult testSectionResult)
         {
             testSectionResult.SectionResults = await _testSectionResultRepository.ReadQueryable
@@ -295,6 +251,38 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                     .Where(x => x.TestSectionResultId == testSectionResult.Id)
                                                     .AsNoTracking()
                                                     .ToListAsync();
+            }
+        }
+
+        public async Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false)
+        {
+            var queryable = isReadOnly ? _testResultRepository.ReadQueryable : _testResultRepository.Queryable;
+
+            var testResult = await queryable
+                                .Where(predicate)
+                                .Include(x => x.SectionResults)
+                                .ThenInclude(x => x.TestAnswers)
+                                .FirstOrDefaultAsync();
+            if (testResult == null)
+            {
+                return null;
+            }
+            var inventory = testResult.SectionResults.Where(x => x.ParentTestSectionResultId != null).ToList();
+            testResult.SectionResults = testResult.SectionResults.Where(x => x.ParentTestSectionResultId == null).ToList();
+            foreach (var sectionResult in testResult.SectionResults)
+            {
+                LoadTestSectionResultTreeRecursive(sectionResult, inventory);
+            }
+            return testResult;
+        }
+
+        private void LoadTestSectionResultTreeRecursive(TestSectionResult testSectionResult, List<TestSectionResult> inventory)
+        {
+            testSectionResult.SectionResults = inventory.Where(x => x.ParentTestSectionResultId == testSectionResult.Id).ToList();
+            inventory = inventory.Except(testSectionResult.SectionResults).ToList();
+            foreach (var child in testSectionResult.SectionResults)
+            {
+                LoadTestSectionResultTreeRecursive(child, inventory);
             }
         }
     }

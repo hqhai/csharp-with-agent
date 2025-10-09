@@ -43,7 +43,7 @@ namespace Fsel.Course.Lms.Api.Extensions
 
             services.AddTransient<ILoadPTResultChainFactory, LoadPTResultChainFactory>();
             services.AddTransient<ILoadQuestionDataHandler, LoadQuestionDataHandler>();
-            services.AddTransient<ILoadTestExcerciseResultHandler, LoadTestExcerciseResultHandler>();
+            services.AddTransient<ILoadTestSectionResultHandler, LoadTestSectionResultHandler>();
             services.AddTransient<ILoadTestGroupResultHandler, LoadTestGroupResultHandler>();
             services.AddTransient<ILoadTestResultHandler, LoadTestResultHandler>();
             services.AddTransient<ILoadTestSkillResultHandler, LoadTestSkillResultHandler>();

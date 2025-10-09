@@ -23,6 +23,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         Task<IEnumerable<List<ModuleStateModel>>> GetAllFlowBranches(Guid flowId);
 
         Task<IEnumerable<List<ModuleStateModel>>> GetBranchesMatch(Guid flowId, IEnumerable<TestResult> testResults);
+
+        Task<Guid?> GetPTNextModule(Guid studentId);
     }
 
     public class FlowService : IFlowService
@@ -115,6 +117,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             var nextStepId = GetNextModule(branchMatchCurrentResult);
 
             await _testService.InitTestForStepFlow(studentId, nextStepId.Value, ptResult.Id, ptResult.ProgramId.Value);
+        }
+
+        public async Task<Guid?> GetPTNextModule(Guid studentId)
+        {
+            var ptResult = await _testGroupResultRepository.ReadQueryable
+                .Where(x => x.StudentId == studentId && x.TestType == Domain.Enums.EnumTestType.PlacementTest)
+                .Include(x => x.TestResults)
+                .FirstOrDefaultAsync();
+
+            var allFlowBranch = await GetAllFlowBranches(ptResult.FlowId.Value);
+
+            var branchMatchCurrentResult = GetBranchesMatch(allFlowBranch, ptResult.TestResults);
+
+            var nextStepId = GetNextModule(branchMatchCurrentResult);
+
+            return nextStepId;
         }
 
         public async Task<IEnumerable<List<ModuleStateModel>>> GetBranchesMatch(Guid flowId, IEnumerable<TestResult> testResults)
@@ -245,7 +263,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
         }
 
-        public Guid? GetNextModule(IEnumerable<List<ModuleStateModel>> branches)
+        public static Guid? GetNextModule(IEnumerable<List<ModuleStateModel>> branches)
         {
             var matchingBranchScore = branches.FirstOrDefault(b =>
             {

@@ -4,67 +4,33 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LoadPTTestRes
 {
     public interface ILoadPTResultChainFactory
     {
-        IBaseLoadPTTestResultHandler GetLoadPTResultChainHandler(LoadDetailType loadDetailType = LoadDetailType.Question);
+        IBaseLoadPTTestResultHandler GetLoadPTResultChainHandler();
     }
 
     public class LoadPTResultChainFactory : ILoadPTResultChainFactory
     {
         private readonly ILoadQuestionDataHandler _loadQuestionDataHandler;
-        private readonly ILoadTestExcerciseResultHandler _loadTestExcerciseResultHandler;
+        private readonly ILoadTestSectionResultHandler _loadTestSectionResultHandler;
         private readonly ILoadTestGroupResultHandler _loadTestGroupResultHandler;
         private readonly ILoadTestResultHandler _loadTestResultHandler;
-        private readonly ILoadTestSkillResultHandler _loadTestSkillResultHandler;
 
         public LoadPTResultChainFactory(ILoadQuestionDataHandler loadQuestionDataHandler,
-            ILoadTestExcerciseResultHandler loadTestExcerciseResultHandler,
+            ILoadTestSectionResultHandler loadTestSectionResultHandler,
             ILoadTestGroupResultHandler loadTestGroupResultHandler,
-            ILoadTestResultHandler loadTestResultHandler,
-            ILoadTestSkillResultHandler loadTestSkillResultHandler)
+            ILoadTestResultHandler loadTestResultHandler)
         {
             _loadTestGroupResultHandler = loadTestGroupResultHandler;
             _loadTestResultHandler = loadTestResultHandler;
-            _loadTestSkillResultHandler = loadTestSkillResultHandler;
-            _loadTestExcerciseResultHandler = loadTestExcerciseResultHandler;
+            _loadTestSectionResultHandler = loadTestSectionResultHandler;
             _loadQuestionDataHandler = loadQuestionDataHandler;
         }
 
-        public IBaseLoadPTTestResultHandler GetLoadPTResultChainHandler(LoadDetailType loadDetailType = LoadDetailType.Question)
+        public IBaseLoadPTTestResultHandler GetLoadPTResultChainHandler()
         {
-            switch (loadDetailType)
-            {
-                case LoadDetailType.Question:
-                    _loadTestGroupResultHandler.SetNex(_loadTestResultHandler)
-                        .SetNex(_loadTestSkillResultHandler)
-                        .SetNex(_loadTestExcerciseResultHandler)
+            _loadTestGroupResultHandler.SetNex(_loadTestResultHandler)
+                        .SetNex(_loadTestSectionResultHandler)
                         .SetNex(_loadQuestionDataHandler);
-                    return _loadTestGroupResultHandler;
-
-                case LoadDetailType.Test:
-                    _loadTestGroupResultHandler.SetNex(_loadTestResultHandler);
-                    return _loadTestGroupResultHandler;
-
-                case LoadDetailType.Skill:
-                    _loadTestGroupResultHandler.SetNex(_loadTestResultHandler)
-                       .SetNex(_loadTestSkillResultHandler);
-                    return _loadTestGroupResultHandler;
-
-                case LoadDetailType.Excercise:
-                    _loadTestGroupResultHandler.SetNex(_loadTestResultHandler)
-                       .SetNex(_loadTestSkillResultHandler)
-                       .SetNex(_loadTestExcerciseResultHandler);
-                    return _loadTestGroupResultHandler;
-
-                default:
-                    return null;
-            }
+            return _loadTestGroupResultHandler;
         }
-    }
-
-    public enum LoadDetailType
-    {
-        Test,
-        Skill,
-        Excercise,
-        Question
     }
 }

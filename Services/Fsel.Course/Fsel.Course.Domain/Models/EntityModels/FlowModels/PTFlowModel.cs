@@ -12,6 +12,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.FlowModels
 
         public Guid? TestGroupResultId { get; set; }
 
-        public int NumberOfModules { get; set; }
+        public int? MaxNumberOfModules { get; set; }
     }
 }

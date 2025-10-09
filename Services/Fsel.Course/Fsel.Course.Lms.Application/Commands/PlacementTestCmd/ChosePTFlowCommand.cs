@@ -87,14 +87,14 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             var flowBranches = FlowService.GetAllFlowBranchesByFlow(flowMatch.StepFlows.First());
 
-            var numberOfModules = flowBranches.FirstOrDefault().Count();
+            var numberOfModules = flowBranches.OrderByDescending(x => x.Count).FirstOrDefault();
 
             methodResult.Result = new PTFlowModel
             {
                 Name = flowMatch.Name,
                 FlowId = flowMatch.Id,
                 TestGroupResultId = flowMatch.Id,
-                NumberOfModules = numberOfModules,
+                MaxNumberOfModules = numberOfModules?.Count,
             };
             return methodResult;
         }

@@ -45,15 +45,32 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LoadPTTestRes
                 return;
             }
 
-            foreach (var excercise in inprogressSkill.Exercises)
+            await LoadQuestionAndAnswer(inprogressSkill);
+
+            if (Next != null)
             {
-                var questions = await _testSectionQuestionRepository.ReadQueryable.Where(x => x.TestSectionId == excercise.SectionId)
+                await Next.Handle(context);
+            }
+        }
+
+        private async Task LoadQuestionAndAnswer(SectionStateModel sectionStateModel)
+        {
+            if (sectionStateModel.ChildSections != null && sectionStateModel.ChildSections.Any())
+            {
+                foreach (var child in sectionStateModel.ChildSections)
+                {
+                    await LoadQuestionAndAnswer(child);
+                }
+            }
+            else
+            {
+                var questions = await _testSectionQuestionRepository.ReadQueryable.Where(x => x.TestSectionId == sectionStateModel.SectionId)
                     .Include(x => x.Question)
                     .ToListAsync();
 
-                var answers = await _testAnswerRepository.ReadQueryable.Where(x => x.TestSectionResultId == excercise.SectionResultId).ToListAsync();
+                var answers = await _testAnswerRepository.ReadQueryable.Where(x => x.TestSectionResultId == sectionStateModel.SectionResultId).ToListAsync();
 
-                excercise.Questions = questions.ConvertAll(x =>
+                sectionStateModel.Questions = questions.ConvertAll(x =>
                 {
                     var answer = answers.Find(a => a.QuestionId == x.QuestionId);
                     return new QuestionStateModel
@@ -65,11 +82,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LoadPTTestRes
                         Status = answer == null ? Shared.Enums.EnumAnswerStatus.Process : answer.Status
                     };
                 });
-            }
-
-            if (Next != null)
-            {
-                await Next.Handle(context);
             }
         }
     }
