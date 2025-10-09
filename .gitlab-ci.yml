@@ -31,7 +31,7 @@ stages:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
 
@@ -43,7 +43,7 @@ build-multi-subject-testing-auth:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -65,7 +65,7 @@ build-multi-subject-testing-gateway:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -87,7 +87,7 @@ build-multi-subject-testing-hangfire:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -109,7 +109,7 @@ build-multi-subject-testing-interaction:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -131,7 +131,7 @@ build-multi-subject-testing-lcmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -153,7 +153,7 @@ build-multi-subject-testing-lmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -175,7 +175,7 @@ build-multi-subject-testing-notification:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -197,7 +197,7 @@ build-multi-subject-testing-ordering:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -219,7 +219,7 @@ build-multi-subject-testing-realtime:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -241,7 +241,7 @@ build-multi-subject-testing-sender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -263,7 +263,7 @@ build-multi-subject-testing-storage:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -285,7 +285,7 @@ build-multi-subject-testing-system:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -307,7 +307,7 @@ build-multi-subject-testing-training:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -329,7 +329,7 @@ build-multi-subject-testing-identity:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -351,7 +351,7 @@ build-multi-subject-testing-cms-planetdefender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
@@ -373,7 +373,7 @@ build-multi-subject-testing-cms-planetdefender:
 #     max: 2
 #   script:
 #     - apk add --update coreutils && rm -rf /var/cache/apk/*
-#     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+#     - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
 #     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
 #     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
 #   variables:
@@ -395,7 +395,7 @@ build-multi-subject-testing-cms-planetdefender:
 #     max: 2
 #   script:
 #     - apk add --update coreutils && rm -rf /var/cache/apk/*
-#     - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p $DOCKER_PASS
+#     - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
 #     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
 #     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
 #   variables:
