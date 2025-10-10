@@ -6,21 +6,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using System.Linq.Expressions;
     using System.Threading.Tasks;
     using Fsel.Core.Base.Interfaces;
-    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.CommandModels.Tests;
+    using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
     public interface ITestService
     {
-        Task<TestResult> InitTestForStepFlow(Guid studentId, Guid stepFlowId, Guid testGroupResultId, Guid programId, Guid? actionFlowId = default);
-
         Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate);
 
         Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false);
 
         Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid studentId, EnumTestType enumTestType);
+
+        Task<TestResult> MakeNewTestResultTree(Guid studentId, Guid stepFlowId, Guid testGroupResultId, Guid programId, Guid? actionFlowId = default);
+
+        Task CreateAnswers(SubmitAnswerCommandModel request);
     }
 
     public class TestService : ITestService
@@ -28,11 +32,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly ITestRepository _testRepository;
         private readonly ICategoryTestBankRepository _categoryTestBankRepository;
         private readonly IStepFlowRepository _stepFlowRepository;
-        private readonly ITestSectionRepository _testSectionRepository;
         private readonly IRepository<TestResult> _testResultRepository;
         private readonly IRepository<TestGroupResult> _testGroupResultRepository;
-        private readonly IRepository<TestSectionResult> _testSectionResultRepository;
-        private readonly ITestSectionQuestionRepository _testSectionQuestionRepository;
+        private readonly IQuestionRepository _questionRepository;
+        private readonly IRepository<TestAnswer> _testAnswerRepository;
+        private readonly QuestionConverter _questionConverter;
 
         public TestService(ITestRepository testRepository,
              ICategoryTestBankRepository categoryTestBankRepository,
@@ -41,16 +45,18 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
              IRepository<TestResult> testResultRepository,
              IRepository<TestGroupResult> testGroupResultRepository,
              IRepository<TestSectionResult> testSectionResultRepository,
-             ITestSectionQuestionRepository testSectionQuestionRepository)
+             IQuestionRepository questionRepository,
+             IRepository<TestAnswer> testAnswerRepository,
+             QuestionConverter questionConverter)
         {
             _testRepository = testRepository;
             _categoryTestBankRepository = categoryTestBankRepository;
             _stepFlowRepository = stepFlowRepository;
-            _testSectionRepository = testSectionRepository;
             _testResultRepository = testResultRepository;
             _testGroupResultRepository = testGroupResultRepository;
-            _testSectionResultRepository = testSectionResultRepository;
-            _testSectionQuestionRepository = testSectionQuestionRepository;
+            _questionRepository = questionRepository;
+            _testAnswerRepository = testAnswerRepository;
+            _questionConverter = questionConverter;
         }
 
         public async Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate)
@@ -83,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
         }
 
-        public async Task<TestResult> InitTestForStepFlow(Guid studentId,
+        public async Task<TestResult> MakeNewTestResultTree(Guid studentId,
             Guid stepFlowId,
             Guid testGroupResultId,
             Guid programId,
@@ -127,67 +133,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     CreateTestSectionResultTree(section, testSectionResult);
                 }
 
-                await FillTotalScoreForTestResult(testResult);
-
-                _testResultRepository.Add(testResult);
-                testResult.Status = EnumResultStatus.Process;
-                var firstSkill = testResult.SectionResults.First();
-                firstSkill.Status = EnumResultStatus.Process;
-
-                await _testResultRepository.UnitOfWork.SaveChangesAsync();
-
                 return testResult;
             }
 
             return null;
-        }
-
-        public async Task FillTotalScoreForTestResult(TestResult testResult)
-        {
-            foreach (var childSectionResult in testResult.SectionResults)
-            {
-                await FillTotalScoreForSectionResult(childSectionResult);
-            }
-
-            testResult.CorrectTotal = testResult.SectionResults.Sum(x => x.CorrectTotal);
-        }
-
-        public async Task FillTotalScoreForSectionResult(TestSectionResult testSectionResult)
-        {
-            if (testSectionResult.SectionResults.Count == 0)
-            {
-                var questions = await _testSectionQuestionRepository.ReadQueryable.Where(x => x.TestSectionId == testSectionResult.TestSectionId)
-                    .Include(x => x.Question)
-                    .Select(x => x.Question)
-                    .ToListAsync();
-
-                testSectionResult.CorrectTotal = questions.Sum(x => x.CorrectTotal);
-                testSectionResult.SkillScores = new List<SkillScores>
-                {
-                    new SkillScores
-                    {
-                        TotalCount = questions.Sum(x => x.CorrectTotal),
-                        TotalQuestion = questions.Count
-                    }
-                };
-            }
-            else
-            {
-                foreach (var childSectionResult in testSectionResult.SectionResults)
-                {
-                    await FillTotalScoreForSectionResult(childSectionResult);
-                }
-
-                testSectionResult.CorrectTotal = testSectionResult.SectionResults.Sum(x => x.CorrectTotal);
-                testSectionResult.SkillScores = new List<SkillScores>
-                {
-                    new SkillScores
-                    {
-                        TotalCount =  testSectionResult.SectionResults.Sum(x => x.CorrectTotal),
-                        TotalQuestion =  testSectionResult.SectionResults.SelectMany(x => x.SkillScores).Sum(x => x.TotalQuestion)
-                    }
-                };
-            }
         }
 
         public async Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid studentId, EnumTestType enumTestType)
@@ -221,39 +170,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
         }
 
-        private async Task LoadTestSectionTree(TestSection testSection)
-        {
-            testSection.TestSections = await _testSectionRepository.ReadQueryable
-                                                .Where(x => x.ParentId == testSection.Id)
-                                                .ToListAsync();
-            foreach (var child in testSection.TestSections)
-            {
-                await LoadTestSectionTree(child);
-            }
-        }
-
-        private async Task LoadTestSectionResultTree(TestSectionResult testSectionResult)
-        {
-            testSectionResult.SectionResults = await _testSectionResultRepository.ReadQueryable
-                                                .Where(x => x.ParentTestSectionResultId == testSectionResult.Id)
-                                                .ToListAsync();
-
-            if (testSectionResult?.SectionResults != null)
-            {
-                foreach (var sectionResult in testSectionResult.SectionResults)
-                {
-                    await LoadTestSectionResultTree(sectionResult);
-                }
-            }
-            else
-            {
-                testSectionResult.TestAnswers = await _testSectionResultRepository.DbContext.Set<TestAnswer>()
-                                                    .Where(x => x.TestSectionResultId == testSectionResult.Id)
-                                                    .AsNoTracking()
-                                                    .ToListAsync();
-            }
-        }
-
         public async Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false)
         {
             var queryable = isReadOnly ? _testResultRepository.ReadQueryable : _testResultRepository.Queryable;
@@ -283,6 +199,58 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             foreach (var child in testSectionResult.SectionResults)
             {
                 LoadTestSectionResultTreeRecursive(child, inventory);
+            }
+        }
+
+        public async Task CreateAnswers(SubmitAnswerCommandModel request)
+        {
+            if (request.Answers == null || !request.Answers.Any())
+            {
+                return;
+            }
+
+            var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
+            var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
+            if (questions != null && questions.Any())
+            {
+                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+                foreach (var item in request.Answers)
+                {
+                    var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
+                    var questionResult = _questionConverter.HandleAnswerTest(question, item.Answer, request.IsSubmit);
+                    if (!questionResult.IsOK)
+                    {
+                        return;
+                    }
+                    var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
+
+                    var questionId = questionItem.TestSectionQuestions.FirstOrDefault()?.QuestionId ?? default;
+                    var testAnswer = testAnswers.FirstOrDefault(x => x.QuestionId == questionId);
+                    if (testAnswer == null)
+                    {
+                        testAnswer = new TestAnswer
+                        {
+                            TestResultId = request.TestResultId,
+                            TestSectionResultId = request.SectionResultId,
+                            QuestionId = questionId,
+                            StudentId = request.StudentId
+                        };
+
+                        _testAnswerRepository.Add(testAnswer);
+                    }
+
+                    testAnswer.Answer = answerConfig;
+                    testAnswer.CorrectCount = correctCount;
+                    testAnswer.IsCorrect = isAnswered ? correctCount == questionItem.CorrectTotal : null;
+                    testAnswer.Status = questionItem.CorrectTotal == correctCount ? EnumAnswerStatus.Done : EnumAnswerStatus.Process;
+
+                    if (!testAnswer.IsValid())
+                    {
+                        return;
+                    }
+                }
+
+                await _testAnswerRepository.DbContext.SaveChangesAsync();
             }
         }
     }

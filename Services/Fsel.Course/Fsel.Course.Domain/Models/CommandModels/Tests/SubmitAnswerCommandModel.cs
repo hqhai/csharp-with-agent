@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Tests
     public class SubmitAnswerCommandModel
     {
         public Guid SectionResultId { get; set; }
+        public Guid TestResultId { get; set; }
         public bool IsSubmit { get; set; }
 
         [JsonIgnore]

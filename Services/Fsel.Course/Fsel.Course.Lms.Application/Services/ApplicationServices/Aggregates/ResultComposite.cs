@@ -7,11 +7,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
     public abstract class ResultComposite : ResultComponent
     {
+        public string? Name { get; set; }
+
         public ICollection<ResultComponent> Children { get; set; } = new List<ResultComponent>();
 
         public abstract void Start();
 
         public abstract void GenerateChildren();
+
+        public abstract Task LoadTotalScoreData();
 
         public override bool IsBelongTo(Guid id)
         {

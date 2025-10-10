@@ -2,9 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 {
-    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Shared.Enums;
     using Newtonsoft.Json;
 
     public class PTStateModel
@@ -15,14 +13,17 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public Guid? TestGroupResultId { get; set; }
 
-        public int NumberOfModules { get; set; }
+        public EnumResultStatus? Status { get; set; }
 
-        public EnumResultStatus Status { get; set; }
-
-        public List<ModuleStateModel> Modules { get; set; } = new List<ModuleStateModel>();
+        public ICollection<BaseTestStateModel> TestStates { get; set; } = new List<BaseTestStateModel>();
     }
 
-    public class ModuleStateModel
+    public class BaseTestStateModel
+    {
+        public EnumResultStatus Status { get; set; }
+    }
+
+    public class TestStateModel : BaseTestStateModel
     {
         [JsonProperty("ModuleId")]
         public Guid? StepFlowId { get; set; }
@@ -31,11 +32,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public Guid? TestResultId { get; set; }
 
-        public int PercentResult { get; set; }
+        public double PercentResult { get; set; }
 
-        public EnumResultStatus Status { get; set; }
-
-        public List<SectionStateModel> Skills { get; set; } = new List<SectionStateModel>();
+        public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
 
         [JsonIgnore]
         public int StartPercent { get; set; }
@@ -44,20 +43,16 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public int ToPercent { get; set; }
     }
 
-    public class SectionStateModel
+    public class SectionStateModel : BaseTestStateModel
     {
         public Guid? SectionId { get; set; }
 
         public Guid? SectionResultId { get; set; }
 
-        public EnumResultStatus Status { get; set; }
-
-        public List<SectionStateModel> ChildSections { get; set; } = new List<SectionStateModel>();
-
-        public List<QuestionStateModel> Questions { get; set; } = new List<QuestionStateModel>();
+        public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
     }
 
-    public class QuestionStateModel
+    public class QuestionStateModel : BaseTestStateModel
     {
         public Guid? QuestionId { get; set; }
 
@@ -66,7 +61,5 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public QuestionModel Question { get; set; }
 
         public AnswerModel Answer { get; set; }
-
-        public EnumAnswerStatus Status { get; set; }
     }
 }

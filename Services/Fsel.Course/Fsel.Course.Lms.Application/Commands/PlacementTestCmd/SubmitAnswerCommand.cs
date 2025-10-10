@@ -5,16 +5,21 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Interfaces;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.TestRequestHandler;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class SubmitAnswerCommand : IRequest<MethodResult<PTStateModel>>
     {
         public Guid StudentId { get; set; }
 
         public Guid SectionResultId { get; set; }
+
+        public Guid TestResultId { get; set; }
 
         public IList<TestAnswerQuestionModel>? Answers { get; set; }
 
@@ -23,44 +28,59 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
     public class SubmitAnswerCommandHandler : IRequestHandler<SubmitAnswerCommand, MethodResult<PTStateModel>>
     {
-        private readonly ITestRequestChainFactory _testRequestChainFactory;
+        private IRepository<TestGroupResult> _testGroupResult;
+        private readonly IServiceProvider _serviceProvider;
 
-        public SubmitAnswerCommandHandler(ITestRequestChainFactory testRequestChainFactory)
+        public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult, IServiceProvider serviceProvider)
         {
-            _testRequestChainFactory = testRequestChainFactory;
+            _testGroupResult = testGroupResult;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<PTStateModel>> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
         {
-            var chainHandlers = _testRequestChainFactory.GetTestSubmitRequestChainHandlers();
+            var flowTestResult = await _testGroupResult.Queryable.Where(x => x.StudentId == request.StudentId && x.TestType == Domain.Enums.EnumTestType.PlacementTest)
+                 .Include(x => x.TestResults)
+                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (chainHandlers == null)
+            if (flowTestResult == null)
+            {
+                var result = new MethodResult<PTStateModel>
+                {
+                    StatusCode = 400,
+                };
+
+                result.AddErrorBadRequest("No active placement test found for the student.", "ContinuePTCommandHandler");
+
+                return result;
+            }
+
+            if (flowTestResult.Status == Domain.Enums.EnumResultStatus.Done)
             {
                 return new MethodResult<PTStateModel>
                 {
-                    StatusCode = 400
+                    Result = new PTStateModel
+                    {
+                        FlowId = flowTestResult.FlowId,
+                        Status = flowTestResult.Status,
+                    }
                 };
             }
 
-            var context = new TestRequestContext
+            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
+
+            await aggregate.MakeAnswers(new SubmitAnswerCommandModel
             {
-                TestRequestCommand = new SubmitAnswerCommandModel
-                {
-                    Answers = request.Answers,
-                    SectionResultId = request.SectionResultId,
-                    StudentId = request.StudentId,
-                    IsSubmit = request.IsSubmit
-                }
+                SectionResultId = request.SectionResultId,
+                TestResultId = request.TestResultId,
+                Answers = request.Answers,
+                IsSubmit = request.IsSubmit
+            });
+
+            return new MethodResult<PTStateModel>
+            {
+                Result = aggregate.ExpotStateData()
             };
-
-            await chainHandlers.Handle(context);
-
-            if (context.MethodResult.ErrorMessages.Count == 0)
-            {
-                context.MethodResult.Result = context.PTState;
-            }
-
-            return context.MethodResult;
         }
     }
 }

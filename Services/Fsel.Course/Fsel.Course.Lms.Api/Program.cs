@@ -9,7 +9,6 @@ using Fsel.Course.Infrastructure.Common.LessonHelpers;
 using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
-using Fsel.Course.Lms.Api.Extensions;
 using Fsel.Course.Lms.Application.InternalEvents;
 using Fsel.Course.Lms.Application.Queues.Consumers;
 using Fsel.Course.Lms.Application.Queues.Publishers;
@@ -17,6 +16,7 @@ using Fsel.Course.Lms.Application.Services.AiService;
 using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
+using Fsel.Course.Lms.Application.Services.ApplicationServices;
 using Fsel.Course.Lms.Application.Services.FFmpegServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
@@ -38,7 +38,8 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
-builder.Services.RegisterPTHandlers();
+builder.Services.AddScoped<IFlowService, FlowService>();
+builder.Services.AddScoped<ITestService, TestService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();

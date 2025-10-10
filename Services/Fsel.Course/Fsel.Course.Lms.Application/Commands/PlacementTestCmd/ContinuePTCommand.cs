@@ -5,9 +5,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Interfaces;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.ContinuePTHandlers;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class ContinuePTCommand : IRequest<MethodResult<PTStateModel>>
     {
@@ -16,34 +19,53 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
     public class ContinuePTCommandHandler : IRequestHandler<ContinuePTCommand, MethodResult<PTStateModel>>
     {
-        private readonly IContinutePTChainFactory _continutePTChainFactory;
+        private IRepository<TestGroupResult> _testGroupResult;
+        private readonly IServiceProvider _serviceProvider;
 
-        public ContinuePTCommandHandler(IContinutePTChainFactory continutePTChainFactory)
+        public ContinuePTCommandHandler(IRepository<TestGroupResult> testGroupResult, IServiceProvider serviceProvider)
         {
-            _continutePTChainFactory = continutePTChainFactory;
+            _testGroupResult = testGroupResult;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<PTStateModel>> Handle(ContinuePTCommand request, CancellationToken cancellationToken)
         {
-            var chainHandlers = _continutePTChainFactory.GeContinutePTChainHandler();
-            if (chainHandlers == null)
+            var flowTestResult = await _testGroupResult.Queryable.Where(x => x.StudentId == request.StudentId && x.TestType == Domain.Enums.EnumTestType.PlacementTest)
+                .Include(x => x.TestResults)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (flowTestResult == null)
+            {
+                var result = new MethodResult<PTStateModel>
+                {
+                    StatusCode = 400,
+                };
+
+                result.AddErrorBadRequest("No active placement test found for the student.", "ContinuePTCommandHandler");
+
+
+                return result;
+            }
+
+            if (flowTestResult.Status == Domain.Enums.EnumResultStatus.Done)
             {
                 return new MethodResult<PTStateModel>
                 {
-                    StatusCode = 400
+                    Result = new PTStateModel
+                    {
+                        FlowId = flowTestResult.FlowId,
+                        Status = flowTestResult.Status,
+                    }
                 };
             }
 
-            var context = new ContinuePTTestContext
-            {
-                StudentId = request.StudentId,
-            };
+            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
 
-            await chainHandlers.Handle(context);
+            await aggregate.Start();
 
             return new MethodResult<PTStateModel>
             {
-                Result = context.PTState
+                Result = aggregate.ExpotStateData()
             };
         }
     }
