@@ -74,7 +74,7 @@ builder.Services.AddMvcCore();
 builder.Services.AddControllers();
 builder.Services.AddControllersWithViews();
 builder.Services.AddLocalApiAuthentication();
-builder.Services.AddHttpsRedirection(opt => opt.HttpsPort = 443);
+//builder.Services.AddHttpsRedirection(opt => opt.HttpsPort = 443);
 
 builder.AddRepositories();
 builder.AddHandlers();
@@ -99,7 +99,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseIdentityServer();
 app.MapDefaultControllerRoute();
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseCookiePolicy(new CookiePolicyOptions
 {
     MinimumSameSitePolicy = SameSiteMode.None,
