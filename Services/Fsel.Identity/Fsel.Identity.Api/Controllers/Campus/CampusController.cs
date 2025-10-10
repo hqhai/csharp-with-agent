@@ -9,12 +9,14 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.CampusCmd;
+    using Fsel.Identity.Application.Commands.CampusCmd.Classes;
     using Fsel.Identity.Application.Queries.CampusQuery;
     using Fsel.Identity.Domain.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -144,6 +146,19 @@ namespace Fsel.Identity.Api.Controllers.Campus
         public async Task<IActionResult> UpdateCourseIdOfStudents([FromBody] UpdateCourseIdOfStudentsCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get number students in file
+        /// </summary>
+        [HttpPost("get-number-students-in-file")]
+        [ProducesResponseType(typeof(MethodResult<AddStudentIntoSchoolClassCommandModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] GetNumberOfStudentInFileQuery query)
+        {
+            ArgumentNullException.ThrowIfNull(query);
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

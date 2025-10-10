@@ -149,25 +149,28 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
             var result = request.FormFile.ImportAndValidateExcel(async (AddStudentsToCurriculumModel x, IList<AddStudentsToCurriculumModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
             {
-                if (string.IsNullOrEmpty(x.FullName?.Trim()))
+                if (!string.IsNullOrEmpty(x.Username?.Trim()) || !string.IsNullOrEmpty(x.FullName?.Trim()))
                 {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = EmptyFullName });
-                }
-                if (string.IsNullOrEmpty(x.Username?.Trim()))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Username), Message = EmptyUserName });
-                }
-                if (students.Select(p => p.Username).Contains(x.Username))
-                {
-                    errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Username), Message = DuplicateData });
-                }
-                else
-                {
-                    students.Add(new AddStudentsToCurriculumModel()
+                    if (string.IsNullOrEmpty(x.FullName?.Trim()))
                     {
-                        FullName = x.FullName,
-                        Username = x.Username,
-                    });
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = EmptyFullName });
+                    }
+                    if (string.IsNullOrEmpty(x.Username?.Trim()))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Username), Message = EmptyUserName });
+                    }
+                    if (students.Select(p => p.Username).Contains(x.Username))
+                    {
+                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Username), Message = DuplicateData });
+                    }
+                    else
+                    {
+                        students.Add(new AddStudentsToCurriculumModel()
+                        {
+                            FullName = x.FullName,
+                            Username = x.Username,
+                        });
+                    }
                 }
 
                 return await Task.FromResult(errors.Count == 0);

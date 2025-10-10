@@ -12,8 +12,15 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
     using Fsel.Identity.Domain.Models.CommandModels.Campus;
     using MediatR;
 
+    public enum FileType
+    {
+        StudentsToClass,
+        StudentsToCurriculum
+    }
+
     public class GetNumberOfStudentInFileQuery : BaseImportCommandModel, IRequest<MethodResult<int>>
     {
+        public FileType FileType { get; set; }
     }
 
     public class GetNumberOfStudentInFileQueryHandler : IRequestHandler<GetNumberOfStudentInFileQuery, MethodResult<int>>
@@ -31,19 +38,38 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
             var userNames = new List<string>();
 
-            var result = request.FormFile.ImportAndValidateExcel(async (AddStudentsToCurriculumModel x, IList<AddStudentsToCurriculumModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+            if (request.FileType == FileType.StudentsToCurriculum)
             {
-                if (!string.IsNullOrEmpty(x.Username?.Trim()) || !string.IsNullOrEmpty(x.FullName?.Trim()))
+                var result = request.FormFile.ImportAndValidateExcel(async (AddStudentsToCurriculumModel x, IList<AddStudentsToCurriculumModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                 {
-                    userNames.Add(x.Username?.Trim() ?? string.Empty);
-                }
+                    if (!string.IsNullOrEmpty(x.Username?.Trim()) || !string.IsNullOrEmpty(x.FullName?.Trim()))
+                    {
+                        userNames.Add(x.Username?.Trim() ?? string.Empty);
+                    }
 
-                return await Task.FromResult(errors.Count == 0);
-            },
-            null,
-            null,
-            null,
-            true);
+                    return await Task.FromResult(errors.Count == 0);
+                },
+                null,
+                null,
+                null,
+                true);
+            }
+            else if (request.FileType == FileType.StudentsToClass)
+            {
+                var result = request.FormFile.ImportAndValidateExcel(async (AddStudentsToSchoolClassModel x, IList<AddStudentsToSchoolClassModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
+                {
+                    if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || !string.IsNullOrEmpty(x.Email?.Trim()) || !x.DateOfBirth.HasValue)
+                    {
+                        userNames.Add(x.Email?.Trim() ?? string.Empty);
+                    }
+
+                    return await Task.FromResult(errors.Count == 0);
+                },
+                null,
+                null,
+                null,
+                true);
+            }
 
             methodResult.Result = userNames.Count;
             return methodResult;
