@@ -92,7 +92,7 @@ builder.AddMassTransit(appSetting);
 
 //App config
 var app = builder.Build();
-app.UseForwardedHeaders();
+app.UseForwardedHeaders(fordwardedHeaderOptions);
 app.UseLanguages();
 app.UseStaticFiles();
 app.UseCertificateForwarding();
