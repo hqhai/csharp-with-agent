@@ -175,7 +175,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Gender,
                     ManageUserId,
                     Position,
-                    FullName,
                     FirstName,
                     LastName,
                     CreatedDate,
@@ -198,7 +197,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     H.Gender,
                     H.ManageUserId,
                     H.Position,
-                    H.FullName,
                     -- FirstName
                     TRIM(
                         CASE
@@ -238,7 +236,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Gender      = ISNULL(H.Gender, U.Gender),
                     ManageUserId= ISNULL(H.ManageUserId, U.ManageUserId),
                     Position    = ISNULL(H.Position, U.Position),
-                    FullName    = ISNULL(U.FullName, H.FullName),
                     -- FirstName
                     FirstName = TRIM(
                         CASE 
