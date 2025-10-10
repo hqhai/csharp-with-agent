@@ -28,13 +28,14 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
 
     public class GetPlacementTestsByProgramIdQueryHandler : IRequestHandler<GetPlacementTestsByProgramIdQuery, MethodResult<IList<PlacementTestSearchModel>>>
     {
-        private readonly IPlacementTestRepository _placementTestRepository;
         private readonly ILevelRepository _levelRepository;
+        private readonly ITestRepository _testRepository;
 
-        public GetPlacementTestsByProgramIdQueryHandler(IPlacementTestRepository placementTestRepository, ILevelRepository levelRepository)
+        public GetPlacementTestsByProgramIdQueryHandler(ILevelRepository levelRepository,
+            ITestRepository testRepository)
         {
-            _placementTestRepository = placementTestRepository;
             _levelRepository = levelRepository;
+            _testRepository = testRepository;
         }
 
         public async Task<MethodResult<IList<PlacementTestSearchModel>>> Handle(GetPlacementTestsByProgramIdQuery request, CancellationToken cancellationToken)
@@ -47,17 +48,17 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
                 queryLevel = queryLevel.WhereBulkContains(request.LevelIds, x => x.Id);
             }
 
-            var query = from baseQ in _placementTestRepository.Queryable
+            var query = from baseQ in _testRepository.Queryable
                         join l in queryLevel on baseQ.LevelId equals l.Id
                         where baseQ.ProgramId == request.ProgramId
                         select new PlacementTestSearchModel
                         {
-                            Id = baseQ.Id,
+                            Id = baseQ.OriginalId,
                             Name = baseQ.Name,
                             CreatedDate = baseQ.CreatedDate,
                             UpdatedDate = baseQ.UpdatedDate,
                             LevelCode = baseQ.Level != null ? baseQ.Level.Code : string.Empty,
-                            LevelId = baseQ.Level != null ? baseQ.Level.Id : null,
+                            LevelId = baseQ.LevelId,
                             LevelName = baseQ.Level != null ? baseQ.Level.Name : null,
                         };
             if (!string.IsNullOrEmpty(request.Keyword))

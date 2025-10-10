@@ -87,7 +87,8 @@ namespace Fsel.Course.Application.Commands.ProgramCmd
             }
             if (request.TestOriginalIds != null && request.TestOriginalIds.Any())
             {
-                var tests = await _testRepository.Queryable.WhereBulkContains(request.TestOriginalIds, x => x.Id).Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).ToListAsync(cancellationToken);
+                var tests = await _testRepository.Queryable.WhereBulkContains(request.TestOriginalIds, x => x.OriginalId).Where(x => x.VersionStatus == EnumVersionStatus.LastVersion).ToListAsync(cancellationToken);
+
                 if (tests.Count != request.TestOriginalIds.Count)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumCategoryErrorCode.NotEnoughTests));
