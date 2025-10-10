@@ -71,6 +71,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 await AddNewTest(newTestResultTree);
             }
 
+            if (TestResultComposites == null || !TestResultComposites.Any())
+            {
+               await InitAggregate();
+            }
+
+
             var inprogressTestResult = TestResultComposites.FirstOrDefault(t => t.TestResult.Status == EnumResultStatus.Process);
             inprogressTestResult?.Start();
 

@@ -123,7 +123,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             if (Children != null && Children.Count > 0)
             {
-                if (Children.All(c => ((TestAnswer)c.Result).Status == Shared.Enums.EnumAnswerStatus.Done))
+                if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == Shared.Enums.EnumAnswerStatus.Done))
                 {
                     if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                     {

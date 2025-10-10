@@ -20,7 +20,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false);
 
-        Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid studentId, EnumTestType enumTestType);
+        Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid programId, Guid studentId, EnumTestType enumTestType);
 
         Task<TestResult> MakeNewTestResultTree(Guid studentId, Guid stepFlowId, Guid testGroupResultId, Guid programId, Guid? actionFlowId = default);
 
@@ -41,10 +41,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         public TestService(ITestRepository testRepository,
              ICategoryTestBankRepository categoryTestBankRepository,
              IStepFlowRepository stepFlowRepository,
-             ITestSectionRepository testSectionRepository,
              IRepository<TestResult> testResultRepository,
              IRepository<TestGroupResult> testGroupResultRepository,
-             IRepository<TestSectionResult> testSectionResultRepository,
              IQuestionRepository questionRepository,
              IRepository<TestAnswer> testAnswerRepository,
              QuestionConverter questionConverter)
@@ -124,13 +122,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     var testSectionResult = new TestSectionResult
                     {
                         TestSectionId = section.Id,
-                        TestResultId = testResult.Id,
                         StudentId = studentId,
                         Status = EnumResultStatus.New,
                     };
                     testResult.SectionResults.Add(testSectionResult);
 
-                    CreateTestSectionResultTree(section, testSectionResult);
+                    CreateTestSectionResultTree(section, testSectionResult, testResult);
                 }
 
                 return testResult;
@@ -139,10 +136,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return null;
         }
 
-        public async Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid studentId, EnumTestType enumTestType)
+        public async Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid programId, Guid studentId, EnumTestType enumTestType)
         {
             var testGroupResult = new TestGroupResult
             {
+                ProgramId = programId,
                 FlowId = flowId,
                 StudentId = studentId,
                 TestType = enumTestType,
@@ -153,20 +151,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return testGroupResult;
         }
 
-        private static void CreateTestSectionResultTree(TestSection parentTestSection, TestSectionResult parentSectionResult)
+        private static void CreateTestSectionResultTree(TestSection parentTestSection, TestSectionResult parentSectionResult, TestResult testResult)
         {
             foreach (var child in parentTestSection.TestSections)
             {
                 var testSectionResult = new TestSectionResult
                 {
                     TestSectionId = child.Id,
-                    TestResultId = parentSectionResult.TestResultId,
                     StudentId = parentSectionResult.StudentId,
                     Status = EnumResultStatus.New,
-                    ParentTestSectionResultId = parentSectionResult.Id
                 };
                 parentSectionResult.SectionResults.Add(testSectionResult);
-                CreateTestSectionResultTree(child, testSectionResult);
+                testResult.SectionResults.Add(testSectionResult);
+                CreateTestSectionResultTree(child, testSectionResult, testResult);
             }
         }
 

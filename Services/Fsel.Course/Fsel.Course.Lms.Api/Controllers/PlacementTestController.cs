@@ -162,7 +162,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpGet("submit-answer/{studentId}")]
+        [HttpPost("submit-answer")]
         public async Task<IActionResult> GetPtState([FromBody] SubmitAnswerCommand submitCommand)
         {
             var queryResult = await _mediator.Send(submitCommand).ConfigureAwait(false);

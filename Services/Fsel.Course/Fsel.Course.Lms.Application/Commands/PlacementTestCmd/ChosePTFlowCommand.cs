@@ -47,29 +47,29 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PTStateModel>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
-                return methodResult;
-            }
-            var student = studentResult?.Content?.Result;
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
-                return methodResult;
-            }
-            if (student.Human == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human));
-                return methodResult;
-            }
+            //var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            //if (!studentResult.IsSuccessStatusCode)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+            //    return methodResult;
+            //}
+            //var student = studentResult?.Content?.Result;
+            //if (student == null)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+            //    return methodResult;
+            //}
+            //if (student.Human == null)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human));
+            //    return methodResult;
+            //}
 
-            var age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+            //var age = DateTimeHelper.GetYearOld(student.Human.Birthday);
 
             var flowMatch = await _flowService.GetHierarchicalFlowByCondition(x => x.ProgramId == request.ProgramId
             && x.Status == EnumStatus.Active
-            && x.FromAge <= age && x.ToAge >= age);
+            && x.FromAge == 1 && x.ToAge == 16);
 
             if (flowMatch?.StepFlows.FirstOrDefault() == null)
             {
@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-            var testGroupResult = await _testService.InitTestGroupResultForFlow(flowMatch.Id, student.Id, Domain.Enums.EnumTestType.PlacementTest);
+            var testGroupResult = await _testService.InitTestGroupResultForFlow(flowMatch.Id, request.ProgramId, new Guid("C9DFA20E-0B90-4585-B02E-58739980CBFF"), Domain.Enums.EnumTestType.PlacementTest);
 
             var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
             await aggregate.Start();

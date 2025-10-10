@@ -243,7 +243,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPut("update-program")]
         [ProducesResponseType(typeof(MethodResult<ProgramModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
+
         public async Task<IActionResult> UpdateProgram([FromBody] UpdateProgramCommand command)
         {
             var methodResult = await _mediator.Send(command).ConfigureAwait(false);
