@@ -18,10 +18,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public int RetryTime { get; set; }
 
-
-        public TestResult? TestResult { get; set; }
-        public Guid? TestResultId { get; set; }
-
         public TestSectionResult? TestSectionResult { get; set; }
         public Guid? TestSectionResultId { get; set; }
 
@@ -29,8 +25,5 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public Question? Question { get; set; }
         public Guid? QuestionId { get; set; }
-
-        public TestSection? TestSection { get; set; }
-        public Guid? TestSectionId { get; set; }
     }
 }

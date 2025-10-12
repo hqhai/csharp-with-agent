@@ -78,9 +78,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public Test? Test { get; set; }
         public Guid? TestId { get; set; }
 
-        public Guid? TestSectionResultId { get; set; }
-        public TestSectionResult? TestSectionResult { get; set; }
-
         public TestSection? Parent { get; set; }
         public Guid? ParentId { get; set; }
         public ICollection<TestSection> TestSections { get; set; } = new List<TestSection>();

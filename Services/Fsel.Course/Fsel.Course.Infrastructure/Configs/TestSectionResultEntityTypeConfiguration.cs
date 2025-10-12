@@ -13,17 +13,17 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.TestResult)
                    .WithMany(b => b.SectionResults)
                    .HasForeignKey(p => p.TestResultId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.ParentTestSectionResult)
                    .WithMany(b => b.SectionResults)
                    .HasForeignKey(p => p.ParentTestSectionResultId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(a => a.TestSection)
                    .WithMany(b => b.SectionResults)
                    .HasForeignKey(p => p.TestSectionId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

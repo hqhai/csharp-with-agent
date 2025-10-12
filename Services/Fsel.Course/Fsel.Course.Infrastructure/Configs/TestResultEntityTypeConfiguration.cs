@@ -2,11 +2,6 @@
 
 namespace Fsel.Course.Infrastructure.Configs
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -18,22 +13,22 @@ namespace Fsel.Course.Infrastructure.Configs
             builder.HasOne(a => a.Test)
                    .WithMany(b => b.TestResults)
                    .HasForeignKey(p => p.TestId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(a => a.TestGroupResult)
                    .WithMany(b => b.TestResults)
                    .HasForeignKey(p => p.TestGroupResultId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                   .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.StepFlow)
                    .WithMany(b => b.TestResults)
                    .HasForeignKey(p => p.StepFlowId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(a => a.ActionFlow)
                    .WithMany(b => b.TestResults)
                    .HasForeignKey(p => p.ActionFlowId)
-                   .OnDelete(DeleteBehavior.NoAction);
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

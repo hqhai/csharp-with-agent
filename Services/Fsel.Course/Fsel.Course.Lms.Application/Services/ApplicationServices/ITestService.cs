@@ -189,7 +189,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return testResult;
         }
 
-        private void LoadTestSectionResultTreeRecursive(TestSectionResult testSectionResult, List<TestSectionResult> inventory)
+        private static void LoadTestSectionResultTreeRecursive(TestSectionResult testSectionResult, List<TestSectionResult> inventory)
         {
             testSectionResult.SectionResults = inventory.Where(x => x.ParentTestSectionResultId == testSectionResult.Id).ToList();
             inventory = inventory.Except(testSectionResult.SectionResults).ToList();
@@ -227,7 +227,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     {
                         testAnswer = new TestAnswer
                         {
-                            TestResultId = request.TestResultId,
                             TestSectionResultId = request.SectionResultId,
                             QuestionId = questionId,
                             StudentId = request.StudentId
