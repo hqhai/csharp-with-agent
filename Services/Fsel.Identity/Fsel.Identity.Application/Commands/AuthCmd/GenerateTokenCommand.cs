@@ -44,6 +44,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IRoleClaimRepository _roleClaimRepository;
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
             IInteractionService interactionService,
@@ -55,7 +56,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IHttpContextAccessor httpContextAccessor,
             IRoleClaimRepository roleClaimRepository,
             RoleManager<Role> roleManager,
-            IMapper mapper)
+            IMapper mapper,
+            ICompetitionEventsRepository competitionEventsRepository)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -68,6 +70,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleClaimRepository = roleClaimRepository;
             _roleManager = roleManager;
             _mapper = mapper;
+            _competitionEventsRepository = competitionEventsRepository;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -140,7 +143,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
-                Code = user.Human?.Code
+                Code = user.Human?.Code,
+                EventCode = await GetEventCodeAsync(user.UserSchools.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.SchoolId, cancellationToken),
             };
 
             if (userRoles.Contains(EnumRole.Student.ToString()))
@@ -173,6 +177,18 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.Result = tokenLogin;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private async Task<string?> GetEventCodeAsync(Guid? schoolId, CancellationToken cancellationToken)
+        {
+            if (!schoolId.HasValue)
+            {
+                return null;
+            }
+            var userSchool = await _competitionEventsRepository.Queryable.Where(x => x.SchoolIdsStr != null && x.SchoolIdsStr.Contains(schoolId.Value.ToString()))
+                                                               .OrderByDescending(x => x.CreatedDate)
+                                                               .FirstOrDefaultAsync(cancellationToken);
+            return userSchool?.EventCode ?? null;
         }
     }
 }
