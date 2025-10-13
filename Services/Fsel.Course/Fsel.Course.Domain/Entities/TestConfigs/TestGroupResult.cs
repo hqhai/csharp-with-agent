@@ -30,8 +30,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public CourseModule? CourseModule { get; set; }
         public Guid? UnitModuleId { get; set; }
         public UnitModule? UnitModule { get; set; }
-        public Guid? CourseUnitLessonTestId { get; set; }
-        public CourseUnitLessonTest? CourseUnitLessonTest { get; set; }
 
         public Guid? LevelId { get; set; }
         public Level? Level { get; set; }

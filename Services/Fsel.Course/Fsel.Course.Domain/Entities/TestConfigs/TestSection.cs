@@ -19,8 +19,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public EnumTestLayoutType? LayoutType { get; set; }
 
-        public double? TotalScore { get; set; }
-
         public int DisplayOrder { get; set; }
 
         public string? SubQuestionIndexsStr { get; set; }
@@ -84,7 +82,6 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public ICollection<TestAISetting> TestAISettings { get; set; } = new List<TestAISetting>();
         public ICollection<TestSectionQuestion> TestSectionQuestions { get; set; } = new List<TestSectionQuestion>();
         public ICollection<TestSectionResult> SectionResults { get; set; } = new List<TestSectionResult>();
-        public ICollection<TestAnswer> TestAnswers { get; set; } = new List<TestAnswer>();
     }
 
     public class TestSectionConfig

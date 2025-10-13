@@ -15,7 +15,5 @@ namespace Fsel.Course.Domain.Entities.V1i1
         public Guid? LessonId { get; set; }
         public MockTest? MockTest { get; set; }
         public Guid? MockTestId { get; set; }
-
-        public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
     }
 }

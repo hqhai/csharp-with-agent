@@ -45,11 +45,6 @@ namespace Fsel.Course.Infrastructure.Configs
                    .HasForeignKey(p => p.UnitModuleId)
                    .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasOne(a => a.CourseUnitLessonTest)
-                   .WithMany(b => b.TestGroupResults)
-                   .HasForeignKey(p => p.CourseUnitLessonTestId)
-                   .OnDelete(DeleteBehavior.NoAction);
-
             builder.HasOne(a => a.Level)
                    .WithMany(b => b.TestGroupResults)
                    .HasForeignKey(p => p.LevelId)
