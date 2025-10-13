@@ -2,8 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 {
+    using System.Text.Json.Serialization;
     using Fsel.Course.Domain.Enums;
     using Newtonsoft.Json;
+    using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 
     public class PTStateModel
     {
@@ -18,6 +20,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public ICollection<BaseTestStateModel> TestStates { get; set; } = new List<BaseTestStateModel>();
     }
 
+    [JsonDerivedType(typeof(TestStateModel))]
+    [JsonDerivedType(typeof(SectionStateModel))]
+    [JsonDerivedType(typeof(QuestionStateModel))]
     public class BaseTestStateModel
     {
         public EnumResultStatus Status { get; set; }
