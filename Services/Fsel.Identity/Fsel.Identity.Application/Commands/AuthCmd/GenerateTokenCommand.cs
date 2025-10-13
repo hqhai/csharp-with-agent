@@ -136,6 +136,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 IpAddress = forwarded?.ToString()
             });
 
+            var schoolId = user.UserSchools.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.SchoolId;
             var tokenLogin = new TokenModel
             {
                 AccessToken = accessToken,
@@ -144,7 +145,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
                 Code = user.Human?.Code,
-                EventCode = await GetEventCodeAsync(user.UserSchools.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.SchoolId, cancellationToken),
+                EventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId),
             };
 
             if (userRoles.Contains(EnumRole.Student.ToString()))
@@ -177,18 +178,6 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             methodResult.Result = tokenLogin;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private async Task<string?> GetEventCodeAsync(Guid? schoolId, CancellationToken cancellationToken)
-        {
-            if (!schoolId.HasValue)
-            {
-                return null;
-            }
-            var userSchool = await _competitionEventsRepository.Queryable.Where(x => x.SchoolIdsStr != null && x.SchoolIdsStr.Contains(schoolId.Value.ToString()))
-                                                               .OrderByDescending(x => x.CreatedDate)
-                                                               .FirstOrDefaultAsync(cancellationToken);
-            return userSchool?.EventCode ?? null;
         }
     }
 }
