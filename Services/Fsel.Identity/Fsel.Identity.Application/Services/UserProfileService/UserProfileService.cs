@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.LmsCourseService;
@@ -24,6 +25,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
     using IdentityServer4.Models;
     using IdentityServer4.Services;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
 
     public class UserProfileService : ProfileService<User>, IProfileService
     {
@@ -49,7 +51,8 @@ namespace Fsel.Identity.Application.Services.UserProfileService
         {
             ArgumentNullException.ThrowIfNull(context);
 
-            var user = await _userManager.GetUserAsync(context.Subject);
+            var userId = _userManager.GetUserId(context.Subject).Parse<Guid>();
+            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == userId);
 
             if (user != null)
             {
