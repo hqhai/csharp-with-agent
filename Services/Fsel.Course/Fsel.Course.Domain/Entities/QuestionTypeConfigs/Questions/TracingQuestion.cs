@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 {
     using System.Text.Json.Serialization;
 
-    public class TracingQuestion
+    public class TracingQuestion : IConfigRuby
     {
         [JsonRequired]
         public string? Name { get; set; }
@@ -19,6 +19,9 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
         public string? Popup { get; set; }
 
         public int Trial { get; set; }
+        public string? NameRuby { get; set; }
+        public string? InstructionRuby { get; set; }
+        public string? PopupRuby { get; set; }
     }
 
     public class KeyboardTextModel

@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
 
-    public class MatchingTypeQuestion
+    public class MatchingTypeQuestion : IConfigRuby
     {
         [JsonRequired]
         public string? Name { get; set; }
@@ -18,6 +18,10 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
         [JsonRequired]
         public IList<MatchingTypeQuestionLink>? Link { get; set; }
+
+        public string? NameRuby { get; set; }
+        public string? InstructionRuby { get; set; }
+        public string? PopupRuby { get; set; }
     }
 
     public class MatchingTypeQuestionContent

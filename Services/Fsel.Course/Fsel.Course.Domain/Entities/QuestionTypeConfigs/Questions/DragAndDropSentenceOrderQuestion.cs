@@ -5,10 +5,14 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     using System.Collections.Generic;
     using System.Text.Json.Serialization;
 
-    public class DragAndDropSentenceOrderQuestion
+    public class DragAndDropSentenceOrderQuestion : IConfigRuby
     {
         [JsonRequired]
         public string? Name { get; set; }
+
+        public string? NameRuby { get; set; }
+        public string? InstructionRuby { get; set; }
+        public string? PopupRuby { get; set; }
 
         [JsonRequired]
         public IList<DragAndDropSentenceOrderQuestionContent>? Contents { get; set; }

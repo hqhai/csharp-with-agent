@@ -33,6 +33,13 @@ namespace Fsel.Course.Domain.Entities
         public string? MediaPost { get; set; }
 
         /// <summary>
+        /// Media Post Ruby
+        /// </summary>
+
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? MediaPostContentRuby { get; set; }
+
+        /// <summary>
         /// Trình độ Level
         /// </summary>
         public EnumCourseLevel CourseLevel { get; set; }

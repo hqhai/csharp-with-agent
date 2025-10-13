@@ -86,9 +86,14 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
     public class TestSectionConfig
     {
-
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
+
+        /// <summary>
+        /// Media Post Ruby
+        /// </summary>
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? MediaPostContentRuby { get; set; }
 
         public double? ExecutionTime { get; set; }
 

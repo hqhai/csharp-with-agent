@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Exercises
         public Guid? Id { get; set; }
         public string? Name { get; set; }
         public string? MediaPost { get; set; }
+        public string? MediaPostContentRuby { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
         public Guid? SkillId { get; set; }
         public IList<CreateQuestionCommandModel>? Questions { get; set; }
