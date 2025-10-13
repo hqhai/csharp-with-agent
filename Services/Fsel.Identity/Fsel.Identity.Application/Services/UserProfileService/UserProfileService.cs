@@ -27,6 +27,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
     using IdentityServer4.Models;
     using IdentityServer4.Services;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
 
     public class UserProfileService : ProfileService<User>, IProfileService
     {
@@ -58,7 +59,8 @@ namespace Fsel.Identity.Application.Services.UserProfileService
             _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager;
             _roleManager = await _tenantProvider.CreateRoleManagerAsync<Role>(userId: userId.Parse<Guid>()) ?? _roleManager;
 
-            var user = await _userManager.GetUserAsync(context.Subject);
+            var userId = _userManager.GetUserId(context.Subject).Parse<Guid>();
+            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == userId);
 
             if (user != null)
             {

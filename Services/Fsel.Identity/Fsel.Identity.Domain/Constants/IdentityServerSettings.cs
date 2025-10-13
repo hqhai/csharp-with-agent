@@ -19,7 +19,7 @@ namespace Fsel.Identity.Domain.Constants
             public const string IsPlacementTest = "is_placement_test";
             public const string IsOrder = "is_order";
             public const string IsSurvey = "is_survey";
-            public const string SchoolId = "school_id";
+            public const string SchoolId = "SchoolId";
         }
     }
 }
