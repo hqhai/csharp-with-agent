@@ -1,7 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.Constants;
+using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
+using Fsel.Core.Middlewares;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
@@ -17,6 +19,7 @@ using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
 using Fsel.Course.Lms.Application.Services.ApplicationServices;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
 using Fsel.Course.Lms.Application.Services.FFmpegServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
@@ -28,6 +31,7 @@ using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
 using Refit;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +44,8 @@ builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
 builder.Services.AddScoped<IFlowService, FlowService>();
 builder.Services.AddScoped<ITestService, TestService>();
+builder.Services.AddScoped<ITestCachingService, TestCachingService>();
+builder.Services.AddScoped<IFlowCachingService, FlowCachingService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -253,5 +259,9 @@ queues: new Dictionary<string, Type>
 });
 
 var app = builder.Build();
+if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsEnvironment(Settings.Environments.Testing))
+{
+    app.UseMiddleware<CacheManagerMiddleware>("/cache");
+}
 app.UseServices();
 app.Run();
