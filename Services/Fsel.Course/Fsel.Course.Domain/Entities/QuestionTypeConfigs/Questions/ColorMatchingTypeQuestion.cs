@@ -9,7 +9,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
 
-    public class ColorMatchingTypeQuestion : ValidationEntity
+    public class ColorMatchingTypeQuestion : ValidationEntity, IConfigRuby
     {
         [JsonRequired]
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
@@ -21,6 +21,10 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
         [JsonRequired]
         public EnumColorMatchingDisplayType Type { get; set; }
+
+        public string? NameRuby { get; set; }
+        public string? InstructionRuby { get; set; }
+        public string? PopupRuby { get; set; }
 
         [JsonRequired]
         public IList<ColorMatchingTypeQuestionOption> Contents { get; set; } = new List<ColorMatchingTypeQuestionOption>();

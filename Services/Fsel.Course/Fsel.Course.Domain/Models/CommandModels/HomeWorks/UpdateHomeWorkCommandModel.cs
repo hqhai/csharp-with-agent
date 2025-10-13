@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.HomeWorks
         public string? Name { get; set; }
         public string? Code { get; set; }
         public string? MediaPost { get; set; }
+        public string? MediaPostContentRuby { get; set; }
         public Guid? SkillId { get; set; }
         public IList<CreateQuestionCommandModel>? Questions { get; set; }
         public Guid? LevelId { get; set; }

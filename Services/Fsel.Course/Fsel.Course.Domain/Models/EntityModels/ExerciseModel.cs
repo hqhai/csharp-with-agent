@@ -13,6 +13,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? SkillId { get; set; }
         public string? SkillName { get; set; }
         public string? MediaPostContent => StringHelper.ProcessHtml(MediaPost, true);
+        public string? MediaPostContentRuby { get; set; }
         public IEnumerable<string>? AudioPaths => StringHelper.GetIframeUrls(MediaPost, true);
         public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false);
         public EnumCourseSkill CourseSkill { get; set; }
