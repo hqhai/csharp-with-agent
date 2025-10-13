@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities.V1i1
 {
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.TestConfigs;
 
     public class CourseUnitLessonTest : Entity
     {

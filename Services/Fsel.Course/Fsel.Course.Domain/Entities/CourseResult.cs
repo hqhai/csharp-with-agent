@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
 
@@ -17,5 +18,7 @@ namespace Fsel.Course.Domain.Entities
         public EnumWorkingStatus WorkingStatus { get; set; }
         public DateTime? ProcessDate { get; set; }
         public DateTime? CompletionDate { get; set; }
+
+        public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
     }
 }

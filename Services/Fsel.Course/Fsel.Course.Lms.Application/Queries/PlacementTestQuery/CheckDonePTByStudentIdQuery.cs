@@ -5,8 +5,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using System;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Interfaces;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -18,21 +19,27 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 
     public class CheckDonePTByStudentIdHandler : IRequestHandler<CheckDonePTByStudentIdQuery, MethodResult<bool>>
     {
-        private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
+        private readonly IRepository<TestGroupResult> _testGroupResult;
 
-        public CheckDonePTByStudentIdHandler(IPlacementTestGroupResultRepository placementTestGroupResultRepository)
+        public CheckDonePTByStudentIdHandler(IRepository<TestGroupResult> testGroupResult)
         {
-            _placementTestGroupResultRepository = placementTestGroupResultRepository;
+            _testGroupResult = testGroupResult;
         }
 
         public async Task<MethodResult<bool>> Handle(CheckDonePTByStudentIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
-            var isCheck = await _placementTestGroupResultRepository.Queryable.AnyAsync(x => x.Status == EnumResultStatus.Done && x.StudentId == request.StudentId, cancellationToken);
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = isCheck;
-            return methodResult;
+
+            var isDone = await _testGroupResult.Queryable.AnyAsync(x => x.Status == EnumResultStatus.Done
+            && x.StudentId == request.StudentId
+            && x.TestType == EnumTestType.PlacementTest,
+                cancellationToken);
+
+            return new MethodResult<bool>
+            {
+                StatusCode = StatusCodes.Status200OK,
+                Result = isDone
+            };
         }
     }
 }

@@ -297,6 +297,11 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new KeyboardTextEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RubyAnnotationTypeConfiguration());
             modelBuilder.ApplyConfiguration(new RubyScopeTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestGroupResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestSectionResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestAnswerEntityTypeConfiguration());
+
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
             //modelBuilder.Ignore<PercentEvaluateInputResultModel>();

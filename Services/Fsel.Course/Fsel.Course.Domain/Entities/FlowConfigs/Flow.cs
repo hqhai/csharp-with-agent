@@ -2,13 +2,14 @@
 
 namespace Fsel.Course.Domain.Entities.FlowConfigs
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
-    using Fsel.Common.Helpers;
-    using System.ComponentModel.DataAnnotations.Schema;
 
     public class Flow : Entity
     {
@@ -41,5 +42,7 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
         public Guid ProgramId { get; set; }
         public ICollection<PlacementTestGroupResult> PlacementTestGroupResults { get; set; } = new List<PlacementTestGroupResult>();
         public ICollection<StepFlow> StepFlows { get; set; } = new List<StepFlow>();
+
+        public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
     }
 }
