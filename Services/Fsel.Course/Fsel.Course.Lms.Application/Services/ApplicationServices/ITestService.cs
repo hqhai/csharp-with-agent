@@ -5,12 +5,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using System;
     using System.Linq.Expressions;
     using System.Threading.Tasks;
-    using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
@@ -29,24 +29,27 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
     public class TestService : ITestService
     {
+        private readonly ITestCachingService _testCachingService;
         private readonly ITestRepository _testRepository;
         private readonly ICategoryTestBankRepository _categoryTestBankRepository;
         private readonly IStepFlowRepository _stepFlowRepository;
-        private readonly IRepository<TestResult> _testResultRepository;
-        private readonly IRepository<TestGroupResult> _testGroupResultRepository;
+        private readonly Core.Base.Interfaces.IRepository<TestResult> _testResultRepository;
+        private readonly Core.Base.Interfaces.IRepository<TestGroupResult> _testGroupResultRepository;
         private readonly IQuestionRepository _questionRepository;
-        private readonly IRepository<TestAnswer> _testAnswerRepository;
+        private readonly Core.Base.Interfaces.IRepository<TestAnswer> _testAnswerRepository;
         private readonly QuestionConverter _questionConverter;
 
-        public TestService(ITestRepository testRepository,
+        public TestService(ITestCachingService testCachingService,
+            ITestRepository testRepository,
              ICategoryTestBankRepository categoryTestBankRepository,
              IStepFlowRepository stepFlowRepository,
-             IRepository<TestResult> testResultRepository,
-             IRepository<TestGroupResult> testGroupResultRepository,
+             Core.Base.Interfaces.IRepository<TestResult> testResultRepository,
+             Core.Base.Interfaces.IRepository<TestGroupResult> testGroupResultRepository,
              IQuestionRepository questionRepository,
-             IRepository<TestAnswer> testAnswerRepository,
+             Core.Base.Interfaces.IRepository<TestAnswer> testAnswerRepository,
              QuestionConverter questionConverter)
         {
+            _testCachingService = testCachingService;
             _testRepository = testRepository;
             _categoryTestBankRepository = categoryTestBankRepository;
             _stepFlowRepository = stepFlowRepository;
@@ -61,19 +64,37 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         {
             var test = await _testRepository.ReadQueryable
                                  .Where(predicate)
-                                 .Include(x => x.TestSections)
                                  .OrderBy(x => x.CreatedDate)
                                  .FirstOrDefaultAsync();
 
-            var childSections = test.TestSections.Where(x => x.ParentId != null).ToList();
-            test.TestSections = test.TestSections.Where(x => x.ParentId == null).ToList();
-
-            foreach (var section in test.TestSections)
+            if (test != null)
             {
-                LoadTestSectionTree(section, childSections);
+                test = await GetHierachicalTestById(test.Id);
             }
 
             return test;
+        }
+
+        private async Task<Test> GetHierachicalTestById(Guid id)
+        {
+            return await _testCachingService.GetOrSetAsync(id.ToString(), async (ctx, _) =>
+            {
+                var test = await _testRepository.ReadQueryable
+                                 .Where(x => x.Id == id)
+                                 .Include(x => x.TestSections)
+                                 .OrderBy(x => x.CreatedDate)
+                                 .FirstOrDefaultAsync(cancellationToken: _);
+
+                var childSections = test.TestSections.Where(x => x.ParentId != null).ToList();
+                test.TestSections = test.TestSections.Where(x => x.ParentId == null).ToList();
+
+                foreach (var section in test.TestSections)
+                {
+                    LoadTestSectionTree(section, childSections);
+                }
+
+                return test;
+            });
         }
 
         private void LoadTestSectionTree(TestSection testSection, List<TestSection> inventory)
