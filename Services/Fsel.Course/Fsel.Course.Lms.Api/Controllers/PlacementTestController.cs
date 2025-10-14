@@ -7,7 +7,9 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Fsel.Course.Lms.Application.Commands.PlacementTestCmd;
+    using Fsel.Course.Lms.Application.Queries.CategoryQuery;
     using Fsel.Course.Lms.Application.Queries.PlacementTestQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
@@ -143,6 +145,14 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
+        [HttpGet("get-subjects")]
+        public async Task<IActionResult> GetSubjects()
+        {
+            var getProgramQuery = new GetAllSubjectsQuery();
+            var queryResult = await _mediator.Send(getProgramQuery).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
         [HttpPost("select/{programId}")]
         public async Task<IActionResult> SelectPTFlowByProgramId(Guid programId)
         {
@@ -150,6 +160,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             var queryResult = await _mediator.Send(chosePtFlowCommand).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
 
         [HttpPost("continue/{studentId}")]
         public async Task<IActionResult> GetPTFlowForStudent(Guid studentId)
