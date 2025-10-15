@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
 {
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
 
     public class StepFlow : Entity
@@ -22,5 +23,6 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
         public ICollection<StepFlow> StepFlows { get; set; } = new List<StepFlow>();
         public ICollection<ActionFlow> ChildActionFlows { get; set; } = new List<ActionFlow>();
         public ICollection<ActionFlow> ParentActionFlows { get; set; } = new List<ActionFlow>();
+        public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
     }
 }

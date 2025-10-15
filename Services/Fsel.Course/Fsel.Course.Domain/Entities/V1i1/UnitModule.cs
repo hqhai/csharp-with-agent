@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Entities.V1i1
     using Fsel.Core.Entities;
     using Enums;
     using IEntities;
+    using Fsel.Course.Domain.Entities.TestConfigs;
 
     public class UnitModule : Entity, IDisplayInfo
     {
@@ -23,5 +24,7 @@ namespace Fsel.Course.Domain.Entities.V1i1
         public Unit? Unit { get; set; }
 
         public Guid OriginalId { get; set; }
+
+        public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
     }
 }

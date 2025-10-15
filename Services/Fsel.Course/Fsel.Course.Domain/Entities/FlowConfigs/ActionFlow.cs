@@ -2,9 +2,10 @@
 
 namespace Fsel.Course.Domain.Entities.FlowConfigs
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.TestConfigs;
 
     public class ActionFlow : Entity
     {
@@ -23,5 +24,6 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
         public string? SystemAutoCode { get; set; }
 
         public ICollection<PlacementTestResult> PlacementTestResults { get; set; } = new List<PlacementTestResult>();
+        public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
     }
 }

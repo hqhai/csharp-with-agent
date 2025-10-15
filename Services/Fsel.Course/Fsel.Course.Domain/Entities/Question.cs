@@ -88,5 +88,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<QuestionExplanationLog> QuestionExplanationLogs { get; set; } = new List<QuestionExplanationLog>();
         public ICollection<QuestionShuffle> QuestionShuffles { get; set; } = new List<QuestionShuffle>();
         public ICollection<TestSectionQuestion> TestSectionQuestions { get; set; } = new List<TestSectionQuestion>();
+        public ICollection<TestAnswer> TestAnswers { get; set; } = new List<TestAnswer>();
     }
 }

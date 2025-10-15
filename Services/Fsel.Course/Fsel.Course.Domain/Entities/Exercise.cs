@@ -25,6 +25,13 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumCourseSkill CourseSkill { get; set; }
 
+        /// <summary>
+        /// Media Post Ruby
+        /// </summary>
+
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? MediaPostContentRuby { get; set; }
+
         public Skill? Skill { get; set; }
         public Guid? SkillId { get; set; }
 

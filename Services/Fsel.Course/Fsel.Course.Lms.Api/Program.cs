@@ -16,6 +16,7 @@ using Fsel.Course.Lms.Application.Services.AiService;
 using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
+using Fsel.Course.Lms.Application.Services.ApplicationServices;
 using Fsel.Course.Lms.Application.Services.FFmpegServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
@@ -36,6 +37,9 @@ builder.AddServices(appSetting);
 builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
+
+builder.Services.AddScoped<IFlowService, FlowService>();
+builder.Services.AddScoped<ITestService, TestService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -138,6 +142,7 @@ builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionReposito
 builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
 builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
 builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
+builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

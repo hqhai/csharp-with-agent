@@ -8,6 +8,7 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Models.CommandModels.TestAiSettings;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.CommandModels.TestSections;
+    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
 
     public class TestProfile : Profile
@@ -15,6 +16,10 @@ namespace Fsel.Course.Infrastructure.Maps
         public TestProfile()
         {
             CreateMap<Test, TestModel>().IgnoreAllNonExisting();
+            CreateMap<Test, TestOriginalModel>()
+                .ForMember(dest => dest.Id, p => p.MapFrom(o => o.OriginalId))
+                .ForMember(dest => dest.Name, p => p.MapFrom(o => o.Code));
+
             CreateMap<TestSection, TestSectionModel>().IgnoreAllNonExisting();
 
             CreateMap<CreateTestSectionCommandModel, TestSection>().ForMember(dest => dest.TestAISettings, opt => opt.Ignore()).IgnoreAllNonExisting();

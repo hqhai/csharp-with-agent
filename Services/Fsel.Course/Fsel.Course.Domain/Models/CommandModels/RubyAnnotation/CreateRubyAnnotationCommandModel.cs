@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.RubyAnnotation
         public Guid ObjectId { get; set; }
         public EnumObjectType ObjectType { get; set; }
         public string? Text { get; set; }
-        public EnumLanguageType LangueType { get; set; }
+        public EnumLanguageType LanguageType { get; set; }
         public string? SelectedText { get; set; }
         public string? TextNote { get; set; }
         public int StartGrapheme { get; set; }

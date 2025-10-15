@@ -104,7 +104,7 @@ namespace Fsel.Course.Application.Commands.RubyAnnotationCmd
             var rubyText = _mapper.Map<EntityRubyAnnotation>(request);
             rubyText.SelectedText = RubyTextNormalization.ToNfc(request.SelectedText);
             rubyText.RubyScopeId = scope.Id;
-            rubyText.LanguageType = request.LangueType;
+            rubyText.LanguageType = request.LanguageType;
             rubyText.LengthNote = request.LengthSelectedText;
 
             if (rubyText == null)

@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Entities
     using System;
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.IEntities;
 
     public class UnitResult : BaseScoreResult, IModuleLifeCycle
@@ -23,5 +24,7 @@ namespace Fsel.Course.Domain.Entities
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid UnitId { get; set; }
+
+        public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
     }
 }

@@ -123,6 +123,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         MediaPost = n.MediaPost,
                                         CourseSkill = n.CourseSkill,
                                         SkillId = n.SkillId,
+                                        MediaPostContentRuby = n.MediaPostContentRuby,
                                         SkillName = n.Skill != null ? n.Skill.Name : null,
                                         Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                                         {

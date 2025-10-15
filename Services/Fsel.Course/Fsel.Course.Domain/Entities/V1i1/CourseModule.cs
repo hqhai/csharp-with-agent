@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities.V1i1
 {
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
 
@@ -23,5 +24,7 @@ namespace Fsel.Course.Domain.Entities.V1i1
         public Guid CourseId { get; set; }
 
         public Guid OriginalId { get; set; }
+
+        public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
     }
 }

@@ -81,14 +81,19 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public ICollection<TestSection> TestSections { get; set; } = new List<TestSection>();
         public ICollection<TestAISetting> TestAISettings { get; set; } = new List<TestAISetting>();
         public ICollection<TestSectionQuestion> TestSectionQuestions { get; set; } = new List<TestSectionQuestion>();
+        public ICollection<TestSectionResult> SectionResults { get; set; } = new List<TestSectionResult>();
     }
 
     public class TestSectionConfig
     {
-        public double? TotalScore { get; set; }
-
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
+
+        /// <summary>
+        /// Media Post Ruby
+        /// </summary>
+        [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? MediaPostContentRuby { get; set; }
 
         public double? ExecutionTime { get; set; }
 
