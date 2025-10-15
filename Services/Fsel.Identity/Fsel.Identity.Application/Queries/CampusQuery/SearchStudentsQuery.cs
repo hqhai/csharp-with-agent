@@ -25,6 +25,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
     {
         public IList<EnumCurriculumStatus>? CurriculumStatus { get; set; }
         public Guid? SchoolClassId { get; set; }
+        public IList<Guid>? SchoolClassIds { get; set; }
         public IList<Guid>? StudentIds { get; set; }
     }
 
@@ -103,6 +104,11 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             if (request.SchoolClassId.HasValue)
             {
                 query = query.Where(p => p.SchoolClassId == request.SchoolClassId);
+            }
+
+            if (request.SchoolClassIds != null && request.SchoolClassIds.Any())
+            {
+                query = query.Where(p => p.SchoolClassId.HasValue && request.SchoolClassIds.Contains(p.SchoolClassId.Value));
             }
 
             if (request.StudentIds != null && request.StudentIds.Any())
