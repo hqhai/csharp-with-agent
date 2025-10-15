@@ -13,6 +13,7 @@ using IdentityServer4.Events;
 using System;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace IdentityServer4.AspNetIdentity
 {
@@ -26,7 +27,7 @@ namespace IdentityServer4.AspNetIdentity
     {
         private SignInManager<TUser> _signInManager;
         private UserManager<TUser> _userManager;
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ResourceOwnerPasswordValidator<TUser>> _logger;
 
         /// <summary>
@@ -38,12 +39,12 @@ namespace IdentityServer4.AspNetIdentity
         public ResourceOwnerPasswordValidator(
             UserManager<TUser> userManager,
             SignInManager<TUser> signInManager,
-            ITenantProvider tenantProvider,
+            IServiceProvider serviceProvider,
             ILogger<ResourceOwnerPasswordValidator<TUser>> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _tenantProvider = tenantProvider;
+            _serviceProvider = serviceProvider;
             _logger = logger;
         }
 
@@ -56,8 +57,9 @@ namespace IdentityServer4.AspNetIdentity
         {
             ArgumentNullException.ThrowIfNull(context);
 
-            _userManager = await _tenantProvider.CreateUserManagerAsync<TUser>(context.UserName) ?? _userManager;
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<TUser>(context.UserName) ?? _signInManager;
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _userManager = tenantProvider != null ? await tenantProvider.CreateUserManagerAsync<TUser>(context.UserName) ?? _userManager : _userManager;
+            _signInManager = tenantProvider != null ? await tenantProvider.CreateSignInManagerAsync<TUser>(context.UserName) ?? _signInManager : _signInManager;
             var user = await _userManager.FindByNameAsync(context.UserName);
             if (user != null)
             {

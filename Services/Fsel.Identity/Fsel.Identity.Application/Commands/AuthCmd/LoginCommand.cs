@@ -4,6 +4,7 @@ using Fsel.Common.ActionResults;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Base.Managers;
 using Fsel.Core.Entities;
+using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Commands.UserDeletionCmd;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
@@ -16,6 +17,7 @@ using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -32,7 +34,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private IStudentRepository _studentRepository;
         private ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IMediator _mediator;
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IServiceProvider _serviceProvider;
 
         public LoginCommandHandler(UserManager<User> userManager,
             Microsoft.AspNetCore.Identity.SignInManager<User> signInManager,
@@ -41,7 +43,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
             IStudentRepository studentRepository,
             ICompetitionEventsRepository competitionEventsRepository,
-            ITenantProvider tenantProvider)
+            IServiceProvider serviceProvider)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -50,7 +52,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _studentRepository = studentRepository;
             _competitionEventsRepository = competitionEventsRepository;
-            _tenantProvider = tenantProvider;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -65,12 +67,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(request.Username) ?? _userManager;
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User>(request.Username) ?? _signInManager;
-            _platformRepository = await _tenantProvider.CreateRepositoryAsync<IPlatformRepository>(request.Username) ?? _platformRepository;
-            _studentCompetitionEventsRepository = await _tenantProvider.CreateRepositoryAsync<IStudentCompetitionEventsRepository>(request.Username) ?? _studentCompetitionEventsRepository;
-            _studentRepository = await _tenantProvider.CreateRepositoryAsync<IStudentRepository>(request.Username) ?? _studentRepository;
-            _competitionEventsRepository = await _tenantProvider.CreateRepositoryAsync<ICompetitionEventsRepository>(request.Username) ?? _competitionEventsRepository;
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            if (tenantProvider != null)
+            {
+                _userManager = await tenantProvider.CreateUserManagerAsync<User>(request.Username) ?? _userManager;
+                _signInManager = await tenantProvider.CreateSignInManagerAsync<User>(request.Username) ?? _signInManager;
+                _platformRepository = await tenantProvider.CreateRepositoryAsync<IPlatformRepository>(request.Username) ?? _platformRepository;
+                _studentCompetitionEventsRepository = await tenantProvider.CreateRepositoryAsync<IStudentCompetitionEventsRepository>(request.Username) ?? _studentCompetitionEventsRepository;
+                _studentRepository = await tenantProvider.CreateRepositoryAsync<IStudentRepository>(request.Username) ?? _studentRepository;
+                _competitionEventsRepository = await tenantProvider.CreateRepositoryAsync<ICompetitionEventsRepository>(request.Username) ?? _competitionEventsRepository;
+            }
 
             var user = await _userManager.FindByNameAsync(request.Username);
             if (user == null || user.IsDeleted)

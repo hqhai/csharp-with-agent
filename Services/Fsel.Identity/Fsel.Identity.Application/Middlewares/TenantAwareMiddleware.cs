@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Middlewares
 {
+    using System;
     using System.Linq;
     using System.Text.Encodings.Web;
     using System.Text.Json;
@@ -27,10 +28,10 @@ namespace Fsel.Identity.Application.Middlewares
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, ITenantProvider tenantProvider)
+        public async Task InvokeAsync(HttpContext context, IServiceProvider serviceProvider)
         {
             ArgumentNullException.ThrowIfNull(context);
-            ArgumentNullException.ThrowIfNull(tenantProvider);
+            ArgumentNullException.ThrowIfNull(serviceProvider);
 
             var endpoint = context.GetEndpoint();
             var actionDescriptor = endpoint?.Metadata.GetMetadata<ControllerActionDescriptor>();
@@ -51,7 +52,8 @@ namespace Fsel.Identity.Application.Middlewares
                 await _next(context);
                 return;
             }
-
+            
+            var tenantProvider = serviceProvider.GetRequiredService<ITenantProvider>();
             var tenant = await tenantProvider.GetTenantAsync(username, userId);
             if (tenant != null)
             {

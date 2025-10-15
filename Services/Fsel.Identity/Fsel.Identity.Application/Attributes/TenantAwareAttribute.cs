@@ -15,6 +15,7 @@ namespace Fsel.Identity.Application.Attributes
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Abstractions;
     using Microsoft.AspNetCore.Mvc.Filters;
+    using Microsoft.Extensions.DependencyInjection;
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public sealed class TenantAwareAttribute : TypeFilterAttribute
@@ -24,10 +25,10 @@ namespace Fsel.Identity.Application.Attributes
 
     public class TenantAwareFilter : IAsyncResourceFilter, IOrderedFilter
     {
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IServiceProvider _serviceProvider;
         public int Order => int.MinValue;
 
-        public TenantAwareFilter(ITenantProvider tenantProvider) => _tenantProvider = tenantProvider;
+        public TenantAwareFilter(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
         public async Task OnResourceExecutionAsync(ResourceExecutingContext context, ResourceExecutionDelegate next)
         {
@@ -40,17 +41,24 @@ namespace Fsel.Identity.Application.Attributes
                 return;
             }
 
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            if (tenantProvider == null)
+            {
+                await next.Invoke();
+                return;
+            }
+
             var (username, userId) = await ExtractTenantInfoAsync(context);
             if (!string.IsNullOrWhiteSpace(username) || userId.HasValue)
             {
-                var tenant = await _tenantProvider.GetTenantAsync(username, userId);
+                var tenant = await tenantProvider.GetTenantAsync(username, userId);
                 if (tenant == null)
                 {
                     await next.Invoke();
                     return;
                 }
 
-                var tenantByDomain = await _tenantProvider.GetTenantByDomainUrlAsync();
+                var tenantByDomain = await tenantProvider.GetTenantByDomainUrlAsync();
                 if (tenantByDomain != null && (tenantByDomain.IsMultiLogin || tenant.Id == tenantByDomain.Tenant?.Id))
                 {
                     context.HttpContext.SetHeader(JwtClaimNames.TenantId, tenant.Id.ToString());

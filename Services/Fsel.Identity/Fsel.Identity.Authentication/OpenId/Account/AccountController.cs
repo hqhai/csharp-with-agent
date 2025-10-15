@@ -39,6 +39,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
 using PhoneNumbers;
@@ -72,7 +73,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly AppSetting _appSetting;
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IServiceProvider _serviceProvider;
 
         public AccountController(
             IMediator mediator,
@@ -97,7 +98,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             ICompetitionEventsRepository competitionEventsRepository,
             IHttpClientFactory httpClientFactory,
             AppSetting appSetting,
-            ITenantProvider tenantProvider)
+            IServiceProvider serviceProvider)
         {
             UserSession = userSession;
             _mediator = mediator;
@@ -121,7 +122,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             _competitionEventsRepository = competitionEventsRepository;
             _httpClientFactory = httpClientFactory;
             _appSetting = appSetting;
-            _tenantProvider = tenantProvider;
+            _serviceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -749,8 +750,10 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             }
 
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(email ?? string.Empty) ?? _userManager;
-            _signInManager = await _tenantProvider.CreateSignInManagerAsync<User>(email ?? string.Empty) ?? _signInManager;
+
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _userManager = tenantProvider != null ? await tenantProvider.CreateUserManagerAsync<User>(email ?? string.Empty) ?? _userManager : _userManager;
+            _signInManager = tenantProvider != null ? await tenantProvider.CreateSignInManagerAsync<User>(email ?? string.Empty) ?? _signInManager : _signInManager;
 
             var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
             if (user != null && !await ValidateLogin(user))

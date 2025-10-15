@@ -11,6 +11,7 @@ using Fsel.Common.ValueSettings;
 using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Base.Managers;
 using Fsel.Core.Entities;
+using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Services.InteractionService;
 using Fsel.Identity.Application.Services.LmsCourseService;
 using Fsel.Identity.Application.Services.OrderService;
@@ -26,6 +27,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
@@ -49,7 +51,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IRoleClaimRepository _roleClaimRepository;
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IServiceProvider _serviceProvider;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
             IInteractionService interactionService,
@@ -62,7 +64,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IRoleClaimRepository roleClaimRepository,
             RoleManager<Role> roleManager,
             IMapper mapper,
-            ITenantProvider tenantProvider)
+            IServiceProvider serviceProvider)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -75,7 +77,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleClaimRepository = roleClaimRepository;
             _roleManager = roleManager;
             _mapper = mapper;
-            _tenantProvider = tenantProvider;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -83,13 +85,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<TokenModel> methodResult = new MethodResult<TokenModel>();
 
-            var tenant = await _tenantProvider.GetTenantAsync(request.UserName);
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(request.UserName) ?? _userManager;
-            _userTokenRepository = await _tenantProvider.CreateRepositoryAsync<IUserTokenRepository>(request.UserName) ?? _userTokenRepository;
-            _interactionService = await _tenantProvider.CreateServiceAsync<IInteractionService>(_appSetting.Services?.InteractionApiUrl, request.UserName) ?? _interactionService;
-            _trainingService = await _tenantProvider.CreateServiceAsync<ITrainingService>(_appSetting.Services?.TrainingApiUrl, request.UserName) ?? _trainingService;
-            _lmsCourseService = await _tenantProvider.CreateServiceAsync<ILmsCourseService>(_appSetting.Services?.LmsCourseApiUrl, request.UserName) ?? _lmsCourseService;
-            _orderService = await _tenantProvider.CreateServiceAsync<IOrderService>(_appSetting.Services?.OrderApiUrl, request.UserName) ?? _orderService;
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            var tenant = tenantProvider != null ? await tenantProvider.GetTenantAsync(request.UserName) : null;
+            if (tenantProvider != null)
+            {
+                _userManager = await tenantProvider.CreateUserManagerAsync<User>(request.UserName) ?? _userManager;
+                _userTokenRepository = await tenantProvider.CreateRepositoryAsync<IUserTokenRepository>(request.UserName) ?? _userTokenRepository;
+                _interactionService = await tenantProvider.CreateServiceAsync<IInteractionService>(_appSetting.Services?.InteractionApiUrl, request.UserName) ?? _interactionService;
+                _trainingService = await tenantProvider.CreateServiceAsync<ITrainingService>(_appSetting.Services?.TrainingApiUrl, request.UserName) ?? _trainingService;
+                _lmsCourseService = await tenantProvider.CreateServiceAsync<ILmsCourseService>(_appSetting.Services?.LmsCourseApiUrl, request.UserName) ?? _lmsCourseService;
+                _orderService = await tenantProvider.CreateServiceAsync<IOrderService>(_appSetting.Services?.OrderApiUrl, request.UserName) ?? _orderService;
+            }
 
             var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)

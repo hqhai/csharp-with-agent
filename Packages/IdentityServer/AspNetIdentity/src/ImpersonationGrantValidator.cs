@@ -9,6 +9,7 @@ namespace IdentityServer4.AspNetIdentity
     using IdentityServer4.Models;
     using IdentityServer4.Validation;
     using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using static IdentityModel.OidcConstants;
 
@@ -22,7 +23,7 @@ namespace IdentityServer4.AspNetIdentity
     {
         private UserManager<TUser> _userManager;
         private readonly SignInManager<TUser> _signInManager;
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ImpersonationGrantValidator<TUser>> _logger;
 
         /// <summary>
@@ -31,11 +32,11 @@ namespace IdentityServer4.AspNetIdentity
         /// <param name="userManager">The user manager.</param>
         /// <param name="signInManager">The sign in manager.</param>
         /// <param name="logger">The logger.</param>
-        public ImpersonationGrantValidator(UserManager<TUser> userManager, SignInManager<TUser> signInManager, ITenantProvider tenantProvider, ILogger<ImpersonationGrantValidator<TUser>> logger)
+        public ImpersonationGrantValidator(UserManager<TUser> userManager, SignInManager<TUser> signInManager, IServiceProvider serviceProvider, ILogger<ImpersonationGrantValidator<TUser>> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _tenantProvider = tenantProvider;
+            _serviceProvider = serviceProvider;
             _logger = logger;
         }
 
@@ -55,7 +56,8 @@ namespace IdentityServer4.AspNetIdentity
 
             var userName = context.Request.Raw.Get(nameof(ExtensionGrantValidationContext.Request.UserName));
 
-            _userManager = await _tenantProvider.CreateUserManagerAsync<TUser>(userName ?? string.Empty) ?? _userManager;
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _userManager = tenantProvider != null ? await tenantProvider.CreateUserManagerAsync<TUser>(userName ?? string.Empty) ?? _userManager : _userManager;
             var user = await _userManager.FindByNameAsync(userName ?? string.Empty);
             if (user != null)
             {

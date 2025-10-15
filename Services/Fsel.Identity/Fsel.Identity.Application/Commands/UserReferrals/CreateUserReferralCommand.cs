@@ -17,6 +17,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
 
     public class CreateUserReferralCommand : CreateUserReferralCommandModel, IRequest<MethodResult<VoidMethodResult>>
     {
@@ -27,22 +28,23 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
         private IUserReferralRepository _userReferralRepository;
         private UserManager<User> _userManager;
         private readonly AuthContext _authContext;
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IServiceProvider _serviceProvider;
         private const int MaxUserCoinRewarded = 10;
 
-        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager, AuthContext authContext, ITenantProvider tenantProvider)
+        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager, AuthContext authContext, IServiceProvider serviceProvider)
         {
             _userReferralRepository = userReferralRepository;
             _userManager = userManager;
             _authContext = authContext;
-            _tenantProvider = tenantProvider;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<VoidMethodResult>> Handle(CreateUserReferralCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: request.ReceiverId) ?? _userManager;
-            _userReferralRepository = await _tenantProvider.CreateRepositoryAsync<IUserReferralRepository>(userId: request.ReceiverId) ?? _userReferralRepository;
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _userManager = tenantProvider != null ? await tenantProvider.CreateUserManagerAsync<User>(userId: request.ReceiverId) ?? _userManager : _userManager;
+            _userReferralRepository = tenantProvider != null ? await tenantProvider.CreateRepositoryAsync<IUserReferralRepository>(userId: request.ReceiverId) ?? _userReferralRepository : _userReferralRepository;
 
             var methodResult = new MethodResult<VoidMethodResult>();
 

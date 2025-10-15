@@ -28,6 +28,8 @@ namespace Fsel.Identity.Application.Services.UserProfileService
     using IdentityServer4.Services;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
+    using static Fsel.Identity.Domain.Constants.IdentityServerSettings;
 
     public class UserProfileService : ProfileService<User>, IProfileService
     {
@@ -37,9 +39,9 @@ namespace Fsel.Identity.Application.Services.UserProfileService
         private readonly ITrainingService _trainingService;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IOrderService _orderService;
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IServiceProvider _serviceProvider;
 
-        public UserProfileService(Core.Base.Managers.UserManager<User> usermanager, Core.Base.Managers.RoleManager<Role> roleManager, IUserClaimsPrincipalFactory<User> userClaimsPrincipalFactory, IInteractionService interactionService, ITrainingService trainingService, ILmsCourseService lmsCourseService, IOrderService orderService, ITenantProvider tenantProvider)
+        public UserProfileService(Core.Base.Managers.UserManager<User> usermanager, Core.Base.Managers.RoleManager<Role> roleManager, IUserClaimsPrincipalFactory<User> userClaimsPrincipalFactory, IInteractionService interactionService, ITrainingService trainingService, ILmsCourseService lmsCourseService, IOrderService orderService, IServiceProvider serviceProvider)
             : base(usermanager, userClaimsPrincipalFactory)
         {
             _userManager = usermanager;
@@ -48,20 +50,24 @@ namespace Fsel.Identity.Application.Services.UserProfileService
             _trainingService = trainingService;
             _lmsCourseService = lmsCourseService;
             _orderService = orderService;
-            _tenantProvider = tenantProvider;
+            _serviceProvider = serviceProvider;
         }
 
         public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
+
             var userId = _userManager.GetUserId(context.Subject);
-            var tenant = await _tenantProvider.GetTenantAsync(string.Empty, userId.Parse<Guid>());
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager;
-            _roleManager = await _tenantProvider.CreateRoleManagerAsync<Role>(userId: userId.Parse<Guid>()) ?? _roleManager;
 
-            var userId = _userManager.GetUserId(context.Subject).Parse<Guid>();
-            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == userId);
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            var tenant = tenantProvider != null ? await tenantProvider.GetTenantAsync(string.Empty, userId.Parse<Guid>()) : null;
+            if (tenantProvider != null)
+            {
+                _userManager = await tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager;
+                _roleManager = await tenantProvider.CreateRoleManagerAsync<Role>(userId: userId.Parse<Guid>()) ?? _roleManager;
+            }
 
+            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Student).FirstOrDefaultAsync(x => x.Id ==  userId.Parse<Guid>());
             if (user != null)
             {
                 var claims = (await _userManager.GetClaimsAsync(user)).ToList();
@@ -162,7 +168,9 @@ namespace Fsel.Identity.Application.Services.UserProfileService
         {
             ArgumentNullException.ThrowIfNull(context);
             var userId = _userManager.GetUserId(context.Subject);
-            _userManager = await _tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager;
+
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _userManager = tenantProvider != null ? await tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager : _userManager;
 
             var sub = context.Subject.GetSubjectId();
             var user = await _userManager.FindByIdAsync(sub);

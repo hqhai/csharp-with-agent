@@ -12,6 +12,8 @@ namespace Fsel.Identity.Application.Commands.SenderCmd
     using Fsel.Shared.Enums;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Identity.Infrastructure.ValueSettings;
+    using Microsoft.Extensions.DependencyInjection;
+    using Fsel.Core.Extensions;
 
     public class SendOtpCommand : IRequest<MethodResult<bool>>
     {
@@ -26,20 +28,20 @@ namespace Fsel.Identity.Application.Commands.SenderCmd
     public class SendOtpCommandHandler : IRequestHandler<SendOtpCommand, MethodResult<bool>>
     {
         private ISenderService _senderService;
-        private readonly ITenantProvider _tenantProvider;
+        private readonly IServiceProvider _serviceProvider;
         private readonly AppSetting _appSetting;
 
-        public SendOtpCommandHandler(ISenderService senderService, ITenantProvider tenantProvider, AppSetting appSetting)
+        public SendOtpCommandHandler(ISenderService senderService, IServiceProvider serviceProvider, AppSetting appSetting)
         {
             _senderService = senderService;
-            _tenantProvider = tenantProvider;
-            _appSetting = appSetting;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<bool>> Handle(SendOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            _senderService = await _tenantProvider.CreateServiceAsync<ISenderService>(_appSetting.Services?.SenderApiUrl, request.Email) ?? _senderService;
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _senderService = tenantProvider != null ? await tenantProvider.CreateServiceAsync<ISenderService>(_appSetting.Services?.SenderApiUrl, request.Email) ?? _senderService : _senderService;
 
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
