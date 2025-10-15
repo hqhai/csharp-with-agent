@@ -120,5 +120,17 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Course
+        /// </summary>
+        [HttpGet("get-course-by-level")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseByCourseLevel([FromQuery] GetCoursesByLevelQuery query)
+        {
+            MethodResult<IList<CourseModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

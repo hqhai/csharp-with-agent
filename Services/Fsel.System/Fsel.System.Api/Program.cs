@@ -17,11 +17,13 @@ using Fsel.System.Application.Services.StorageServices;
 using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
 using Fsel.System.Domain.IRepositories.BlindBoxes;
+using Fsel.System.Domain.IRepositories.CourseGoals;
 using Fsel.System.Domain.IRepositories.DailyQuizs;
 using Fsel.System.Infrastructure;
 using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.Repositories.BlindBoxes;
+using Fsel.System.Infrastructure.Repositories.CourseGoals;
 using Fsel.System.Infrastructure.Repositories.DailyQuizs;
 using Fsel.System.Infrastructure.ValueSettings;
 using Microsoft.EntityFrameworkCore;
@@ -86,14 +88,14 @@ builder.Services.AddScoped<IBlindBoxHistoryRepository, BlindBoxHistoryRepository
 builder.Services.AddScoped<IBlindBoxUserRepository, BlindBoxUserRepository>();
 builder.Services.AddScoped<IDictionaryRepository, DictionaryRepository>();
 builder.Services.AddScoped<IUnknownWordRepository, UnknownWordRepository>();
-
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
 builder.Services.AddScoped<IDisplayOrderConfigRepository, DisplayOrderConfigRepository>();
-
 builder.Services.AddScoped<IDailyQuizAnswerRepository, DailyQuizAnswerRepository>();
 builder.Services.AddScoped<IDailyQuizHistoryRepository, DailyQuizHistoryRepository>();
 builder.Services.AddScoped<IDailyQuizQuestionRepository, DailyQuizQuestionRepository>();
 builder.Services.AddScoped<IDailyQuizWinnerRepository, DailyQuizWinnerRepository>();
+builder.Services.AddScoped<ICourseGoalRepository, CourseGoalRepository>();
+builder.Services.AddScoped<ICourseGoalConfigRepository, CourseGoalConfigRepository>();
 
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();

@@ -47,5 +47,8 @@ namespace Fsel.System.Application.Services.CourseServices
 
         [Get("/v1/student/student-setting/{userId}")]
         Task<IApiResponse<MethodResult<StudentSettingModel>>> GetStudentSetting([FromRoute] Guid? userId);
+
+        [Post("/v1.1/admin/course")]
+        Task<IApiResponse<MethodResult<IList<CourseModel>>>> GetCoursesByIdsAsync([FromBody] IList<Guid> courseIds);
     }
 }

@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
     public class GetCoursesByLevelQuery : IRequest<MethodResult<IList<CourseModel>>>
     {
+        public EnumCourseStatus? DifferentStatus { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
     }
 
@@ -30,15 +31,20 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<CourseModel>>();
-            var courses = await _courseRepository.Queryable
+            var courses = await _courseRepository.Queryable.Where(x => !x.IsArchive)
+                                .Where(x => !request.DifferentStatus.HasValue || x.Status != request.DifferentStatus)
                                 .Where(x => request.CourseLevel != null && x.CourseLevel == request.CourseLevel)
                                 .Select(x => new CourseModel
                                 {
                                     Id = x.Id,
+                                    Code = x.Code,
+                                    Status = x.Status,
                                     Name = x.Name,
                                     CourseLevel = x.CourseLevel,
                                     CreatedDate = x.CreatedDate,
-                                }).ToListAsync(cancellationToken);
+                                    UpdatedDate = x.UpdatedDate,
+                                }).OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                                .ToListAsync(cancellationToken);
 
             methodResult.Result = courses;
             methodResult.StatusCode = StatusCodes.Status200OK;
