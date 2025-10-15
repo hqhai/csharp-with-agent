@@ -39,10 +39,10 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
             , QuestionConverter questionConverter
             , IQuestionRepository questionRepository
             , ISkillRepository skillRepository,
-ICategoryRepository categoryRepository,
-ILevelRepository levelRepository,
-IVersionEntityUpdater<HomeWork> versionEntityUpdater,
-IHomeWorkQuestionRepository homeWorkQuestionRepository)
+            ICategoryRepository categoryRepository,
+            ILevelRepository levelRepository,
+            IVersionEntityUpdater<HomeWork> versionEntityUpdater,
+            IHomeWorkQuestionRepository homeWorkQuestionRepository)
         {
             _mapper = mapper;
             _homeWorkRepository = homeWorkRepository;
@@ -143,6 +143,7 @@ IHomeWorkQuestionRepository homeWorkQuestionRepository)
                     oldEntity.LevelId = newEntity.LevelId;
                     oldEntity.ProgramId = newEntity.ProgramId;
                     oldEntity.SkillId = newEntity.SkillId;
+                    oldEntity.MediaPostContentRuby = newEntity.MediaPostContentRuby;
 
                     var removedModules = homeWork.HomeWorkQuestions
                                          .ExceptBy(newVersionHomeWork.HomeWorkQuestions.Where(x => x.Question != null).Select(x => x.Question!.Id), u => u.QuestionId)

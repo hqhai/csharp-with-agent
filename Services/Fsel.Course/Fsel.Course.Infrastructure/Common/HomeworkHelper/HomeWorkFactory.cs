@@ -31,6 +31,7 @@ namespace Fsel.Course.Infrastructure.Common.HomeworkHelper
                 Name = _createRequest.Name,
                 MediaPost = _createRequest.MediaPost,
                 VersionStatus = EnumVersionStatus.LastVersion,
+                MediaPostContentRuby = _createRequest.MediaPostContentRuby,
                 Version = version,
                 LevelId = _createRequest.LevelId,
                 ProgramId = _createRequest.ProgramId,
