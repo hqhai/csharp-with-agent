@@ -185,5 +185,18 @@ namespace Fsel.Identity.Api.Controllers.Campus
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Search Class By School
+        /// </summary>
+        [HttpGet("search-class-by-school")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SchoolClassModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        public async Task<IActionResult> Search([FromQuery] SearchClassBySchoolQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }
