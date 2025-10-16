@@ -50,16 +50,6 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<CurriculumModel>>();
 
-            var userId = request.UserId ?? _authContext.CurrentUserId;
-
-            var studentResult = await _userService.GetStudentByUserIdAsync(userId);
-            var student = studentResult.Content?.Result;
-            if (student == null)
-            {
-                methodResult.Result = null;
-                return methodResult;
-            }
-
             var query = await (from baseQuery in _curriculumStudentRepository.Queryable
                                join cu in _curriculumRepository.Queryable on baseQuery.CurriculumId equals cu.Id
                                join c in _courseRepository.Queryable on cu.CourseId equals c.Id
@@ -108,9 +98,16 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                 curriculums = curriculums.Where(p => p.IsDone == request.IsDone).ToList();
             }
 
-            if (request.IsFilter.HasValue && request.IsFilter.Value && student.CourseId.HasValue)
+            if (request.IsFilter.HasValue && request.IsFilter.Value)
             {
-                curriculums = curriculums.Where(p => p.CourseCloneId != student.CourseId).ToList();
+                var userId = request.UserId ?? _authContext.CurrentUserId;
+
+                var studentResult = await _userService.GetStudentByUserIdAsync(userId);
+                var student = studentResult.Content?.Result;
+                if (student != null && student.CourseId.HasValue)
+                {
+                    curriculums = curriculums.Where(p => p.CourseCloneId != student.CourseId).ToList();
+                }
             }
 
             methodResult.Result = curriculums;
