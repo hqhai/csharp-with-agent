@@ -31,7 +31,6 @@ using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
 using Refit;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,6 +45,7 @@ builder.Services.AddScoped<IFlowService, FlowService>();
 builder.Services.AddScoped<ITestService, TestService>();
 builder.Services.AddScoped<ITestCachingService, TestCachingService>();
 builder.Services.AddScoped<IFlowCachingService, FlowCachingService>();
+builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
