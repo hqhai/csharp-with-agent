@@ -9,13 +9,14 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     using Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
     [ApiController]
-   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class MockTestController : ControllerBase
     {
         private readonly IMediator _mediator;
