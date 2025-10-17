@@ -43,6 +43,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListLearningStatus = request.ListLearningStatus,
                 ListCompletionStatus = request.ListCompletionStatus,
                 IsLearning = request.IsLearning,
+                ListCourseType = request.ListCourseType,
 
                 EndDate = request.EndDate,
                 StartDate = request.StartDate,

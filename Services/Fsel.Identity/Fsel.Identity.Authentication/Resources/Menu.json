@@ -653,5 +653,56 @@
       "children": []
     },
     "createdDate": "2025-06-15"
+  },
+  {
+    "id": "40217f52-0b4b-4c95-b5f8-c1317deba995",
+    "name": "Curriculum Management",
+    "category": "LMSAdmin",
+    "index": 33,
+    "config": {
+      "id": 28,
+      "code_title": "Quản lý giáo trình",
+      "link": "/curriculum-management",
+      "icon": "Star.png",
+      "parentId": 0,
+      "code": "",
+      "permission": "Admin,CSO,AdminSchool",
+      "children": []
+    },
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "9b06098b-4328-43b0-a1bd-0d0d12d87d7c",
+    "name": "School Student Management",
+    "category": "LMSAdmin",
+    "index": 34,
+    "config": {
+      "id": 31,
+      "code_title": "Quản lý học sinh(School)",
+      "link": "/student-school-management",
+      "icon": "Star.png",
+      "parentId": 0,
+      "code": "",
+      "permission": "Admin,CSO,AdminSchool",
+      "children": []
+    },
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "d7c5e83c-5ec4-479e-b0dc-4dd3784e36e4",
+    "name": "School Class Management",
+    "category": "LMSAdmin",
+    "index": 35,
+    "config": {
+      "id": 32,
+      "code_title": "Quản lý lớp(School)",
+      "link": "/class-school-management",
+      "icon": "Star.png",
+      "parentId": 0,
+      "code": "",
+      "permission": "Admin,CSO,AdminSchool",
+      "children": []
+    },
+    "createdDate": "2025-09-18"
   }
 ]

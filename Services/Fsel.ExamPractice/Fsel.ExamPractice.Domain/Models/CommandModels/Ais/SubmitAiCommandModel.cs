@@ -20,6 +20,6 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.Ais
 
         public string? UserAIConfig { get; set; }
 
-        public object? Text { get; set; }
+        public object? Format { get; set; }
     }
 }

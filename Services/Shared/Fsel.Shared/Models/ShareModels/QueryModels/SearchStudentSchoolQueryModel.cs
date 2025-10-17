@@ -17,6 +17,7 @@ namespace Fsel.Shared.Models.ShareModels.QueryModels
         public string? ListOverallScore { get; set; }
         public string? ListCourseLevel { get; set; }
         public string? ListCurrentLevel { get; set; }
+        public string? ListCourseType { get; set; }
         public virtual EnumCourseType? CourseType { get; set; }
         public virtual bool? IsLearning { get; set; }
         public DateTime? EndDate { get; set; }

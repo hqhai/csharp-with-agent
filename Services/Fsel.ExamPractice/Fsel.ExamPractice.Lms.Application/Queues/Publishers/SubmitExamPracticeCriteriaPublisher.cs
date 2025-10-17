@@ -16,7 +16,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(SubmitExamPracticeResponseModel? request, CancellationToken cancellationToken)
+        public async Task Publish(SubmitExamPracticeAiSpeakingResponseModel? request, CancellationToken cancellationToken)
         {
             if (request == null)
             {

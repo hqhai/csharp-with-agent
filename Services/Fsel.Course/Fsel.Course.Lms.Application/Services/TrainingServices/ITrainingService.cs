@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
     using Fsel.Course.Lms.Application.Services.TrainingServices.QueryModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -47,5 +48,11 @@ namespace Fsel.Course.Lms.Application.Services.TrainingServices
 
         [Get("/v1/class/get-students-in-7-day-choose-level")]
         Task<IApiResponse<MethodResult<IList<StudentsIn7DayChooseLevelModel>>>> GetStudentsIn7DayChooseLevel();
+
+        [Post("/v1/campus/add-students-into-class")]
+        Task<IApiResponse<MethodResult<bool>>> AddStudentsCampusIntoClass([FromBody] AddStudentsCampusIntoClassCommandModel model);
+
+        [Post("/v1/campus/delete-class-students-from-curriculum")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteClassStudents([FromBody] DeleteClassStudentsFromCurriculumCommandModels model);
     }
 }

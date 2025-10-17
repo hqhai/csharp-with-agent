@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
@@ -45,6 +46,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly ISystemConfigRepository _systemConfigRepository;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
 
@@ -58,7 +60,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IRoleClaimRepository roleClaimRepository,
             RoleManager<Role> roleManager,
             IMapper mapper,
-            ICompetitionEventsRepository competitionEventsRepository)
+            ICompetitionEventsRepository competitionEventsRepository,
+            ISystemConfigRepository systemConfigRepository)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -72,6 +75,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleManager = roleManager;
             _mapper = mapper;
             _competitionEventsRepository = competitionEventsRepository;
+            _systemConfigRepository = systemConfigRepository;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -101,6 +105,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(JwtClaimNames.Jti, jti),
                 new Claim(nameof(TokenModel.EventCode), eventCode),
             };
+
+            if (user.UserSchools != null && user.UserSchools.Any())
+            {
+                authClaims.Add(new Claim("SchoolId", user.UserSchools.First().SchoolId.ToString()));
+            }
 
             foreach (var userRole in userRoles)
             {
@@ -142,6 +151,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 IpAddress = forwarded?.ToString()
             });
 
+            var isEnabledExtra = await _systemConfigRepository.Queryable.Select(x => x.IsEnabled).FirstOrDefaultAsync(cancellationToken);
             var tokenLogin = new TokenModel
             {
                 AccessToken = accessToken,
@@ -150,10 +160,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
                 Code = user.Human?.Code,
+                IsEnabledExtra = isEnabledExtra,
                 EventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId),
             };
 
-            if (userRoles.Contains(EnumRole.Student.ToString()))
+            if (userRoles.Contains(EnumRole.Student.ToString()) || userRoles.Contains(EnumRole.StudentCampus.ToString()))
             {
                 var student = user.Human?.Student;
                 tokenLogin.IsOrder = false;
@@ -175,9 +186,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     tokenLogin.IsSurvey = isSurvey?.Content?.Result;
                 }
             }
-            if (userRoles.Contains(EnumRole.AdminSchool.ToString()))
+
+            if (userRoles.Any(p => p == EnumRole.AdminSchool.ToString() || p == EnumRole.AdminCampus.ToString() || p == EnumRole.TeacherCampus.ToString()))
             {
-                tokenLogin.SchoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                tokenLogin.SchoolId = user.UserSchools?.FirstOrDefault()?.SchoolId;
             }
 
             methodResult.Result = tokenLogin;

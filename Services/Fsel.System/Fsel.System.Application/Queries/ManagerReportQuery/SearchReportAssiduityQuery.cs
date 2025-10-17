@@ -42,6 +42,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
                 ListDistrict = request.ListDistrict,
@@ -53,6 +54,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 IsLearning = request.IsLearning,
                 ListLearningStatus = request.ListLearningStatus,
                 ListCompletionStatus = request.ListCompletionStatus,
+                ListCourseType = request.ListCourseType,
 
                 PageSize = request.PageSize,
                 Filters = request.Filters,
@@ -98,6 +100,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListCompletionStatus = request.ListCompletionStatus,
                 ListCourseLevel = request.ListCourseLevel,
                 ListLearningStatus = request.ListLearningStatus,
+                ListCourseType = request.ListCourseType,
 
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,

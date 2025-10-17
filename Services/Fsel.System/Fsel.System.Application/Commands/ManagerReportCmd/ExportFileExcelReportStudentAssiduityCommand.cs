@@ -46,6 +46,7 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 IsSearchReport = request.IsSearchReport,
                 ListCompletionStatus = request.ListCompletionStatus,
                 ListLearningStatus = request.ListLearningStatus,
+                ListCourseType = request.ListCourseType,
 
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
@@ -64,6 +65,7 @@ namespace Fsel.System.Application.Commands.ManagerReportCmd
                 IsSearchReport = request.IsSearchReport,
                 ListCompletionStatus = request.ListCompletionStatus,
                 ListLearningStatus = request.ListLearningStatus,
+                ListCourseType = request.ListCourseType,
 
                 Keyword = request.Keyword,
                 StartDate = request.StartDate,
