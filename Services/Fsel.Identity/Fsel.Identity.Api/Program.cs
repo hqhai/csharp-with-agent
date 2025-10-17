@@ -70,6 +70,7 @@ builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepo
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<ISystemConfigRepository, SystemConfigRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();

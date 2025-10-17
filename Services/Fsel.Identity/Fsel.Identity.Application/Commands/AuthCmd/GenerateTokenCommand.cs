@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq.Dynamic.Core;
 using System.Security.Claims;
 using System.Text;
 using AutoMapper;
@@ -45,6 +46,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly ISystemConfigRepository _systemConfigRepository;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
 
@@ -58,7 +60,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IRoleClaimRepository roleClaimRepository,
             RoleManager<Role> roleManager,
             IMapper mapper,
-            ICompetitionEventsRepository competitionEventsRepository)
+            ICompetitionEventsRepository competitionEventsRepository,
+            ISystemConfigRepository systemConfigRepository)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -72,6 +75,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleManager = roleManager;
             _mapper = mapper;
             _competitionEventsRepository = competitionEventsRepository;
+            _systemConfigRepository = systemConfigRepository;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -147,6 +151,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 IpAddress = forwarded?.ToString()
             });
 
+            var isEnabledExtra = await _systemConfigRepository.Queryable.Select(x => x.IsEnabled).FirstOrDefaultAsync(cancellationToken);
             var tokenLogin = new TokenModel
             {
                 AccessToken = accessToken,
@@ -155,6 +160,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
                 Code = user.Human?.Code,
+                IsEnabledExtra = isEnabledExtra,
                 EventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId),
             };
 

@@ -115,6 +115,7 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<Menu> Menus { get; set; }
         public DbSet<SchoolClass> SchoolClasses { get; set; }
         public DbSet<UserSenderSetting> UserSenderSettings { get; set; }
+        public DbSet<SystemConfig> SystemConfigs { get; set; }
 
         #endregion Db Set
 
