@@ -567,7 +567,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     if (mockTestAnswer == null)
                     {
                         mockTestAnswer = GetMockTestAnswer(sectionGroupResult, null, sectionTimeCode.Id);
-                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
+                        double pronScore = await _evaluationAIService.EvaluationSpeakingV1(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
 
                         mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore);
                         if (!mockTestAnswer.IsValid())
@@ -579,7 +579,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                     }
                     else
                     {
-                        double pronScore = await _evaluationAIService.EvaluationSpeaking(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
+                        double pronScore = await _evaluationAIService.EvaluationSpeakingV1(sectionTimeCode.Name, item?.Answer?.ToString() ?? default);
 
                         mockTestAnswer = GetMockTestAnswer(mockTestAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore);
                         if (!mockTestAnswer.IsValid())

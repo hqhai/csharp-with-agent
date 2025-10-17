@@ -61,6 +61,8 @@ namespace Fsel.Course.Infrastructure.ValueSettings
         public string? FirstApiKey { get; set; }
         public string? SecondApiKey { get; set; }
         public string? Location { get; set; }
+
+        public string? SpeechRecognitionLanguage { get; set; }
     }
 
     public class Services : BaseServices
