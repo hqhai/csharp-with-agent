@@ -11,9 +11,10 @@ namespace Fsel.Identity.Infrastructure.Maps
 
     public class StudentRankingProfile : Profile
     {
+        private readonly int _maxTotalScore = 100;
         public StudentRankingProfile()
         {
-            CreateMap<StudentRanking, StudentRankingModel>().IgnoreAllNonExisting();
+            CreateMap<StudentRanking, StudentRankingModel>().ForMember(x => x.TotalScore, c => c.MapFrom(p => p.TotalScore > _maxTotalScore ? _maxTotalScore : p.TotalScore));
             CreateMap<StudentRanking, StudentRankingRealTime>().IgnoreAllNonExisting();
             CreateMap<CreateStudentRankingCommandModel, StudentRanking>().IgnoreAllNonExisting();
             CreateMap<RegisterStudentForEventCommandModel, EventRegistration>().IgnoreAllNonExisting();
