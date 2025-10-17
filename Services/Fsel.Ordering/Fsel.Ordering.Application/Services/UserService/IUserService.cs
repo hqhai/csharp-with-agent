@@ -44,5 +44,8 @@ namespace Fsel.Ordering.Application.Services.UserService
 
         [Get("/v1/user/get-role-by-user-id/{userId}")]
         Task<IApiResponse<MethodResult<string?>>> GetRoleByUserId([FromRoute] string userId);
+
+        [Post("/v1/user-setting/sender-setting-generate-token")]
+        Task<IApiResponse<MethodResult<string>>> SenderSettingGenerateToken([Body] UpdateSenderSettingCommandModel command);
     }
 }
