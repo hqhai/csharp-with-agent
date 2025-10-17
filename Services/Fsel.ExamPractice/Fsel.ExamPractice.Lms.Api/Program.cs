@@ -40,6 +40,7 @@ builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAISer
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 builder.Services.AddScoped<IPronuciationAssessmentService, PronuciationAssessmentService>();
+builder.Services.AddScoped<IContinuousPronunciationAssessmentService, PronuciationAssessmentService>();
 
 builder.Services.AddScoped<ExamPracticeHelper>();
 builder.Services.AddScoped<ExamPracticeSectionHelper>();

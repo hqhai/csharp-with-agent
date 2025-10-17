@@ -43,7 +43,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         private readonly SubmitSpeakingAIPublisher _submitSpeakingAIPublisher;
         private readonly SubmitExamPracticeAnswerPublisher _submitExamPracticeAnswerPublisher;
         private readonly ExamPracticeSectionHelper _examPracticeSectionHelper;
-        private readonly IPronuciationAssessmentService _pronuciationAssessmentService;
+        private readonly IContinuousPronunciationAssessmentService _pronuciationAssessmentService;
         private readonly IMapper _mapper;
 
         public CreateExamPracticeAnswerCommandHandler(
@@ -58,7 +58,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             SubmitSpeakingAIPublisher submitSpeakingAIPublisher,
             SubmitExamPracticeAnswerPublisher submitExamPracticeAnswerPublisher,
             ExamPracticeSectionHelper examPracticeSectionHelper,
-            IPronuciationAssessmentService pronuciationAssessmentService,
+            IContinuousPronunciationAssessmentService pronuciationAssessmentService,
             IMapper mapper)
         {
             _examPracticeRepository = examPracticeRepository;
@@ -553,12 +553,8 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     continue;
                 }
                 var answer = answers.FirstOrDefault(x => x.ExamPracticeResultId == request.ExamPracticeResultId && x.ExamPracticeSectionId == section.Id);
-                PronunciationAssessmentModel? pronunciationAssessment = default;
-                if (item.Answer != null && !string.IsNullOrEmpty(item.SpeechTextAnswer))
-                {
-                    pronunciationAssessment = await _pronuciationAssessmentService.AssessPronunciationFromFileAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer);
-                }
-                double pronScore = pronunciationAssessment?.PronunciationScore ?? default;
+                var pronunciationAssessment = await _pronuciationAssessmentService.AssessPronunciationFromFileContinuousAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
+                double pronScore = pronunciationAssessment.PronunciationScore;
                 if (answer == null)
                 {
                     answer = GetExamPracticeAnswer(sectionResult, section.Id);
