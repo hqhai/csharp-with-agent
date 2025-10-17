@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queues.Consumers
+namespace Fsel.Course.Lms.Application.Queues.Consumers.ExportFiles
 {
     using Fsel.Core.Base;
     using Fsel.Course.Lms.Application.Queries.Reports;
