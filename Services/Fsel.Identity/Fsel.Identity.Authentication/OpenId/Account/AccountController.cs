@@ -625,7 +625,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             {
                 var origin = Request.Host.Value;
                 var scheme = Request.Scheme;
-                var redirectUrl = $"{scheme}://{origin}{Url.Action(nameof(VnEduExternalLoginConfirmation), new { returnUrl })}";
+                var redirectUrl = $"{scheme}://{origin}{Url.Action(nameof(VnEduExternalLoginConfirmation), new { returnUrl = Uri.EscapeDataString(returnUrl) })}";
 
                 return this.RedirectWithQuery(_appSetting.Authentication.VnEdu.Endpoint,
                     new { app_id = _appSetting.Authentication.VnEdu.AppId, @continue = redirectUrl }, isEndcode: false);
