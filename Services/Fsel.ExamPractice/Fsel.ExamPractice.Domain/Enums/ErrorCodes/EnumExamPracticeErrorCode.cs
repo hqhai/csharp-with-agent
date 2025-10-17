@@ -31,6 +31,8 @@ namespace Fsel.ExamPractice.Domain.Enums.ErrorCodes
 
         InvalidReadingQuestionCount,
 
-        InvalidListenningQuestionCount
+        InvalidListenningQuestionCount,
+
+        AlreadyExistsLearningData
     }
 }

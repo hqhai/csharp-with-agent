@@ -61,6 +61,12 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery.V1i1
             {
                 query = query.Where(x => request.SubTypes.Contains(x.SubType));
             }
+
+            if (request.Skill.HasValue)
+            {
+                query = query.Where(x => x.ExamPracticeSections.Any(c => c.CourseSkill == request.Skill));
+            }
+
             var queryData = query.Select(x => new ExamPracticeSearchModel
             {
                 Id = x.Id,
@@ -77,6 +83,9 @@ namespace Fsel.ExamPractice.Application.Queries.ExamPracticeQuery.V1i1
                 CourseSkills = x.ExamPracticeSections.Where(x => x.CourseSkill.HasValue).Select(x => x.CourseSkill.GetValueOrDefault()).Distinct().ToList(),
                 CourseSubType = x.SubType,
                 TotalAttempts = x.ExamPracticeResults.Count,
+                OriginalId = x.OriginalId,
+                Version = x.Version,
+                VersionStatus = x.VersionStatus
             });
             int totalItem = await queryData.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await queryData.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)

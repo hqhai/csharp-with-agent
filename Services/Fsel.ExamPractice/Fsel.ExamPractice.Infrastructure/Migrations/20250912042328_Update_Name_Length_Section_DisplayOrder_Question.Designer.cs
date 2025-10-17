@@ -4,6 +4,7 @@ using Fsel.ExamPractice.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.ExamPractice.Infrastructure.Migrations
 {
     [DbContext(typeof(ExamPracticesDBContext))]
-    partial class ExamPracticesDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250912042328_Update_Name_Length_Section_DisplayOrder_Question")]
+    partial class Update_Name_Length_Section_DisplayOrder_Question
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -363,9 +366,6 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<string>("PronunciationAssessmentStr")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<double?>("PronunciationScore")
                         .HasColumnType("float");
 
@@ -597,10 +597,8 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
-                    b.Property<string>("Criteria")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int>("Criteria")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -624,9 +622,6 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                     b.Property<string>("FeedBack")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
-
-                    b.Property<string>("GradingAlFeedback")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit")
@@ -800,10 +795,6 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<string>("Note")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
                     b.Property<Guid?>("ParentExamPracticeSectionResultId")
                         .HasColumnType("uniqueidentifier");
 
@@ -855,11 +846,6 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<string>("AIType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("BandComment")
                         .HasColumnType("nvarchar(max)");
 
@@ -897,20 +883,11 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
-                    b.Property<string>("Language")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.Property<double>("MaxScore")
                         .HasColumnType("float");
 
                     b.Property<double>("MinScore")
                         .HasColumnType("float");
-
-                    b.Property<string>("ModuleAIType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")

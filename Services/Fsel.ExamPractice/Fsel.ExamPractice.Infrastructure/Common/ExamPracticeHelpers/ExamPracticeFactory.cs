@@ -12,12 +12,13 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPractices;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
     using Fsel.ExamPractice.Domain.Models.CommandModels.Questions;
+    using Fsel.Shared.Helpers;
 
     public class ExamPracticeFactory
     {
         private readonly UpdateExamPracticeCommandModel _createRequest;
         private readonly IMapper _mapper;
-        private int _countQuestion;
+        private ExamPracticeCommon _examPracticeCommon = new ExamPracticeCommon().Create();
 
         protected ExamPracticeFactory(UpdateExamPracticeCommandModel createRequest, IMapper mapper)
         {
@@ -33,6 +34,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             examPractice.OriginalId = originalId.HasValue ? originalId.Value : examPractice.Id;
             examPractice.Status = EnumExamPracticeStatus.Inactive;
             examPractice.ExamPracticeSections = ExamPracticeSectionClassification(_createRequest.ExamPracticeSections).ToList();
+            _examPracticeCommon.HanderQuestionIndexSection(examPractice.ExamPracticeSections);
             return examPractice;
         }
 
@@ -40,29 +42,31 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             if (examPracticeSectionRequests != null && examPracticeSectionRequests.Any())
             {
+                var countQuestion = 0;
                 for (var i = 0; i < examPracticeSectionRequests.Count; i++)
                 {
-                    var numberQuestion = _countQuestion;
                     var examPracticeSectionRequest = examPracticeSectionRequests[i];
                     var examPracticeSection = _mapper.Map<ExamPracticeSection>(examPracticeSectionRequest);
 
+                    if (examPracticeSection.Config != null && examPracticeSection.CourseSkill.HasValue)
+                    {
+                        var config = examPracticeSection.Config;
+                        var executionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath ?? examPracticeSection.Config.VideoFilePath);
+                        config.ExecutionTime = executionTime;
+                        examPracticeSection.Config = config;
+                    }
                     examPracticeSection.DisplayOrder = i + 1;
                     examPracticeSection.ExamPracticeSections = ExamPracticeSectionClassification(examPracticeSectionRequest.ChildrenExamPracticeSections).ToList();
                     examPracticeSection.ExamPracticeAISettings = ExamPracticeAISettingClassification(examPracticeSectionRequest.ExamPracticeAISettings).ToList();
-                    examPracticeSection.Questions = ExamPracticeQuestionClassification(examPracticeSectionRequest.Questions).ToList();
+                    examPracticeSection.Questions = ExamPracticeQuestionClassification(examPracticeSectionRequest.Questions, countQuestion).ToList();
 
-                    if (examPracticeSection.Questions != null && examPracticeSection.Questions.Any())
-                    {
-                        var data = Enumerable.Range(numberQuestion++, _countQuestion).ToList();
-                        examPracticeSection.SubQuestionIndexs = data;
-                    }
-
+                    countQuestion += examPracticeSectionRequest.Questions.Count;
                     yield return examPracticeSection;
                 }
             }
         }
 
-        private IEnumerable<Question> ExamPracticeQuestionClassification(IList<UpdateQuestionCommandModel>? questionRequests)
+        private IEnumerable<Question> ExamPracticeQuestionClassification(IList<UpdateQuestionCommandModel>? questionRequests, int countQuestion)
         {
             if (questionRequests != null && questionRequests.Any())
             {
@@ -70,14 +74,8 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                 {
                     var questionRequest = questionRequests[i];
                     var question = _mapper.Map<Question>(questionRequest);
+                    question.DisplayOrder = countQuestion + i;
                     question = QuestionHelper.HandleQuestion(question).Result;
-                    if (question != null)
-                    {
-                        var numberQuestion = _countQuestion;
-                        _countQuestion += question.CorrectTotal;
-                        var data = Enumerable.Range(numberQuestion++, _countQuestion).ToList();
-                        question.SubQuestionIndexs = data;
-                    }
 
                     yield return question ?? new Question();
                 }

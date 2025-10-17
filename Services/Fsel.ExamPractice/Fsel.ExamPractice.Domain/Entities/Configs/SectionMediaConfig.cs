@@ -8,10 +8,10 @@ namespace Fsel.ExamPractice.Domain.Entities.Configs
 
     public class SectionMediaConfig
     {
-        [MaxLength(4000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(7000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
 
-        [MaxLength(4000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(7000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Instruction { get; set; }
 
         public double? DisplayTime { get; set; }

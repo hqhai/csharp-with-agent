@@ -12,6 +12,7 @@ namespace Fsel.Shared.Enums
         TaskFulfillment,
         Organization,
         Vocabulary,
-        Grammar
+        Grammar,
+        DiscourseManagement
     }
 }
