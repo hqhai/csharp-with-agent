@@ -93,8 +93,12 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
         public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
+        public DbSet<HomeWorkConfig> HomeWorkConfigs { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
         public DbSet<VideoSubFilePath> VideoSubFilePaths { get; set; }
+        public DbSet<HomeWorkExtraPracticeAnswer> HomeWorkExtraPracticeAnswers { get; set; }
+        public DbSet<HomeWorkExtraPracticeResult> HomeWorkExtraPracticeResults { get; set; }
+        public DbSet<HomeWorkRetry> HomeWorkRetries { get; set; }
         public DbSet<Topic> Topics { get; set; }
 
         #region Report
@@ -124,7 +128,6 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
         public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
         public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
-        public DbSet<HomeWorkConfig> HomeWorkConfigs { get; set; }
 
         #endregion Report
 
@@ -205,34 +208,37 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumDetailResultHistoryTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkExtraPracticeAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkExtraPracticeResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkRetryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoSubFilePathEntityTypeConfiguration());
 
-            modelBuilder.Ignore<TotalEvaluateInputResultModel>();
-            modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
-            modelBuilder.Ignore<PercentEvaluateInputResultModel>();
-            modelBuilder.Ignore<LevelEvaluateInputResultModel>();
-            modelBuilder.Ignore<SchoolSummaryModel>();
-            modelBuilder.Ignore<TotalLearningProgressModel>();
-            modelBuilder.Ignore<AverageLearningProgressModel>();
-            modelBuilder.Ignore<UnitDoneLearningProgressIeltsModel>();
-            modelBuilder.Ignore<UnitDoneLearningProgressAcademicModel>();
-            modelBuilder.Ignore<LessonDoneLearningProgressIeltsModel>();
-            modelBuilder.Ignore<LessonDoneLearningProgressAcademicModel>();
-            modelBuilder.Ignore<TotalLearningModel>();
-            modelBuilder.Ignore<RateLearningModel>();
-            modelBuilder.Ignore<TotalLearningQualityModel>();
-            modelBuilder.Ignore<TotalDetailLearningQualityModel>();
-            modelBuilder.Ignore<SchoolInfoModel>();
-            modelBuilder.Ignore<CourseCompleteReportModel>();
-            modelBuilder.Ignore<SchoolInfoFilterModel>();
-            modelBuilder.Ignore<DistrictInfoModel>();
-            modelBuilder.Ignore<ReportLearningProcessModel>();
-            modelBuilder.Ignore<ReportLearningResultModel>();
-            modelBuilder.Ignore<ExportSchoolEventModel>();
-            modelBuilder.Ignore<ExportStudentEventModel>();
-            modelBuilder.Ignore<ExportSummaryReportCommandModel>();
-            modelBuilder.Ignore<ExportDistrictEventModel>();
+            //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
+            //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
+            //modelBuilder.Ignore<PercentEvaluateInputResultModel>();
+            //modelBuilder.Ignore<LevelEvaluateInputResultModel>();
+            //modelBuilder.Ignore<SchoolSummaryModel>();
+            //modelBuilder.Ignore<TotalLearningProgressModel>();
+            //modelBuilder.Ignore<AverageLearningProgressModel>();
+            //modelBuilder.Ignore<UnitDoneLearningProgressIeltsModel>();
+            //modelBuilder.Ignore<UnitDoneLearningProgressAcademicModel>();
+            //modelBuilder.Ignore<LessonDoneLearningProgressIeltsModel>();
+            //modelBuilder.Ignore<LessonDoneLearningProgressAcademicModel>();
+            //modelBuilder.Ignore<TotalLearningModel>();
+            //modelBuilder.Ignore<RateLearningModel>();
+            //modelBuilder.Ignore<TotalLearningQualityModel>();
+            //modelBuilder.Ignore<TotalDetailLearningQualityModel>();
+            //modelBuilder.Ignore<SchoolInfoModel>();
+            //modelBuilder.Ignore<CourseCompleteReportModel>();
+            //modelBuilder.Ignore<SchoolInfoFilterModel>();
+            //modelBuilder.Ignore<DistrictInfoModel>();
+            //modelBuilder.Ignore<ReportLearningProcessModel>();
+            //modelBuilder.Ignore<ReportLearningResultModel>();
+            //modelBuilder.Ignore<ExportSchoolEventModel>();
+            //modelBuilder.Ignore<ExportStudentEventModel>();
+            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
+            //modelBuilder.Ignore<ExportDistrictEventModel>();
 
             base.OnModelCreating(modelBuilder);
         }

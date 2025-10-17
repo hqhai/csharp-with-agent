@@ -4,6 +4,7 @@ using Fsel.Course.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250924070926_Update_HomeWorkExtra_WorkingStatus")]
+    partial class Update_HomeWorkExtra_WorkingStatus
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2706,9 +2709,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(103);
 
-                    b.Property<Guid?>("HomeWorkConfigId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("HomeWorkId")
                         .HasColumnType("uniqueidentifier");
 
@@ -2738,8 +2738,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CurriculumId");
-
-                    b.HasIndex("HomeWorkConfigId");
 
                     b.HasIndex("HomeWorkId");
 
@@ -5887,77 +5885,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.ToTable("VideoResults");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.VideoSubFilePath", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(0);
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(107);
-
-                    b.Property<string>("CreatedFullName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(104);
-
-                    b.Property<Guid>("CreatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(101);
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(109);
-
-                    b.Property<string>("DeletedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(106);
-
-                    b.Property<Guid?>("DeletedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(103);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit")
-                        .HasColumnOrder(110);
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<string>("SubFilePath")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2")
-                        .HasColumnOrder(108);
-
-                    b.Property<string>("UpdatedFullName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnOrder(105);
-
-                    b.Property<Guid?>("UpdatedUserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnOrder(102);
-
-                    b.Property<Guid>("VideoId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("VideoId");
-
-                    b.ToTable("VideoSubFilePaths");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.VideoTimeCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -6823,17 +6750,12 @@ namespace Fsel.Course.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkRetry", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.CurriculumConfig", "Curriculum")
-                        .WithMany("HomeWorkRetries")
+                        .WithMany("HomeWorkRetrys")
                         .HasForeignKey("CurriculumId")
                         .OnDelete(DeleteBehavior.NoAction);
 
-                    b.HasOne("Fsel.Course.Domain.Entities.HomeWorkConfig", "HomeWorkConfig")
-                        .WithMany("HomeWorkRetríes")
-                        .HasForeignKey("HomeWorkConfigId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("Fsel.Course.Domain.Entities.HomeWork", "HomeWork")
-                        .WithMany("HomeWorkRetries")
+                        .WithMany("HomeWorkRetrys")
                         .HasForeignKey("HomeWorkId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
@@ -6841,8 +6763,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("Curriculum");
 
                     b.Navigation("HomeWork");
-
-                    b.Navigation("HomeWorkConfig");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.LessonExtraPractice", b =>
@@ -7367,17 +7287,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("Video");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.VideoSubFilePath", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.Video", "Video")
-                        .WithMany("VideoSubFilePaths")
-                        .HasForeignKey("VideoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Video");
-                });
-
             modelBuilder.Entity("Fsel.Course.Domain.Entities.VideoTimeCode", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.Video", "Video")
@@ -7509,7 +7418,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Navigation("HomeWorkConfigs");
 
-                    b.Navigation("HomeWorkRetries");
+                    b.Navigation("HomeWorkRetrys");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Exercise", b =>
@@ -7584,14 +7493,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Navigation("HomeWorkResults");
 
-                    b.Navigation("HomeWorkRetries");
+                    b.Navigation("HomeWorkRetrys");
 
                     b.Navigation("LessonHomeWorks");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkConfig", b =>
-                {
-                    b.Navigation("HomeWorkRetríes");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.HomeWorkExtraPracticeResult", b =>
@@ -7805,8 +7709,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("LessonVideos");
 
                     b.Navigation("VideoResults");
-
-                    b.Navigation("VideoSubFilePaths");
 
                     b.Navigation("VideoTimeCodes");
                 });
