@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queues.Publishers
+namespace Fsel.Course.Lms.Application.Queues.Publishers.ExportFiles
 {
     using Fsel.Core.Base.Interfaces;
     using Fsel.Shared.Constants;

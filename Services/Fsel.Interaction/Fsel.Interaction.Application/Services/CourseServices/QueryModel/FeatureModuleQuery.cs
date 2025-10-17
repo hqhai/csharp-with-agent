@@ -9,6 +9,6 @@ namespace Fsel.Interaction.Application.Services.CourseServices.QueryModel
         public EnumFeatureModule FeatureModule { get; set; }
 
         public Guid ObjectId { get; set; }
-        public Guid UserId { get; set; }
+        public Guid? UserId { get; set; }
     }
 }
