@@ -162,6 +162,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 Id = examPractice.Id,
                 Code = examPractice.Code,
                 Type = examPractice.Type,
+                ActivatedAt = examPractice.ActivatedAt,
                 ExamPracticeStatus = examPractice.Status,
                 ExecutionTime = examPractice.ExecutionTime,
                 Name = examPractice.Name,
