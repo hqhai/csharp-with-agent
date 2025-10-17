@@ -155,8 +155,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, IList<SectionGroupResult> sectionGroupResults, CancellationToken cancellationToken)
         {
             mockTestResult.TokenFirstTime = sectionGroupResults.Sum(x => (x.TokenFirstTime ?? default));
-            _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
-            await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.MockTestId, c.UnitId };
+            });
         }
 
         private async Task<IList<TokenHistoryQueueModel>> UpdateSectionGroupResultsAsync(MockTestResult mockTestResult, SectionGroupResult? sectionGroupResult, Course course, Guid userId, bool isSkillMockTest, CancellationToken cancellationToken)
@@ -218,8 +220,10 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private async Task UpdateSectionGroupResultAsync(SectionGroupResult sectionGroupResult, CancellationToken cancellationToken)
         {
-            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime, x => x.SectionGroupId, x => x.PlacementTestResultId, x => x.MockTestResultId, x => x.FinalTestResultId, x => x.StudentId);
-            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.WorkingTime, c.StudentId, c.SectionGroupId, c.PlacementTestResultId, c.MockTestResultId, c.FinalTestResultId };
+            });
         }
 
         #region Skill Reading And Listening
@@ -247,9 +251,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         tokenHistorys.Add(GetTokenHistoryQueue(sectionGroupResult, courseResultId, userId, tokenMission.Value, isSkillTest));
                     }
                 }
-
-                _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime, x => x.SectionGroupId, x => x.PlacementTestResultId, x => x.MockTestResultId, x => x.FinalTestResultId, x => x.StudentId);
-                await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await UpdateSectionGroupResultAsync(sectionGroupResult, cancellationToken);
             }
             return tokenHistorys;
         }
@@ -469,8 +471,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         break;
                 }
             }
-            _sectionGroupResultRepository.Update(sectionGroupResult, false, x => x.WorkingTime, x => x.SectionGroupId, x => x.PlacementTestResultId, x => x.MockTestResultId, x => x.FinalTestResultId, x => x.StudentId);
-            await _sectionGroupResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+            await UpdateSectionGroupResultAsync(sectionGroupResult, cancellationToken);
             return tokenHistorys;
         }
 

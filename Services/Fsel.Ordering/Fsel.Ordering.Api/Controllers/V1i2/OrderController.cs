@@ -117,5 +117,35 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get users has order payment
+        /// </summary>
+        [HttpPost("get-users-has-order-payment")]
+        [ProducesResponseType(typeof(MethodResult<IList<Guid>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUsersHasOrderPayment([FromBody] GetUsersHasOrderPaymentQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get order revenue
+        /// </summary>
+        [HttpGet("get-order-revenue")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchOrderModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> GetOrderRevenues()
+        {
+            var query = new SearchOrderQuery()
+            {
+                RevenueType = EnumPaymentRevenueType.Revenue,
+            };
+            query.SetIsQueryAll(true);
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

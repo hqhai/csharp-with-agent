@@ -6,15 +6,17 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
     public class EventRegistrationModel
     {
+        public string? FullName { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
+        public string? UserName { get; set; }
         public string? Email { get; set; }
         public string? PhoneNumber { get; set; }
         public string? TeacherPhoneNumber { get; set; }
         public string? ParentEmail { get; set; }
         public string? ParentPhoneNumber { get; set; }
         public bool IsBussinessCheckBox { get; set; }
-        public DateTime BirthDay { get; set; }
+        public DateTime? BirthDay { get; set; }
         public string? Province { get; set; }
         public Guid? ProvinceId { get; set; }
         public string? District { get; set; }

@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -11,14 +12,13 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Lms.Application.Queries.StudentProgressQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/student-progress")]
     [ApiController]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+    [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.ViewProgress })]
     public class StudentProgressController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -34,6 +34,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentProgressModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [EncryptResponse]
         public async Task<IActionResult> Search([FromQuery] SearchStudentProgressQuery query)
         {
             MethodResult<PagingItemsModel<StudentProgressModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);

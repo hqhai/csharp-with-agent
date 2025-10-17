@@ -48,7 +48,7 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
                 return methodResult;
             }
 
-            if (sender.Id == request.ReceiverId)
+            if (sender.Id == receiverId)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.CannotEnterOwnCode));
                 return methodResult;

@@ -4,7 +4,6 @@ namespace Fsel.Storage.Application.Services.FFmpegServices
 {
     using System.Threading.Tasks;
     using Fsel.Storage.Application.Services.FFmpegServices.Models;
-    using Microsoft.AspNetCore.Mvc;
     using Refit;
 
     public interface IFFmpegServices
@@ -16,8 +15,5 @@ namespace Fsel.Storage.Application.Services.FFmpegServices
         [Multipart]
         [Post("/convert")]
         Task<IApiResponse<ConvertModel>> Convert([AliasAs("file")] StreamPart file);
-
-        [Get("/status/{jobId}")]
-        Task<IApiResponse<StatusJobModel>> Status([FromRoute] Guid jobId);
     }
 }

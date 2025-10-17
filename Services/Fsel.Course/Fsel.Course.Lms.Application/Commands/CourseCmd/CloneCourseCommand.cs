@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -25,14 +26,20 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
         private readonly ICourseRepository _courseRepository;
         private readonly ILogger<CloneCourseCommand> _logger;
         private readonly IMapper _mapper;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly ICourseTeacherRepository _courseTeacherRepository;
 
         public CloneCourseCommandHandler(ICourseRepository courseRepository
             , ILogger<CloneCourseCommand> logger
-            , IMapper mapper)
+            , IMapper mapper
+            , ICourseUnitMockTestRepository courseUnitMockTestRepository
+            , ICourseTeacherRepository courseTeacherRepository)
         {
             _courseRepository = courseRepository;
             _logger = logger;
             _mapper = mapper;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _courseTeacherRepository = courseTeacherRepository;
         }
 
         public async Task<MethodResult<CourseModel>> Handle(CloneCourseCommand request, CancellationToken cancellationToken)
@@ -43,9 +50,11 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseTeachers).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course != null && course.Status != EnumCourseStatus.Active)
             {
-                course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseTeachers).Where(x => x.CourseLevel == course.CourseLevel && x.Status == EnumCourseStatus.Active && !x.ParentCourseId.HasValue)
-                    .OrderByDescending(x => x.CreatedDate)
-                    .FirstOrDefaultAsync(cancellationToken);
+                course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).Include(x => x.CourseTeachers)
+                                                .Where(x => x.CourseLevel == course.CourseLevel && !x.ParentCourseId.HasValue)
+                                                .Where(x => x.Status == EnumCourseStatus.Active)
+                                                .OrderByDescending(x => x.CreatedDate)
+                                                .FirstOrDefaultAsync(cancellationToken);
             }
 
             if (course == null || course.ParentCourseId.HasValue)
@@ -59,19 +68,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 methodResult.AddErrorBadRequest(courseClone.ErrorMessages);
                 return methodResult;
             }
-            courseClone.CourseTeachers = course.CourseTeachers.Select(x =>
-            {
-                var courseTeacher = _mapper.Map<CourseTeacher>(x);
-                courseTeacher.CourseId = courseClone.Id;
-                return courseTeacher;
-            }).ToList();
-
-            courseClone.CourseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).Select(x =>
-            {
-                var courseUnitMockTest = _mapper.Map<CourseUnitMockTest>(x);
-                courseUnitMockTest.CourseId = courseClone.Id;
-                return courseUnitMockTest;
-            }).ToList();
 
             var priority = await _courseRepository.Queryable.Where(x => x.ParentCourseId.HasValue && x.ParentCourseId == course.Id).CountAsync(cancellationToken);
             courseClone.Status = EnumCourseStatus.Clone;
@@ -80,18 +76,36 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             courseClone.Priority = priority;
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
-                courseClone = _courseRepository.Add(courseClone);
                 try
                 {
-                    await _courseRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseRepository.BulkMergeAsync(new List<EntityCourse> { courseClone }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ParentCourseId, entity.Priority, entity.IsDeleted };
+                    });
+
+                    var courseTeachers = course.CourseTeachers.Select(x =>
+                    {
+                        var courseTeacher = _mapper.Map<CourseTeacher>(x);
+                        courseTeacher.CourseId = courseClone.Id;
+                        return courseTeacher;
+                    }).ToList();
+
+                    var courseUnitMockTests = course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder).Select(x =>
+                    {
+                        var courseUnitMockTest = _mapper.Map<CourseUnitMockTest>(x);
+                        courseUnitMockTest.CourseId = courseClone.Id;
+                        return courseUnitMockTest;
+                    }).ToList();
+
+                    await _courseUnitMockTestRepository.BulkMergeAsync(courseUnitMockTests);
+                    await _courseTeacherRepository.BulkMergeAsync(courseTeachers);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning($"Log Duplicate Course : {ex.Message}");
+                    _logger.LoggerRequest($"Log Duplicate Course : {ex.Message}");
                     courseClone = await _courseRepository.Queryable.Where(x => x.ParentCourseId.HasValue && x.ParentCourseId == course.Id && x.Priority == priority)
                                                                    .FirstOrDefaultAsync(cancellationToken);
                 }
-
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<CourseModel>(courseClone);
                 return methodResult;

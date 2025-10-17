@@ -58,7 +58,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int NumberStudentCompleteVerify { get; set; }
 
         /// <summary>
-        /// Tỷ lệ HS Hoàn thành PT/Đăng ký TK
+        /// Số học sinh Hoàn thành PT
         /// </summary>
         public int NumberStudentsCompletedPT { get; set; }
 
@@ -79,7 +79,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentCompleteVerify, NumberValidStudentAccount);
+                return NumberValidStudentAccount == 0 ? 0 : NumberHelper.GetPercent(NumberStudentCompleteVerify, TotalStudentAccount);
             }
         }
 
@@ -90,7 +90,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberStudentCompleteVerify == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentCompleteVerify);
+                return NumberStudentCompleteVerify == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, TotalStudentAccount);
             }
         }
 
@@ -172,7 +172,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return NumberStudentCompleteVerify == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, NumberStudentCompleteVerify);
+                return NumberStudentCompleteVerify == 0 ? 0 : NumberHelper.GetPercent(NumberStudentsCompletedPT, TotalStudentAccount);
             }
         }
 

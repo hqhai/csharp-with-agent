@@ -8,6 +8,7 @@ namespace Fsel.Identity.Application.Services.SystemService
     using Fsel.Identity.Application.Services.SystemService.CommandModels;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
+    using Fsel.Identity.Domain.Models.CommandModels.GoogleSheets;
     using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
@@ -75,5 +76,14 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/admin/token-history/add-coin-fsel-event-reward")]
         Task<IApiResponse<MethodResult<bool>>> AddCoinFselEventReward([Body] AddCoinFselEventRewardModel query);
+
+        [Post("/v1/google-sheet/add-dynamic-info-to-google-sheet-file")]
+        Task<IApiResponse<MethodResult<bool>>> AddDynamicInfoToGoogleSheetFile([Body] CreateDynamicInfosToGoogleSheetFileCommandModel model);
+
+        [Post("/v1/token-history/create-history-deduct-coin-of-student")]
+        Task<IApiResponse<MethodResult<bool>>> CreateHistoryDeductCoinOfStudent([Body] CreateHistoryDeductCoinOfStudentCommandModel query);
+
+        [Post("/v1/course-suggest-config/level-suggestion-users")]
+        Task<IApiResponse<MethodResult<IList<CourseSuggestUsersModel>>>> GetCourseSuggestByUserIds([Body] GetCourseSuggestByUserIdsQueryModel query);
     }
 }

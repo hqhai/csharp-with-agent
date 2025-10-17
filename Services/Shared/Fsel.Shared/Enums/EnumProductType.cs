@@ -4,6 +4,6 @@ namespace Fsel.Shared.Enums
 {
     public enum EnumProductType
     {
-        Voucher, Reward
+        Voucher, Reward, Physical
     }
 }

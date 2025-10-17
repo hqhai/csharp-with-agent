@@ -15,6 +15,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
     using Fsel.Storage.Infrastructure.ValueSettings;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Polly;
     using Refit;
@@ -31,6 +32,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
         private readonly IDeepgramProvider _deepgramProvider;
         private readonly ICognitiveProvider _cognitiveProvider;
         private readonly ResponseSpeechToTextPendingPublisher _responseSpeechToTextPendingPublisher;
+        private readonly ILogger<ConvertSpeechToTextPendingCommand> _logger;
         private const int Max_Time_Retry = 3;
         private const int Retry_GPT_Time = 2;
         private int _countRetry;
@@ -41,7 +43,8 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                                                         AppSetting appSetting,
                                                         IDeepgramProvider deepgramProvider,
                                                         ICognitiveProvider cognitiveProvider,
-                                                        ResponseSpeechToTextPendingPublisher responseSpeechToTextPendingPublisher)
+                                                        ResponseSpeechToTextPendingPublisher responseSpeechToTextPendingPublisher,
+                                                        ILogger<ConvertSpeechToTextPendingCommand> logger)
         {
             _openAIService = openAIService;
             _amazonS3Service = amazonS3Service;
@@ -49,6 +52,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
             _deepgramProvider = deepgramProvider;
             _cognitiveProvider = cognitiveProvider;
             _responseSpeechToTextPendingPublisher = responseSpeechToTextPendingPublisher;
+            _logger = logger;
         }
 
         public async Task<MethodResult<bool>> Handle(ConvertSpeechToTextPendingCommand request, CancellationToken cancellationToken)
@@ -82,11 +86,13 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                 if (string.IsNullOrEmpty(contentText) || _countRetry == Max_Time_Retry)
                 {
                     var deepGramContent = await _deepgramProvider.GetTranscriptionAsync(formFile);
+                    _logger.LogError($"LogContentDeepgramPendingSTT: userId: {request.UserId} classForumDetailResultId: {request.ClassForumDetailResultId} content: {deepGramContent} date: {DateTime.UtcNow}");
 
                     if (string.IsNullOrEmpty(deepGramContent))
                     {
                         // vào azure
                         contentText = await _cognitiveProvider.GetTranscriptionAsync(formFile);
+                        _logger.LogError($"LogContentAzurePendingSTT: userId: {request.UserId} classForumDetailResultId: {request.ClassForumDetailResultId} content: {contentText} date: {DateTime.UtcNow}");
                     }
                     else
                     {
@@ -95,7 +101,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
 
                     if (string.IsNullOrEmpty(contentText))
                     {
-                        await SendResponseSpeechToText(formFile, request.ClassForumDetailResultId, contentText, cancellationToken);
+                        await SendResponseSpeechToText(formFile, request.ClassForumDetailResultId, contentText, request.UserId, cancellationToken);
                     }
                 }
 
@@ -106,7 +112,8 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
                 }
                 else
                 {
-                    await SendResponseSpeechToText(formFile, request.ClassForumDetailResultId, contentText, cancellationToken);
+                    await SendResponseSpeechToText(formFile, request.ClassForumDetailResultId, contentText, request.UserId, cancellationToken);
+                    _logger.LogError($"LogContentChatGptPendingSTT: userId: {request.UserId} classForumDetailResultId: {request.ClassForumDetailResultId} content: {contentText}  date: {DateTime.UtcNow}");
                 }
 
                 return true;
@@ -130,8 +137,9 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd.V1i2
             return await _amazonS3Service.UploadFileAsync(EnumBucketType.FselPublic, formFile, EnumFolderType.Videos, false, false);
         }
 
-        private async Task SendResponseSpeechToText(IFormFile formFile, Guid classForumDetailResultId, string? contentText, CancellationToken cancellationToken)
+        private async Task SendResponseSpeechToText(IFormFile formFile, Guid classForumDetailResultId, string? contentText, Guid userId, CancellationToken cancellationToken)
         {
+            _logger.LogError($"LogContentPendingSTT: userId: {userId} classForumDetailResultId: {classForumDetailResultId} content: {contentText}  date: {DateTime.UtcNow}");
             await _responseSpeechToTextPendingPublisher.Publish(new ResponseSpeechToTextPendingAiConsumerModel
             {
                 ClassForumDetailResultId = classForumDetailResultId,

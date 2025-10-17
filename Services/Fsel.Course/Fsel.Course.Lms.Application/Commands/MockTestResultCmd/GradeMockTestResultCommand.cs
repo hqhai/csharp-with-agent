@@ -178,10 +178,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _sectionGroupResultRepository.UpdateList(sectionGroupResults, false, x => x.WorkingTime, x => x.SectionGroupId, x => x.PlacementTestResultId, x => x.MockTestResultId, x => x.FinalTestResultId, x => x.StudentId);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionGroupResultRepository.BulkUpdateList(sectionGroupResults, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.WorkingTime, c.StudentId, c.SectionGroupId, c.PlacementTestResultId, c.MockTestResultId, c.FinalTestResultId };
+                });
                 await SendNotification(mockTestResult, cancellationToken);
-                _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
+
+                await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.MockTestId, c.UnitId };
+                });
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

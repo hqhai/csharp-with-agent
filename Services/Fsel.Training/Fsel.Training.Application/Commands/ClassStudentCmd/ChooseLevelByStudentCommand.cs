@@ -14,8 +14,6 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.CourseServices.CommandModels;
-    using Fsel.Training.Application.Services.OrderServices;
-    using Fsel.Training.Application.Services.OrderServices.Model;
     using Fsel.Training.Application.Services.UserServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -31,15 +29,13 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
         private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
         private readonly IUserService _userService;
-        private readonly IOrderService _orderService;
 
-        public ChooseLevelByStudentCommandHandler(ICourseService courseService, AuthContext authContext, IMediator mediator, IUserService userService, IOrderService orderService)
+        public ChooseLevelByStudentCommandHandler(ICourseService courseService, AuthContext authContext, IMediator mediator, IUserService userService)
         {
             _courseService = courseService;
             _authContext = authContext;
             _mediator = mediator;
             _userService = userService;
-            _orderService = orderService;
         }
 
         public async Task<MethodResult<bool>> Handle(ChooseLevelByStudentCommand request, CancellationToken cancellationToken)
@@ -47,41 +43,55 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var courseResult = await _courseService.GetCourseByLevel(new BaseQueryModel()
+            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+
+            if (!studentResult.IsSuccessStatusCode)
             {
-                Filters = new List<GenericFilterModel>()
-                {
-                    new GenericFilterModel()
-                    {
-                        Property = "Status",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = "Active"
-                    },
-                    new GenericFilterModel()
-                    {
-                        Property = "CourseLevel",
-                        Operator = EnumFilterOperator.Equal,
-                        Value = request.CourseLevel.ToString()
-                    }
-                }
+                methodResult.AddError(studentResult.Error);
+                return methodResult;
+            }
+
+            var student = studentResult.Content?.Result;
+
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
+            var courseResult = await _courseService.GetCourseForChooseLevel(new GetCourseForChooseLevelQueryModel()
+            {
+                StudentId = student.Id,
+                CourseLevel = request.CourseLevel
             });
+
             if (!courseResult.IsSuccessStatusCode)
             {
                 methodResult.AddError(courseResult.Error);
                 return methodResult;
             }
+
             var course = courseResult.Content?.Result;
+
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
+
+            if (course.IsHasCourseResult)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(course.IsHasCourseResult));
+                return methodResult;
+            }
+
             var addStudentIntoClass = await _mediator.Send(new AddStudentIntoClassCommand()
             {
                 UserId = _authContext.CurrentUserId,
-                CourseId = course.Id,
+                CourseId = course.CourseId,
                 NumberOfShield = 0
             }, cancellationToken);
+
             if (!addStudentIntoClass.IsOK)
             {
                 methodResult.AddError(addStudentIntoClass.ErrorMessages);
@@ -92,36 +102,6 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             {
                 ChooseCourseLevel = request.CourseLevel
             });
-
-            //var eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
-
-            //if (eventResults.IsSuccessStatusCode && eventResults.Content != null && eventResults.Content.Result != null && eventResults.Content.Result.Any(p => p.EventContent != null && p.EventContent.IsByPassPayment))
-            //{
-            //    var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
-            //    if (!studentResult.IsSuccessStatusCode)
-            //    {
-            //        methodResult.AddError(studentResult.Error);
-            //        return methodResult;
-            //    }
-            //    var student = studentResult.Content?.Result;
-
-            //    var @events = eventResults.Content.Result;
-            //    var @event = @events.Where(p => p.EventContent != null && p.EventContent.IsByPassPayment).Select(p => p.EventContent).FirstOrDefault();
-            //    if (@event != null && student != null && !student.ExpiredDate.HasValue)
-            //    {
-            //        await _orderService.CreateOrderForUserLeaderBoard(new CreateOrderForUserFromLeaderBoardCommandModel()
-            //        {
-            //            UserId = _authContext.CurrentUserId,
-            //            Month = @event.PaymentMonth,
-            //            FullName = student.Human?.FullName,
-            //            Email = student.Human?.Email,
-            //            PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
-            //            PackageId = default,
-            //            EventId = default,
-            //            ExpiredDate = @event.PaymentDate,
-            //        });
-            //    }
-            //}
 
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;

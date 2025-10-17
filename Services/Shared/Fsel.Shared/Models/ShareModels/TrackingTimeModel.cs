@@ -14,6 +14,8 @@ namespace Fsel.Shared.Models.ShareModels
         public Guid? LessonId { get; set; }
 
         public Guid UserId { get; set; }
+
+        public string? UserAgent { get; set; }
     }
 
 }

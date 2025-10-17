@@ -1,0 +1,36 @@
+{
+  "type": "object",
+  "properties": {
+    "parameters": {
+      "type": "array",
+      "description": "A list of determinations regarding appropriateness.",
+      "items": {
+        "type": "object",
+        "required": [
+          "determination",
+          "reason"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string",
+            "description": "Reason provided for the determination."
+          },
+          "determination": {
+            "enum": [
+              "INAPPROPRIATE",
+              "LANGUAGE",
+              "NO"
+            ],
+            "type": "string",
+            "description": "Determination value indicating INAPPROPRIATE, LANGUAGE, or NO."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "parameters"
+  ],
+  "additionalProperties": false
+}

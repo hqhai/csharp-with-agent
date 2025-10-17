@@ -80,8 +80,10 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestResultQuery
             if (mockTestResult.MockTestScores != null && mockTestResult.MockTestScores.Any())
             {
                 mockTestResult.IsViewed = true;
-                _mockTestResultRepository.Update(mockTestResult);
-                await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };
+                });
             }
 
             var mockTestResultModel = GetMockTestResult(mockTestResult);

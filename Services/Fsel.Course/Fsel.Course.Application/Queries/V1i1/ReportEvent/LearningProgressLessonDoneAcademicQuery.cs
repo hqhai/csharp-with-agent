@@ -8,7 +8,7 @@ namespace Fsel.Course.Application.Queries.V1i1.ReportEvent
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
-    using Fsel.Core.Caching;
+    using Fsel.Common.Caching;
     using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
     using Fsel.Course.Infrastructure;
     using Fsel.Course.Infrastructure.ValueSettings;

@@ -10,7 +10,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
-    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -31,12 +31,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class UpdatePasswordForUserEventHaNoiCommandHandle : IRequestHandler<UpdatePasswordForUserEventHaNoiCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IUserOtpCodeRepository _userOtpCodeRepository;
 
-        public UpdatePasswordForUserEventHaNoiCommandHandle(UserManager<User> userManager, IUserOtpCodeRepository userOtpCodeRepository)
+        public UpdatePasswordForUserEventHaNoiCommandHandle(UserManager<User> userManager)
         {
             _userManager = userManager;
-            _userOtpCodeRepository = userOtpCodeRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdatePasswordForUserEventHaNoiCommand request, CancellationToken cancellationToken)
@@ -44,7 +42,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            if (string.IsNullOrEmpty(request.PhoneNumber) || string.IsNullOrEmpty(request.Password) || string.IsNullOrEmpty(request.PhoneNumber))
+            if (string.IsNullOrEmpty(request.PhoneNumber) || string.IsNullOrEmpty(request.Password))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;
@@ -71,7 +69,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(p => p.Human).ThenInclude(p => p.Student).FirstOrDefaultAsync(p => p.UserName == request.PhoneNumber, cancellationToken);
             if (user == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user), request.PhoneNumber);
                 return methodResult;
             }
 
@@ -94,6 +92,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.OTPNotVerified));
                 return methodResult;
             }
+            var passwordValidator = new Microsoft.AspNetCore.Identity.PasswordValidator<User>();
+            var validPassword = await passwordValidator.ValidateAsync(_userManager, user, request.Password);
+            if (!validPassword.Succeeded)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PasswordIsNotValid));
+                return methodResult;
+            }
 
             var hashPassword = _userManager.PasswordHasher.HashPassword(user, request.Password);
             user.PasswordHash = hashPassword;
@@ -104,6 +109,21 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             user.Human.Birthday = request.Birthday;
             user.Human.Student!.ParentEmail = request.ParentEmail;
             user.Human.Student.ParentPhoneNumber = request.ParentPhoneNumber;
+            if (!user.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.ErrorMessages);
+                return methodResult;
+            }
+            if (user.Human != null && !user.Human.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.Human.ErrorMessages);
+                return methodResult;
+            }
+            if (user.Human?.Student != null && !user.Human.Student.IsValid())
+            {
+                methodResult.AddErrorBadRequest(user.Human.Student.ErrorMessages);
+                return methodResult;
+            }
             await _userManager.UpdateAsync(user);
 
             methodResult.StatusCode = StatusCodes.Status200OK;

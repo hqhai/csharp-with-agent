@@ -25,18 +25,22 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 if (createQuestionShuffles != null && createQuestionShuffles.Any())
                 {
-                    await AddList(createQuestionShuffles);
-                    await UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                }
-                await ExecuteTransactionAsync(async () =>
-                {
-                    if (updateQuestionShuffles != null && updateQuestionShuffles.Any())
+                    await BulkMergeAsync(createQuestionShuffles, bulk =>
                     {
-                        UpdateList(updateQuestionShuffles);
-                        await UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                    }
-                    return methodResult;
-                });
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.StudentId, entity.QuestionId };
+                    });
+                }
+                if (updateQuestionShuffles != null && updateQuestionShuffles.Any())
+                {
+                    await ExecuteTransactionAsync(async () =>
+                    {
+                        await BulkUpdateList(updateQuestionShuffles, bulk =>
+                        {
+                            bulk.IgnoreOnUpdateExpression = entity => new { entity.StudentId, entity.QuestionId, entity.IsDeleted };
+                        });
+                        return methodResult;
+                    });
+                }
             }
             catch { }
 

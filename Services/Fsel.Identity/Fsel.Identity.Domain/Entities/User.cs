@@ -12,7 +12,7 @@ namespace Fsel.Identity.Domain.Entities
     public class User : UserEntity
     {
         [Required]
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? FullName { get; set; }
 
         [EmailValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]

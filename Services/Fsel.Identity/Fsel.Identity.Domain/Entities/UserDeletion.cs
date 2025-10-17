@@ -15,9 +15,11 @@ namespace Fsel.Identity.Domain.Entities
         public string? FullName { get; set; }
 
         [PhoneValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(20, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? PhoneNumber { get; set; }
 
         [EmailValid(ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(70, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Email { get; set; }
 
         public EnumUserDeletionReason Reason { get; set; }

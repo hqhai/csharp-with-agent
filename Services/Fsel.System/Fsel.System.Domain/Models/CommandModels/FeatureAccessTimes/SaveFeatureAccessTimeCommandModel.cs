@@ -12,5 +12,7 @@ namespace Fsel.System.Domain.Models.CommandModels.FeatureAccessTimes
         public Guid? LessonId { get; set; }
 
         public Guid UserId { get; set; }
+
+        public string? UserAgent { get; set; }
     }
 }

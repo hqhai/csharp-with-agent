@@ -20,6 +20,7 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.CommandModels.ChatBot;
     using Fsel.System.Domain.Models.EntityModels;
+    using global::System.ComponentModel.DataAnnotations;
     using global::System.Text.RegularExpressions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -28,6 +29,7 @@ namespace Fsel.System.Application.Commands.Chatbots
 
     public class SaveChatBotMessageCommand : SaveChatBotMessageModel, IRequest<MethodResult<ChatBotModel>>
     {
+        [MaxLength(4000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Content { get; set; }
 
         public Guid? ChatBotId { get; set; }
@@ -35,7 +37,6 @@ namespace Fsel.System.Application.Commands.Chatbots
 
     public class SaveChatBotMessageCommandHandler : IRequestHandler<SaveChatBotMessageCommand, MethodResult<ChatBotModel>>
     {
-
         private readonly IMapper _mapper;
         private readonly IChatBotRepository _chatBotRepository;
         private readonly IChatbotConfigRepository _chatbotConfigRepository;
@@ -43,25 +44,32 @@ namespace Fsel.System.Application.Commands.Chatbots
         private readonly IStorageService _storageService;
         private readonly ChatBotPublisher _chatBotPublisher;
         private const int Number_Of_Config = 2;
-        private readonly ILogger<object> _logger;
+        private readonly ILogger<SaveChatBotMessageCommandHandler> _logger;
+        private readonly IMediator _mediator;
 
-        public SaveChatBotMessageCommandHandler(IMapper mapper, IChatBotRepository chatBotRepository, IStorageService storageService, ChatBotPublisher chatBotPublisher, IChatbotConfigRepository chatbotConfigRepository, IOpenAIService openAIService, ILogger<SaveChatBotMessageCommandHandler> logger)
+        public SaveChatBotMessageCommandHandler(IMapper mapper,
+            IChatBotRepository chatBotRepository,
+            IStorageService storageService,
+            ChatBotPublisher chatBotPublisher,
+            IChatbotConfigRepository chatbotConfigRepository,
+            IOpenAIService openAIService,
+            ILogger<SaveChatBotMessageCommandHandler> logger,
+            IMediator mediator)
         {
             _mapper = mapper;
             _chatBotRepository = chatBotRepository;
-
             _storageService = storageService;
             _chatBotPublisher = chatBotPublisher;
             _chatbotConfigRepository = chatbotConfigRepository;
             _openAIService = openAIService;
             _logger = logger;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<ChatBotModel>> Handle(SaveChatBotMessageCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ChatBotModel>();
-
 
             var chatbotMessage = _chatBotRepository.Queryable.FirstOrDefault(x => x.Id == request.ChatBotId);
 
@@ -81,7 +89,6 @@ namespace Fsel.System.Application.Commands.Chatbots
 
             double tokenRatio = CalculateTokenRatio(chatbotMessage.RemainToken, chatbotMessage.Skill, chatbotConfig);
 
-
             // Khi token còn dưới 20% so với số lượng token ban đầu
             if (chatbotMessage.RemainToken == 0)
             {
@@ -94,7 +101,6 @@ namespace Fsel.System.Application.Commands.Chatbots
             var chatBotMessageModel = _mapper.Map<IList<ChatBotMessageModel>>(chatbotMessage.Conversations);
             chatBotMessageModel.Add(newQuestion);
 
-
             var chatGptResponse = await _openAIService.SubmitAICompletionsAsync(new RequestAIModel
             {
                 Model = ValueSettings.ChatBotSetup.Model,
@@ -105,8 +111,9 @@ namespace Fsel.System.Application.Commands.Chatbots
                 TopP = ValueSettings.ChatBotSetup.TopP
             });
 
-
             string response = chatGptResponse?.Content?.Choices?.Select(x => x.Message?.Content).FirstOrDefault() ?? string.Empty;
+            response = Shared.Helpers.StringHelper.TextCleaner.NormalizeListeningContent(response);
+
             string tokenInUse = chatGptResponse?.Content?.Usage?.ToString() ?? string.Empty;
             var totalTokenUse = ConvertHelper.Deserialize<TokenAIModel>(tokenInUse);
             bool isContainAudioScript = response.Contains("Click to listen", StringComparison.OrdinalIgnoreCase);
@@ -134,7 +141,6 @@ namespace Fsel.System.Application.Commands.Chatbots
             ChatBot chatBot = new ChatBot();
             await _chatBotRepository.ExecuteTransactionAsync(async () =>
             {
-
                 if (chatbotMessage.RemainToken == 0)
                 {
                     chatbotMessage.Status = EnumChatBotStatus.Done;
@@ -149,12 +155,12 @@ namespace Fsel.System.Application.Commands.Chatbots
                 return methodResult;
             });
 
-
             methodResult.StatusCode = StatusCodes.Status201Created;
             return methodResult;
         }
 
         #region Func
+
         /// <summary>
         /// Bỏ đi các phần tử config ở đầu mảng
         /// </summary>
@@ -207,6 +213,20 @@ namespace Fsel.System.Application.Commands.Chatbots
                     Voice = "nova",
                 });
                 filePath = audioResult?.Content?.Result!;
+
+                try
+                {
+                    var reponse = await _mediator.Send(new ConvertFileWavCommand { File = filePath }, CancellationToken.None);
+                    if (!reponse.IsOK)
+                    {
+                        _logger.LogError($"ConvertFileWavCommand : {filePath} => {reponse.Result}", reponse.ErrorMessages);
+                    }
+                    filePath = reponse.Result ?? filePath;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"ConvertFileWavCommand Exception : {filePath} ", ex.Message);
+                }
             }
             return filePath;
         }
@@ -249,7 +269,6 @@ namespace Fsel.System.Application.Commands.Chatbots
             };
         }
 
-
         /// <summary>
         /// Get Content of Listening from ChatGPT
         /// </summary>
@@ -276,7 +295,6 @@ namespace Fsel.System.Application.Commands.Chatbots
             }
         }
 
-
         /// <summary>
         /// Lấy số lượng token theo skill
         /// </summary>
@@ -291,24 +309,30 @@ namespace Fsel.System.Application.Commands.Chatbots
                 case (EnumCourseSkill.Vocabulary):
                     token = chatbotConfig?.ChatbotTokenConfigs?.VocabularyToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Grammar):
                     token = chatbotConfig?.ChatbotTokenConfigs?.GrammarToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Listening):
                     token = chatbotConfig?.ChatbotTokenConfigs?.ListeningToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Reading):
                     token = chatbotConfig?.ChatbotTokenConfigs?.ReadingToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Writing):
                     token = chatbotConfig?.ChatbotTokenConfigs?.WritingToken ?? default;
                     break;
+
                 case (EnumCourseSkill.Speaking):
                     token = chatbotConfig?.ChatbotTokenConfigs?.SpeakingToken ?? default;
                     break;
             }
             return token;
         }
-        #endregion
+
+        #endregion Func
     }
 }

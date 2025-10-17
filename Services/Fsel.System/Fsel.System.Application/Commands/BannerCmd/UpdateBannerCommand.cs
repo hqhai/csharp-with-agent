@@ -59,12 +59,7 @@ namespace Fsel.System.Application.Commands.BannerCmd
                 return methodResult;
             }
 
-            bool checkBanner = request.BannerScopes == null && request.Status != banner.Status;
-            if (checkBanner)
-            {
-                request.BannerScopes = _mapper.Map<IList<CreateBannerScopeCommandModel>>(banner.BannerScopes);
-                request.BannerImages = _mapper.Map<IList<CreateBannerImageCommandModel>>(banner.BannerImages);
-            }
+            bool checkBanner = (request.BannerScopes == null || !request.BannerScopes.Any()) && request.Status != banner.Status;
 
             if (await _bannerRepository.Queryable.AnyAsync(x => x.Id != request.Id && x.Code.ToLower().Trim() == request.Code.ToLower().Trim(), cancellationToken))
             {
@@ -73,9 +68,9 @@ namespace Fsel.System.Application.Commands.BannerCmd
             }
 
             (bool isValid, string errorCode, string field, object? value) = _bannerConverter.ValidateBanner(request);
-            if (!isValid)
+            if (!isValid && !checkBanner)
             {
-                methodResult.AddErrorBadRequest(nameof(errorCode), nameof(field), value);
+                methodResult.AddErrorBadRequest(nameof(errorCode), nameof(field), errorCode);
                 return methodResult;
             }
 

@@ -18,7 +18,7 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Students
         [EpplusTableColumn(Header = "Date Of Birth\n(Ngày sinh)")]
         public DateTime? DateOfBirth { get; set; }
 
-        [EpplusTableColumn(Header = "Grade\n(Cấp học)")]
+        [EpplusTableColumn(Header = "Grade\n(Khối học)")]
         public string? SchoolGrade { get; set; }
 
         [EpplusTableColumn(Header = "Class\n(Lớp)")]

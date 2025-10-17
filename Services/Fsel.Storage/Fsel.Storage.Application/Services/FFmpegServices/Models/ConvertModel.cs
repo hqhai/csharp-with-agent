@@ -6,19 +6,13 @@ namespace Fsel.Storage.Application.Services.FFmpegServices.Models
 
     public class ConvertModel
     {
-        [JsonPropertyName("job_id")]
-        public Guid? JobId { get; set; }
+        [JsonPropertyName("path_s3")]
+        public string? Paths3 { get; set; }
 
         [JsonPropertyName("status")]
         public string? Status { get; set; }
 
         [JsonPropertyName("message")]
         public string? Message { get; set; }
-
-        [JsonPropertyName("input_file")]
-        public string? InputFile { get; set; }
-
-        [JsonPropertyName("path_s3")]
-        public string? PathS3 { get; set; }
     }
 }

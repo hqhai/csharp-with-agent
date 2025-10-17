@@ -2,23 +2,22 @@
 
 namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
 {
-    using Fsel.Common.ActionResults;
     using System.Net;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Ordering.Application.Commands.VoucherCmds;
     using Fsel.Ordering.Application.Queries.VoucherQuery;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Ordering.Application.Commands.VoucherCmds;
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/admin/voucher")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Admin))]
     public class VoucherController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -34,6 +33,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("search-voucher-fsel")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<VoucherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.View)]
         public async Task<IActionResult> SearchVoucherFSEL([FromQuery] SearchVoucherFSELQuery query)
         {
             MethodResult<PagingItemsModel<VoucherModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -46,6 +46,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("search-voucher-auto")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<VoucherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.View)]
         public async Task<IActionResult> SearchVoucherAuto([FromQuery] SearchVoucherAutoQuery query)
         {
             MethodResult<PagingItemsModel<VoucherModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -58,6 +59,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<VoucherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.View)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<VoucherModel> queryResult = await _mediator.Send(new GetVoucherQuery { Id = id }).ConfigureAwait(false);
@@ -70,6 +72,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("get-info-voucher-auto")]
         [ProducesResponseType(typeof(MethodResult<VoucherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.View)]
         public async Task<IActionResult> GetInfoVoucherAuto([FromQuery] GetInfoVoucherAutoQuery query)
         {
             MethodResult<VoucherModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -82,6 +85,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<VoucherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.Add)]
         public async Task<IActionResult> Create([FromForm] CreateVoucherCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
@@ -96,6 +100,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpPut]
         [ProducesResponseType(typeof(MethodResult<VoucherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.Update)]
         public async Task<IActionResult> Update([FromForm] UpdateVoucherCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
@@ -109,6 +114,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpDelete("delete")]
         [ProducesResponseType(typeof(MethodResult<VoucherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.Delete)]
         public async Task<IActionResult> Delete([FromBody] DeleteVouchersCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
@@ -122,6 +128,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("search-history")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<HistoryVoucherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.View)]
         public async Task<IActionResult> SearchHistory([FromQuery] SearchHistoryVoucherQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -134,6 +141,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("search-history-voucher-auto")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<HistoryVoucherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.View)]
         public async Task<IActionResult> SearchHistoryVoucherAuto([FromQuery] SearchDetailHistoryVoucherAutoQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -146,6 +154,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpPost("create-vouchers-for-master-agency")]
         [ProducesResponseType(typeof(MethodResult<CheckVoucherModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.Add)]
         public async Task<IActionResult> CreateVouchersForMA([FromBody] CreateVoucherForMasterAgencyCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -158,6 +167,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("export-detail-history-voucher-auto")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.Export)]
         public async Task<IActionResult> ExportDetailHistoryVoucherAuto([FromQuery] ExportDetailHistoryVoucherAutoCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -174,6 +184,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("export-voucher-fsel")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.Export)]
         public async Task<IActionResult> ExportVoucherFSEL([FromQuery] ExportVoucherFSELCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -190,6 +201,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2.Admin
         [HttpGet("export-voucher-auto")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(VoucherManagement.Export)]
         public async Task<IActionResult> ExportVoucherAuto([FromQuery] ExportVoucherAutoCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);

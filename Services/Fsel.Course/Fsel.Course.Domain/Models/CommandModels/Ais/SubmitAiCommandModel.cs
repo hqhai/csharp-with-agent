@@ -28,5 +28,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Ais
         public string? UserAIConfig { get; set; }
 
         public object? Text { get; set; }
+
+        public string? NameSchema { get; set; }
     }
 }

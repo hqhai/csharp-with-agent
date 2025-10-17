@@ -6,12 +6,15 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queries.Reports;
+    using Fsel.Course.Lms.Application.Queries.Reports.Sales;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
@@ -22,10 +25,12 @@ namespace Fsel.Course.Lms.Api.Controllers
     public class ReportController : ControllerBase
     {
         private readonly IMediator _mediator;
+        private ILogger<ReportController> _logger;
 
-        public ReportController(IMediator mediator)
+        public ReportController(IMediator mediator, ILogger<ReportController> logger)
         {
             _mediator = mediator;
+            _logger = logger;
         }
 
         /// <summary>
@@ -146,6 +151,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [Permission(role: nameof(EnumRole.Admin))]
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventSchoolQuery query)
         {
+            _logger.LoggerRequest($"ExportReportPlacementTestEventSchoolQuery : {query.Serialize()}");
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             if (!queryResult.IsOK || queryResult.Result == null)
             {
@@ -164,6 +170,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> ExportFile([FromQuery] ExportReportPlacementTestEventDistrictSchoolQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+
             if (!queryResult.IsOK || queryResult.Result == null)
             {
                 return queryResult.GetActionResult();
@@ -185,7 +192,8 @@ namespace Fsel.Course.Lms.Api.Controllers
             {
                 return queryResult.GetActionResult();
             }
-            return File(queryResult.Result, Settings.Excels.ContentType, "export-file-learning-process-district.xlsx");
+            string url = $"export-file-learning-process-district-{query.EventCodeStr}-{query.CourseType}-{query.CourseLevel}-{query.EducationLevel}-{NumberHelper.GenerateCodeNumber(5)}.xlsx";
+            return File(queryResult.Result, Settings.Excels.ContentType, url);
         }
 
         ///// <summary>
@@ -240,6 +248,53 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> AggregateDataStudentsInEvent([FromBody] AggregateDataStudentsInEventQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Expot File Learning Process District
+        /// </summary>
+        [HttpPost("export-file")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ExportFile([FromQuery] ExportReportSelfStudyMonthlyQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, $"{query.FileName}_{query.EducationLevel.GetDescription()}.xlsx");
+        }
+
+        /// <summary>
+        /// aggregate data students in event
+        /// </summary>
+        [HttpPost("export-file-report-sale-progress")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Admin))]
+        public async Task<IActionResult> ExportReportSaleProgress()
+        {
+            var queryResult = await _mediator.Send(new ExportCustomerSupportSummaryQuery()).ConfigureAwait(false);
+            if (!queryResult.IsOK || queryResult.Result == null)
+            {
+                return queryResult.GetActionResult();
+            }
+            return File(queryResult.Result, Settings.Excels.ContentType, $"ExportReportSaleProgress_{DateTime.Now.Ticks}.xlsx");
+        }
+
+        /// <summary>
+        /// Get Overall Report By Student
+        /// </summary>
+        [HttpGet("get-file-report-sale-support")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
+        public async Task<IActionResult> Get()
+        {
+            var queryResult = await _mediator.Send(new GetFileExcelUserInformationSupportSaleQuery()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

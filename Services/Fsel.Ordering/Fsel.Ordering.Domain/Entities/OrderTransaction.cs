@@ -2,7 +2,9 @@
 
 namespace Fsel.Ordering.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Shared.Enums;
@@ -13,7 +15,10 @@ namespace Fsel.Ordering.Domain.Entities
         public EnumOrderTransactionType Type { get; set; }
         public Guid? OrderId { get; set; }
         public Guid? ProductId { get; set; }
+
+        [MaxLength(100, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
+
         public string? RequestBodyStr { get; set; }
 
         [NotMapped]

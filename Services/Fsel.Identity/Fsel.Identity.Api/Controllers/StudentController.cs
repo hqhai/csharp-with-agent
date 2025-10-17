@@ -298,9 +298,9 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("send-otp-sms")]
         [ProducesResponseType(typeof(MethodResult<SaveOTPForUserEventHaNoiCommandModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendOtpSMS()
+        public async Task<IActionResult> SendOtpSMS([FromBody] SendOtpForPhoneVerificationCommand command)
         {
-            MethodResult<SaveOTPForUserEventHaNoiCommandModel> commandResult = await _mediator.Send(new SendOtpForPhoneVerificationCommand()).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -337,6 +337,19 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> UpdateStudentInfoEvent([FromBody] UpdateStudentInfoEventCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// deduct coin of student
+        /// </summary>
+        [HttpPost("deduct-coin-of-student")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> DeductCoinOfStudent([FromBody] DeductCoinOfStudentCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

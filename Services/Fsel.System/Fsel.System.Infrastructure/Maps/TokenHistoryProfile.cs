@@ -15,6 +15,8 @@ namespace Fsel.System.Infrastructure.Maps
             CreateMap<TokenHistory, TokenHistoryModel>().MapTranslations<TokenHistory, TokenHistoryModel, TokenHistoryTranslation>();
             CreateMap<TokenHistoryQueueModel, TokenHistory>().IgnoreAllNonExisting();
             CreateMap<TokenHistoryTranslation, TokenHistory>().IgnoreEntity()?.ReverseMap();
+            CreateMap<CreateHistoryDeductCoinOfStudentCommandModel, TokenHistory>().IgnoreAllNonExisting();
+            CreateMap<TokenHistoryTranslationModel, TokenHistoryTranslation>().IgnoreAllNonExisting();
         }
     }
 }

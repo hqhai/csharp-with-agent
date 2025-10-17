@@ -6,6 +6,7 @@ namespace Fsel.Shared.Enums
     {
         IRISSMS,
         GAPITSMS,
-        Email
+        Email,
+        Zalo
     }
 }

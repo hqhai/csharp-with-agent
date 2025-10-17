@@ -8,7 +8,7 @@ namespace Fsel.System.Api.Controllers
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.System.Application.Commands.OtherCmd;
+    using Fsel.System.Application.Commands.TokenHistoryCmd;
     using Fsel.System.Application.Queries.TokenHistoryQuery;
     using Fsel.System.Domain.Models.EntityModels;
     using global::System.Net;
@@ -49,6 +49,19 @@ namespace Fsel.System.Api.Controllers
         public async Task<IActionResult> GetUserTokenHistory([FromQuery] GetCurrentUserTokenHistoryQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// create history deduct coin of student
+        /// </summary>
+        [HttpPost("create-history-deduct-coin-of-student")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> CreateHistoryDeductCoinOfStudent([FromBody] CreateHistoryDeductCoinOfStudentCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -53,6 +53,10 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<NotifyUrlModel>();
 
+            var payooResponse = request.Serialize();
+
+            _logger.LogError($"payoo notify: {payooResponse}");
+
             methodResult.Result = new NotifyUrlModel { ReturnCode = 1, Description = string.Empty };
 
             var secureHash = EncodeHelper.SecureHash(_appSetting.PayooConfig?.Key + request.ResponseData + _appSetting.PayooConfig?.PayooIP);
