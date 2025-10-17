@@ -303,6 +303,7 @@ form:invalid .btn {
   align-items: center;
   width: 100%;
   gap: 56px;
+  flex-wrap: wrap;
 }
 
 html {
