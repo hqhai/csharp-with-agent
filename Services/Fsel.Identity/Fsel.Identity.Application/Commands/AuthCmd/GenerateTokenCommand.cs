@@ -45,9 +45,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IRoleClaimRepository _roleClaimRepository;
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly ISystemConfigRepository _systemConfigRepository;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
+
             IInteractionService interactionService,
             ITrainingService trainingService,
             ILmsCourseService lmsCourseService,
@@ -58,6 +60,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IRoleClaimRepository roleClaimRepository,
             RoleManager<Role> roleManager,
             IMapper mapper,
+            ICompetitionEventsRepository competitionEventsRepository,
             ISystemConfigRepository systemConfigRepository)
         {
             _userManager = userManager;
@@ -71,6 +74,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleClaimRepository = roleClaimRepository;
             _roleManager = roleManager;
             _mapper = mapper;
+            _competitionEventsRepository = competitionEventsRepository;
             _systemConfigRepository = systemConfigRepository;
         }
 
@@ -86,6 +90,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
+
+            var schoolId = user.UserSchools.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.SchoolId;
+            var eventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId);
+
             var jti = Guid.NewGuid().ToString();
             var authClaims = new List<Claim>
             {
@@ -95,7 +103,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(JwtClaimNames.UserId, user.Id.ToString()),
                 new Claim(JwtClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
                 new Claim(JwtClaimNames.Jti, jti),
+                new Claim(nameof(TokenModel.EventCode), eventCode),
             };
+
+            if (user.UserSchools != null && user.UserSchools.Any())
+            {
+                authClaims.Add(new Claim("SchoolId", user.UserSchools.First().SchoolId.ToString()));
+            }
 
             foreach (var userRole in userRoles)
             {
@@ -146,10 +160,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
                 Code = user.Human?.Code,
-                IsEnabledExtra = isEnabledExtra
+                IsEnabledExtra = isEnabledExtra,
+                EventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId),
             };
 
-            if (userRoles.Contains(EnumRole.Student.ToString()))
+            if (userRoles.Contains(EnumRole.Student.ToString()) || userRoles.Contains(EnumRole.StudentCampus.ToString()))
             {
                 var student = user.Human?.Student;
                 tokenLogin.IsOrder = false;
@@ -171,9 +186,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     tokenLogin.IsSurvey = isSurvey?.Content?.Result;
                 }
             }
-            if (userRoles.Contains(EnumRole.AdminSchool.ToString()))
+
+            if (userRoles.Any(p => p == EnumRole.AdminSchool.ToString() || p == EnumRole.AdminCampus.ToString() || p == EnumRole.TeacherCampus.ToString()))
             {
-                tokenLogin.SchoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                tokenLogin.SchoolId = user.UserSchools?.FirstOrDefault()?.SchoolId;
             }
 
             methodResult.Result = tokenLogin;

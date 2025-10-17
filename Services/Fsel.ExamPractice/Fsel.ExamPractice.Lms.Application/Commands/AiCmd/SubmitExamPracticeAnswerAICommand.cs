@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.AiCmd
+namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
 {
     using System;
     using System.Linq.Dynamic.Core;
@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
-    using Fsel.ExamPractice.Lms.Application.Commands.AiCmd;
     using Fsel.ExamPractice.Lms.Application.Queues.Publishers;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
@@ -86,12 +85,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 return true;
             }
 
-            if (aiConfig == null || (aiConfig.ExamPracticeAICriteriaSettings == null && aiConfig.SystemRoleAlConfig == null || aiConfig!.ExamPracticeAICriteriaSettings!.Count == 0 && aiConfig.SystemRoleAlConfig == null))
+            if (aiConfig == null || aiConfig.ExamPracticeAICriteriaSettings == null && aiConfig.SystemRoleAlConfig == null || aiConfig!.ExamPracticeAICriteriaSettings!.Count == 0 && aiConfig.SystemRoleAlConfig == null)
             {
                 return true;
             }
 
-            if (string.IsNullOrEmpty(aiConfig.SystemRoleAlConfig) || (aiConfig.Prompts != null && aiConfig.Prompts.Count == 0))
+            if (string.IsNullOrEmpty(aiConfig.SystemRoleAlConfig) || aiConfig.Prompts != null && aiConfig.Prompts.Count == 0)
             {
                 foreach (var item in aiConfig.ExamPracticeAICriteriaSettings)
                 {
@@ -142,10 +141,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 GrammaticalRange = resultDictionary[EnumMockTestAIType.GrammaticalRange]
             };
 
-            var taskResponse = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult.TaskResponse);
-            var coherence = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult.Coherence);
-            var lexicalResource = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult.LexicalResource);
-            var grammaticalRange = ConvertHelper.Deserialize<List<ExamPracticeAIGradingModel>>(gradingAiFeedBackResult.GrammaticalRange);
+            var taskResponse = gradingAiFeedBackResult.TaskResponse.Deserialize<List<ExamPracticeAIGradingModel>>();
+            var coherence = gradingAiFeedBackResult.Coherence.Deserialize<List<ExamPracticeAIGradingModel>>();
+            var lexicalResource = gradingAiFeedBackResult.LexicalResource.Deserialize<List<ExamPracticeAIGradingModel>>();
+            var grammaticalRange = gradingAiFeedBackResult.GrammaticalRange.Deserialize<List<ExamPracticeAIGradingModel>>();
 
             var examPracticeResult = await _examPracticeResultRepository.Queryable.Include(x => x.ExamPractice)
                                                                         .FirstOrDefaultAsync(x => x.Id == examPracticeSectionResult.ExamPracticeResultId, cancellationToken);
@@ -216,7 +215,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             }
 
             examPracticeSectionResult.SkillScores = skillScores;
-            string? gradingAiFeedBack = ConvertHelper.Serialize(gradingAiFeedBackResult);
+            string? gradingAiFeedBack = gradingAiFeedBackResult.Serialize();
 
             if (examPracticeAnswer != null)
             {
@@ -246,7 +245,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 return bandScore;
             }
 
-            ExamPracticeAIGradingModel firstItem = bandScoreDescription.FirstOrDefault()!;
+            var firstItem = bandScoreDescription.FirstOrDefault()!;
 
             if (firstItem == null || firstItem.BandScore == null || string.IsNullOrEmpty(firstItem.BandScore))
             {
@@ -298,7 +297,35 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 SettingPresence = aiConfig.SettingPresence,
                 SettingTopP = aiConfig.SettingTopP,
                 SystemRoleAlConfig = systemRole,
+                UserAIConfig = userAiConfig
+            }, cancellationToken).ConfigureAwait(false);
+
+            if (!string.IsNullOrEmpty(result))
+            {
+                aIResponse = result;
+            }
+            return aIResponse;
+        }
+
+        private async Task<string> SendChatGPTSchema(ExamPracticeAISetting aiConfig, string systemRole, string userAiConfig, string jsonSchema, CancellationToken cancellationToken)
+        {
+            string aIResponse = "";
+            if (string.IsNullOrEmpty(userAiConfig))
+            {
+                return aIResponse;
+            }
+
+            var result = await _mediator.Send(new V1i1.SubmitAICommand
+            {
+                SettingModel = aiConfig.SettingModel,
+                SettingTemperature = aiConfig.SettingTemperature,
+                SettingFrequecy = aiConfig.SettingFrequecy,
+                SettingWordMaxLength = aiConfig.SettingWordMaxLength,
+                SettingPresence = aiConfig.SettingPresence,
+                SettingTopP = aiConfig.SettingTopP,
+                SystemRoleAlConfig = systemRole,
                 UserAIConfig = userAiConfig,
+                Format = jsonSchema
             }, cancellationToken).ConfigureAwait(false);
 
             if (!string.IsNullOrEmpty(result))

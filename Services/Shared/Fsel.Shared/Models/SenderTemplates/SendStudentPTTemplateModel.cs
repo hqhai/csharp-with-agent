@@ -8,5 +8,6 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? CurrentCourse { get; set; }
         public string? CourseInfos { get; set; }
         public string? ContinueLearn { get; set; }
+        public string? AccessLink { get; set; }
     }
 }

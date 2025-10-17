@@ -57,6 +57,13 @@ namespace Fsel.Course.Application.Commands.HomeWorkCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork));
                 return methodResult;
             }
+            var isExistCode = await _homeWorkRepository.Queryable.Where(x => x.Id != homeWork.Id).AnyAsync(x => x.Code == request.Code && x.Type == homeWork.Type, cancellationToken);
+            if (isExistCode)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
+                return methodResult;
+            }
+
             var questionDeletes = homeWork.HomeWorkQuestions.Where(x => x.Question != null && !x.IsDeleted).Select(x => x.Question!);
             homeWork = _mapper.Map(request, homeWork);
 

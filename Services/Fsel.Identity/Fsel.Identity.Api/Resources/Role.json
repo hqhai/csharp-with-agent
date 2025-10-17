@@ -93,5 +93,29 @@
     "createdDate": "2023-07-21",
     "createdFullName": "",
     "isDefault": true
+  },
+  {
+    "id": "52120645-e701-4e83-a61d-32d99192abec",
+    "name": "StudentCampus",
+    "normalizedName": "STUDENTCAMPUS",
+    "createdDate": "2025-09-18",
+    "createdFullName": "",
+    "isDefault": true
+  },
+  {
+    "id": "daaa1fa3-e040-4344-bfbd-a7b0d32c6bd4",
+    "name": "TeacherCampus",
+    "normalizedName": "TEACHERCAMPUS",
+    "createdDate": "2025-09-18",
+    "createdFullName": "",
+    "isDefault": true
+  },
+  {
+    "id": "a00e83f8-9fa3-4f4f-9d24-2a28cb6aeb79",
+    "name": "AdminCampus",
+    "normalizedName": "ADMINCAMPUS",
+    "createdDate": "2025-09-18",
+    "createdFullName": "",
+    "isDefault": true
   }
 ]

@@ -1,0 +1,44 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.ExamPractice.Lms.Api.Controllers.V1i1
+{
+    using System.Net;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Constants;
+    using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
+    using Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
+    using MediatR;
+    using Microsoft.AspNetCore.Mvc;
+
+    [ApiVersions(ApiSettings.APIVersion1i1)]
+    [ApiController]
+    [Route(Settings.APIDefaultRoute + "/exam-practice")]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+    public class ExamPracticeController : BaseController
+    {
+        private readonly IMediator _mediator;
+
+        public ExamPracticeController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Search ExamPractice
+        /// </summary>
+        [HttpGet]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExamPracticeGroupModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] SearchExamPracticeQuery query)
+        {
+            SetQuery(query);
+            MethodResult<PagingItemsModel<ExamPracticeGroupModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+    }
+}

@@ -17,5 +17,14 @@ namespace Fsel.Identity.Domain.Models.CommandModels.UserSettings
         public bool IsSoundEffect { get; set; }
 
         public string? Language { get; set; }
+
+        public IList<SaveUserSenderSetting>? UserSenderSettings { get; set; }
+    }
+
+    public class SaveUserSenderSetting
+    {
+        public Guid SenderConfigId { get; set; }
+
+        public bool IsActive { get; set; }
     }
 }

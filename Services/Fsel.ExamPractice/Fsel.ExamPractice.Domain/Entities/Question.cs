@@ -76,6 +76,8 @@ namespace Fsel.ExamPractice.Domain.Entities
             set { SubQuestionIndexsStr = ConvertHelper.Serialize(value); }
         }
 
+        public int DisplayOrder { get; set; }
+
         [MaxLength(3000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
