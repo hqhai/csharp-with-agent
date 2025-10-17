@@ -57,6 +57,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 UpdatedDate = x.UpdatedDate,
                 CreatedFullName = x.CreatedFullName,
                 Status = x.Status,
+                Address = x.Address,
                 PaymentMethod = x.PaymentMethod,
                 PackageId = x.PackageId,
                 MonthNumber = x.Package == null ? null : x.Package.MonthNumber,
@@ -130,6 +131,11 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     .ToListAsync(cancellationToken);
 
             var userIds = lists.Select(l => l.UserId).Distinct().ToList();
+
+            var orderUsers = await _orderRepository.Queryable.Where(p => !p.IsTrial && p.RevenueType == EnumPaymentRevenueType.Revenue)
+                                                             .WhereBulkContains(userIds, x => x.UserId)
+                                                             .GroupBy(x => x.UserId)
+                                                             .ToDictionaryAsync(x => x.Key, x => x.Count(), cancellationToken);
             if (userIds.Any())
             {
                 var batches = SplitList(userIds, BatchSize);
@@ -167,6 +173,10 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                             p.StudentEmail = student.Human?.Email;
                             p.StudentFullName = student.Human?.FullName;
                             p.ExpiredDate = student.ExpiredDate;
+                        }
+                        if (orderUsers.TryGetValue(p.UserId, out var countOrder))
+                        {
+                            p.CountOrder = countOrder;
                         }
                     });
                 }

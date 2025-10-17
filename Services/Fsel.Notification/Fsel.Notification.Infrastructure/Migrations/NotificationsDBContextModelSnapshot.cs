@@ -2146,7 +2146,7 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             IsDeleted = false,
                             Language = "vi-VN",
                             NotificationTypeId = new Guid("4a1f848c-f666-48fa-b127-c871af142332"),
-                            TemplateMessage = "Chúc mừng bạn đã hoàn thành khoá học {0}. Nhấn để xem lại hành trình của bạn theo góc nhìn tổng quan nhé."
+                            TemplateMessage = "Việc học liên tục có thể giúp cải thiện các kỹ năng của bạn nhanh gấp 3 lần so với các bạn học dừng lại. Nhấn để nâng cấp ngay nào!"
                         },
                         new
                         {

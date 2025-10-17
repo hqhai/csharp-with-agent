@@ -44,8 +44,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IRoleClaimRepository _roleClaimRepository;
         private readonly RoleManager<Role> _roleManager;
         private readonly IMapper _mapper;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
+
             IInteractionService interactionService,
             ITrainingService trainingService,
             ILmsCourseService lmsCourseService,
@@ -55,7 +57,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             IHttpContextAccessor httpContextAccessor,
             IRoleClaimRepository roleClaimRepository,
             RoleManager<Role> roleManager,
-            IMapper mapper)
+            IMapper mapper,
+            ICompetitionEventsRepository competitionEventsRepository)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -68,6 +71,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _roleClaimRepository = roleClaimRepository;
             _roleManager = roleManager;
             _mapper = mapper;
+            _competitionEventsRepository = competitionEventsRepository;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -82,6 +86,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
+
+            var schoolId = user.UserSchools.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.SchoolId;
+            var eventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId);
+
             var jti = Guid.NewGuid().ToString();
             var authClaims = new List<Claim>
             {
@@ -91,6 +99,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(JwtClaimNames.UserId, user.Id.ToString()),
                 new Claim(JwtClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
                 new Claim(JwtClaimNames.Jti, jti),
+                new Claim(nameof(TokenModel.EventCode), eventCode),
             };
 
             foreach (var userRole in userRoles)
@@ -140,7 +149,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
-                Code = user.Human?.Code
+                Code = user.Human?.Code,
+                EventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId),
             };
 
             if (userRoles.Contains(EnumRole.Student.ToString()))
