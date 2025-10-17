@@ -2415,7 +2415,7 @@ build-staging-exam-practice:
     refs:
     - staging
 
-build-prod-exam-practice:
+build-pre-prod-exam-practice:
   stage: build-image
   tags:
   - docker-runner
