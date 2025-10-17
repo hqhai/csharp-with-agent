@@ -29,6 +29,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public EnumResultStatus? Status { get; set; }
         public double? ProgressPercent { get; set; }
         public string? ScoreLevel { get; set; }
+        public bool IsPendingAi { get; set; }
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
         public IList<EnumCourseSkill>? RemainingSkills { get; set; }
     }

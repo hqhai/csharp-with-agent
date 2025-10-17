@@ -2,11 +2,11 @@
 
 namespace Fsel.ExamPractice.Infrastructure.Configs
 {
-    using Fsel.ExamPractice.Domain.Entities;
-    using Microsoft.EntityFrameworkCore.Metadata.Builders;
-    using Microsoft.EntityFrameworkCore;
     using Fsel.Common.Helpers;
-    using Fsel.Shared.Enums;
+    using Fsel.ExamPractice.Domain.Entities;
+    using Fsel.ExamPractice.Domain.Enums;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
     public class ExamPracticeAiCriteriaSettingEntityTypeConfiguration : IEntityTypeConfiguration<ExamPracticeAICriteriaSetting>
     {
@@ -18,7 +18,7 @@ namespace Fsel.ExamPractice.Infrastructure.Configs
               .HasMaxLength(50)
               .HasConversion(
                   v => v.ToString(),
-                  v => v.EnumParse<EnumMockTestAIType>());
+                  v => v.EnumParse<EnumExamPracticeAIType>());
 
             builder.HasOne(a => a.ExamPracticeAISetting)
                    .WithMany(b => b.ExamPracticeAICriteriaSettings)

@@ -9,6 +9,6 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.Configs
     {
         public EnumCourseSkill CourseSkill { get; set; }
         public EnumExamPracticeType Type { get; set; }
-        public IList<ExamBandScore> ExamBandScores { get; set; } = new List<ExamBandScore>();
+        public IList<ExamBandScore> BandScores { get; set; } = new List<ExamBandScore>();
     }
 }

@@ -49,19 +49,22 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
         private readonly AuthContext _authContext;
         private readonly IMapper _mapper;
         private readonly IExamPracticeAnswerRepository _examPracticeAnswerRepository;
+        private readonly IExamPracticeScoreRepository _examPracticeScoreRepository;
         private const int TotalRetry = 20;
 
         public SearchExamPracticeQueryHandler(IExamPracticeRepository examPracticeRepository,
             IUserService userService,
             AuthContext authContext,
             IMapper mapper,
-            IExamPracticeAnswerRepository examPracticeAnswerRepository)
+            IExamPracticeAnswerRepository examPracticeAnswerRepository,
+            IExamPracticeScoreRepository examPracticeScoreRepository)
         {
             _examPracticeRepository = examPracticeRepository;
             _userService = userService;
             _authContext = authContext;
             _mapper = mapper;
             _examPracticeAnswerRepository = examPracticeAnswerRepository;
+            _examPracticeScoreRepository = examPracticeScoreRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<ExamPracticeGroupModel>>> Handle(SearchExamPracticeQuery request, CancellationToken cancellationToken)
@@ -100,9 +103,9 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                 query = query.Where(x => x.SubType == request.SubType);
             }
 
-            if (request.Type == EnumExamPracticeType.IELTS && request.CourseSkill.HasValue)
+            if (request.CourseSkill.HasValue)
             {
-                query = query.Where(x => x.ExamPracticeSections.Any(y => y.CourseSkill == request.CourseSkill.Value));
+                query = query.Where(x => x.ExamPracticeSections.Any(y => y.CourseSkill.HasValue && y.CourseSkill == request.CourseSkill.Value));
             }
             var queryTest = query.Select(x => new
             {
@@ -113,11 +116,11 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                 ExamPracticeResult = x.ExamPracticeResults.FirstOrDefault(y => y.StudentId == student.Id && y.ExamPracticeId == x.Id && y.WorkingStatus == EnumWorkingStatus.Active),
             });
             int totalItem = await queryTest.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await queryTest
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            var lists = await queryTest.OrderBy(x => x.ExamPractice.Code)
+                                       .ApplyPaging(request)
+                                       .AsNoTracking()
+                                       .ToListAsync(cancellationToken: cancellationToken)
+                                       .ConfigureAwait(false);
             var examPracticeResultIds = lists.Where(x => x.ExamPractice.SubType == EnumExamPracticeSubType.SkillMockTest || x.ExamPractice.SubType == EnumExamPracticeSubType.SingleVstepSkill
                                                 || x.ExamPractice.Type == EnumExamPracticeType.ExamPractice)
                                        .Where(x => x.ExamPracticeResult != null)
@@ -127,11 +130,17 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
             var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.AsNoTracking().Where(x => x.QuestionId.HasValue)
                                                                          .WhereBulkContains(examPracticeResultIds, x => x.ExamPracticeResultId)
                                                                          .ToListAsync(cancellationToken);
+            var examPracticeScores = await _examPracticeScoreRepository.Queryable.AsNoTracking()
+                                                                   .WhereBulkContains(examPracticeResultIds, x => x.ExamPracticeResultId)
+                                                                   .ToListAsync(cancellationToken);
+
             var examPracticeAnswerGroups = examPracticeAnswers.GroupBy(x => x.ExamPracticeResultId).ToDictionary(g => g.Key, g => g.ToList());
+            var examPracticeScoreGroups = examPracticeScores.GroupBy(x => x.ExamPracticeResultId).ToDictionary(g => g.Key, g => g.ToList());
             var data = lists.Select(x =>
             {
                 examPracticeAnswerGroups.TryGetValue(x.ExamPracticeResult?.Id ?? Guid.Empty, out var answers);
-                return BuildExamPracticeGroupModel(x, x.ExamPractice, x.ExamPracticeSections, x.ExamPracticeResult, answers?.Count ?? default);
+                examPracticeScoreGroups.TryGetValue(x.ExamPracticeResult?.Id ?? Guid.Empty, out var scores);
+                return BuildExamPracticeGroupModel(x, x.ExamPractice, x.ExamPracticeSections, x.ExamPracticeResult, answers, scores);
             }).ToList();
             methodResult.Result = new PagingItemsModel<ExamPracticeGroupModel>(data, request, totalItem);
             return methodResult;
@@ -155,14 +164,16 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
             return student;
         }
 
-        private ExamPracticeGroupModel BuildExamPracticeGroupModel(dynamic x, ExamPractice examPractice, IList<ExamPracticeSection>? examPracticeSections, ExamPracticeResult? examPracticeResult, double countAnswer)
+        private ExamPracticeGroupModel BuildExamPracticeGroupModel(dynamic x, ExamPractice examPractice, IList<ExamPracticeSection>? examPracticeSections, ExamPracticeResult? examPracticeResult, IList<ExamPracticeAnswer>? examPracticeAnswers, IList<ExamPracticeScore>? examPracticeScores)
         {
             var examPracticeModel = _mapper.Map<ExamPracticeGroupModel>(examPractice);
-            var courseSkills = examPracticeSections?.Where(x => x.CourseSkill.HasValue).Select(x => x.CourseSkill!.Value).Distinct().ToList() ?? new List<EnumCourseSkill>();
+            var courseSkills = examPracticeSections?.OrderBy(x => x.DisplayOrder).Where(x => x.CourseSkill.HasValue).Select(x => x.CourseSkill!.Value).Distinct().ToList() ?? new List<EnumCourseSkill>();
+            var countAnswer = examPracticeAnswers?.Count ?? default;
             examPracticeModel.CourseSkills = courseSkills;
+
             if (examPracticeSections != null)
             {
-                if (examPractice.Type is not (EnumExamPracticeType.Vstep or EnumExamPracticeType.IELTS))
+                if (examPractice.Type is (EnumExamPracticeType.Vstep or EnumExamPracticeType.IELTS))
                 {
                     examPracticeModel.ExecutionTime = examPracticeSections.Sum(x => x.Config?.ExecutionTime ?? default);
                 }
@@ -180,10 +191,21 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                 #region ProgressPercent
 
                 var skillScore = examPracticeResult.SkillScores?.FirstOrDefault();
-                if (examPractice.Type is not (EnumExamPracticeType.Vstep or EnumExamPracticeType.IELTS))
+                if (examPractice.Type is (EnumExamPracticeType.Vstep or EnumExamPracticeType.IELTS))
                 {
                     if (examPractice.SubType is EnumExamPracticeSubType.FullMockTest or EnumExamPracticeSubType.FullVstepSkill)
                     {
+                        var examPracticeSection = examPracticeSections?.FirstOrDefault(s => s.CourseSkill == EnumCourseSkill.Writing);
+                        if (examPracticeSection != null)
+                        {
+                            var answers = examPracticeAnswers?.Where(x => x.ExamPracticeSectionId == examPracticeSection.Id).ToList();
+                            examPracticeModel.IsPendingAi = answers?.Any(x => x.GradingAlFeedbacks == null || !x.GradingAlFeedbacks.Any()) ?? default;
+                        }
+                        if (!examPracticeModel.IsPendingAi)
+                        {
+                            examPracticeModel.IsPendingAi = examPracticeScores?.Any() ?? default;
+                        }
+
                         examPracticeModel.ProgressPercent = skills != null && skills.Any()
                            ? NumberHelper.GetPercent(skills.Count(), courseSkills.Count)
                            : default;
@@ -196,12 +218,22 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                         }
                         else
                         {
+                            ;
+                            if (courseSkills.Any(s => s == EnumCourseSkill.Writing))
+                            {
+                                examPracticeModel.IsPendingAi = examPracticeAnswers?.Any(x => x.GradingAlFeedbacks == null || !x.GradingAlFeedbacks.Any()) ?? default;
+                            }
+                            if (courseSkills.Any(s => s == EnumCourseSkill.Speaking) && !examPracticeModel.IsPendingAi)
+                            {
+                                examPracticeModel.IsPendingAi = !examPracticeScores?.Any() ?? default;
+                            }
+
                             var maxPercent = 100;
                             examPracticeModel.ProgressPercent = examPracticeResult.Status == EnumResultStatus.Done ? maxPercent : default;
                         }
                     }
                 }
-                else if (skillScore != null)
+                else
                 {
                     examPracticeModel.ProgressPercent = NumberHelper.GetPercent(countAnswer, examPracticeModel.TotalQuestion);
                 }

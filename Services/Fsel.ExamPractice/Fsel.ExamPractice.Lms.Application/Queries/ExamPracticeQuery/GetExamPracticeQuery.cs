@@ -18,6 +18,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
     using Fsel.ExamPractice.Infrastructure.Common;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices;
     using Fsel.ExamPractice.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
 
@@ -28,7 +29,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 
     public class GetExamPracticeQueryHandler : IRequestHandler<GetExamPracticeQuery, MethodResult<ExamPracticeDetailModel>>
     {
-        private readonly IExamPracticeRepository _examPracticeRepository;
         private readonly IExamPracticeSectionRepository _examPracticeSectionRepository;
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
@@ -36,7 +36,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         private readonly IExamPracticeAnswerRepository _examPracticeAnswerRepository;
         private readonly IMapper _mapper;
 
-        public GetExamPracticeQueryHandler(IExamPracticeRepository examPracticeRepository,
+        public GetExamPracticeQueryHandler(
             IExamPracticeSectionRepository examPracticeSectionRepository,
             AuthContext authContext,
             IUserService userService,
@@ -44,7 +44,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             IExamPracticeAnswerRepository examPracticeAnswerRepository,
             IMapper mapper)
         {
-            _examPracticeRepository = examPracticeRepository;
             _examPracticeSectionRepository = examPracticeSectionRepository;
             _authContext = authContext;
             _userService = userService;
@@ -66,14 +65,9 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             }
             var student = methodResultStudent.Result ?? new StudentModel();
 
-            var examPractice = await _examPracticeRepository.GetByIdAsync(request.Id);
-            if (examPractice == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPractice), request.Id);
-                return methodResult;
-            }
-            var examPracticeResult = await _examPracticeResultRepository.Queryable.Where(x => x.ExamPracticeId == examPractice.Id && x.StudentId == student.Id)
-                                                                        .Where(x => x.WorkingStatus == Shared.Enums.EnumWorkingStatus.Active)
+            var examPracticeResult = await _examPracticeResultRepository.Queryable.Include(x => x.ExamPractice)
+                                                                        .Where(x => x.ExamPracticeId == request.Id && x.StudentId == student.Id)
+                                                                        .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
                                                                         .AsNoTracking()
                                                                         .FirstOrDefaultAsync(cancellationToken);
             if (examPracticeResult == null)
@@ -81,9 +75,14 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeResult));
                 return methodResult;
             }
+            if (examPracticeResult.ExamPractice == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeResult.ExamPractice), request.Id);
+                return methodResult;
+            }
 
-            var examPracticeDetail = GetExamPracticeDetail(examPractice, examPracticeResult);
-            examPracticeDetail.ExamPracticeSections = await GetExamPracticeSections(examPractice, examPracticeResult);
+            var examPracticeDetail = GetExamPracticeDetail(examPracticeResult.ExamPractice, examPracticeResult);
+            examPracticeDetail.ExamPracticeSections = await GetExamPracticeSections(examPracticeResult.ExamPractice, examPracticeResult);
             methodResult.Result = examPracticeDetail;
             return methodResult;
         }
@@ -108,9 +107,10 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         {
             var examPracticeSectionDetails = new List<ExamPracticeSectionDetailModel>();
             var examPracticeSections = await GetSectionsAsync(examPractice, examPracticeResult.Id);
-            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.AsNoTracking()
+            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable
                                                                          .Where(x => x.ExamPracticeResultId == examPracticeResult.Id && x.QuestionId.HasValue)
                                                                          .ToListAsync();
+            var examPracticeAnswerDict = examPracticeAnswers.GroupBy(x => x.QuestionId!.Value).ToDictionary(g => g.Key, g => g.FirstOrDefault());
 
             foreach (var item in examPracticeSections)
             {
@@ -133,7 +133,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 examPracticeSectionDto.QuestionTests = item.Questions.OrderBy(x => x.CreatedDate)
                                                                      .Select(x =>
                                                                      {
-                                                                         var answer = examPracticeAnswers.FirstOrDefault(y => y.QuestionId == x.Id);
+                                                                         examPracticeAnswerDict.TryGetValue(x.Id, out var answer);
                                                                          return new QuestionCorrectStatusModel
                                                                          {
                                                                              QuestionId = x.Id,
@@ -150,7 +150,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             // Base query
             var query = _examPracticeSectionRepository.Queryable
                 .AsNoTracking()
-                .Where(x => x.ExamPracticeId == examPractice.Id);
+                .Where(x => x.ExamPracticeId == examPractice.Id && !x.ParentExamPracticeSectionId.HasValue);
 
             if (examPractice.Type != EnumExamPracticeType.ExamPractice)
             {

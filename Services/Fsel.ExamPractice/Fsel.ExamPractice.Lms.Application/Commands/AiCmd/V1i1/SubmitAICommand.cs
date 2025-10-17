@@ -3,6 +3,7 @@
 namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd.V1i1
 {
     using System;
+    using System.Text.Json.Nodes;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.Helpers;
@@ -31,7 +32,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var response = await _openAIService.SubmitAIResponsesAsync(new RequestSchemaAIModel
+            var modelAI = new RequestSchemaAIModel
             {
                 Model = request.SettingModel,
                 Input = new List<object>
@@ -49,13 +50,13 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd.V1i1
                 },
                 Text = new
                 {
-                    Format = request.Format
+                    Format = request.Format == null ? null : JsonNode.Parse(request.Format.ToString() ?? string.Empty),
                 },
-                Temperature = request.SettingTemperature,
                 TopP = request.SettingTopP
-            });
-
-            var result = response.Content?.Output?.FirstOrDefault()?.Content?.FirstOrDefault()?.Text;
+            };
+            var response = await _openAIService.SubmitAIResponsesAsync(modelAI);
+            var statusAI = "completed";
+            var result = response.Content?.Output?.FirstOrDefault(x => x.Status == statusAI)?.Content?.FirstOrDefault()?.Text;
 
             string requestLog = request.Serialize();
             string responseLog = "";

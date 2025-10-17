@@ -52,7 +52,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 return methodResult;
             }
 
-            var examPracticeSection = await GetExamPracticeSectionAsync(request.ExamPracticeSectionId, methodResult);
+            var examPracticeSection = await GetExamPracticeSectionAsync(request.ExamPracticeSectionId, request.ExamPracticeResultId, methodResult);
             if (examPracticeSection == null)
             {
                 return methodResult;
@@ -64,7 +64,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 
             var examPracticeSectionDetail = _mapper.Map<ExamPracticeSectionDetailModel>(examPracticeSection);
             var examPracticeSectionResultModel = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
-            examPracticeSectionResultModel.RemainingTime = CalculateRemainingTime(examPracticeResult, examPracticeSectionResult);
+            examPracticeSectionResultModel.RemainingTime = CalculateRemainingTime(examPracticeResult, examPracticeSectionResult, examPracticeSection);
 
             var examPracticeSectionDetails = MapChildSectionDetails(examPracticeSections, examPracticeAnswers, isResultDone: examPracticeResult.Status == EnumResultStatus.Done);
             var executionTime = CalculateExecutionTime(examPracticeResult, examPracticeSection);
@@ -112,18 +112,19 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 .ToList();
         }
 
-        private static double CalculateRemainingTime(ExamPracticeResult examPracticeResult, ExamPracticeSectionResult sectionResult)
+        private static double CalculateRemainingTime(ExamPracticeResult examPracticeResult, ExamPracticeSectionResult sectionResult, ExamPracticeSection examPracticeSection)
         {
-            // Practice mode and NOT ExamBased => dùng time limit từ Result.Config
-            if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice &&
-                examPracticeResult.Config?.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
+            double totalExecutionTime;
+            if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice && examPracticeResult.Config?.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
             {
-                var total = examPracticeResult.Config?.ExecutionTime ?? default;
-                var remain = total - sectionResult.WorkingTime;
-                return remain > 0 ? remain : default;
+                totalExecutionTime = examPracticeResult.Config?.ExecutionTime ?? default;
             }
-
-            return default;
+            else
+            {
+                totalExecutionTime = examPracticeSection.Config?.ExecutionTime ?? default;
+            }
+            var remain = totalExecutionTime - sectionResult.WorkingTime;
+            return remain > 0 ? remain : default;
         }
 
         private static double CalculateExecutionTime(ExamPracticeResult examPracticeResult, ExamPracticeSection section)
@@ -139,26 +140,27 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         private async Task<List<ExamPracticeSection>> GetChildSectionsAsync(ExamPracticeResult examPracticeResult, Guid parentSectionId, CancellationToken ct)
         {
             var baseQuery = _examPracticeSectionRepository.Queryable
-                .Include(x => x.Questions)
-                .Where(x => x.ParentExamPracticeSectionId == parentSectionId)
-                .AsNoTracking();
+                                .Include(x => x.Questions)
+                                .Include(x => x.ExamPracticeAnswers.Where(x => x.ExamPracticeResultId == examPracticeResult.Id))
+                                .Include(x => x.ExamPracticeSections)
+                                .ThenInclude(x => x.ExamPracticeAnswers.Where(x => x.ExamPracticeResultId == examPracticeResult.Id))
+                                .Where(x => x.ParentExamPracticeSectionId == parentSectionId)
+                                .AsNoTracking();
 
             // If config null or IsAllPart = true -> lấy tất cả phần con
             if (examPracticeResult.Config == null || examPracticeResult.Config.IsAllPart)
             {
-                return await baseQuery.ToListAsync(ct);
+                return await baseQuery.OrderBy(x => x.CreatedDate).ToListAsync(ct);
             }
 
             // Nếu có danh sách phần cụ thể
             if (examPracticeResult.Config.ExamPracticeSectionIds is { Count: > 0 })
             {
-                return await baseQuery
-                    .WhereBulkContains(examPracticeResult.Config.ExamPracticeSectionIds, x => x.Id)
-                    .ToListAsync(ct);
+                baseQuery = baseQuery.WhereBulkContains(examPracticeResult.Config.ExamPracticeSectionIds, x => x.Id);
             }
 
             // Config có nhưng rỗng => không có phần nào
-            return new List<ExamPracticeSection>();
+            return await baseQuery.OrderBy(x => x.CreatedDate).ToListAsync(ct);
         }
 
         private async Task<List<ExamPracticeAnswer>> GetAnswersAsync(Guid examPracticeResultId, CancellationToken ct)
@@ -173,35 +175,36 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         {
             // Try read existing (no tracking is fine here)
             var examPracticeSectionResult = await _examPracticeSectionResultRepository.Queryable
-                                                                     .AsNoTracking()
-                                                                     .Where(x => x.ExamPracticeSectionId == examPracticeSection.Id)
-                                                                     .FirstOrDefaultAsync(x => x.ExamPracticeResultId == examPracticeResult.Id);
+                                                  .Where(x => x.ExamPracticeSectionId == examPracticeSection.Id)
+                                                  .Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
+                                                  .AsNoTracking()
+                                                  .FirstOrDefaultAsync();
 
-            if (examPracticeSectionResult != null)
+            if (examPracticeSectionResult == null)
             {
-                return examPracticeSectionResult;
-            }
-            // Insert idempotently via BulkMerge on natural key
-            examPracticeSectionResult = new ExamPracticeSectionResult
-            {
-                ExamPracticeSectionId = examPracticeSection.Id,
-                StudentId = examPracticeResult.StudentId,
-                ExamPracticeResultId = examPracticeResult.Id,
-                Status = EnumResultStatus.New
-            };
-            try
-            {
-                await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
+                // Insert idempotently via BulkMerge on natural key
+                examPracticeSectionResult = new ExamPracticeSectionResult
                 {
-                    await _examPracticeSectionResultRepository.BulkMergeAsync(new List<ExamPracticeSectionResult> { examPracticeSectionResult },
-                        bulk => bulk.ColumnPrimaryKeyExpression = e => new { e.StudentId, e.ExamPracticeSectionId, e.ExamPracticeResultId }
-                    );
-                    return methodResult;
-                });
+                    ExamPracticeSectionId = examPracticeSection.Id,
+                    StudentId = examPracticeResult.StudentId,
+                    ExamPracticeResultId = examPracticeResult.Id,
+                    Status = EnumResultStatus.New
+                };
+                try
+                {
+                    await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
+                    {
+                        await _examPracticeSectionResultRepository.BulkMergeAsync(new List<ExamPracticeSectionResult> { examPracticeSectionResult },
+                            bulk => bulk.ColumnPrimaryKeyExpression = e => new { e.StudentId, e.ExamPracticeSectionId, e.ExamPracticeResultId }
+                        );
+                        return methodResult;
+                    });
+                }
+                catch
+                {
+                }
             }
-            catch
-            {
-            }
+
             return examPracticeSectionResult;
         }
 
@@ -215,9 +218,10 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             return examPracticeResult;
         }
 
-        private async Task<ExamPracticeSection?> GetExamPracticeSectionAsync(Guid id, MethodResult<ExamPracticeSectionDetailModel> result)
+        private async Task<ExamPracticeSection?> GetExamPracticeSectionAsync(Guid id, Guid examPracticeResultId, MethodResult<ExamPracticeSectionDetailModel> result)
         {
-            var examPracticeSection = await _examPracticeSectionRepository.GetByIdAsync(id);
+            var examPracticeSection = await _examPracticeSectionRepository.Queryable.AsNoTracking().Include(x => x.ExamPracticeScores.Where(x => x.ExamPracticeResultId == examPracticeResultId))
+                                                                          .FirstOrDefaultAsync(x => x.Id == id);
             if (examPracticeSection == null)
             {
                 result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(ExamPracticeSection), id);

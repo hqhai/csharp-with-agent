@@ -107,21 +107,21 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
         private ExamPracticeSectionResultModel GetSectionResultReport(ExamPracticeSectionResult examPracticeSectionResult, ExamPracticeResult examPracticeResult)
         {
             var report = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
+            var scores = examPracticeSectionResult.SkillScores?.Select(x => x.Scores).FirstOrDefault() ?? default;
+            report.BandScoresReport = GetBandScoresReport(examPracticeSectionResult, examPracticeResult, scores);
+
             double executionTime = default;
-            if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice && examPracticeResult.Config?.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
+            if (examPracticeResult.PracticeMode == EnumPracticeMode.Practice
+                && examPracticeResult.Config?.PracticeTimeLimitOption != EnumPracticeTimeLimitOption.ExamBased)
             {
                 executionTime = examPracticeResult.Config?.ExecutionTime ?? default;
                 report.RemainingTime = executionTime - examPracticeSectionResult.WorkingTime > 0 ? executionTime - examPracticeSectionResult.WorkingTime : default;
             }
-
-            var scores = examPracticeSectionResult.SkillScores?.Select(x => x.Scores).FirstOrDefault() ?? default;
-
-            report.BandScoresReport = GetBandScoresReport(examPracticeSectionResult, examPracticeResult, scores);
-            if (examPracticeResult.ExamPractice != null && examPracticeResult.ExamPractice.CourseLevel.HasValue)
+            if (examPracticeResult.ExamPractice?.Type == EnumExamPracticeType.IELTS
+                && examPracticeResult.ExamPractice != null && examPracticeResult.ExamPractice.CourseLevel.HasValue)
             {
                 (report.IsCheckScoreColor, report.TargetBandScore) = examPracticeResult.ExamPractice.CourseLevel.Value.CheckScoreColor(scores);
             }
-
             return report;
         }
 
@@ -132,10 +132,18 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
             var bandScores = GetBandScoreConfigs(examPracticeSectionResult, examPracticeResult);
             var bandScore = isVstep ? GetVstepBandScore(bandScores, scores) : GetBandScore(bandScores, scores);
             var bandScoreReport = _mapper.Map<BandScoresReport>(bandScore);
-            var bandScoreStudent = bandScores?.FirstOrDefault(x => x.Scores == scores);
+            BandScores? bandScoreStudent;
+            if (isVstep)
+            {
+                bandScoreStudent = bandScores?.FirstOrDefault(x => x.MaxInclusive >= scores && x.MinInclusive <= scores);
+            }
+            else
+            {
+                bandScoreStudent = bandScores?.FirstOrDefault(x => x.Scores == scores);
+            }
             if (bandScoreStudent != null)
             {
-                bandScoreReport.ScoresStudent = bandScoreStudent.Scores;
+                bandScoreReport.ScoresStudent = isVstep ? scores : bandScoreStudent.Scores;
                 bandScoreReport.CorrectAnswerStudents = bandScoreStudent.CorrectAnswers;
             }
             return bandScoreReport;

@@ -5,6 +5,6 @@ namespace Fsel.ExamPractice.Domain.IRepositories
 
     public interface IExamPracticeRepository : IRepository<ExamPractice>
     {
-        Task<bool> IsUsingByClient(Guid originalId);
+        Task<bool> IsUsingByClient(Guid id);
     }
 }

@@ -3,7 +3,9 @@
 namespace Fsel.ExamPractice.Infrastructure.Configs
 {
     using System;
+    using Fsel.Common.Helpers;
     using Fsel.ExamPractice.Domain.Entities;
+    using Fsel.ExamPractice.Domain.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,6 +14,12 @@ namespace Fsel.ExamPractice.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<ExamPracticeScore> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+
+            builder.Property(e => e.Criteria)
+                 .HasMaxLength(100)
+                 .HasConversion(
+                     v => v.ToString(),
+                     v => v.EnumParse<EnumExamPracticeScoreCriteria>());
 
             builder.HasOne(a => a.ExamPracticeResult)
                 .WithMany(b => b.ExamPracticeScores)
