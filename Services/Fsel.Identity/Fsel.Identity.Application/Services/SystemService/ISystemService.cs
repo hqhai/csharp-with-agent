@@ -85,5 +85,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Post("/v1/course-suggest-config/level-suggestion-users")]
         Task<IApiResponse<MethodResult<IList<CourseSuggestUsersModel>>>> GetCourseSuggestByUserIds([Body] GetCourseSuggestByUserIdsQueryModel query);
+
+        [Get("/v1/sender-config")]
+        Task<IApiResponse<MethodResult<IList<SenderConfigModel>>>> GetSenderConfigs();
     }
 }

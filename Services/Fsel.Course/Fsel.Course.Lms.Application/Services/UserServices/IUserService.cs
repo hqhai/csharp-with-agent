@@ -178,5 +178,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
         [Post("/v1/student-export/get-by-user-ids")]
         [RefitCache(CacheSettings.TimeCache.OneHour)]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentExportByIds([FromBody] IList<Guid>? userIds);
+
+        [Post("/v1/user-setting/sender-setting-generate-token")]
+        Task<IApiResponse<MethodResult<string>>> SenderSettingGenerateToken([Body] UpdateSenderSettingCommandModel command);
     }
 }

@@ -41,5 +41,8 @@ namespace Fsel.Ordering.Application.Services.UserService
 
         [Post("/v1/student/deduct-coin-of-student")]
         Task<IApiResponse<MethodResult<bool>>> DeductCoinOfStudent([Body] DeductCoinOfStudentCommandModel model);
+
+        [Post("/v1/user-setting/sender-setting-generate-token")]
+        Task<IApiResponse<MethodResult<string>>> SenderSettingGenerateToken([Body] UpdateSenderSettingCommandModel command);
     }
 }

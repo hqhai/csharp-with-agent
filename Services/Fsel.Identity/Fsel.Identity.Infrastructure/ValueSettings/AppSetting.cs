@@ -16,6 +16,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public UserDeletionConfig? UserDeletionConfig { get; set; }
         public CacheConfig? CacheConfig { get; set; }
         public CRMConfig? CRMConfig { get; set; }
+        public SenderJwt? SenderJwt { get; set; }
     }
 
     public class UserReferralConfig
@@ -35,6 +36,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? ConfirmOtpUrl { get; set; }
         public string? RegisterUrl { get; set; }
         public string? LinkResetProgress { get; set; }
+        public string? UpdateSenderSettingUrl { get; set; }
     }
 
     public class Services : BaseServices
@@ -93,5 +95,16 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class CRMConfig
     {
         public string? SecretKey { get; set; }
+    }
+
+    public class SenderJwt
+    {
+        public string? SecretKey { get; set; }
+
+        public string? Issuer { get; set; }
+
+        public string? Audience { get; set; }
+
+        public int Expiration { get; set; }
     }
 }
