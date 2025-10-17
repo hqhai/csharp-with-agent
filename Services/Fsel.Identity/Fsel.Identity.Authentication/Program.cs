@@ -65,6 +65,9 @@ builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
 builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
 builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
 builder.Services.AddScoped<QuestBoardPublisher>();

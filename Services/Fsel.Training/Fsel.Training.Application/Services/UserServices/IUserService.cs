@@ -5,6 +5,7 @@ namespace Fsel.Training.Application.Services.UserServices
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
     using Fsel.Training.Application.Services.UserServices.Models;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -61,5 +62,14 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Get("/v1/user/get-by-student-id/{id}")]
         Task<IApiResponse<MethodResult<StudentModel>>> GetUserByStudentId([FromRoute] Guid id);
+
+        [Post("/v1/campus/add-course-id-for-students")]
+        Task<IApiResponse<MethodResult<bool>>> AddCourseIdForStudentsCampus([Body] AddCourseIdForStudentsCampusCommandModel model);
+
+        [Post("/v1/campus/update-expired-date-for-students")]
+        Task<IApiResponse<MethodResult<bool>>> UpdateExpiredDateForStudentsCampus([Body] UpdateExpiredDateForStudentsCampusCommandModels model);
+
+        [Post("/v1/campus/update-course-id-for-students")]
+        Task<IApiResponse<MethodResult<bool>>> UpdateCourseIdForStudentsCampus([Body] UpdateCourseIdOfStudentsCommandModels model);
     }
 }
