@@ -36,13 +36,16 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExamPracticeConfigModel>();
-            var examPractice = await _examPracticeRepository.Queryable.Include(x => x.ExamPracticeSections).FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
+            var examPractice = await _examPracticeRepository.Queryable.Include(x => x.ExamPracticeSections).AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (examPractice == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPractice), request.Id);
                 return methodResult;
             }
-            var examPracticeConfig = new ExamPracticeConfigModel();
+            if (examPractice.Type == EnumExamPracticeType.IELTS && examPractice.SubType != EnumExamPracticeSubType.SkillMockTest)
+            {
+                return methodResult;
+            }
             if (examPractice.Type == EnumExamPracticeType.IELTS && examPractice.SubType != EnumExamPracticeSubType.SkillMockTest)
             {
                 return methodResult;
@@ -52,8 +55,9 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             {
                 return methodResult;
             }
+            var examPracticeConfig = new ExamPracticeConfigModel();
             var listSkill = new List<EnumCourseSkill> { EnumCourseSkill.Reading, EnumCourseSkill.Writing };
-            if (examPractice.Type == EnumExamPracticeType.IELTS && examPracticeSection.CourseSkill.HasValue && listSkill.Any(x => x == examPracticeSection.CourseSkill.Value))
+            if (examPractice.Type != EnumExamPracticeType.ExamPractice && examPracticeSection.CourseSkill.HasValue && listSkill.Any(x => x == examPracticeSection.CourseSkill.Value))
             {
                 var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ParentExamPracticeSectionId == examPracticeSection.Id)
                                                 .OrderBy(x => x.DisplayOrder)
@@ -66,8 +70,8 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
 
                 examPracticeConfig.ExamPracticeParts = examPracticeSections;
             }
-            examPracticeConfig.PracticeTimeLimitRules = examPractice.Type.GetEnumPracticeTimeLimits(examPractice.SubType, examPracticeSection.CourseSkill);
 
+            examPracticeConfig.PracticeTimeLimitRules = examPractice.Type.GetEnumPracticeTimeLimits(examPractice.SubType, examPracticeSection.CourseSkill);
             methodResult.Result = examPracticeConfig;
             return methodResult;
         }

@@ -94,6 +94,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
         public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
+        public DbSet<VideoSubFilePath> VideoSubFilePaths { get; set; }
         public DbSet<Topic> Topics { get; set; }
 
         #region Report
@@ -205,6 +206,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumDetailResultHistoryTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoSubFilePathEntityTypeConfiguration());
 
             modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
