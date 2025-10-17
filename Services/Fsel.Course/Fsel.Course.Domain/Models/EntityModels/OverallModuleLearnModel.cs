@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     public class OverallModuleLearnModel
     {
         public Guid CourseId { get; set; }
+        public string? CourseName { get; set; }
         public int Count { get; set; }
     }
 }

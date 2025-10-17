@@ -18,6 +18,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public bool? IsOrder { get; set; } = true;
         public Guid? SchoolId { get; set; }
         public bool? IsPlacementTest { get; set; } = true;
+        public string? EventCode { get; set; }
         public EnumUserStatus? Status { get; set; }
     }
 }

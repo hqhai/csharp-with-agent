@@ -174,5 +174,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Post("/v1/event/get-student-ids-in-event-by-student-ids")]
         Task<IApiResponse<MethodResult<IList<Guid>?>>> GetStudentsInEventByStudentIds([Body] GetStudentIdsInEventByStudentIdsQueryModel model);
+
+        [Post("/v1/student-export/get-by-user-ids")]
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentExportByIds([FromBody] IList<Guid>? userIds);
     }
 }
