@@ -19,10 +19,6 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.Models
         [JsonPropertyName("text")]
         public object? Text { get; set; }
 
-        [AliasAs("temperature")]
-        [JsonPropertyName("temperature")]
-        public double Temperature { get; set; }
-
         [AliasAs("top_p")]
         [JsonPropertyName("top_p")]
         public double TopP { get; set; }

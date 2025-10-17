@@ -27,6 +27,7 @@ namespace Fsel.Course.Infrastructure.ValueSettings
     {
         public string? LinkFullMockTestReport { get; set; }
         public string? LinkMockTestReport { get; set; }
+        public string? UpdateSenderSettingUrl { get; set; }
     }
 
     public class CustomerSupportConfig

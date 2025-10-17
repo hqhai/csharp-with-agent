@@ -17,6 +17,8 @@ namespace Fsel.ExamPractice.Infrastructure.Common
         {
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.IELTS, EnumExamPracticeSubType.FullMockTest),
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.IELTS, EnumExamPracticeSubType.SkillMockTest),
+            new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.Vstep, EnumExamPracticeSubType.SingleVstepSkill),
+            new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.Vstep, EnumExamPracticeSubType.FullVstepSkill),
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.ExamPractice, EnumExamPracticeSubType.Practice),
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.ExamPractice, EnumExamPracticeSubType.UniversityEntrance),
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.ExamPractice, EnumExamPracticeSubType.HighschoolEntrance)
@@ -185,6 +187,34 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             {
                 SubType = EnumExamPracticeSubType.Practice,
                 Description = EnumExamPracticeSubType.Practice.GetDescription()
+            }), new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep, new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.FullVstepSkill,
+                Description = EnumExamPracticeSubType.FullVstepSkill.GetDescription()
+            }),
+            new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep,new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.SingleVstepSkill,
+                Description = EnumExamPracticeSubType.SingleVstepSkill.GetDescription(),
+                CourseSkill = EnumCourseSkill.Reading
+            }),
+            new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep,new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.SingleVstepSkill,
+                Description = EnumExamPracticeSubType.SingleVstepSkill.GetDescription(),
+                CourseSkill = EnumCourseSkill.Listening
+            }),
+            new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep,new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.SingleVstepSkill,
+                Description = EnumExamPracticeSubType.SingleVstepSkill.GetDescription(),
+                CourseSkill = EnumCourseSkill.Writing
+            }),
+            new KeyValuePair<EnumExamPracticeType, ExamPracticeTagModel>(EnumExamPracticeType.Vstep,new ExamPracticeTagModel
+            {
+                SubType = EnumExamPracticeSubType.SingleVstepSkill,
+                Description = EnumExamPracticeSubType.SingleVstepSkill.GetDescription(),
+                CourseSkill = EnumCourseSkill.Speaking
             }),
         };
 
