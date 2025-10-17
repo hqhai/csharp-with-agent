@@ -65,5 +65,11 @@ namespace Fsel.Training.Application.Services.UserServices
 
         [Post("/v1/campus/add-course-id-for-students")]
         Task<IApiResponse<MethodResult<bool>>> AddCourseIdForStudentsCampus([Body] AddCourseIdForStudentsCampusCommandModel model);
+
+        [Post("/v1/campus/update-expired-date-for-students")]
+        Task<IApiResponse<MethodResult<bool>>> UpdateExpiredDateForStudentsCampus([Body] UpdateExpiredDateForStudentsCampusCommandModels model);
+
+        [Post("/v1/campus/update-course-id-for-students")]
+        Task<IApiResponse<MethodResult<bool>>> UpdateCourseIdForStudentsCampus([Body] UpdateCourseIdOfStudentsCommandModels model);
     }
 }

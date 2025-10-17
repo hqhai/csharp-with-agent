@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -114,19 +115,6 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                                    .Where(x => x.Course != null && x.Course.Id == curriculum.CourseClone.Id)
                                    .FirstOrDefaultAsync(x => x.WorkingStatus != EnumWorkingStatus.NotWorking && x.StudentId == student.Id, cancellationToken);
 
-            var course = courseResult?.Course;
-
-            if (course == null)
-            {
-                course = await GetCourseAsync(curriculum.CourseClone.Id);
-            }
-
-            if (course == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
-                return methodResult;
-            }
-
             await _courseResultRepository.ExecuteTransactionAsync(async () =>
             {
                 var courseResultActives = await _courseResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id).ToListAsync(cancellationToken);
@@ -146,7 +134,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 {
                     courseResult = new CourseResult
                     {
-                        CourseId = course.Id,
+                        CourseId = curriculum.CourseClone.Id,
                         StudentId = student.Id,
                         Status = EnumResultStatus.New,
                         WorkingStatus = EnumWorkingStatus.Active
@@ -192,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
             var classResult = await _trainingService.RegisterClassAsync(new RegisterClassCommandModel
             {
-                CourseId = course.Id,
+                CourseId = curriculum.CourseClone.Id,
                 UserId = _authContext.CurrentUserId,
             });
             if (!classResult.IsSuccessStatusCode)
@@ -201,25 +189,27 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 return methodResult;
             }
 
+            var updateExpiredDateResult = await _userService.UpdateExpiredDateForStudentsCampus(new UpdateExpiredDateForStudentsCampusCommandModels()
+            {
+                Students = new List<UpdateExpiredDateForStudentsCampusCommandModel>()
+                {
+                    new UpdateExpiredDateForStudentsCampusCommandModel()
+                    {
+                        StudentId = student.Id,
+                        ExpiredDate = curriculum.Curriculum.EndDate
+                    }
+                }
+            });
+
+            if (!updateExpiredDateResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(updateExpiredDateResult.Error);
+                return methodResult;
+            }
+
             methodResult.Result = true;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private async Task<Course?> GetCourseAsync(Guid courseId)
-        {
-            var course = await _courseRepository.Queryable.Where(x => x.Status == EnumCourseStatus.Active && x.Id == courseId)
-                                                        .OrderByDescending(x => x.UpdatedDate)
-                                                        .ThenByDescending(x => x.CreatedDate)
-                                                        .FirstOrDefaultAsync();
-            if (course == null)
-            {
-                course = await _courseRepository.Queryable.Where(x => x.Status == EnumCourseStatus.InActive && x.Id == courseId)
-                                                      .OrderByDescending(x => x.UpdatedDate)
-                                                      .ThenByDescending(x => x.CreatedDate)
-                                                      .FirstOrDefaultAsync();
-            }
-            return course;
         }
     }
 }

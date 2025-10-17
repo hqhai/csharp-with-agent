@@ -27,6 +27,11 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// <summary>
         /// Không tìm thấy giáo trình
         /// </summary>
-        CurriculumDoesNotExist
+        CurriculumDoesNotExist,
+
+        /// <summary>
+        /// Thời gian phải nằm trong khoảng thời gian của giáo trình
+        /// </summary>
+        TimeMustBeWithinCurriculumPeriod
     }
 }

@@ -14,7 +14,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
     using Fsel.Course.Lms.Application.Queries.HomeWorkConfigQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -209,6 +208,32 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(CurriculumManagement.View)]
         public async Task<IActionResult> SearchCreateUsersInfoHomeWorkConfig([FromQuery] SearchCreateUsersInfoHomeWorkConfigQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get homework config by id
+        /// </summary>
+        [HttpGet("get-homework-config-by-id")]
+        [ProducesResponseType(typeof(MethodResult<HomeWorkConfigModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
+        public async Task<IActionResult> GetHomeWorkConfigById([FromQuery] GetHomeWorkConfigByIdQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get curriculums by student id
+        /// </summary>
+        [HttpGet("get-curriculums-by-student-id")]
+        [ProducesResponseType(typeof(MethodResult<IList<CurriculumModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
+        public async Task<IActionResult> GetCurriculumsByStudentId([FromQuery] GetCurriculumsByStudentIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();

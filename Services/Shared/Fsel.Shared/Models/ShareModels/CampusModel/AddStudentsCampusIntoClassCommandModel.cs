@@ -9,5 +9,6 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
     {
         public IList<Guid>? StudentIds { get; set; }
         public Guid CourseId { get; set; }
+        public DateTime ExpiredDate { get; set; }
     }
 }

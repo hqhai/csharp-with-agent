@@ -14,5 +14,7 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
     {
         public Guid StudentId { get; set; }
         public DateTime? ExpiredDate { get; set; }
+        public bool IsCheckCourse { get; set; }
+        public Guid? CourseId { get; set; }
     }
 }

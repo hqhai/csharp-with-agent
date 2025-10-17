@@ -2422,6 +2422,18 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("49019ea5-3e80-4f3f-bdaa-f5d807b1869f"),
+                            ClaimValue = "StudentCampusManagement.Update",
+                            CreatedDate = new DateTime(2025, 9, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Cập nhật thông tin học sinh",
+                            PermissionGroupId = new Guid("642f9c9c-c338-48fa-a42a-6d22e766bfca"),
+                            Status = true
+                        },
+                        new
+                        {
                             Id = new Guid("ec393b2d-0a9f-45e8-a1a0-13e8fb66ecd9"),
                             ClaimValue = "SchoolClassCampusManagement.Add",
                             CreatedDate = new DateTime(2025, 9, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -3303,6 +3315,19 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             IsDeleted = false,
                             Name = "TeacherCampus",
                             NormalizedName = "TEACHERCAMPUS"
+                        },
+                        new
+                        {
+                            Id = new Guid("a00e83f8-9fa3-4f4f-9d24-2a28cb6aeb79"),
+                            CreatedDate = new DateTime(2025, 9, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DisplayOrder = 0,
+                            IsActive = false,
+                            IsDefault = true,
+                            IsDeleted = false,
+                            Name = "AdminCampus",
+                            NormalizedName = "ADMINCAMPUS"
                         });
                 });
 
@@ -5148,6 +5173,73 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("UserSchools");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSenderSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("SenderConfigId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid>("UserSettingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserSettingId");
+
+                    b.ToTable("UserSenderSettings");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSetting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5648,6 +5740,17 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSenderSetting", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.UserSetting", "UserSetting")
+                        .WithMany("UserSenderSettings")
+                        .HasForeignKey("UserSettingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserSetting");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSetting", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
@@ -5774,6 +5877,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserGroup", b =>
                 {
                     b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSetting", b =>
+                {
+                    b.Navigation("UserSenderSettings");
                 });
 #pragma warning restore 612, 618
         }

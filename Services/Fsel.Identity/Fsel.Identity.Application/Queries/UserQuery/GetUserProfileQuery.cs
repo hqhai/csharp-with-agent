@@ -72,7 +72,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                    .ThenInclude(x => x!.TeacherBankAccounts)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             }
-            else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
+            else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() || userRoles.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .ThenInclude(x => x!.Student)
@@ -123,7 +123,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             var userModel = _mapper.Map<UserProfileModel>(userView ?? user);
             _mapper.Map(userView?.Human, userModel);
 
-            if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
+            if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() || userRoles.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
                 var student = userView?.Human?.Student;
                 if (student != null)

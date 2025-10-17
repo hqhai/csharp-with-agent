@@ -46,7 +46,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
             var schoolIdStr = _authContext.ClaimsPrincipal?.FindFirstValue("SchoolId");
 
-            if (!string.IsNullOrEmpty(schoolIdStr) || !Guid.TryParse(schoolIdStr, out Guid schoolId))
+            if (string.IsNullOrEmpty(schoolIdStr) || !Guid.TryParse(schoolIdStr, out Guid schoolId))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(schoolId), _authContext.CurrentUserId);
                 return methodResult;
@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            if (currentDate < request.StartDate)
+            if (request.StartDate.Date <= currentDate.Date)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumCurriculumErrorCode.StartDateCannotBeInThePast), nameof(request.StartDate), request.StartDate);
                 return methodResult;

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Identity.Application.Commands.Campus
+namespace Fsel.Identity.Application.Commands.CampusCmd
 {
     using System.Collections.Concurrent;
     using System.Threading;
@@ -50,12 +50,7 @@ namespace Fsel.Identity.Application.Commands.Campus
             {
                 if (studentDict.TryGetValue(p.Id, out var student))
                 {
-                    bool updateExpiredDate =
-                        !p.ExpiredDate.HasValue ||
-                        student.ExpiredDate.HasValue && p.ExpiredDate.Value < student.ExpiredDate ||
-                        !student.ExpiredDate.HasValue;
-
-                    if (updateExpiredDate)
+                    if (!student.IsCheckCourse || (student.CourseId.HasValue && student.CourseId == p.CourseId))
                     {
                         p.ExpiredDate = student.ExpiredDate;
                         studentsBag.Add(p);
@@ -65,9 +60,14 @@ namespace Fsel.Identity.Application.Commands.Campus
 
             var students = studentsBag.ToList();
 
-            await _studentRepository.BulkUpdateList(students);
+            await _studentRepository.ExecuteTransactionAsync(async () =>
+            {
+                await _studentRepository.BulkUpdateList(students);
+                await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                methodResult.Result = true;
+                return methodResult;
+            });
 
-            methodResult.Result = true;
             return methodResult;
         }
     }

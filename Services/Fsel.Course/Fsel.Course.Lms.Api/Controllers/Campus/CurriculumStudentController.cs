@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         [HttpGet("get-curriculums-by-student-id")]
         [ProducesResponseType(typeof(MethodResult<IList<CurriculumModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+        [Permission(roles: new string[] { nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetCurriculumsByStudentId([FromQuery] GetCurriculumsByStudentIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -44,9 +44,9 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         /// get current curriculum
         /// </summary>
         [HttpGet("get-current-curriculum")]
-        [ProducesResponseType(typeof(MethodResult<CurriculumModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<CurriculumModel?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+        [Permission(roles: new string[] { nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetCurrentCurriculumOfStudent([FromQuery] GetCurrentCurriculumOfStudentQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -63,6 +63,32 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         public async Task<IActionResult> ChangeCurriculumOfStudent([FromBody] ChangeCurriculumOfStudentCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// change curriculum
+        /// </summary>
+        [HttpPost("reset-curriculum")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.StudentCampus) })]
+        public async Task<IActionResult> ResetCurriculumOfStudent([FromBody] ResetCurriculumByStudentCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get students id by curriculum id
+        /// </summary>
+        [HttpGet("get-student-ids-by-curriculum-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<IList<CurriculumModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.View)]
+        public async Task<IActionResult> GetCurriculumsByStudentId([FromRoute] Guid id)
+        {
+            var commandResult = await _mediator.Send(new GetStudentIdsByCurriculumIdQuery() { CurriculumId = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -9,11 +9,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.HomeWorkConfigs;
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class SaveHomeWorkConfigCommand : SaveHomeWorkConfigCommandModel, IRequest<MethodResult<HomeWorkConfigModel>>
     {
@@ -57,9 +59,15 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            if (request.StartDate < currentDate || request.StartDate > request.EndDate || request.StartDate < curriculum.StartDate || request.EndDate > curriculum.EndDate)
+            if (request.StartDate <= currentDate || request.StartDate >= request.EndDate)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.StartDate), request.StartDate);
+                methodResult.AddErrorBadRequest(nameof(EnumCurriculumErrorCode.StartDateCannotBeInThePast), nameof(request.StartDate), request.StartDate);
+                return methodResult;
+            }
+
+            if (request.StartDate < curriculum.StartDate || request.EndDate > curriculum.EndDate)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumCurriculumErrorCode.TimeMustBeWithinCurriculumPeriod), nameof(request.StartDate), request.StartDate);
                 return methodResult;
             }
 
@@ -71,10 +79,19 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkConfigCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeworkConfig), request.Id);
                     return methodResult;
                 }
+
                 _mapper.Map(request, homeworkConfig);
             }
             else
             {
+                var homeworkIds = await _homeWorkConfigRepository.Queryable.Where(p => p.CurriculumId == curriculum.Id).Select(p => p.HomeWorkId).ToListAsync(cancellationToken);
+
+                if (homeworkIds.Contains(request.HomeWorkId))
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.HomeWorkId), request.HomeWorkId);
+                    return methodResult;
+                }
+
                 homeworkConfig = _mapper.Map<HomeWorkConfig>(request);
             }
 

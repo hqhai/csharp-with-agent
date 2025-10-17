@@ -21,5 +21,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public bool IsSoundEffect { get; set; }
 
         public string? Language { get; set; }
+
+        public IList<UserSenderSettingModel>? UserSenderSettings { get; set; }
     }
 }

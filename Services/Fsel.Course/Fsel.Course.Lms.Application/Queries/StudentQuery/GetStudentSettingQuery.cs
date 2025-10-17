@@ -87,7 +87,13 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 UserStatus = student.Human?.User?.Status
             };
             var role = _authContext.Roles?.FirstOrDefault();
-            if (role == null || role == EnumRole.Student.ToString())
+
+            if (!string.IsNullOrEmpty(role) && role == EnumRole.StudentCampus.ToString())
+            {
+                settingStudentModel.IsLockPT = true;
+                settingStudentModel.IsPlacementTest = true;
+            }
+            else
             {
                 await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
             }

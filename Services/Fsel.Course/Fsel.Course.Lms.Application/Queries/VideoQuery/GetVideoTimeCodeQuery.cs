@@ -75,6 +75,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
             var video = await _videoRepository.Queryable.Include(i => i.VideoTimeCodes)
+                                                        .Include(p => p.VideoSubFilePaths)
                                                         .Where(x => x.Id == request.VideoId)
                                                         .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 

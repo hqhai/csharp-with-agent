@@ -5,6 +5,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
 
     public class CurriculumModel : BaseModel
     {
@@ -34,6 +35,33 @@ namespace Fsel.Course.Domain.Models.EntityModels
                     return EnumCurriculumStatus.Expired;
                 }
                 return EnumCurriculumStatus.Progress;
+            }
+        }
+
+        public string? Status
+        {
+            get
+            {
+                return CurriculumStatus.GetDescription();
+            }
+        }
+
+        public string? ProgressStatus
+        {
+            get
+            {
+                if (IsDone)
+                {
+                    return EnumStudentCampusLearningStatus.Completed.GetDescription();
+                }
+                else if (CurriculumStatus == EnumCurriculumStatus.Progress)
+                {
+                    return EnumStudentCampusLearningStatus.InProgress.GetDescription();
+                }
+                else
+                {
+                    return EnumStudentCampusLearningStatus.NotStarted.GetDescription();
+                }
             }
         }
     }

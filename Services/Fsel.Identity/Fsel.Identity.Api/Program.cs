@@ -69,6 +69,7 @@ builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLe
 builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
@@ -77,6 +78,7 @@ builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
 builder.Services.AddScoped<SendStudentsFromFilePublisher>();
+builder.Services.AddScoped<CreateStudentsAndParentsFromFilePublisher>();
 
 //Common
 builder.Services.AddScoped<SaveOtpCodeConverter>();
@@ -110,7 +112,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) },
     { QueueSettings.UserQueue.NameQueue.CreateStudentsFromFile, typeof(CreateStudentsFromFileConsumer) },
-    { QueueSettings.UserQueue.NameQueue.AggregateDataStudentsInEvent, typeof(AggregateDataStudentsInEventConsumer) }
+    { QueueSettings.UserQueue.NameQueue.AggregateDataStudentsInEvent, typeof(AggregateDataStudentsInEventConsumer) },
+    { QueueSettings.UserQueue.NameQueue.CreateStudentsAndParentsFromFile, typeof(CreateStudentsAndParentsFromFileConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

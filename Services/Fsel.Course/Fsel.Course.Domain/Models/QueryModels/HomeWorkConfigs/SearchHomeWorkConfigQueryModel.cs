@@ -7,9 +7,10 @@ namespace Fsel.Course.Domain.Models.QueryModels.HomeWorkConfigs
 
     public class SearchHomeWorkConfigQueryModel : BaseQueryModel
     {
-        public EnumCourseLevel? CourseLevel { get; set; }
-        public EnumCourseSkill? CourseSkill { get; set; }
-        public EnumCourseType? CourseType { get; set; }
-        public Guid? CreatedUserId { get; set; }
+        public Guid CurriculumId { get; set; }
+        public IList<EnumCourseLevel>? CourseLevels { get; set; }
+        public IList<EnumCourseSkill>? CourseSkills { get; set; }
+        public IList<EnumCourseType>? CourseTypes { get; set; }
+        public IList<Guid>? CreatedUserIds { get; set; }
     }
 }

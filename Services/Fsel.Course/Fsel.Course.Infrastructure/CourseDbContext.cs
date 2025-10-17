@@ -95,6 +95,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
         public DbSet<HomeWorkConfig> HomeWorkConfigs { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
+        public DbSet<VideoSubFilePath> VideoSubFilePaths { get; set; }
         public DbSet<HomeWorkExtraPracticeAnswer> HomeWorkExtraPracticeAnswers { get; set; }
         public DbSet<HomeWorkExtraPracticeResult> HomeWorkExtraPracticeResults { get; set; }
         public DbSet<HomeWorkRetry> HomeWorkRetries { get; set; }
@@ -211,6 +212,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new HomeWorkExtraPracticeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new HomeWorkRetryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoSubFilePathEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

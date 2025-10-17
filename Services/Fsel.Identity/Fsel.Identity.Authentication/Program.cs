@@ -66,6 +66,7 @@ builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLe
 builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
 builder.Services.AddScoped<IMenuRepository, MenuRepository>();
 builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
 // Queue
 builder.Services.AddScoped<LeaderBoardPublisher>();
@@ -74,6 +75,7 @@ builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
 builder.Services.AddScoped<SendStudentsFromFilePublisher>();
+builder.Services.AddScoped<CreateStudentsAndParentsFromFilePublisher>();
 
 //Common
 builder.Services.AddScoped<SaveOtpCodeConverter>();

@@ -52,9 +52,11 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             var studentResults = await _userService.SearchStudentsByStudentIds(new SearchStudentsCampusByStudentIdsQueryModel()
             {
-                SchoolClassId = request.SchoolClassId,
+                SchoolClassIds = request.SchoolClassIds,
                 Keyword = request.Keyword,
-                StudentIds = studentIds
+                StudentIds = studentIds,
+                Page = request.Page,
+                PageSize = request.PageSize
             });
 
             var students = studentResults.Content?.Result;
@@ -78,9 +80,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             var studentsLearningProgressModel = studentsLearningProgress.Result;
 
-            students.Items.ForEach(p =>
+            students.Items?.ForEach(p =>
             {
-                p.Students = studentsLearningProgressModel?.Where(x => x.StudentId == p.StudentId).ToList();
+                p.LearningProgresses = studentsLearningProgressModel?.Where(x => x.StudentId == p.StudentId && x.CurriculumId == curriculum.Id).ToList();
             });
 
             methodResult.Result = students;

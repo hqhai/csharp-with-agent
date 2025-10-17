@@ -214,6 +214,7 @@ namespace Fsel.Shared.Constants
     {
         public const string ClaimType = nameof(StudentCampusManagement);
         public const string View = $"{ClaimType}.View";
+        public const string Update = $"{ClaimType}.Update";
     }
 
     public static class SchoolClassCampusManagement

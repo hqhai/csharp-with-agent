@@ -62,7 +62,10 @@ namespace Fsel.Training.Application.Commands.Campus
             var @class = await _classRepository.Queryable.FirstOrDefaultAsync(p => p.CourseId == request.CourseId, cancellationToken);
 
             var classStudentEntities = await _classStudentRepository.Queryable.WhereBulkContains(request.StudentIds, p => p.StudentId).ToListAsync(cancellationToken);
+
             var classStudents = new List<ClassStudent>();
+
+            var updateExpiredDateForStudentsModels = new List<UpdateExpiredDateForStudentsCampusCommandModel>();
 
             if (@class == null)
             {
@@ -74,6 +77,11 @@ namespace Fsel.Training.Application.Commands.Campus
                     if (!classStudentEntities.Any(x => x.StudentId == p))
                     {
                         classStudents.Add(new ClassStudent() { StudentId = p, IsActive = true });
+                        updateExpiredDateForStudentsModels.Add(new UpdateExpiredDateForStudentsCampusCommandModel()
+                        {
+                            StudentId = p,
+                            ExpiredDate = request.ExpiredDate,
+                        });
                     }
                 });
 
@@ -91,19 +99,6 @@ namespace Fsel.Training.Application.Commands.Campus
                     @class = _classRepository.Add(newClass);
                     await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                    var updateStudentResult = await _userService.AddCourseIdForStudentsCampus(new AddCourseIdForStudentsCampusCommandModel()
-                    {
-                        ClassId = @class.Id,
-                        CourseId = request.CourseId,
-                        CourseLevel = course.CourseLevel,
-                        StudentIds = classStudents.Select(p => p.StudentId).ToList()
-                    });
-                    if (!updateStudentResult.IsSuccessStatusCode)
-                    {
-                        methodResult.AddError(updateStudentResult.Error);
-                        return methodResult;
-                    }
-
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     methodResult.Result = true;
                     return methodResult;
@@ -116,6 +111,11 @@ namespace Fsel.Training.Application.Commands.Campus
                     if (!classStudentEntities.Any(x => x.StudentId == p))
                     {
                         classStudents.Add(new ClassStudent() { StudentId = p, ClassId = @class.Id, IsActive = true });
+                        updateExpiredDateForStudentsModels.Add(new UpdateExpiredDateForStudentsCampusCommandModel()
+                        {
+                            StudentId = p,
+                            ExpiredDate = request.ExpiredDate,
+                        });
                     }
                 });
 
@@ -124,30 +124,40 @@ namespace Fsel.Training.Application.Commands.Campus
                     await _classStudentRepository.BulkMergeAsync(classStudents);
                     await _classStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-                    if (@class.Status != EnumClassStatus.Active)
-                    {
-                        @class.Status = EnumClassStatus.Active;
-                        _classRepository.Update(@class);
-                        await _classRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                    }
-
-                    var updateStudentResult = await _userService.AddCourseIdForStudentsCampus(new AddCourseIdForStudentsCampusCommandModel()
-                    {
-                        ClassId = @class.Id,
-                        CourseId = request.CourseId,
-                        CourseLevel = course.CourseLevel,
-                        StudentIds = classStudents.Select(p => p.StudentId).ToList()
-                    });
-                    if (!updateStudentResult.IsSuccessStatusCode)
-                    {
-                        methodResult.AddError(updateStudentResult.Error);
-                        return methodResult;
-                    }
-
                     methodResult.StatusCode = StatusCodes.Status200OK;
                     methodResult.Result = true;
                     return methodResult;
                 });
+            }
+
+            if (@class == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(@class));
+                return methodResult;
+            }
+
+            var updateStudentResult = await _userService.AddCourseIdForStudentsCampus(new AddCourseIdForStudentsCampusCommandModel()
+            {
+                ClassId = @class.Id,
+                CourseId = request.CourseId,
+                CourseLevel = course.CourseLevel,
+                StudentIds = classStudents.Select(p => p.StudentId).ToList()
+            });
+            if (!updateStudentResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(updateStudentResult.Error);
+                return methodResult;
+            }
+
+            var updateExpiredDateResult = await _userService.UpdateExpiredDateForStudentsCampus(new UpdateExpiredDateForStudentsCampusCommandModels()
+            {
+                Students = updateExpiredDateForStudentsModels
+            });
+
+            if (!updateExpiredDateResult.IsSuccessStatusCode)
+            {
+                methodResult.AddError(updateExpiredDateResult.Error);
+                return methodResult;
             }
 
             return methodResult;

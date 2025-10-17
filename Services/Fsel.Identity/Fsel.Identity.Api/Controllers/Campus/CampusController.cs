@@ -8,13 +8,15 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Identity.Application.Commands.Campus;
-    using Fsel.Identity.Application.Commands.StudentCmd;
+    using Fsel.Identity.Application.Commands.CampusCmd;
+    using Fsel.Identity.Application.Commands.CampusCmd.Classes;
     using Fsel.Identity.Application.Queries.CampusQuery;
+    using Fsel.Identity.Domain.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
@@ -87,6 +89,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
         [HttpPost("export-students")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(SchoolClassCampusManagement.View)]
         public async Task<IActionResult> ExportStudents([FromBody] ExportStudentsInfoQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -95,6 +98,68 @@ namespace Fsel.Identity.Api.Controllers.Campus
                 return queryResult.GetActionResult();
             }
             return File(queryResult.Result, Settings.Excels.ContentType, "Thông tin học sinh.xlsx");
+        }
+
+        /// <summary>
+        /// Get list student by student ids
+        /// </summary>
+        [HttpPost("add-students-to-curriculum")]
+        [ProducesResponseType(typeof(MethodResult<AddStudentIntoSchoolClassCommandModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.AddStudents)]
+        public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] AddStudentsToCurriculumCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+
+            if (!commandResult.IsOK || commandResult.Result == null || commandResult.Result.Stream == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result.Stream, Settings.Excels.ContentType, "Add_Students_To_Curriculum_Error.xlsx");
+        }
+
+        /// <summary>
+        /// export template add students to curriculum
+        /// </summary>
+        [HttpPost("export-template-add-students-to-curriculum")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.AddStudents)]
+        public async Task<IActionResult> ExportTemplateAddStudentToCurriculum()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplateAddStudentsToCurriculumCommand { }).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Add_Student_To_Curriculum.xlsx");
+        }
+
+        /// <summary>
+        /// update course id for student
+        /// </summary>
+        [HttpPost("update-course-id-for-students")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(CurriculumManagement.DeleteStudents)]
+        public async Task<IActionResult> UpdateCourseIdOfStudents([FromBody] UpdateCourseIdOfStudentsCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get number students in file
+        /// </summary>
+        [HttpPost("get-number-students-in-file")]
+        [ProducesResponseType(typeof(MethodResult<AddStudentIntoSchoolClassCommandModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] GetNumberOfStudentInFileQuery query)
+        {
+            ArgumentNullException.ThrowIfNull(query);
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

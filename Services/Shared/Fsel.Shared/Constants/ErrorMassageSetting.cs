@@ -23,5 +23,6 @@ namespace Fsel.Shared.Constants
         public const string DataAlreadyExistVN = "Đã tồn tại tài khoản này trong hệ thống";
         public const string ErrorTemplate = "Sai định dạng file mẫu";
         public const string ErrorData = "Dữ liệu bị rỗng hoặc sai định dạng";
+        public const string FileNull = "File tải lên không được để trống";
     }
 }

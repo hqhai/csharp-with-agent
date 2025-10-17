@@ -7,8 +7,10 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -16,8 +18,10 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
     public class GetCurriculumsByStudentIdQuery : IRequest<MethodResult<IList<CurriculumModel>>>
     {
         public Guid StudentId { get; set; }
-        public EnumCurriculumStatus? Status { get; set; }
+        public IList<EnumCurriculumStatus>? Status { get; set; }
         public bool? IsDone { get; set; }
+        public bool? IsFilter { get; set; }
+        public Guid? UserId { get; set; }
     }
 
     public class GetCurriculumsByStudentIdQueryHandler : IRequestHandler<GetCurriculumsByStudentIdQuery, MethodResult<IList<CurriculumModel>>>
@@ -27,14 +31,18 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly ICourseRepository _courseRepository;
+        private readonly AuthContext _authContext;
+        private readonly IUserService _userService;
 
-        public GetCurriculumsByStudentIdQueryHandler(ICurriculumStudentRepository curriculumStudentRepository, ICurriculumRepository curriculumRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository)
+        public GetCurriculumsByStudentIdQueryHandler(ICurriculumStudentRepository curriculumStudentRepository, ICurriculumRepository curriculumRepository, ILessonResultRepository lessonResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, AuthContext authContext, IUserService userService)
         {
             _curriculumStudentRepository = curriculumStudentRepository;
             _curriculumRepository = curriculumRepository;
             _lessonResultRepository = lessonResultRepository;
             _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
+            _authContext = authContext;
+            _userService = userService;
         }
 
         public async Task<MethodResult<IList<CurriculumModel>>> Handle(GetCurriculumsByStudentIdQuery request, CancellationToken cancellationToken)
@@ -55,9 +63,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                                    CourseClone = cc
                                }).ToListAsync(cancellationToken);
 
-            if (request.Status.HasValue)
+            if (request.Status != null && request.Status.Any())
             {
-                query = query.Where(p => p.Curriculum.CurriculumStatus == request.Status).ToList();
+                query = query.Where(p => request.Status.Contains(p.Curriculum.CurriculumStatus)).ToList();
             }
 
             var courseIds = query.Select(p => p.CourseClone.Id).ToList();
@@ -88,6 +96,18 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             if (request.IsDone.HasValue)
             {
                 curriculums = curriculums.Where(p => p.IsDone == request.IsDone).ToList();
+            }
+
+            if (request.IsFilter.HasValue && request.IsFilter.Value)
+            {
+                var userId = request.UserId ?? _authContext.CurrentUserId;
+
+                var studentResult = await _userService.GetStudentByUserIdAsync(userId);
+                var student = studentResult.Content?.Result;
+                if (student != null && student.CourseId.HasValue)
+                {
+                    curriculums = curriculums.Where(p => p.CourseCloneId != student.CourseId).ToList();
+                }
             }
 
             methodResult.Result = curriculums;

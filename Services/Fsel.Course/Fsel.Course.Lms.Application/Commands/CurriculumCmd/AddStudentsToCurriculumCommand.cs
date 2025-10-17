@@ -65,7 +65,8 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                 var result = await _trainingService.AddStudentsCampusIntoClass(new AddStudentsCampusIntoClassCommandModel()
                 {
                     CourseId = curriculum.CourseCloneId,
-                    StudentIds = curriculumStudents.Select(p => p.StudentId).ToList()
+                    StudentIds = curriculumStudents.Select(p => p.StudentId).ToList(),
+                    ExpiredDate = curriculum.EndDate
                 });
 
                 await _curriculumStudentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

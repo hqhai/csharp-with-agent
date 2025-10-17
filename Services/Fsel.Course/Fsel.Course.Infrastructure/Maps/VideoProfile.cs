@@ -15,6 +15,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<Video, VideoModel>().IgnoreAllNonExisting();
             CreateMap<CreateVideoCommandModel, Video>().IgnoreAllNonExisting();
             CreateMap<UpdateVideoCommandModel, Video>().IgnoreAllNonExisting();
+            CreateMap<CreateVideoSubFilePathCommandModel, VideoSubFilePath>().IgnoreAllNonExisting();
+            CreateMap<VideoSubFilePath, VideoSubFilePathModel>().IgnoreAllNonExisting();
         }
     }
 }
