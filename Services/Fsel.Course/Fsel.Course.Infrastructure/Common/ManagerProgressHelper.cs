@@ -457,7 +457,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                     .Select(x => x.Unit!.CourseUnitMockTests.Where(n => n.CourseId == x.CourseId)
                                                     .Select(n => n.Number).FirstOrDefault()).FirstOrDefault(),
                             };
-                courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
+                courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).AsNoTracking().ToListAsync() : await query.ApplySort(baseQuery).AsNoTracking().ToListAsync();
             }
             return courseCompletes;
         }
@@ -543,7 +543,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                   .Where(x => !arrivalDate.HasValue || (x.skmt.UpdatedDate ?? x.skmt.CreatedDate).Date <= arrivalDate.Value.Date)
                                                   .Select(x => x.skmt.Id).Distinct().Count(),
                             };
-                courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).ToListAsync() : await query.ApplySort(baseQuery).ToListAsync();
+                courseCompletes = baseQuery != null && baseQuery.SortBy.Any() && isSearchReport ? await query.ApplySortAndPaging(baseQuery).AsNoTracking().ToListAsync() : await query.ApplySort(baseQuery).AsNoTracking().ToListAsync();
             }
             return courseCompletes;
         }
@@ -562,7 +562,7 @@ namespace Fsel.Course.Infrastructure.Common
                             StudentId = baseQ.StudentId,
                             CourseId = baseQ.CourseId,
                         };
-            return await query.ToListAsync();
+            return await query.AsNoTracking().ToListAsync();
         }
 
         private async Task<List<OverallModuleLearnModel>> GetCompleteCourseTotalsAsync(IList<CourseResultModel>? courseResults)

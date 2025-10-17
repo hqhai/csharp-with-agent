@@ -51,6 +51,9 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListCourseLevel = request.ListCourseLevel,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                IsLearning = request.IsLearning,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCompletionStatus = request.ListCompletionStatus,
                 ListCourseType = request.ListCourseType,
 
                 PageSize = request.PageSize,
@@ -58,11 +61,8 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
                 Page = request.Page,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
                 IsSearchReport = true,
             }, cancellationToken);
@@ -96,15 +96,15 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListSchool = request.ListSchool,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
-                ListCourseType = request.ListCourseType,
+                IsLearning = request.IsLearning,
+                ListCompletionStatus = request.ListCompletionStatus,
                 ListCourseLevel = request.ListCourseLevel,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCourseType = request.ListCourseType,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 CourseType = request.CourseType,
-                LearningStatus = request.LearningStatus,
             }, cancellationToken);
             var reportStudentAssiduity = _mapper.Map<SearchReportStudentAssiduityModel>(dataOverallResult.Result);
             var studentIds = students.Select(x => x.Id).ToList();
