@@ -205,6 +205,12 @@ namespace Fsel.System.Application.Commands.DailyQuiz
             }
 
             var dailyQuizHistories = _mapper.Map<IList<DailyQuizHistory>>(request.DailyQuizzes);
+            int index = 1;
+            foreach (var item in dailyQuizHistories)
+            {
+                item.Index = index;
+                index++;
+            }
 
             await _dailyQuizHistoryRepository.ExecuteTransactionAsync(async () =>
             {
@@ -233,10 +239,19 @@ namespace Fsel.System.Application.Commands.DailyQuiz
                         x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.CreatedDateLocal };
                     });
                 }
+                else
+                {
+                    var deleteWinners = await _dailyQuizWinnerRepository.Queryable.Where(p => p.CreatedUserId == _authContext.CurrentUserId).ToListAsync(cancellationToken);
+                    deleteWinners = deleteWinners.Where(p => p.CreatedDateLocal.HasValue && p.CreatedDateLocal.Value.Date == currentDate.Date).ToList();
+                    if (deleteWinners.Any())
+                    {
+                        await _dailyQuizWinnerRepository.DeleteListAsync(deleteWinners);
+                    }
+                }
 
                 await _dailyQuizHistoryRepository.BulkMergeAsync(dailyQuizHistories, x =>
                 {
-                    x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.DailyQuizQuestionId, c.CreatedDateLocal };
+                    x.ColumnPrimaryKeyExpression = c => new { c.CreatedUserId, c.Index, c.CreatedDateLocal };
                 });
 
                 await _dailyQuizHistoryRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

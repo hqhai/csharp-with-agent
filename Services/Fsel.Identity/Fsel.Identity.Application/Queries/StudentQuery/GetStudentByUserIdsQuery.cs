@@ -43,16 +43,20 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var students = await _humanRepository.Queryable
                 .Include(x => x.User)
                 .Where(i => i.UserId != null)
+                .Where(i => i.Student != null)
                 .WhereBulkContains(request.UserIds, i => i.UserId)
                 .Select(x => new StudentModel
                 {
-                    Id = x.Id,
+                    Id = x.Student!.Id,
                     ClassId = x.Student!.ClassId,
                     Occupation = x.Student.Occupation,
                     CourseLevel = x.Student.CourseLevel,
                     CreatedDate = x.Student.CreatedDate,
                     School = x.Student.School,
                     SchoolId = x.Student.SchoolId,
+                    SchoolClass = x.Student.SchoolClass,
+                    SchoolGrade = x.Student.SchoolGrade,
+                    BaseCourseLevel = x.Student.BaseCourseLevel,
                     ExpiredDate = x.Student.ExpiredDate,
                     Human = _mapper.Map<HumanProfileModel>(x)
                 })

@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
@@ -41,16 +42,16 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
 
             var userReferrals = await _userReferralRepository.Queryable.Where(p => p.SenderId == request.SenderId).ToListAsync(cancellationToken);
             var receiverIds = userReferrals.Select(p => p.ReceiverId).ToList();
-            var users = _userManager.Users.Include(p => p.Human).Where(p => receiverIds != null && receiverIds.Contains(p.Id));
+            var users = await _userManager.Users.WhereBulkContains(receiverIds, p => p.Id).ToListAsync(cancellationToken);
 
             var models = new List<SearchDetailReferralCodeModel>();
 
             foreach (var userReferral in userReferrals)
             {
+                var user = users.FirstOrDefault(p => p.Id == userReferral.ReceiverId);
+
                 if (userReferral.FeatureMissions != null && userReferral.FeatureMissions.Count > 0)
                 {
-                    var user = users.FirstOrDefault(p => p.Id == userReferral.ReceiverId);
-
                     foreach (var item in userReferral.FeatureMissions)
                     {
                         models.Add(new SearchDetailReferralCodeModel
@@ -58,12 +59,25 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                             ReceiverId = userReferral.ReceiverId,
                             Email = user?.Email,
                             FullName = user?.FullName,
-                            CreatedDate = item.CreatedDate,
+                            CreatedDate = item.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam),
                             Type = userReferral.Type,
                             Token = item.Token,
                             UserReferral = item.FeatureUserReferral
                         });
                     }
+                }
+                else
+                {
+                    models.Add(new SearchDetailReferralCodeModel
+                    {
+                        ReceiverId = userReferral.ReceiverId,
+                        Email = user?.Email,
+                        FullName = user?.FullName,
+                        CreatedDate = userReferral.CreatedDate.ConvertTimeFromUtc(EnumCountryKey.Vietnam),
+                        Type = userReferral.Type,
+                        Token = 0,
+                        UserReferral = null
+                    });
                 }
             }
 

@@ -21,6 +21,11 @@ namespace Fsel.Course.Infrastructure.Configs
                  .WithMany(b => b.ClassForumResultFiles)
                  .HasForeignKey(p => p.ClassForumResultId)
                  .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(a => a.ClassForumDetailResultHistory)
+                   .WithMany(b => b.ClassForumResultFiles)
+                   .HasForeignKey(p => p.ClassForumDetailResultHistoryId)
+                   .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

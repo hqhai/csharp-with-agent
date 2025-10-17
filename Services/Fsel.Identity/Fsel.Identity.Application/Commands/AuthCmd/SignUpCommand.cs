@@ -90,7 +90,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                 if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
                 {
-                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
+                    methodResult.AddError(StatusCodes.Status400BadRequest, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
                     return methodResult;
                 }
                 if (user != null && (user.EmailConfirmed || user.Human != null))
@@ -110,7 +110,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
                 if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
                 {
-                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
+                    methodResult.AddError(StatusCodes.Status400BadRequest, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
                     return methodResult;
                 }
                 if (user != null && (user.EmailConfirmed || user.Human != null))
@@ -227,7 +227,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                                 return methodResult;
                             }
 
-                            await _userDbContext.UserRoles.AddAsync(new UserRoleEntity
+                            await _userDbContext.UserRoles.AddAsync(new UserRole
                             {
                                 UserId = user.Id,
                                 RoleId = role.Id

@@ -28,6 +28,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
         private readonly UserManager<User> _userManager;
         private readonly ISystemService _systemService;
         private const string Sheet = "Sheet1";
+        private const string RangeError = "SheetError!A1";
 
         public AddCoinBuyCourseBySheetCommandHandler(AppSetting appSetting,
                                                      UserManager<User> userManager,
@@ -60,7 +61,7 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
                 return methodResult;
             }
 
-            var users = await _userManager.Users.Where(x => dataResults.Contains(x.UserName)).ToListAsync(cancellationToken);
+            var users = await _userManager.Users.WhereBulkContains(dataResults, x => x.UserName).ToListAsync(cancellationToken);
             var userIds = users.DistinctBy(x => x.Id).Select(x => x.Id).ToList();
             if (userIds == null)
             {
@@ -78,6 +79,24 @@ namespace Fsel.Identity.Application.Commands.OtherCmd
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
+            }
+
+            var userNames = users.Select(x => x.UserName).ToList();
+            var exceptUserNames = dataResults.Except(userNames).Union(userNames.Except(dataResults)).ToList();
+            if (exceptUserNames.Any())
+            {
+                var datas = new List<IList<object>>();
+
+                exceptUserNames.ForEach(userName =>
+                {
+                    if (!string.IsNullOrEmpty(userName))
+                    {
+                        var objectData = new List<object> { userName };
+                        datas.Add(objectData);
+                    }
+                });
+
+                _googleSheetService.CreateDataFromSheet(spreadSheetId, RangeError, datas);
             }
 
             methodResult.Result = true;

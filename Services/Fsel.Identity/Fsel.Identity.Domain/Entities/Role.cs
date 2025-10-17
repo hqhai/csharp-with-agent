@@ -9,6 +9,14 @@ namespace Fsel.Identity.Domain.Entities
     public class Role : RoleEntity
     {
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Discription { get; set; }
+        public string? Description { get; set; }
+
+        public int DisplayOrder { get; set; }
+
+        public bool IsActive { get; set; }
+
+        public bool IsDefault { get; set; }
+
+        public string? LocationIdStr { get; set; }
     }
 }

@@ -3,6 +3,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
@@ -40,15 +41,24 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly IOrderService _orderService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly AppSetting _appSetting;
+        private readonly IRoleClaimRepository _roleClaimRepository;
+        private readonly RoleManager<Role> _roleManager;
+        private readonly IMapper _mapper;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
 
         public GenerateTokenCommandHandler(UserManager<User> userManager,
+
             IInteractionService interactionService,
             ITrainingService trainingService,
             ILmsCourseService lmsCourseService,
             IUserTokenRepository userTokenRepository,
             IOrderService orderService,
             AppSetting appSetting,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            IRoleClaimRepository roleClaimRepository,
+            RoleManager<Role> roleManager,
+            IMapper mapper,
+            ICompetitionEventsRepository competitionEventsRepository)
         {
             _userManager = userManager;
             _interactionService = interactionService;
@@ -58,6 +68,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             _orderService = orderService;
             _appSetting = appSetting;
             _httpContextAccessor = httpContextAccessor;
+            _roleClaimRepository = roleClaimRepository;
+            _roleManager = roleManager;
+            _mapper = mapper;
+            _competitionEventsRepository = competitionEventsRepository;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
@@ -72,6 +86,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
+
+            var schoolId = user.UserSchools.OrderByDescending(x => x.CreatedDate).FirstOrDefault()?.SchoolId;
+            var eventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId);
+
             var jti = Guid.NewGuid().ToString();
             var authClaims = new List<Claim>
             {
@@ -81,12 +99,23 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(JwtClaimNames.UserId, user.Id.ToString()),
                 new Claim(JwtClaimNames.Sub, _appSetting.Jwt?.Subject ?? string.Empty),
                 new Claim(JwtClaimNames.Jti, jti),
+                new Claim(nameof(TokenModel.EventCode), eventCode),
             };
 
             foreach (var userRole in userRoles)
             {
                 authClaims.Add(new Claim(JwtClaimNames.Role, userRole));
             }
+
+            var role = await _roleManager.FindByNameAsync(userRoles.FirstOrDefault() ?? string.Empty);
+            if (role == null)
+            {
+                methodResult.StatusCode = StatusCodes.Status401Unauthorized;
+                return methodResult;
+            }
+
+            var roleClaims = await _roleClaimRepository.GetClaimsByRole(role.Id, cancellationToken);
+            authClaims.AddRange(_mapper.Map<IList<Claim>>(roleClaims));
 
             var secretKeyBytes = Encoding.ASCII.GetBytes(_appSetting.Jwt?.SecretKey ?? string.Empty);
             var signin = new SigningCredentials(new SymmetricSecurityKey(secretKeyBytes), SecurityAlgorithms.HmacSha256);
@@ -120,7 +149,8 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 Expiration = token.ValidTo.ConvertTimeFromUtc(TimeZoneInfo.Local),
                 FullName = user.FullName,
                 Roles = userRoles.ToList(),
-                Code = user.Human?.Code
+                Code = user.Human?.Code,
+                EventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId),
             };
 
             if (userRoles.Contains(EnumRole.Student.ToString()))
