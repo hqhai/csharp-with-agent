@@ -11,6 +11,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public Guid Id { get; set; }
         public EnumExamPracticeType Type { get; set; }
         public EnumExamPracticeStatus ExamPracticeStatus { get; set; }
+        public DateTime? ActivatedAt { get; set; }
         public string? Name { get; set; }
         public string? Code { get; set; }
         public bool IsNew { get; set; }

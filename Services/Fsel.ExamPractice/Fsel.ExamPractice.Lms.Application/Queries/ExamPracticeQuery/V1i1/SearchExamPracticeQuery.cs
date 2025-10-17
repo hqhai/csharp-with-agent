@@ -116,11 +116,11 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery.V1i1
                 ExamPracticeResult = x.ExamPracticeResults.FirstOrDefault(y => y.StudentId == student.Id && y.ExamPracticeId == x.Id && y.WorkingStatus == EnumWorkingStatus.Active),
             });
             int totalItem = await queryTest.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            var lists = await queryTest
-                    .ApplySortAndPaging(request)
-                    .AsNoTracking()
-                    .ToListAsync(cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
+            var lists = await queryTest.OrderBy(x => x.ExamPractice.Code)
+                                       .ApplyPaging(request)
+                                       .AsNoTracking()
+                                       .ToListAsync(cancellationToken: cancellationToken)
+                                       .ConfigureAwait(false);
             var examPracticeResultIds = lists.Where(x => x.ExamPractice.SubType == EnumExamPracticeSubType.SkillMockTest || x.ExamPractice.SubType == EnumExamPracticeSubType.SingleVstepSkill
                                                 || x.ExamPractice.Type == EnumExamPracticeType.ExamPractice)
                                        .Where(x => x.ExamPracticeResult != null)

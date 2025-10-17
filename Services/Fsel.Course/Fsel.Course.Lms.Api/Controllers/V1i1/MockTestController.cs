@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class MockTestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -35,6 +35,18 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         public async Task<IActionResult> CreateAnswers([FromBody] CreateMockTestAnswerBySectionGroupCommand command)
         {
             MethodResult<SectionGroupResultModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create MockTestAnswers
+        /// </summary>
+        [HttpPost("test-azure")]
+        [ProducesResponseType(typeof(MethodResult<PronunciationAssessmentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> TestAzurePronunciation([FromBody] AzurePronTestCmd command)
+        {
+            MethodResult<PronunciationAssessmentModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

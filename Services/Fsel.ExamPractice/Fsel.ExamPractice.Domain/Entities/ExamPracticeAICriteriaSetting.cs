@@ -28,6 +28,7 @@ namespace Fsel.ExamPractice.Domain.Entities
 
         public EnumExamPracticeAIType CriteriaName { get; set; }
         public Guid? ExamPracticeAISettingId { get; set; }
+
         public ExamPracticeAISetting? ExamPracticeAISetting { get; set; }
     }
 }

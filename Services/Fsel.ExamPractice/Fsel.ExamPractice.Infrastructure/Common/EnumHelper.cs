@@ -17,6 +17,8 @@ namespace Fsel.ExamPractice.Infrastructure.Common
         {
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.IELTS, EnumExamPracticeSubType.FullMockTest),
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.IELTS, EnumExamPracticeSubType.SkillMockTest),
+            new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.Vstep, EnumExamPracticeSubType.SingleVstepSkill),
+            new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.Vstep, EnumExamPracticeSubType.FullVstepSkill),
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.ExamPractice, EnumExamPracticeSubType.Practice),
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.ExamPractice, EnumExamPracticeSubType.UniversityEntrance),
             new KeyValuePair<EnumExamPracticeType, EnumExamPracticeSubType>(EnumExamPracticeType.ExamPractice, EnumExamPracticeSubType.HighschoolEntrance)

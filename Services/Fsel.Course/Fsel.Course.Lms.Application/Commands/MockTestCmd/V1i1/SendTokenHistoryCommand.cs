@@ -128,7 +128,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
 
         private async Task GetTokenHistoryAsync(MockTestResult mockTestResult, Course course, StudentModel student, bool isSkillMockTest, CancellationToken cancellationToken)
         {
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).ThenInclude(x => x!.Sections.OrderBy(x => x.DisplayOrder)).Where(x => x.MockTestResultId == mockTestResult.Id).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).ThenInclude(x => x!.Sections.OrderBy(x => x.DisplayOrder)).Where(x => x.MockTestResultId == mockTestResult.Id && x.CreatedDate >= mockTestResult.CreatedDate).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             var tokenHistoryQueues = new List<TokenHistoryQueueModel>();
             var userId = student.Human?.UserId ?? default;
             if (sectionGroupResults != null && sectionGroupResults.Any())
@@ -179,7 +179,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                         break;
 
                     case EnumCourseSkill.Writing:
-                        var mocktestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync(cancellationToken);
+                        var mocktestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                             .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                             .ToListAsync(cancellationToken);
                         var tokenHistoryWritings = new List<TokenHistoryQueueModel>();
                         var sections = sectionGroupResult.SectionGroup.Sections.ToList();
                         foreach (var section in sections)

@@ -191,7 +191,7 @@
   {
     "id": "6124621e-ecf9-4c80-81cc-48d0d16e22d0",
     "claimValue": "StudentProgressManagement.LoginAsUser",
-    "name": "Log in as user",
+    "name": "Login as user",
     "description": null,
     "status": true,
     "permissionGroupId": "39d8915b-4373-4ed2-9a79-d59db3a5285f",
@@ -639,6 +639,24 @@
     "createdDate": "2025-06-15"
   },
   {
+    "id": "20346a71-33f6-490e-a1a3-c7ee757cf84c",
+    "claimValue": "SchoolStudentManagement.LoginAsUser",
+    "name": "Login as user",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-08-27"
+  },
+  {
+    "id": "fe9af0ba-2ae1-4e4a-bbb9-b6975234afe8",
+    "claimValue": "SchoolStudentManagement.ViewProgress",
+    "name": "Xem tiến độ học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "createdDate": "2025-08-27"
+  },
+  {
     "id": "6df0f361-0d99-4a38-b5be-706225b7f22b",
     "claimValue": "ReportManagementByAdminSchool.ViewPTResultsReport",
     "name": "Xem báo cáo kết quả đánh giá đầu vào",
@@ -709,5 +727,131 @@
     "status": true,
     "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
     "createdDate": "2025-07-01"
+  },
+  {
+    "id": "b2f659ab-38cf-4dc7-8c0e-d4c9311becd9",
+    "claimValue": "CurriculumManagement.View",
+    "name": "Xem thông tin giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "be4ef82b-ef95-42a0-a15d-e9f9ab36905e",
+    "claimValue": "CurriculumManagement.Add",
+    "name": "Thêm giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "6ea0c374-f82d-4479-ad16-18d70acf92f8",
+    "claimValue": "CurriculumManagement.Update",
+    "name": "Cập nhật giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "68905ab5-68ce-4cc1-a52a-e5ab46879460",
+    "claimValue": "CurriculumManagement.Delete",
+    "name": "Xóa giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "5535786d-216c-4f3e-b25f-e533a1a7ea3b",
+    "claimValue": "CurriculumManagement.AddStudents",
+    "name": "Thêm học sinh vào giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "324bb73f-6459-4d16-b33a-8db6b100e525",
+    "claimValue": "CurriculumManagement.DeleteStudents",
+    "name": "Xóa học sinh khỏi giáo trình",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "2e7ab492-59cf-4b14-a2ce-5cf2a2692427",
+    "claimValue": "StudentCampusManagement.View",
+    "name": "Xem thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "642f9c9c-c338-48fa-a42a-6d22e766bfca",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "49019ea5-3e80-4f3f-bdaa-f5d807b1869f",
+    "claimValue": "StudentCampusManagement.Update",
+    "name": "Cập nhật thông tin học sinh",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "642f9c9c-c338-48fa-a42a-6d22e766bfca",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "ec393b2d-0a9f-45e8-a1a0-13e8fb66ecd9",
+    "claimValue": "SchoolClassCampusManagement.Add",
+    "name": "Thêm mới lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "2638eed4-5578-4e3b-98c2-b493ee8b5aef",
+    "claimValue": "SchoolClassCampusManagement.Update",
+    "name": "Cập nhật lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "1d7feea3-a183-4a24-a9fa-bc6fa77847c7",
+    "claimValue": "SchoolClassCampusManagement.View",
+    "name": "Xem thông tin lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "a1a48ab9-8502-4d3b-8346-f267d8d8c680",
+    "claimValue": "SchoolClassCampusManagement.Delete",
+    "name": "Xóa lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "da8ac310-dd13-4386-9c49-2fe376d33a0d",
+    "claimValue": "SchoolClassCampusManagement.AddStudents",
+    "name": "Thêm học sinh vào lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "873f2abd-1de2-41a9-8ab8-ce49de12ca60",
+    "claimValue": "SchoolClassCampusManagement.DeleteStudents",
+    "name": "Xóa học sinh khỏi lớp",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
+    "createdDate": "2025-09-18"
   }
 ]

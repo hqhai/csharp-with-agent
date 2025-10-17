@@ -85,5 +85,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/feature-access-time/get-feature-access-time-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTimeByUserIds([Body] GetFeatureAccessTimesByUserIdsQueryModel model);
+
+        [Post("/v1/feature-access-time/get-last-feature-access-by-user-ids")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetLastFeatureAccessByUserIdsAsync([Body] GetFeatureAccessTimesByUserIdsQueryModel model);
     }
 }

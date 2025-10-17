@@ -6,8 +6,6 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
-    using Fsel.Common.Models;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -18,6 +16,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.SystemService.QueryModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -98,15 +97,15 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             };
 
             //Lấy những học sinh bật thông báo Gửi Email hàng tuần
-            var studentFilter = await _userService.GetListUserSetting(query);
-            var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
+            //var studentFilter = await _userService.GetListUserSetting(query);
+            //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
 
-            if (studentFilterResult == null || studentFilterResult.Count == 0)
-            {
-                return methodResult;
-            }
+            //if (studentFilterResult == null || studentFilterResult.Count == 0)
+            //{
+            //    return methodResult;
+            //}
             //filter những học sinh bật thông báo email.
-            students = students.Where(x => x.Human != null && studentFilterResult.Contains(x.Human.UserId)).OrderBy(x => x.Human!.Email).ToList();
+            //students = students.Where(x => x.Human != null && studentFilterResult.Contains(x.Human.UserId)).OrderBy(x => x.Human!.Email).ToList();
 
             var userIds = students.Where(p => p.Human != null && p.Human.UserId.HasValue).Select(x => x.Human!.UserId!.Value).Distinct().ToList();
 
@@ -361,6 +360,15 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                     //weeklyReport.DailyStreak = totalDailyStreak >= 7 ? null : SendMailSetting.Display;
                     //weeklyReport.TotalDailyStreak = dailyStreak?.NumberOfDaysStreak.ToString(CultureInfo.CurrentCulture);
                 }
+
+                var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+                {
+                    UserId = item.Human?.UserId ?? Guid.Empty,
+                    Template = weeklyReport.SenderTemplate
+                });
+
+                weeklyReport.AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+
                 if (!string.IsNullOrEmpty(item.Human?.Email))
                 {
                     //await SendWeekly(item.Human?.Email, item.ParentEmail, weeklyReport, cancellationToken);
@@ -372,6 +380,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
                         Param = weeklyReport
                     });
                 }
+
             }
 
             await _weeklyReportRepository.ExecuteTransactionAsync(async () =>

@@ -24,6 +24,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.Logging;
     using static Fsel.Shared.Constants.ValueSettings;
 
     public class SubmitExamPracticeAnswerAICommand : ExamPracticeAnswerResponseModel, IRequest<bool>
@@ -44,6 +45,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
         private readonly IProsodyScoreRepository _prosodyScoreRepository;
         private readonly ExamPracticesDBContext _examPracticesDBContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<SubmitExamPracticeAnswerAICommandHandler> _logger;
         private const int CorrectTotal_IELTS_Writing = 36;
         private const int CorrectTotal_Vstep_Writing = 40;
         private const int MaxSection = 2;
@@ -61,7 +63,8 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             IMediator mediator,
             IProsodyScoreRepository prosodyScoreRepository,
             ExamPracticesDBContext examPracticesDBContext,
-            IMapper mapper)
+            IMapper mapper,
+            ILogger<SubmitExamPracticeAnswerAICommandHandler> logger)
         {
             _examPracticeAnswerRepository = examPracticeAnswerRepository;
             _submitExamPracticeCriteria = submitExamPracticeCriteria;
@@ -75,11 +78,13 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             _prosodyScoreRepository = prosodyScoreRepository;
             _examPracticesDBContext = examPracticesDBContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<bool> Handle(SubmitExamPracticeAnswerAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            _logger.LoggerRequest(request);
 
             var examPracticeSectionResult = await _examPracticeSectionResultRepository.GetByIdAsync(request.ExamPracticeSectionResultId);
             if (examPracticeSectionResult == null)
@@ -139,7 +144,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             ExamPracticeResult examPracticeResult,
             CancellationToken cancellationToken)
         {
-            double ConverBandScore(IList<ExamPracticeAIGradingLanguageModel>? examPracticeAIGradingLanguages) => double.TryParse(examPracticeAIGradingLanguages?[0]?.ExamPracticeAIGradings?[0]?.BandScore, out double bandScore) ? bandScore : ValueDefault;
+            static double ConverBandScore(IList<ExamPracticeAIGradingLanguageModel>? examPracticeAIGradingLanguages) => double.TryParse(examPracticeAIGradingLanguages?[0]?.ExamPracticeAIGradings?[0]?.BandScore, out double bandScore) ? bandScore : ValueDefault;
 
             var gradingAiFeedBackResult = new List<AiFeedbackItemModel>
             {
@@ -188,7 +193,6 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             ExamPracticeResult examPracticeResult,
             CancellationToken cancellationToken)
         {
-            double ConverBandScore(IList<ExamPracticeAIGradingLanguageModel>? examPracticeAIGradingLanguages) => double.TryParse(examPracticeAIGradingLanguages?[0]?.ExamPracticeAIGradings?[0]?.BandScore, out double bandScore) ? bandScore : ValueDefault;
             List<ExamPracticeAIGradingModel>? GetAIGradings(List<ExamPracticeAIGradingLanguageModel>? list) => list != null && list.Count > 0 ? list[0].ExamPracticeAIGradings?.ToList() : null;
             var gradingAiFeedBackResult = new List<AiFeedbackItemModel>
             {
@@ -362,9 +366,9 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                 {
                     aIResponse = await SendChatGPT(aiConfig, item.SystemRoleAlConfig ?? string.Empty, userAiConfig, cancellationToken);
                 }
-
-                resultDictionary[item.Prompts[0].Type] = ConvertHelper.Deserialize<List<ExamPracticeAIGradingLanguageModel>>(aIResponse) ?? new List<ExamPracticeAIGradingLanguageModel>();
-                await SendWebSocket(aIResponse, item.Prompts![0].Type.ToString(), examPracticeSection.DisplayOrder, examPracticeSectionResult.ExamPracticeResultId, cancellationToken);
+                var data = ConvertHelper.Deserialize<List<ExamPracticeAIGradingLanguageModel>>(aIResponse) ?? new List<ExamPracticeAIGradingLanguageModel>();
+                resultDictionary[item.Prompts[0].Type] = data;
+                await SendWebSocket(data, aIResponse, item.Prompts![0].Type.ToString(), examPracticeSection.DisplayOrder, examPracticeSectionResult.ExamPracticeResultId, cancellationToken);
             }
         }
 
@@ -389,51 +393,67 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             var gradingDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aiResponse) ?? new ExamPracticeAIGradingDataModel();
             var gradingModel = _mapper.Map<ExamPracticeAIGradingModel>(gradingDataModel);
 
+            if (gradingModel == null)
+            {
+                gradingModel = new ExamPracticeAIGradingModel();
+                gradingModel.ErrorMessage = "GradingModel is null";
+            }
+            var matchedScores = new List<ProsodyScore>();
             if (double.TryParse(gradingModel.BandScore, out double bandScore))
             {
-                var matchedScores = relevantProsodyScores
-                    .Where(x => x.MinScore <= bandScore && x.MaxScore >= bandScore)
-                    .OrderBy(x => x.Language)
-                    .ToList();
-
-                if (matchedScores.Count > 0)
-                {
-                    var mainComment = matchedScores[0].BandComment ?? string.Empty;
-                    var altComment = matchedScores.Count > 1 ? matchedScores[1].BandComment ?? string.Empty : mainComment;
-
-                    gradingModel.BandDescriptorText = mainComment;
-                    var aIResponseTranslate = await GetTranslateAIResponse(aiResponse, cancellationToken);
-                    var responseTranslateDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aIResponseTranslate);
-                    var responseTranslateModel = _mapper.Map<ExamPracticeAIGradingModel>(responseTranslateDataModel);
-                    var altData = new List<ExamPracticeAIGradingModel>
-                    {
-                        new ExamPracticeAIGradingModel
-                        {
-                            BandScore = gradingModel.BandScore,
-                            BandDescriptorText = altComment,
-                            Explanation = responseTranslateModel?.Explanation ?? string.Empty,
-                            SuggestionsForImprovement = responseTranslateModel?.SuggestionsForImprovement ?? string.Empty
-                        }
-                    };
-
-                    var languageModels = matchedScores
-                        .OrderBy(x => x.Language)
-                        .Select(x => new ExamPracticeAIGradingLanguageModel
-                        {
-                            Language = x.Language,
-                            ExamPracticeAIGradings = x.Language == LanguageAIModule.English ? new List<ExamPracticeAIGradingModel>
-                            {
-                                gradingModel
-                            } : altData,
-                        })
-                        .ToList();
-
-                    if (languageModels.Any())
-                    {
-                        aiResponse = languageModels.Serialize();
-                    }
-                }
+                matchedScores = relevantProsodyScores.Where(x => x.MinScore <= bandScore && x.MaxScore >= bandScore)
+                                                     .OrderBy(x => x.Language)
+                                                     .ToList();
             }
+            var mainComment = matchedScores[0].BandComment ?? string.Empty;
+            var altComment = matchedScores.Count > 1 ? matchedScores[1].BandComment ?? string.Empty : mainComment;
+            gradingModel.BandDescriptorText = mainComment;
+
+            var aIResponseTranslate = await GetTranslateAIResponse(aiResponse, cancellationToken);
+            var responseTranslateDataModel = ConvertHelper.Deserialize<ExamPracticeAIGradingDataModel>(aIResponseTranslate);
+            var responseTranslateModel = _mapper.Map<ExamPracticeAIGradingModel>(responseTranslateDataModel);
+            var altData = new List<ExamPracticeAIGradingModel>
+            {
+                new ExamPracticeAIGradingModel
+                {
+                    BandScore = gradingModel.BandScore,
+                    BandDescriptorText = altComment,
+                    Explanation = responseTranslateModel?.Explanation ?? string.Empty,
+                    SuggestionsForImprovement = responseTranslateModel?.SuggestionsForImprovement ?? string.Empty
+                }
+            };
+
+            var languageModels = matchedScores
+                .OrderBy(x => x.Language)
+                .Select(x => new ExamPracticeAIGradingLanguageModel
+                {
+                    Language = x.Language,
+                    ExamPracticeAIGradings = x.Language == LanguageAIModule.English ? new List<ExamPracticeAIGradingModel>
+                    {
+                        gradingModel
+                    } : altData,
+                })
+                .ToList();
+
+            if (languageModels.Any())
+            {
+                aiResponse = languageModels.Serialize();
+            }
+            else
+            {
+                aiResponse = new List<ExamPracticeAIGradingLanguageModel>
+                {
+                    new ExamPracticeAIGradingLanguageModel
+                    {
+                        Language = LanguageAIModule.English,
+                        ExamPracticeAIGradings = new List<ExamPracticeAIGradingModel>
+                        {
+                            gradingModel
+                        }
+                    }
+                }.Serialize();
+            }
+
             return aiResponse;
         }
 
@@ -477,8 +497,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
                     continue;
                 }
                 var aIResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig ?? string.Empty, userAiConfig, cancellationToken) ?? string.Empty;
-                resultDictionary[item.Type] = ConvertHelper.Deserialize<List<ExamPracticeAIGradingLanguageModel>>(aIResponse) ?? new List<ExamPracticeAIGradingLanguageModel>();
-                await SendWebSocket(aIResponse, item.Type.ToString(), examPracticeSection.DisplayOrder, examPracticeSectionResult.ExamPracticeResultId, cancellationToken);
+                var data = ConvertHelper.Deserialize<List<ExamPracticeAIGradingLanguageModel>>(aIResponse) ?? new List<ExamPracticeAIGradingLanguageModel>();
+
+                resultDictionary[item.Type] = data;
+                await SendWebSocket(data, aIResponse, item.Type.ToString(), examPracticeSection.DisplayOrder, examPracticeSectionResult.ExamPracticeResultId, cancellationToken);
             }
         }
 
@@ -722,15 +744,30 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.AiCmd
             return aIResponse;
         }
 
-        private async Task SendWebSocket(string aIResponse, string type, int displayOrder, Guid examPracticeResultId, CancellationToken cancellationToken)
+        private async Task SendWebSocket(IList<ExamPracticeAIGradingLanguageModel> examPracticeAIs, string aIResponse, string type, int displayOrder, Guid examPracticeResultId, CancellationToken cancellationToken)
         {
-            await _submitExamPracticeCriteria.Publish(new SubmitExamPracticeResponseModel
+            await _submitExamPracticeCriteria.Publish(new SubmitExamPracticeAiSpeakingResponseModel
             {
-                GradingAlFeedBack = aIResponse,
+                ExamPracticeAIGradingLanguages = examPracticeAIs,
                 CriteriaName = type,
+                BandScore = ConverBandScore(examPracticeAIs),
                 DisplayOrder = displayOrder,
                 ExamPracticeResultId = examPracticeResultId
             }, cancellationToken);
+        }
+
+        private static double ConverBandScore(IList<ExamPracticeAIGradingLanguageModel>? examPracticeAIGradingLanguages)
+        {
+            if (examPracticeAIGradingLanguages == null || examPracticeAIGradingLanguages.Count == 0)
+            {
+                return default;
+            }
+            var bandScoreStr = examPracticeAIGradingLanguages.First().ExamPracticeAIGradings?[0]?.BandScore;
+            if (double.TryParse(bandScoreStr, out double bandScore))
+            {
+                return bandScore;
+            }
+            return default;
         }
     }
 }

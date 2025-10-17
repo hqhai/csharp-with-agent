@@ -34,7 +34,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpGet("get-by-id")]
         [ProducesResponseType(typeof(MethodResult<ProductModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> Get([FromQuery] GetProductByIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -47,7 +47,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpGet("search")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ProductModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> Search([FromQuery] SearchProductQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -60,7 +60,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpPost("redeem-product")]
         [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> RedeemProduct([FromBody] RedeemProductCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -73,7 +73,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpGet("history-redeem-product")]
         [ProducesResponseType(typeof(MethodResult<HistoryRedeemProductModels>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> HistoryRedeemProduct()
         {
             var commandResult = await _mediator.Send(new GetHistoryRedeemProductQuery()).ConfigureAwait(false);

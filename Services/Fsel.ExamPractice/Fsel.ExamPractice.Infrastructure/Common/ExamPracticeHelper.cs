@@ -51,7 +51,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                 return true;
             }
 
-            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.Questions).Where(x => x.ExamPracticeId == examPractice.Id).OrderBy(x => x.DisplayOrder).ToListAsync();
+            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.Questions).Where(x => x.ExamPracticeId == examPractice.Id && !x.ParentExamPracticeSectionId.HasValue).OrderBy(x => x.DisplayOrder).ToListAsync();
             if (examPracticeSections.Count != request.ExamPracticeSections.Count)
             {
                 return true;
@@ -123,7 +123,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             {
                 return false;
             }
-            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPractice.Id).ToListAsync();
+            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPractice.Id && !x.ParentExamPracticeSectionId.HasValue).ToListAsync();
             var currentSections = await GetLeafSectionsWithQuestionsAsync(examPracticeSections);
             return AllSectionsHaveAtLeastOneQuestion(currentSections);
         }
@@ -527,7 +527,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                                .Select(c => c.Id.GetValueOrDefault())
                                .ToHashSet();
             var examPracticeSections = await _examPracticeSectionRepository.Queryable
-                                                .Where(x => x.ExamPracticeId.HasValue && x.ExamPracticeId == request.Id)
+                                                .Where(x => x.ExamPracticeId == request.Id && !x.ParentExamPracticeSectionId.HasValue)
                                                 .ToListAsync();
 
             var toRemoves = examPracticeSections.Where(c => c.Id != Guid.Empty && !examPracticeSectionIds.Contains(c.Id)).ToList();
@@ -576,7 +576,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             {
                 return;
             }
-            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.ExamPracticeSections).Where(x => x.ExamPracticeId == examPractice.Id).ToListAsync();
+            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.ExamPracticeSections).Where(x => !x.ParentExamPracticeSectionId.HasValue && x.ExamPracticeId == examPractice.Id).ToListAsync();
 
             foreach (var item in examPracticeSections)
             {
@@ -616,8 +616,8 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                     }
                     else if (item.CourseSkill.Value == Shared.Enums.EnumCourseSkill.Speaking)
                     {
-                        var examPracticeIds = item.ExamPracticeSections.Select(x => x.Id).ToList();
-                        var countQuestion = await _examPracticeSectionRepository.Queryable.WhereBulkContains(examPracticeIds, x => x.ParentExamPracticeSectionId).CountAsync();
+                        var examPracticeSectionIds = item.ExamPracticeSections.Select(x => x.Id).ToList();
+                        var countQuestion = await _examPracticeSectionRepository.Queryable.WhereBulkContains(examPracticeSectionIds, x => x.ParentExamPracticeSectionId).CountAsync();
                         if (item.Config == null)
                         {
                             item.Config = new Domain.Entities.Configs.SectionMediaConfig

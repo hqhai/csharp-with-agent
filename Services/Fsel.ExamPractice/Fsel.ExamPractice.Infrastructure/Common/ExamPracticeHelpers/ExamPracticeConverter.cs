@@ -9,6 +9,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAISettings;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections;
     using Fsel.ExamPractice.Domain.Models.CommandModels.Questions;
+    using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
 
     public class ExamPracticeConverter
@@ -36,57 +37,113 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
             _examPracticeAICriteriaSettingRepository = examPracticeAICriteriaSettingRepository;
         }
 
-        public async Task HandlerChildents(IList<UpdateExamPracticeSectionCommandModel> newExamPracticeSections, ICollection<ExamPracticeSection> examPracticeSectionBelongParents, Guid? examPracticeId, Guid? examPracticeSectionParentId, CancellationToken cancellationToken)
+        public async Task HandlerExamPracticeSections(IList<UpdateExamPracticeSectionCommandModel> newExamPracticeSections, ICollection<ExamPracticeSection> examPracticeSectionBelongParents, Guid? examPracticeId, Guid? examPracticeSectionParentId, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(newExamPracticeSections);
             ArgumentNullException.ThrowIfNull(examPracticeSectionBelongParents);
 
             var oldExamPracticeSections = await GetExamPracticeSectionSectionAsync(examPracticeId, examPracticeSectionParentId, cancellationToken);
-            if (oldExamPracticeSections != null && oldExamPracticeSections.Any())
-            {
-                // xoá nhưng đối tượng không được update
-                var removedPracticeSections = oldExamPracticeSections.Where(x => x.Id != Guid.Empty).ExceptBy(newExamPracticeSections.Select(x => x.Id), u => u.Id).ToList();
-                _examPracticeSections.AddRange(removedPracticeSections);
-            }
+
+            // xoá nhưng đối tượng không được update
+            var removedPracticeSections = oldExamPracticeSections.Where(x => x.Id != Guid.Empty).ExceptBy(newExamPracticeSections.Select(x => x.Id), u => u.Id).ToList();
+            _examPracticeSections.AddRange(removedPracticeSections);
 
             foreach (var newExamPracticeSection in newExamPracticeSections)
             {
+                var countQuestion = 0;
+
+                ExamPracticeSection? examPracticeSection = null;
                 if (!newExamPracticeSection.Id.HasValue)
                 {
-                    examPracticeSectionBelongParents.Add(_mapper.Map<ExamPracticeSection>(newExamPracticeSection));
+                    examPracticeSection = _mapper.Map<ExamPracticeSection>(newExamPracticeSection);
+                    examPracticeSectionBelongParents.Add(examPracticeSection);
                 }
                 else
                 {
-                    var oldExamPracticeSection = oldExamPracticeSections?.FirstOrDefault(x => x.Id == newExamPracticeSection.Id);
-                    _mapper.Map(newExamPracticeSection, oldExamPracticeSection);
-                    if (oldExamPracticeSection == null)
+                    examPracticeSection = oldExamPracticeSections.FirstOrDefault(x => x.Id == newExamPracticeSection.Id);
+                    _mapper.Map(newExamPracticeSection, examPracticeSection);
+                }
+
+                if (examPracticeSection != null)
+                {
+                    if (examPracticeSection.Config != null && examPracticeSection.CourseSkill.HasValue)
                     {
-                        continue;
+                        var config = examPracticeSection.Config;
+                        var executionTime = examPracticeSection.CourseSkill.Value.GetTimeSkill(examPracticeSection.Config.AudioPath ?? examPracticeSection.Config.VideoFilePath);
+                        config.ExecutionTime = executionTime;
+                        examPracticeSection.Config = config;
                     }
-
-                    QuestionHandler(oldExamPracticeSection.Questions, newExamPracticeSection.Questions);
-                    ExamPracticeAISettingHandler(oldExamPracticeSection.ExamPracticeAISettings, newExamPracticeSection.ExamPracticeAISettings);
-
+                    examPracticeSection.ExamPracticeId = examPracticeId;
+                    examPracticeSection.DisplayOrder = newExamPracticeSections.IndexOf(newExamPracticeSection) + 1;
                     if (newExamPracticeSection.ChildrenExamPracticeSections.Any())
                     {
-                        await HandlerChildents(newExamPracticeSection.ChildrenExamPracticeSections, oldExamPracticeSection.ExamPracticeSections, null, oldExamPracticeSection.Id, cancellationToken);
+                        await HandlerChildents(newExamPracticeSection.ChildrenExamPracticeSections, examPracticeSection.ExamPracticeSections, countQuestion, examPracticeSection, cancellationToken);
                     }
                 }
             }
         }
 
-        private void QuestionHandler(ICollection<Question> oldQuestions, IList<UpdateQuestionCommandModel> newQuestions)
+        public async Task HandlerChildents(IList<UpdateExamPracticeSectionCommandModel> newExamPracticeSections, ICollection<ExamPracticeSection> examPracticeSectionBelongParents, int countQuestion, ExamPracticeSection? examPracticeSection, CancellationToken cancellationToken)
         {
-            foreach (var newQuestion in newQuestions)
+            ArgumentNullException.ThrowIfNull(newExamPracticeSections);
+            ArgumentNullException.ThrowIfNull(examPracticeSectionBelongParents);
+
+            var oldExamPracticeSections = await GetExamPracticeSectionSectionAsync(examPracticeSection?.ExamPracticeId, examPracticeSection?.Id, cancellationToken);
+
+            // xoá nhưng đối tượng không được update
+            var removedPracticeSections = oldExamPracticeSections.Where(x => x.Id != Guid.Empty).ExceptBy(newExamPracticeSections.Select(x => x.Id), u => u.Id).ToList();
+            _examPracticeSections.AddRange(removedPracticeSections);
+
+            foreach (var newExamPracticeSection in newExamPracticeSections)
             {
-                if (!newQuestion.Id.HasValue)
+                ExamPracticeSection? examPracticeSectionChildent = null;
+                if (!newExamPracticeSection.Id.HasValue)
                 {
-                    oldQuestions.Add(_mapper.Map<Question>(newQuestion));
+                    examPracticeSectionChildent = _mapper.Map<ExamPracticeSection>(newExamPracticeSection);
+                    examPracticeSectionBelongParents.Add(examPracticeSectionChildent);
                 }
                 else
                 {
-                    var oldQuestion = oldQuestions.FirstOrDefault(x => x.Id == newQuestion.Id);
-                    _mapper.Map(newQuestion, oldQuestion);
+                    examPracticeSectionChildent = oldExamPracticeSections.FirstOrDefault(x => x.Id == newExamPracticeSection.Id);
+                    _mapper.Map(newExamPracticeSection, examPracticeSectionChildent);
+                }
+
+                if (examPracticeSectionChildent != null)
+                {
+                    examPracticeSectionChildent.ExamPracticeId = examPracticeSection?.ExamPracticeId;
+                    examPracticeSectionChildent.DisplayOrder = newExamPracticeSections.IndexOf(newExamPracticeSection) + 1;
+                    QuestionHandler(examPracticeSectionChildent.Questions, newExamPracticeSection.Questions, countQuestion);
+                    countQuestion += newExamPracticeSection.Questions.Count;
+                    ExamPracticeAISettingHandler(examPracticeSectionChildent.ExamPracticeAISettings, newExamPracticeSection.ExamPracticeAISettings);
+                    if (newExamPracticeSection.ChildrenExamPracticeSections.Any())
+                    {
+                        await HandlerChildents(newExamPracticeSection.ChildrenExamPracticeSections, examPracticeSectionChildent.ExamPracticeSections, countQuestion, examPracticeSectionChildent, cancellationToken);
+                    }
+                }
+            }
+        }
+
+        private void QuestionHandler(ICollection<Question> oldQuestions, IList<UpdateQuestionCommandModel> newQuestions, int countQuestion)
+        {
+            foreach (var newQuestion in newQuestions)
+            {
+                Question? question = null;
+
+                if (!newQuestion.Id.HasValue)
+                {
+                    question = _mapper.Map<Question>(newQuestion);
+                    oldQuestions.Add(question);
+                }
+                else
+                {
+                    question = oldQuestions.FirstOrDefault(x => x.Id == newQuestion.Id);
+                    _mapper.Map(newQuestion, question);
+                }
+
+                if (question != null)
+                {
+                    question.DisplayOrder = newQuestions.IndexOf(newQuestion) + countQuestion;
+                    question = QuestionHelper.HandleQuestion(question).Result;
                 }
             }
 
@@ -99,23 +156,22 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             foreach (var newExamPracticeAISetting in newExamPracticeAISettings)
             {
+                ExamPracticeAISetting? examPracticeAISetting = null;
+
                 if (!newExamPracticeAISetting.Id.HasValue)
                 {
-                    oldExamPracticeAISettings.Add(_mapper.Map<ExamPracticeAISetting>(newExamPracticeAISetting));
+                    examPracticeAISetting = _mapper.Map<ExamPracticeAISetting>(newExamPracticeAISetting);
+                    oldExamPracticeAISettings.Add(examPracticeAISetting);
                 }
                 else
                 {
-                    var oldExamPracticeAISetting = oldExamPracticeAISettings.FirstOrDefault(x => x.Id == newExamPracticeAISetting.Id);
-                    if (oldExamPracticeAISetting == null)
-                    {
-                        continue;
-                    }
+                    examPracticeAISetting = oldExamPracticeAISettings.FirstOrDefault(x => x.Id == newExamPracticeAISetting.Id);
+                    _mapper.Map(newExamPracticeAISetting, examPracticeAISetting);
+                }
 
-                    _mapper.Map(newExamPracticeAISetting, oldExamPracticeAISetting);
-                    if (newExamPracticeAISetting.ExamPracticeAICriteriaSettings != null && newExamPracticeAISetting.ExamPracticeAICriteriaSettings.Any())
-                    {
-                        ExamPracticeAICriteriaSettingHandler(oldExamPracticeAISetting.ExamPracticeAICriteriaSettings, newExamPracticeAISetting.ExamPracticeAICriteriaSettings);
-                    }
+                if (newExamPracticeAISetting.ExamPracticeAICriteriaSettings != null && newExamPracticeAISetting.ExamPracticeAICriteriaSettings.Any() && examPracticeAISetting != null)
+                {
+                    ExamPracticeAICriteriaSettingHandler(examPracticeAISetting.ExamPracticeAICriteriaSettings, newExamPracticeAISetting.ExamPracticeAICriteriaSettings);
                 }
             }
 
@@ -128,14 +184,17 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
         {
             foreach (var newExamPracticeAICriteriaSetting in newExamPracticeAICriteriaSettings)
             {
+                ExamPracticeAICriteriaSetting? examPracticeAICriteriaSetting = null;
+
                 if (!newExamPracticeAICriteriaSetting.Id.HasValue)
                 {
-                    oldExamPracticeAICriteriaSettings.Add(_mapper.Map<ExamPracticeAICriteriaSetting>(newExamPracticeAICriteriaSetting));
+                    examPracticeAICriteriaSetting = _mapper.Map<ExamPracticeAICriteriaSetting>(newExamPracticeAICriteriaSetting);
+                    oldExamPracticeAICriteriaSettings.Add(examPracticeAICriteriaSetting);
                 }
                 else
                 {
-                    var oldExamPracticeAICriteriaSetting = oldExamPracticeAICriteriaSettings.FirstOrDefault(x => x.Id == newExamPracticeAICriteriaSetting.Id);
-                    _mapper.Map(newExamPracticeAICriteriaSetting, oldExamPracticeAICriteriaSetting);
+                    examPracticeAICriteriaSetting = oldExamPracticeAICriteriaSettings.FirstOrDefault(x => x.Id == newExamPracticeAICriteriaSetting.Id);
+                    _mapper.Map(newExamPracticeAICriteriaSetting, examPracticeAICriteriaSetting);
                 }
             }
 
@@ -146,16 +205,6 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
 
         private async Task<IList<ExamPracticeSection>> GetExamPracticeSectionSectionAsync(Guid? examPracticeId, Guid? examPracticeSectionParentId, CancellationToken cancellationToken)
         {
-            if (examPracticeId.HasValue)
-            {
-                return await _examPracticeSectionRepository.Queryable
-                                                           .Include(x => x.Questions)
-                                                           .Include(x => x.ExamPracticeAISettings)
-                                                           .ThenInclude(x => x.ExamPracticeAICriteriaSettings)
-                                                           .Where(x => x.ExamPracticeId == examPracticeId && !x.ParentExamPracticeSectionId.HasValue)
-                                                           .ToListAsync(cancellationToken);
-            }
-
             if (examPracticeSectionParentId.HasValue)
             {
                 return await _examPracticeSectionRepository.Queryable
@@ -163,6 +212,13 @@ namespace Fsel.ExamPractice.Infrastructure.Common.ExamPracticeHelpers
                                                            .Include(x => x.ExamPracticeAISettings)
                                                            .ThenInclude(x => x.ExamPracticeAICriteriaSettings)
                                                            .Where(x => x.ParentExamPracticeSectionId == examPracticeSectionParentId)
+                                                           .ToListAsync(cancellationToken);
+            }
+
+            if (examPracticeId.HasValue)
+            {
+                return await _examPracticeSectionRepository.Queryable
+                                                           .Where(x => x.ExamPracticeId == examPracticeId && !x.ParentExamPracticeSectionId.HasValue)
                                                            .ToListAsync(cancellationToken);
             }
 

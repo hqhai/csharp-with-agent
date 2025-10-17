@@ -47,7 +47,6 @@ namespace Fsel.System.Api.Controllers
             return result.GetActionResult();
         }
 
-
         /// <summary>
         /// Lưu ChatbotConfig
         /// </summary>
@@ -84,7 +83,6 @@ namespace Fsel.System.Api.Controllers
             MethodResult<ChatBotModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
-
 
         /// <summary>
         /// Lấy chatbotconfig theo unitid
@@ -139,6 +137,15 @@ namespace Fsel.System.Api.Controllers
         public async Task<IActionResult> GetChatBotById([FromRoute] Guid chatbotId)
         {
             MethodResult<ChatBotModel> commandResult = await _mediator.Send(new GetChatBotByIdQuery { ChatbotId = chatbotId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPost("convert-file")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ConvertFile([FromBody] ConvertFileWavCommand command)
+        {
+            MethodResult<string> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

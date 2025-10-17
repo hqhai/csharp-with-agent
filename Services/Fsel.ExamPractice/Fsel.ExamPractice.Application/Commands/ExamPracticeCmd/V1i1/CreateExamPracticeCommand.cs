@@ -28,7 +28,6 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
         private readonly IMapper _mapper;
         private readonly ExamPracticeHelper _examPracticeHelper;
         private readonly ISystemService _systemService;
-        private ExamPracticeCommon _examPracticeCommon = new ExamPracticeCommon().Create();
 
         public CreateExamPracticeCommandHandler(
             IExamPracticeRepository examPracticeRepository,
@@ -47,31 +46,24 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExamPracticeModel>();
 
-            if (string.IsNullOrEmpty(request.Code))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Code), request.Code);
-                return methodResult;
-            }
             var existCode = await _examPracticeRepository.Queryable.AnyAsync(x => x.Code == request.Code, cancellationToken);
             if (existCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
                 return methodResult;
             }
-            if (request.Type == EnumExamPracticeType.IELTS && !request.Type.GetSubTypes().Any(x => x == request.SubType))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.SubType);
-                return methodResult;
-            }
-            if (request.Type == EnumExamPracticeType.ExamPractice && !request.Type.GetSubTypes().Any(x => x == request.SubType))
+            if (!request.Type.GetSubTypes().Any(x => x == request.SubType))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Type), request.SubType);
                 return methodResult;
             }
 
-            // tính lại tổng số question
-            _examPracticeCommon.HandlerTotalQuestion(request.ExamPracticeSections);
-            _examPracticeCommon.SetTotalQuestion(request.ExamPracticeSections);
+            var validate = ExamPracticeValidateBuilder.Create(request, _examPracticeRepository).IsValidateQuestion(request.ExamPracticeSections, _mapper).GetResult();
+            if (!validate.IsOK)
+            {
+                methodResult.AddErrorBadRequest(validate.ErrorMessages);
+                return methodResult;
+            }
 
             var examPractice = ExamPracticeFactory.Create(request, _mapper).Build(version: 0, originalId: Guid.NewGuid());
             if (!examPractice.IsValid())

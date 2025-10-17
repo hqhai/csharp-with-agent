@@ -12,5 +12,6 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels
         public IList<ExamPracticePromptModel>? Prompts { get; set; }
         public EnumMockTestAIType CriteriaName { get; set; }
         public Guid? ExamPracticeAISettingId { get; set; }
+        public string? JsonSchema { get; set; }
     }
 }

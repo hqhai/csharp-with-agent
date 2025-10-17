@@ -580,8 +580,9 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                 {
                     CriteriaName = score.Criteria.ToString(),
                     BandScore = score.Score,
-                    BandDescriptionText = score.FeedBack,
-                    ExamPracticeResultId = score.ExamPracticeSectionId,
+                    ExamPracticeResultId = score.ExamPracticeResultId,
+                    DisplayOrder = scores.IndexOf(score),
+                    ExamPracticeAIGradingLanguages = score.GradingAlFeedbacks ?? new List<ExamPracticeAIGradingLanguageModel>()
                 };
                 await _submitAiSpeakingAnswerPublisher.Publish(model, cancellationToken);
             }

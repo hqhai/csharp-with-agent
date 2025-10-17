@@ -358,7 +358,7 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
 
         private (EnumStudentEditHistoryType, string) GetStudentEditHistory(string? role, int package)
         {
-            if (role == null || role == EnumRole.Student.ToString())
+            if (role == null || role == EnumRole.Student.ToString() || role == EnumRole.StudentCampus.ToString())
             {
                 return (EnumStudentEditHistoryType.BuyPackage, BuyPackage + $"{package} tháng");
             }

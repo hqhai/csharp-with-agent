@@ -2,7 +2,7 @@
 
 namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
 {
-    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
+    using Fsel.Shared.Models.ShareModels;
 
     public class AiFeedbackItemModel
     {

@@ -3,7 +3,7 @@
 namespace Fsel.ExamPractice.Domain.Models.EntityModels
 {
     using Fsel.ExamPractice.Domain.Enums;
-    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
+    using Fsel.Shared.Models.ShareModels;
 
     public class ExamPracticeScoreModel
     {

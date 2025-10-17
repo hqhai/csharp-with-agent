@@ -10,7 +10,7 @@ namespace Fsel.ExamPractice.Domain.Enums
         [Description("IELTS Mock Test")]
         IELTS = 1,
 
-        [Description("Vietnamese Standardized Test of English Proficiency")]
+        [Description("Bộ đề Vstep")]
         Vstep
     }
 }

@@ -597,8 +597,10 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(101);
 
-                    b.Property<int>("Criteria")
-                        .HasColumnType("int");
+                    b.Property<string>("Criteria")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2")
@@ -707,8 +709,8 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                         .HasColumnOrder(110);
 
                     b.Property<string>("Name")
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasMaxLength(750)
+                        .HasColumnType("nvarchar(750)");
 
                     b.Property<Guid?>("ParentExamPracticeSectionId")
                         .HasColumnType("uniqueidentifier");
@@ -972,6 +974,9 @@ namespace Fsel.ExamPractice.Infrastructure.Migrations
                     b.Property<string>("Description")
                         .HasMaxLength(3000)
                         .HasColumnType("nvarchar(3000)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("ExamPracticeSectionId")
                         .HasColumnType("uniqueidentifier");

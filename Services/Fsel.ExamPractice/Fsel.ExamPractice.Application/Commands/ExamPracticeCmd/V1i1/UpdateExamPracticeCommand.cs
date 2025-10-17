@@ -1,4 +1,3 @@
-
 // Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
@@ -52,7 +51,7 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
                 return methodResult;
             }
 
-            var validate = await ExamPracticeValidateBuilder.Create(request, _examPracticeRepository).ValidateRequestData().ValidateDuplicateTestAsync(examPractice.OriginalId);
+            var validate = await ExamPracticeValidateBuilder.Create(request, _examPracticeRepository).IsValidateQuestion(request.ExamPracticeSections, _mapper).ValidateDuplicateTestAsync(examPractice.OriginalId);
             var validateResult = validate.GetResult();
             if (!validateResult.IsOK)
             {
@@ -61,10 +60,6 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
             }
 
             var isUsingByClient = await _examPracticeRepository.IsUsingByClient(examPractice.Id);
-
-            // tính lại tổng số question
-            _examPracticeCommon.HandlerTotalQuestion(request.ExamPracticeSections);
-            _examPracticeCommon.SetTotalQuestion(request.ExamPracticeSections);
 
             var newVersionExamPractice = ExamPracticeFactory.Create(request, _mapper).Build();
 
@@ -80,8 +75,9 @@ namespace Fsel.ExamPractice.Application.Commands.ExamPracticeCmd.V1i1
 
                     if (!isUsingByClient)
                     {
-                        await _examPracticeConverter.HandlerChildents(request.ExamPracticeSections, oldEntity.ExamPracticeSections, oldEntity.Id, null, cancellationToken);
+                        await _examPracticeConverter.HandlerExamPracticeSections(request.ExamPracticeSections, oldEntity.ExamPracticeSections.OrderBy(x => x.DisplayOrder).ToList(), oldEntity.Id, null, cancellationToken);
                         await _examPracticeConverter.DeleteObjectInstance();
+                        _examPracticeCommon.HanderQuestionIndexSection(oldEntity.ExamPracticeSections.OrderBy(x => x.DisplayOrder).ToList());
                     }
 
                     await Task.Yield();

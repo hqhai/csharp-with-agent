@@ -8,6 +8,7 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
     public class ExamPracticeReportModel : BaseModel
     {
         public string? Name { get; set; }
+        public string? Code { get; set; }
         public EnumExamPracticeType Type { get; set; }
         public EnumExamPracticeSubType SubType { get; set; }
         public ExamPracticeResultModel? ExamPracticeResult { get; set; }
