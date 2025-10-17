@@ -598,6 +598,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Menu", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
@@ -1520,7 +1521,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             CreatedFullName = "",
                             CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsDeleted = false,
-                            Name = "Log in as user",
+                            Name = "Login as user",
                             PermissionGroupId = new Guid("39d8915b-4373-4ed2-9a79-d59db3a5285f"),
                             Status = true
                         },
@@ -2114,6 +2115,30 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         },
                         new
                         {
+                            Id = new Guid("20346a71-33f6-490e-a1a3-c7ee757cf84c"),
+                            ClaimValue = "SchoolStudentManagement.LoginAsUser",
+                            CreatedDate = new DateTime(2025, 8, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Login as user",
+                            PermissionGroupId = new Guid("618be731-43b3-45ed-bfad-262945ef0d51"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("fe9af0ba-2ae1-4e4a-bbb9-b6975234afe8"),
+                            ClaimValue = "SchoolStudentManagement.ViewProgress",
+                            CreatedDate = new DateTime(2025, 8, 27, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xem tiến độ học sinh",
+                            PermissionGroupId = new Guid("618be731-43b3-45ed-bfad-262945ef0d51"),
+                            Status = true
+                        },
+                        new
+                        {
                             Id = new Guid("6df0f361-0d99-4a38-b5be-706225b7f22b"),
                             ClaimValue = "ReportManagementByAdminSchool.ViewPTResultsReport",
                             CreatedDate = new DateTime(2025, 6, 19, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -2282,6 +2307,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MenuId")
+                        .IsUnique()
+                        .HasFilter("[MenuId] IS NOT NULL");
 
                     b.ToTable("PermissionGroups");
 
@@ -4447,18 +4476,15 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(102);
 
+                    b.Property<Guid?>("UserGroupId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroupId");
-
-                    b.HasIndex("IsActive");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("UserId", "GroupId", "IsActive");
+                    b.HasIndex("UserGroupId");
 
                     b.ToTable("UserGroupMemberShips");
                 });
@@ -5086,17 +5112,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Menu", b =>
-                {
-                    b.HasOne("Fsel.Identity.Domain.Entities.PermissionGroup", "PermissionGroup")
-                        .WithOne("Menu")
-                        .HasForeignKey("Fsel.Identity.Domain.Entities.Menu", "Id")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("PermissionGroup");
-                });
-
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Parent", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.Human", "Human")
@@ -5132,6 +5147,16 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("PermissionGroup");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.PermissionGroup", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.Menu", "Menu")
+                        .WithOne("PermissionGroup")
+                        .HasForeignKey("Fsel.Identity.Domain.Entities.PermissionGroup", "MenuId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Menu");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Student", b =>
@@ -5212,21 +5237,9 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserGroupMemberShip", b =>
                 {
-                    b.HasOne("Fsel.Identity.Domain.Entities.UserGroup", "Group")
+                    b.HasOne("Fsel.Identity.Domain.Entities.UserGroup", null)
                         .WithMany("Members")
-                        .HasForeignKey("GroupId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
-                        .WithMany("UserGroups")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Group");
-
-                    b.Navigation("User");
+                        .HasForeignKey("UserGroupId");
                 });
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserOtpCode", b =>
@@ -5358,6 +5371,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("Teacher");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.Menu", b =>
+                {
+                    b.Navigation("PermissionGroup");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Parent", b =>
                 {
                     b.Navigation("ParentStudents");
@@ -5370,8 +5388,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.PermissionGroup", b =>
                 {
-                    b.Navigation("Menu");
-
                     b.Navigation("Permissions");
 
                     b.Navigation("RoleClaims");
@@ -5407,8 +5423,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("UserCourseSettings");
 
                     b.Navigation("UserDeletions");
-
-                    b.Navigation("UserGroups");
 
                     b.Navigation("UserOtpCodes");
 

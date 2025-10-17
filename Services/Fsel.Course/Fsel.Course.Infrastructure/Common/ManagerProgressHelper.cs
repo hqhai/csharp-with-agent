@@ -4,7 +4,6 @@ namespace Fsel.Course.Infrastructure.Common
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Linq;
     using System.Text;
     using System.Threading;
@@ -286,6 +285,7 @@ namespace Fsel.Course.Infrastructure.Common
                     CourseId = courseResult.CourseId,
                 };
                 var courseCompleteTotalModule = courseCompleteTotalModules.FirstOrDefault(x => x.CourseId == courseResult.CourseId);
+                courseCompleteModule.CourseName = courseCompleteTotalModule?.CourseName;
                 courseCompleteModule.TotalComplete = courseCompleteTotalModule?.Count ?? default;
                 courseCompleteModule.UnitDisplayOrder = courseCompleteModule.UnitDisplayOrder != 0 ? courseCompleteModule.UnitDisplayOrder : ModuleDefault;
                 courseCompleteModule.LessonDisplayOrder = courseCompleteModule.LessonDisplayOrder != 0 ? courseCompleteModule.LessonDisplayOrder : ModuleDefault;
@@ -301,6 +301,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return new List<CourseCompleteModel>();
             }
             #region
+            //var courseCompletes = new List<CourseCompleteModel>();
             //using (var scope = _serviceProvider.CreateScope())
             //{
             //    var courseResultRepository = scope.ServiceProvider.GetRequiredService<ICourseResultRepository>();
@@ -394,8 +395,8 @@ namespace Fsel.Course.Infrastructure.Common
             //                                               .Select(x => x.Lesson!.UnitLessons.Where(n => n.UnitId == x.UnitId).Select(n => n.DisplayOrder).FirstOrDefault()).FirstOrDefault()
             //                       }).ToListAsync();
             //    courseCompletes = baseQuery != null && baseQuery.SortBy.Any() ? query.ApplySortAndPaging(baseQuery).ToList() : query.ApplySort(baseQuery).ToList();
-            //};
-            //     return courseCompletes;
+            //}
+            //return courseCompletes;
             #endregion
             var studentIds = courseResults.Select(x => x.StudentId).ToList();
             StringBuilder sb = new StringBuilder();
@@ -576,6 +577,7 @@ namespace Fsel.Course.Infrastructure.Common
                                                                       .Select(x => new
                                                                       {
                                                                           CourseId = x.Key,
+                                                                          CourseName = x.Select(x => x.Course!.Name).FirstOrDefault(),
                                                                           CountLesson = x.Where(x => x.UnitId.HasValue).Select(x => x.Unit).SelectMany(x => x.UnitLessons).Count(),
                                                                           CountSkillMockTest = x.Where(x => x.UnitId.HasValue).Select(x => x.Unit).SelectMany(x => x.UnitSkillMockTests).Count(),
                                                                           CountMockTest = x.Where(x => x.MockTestId.HasValue).Count(),
@@ -587,6 +589,7 @@ namespace Fsel.Course.Infrastructure.Common
                                       (courseResult, course) => course).Select(x => new OverallModuleLearnModel
                                       {
                                           CourseId = x.CourseId,
+                                          CourseName = x.CourseName,
                                           Count = x.CountLesson * NumberModuleLesson + x.CountMockTest + x.CountSkillMockTest + x.CountFinalTest
                                       }).ToList();
         }
