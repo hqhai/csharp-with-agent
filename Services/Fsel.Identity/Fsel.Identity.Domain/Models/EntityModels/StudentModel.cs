@@ -20,10 +20,13 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Membership { get; set; }
         public Guid? ClassId { get; set; }
         public string? CodeClass { get; set; }
-        public string? ParentEmail { get; set; }
         public string? EmailParent { get; set; }
+        public string? ParentFullName { get; set; }
+        public string? ParentEmail { get; set; }
         public string? ParentPhoneNumber { get; set; }
         public long NumberOfToken { get; set; }
+        public string? Province { get; set; }
+        public string? District { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }

@@ -74,6 +74,7 @@ namespace Fsel.System.Infrastructure.ValueSettings
         public string? OrderApiUrl { get; set; }
         public string? DictionaryApiUrl { get; set; }
         public string? StorageApiUrl { get; set; }
+        public string? FFmpegApiUrl { get; set; }
     }
 
     public class Otp

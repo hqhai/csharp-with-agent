@@ -9,11 +9,11 @@ namespace Fsel.Identity.Domain.Entities
     {
         // Thiết lập mối quan hệ với User
         public Guid UserId { get; set; }
-        public virtual User? User { get; set; }
+        //public virtual User? User { get; set; }
 
         // Thiết lập mối quan hệ với UserGroup
         public Guid GroupId { get; set; }
-        public virtual UserGroup? Group { get; set; }
+        //public virtual UserGroup? Group { get; set; }
 
         // Thông tin về thành viên trong nhóm
         public bool IsActive { get; set; } = true;
