@@ -3,9 +3,11 @@
 namespace Fsel.ExamPractice.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd;
     using Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery;
@@ -15,7 +17,6 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
@@ -58,6 +59,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
         /// Search ExamPractice
         /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<IList<ExamPracticeGroupTypeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchExamPracticeQuery query)

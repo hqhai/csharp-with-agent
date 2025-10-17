@@ -21,9 +21,9 @@ namespace Fsel.ExamPractice.Infrastructure.Configs
                   v => v.EnumParse<EnumMockTestAIType>());
 
             builder.HasOne(a => a.ExamPracticeAISetting)
-                .WithMany(b => b.ExamPracticeAICriteriaSettings)
-                .HasForeignKey(b => b.ExamPracticeAISettingId)
-                .OnDelete(DeleteBehavior.NoAction);
+                   .WithMany(b => b.ExamPracticeAICriteriaSettings)
+                   .HasForeignKey(b => b.ExamPracticeAISettingId)
+                   .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

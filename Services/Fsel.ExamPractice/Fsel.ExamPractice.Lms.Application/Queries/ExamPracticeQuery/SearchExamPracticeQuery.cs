@@ -160,8 +160,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
             return new ExamPracticeGroupModel
             {
                 Id = examPractice.Id,
-                CreatedDate = examPractice.CreatedDate,
-                UpdatedDate = examPractice.UpdatedDate,
                 Code = examPractice.Code,
                 Type = examPractice.Type,
                 ExamPracticeStatus = examPractice.Status,
@@ -176,8 +174,8 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery
                 CorrectCount = examPracticeResult?.CorrectCount ?? default,
                 CorrectTotal = examPracticeResult?.CorrectTotal ?? default,
                 PracticeMode = examPracticeResult?.PracticeMode,
-                TotalSections = examPracticeSections?.Count ?? default,
-                TotalQuestions = examPracticeSections?.Select(s => s.Config?.TotalQuestion).Sum() ?? default,
+                TotalSection = examPracticeSections?.Count ?? default,
+                TotalQuestion = examPracticeSections?.Select(s => s.Config?.TotalQuestion).Sum() ?? default,
                 TotalRetry = x.ExamPracticeRetry?.RetryCount ?? TotalRetry,
                 Score = examPracticeResult?.SkillScores?.Any() == true
                                     ? NumberHelper.RoundNumberDouble(examPracticeResult.SkillScores.Average(s => s.Scores))
