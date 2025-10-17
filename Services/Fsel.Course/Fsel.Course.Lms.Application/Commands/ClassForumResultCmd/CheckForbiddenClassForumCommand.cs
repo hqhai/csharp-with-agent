@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 classForumDetailResult.IsForbiddenWork = true;
                 await SaveClassForumDetailResult(classForumDetailResult, cancellationToken);
                 var paramsMessage = new List<object> { classForumDetailResult.ClassForumResult?.ClassForum?.Lesson?.Name ?? string.Empty };
-                //await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
+                await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
                 return methodResult;
             }
             else
@@ -104,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                     if (checkWordContent.Result)
                     {
                         // thông báo lỗi language
-                        //await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.LanguageNotEnglish, EnumNotificationType.LinkPage, null, cancellationToken);
+                        await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.LanguageNotEnglish, EnumNotificationType.LinkPage, null, cancellationToken);
                         methodResult.Result = true;
                     }
                 }
@@ -113,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 if (classForumDetailResult.IsForbiddenImage || classForumDetailResult.IsForbiddenWork)
                 {
                     var paramsMessage = new List<object> { classForumDetailResult.ClassForumResult?.ClassForum?.Lesson?.Name ?? string.Empty };
-                    //await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
+                    await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.ForbiddenClassForum, EnumNotificationType.LinkPage, paramsMessage, cancellationToken);
                 }
             }
 
@@ -129,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             if (retryResult == null)
             {
                 // gửi thông báo null
-                //await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.NullForbiddenClassForum, EnumNotificationType.LinkPage, null, cancellationToken);
+                await SendNotification(classForumDetailResult.Id, classForumDetailResult.ClassForumResult?.CreatedUserId ?? Guid.Empty, EnumNotificationContent.NullForbiddenClassForum, EnumNotificationType.LinkPage, null, cancellationToken);
                 return methodResult;
             }
 

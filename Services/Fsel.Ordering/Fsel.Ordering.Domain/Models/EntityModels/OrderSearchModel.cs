@@ -3,6 +3,7 @@
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Ordering.Domain.Models.EntityModels.IntegrationModel;
     using Fsel.Shared.Enums;
 
     public class OrderSearchModel : BaseModel
@@ -25,5 +26,10 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public decimal DiscountPrice { get; set; }
         public decimal TotalPrice { get; set; }
         public string? StatusCourseResult { get; set; }
+        public string? Address { get; set; }
+        public string? PhoneNumber { get; set; }
+        public double Price { get; set; }
+        public string? ReferralCode { get; set; }
+        public VoucherIntegrationModel? Voucher { get; set; }
     }
 }

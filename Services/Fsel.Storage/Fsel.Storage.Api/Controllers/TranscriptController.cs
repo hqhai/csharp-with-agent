@@ -135,6 +135,18 @@ namespace Fsel.Storage.Api.Controllers
         }
 
         /// <summary>
+        /// speech to text
+        /// </summary>
+        [HttpPost("convert-speech-to-text")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ToolConvertSpeechToText([FromBody] SpeechToTextCommand command)
+        {
+            var methodResult = await _mediator.Send(command);
+            return methodResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Speech To Text Set Language
         /// </summary>
         [HttpPost("speech-to-text-language")]

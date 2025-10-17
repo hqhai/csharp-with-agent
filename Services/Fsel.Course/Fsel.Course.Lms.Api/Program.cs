@@ -9,7 +9,9 @@ using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
 using Fsel.Course.Lms.Application.InternalEvents;
 using Fsel.Course.Lms.Application.Queues.Consumers;
+using Fsel.Course.Lms.Application.Queues.Consumers.ExportFiles;
 using Fsel.Course.Lms.Application.Queues.Publishers;
+using Fsel.Course.Lms.Application.Queues.Publishers.ExportFiles;
 using Fsel.Course.Lms.Application.Services.AiService;
 using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
@@ -117,6 +119,7 @@ builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGro
 builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository>();
 builder.Services.AddScoped<IWeeklyReportRepository, WeeklyReportRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
+builder.Services.AddScoped<IClassforumDetailResultHistoryRepository, ClassforumDetailResultHistoryRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
@@ -176,6 +179,7 @@ builder.Services.AddScoped<SavePlacementTestAnswersPublisher>();
 builder.Services.AddScoped<ErrorExplainPublisher>();
 builder.Services.AddScoped<ExportFileExcelSchoolLearningProcessPublisher>();
 builder.Services.AddScoped<SpeechToTextPendingAiPublisher>();
+builder.Services.AddScoped<ExportFileUserInformationSupportSalePublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
@@ -220,6 +224,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
     { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.ExportExcelUserInformationSupportSale, typeof(ExportFileUserInformationSupportSaleConsumer) },
 });
 
 var app = builder.Build();

@@ -16,5 +16,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public int TotalToken { get; set; }
         public bool IsShowToken { get; set; }
         public EnumResultStatus? StatusVideoResult { get; set; }
+        public EnumBadge? Badge { get; set; }
+        public string? BadgeDescription { get; set; }
     }
 }

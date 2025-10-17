@@ -33,6 +33,7 @@ namespace Fsel.Ordering.Api.Controllers
         [ServerCache(CacheSettings.TimeCache.OneMinutes)]
         [ProducesResponseType(typeof(MethodResult<List<PackageModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetPackages()
         {
             MethodResult<List<PackageModel>> commandResult = await _mediator.Send(new GetPackagesQuery()).ConfigureAwait(false);
@@ -45,6 +46,7 @@ namespace Fsel.Ordering.Api.Controllers
         [HttpGet("get-by-status")]
         [ProducesResponseType(typeof(MethodResult<List<PackageModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(PriceManagement.ViewPackage)]
         public async Task<IActionResult> GetPackagesByStatus([FromQuery] GetPackageByStatusQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
