@@ -17,7 +17,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
     [Route(Settings.APIDefaultRoute + "/question")]
-    [Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class QuestionController : ControllerBase
     {
         private readonly IMediator _mediator;

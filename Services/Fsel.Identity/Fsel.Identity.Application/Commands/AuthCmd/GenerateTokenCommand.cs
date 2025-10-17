@@ -102,6 +102,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 new Claim(nameof(TokenModel.EventCode), eventCode),
             };
 
+            if (user.UserSchools != null && user.UserSchools.Any())
+            {
+                authClaims.Add(new Claim("SchoolId", user.UserSchools.First().SchoolId.ToString()));
+            }
+
             foreach (var userRole in userRoles)
             {
                 authClaims.Add(new Claim(JwtClaimNames.Role, userRole));
@@ -153,7 +158,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 EventCode = await _competitionEventsRepository.GetEventCodeAsync(schoolId),
             };
 
-            if (userRoles.Contains(EnumRole.Student.ToString()))
+            if (userRoles.Contains(EnumRole.Student.ToString()) || userRoles.Contains(EnumRole.StudentCampus.ToString()))
             {
                 var student = user.Human?.Student;
                 tokenLogin.IsOrder = false;
@@ -175,9 +180,10 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     tokenLogin.IsSurvey = isSurvey?.Content?.Result;
                 }
             }
-            if (userRoles.Contains(EnumRole.AdminSchool.ToString()))
+
+            if (userRoles.Any(p => p == EnumRole.AdminSchool.ToString() || p == EnumRole.AdminCampus.ToString() || p == EnumRole.TeacherCampus.ToString()))
             {
-                tokenLogin.SchoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                tokenLogin.SchoolId = user.UserSchools?.FirstOrDefault()?.SchoolId;
             }
 
             methodResult.Result = tokenLogin;
