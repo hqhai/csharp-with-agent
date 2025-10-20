@@ -12,7 +12,9 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseType CourseType { get; set; }
         public string? SchoolName { get; set; }
+        public Guid? SchoolId { get; set; }
         public string? ClassName { get; set; }
+        public Guid? ClassId { get; set; }
         public IList<CourseGoalConfigModel> CourseGoalConfigs { get; set; } = new List<CourseGoalConfigModel>();
     }
 }
