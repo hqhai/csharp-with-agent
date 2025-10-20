@@ -86,8 +86,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 TurnOnTouchpoint = _appSetting.TouchpointConfig?.TurnOnTouchpoint ?? false,
                 UserStatus = student.Human?.User?.Status
             };
+            var role = _authContext.Roles?.FirstOrDefault();
 
-            await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
+            if (!string.IsNullOrEmpty(role) && role == EnumRole.StudentCampus.ToString())
+            {
+                settingStudentModel.IsLockPT = true;
+                settingStudentModel.IsPlacementTest = true;
+            }
+            else
+            {
+                await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
+            }
+
             var @eventResults = await _userService.GetEventByUserId(request.UserId ?? _authContext.CurrentUserId);
 
             var requestCheckSurvey = new CheckSurveyBySurveyFormTypeModel()

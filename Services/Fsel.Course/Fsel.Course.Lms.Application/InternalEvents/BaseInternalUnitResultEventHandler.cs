@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -376,6 +377,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var percentUnit = (int)unitResults.Average(p => p.Percent);
 
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = userId,
+                Template = (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation) ? EnumSenderTemplate.SendMailMidCourseAcademic : EnumSenderTemplate.SendMailMidCourseIELT
+            });
+
+            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+
             var model = new SendStudentCompleteMidCourseModel()
             {
                 CourseLevel = course.CourseLevel.ToString(),
@@ -398,7 +407,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 IndexMiddleUnit = course.CourseType == EnumCourseType.Academic || course.CourseLevel != EnumCourseLevel.EFA1 ? "6" : "5",
                 TotalUnit = course.CourseType == EnumCourseType.Academic || course.CourseLevel != EnumCourseLevel.EFA1 ? "12" : "10",
                 HideSkillTest = course.CourseType == EnumCourseType.EnglishFoundation ? SendMailSetting.DisplayNone : default,
-                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkFullMockTestReport!, course.Id, mockTestId, userId)
+                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkFullMockTestReport!, course.Id, mockTestId, userId),
+                AccessLink = accessLink
             };
 
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
@@ -685,6 +695,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 (parameter.ColorOther, parameter.CompareOther) = SendMailHelper.Compare(currentOther, previousOther);
             }
+
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = userId,
+                Template = parameter.SenderTemplate
+            });
+
+            parameter.AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+
             return parameter;
         }
 

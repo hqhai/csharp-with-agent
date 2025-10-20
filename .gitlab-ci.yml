@@ -2415,6 +2415,28 @@ build-staging-exam-practice:
     refs:
     - staging
 
+build-pre-prod-exam-practice:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
+    DOCKERFILE: "./Environments/Production/ExamPractice.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.ExamPractice/**/*
+    - Services/Shared/**/*
+    refs:
+    - pre-production
+
 build-1m-exam-practice:
   stage: build-image
   tags:
@@ -2548,6 +2570,28 @@ build-staging-exam-practice-lms:
     - Services/Shared/**/*
     refs:
     - staging
+
+build-pre-prod-exam-practice-lms:
+  stage: build-image
+  tags:
+  - docker-runner
+  retry:
+    max: 2
+  script:
+    - apk add --update coreutils && rm -rf /var/cache/apk/*
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
+    - docker push $IMAGE_NAME:$TAG
+  variables:
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice-lms
+    DOCKERFILE: "./Environments/Production/ExamPracticeLms.Production.Dockerfile"
+  extends: ".build-image-gitlab-registry"
+  only:
+    changes:
+    - Services/Fsel.ExamPractice/**/*
+    - Services/Shared/**/*
+    refs:
+    - pre-production
 
 build-1m-exam-practice-lms:
   stage: build-image

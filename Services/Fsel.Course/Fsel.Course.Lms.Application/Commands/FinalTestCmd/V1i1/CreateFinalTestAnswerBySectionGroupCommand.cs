@@ -152,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.StudentId == student.Id && x.SectionGroupId == request.SectionGroupId && x.FinalTestResultId == finalTestResult.Id).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.StudentId == student.Id && x.SectionGroupId == request.SectionGroupId && x.FinalTestResultId == finalTestResult.Id && x.CreatedDate >= finalTestResult.CreatedDate).FirstOrDefaultAsync(cancellationToken);
             if (sectionGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));
@@ -213,7 +213,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         private async Task UpdateFinalTestResultAsync(FinalTestResult finalTestResult, StudentModel student, EnumCourseType courseType, CancellationToken cancellationToken)
         {
             var numberOfDone = 3;
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.FinalTestResultId == finalTestResult.Id).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.FinalTestResultId == finalTestResult.Id && s.CreatedDate >= finalTestResult.CreatedDate).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 finalTestResult = await SetFinalTestResultAsync(sectionGroupResults, finalTestResult, courseType);
@@ -348,6 +348,10 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             var createFinalTestAnswers = new List<FinalTestAnswer>();
             if (questions != null && questions.Any())
             {
+                var finalTestAnswers = await _finalTestAnswerRepository.Queryable
+                                                                     .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                     .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                     .ToListAsync();
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -359,7 +363,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                     }
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
                     var sectionQuestionId = questionItem.SectionQuestions.FirstOrDefault()?.Id ?? default;
-                    var finalTestAnswer = await _finalTestAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.SectionGroupResultId == sectionGroupResult.Id && x.SectionQuestionId == sectionQuestionId);
+                    var finalTestAnswer = finalTestAnswers.FirstOrDefault(x => x.SectionQuestionId == sectionQuestionId && x.SectionGroupResultId == sectionGroupResult.Id);
                     if (finalTestAnswer == null)
                     {
                         finalTestAnswer = new FinalTestAnswer

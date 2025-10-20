@@ -26,6 +26,7 @@ using Fsel.Course.Lms.Application.Services.SystemService;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
+using Microsoft.CognitiveServices.Speech;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -113,6 +114,7 @@ builder.Services.AddScoped<IClassForumDetailResultRepository, ClassForumDetailRe
 builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
+builder.Services.AddScoped<IPronuciationAssessmentService, PronuciationAssessmentService>();
 builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
 builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
 builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGroupResultRepository>();
@@ -120,6 +122,15 @@ builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository
 builder.Services.AddScoped<IWeeklyReportRepository, WeeklyReportRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
 builder.Services.AddScoped<IClassforumDetailResultHistoryRepository, ClassforumDetailResultHistoryRepository>();
+builder.Services.AddScoped<ITopicRepository, TopicRepository>();
+builder.Services.AddScoped<ICurriculumStudentRepository, CurriculumStudentRepository>();
+builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
+builder.Services.AddScoped<IHomeWorkConfigRepository, HomeWorkConfigRepository>();
+builder.Services.AddScoped<IHomeWorkExtraPracticeAnswerRepository, HomeWorkExtraPracticeAnswerRepository>();
+builder.Services.AddScoped<IHomeWorkExtraPracticeResultRepository, HomeWorkExtraPracticeResultRepository>();
+builder.Services.AddScoped<IHomeWorkRetryRepository, HomeWorkRetryRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IVideoSubFilePathRepository, VideoSubFilePathRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

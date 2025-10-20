@@ -59,7 +59,7 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         [HttpPost("receive-token")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<StudentFocusTimeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReceiveToken()

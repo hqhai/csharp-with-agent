@@ -155,6 +155,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             var isTryAgain = homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
             var createHomeWorkAnswers = new List<HomeWorkAnswer>();
             var updateHomeWorkAnswers = new List<HomeWorkAnswer>();
+
+            var homeWorkAnswers = await _homeWorkAnswerRepository.Queryable.Where(x => x.HomeWorkResultId == homeWorkResult.Id)
+                                                                 .Where(x => x.CreatedDate >= homeWorkResult.CreatedDate)
+                                                                 .ToListAsync(cancellationToken);
+
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -164,7 +169,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkQuestion));
                     return methodResult;
                 }
-                var homeWorkAnswer = await _homeWorkAnswerRepository.Queryable.FirstOrDefaultAsync(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == homeWorkResult.Id, cancellationToken);
+                var homeWorkAnswer = homeWorkAnswers.FirstOrDefault(x => x.HomeWorkQuestionId == homeWorkQuestion.Id && x.HomeWorkResultId == homeWorkResult.Id);
                 var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, homeWorkAnswer?.Answer, isTryAgain, request.IsSubmit);
                 if (!questionResult.IsOK)
                 {
@@ -447,7 +452,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
         public async Task<long> UpdateHomeWorkAnswers(HomeWorkResult? homeWorkResult, bool isDone = false)
         {
             ArgumentNullException.ThrowIfNull(homeWorkResult);
-            var homeWorkAnswers = await _homeWorkAnswerRepository.Queryable.Include(x => x.HomeWorkQuestion).ThenInclude(x => x!.Question).Where(x => x.HomeWorkResultId == homeWorkResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
+            var homeWorkAnswers = await _homeWorkAnswerRepository.Queryable.Include(x => x.HomeWorkQuestion).ThenInclude(x => x!.Question)
+                                                                 .Where(x => x.CreatedDate >= homeWorkResult.CreatedDate)
+                                                                 .Where(x => x.HomeWorkResultId == homeWorkResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
             if (homeWorkAnswers != null && homeWorkAnswers.Any())
             {
                 homeWorkAnswers.ForEach(x =>

@@ -29,6 +29,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -169,7 +170,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroup));
                 return methodResult;
             }
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == placementTestResult.Id).FirstOrDefaultAsync(cancellationToken);
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == request.SectionGroupId && x.PlacementTestResultId == placementTestResult.Id && x.CreatedDate >= placementTestResult.CreatedDate).FirstOrDefaultAsync(cancellationToken);
             if (sectionGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResult));
@@ -266,7 +267,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             var updatePlacementTestAnswers = new List<PlacementTestAnswer>();
             if (questions != null && questions.Any())
             {
-                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.PlacementTestResultId == request.PlacementTestResultId).ToListAsync();
+                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                               .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                               .ToListAsync();
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -356,7 +359,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             if (student != null)
             {
                 var numberOfDone = 4;
-                var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
+                var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id && s.CreatedDate >= placementTestResult.CreatedDate).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
                 if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
                 {
                     int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
@@ -497,12 +500,19 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 coursesInfo += courseInfo;
             }
 
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = _authContext.CurrentUserId,
+                Template = EnumSenderTemplate.StudentCompletePT
+            });
+
             var param = new SendStudentPTTemplateModel
             {
                 FullName = student.Human?.FullName,
                 CurrentCourse = currentCourseHtml,
                 CourseInfos = coursesInfo,
-                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, token?.Content?.Result ?? string.Empty)
             };
 
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);

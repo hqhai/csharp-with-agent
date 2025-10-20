@@ -18,7 +18,7 @@ namespace Fsel.System.Api.Controllers.Student
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/quest-board")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class QuestBoardController : ControllerBase
     {
         private readonly IMediator _mediator;

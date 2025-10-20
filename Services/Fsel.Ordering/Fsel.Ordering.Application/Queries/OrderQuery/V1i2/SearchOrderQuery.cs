@@ -78,7 +78,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                 query = query.Where(p => p.Status != EnumOrderStatus.New || (p.Status == EnumOrderStatus.New && (p.PaymentMethod == EnumPaymentMethodStatus.Payoo || p.PaymentMethod == EnumPaymentMethodStatus.AppStore || p.PaymentMethod == EnumPaymentMethodStatus.CHPlay)));
             }
 
-            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString() || _authContext.Roles?.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
                 query = query.Where(p => p.UserId == _authContext.CurrentUserId);
             }
