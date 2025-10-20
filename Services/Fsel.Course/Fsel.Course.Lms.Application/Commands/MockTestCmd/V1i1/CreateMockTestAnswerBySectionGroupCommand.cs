@@ -58,6 +58,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         private readonly SubmitSpeakingAIPublisher _submitSpeakingAIPublisher;
         private readonly ILogger<CreateMockTestAnswerBySectionGroupCommand> _logger;
         private readonly DisconnectSocketCalculateTimePublisher _disconnectSocketCalculateTimePublisher;
+        private readonly SaveUserSurveyAssignmentPublisher _saveUserSurveyAssignmentPublisher;
+        private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
 
         public CreateMockTestAnswerBySectionGroupCommandHandler(IQuestionRepository questionRepository,
             AuthContext authContext,
@@ -77,7 +79,9 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             ISpeakingAIService speakingAIService,
             ISpeakingEvaluationAIService evaluationAIService,
             SubmitSpeakingAIPublisher submitSpeakingAIPublisher,
-            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher)
+            DisconnectSocketCalculateTimePublisher disconnectSocketCalculateTimePublisher,
+            SaveUserSurveyAssignmentPublisher saveUserSurveyAssignmentPublisher,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository)
         {
             _questionRepository = questionRepository;
             _authContext = authContext;
@@ -98,6 +102,8 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             _evaluationAIService = evaluationAIService;
             _submitSpeakingAIPublisher = submitSpeakingAIPublisher;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
+            _saveUserSurveyAssignmentPublisher = saveUserSurveyAssignmentPublisher;
+            _courseUnitMockTestRepository = courseUnitMockTestRepository;
         }
 
         public async Task<MethodResult<SectionGroupResultModel>> Handle(CreateMockTestAnswerBySectionGroupCommand request, CancellationToken cancellationToken)
@@ -299,9 +305,26 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 });
                 if (mockTestResult.Status == EnumResultStatus.Done)
                 {
+                    var courseUnitMockTest = await _courseUnitMockTestRepository.Queryable.Include(p => p.Course).FirstOrDefaultAsync(p => p.CourseId == mockTestResult.CourseId && p.MockTestId == mockTestResult.MockTestId, cancellationToken);
+                    if (courseUnitMockTest != null)
+                    {
+                        await SaveSurvey(courseUnitMockTest, cancellationToken);
+                    }
+
                     await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
+        }
+
+        private async Task SaveSurvey(CourseUnitMockTest courseUnitMockTest, CancellationToken cancellationToken)
+        {
+            await _saveUserSurveyAssignmentPublisher.Publish(new SaveUserSurveyAssignmentCommandModel()
+            {
+                CourseLevel = courseUnitMockTest.Course!.CourseLevel,
+                CourseType = courseUnitMockTest.Course!.CourseType,
+                ProgressRequirement = courseUnitMockTest.Number == 1 ? EnumProgressRequirement.DoneFullMockTestOne : EnumProgressRequirement.DoneFullMockTestTwo,
+                IsSurveyQuestBoard = false
+            }, cancellationToken);
         }
 
         private static MockTestResult GetMockTestResult(IList<SectionGroupResult>? sectionGroupResults, MockTestResult mockTestResult)

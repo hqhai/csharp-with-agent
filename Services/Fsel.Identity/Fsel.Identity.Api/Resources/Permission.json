@@ -853,5 +853,50 @@
     "status": true,
     "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
     "createdDate": "2025-09-18"
+  },
+  {
+    "id": "63b8f5af-7432-4ad2-9499-95eb9368612d",
+    "claimValue": "SurveyManagement.View",
+    "name": "Xem khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "22751359-1559-4b69-962b-cb401a4abc36",
+    "claimValue": "SurveyManagement.Update",
+    "name": "Cập nhật khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "3ac8acfd-aa22-418e-9937-120196778127",
+    "claimValue": "SurveyManagement.Add",
+    "name": "Thêm khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "21243a48-7cf4-40bd-8f65-0209e97ebd9e",
+    "claimValue": "SurveyManagement.Delete",
+    "name": "Xóa khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "af2ea7ab-77dc-487c-bda2-082baa34d4e8",
+    "claimValue": "SurveyManagement.Export",
+    "name": "Xuất dữ liệu khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
   }
 ]

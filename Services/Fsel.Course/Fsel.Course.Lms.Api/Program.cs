@@ -140,6 +140,7 @@ builder.Services.AddScoped<SetTimeRetryClassForumPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<CreateLuckyTicketPublisher>();
 builder.Services.AddScoped<AddFeatureMissionPublisher>();
+builder.Services.AddScoped<SaveUserSurveyAssignmentPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();

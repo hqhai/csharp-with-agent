@@ -39,12 +39,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ILogger<BaseInternalUnitResultEventHandler> _logger;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly SaveUserSurveyAssignmentPublisher _saveUserSurveyAssignmentPublisher;
 
-        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILogger<BaseInternalUnitResultEventHandler> logger, NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
+        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILogger<BaseInternalUnitResultEventHandler> logger, NotificationMessagePublisher notificationMessagePublisher, SaveUserSurveyAssignmentPublisher saveUserSurveyAssignmentPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
         {
             _questBoardPublisher = questBoardPublisher;
             _lessonResultRepository = lessonResultRepository;
             _logger = logger;
+            _saveUserSurveyAssignmentPublisher = saveUserSurveyAssignmentPublisher;
         }
 
         public async Task UpdateUnitResultAsync(IList<LessonResult>? lessonResults, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken, bool isUnitUpdate = true)
@@ -87,6 +89,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 ReceiverId = unitResult.CreatedUserId,
                             }).ConfigureAwait(false);
                         }
+                        var progressRequirement = ProgressRequirement(course, unitResult);
+                        if (progressRequirement != null)
+                        {
+                            await _saveUserSurveyAssignmentPublisher.Publish(new SaveUserSurveyAssignmentCommandModel()
+                            {
+                                CourseLevel = course.CourseLevel,
+                                CourseType = course.CourseType,
+                                ProgressRequirement = progressRequirement.Value,
+                                IsSurveyQuestBoard = false
+                            }, cancellationToken);
+                        }
                     }
                     if (isUnitUpdate)
                     {
@@ -126,6 +139,48 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     }
                 }
             }
+        }
+
+        private EnumProgressRequirement? ProgressRequirement(Course course, UnitResult unitResult)
+        {
+            var index = course.CourseUnitMockTests.FirstOrDefault(p => p.UnitId == unitResult.UnitId)?.DisplayOrder;
+
+            if (index == null)
+                return null;
+
+            var academicMap = new Dictionary<int, EnumProgressRequirement>
+            {
+                {1, EnumProgressRequirement.DoneUnit1},
+                {2, EnumProgressRequirement.DoneUnit2},
+                {3, EnumProgressRequirement.DoneUnit3},
+                {4, EnumProgressRequirement.DoneUnit4},
+                {5, EnumProgressRequirement.DoneUnit5},
+                {6, EnumProgressRequirement.DoneUnit6},
+                {7, EnumProgressRequirement.DoneUnit7},
+                {8, EnumProgressRequirement.DoneUnit8},
+                {9, EnumProgressRequirement.DoneUnit9},
+                {10, EnumProgressRequirement.DoneUnit10},
+                {11, EnumProgressRequirement.DoneUnit11},
+                {12, EnumProgressRequirement.DoneUnit12},
+            };
+
+            var otherMap = new Dictionary<int, EnumProgressRequirement>
+            {
+                {1, EnumProgressRequirement.DoneUnit1},
+                {2, EnumProgressRequirement.DoneUnit2},
+                {3, EnumProgressRequirement.DoneUnit3},
+                {4, EnumProgressRequirement.DoneUnit4},
+                {6, EnumProgressRequirement.DoneUnit5},
+                {7, EnumProgressRequirement.DoneUnit6},
+                {8, EnumProgressRequirement.DoneUnit7},
+                {9, EnumProgressRequirement.DoneUnit8},
+            };
+
+            var map = course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation
+                ? academicMap
+                : otherMap;
+
+            return map.TryGetValue(index.Value, out var requirement) ? requirement : null;
         }
 
         private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)

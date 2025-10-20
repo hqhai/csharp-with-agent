@@ -247,5 +247,14 @@
     "status": true,
     "menuId": "d7c5e83c-5ec4-479e-b0dc-4dd3784e36e4",
     "createdDate": "2025-09-18"
+  },
+  {
+    "id": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "claimType": "SurveyManagement",
+    "name": "Quản lý khảo sát",
+    "description": null,
+    "status": true,
+    "menuId": "49dece94-b2de-4271-88ef-72f3e2461a2f",
+    "createdDate": "2025-08-05"
   }
 ]

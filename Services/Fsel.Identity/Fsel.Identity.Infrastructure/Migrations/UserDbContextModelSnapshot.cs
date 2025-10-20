@@ -1152,6 +1152,18 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             Index = 35,
                             IsDeleted = false,
                             Name = "School Class Management"
+                        },
+                        new
+                        {
+                            Id = new Guid("49dece94-b2de-4271-88ef-72f3e2461a2f"),
+                            Category = "LMSAdmin",
+                            ConfigStr = "{\"id\":27,\"code_title\":\"Quản lý khảo sát\",\"link\":\"/config-servey\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
+                            CreatedDate = new DateTime(2025, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 33,
+                            IsDeleted = false,
+                            Name = "Survey management"
                         });
                 });
 
@@ -2503,6 +2515,66 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             Name = "Xóa học sinh khỏi lớp",
                             PermissionGroupId = new Guid("0b734124-0372-488c-8321-2129484f8adb"),
                             Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("63b8f5af-7432-4ad2-9499-95eb9368612d"),
+                            ClaimValue = "SurveyManagement.View",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xem khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("22751359-1559-4b69-962b-cb401a4abc36"),
+                            ClaimValue = "SurveyManagement.Update",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Cập nhật khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("3ac8acfd-aa22-418e-9937-120196778127"),
+                            ClaimValue = "SurveyManagement.Add",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Thêm khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("21243a48-7cf4-40bd-8f65-0209e97ebd9e"),
+                            ClaimValue = "SurveyManagement.Delete",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xóa khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("af2ea7ab-77dc-487c-bda2-082baa34d4e8"),
+                            ClaimValue = "SurveyManagement.Export",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xuất dữ liệu khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
                         });
                 });
 
@@ -2917,6 +2989,18 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             IsDeleted = false,
                             MenuId = new Guid("d7c5e83c-5ec4-479e-b0dc-4dd3784e36e4"),
                             Name = "Quản lý lớp Campus",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            ClaimType = "SurveyManagement",
+                            CreatedDate = new DateTime(2025, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            MenuId = new Guid("49dece94-b2de-4271-88ef-72f3e2461a2f"),
+                            Name = "Quản lý khảo sát",
                             Status = true
                         });
                 });
