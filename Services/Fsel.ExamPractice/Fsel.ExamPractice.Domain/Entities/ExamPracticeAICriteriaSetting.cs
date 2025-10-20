@@ -2,11 +2,11 @@
 
 namespace Fsel.ExamPractice.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
+    using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.Models.CommandModels.AiGradeSettings;
-    using Fsel.Shared.Enums;
-    using System.ComponentModel.DataAnnotations.Schema;
 
     public class ExamPracticeAICriteriaSetting : Entity
     {
@@ -24,8 +24,11 @@ namespace Fsel.ExamPractice.Domain.Entities
             set { PromptStr = ConvertHelper.Serialize(value); }
         }
 
-        public EnumMockTestAIType CriteriaName { get; set; }
+        public string? JsonSchema { get; set; }
+
+        public EnumExamPracticeAIType CriteriaName { get; set; }
         public Guid? ExamPracticeAISettingId { get; set; }
+
         public ExamPracticeAISetting? ExamPracticeAISetting { get; set; }
     }
 }

@@ -15,4 +15,13 @@
     <ProjectReference Include="..\Fsel.ExamPractice.Lms.Application\Fsel.ExamPractice.Lms.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\AIPrompt\Instruction\TranslateAiInstruction.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\AIPrompt\Role\TranslateAiRole.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

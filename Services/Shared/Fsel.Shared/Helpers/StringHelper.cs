@@ -367,6 +367,12 @@ namespace Fsel.Shared.Helpers
             return string.Format(objStr, param ?? Array.Empty<object>());
         }
 
+        public static string FormatStringWithParam(object data, dynamic? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param);
+        }
+
         public static bool ContainsSpecialChars(string input)
         {
             return Regex.IsMatch(input, @"^[\p{L}\s]+$");

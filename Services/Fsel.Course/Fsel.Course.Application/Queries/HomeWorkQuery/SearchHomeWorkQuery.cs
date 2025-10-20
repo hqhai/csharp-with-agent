@@ -39,13 +39,14 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var homeWorkQuery = _homeWorkRepository.Queryable.Where(p => !p.IsArchive)
+            var homeWorkQuery = _homeWorkRepository.Queryable.Where(p => !p.IsArchive && p.Type == request.Type)
                                     .Include(x => x.LessonHomeWorks.Where(n => !n.IsDeleted))
                                     .Select(x => new HomeWorkSearchModel
                                     {
                                         Id = x.Id,
                                         Code = x.Code,
                                         Name = x.Name,
+                                        Type = x.Type,
                                         CreatedFullName = x.CreatedFullName,
                                         CreatedDate = x.CreatedDate,
                                         IsActive = x.LessonHomeWorks.Where(n => !n.IsDeleted).Any(),

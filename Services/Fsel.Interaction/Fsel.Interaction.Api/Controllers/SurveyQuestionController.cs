@@ -3,18 +3,22 @@
 namespace Fsel.Interaction.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
+    using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
     using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/surveyQuestion")]
     [ApiController]
+    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class SurveyQuestionController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -63,12 +67,12 @@ namespace Fsel.Interaction.Api.Controllers
         /// <summary>
         /// Get list Survey Question by ids
         /// </summary>
-        [HttpGet("get-question-by-surveytype")]
-        [ProducesResponseType(typeof(MethodResult<IList<SurveyQuestionModel>>), (int)HttpStatusCode.OK)]
+        [HttpGet("get-questions-survey-pt")]
+        [ProducesResponseType(typeof(MethodResult<SurveyConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetSurveyQuestionBySurveyFormType([FromQuery] GetSurveyQuestionBySurveyFormType query)
+        public async Task<IActionResult> GetSurveyQuestionBySurveyFormType([FromQuery] GetSurveyPTQuery query)
         {
-            MethodResult<IList<SurveyQuestionModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

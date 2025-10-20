@@ -17,7 +17,7 @@ namespace Fsel.Ordering.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/marketplace-premium")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Student))]
+    [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class MarketPlacePremiumController : ControllerBase
     {
         private readonly IMediator _mediator;

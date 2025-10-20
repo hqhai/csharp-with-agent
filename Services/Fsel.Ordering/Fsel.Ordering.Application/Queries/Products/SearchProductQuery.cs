@@ -90,7 +90,7 @@ namespace Fsel.Ordering.Application.Queries.Products
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString() || _authContext.Roles?.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
                 var queryShowPriority = query.Where(p => p.ShowPriority).ToList();
                 var queryNotShowPriority = query.Where(p => !p.ShowPriority).ToList();
@@ -121,7 +121,7 @@ namespace Fsel.Ordering.Application.Queries.Products
 
             var lists = new List<ProductModel>();
 
-            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString())
+            if (_authContext.Roles?.FirstOrDefault() == EnumRole.Student.ToString() || _authContext.Roles?.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
                 lists = queryable
                     .ApplyPaging(request)

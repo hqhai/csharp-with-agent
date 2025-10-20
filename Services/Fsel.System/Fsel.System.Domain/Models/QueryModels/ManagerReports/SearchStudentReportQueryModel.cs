@@ -7,7 +7,6 @@ namespace Fsel.System.Domain.Models.QueryModels.ManagerReports
     public class SearchStudentReportQueryModel : SearchStudentSchoolQueryModel
     {
         public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
         public bool IsSearchReport { get; set; }
         public override bool? IsLearning { get; set; } = true;
     }

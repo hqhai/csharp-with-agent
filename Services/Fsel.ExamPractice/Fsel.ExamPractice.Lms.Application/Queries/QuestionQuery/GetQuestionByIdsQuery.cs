@@ -2,7 +2,9 @@
 
 namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
 {
+    using System.Linq.Dynamic.Core;
     using System.Text.Json.Serialization;
+    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.ExamPractice.Domain.Entities;
@@ -33,14 +35,17 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
         private readonly IQuestionRepository _questionRepository;
         private readonly IMapper _mapper;
         private readonly IExamPracticeResultRepository _examPracticeResultRepository;
+        private readonly IExamPracticeAnswerRepository _examPracticeAnswerRepository;
 
         public GetQuestionByIdQueryHandler(IQuestionRepository questionRepository,
             IMapper mapper,
-            IExamPracticeResultRepository examPracticeResultRepository)
+            IExamPracticeResultRepository examPracticeResultRepository,
+            IExamPracticeAnswerRepository examPracticeAnswerRepository)
         {
             _questionRepository = questionRepository;
             _mapper = mapper;
             _examPracticeResultRepository = examPracticeResultRepository;
+            _examPracticeAnswerRepository = examPracticeAnswerRepository;
         }
 
         public async Task<MethodResult<IList<QuestionModel>>> Handle(GetQuestionByIdsQuery request, CancellationToken cancellationToken)
@@ -64,36 +69,41 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
             {
                 return default;
             }
-            var questions = await _questionRepository.Queryable
-                                        .Include(x => x.ExamPracticeAnswers.Where(x => examPracticeResult != null && x.ExamPracticeResultId == examPracticeResult.Id))
+            var questions = await _questionRepository.Queryable.AsNoTracking()
                                         .WhereBulkContains(request.ListQuestionIds, x => x.Id)
-                                        .OrderBy(x => x.CreatedDate)
+                                        .OrderBy(x => x.DisplayOrder)
+                                        .ThenBy(x => x.CreatedDate)
                                         .ToListAsync();
             if (questions == null || !questions.Any())
             {
                 return default;
             }
-            return GetQuestionsAsync(questions, examPracticeResult);
+            return await GetQuestionsAsync(questions, examPracticeResult);
         }
 
-        private IList<QuestionModel> GetQuestionsAsync(IList<Question>? questions, ExamPracticeResult examPracticeResult)
+        private async Task<IList<QuestionModel>> GetQuestionsAsync(IList<Question>? questions, ExamPracticeResult examPracticeResult)
         {
             var listQuestion = new List<QuestionModel>();
             if (questions == null || !questions.Any())
             {
                 return new List<QuestionModel>();
             }
+            var questionIds = questions.Select(x => x.Id).ToList();
+
+            var examPracticeAnswers = await GetAnswersAsync(examPracticeResult.Id, questionIds);
+            var answerByQuestionId = BuildAnswerIndex(examPracticeAnswers);
+            var isShowAnswer = examPracticeResult.Status == EnumResultStatus.Done;
+
             return questions.Select(question =>
             {
-                bool isShowAnswer = examPracticeResult.Status == EnumResultStatus.Done;
-                var answer = question.ExamPracticeAnswers.FirstOrDefault();
-                var questionModel = _mapper.Map<QuestionModel>(question);
+                answerByQuestionId.TryGetValue(question.Id, out var examPracticeAnswer);
 
+                var questionModel = _mapper.Map<QuestionModel>(question);
                 questionModel.Config = QuestionTypeHelper.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !isShowAnswer).Item1;
-                questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer));
-                if (answer != null)
+                questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(examPracticeAnswer));
+                if (examPracticeAnswer != null)
                 {
-                    var answerDto = _mapper.Map<AnswerModel>(answer);
+                    var answerDto = _mapper.Map<AnswerModel>(examPracticeAnswer);
                     answerDto.Answer = AnswerTypeHelper.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, examPracticeResult.Status, isShowAnswer);
                     if (!isShowAnswer)
                     {
@@ -105,6 +115,27 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
                 }
                 return questionModel;
             }).ToList();
+        }
+
+        private async Task<List<ExamPracticeAnswer>> GetAnswersAsync(Guid examPracticeResultId, IList<Guid> questionIds)
+        {
+            // Nếu WhereBulkContains không hỗ trợ Guid? -> dùng Contains với .Value (đã filter HasValue)
+            return await _examPracticeAnswerRepository.Queryable
+                .AsNoTracking()
+                .Where(a => a.ExamPracticeResultId == examPracticeResultId && a.QuestionId.HasValue)
+                .WhereBulkContains(questionIds, a => a.QuestionId) // hoặc: .Where(a => questionIds.Contains(a.QuestionId!.Value))
+                .ToListAsync();
+        }
+
+        private static Dictionary<Guid, ExamPracticeAnswer?> BuildAnswerIndex(IEnumerable<ExamPracticeAnswer> answers)
+        {
+            // Nếu có CreatedDate/UpdatedDate: lấy bản mới nhất; nếu không, lấy First()
+            return answers
+                .GroupBy(a => a.QuestionId!.Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderByDescending(a => a.CreatedDate).FirstOrDefault() // nếu không có CreatedDate, đổi thành g.FirstOrDefault()
+                );
         }
 
         private static EnumCorrectStatus? GetCorrectStatus(BaseAnswer? answer)
