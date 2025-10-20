@@ -7,6 +7,7 @@ namespace Fsel.Course.Infrastructure.Maps
     using Domain.Entities;
     using Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.CommandModels.AiModelManager;
+    using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
 
     public class AiModelManagerProfile : Profile
     {

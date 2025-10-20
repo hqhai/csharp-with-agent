@@ -10,7 +10,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Course.Application.Commands.AiModelManagerCmd;
     using Fsel.Course.Application.Queries.AiModelManagerQuery;
     using Fsel.Course.Domain.Models.CommandModels.AiModelManager;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;

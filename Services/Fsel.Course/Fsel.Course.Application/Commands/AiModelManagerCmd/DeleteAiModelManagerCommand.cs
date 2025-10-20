@@ -80,7 +80,7 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
 
             if (isFeature)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAiModelManager.IsFeature), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumAiModelManagerErrorCode.IsFeature), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

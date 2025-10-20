@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Domain.Models.EntityModels
+namespace Fsel.Course.Domain.Models.EntityModels.AiManagerModels
 {
     using Core.Base.BaseModels;
 

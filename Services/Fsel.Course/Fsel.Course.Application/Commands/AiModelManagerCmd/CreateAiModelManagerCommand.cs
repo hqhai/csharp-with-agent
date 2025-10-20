@@ -10,7 +10,7 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.AiModelManager;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
     using MailKit.Net.Smtp;
     using MediatR;
     using Microsoft.AspNetCore.Http;

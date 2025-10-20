@@ -9,7 +9,7 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.AiModelManager;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
