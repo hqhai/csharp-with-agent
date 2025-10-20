@@ -43,21 +43,9 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Create a Ai Model Feature
+        /// Create a Ai Model Feature with sub
         /// </summary>
-        [HttpPost]
-        [ProducesResponseType(typeof(MethodResult<AiFeatureModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateAiModelFeatureCommand command)
-        {
-            MethodResult<AiFeatureModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Create a Ai Model Feature wwith sub
-        /// </summary>
-        [HttpPost("sub")]
+        [HttpPost()]
         [ProducesResponseType(typeof(MethodResult<AiFeatureModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateAiModelHasSubFeatureCommand command)
