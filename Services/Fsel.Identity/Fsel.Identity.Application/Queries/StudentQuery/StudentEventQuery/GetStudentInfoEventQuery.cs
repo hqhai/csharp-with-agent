@@ -24,6 +24,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
         private readonly UserManager<User> _userManager;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
+        private const string EventCode = "EVHoChiMinh";
 
         public GetStudentInfoEventQueryHandler(
             IHumanRepository humanRepository,
@@ -52,10 +53,13 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                 return methodResult;
             }
             var studentCompetitionEvent = await _studentCompetitionEventsRepository.Queryable.Include(x => x.CompetitionEvents)
-                                                                                   .Where(x => x.StudentId == student.Id)
+                                                                                   .Where(x => x.StudentId == student.Id).OrderByDescending(p => p.CreatedDate)
                                                                                    .FirstOrDefaultAsync(cancellationToken);
 
-            var isByPassEmailComfirm = studentCompetitionEvent?.CompetitionEvents?.EventContent?.IsByPassEmailComfirm ?? default;
+            var competitionEvent = studentCompetitionEvent?.CompetitionEvents;
+
+            var isByPassEmailConfirm = competitionEvent?.EventContent?.IsByPassEmailComfirm ?? default;
+
             var isChangePassword = await _userManager.CheckPasswordAsync(user, user.DefaultPassword ?? string.Empty);
             var studentInfoEvent = new StudentInfoEventModel
             {
@@ -71,7 +75,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                 EmailConfirmed = user.EmailConfirmed,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 IsChangePassword = !isChangePassword,
-                IsStudentVerifiedForEvent = isByPassEmailComfirm
+                IsStudentVerifiedForEvent = isByPassEmailConfirm,
+                IsNotShowInfoParent = competitionEvent != null && !string.IsNullOrEmpty(competitionEvent.EventCode) && competitionEvent.EventCode.Contains(EventCode, StringComparison.InvariantCultureIgnoreCase),
             };
 
             var schoolId = human.Student?.SchoolId ?? default;

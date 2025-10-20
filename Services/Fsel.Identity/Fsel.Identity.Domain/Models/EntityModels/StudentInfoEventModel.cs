@@ -18,6 +18,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public bool EmailConfirmed { get; set; }
         public bool IsStudentVerifiedForEvent { get; set; }
         public bool IsParent { get; set; }
+        public bool IsNotShowInfoParent { get; set; }
         public CompanionInfoEventModel? CompanionInfo { get; set; }
     }
 }
