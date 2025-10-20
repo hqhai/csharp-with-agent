@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -181,6 +182,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 }
                 toInsert.Add(new StudentGoalSummary
                 {
+                    ProgressStatus = EnumProgressStatus.Behind,
                     StartDate = weekStartUtc,
                     EndDate = weekEndUtc,
                     StudentGoalAggregateId = ag.Id,
@@ -275,14 +277,9 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     ? r
                     : Enumerable.Empty<LessonResultLite>();
 
-                // Cập nhật tiến độ tuần và tổng
                 ApplyWeeklyAndTotalProgress(nowVn, weekly, ag, results);
-
-                // Tổng hợp trạng thái (Tổng × Tuần)
-                if (weekly.ProgressStatus.HasValue)
-                {
-                    ag.CombinedProgress = CombineProgress(ag.TotalCompletedLessons, ag.TotalTargetLessons, weekly.ProgressStatus.Value);
-                }
+                ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(ag.TotalCompletedLessons, ag.TotalTargetLessons, weekly.ProgressStatus);
+                ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(ag.TotalCompletedLessons, ag.TotalTargetLessons);
             }
 
             // 6) Lưu
@@ -362,58 +359,20 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 (x.CompletionDate ?? x.UpdatedDate) <= end);
 
             weekly.CompletedLessons = completedThisWeek;
-            weekly.ProgressStatus = GetProgressStatusFromCounts(completedThisWeek, weekly.LessonsPerWeek);
+            weekly.ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(completedThisWeek, weekly.LessonsPerWeek);
 
             // Tổng
             var totalCompleted = results.Count();
             weekly.TotalCompletedLessons = totalCompleted;
             agg.TotalCompletedLessons = totalCompleted;
 
-            if (weekly.ProgressStatus.HasValue)
-            {
-                UpdateBehindStreak(agg, weekly.ProgressStatus.Value);
-            }
+            UpdateBehindStreak(agg, weekly.ProgressStatus);
         }
 
         private static void UpdateBehindStreak(StudentGoalAggregate agg, EnumProgressStatus weekStatus)
         {
             agg.ConsecutiveBehindWeeks = weekStatus == EnumProgressStatus.Behind
-                ? agg.ConsecutiveBehindWeeks + 1
-                : 0;
-        }
-
-        public static EnumProgressStatus GetProgressStatusFromCounts(int completed, int target)
-        {
-            if (completed > target)
-            {
-                return EnumProgressStatus.Ahead;
-            }
-            if (completed < target)
-            {
-                return EnumProgressStatus.Behind;
-            }
-            return EnumProgressStatus.OnTrack;
-        }
-
-        public static EnumCombinedProgress CombineProgress(EnumProgressStatus totalStatus, EnumProgressStatus weekStatus) =>
-           (totalStatus, weekStatus) switch
-           {
-               (EnumProgressStatus.Ahead, EnumProgressStatus.Ahead) => EnumCombinedProgress.TotalAheadWeekAhead,
-               (EnumProgressStatus.Ahead, EnumProgressStatus.OnTrack) => EnumCombinedProgress.TotalAheadWeekOnTrack,
-               (EnumProgressStatus.Ahead, EnumProgressStatus.Behind) => EnumCombinedProgress.TotalAheadWeekBehind,
-               (EnumProgressStatus.OnTrack, EnumProgressStatus.Ahead) => EnumCombinedProgress.TotalOnTrackWeekAhead,
-               (EnumProgressStatus.OnTrack, EnumProgressStatus.OnTrack) => EnumCombinedProgress.TotalOnTrackWeekOnTrack,
-               (EnumProgressStatus.OnTrack, EnumProgressStatus.Behind) => EnumCombinedProgress.TotalOnTrackWeekBehind,
-               (EnumProgressStatus.Behind, EnumProgressStatus.Ahead) => EnumCombinedProgress.TotalBehindWeekAhead,
-               (EnumProgressStatus.Behind, EnumProgressStatus.OnTrack) => EnumCombinedProgress.TotalBehindWeekOnTrack,
-               (EnumProgressStatus.Behind, EnumProgressStatus.Behind) => EnumCombinedProgress.TotalBehindWeekBehind,
-               _ => EnumCombinedProgress.TotalOnTrackWeekOnTrack
-           };
-
-        public static EnumCombinedProgress CombineProgress(int totalCompleted, int totalTarget, EnumProgressStatus weekStatus)
-        {
-            var totalStatus = GetProgressStatusFromCounts(totalCompleted, totalTarget);
-            return CombineProgress(totalStatus, weekStatus);
+                ? agg.ConsecutiveBehindWeeks + 1 : 0;
         }
     }
 }

@@ -5,7 +5,6 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class StudentGoalAggregate : Entity
@@ -17,6 +16,7 @@ namespace Fsel.Course.Domain.Entities
         public int TotalTargetLessons { get; set; }
 
         public int ConsecutiveBehindWeeks { get; set; }
+        public EnumCombinedProgress? CurrentCombinedProgress { get; set; }
         public EnumCombinedProgress? CombinedProgress { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseType CourseType { get; set; }

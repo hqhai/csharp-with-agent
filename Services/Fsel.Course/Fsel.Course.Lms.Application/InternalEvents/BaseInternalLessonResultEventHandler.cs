@@ -137,15 +137,18 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             studentSummary.TotalCompletedLessons += 1;
             studentSummary.CompletedLessons += 1;
             studentSummary.LastCompletedAt = DateTime.UtcNow;
+            studentSummary.ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(studentSummary.CompletedLessons, studentSummary.LessonsPerWeek);
+
             await _studentGoalSummaryRepository.BulkUpdateList(new List<StudentGoalSummary> { studentSummary }, bulk =>
             {
-                bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CompletedLessons, c.LastCompletedAt };
+                bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CompletedLessons, c.LastCompletedAt, c.ProgressStatus };
             });
 
             studentAggregate.TotalCompletedLessons += 1;
+            studentAggregate.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(studentAggregate.TotalCompletedLessons, studentAggregate.TotalTargetLessons);
             await _studentGoalAggregateRepository.BulkUpdateList(new List<StudentGoalAggregate> { studentAggregate }, bulk =>
             {
-                bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons };
+                bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CombinedProgress };
             });
         }
 

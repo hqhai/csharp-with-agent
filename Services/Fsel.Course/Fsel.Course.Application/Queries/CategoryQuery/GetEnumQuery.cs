@@ -129,6 +129,14 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.HomeWorkType:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumHomeWorkType>();
                     break;
+
+                case EnumCourseSourceData.ProcessedStatus:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumProcessedStatus>();
+                    break;
+
+                case EnumCourseSourceData.ProgressStatus:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumProgressStatus>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

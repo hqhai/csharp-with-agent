@@ -32,6 +32,12 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCourseType>());
+
+            builder.Property(e => e.CurrentCombinedProgress)
+                 .HasMaxLength(100)
+                 .HasConversion(
+                     v => v.ToString(),
+                     v => v.EnumParse<EnumCombinedProgress>());
         }
     }
 }

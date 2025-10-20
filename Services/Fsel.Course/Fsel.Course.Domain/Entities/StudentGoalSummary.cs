@@ -3,7 +3,7 @@
 namespace Fsel.Course.Domain.Entities
 {
     using Fsel.Core.Entities;
-    using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class StudentGoalSummary : Entity
     {
@@ -24,7 +24,7 @@ namespace Fsel.Course.Domain.Entities
         /// <summary>Thời điểm hoàn thành gần nhất</summary>
         public DateTime? LastCompletedAt { get; set; }
 
-        public EnumProgressStatus? ProgressStatus { get; set; }
+        public EnumProgressStatus ProgressStatus { get; set; }
         public Guid StudentGoalAggregateId { get; set; }
         public StudentGoalAggregate? StudentGoalAggregate { get; set; }
     }
