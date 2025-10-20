@@ -9,7 +9,6 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
     using Fsel.Core.Base;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities.CourseGoals;
-    using Fsel.System.Domain.Enums;
     using Fsel.System.Domain.IRepositories.CourseGoals;
     using Fsel.System.Domain.Models.CommandModels.CourseGoals;
     using Fsel.System.Domain.Models.EntityModels;

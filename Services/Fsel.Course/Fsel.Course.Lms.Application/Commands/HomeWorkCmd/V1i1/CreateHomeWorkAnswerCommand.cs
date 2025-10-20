@@ -318,7 +318,10 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 }
                 homeWorkResult = await GetHomeWorkResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone, (int)tokensAchieved);
             }
-
+            if (!homeWorkResult.ProcessDate.HasValue)
+            {
+                homeWorkResult.ProcessDate = DateTime.UtcNow;
+            }
             await _homeWorkResultRepository.BulkUpdateList(new List<HomeWorkResult> { homeWorkResult }, bulk =>
             {
                 bulk.IgnoreOnUpdateExpression = c => new { c.LessonResultId, c.StudentId, c.HomeWorkId };
@@ -344,6 +347,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
             }
             if (isHomeWorkDone)
             {
+                homeWorkResult.CompletionDate = DateTime.UtcNow;
                 homeWorkResult.Status = EnumResultStatus.Done;
                 await _finishOneHomeWorkPublisher.Publish(homeWorkResult, CancellationToken.None);
 

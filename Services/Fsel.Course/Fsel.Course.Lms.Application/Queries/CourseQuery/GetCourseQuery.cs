@@ -342,6 +342,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 {
                     StudentId = studentId ?? default,
                     Status = EnumResultStatus.New,
+                    NewDate = DateTime.UtcNow,
                     CourseId = course.Id
                 };
                 await _courseResultRepository.BulkMergeAsync(new List<CourseResult> { courseResult }, bulk =>
@@ -429,6 +430,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 UnitId = courseUnitMockTest != null ? courseUnitMockTest.UnitId!.Value : default,
                 StudentId = studentId ?? default,
                 CourseId = course.Id,
+                NewDate = (index == 0 || checkFirstDone) ? DateTime.UtcNow : null,
                 Status = (index == 0 || checkFirstDone) ? EnumResultStatus.New : EnumResultStatus.Unfinished
             });
         }

@@ -133,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, CancellationToken cancellationToken)
         {
             mockTestResult.Status = EnumResultStatus.Process;
-
+            mockTestResult.ProcessDate = DateTime.UtcNow;
             await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
             {
                 bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };

@@ -452,6 +452,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     await UpdateStudentTrialRegistration(currentAccountStatus, unitResultNext.CreatedUserId);
                     if (unitResultNext.Status == EnumResultStatus.Unfinished && currentAccountStatus == EnumTrialRegistrationStatus.Payment)
                     {
+                        unitResultNext.NewDate = DateTime.UtcNow;
                         unitResultNext.Status = EnumResultStatus.New;
                         await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResultNext }, bulk =>
                         {
@@ -464,6 +465,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var finalTestResultNext = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
                     if (finalTestResultNext != null && finalTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
+                        finalTestResultNext.NewDate = DateTime.UtcNow;
                         finalTestResultNext.Status = EnumResultStatus.New;
                         await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult> { finalTestResultNext }, bulk =>
                         {
@@ -476,6 +478,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var mockTestResultNext = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
                     if (mockTestResultNext != null && mockTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
+                        mockTestResultNext.NewDate = DateTime.UtcNow;
                         mockTestResultNext.Status = EnumResultStatus.New;
                         await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResultNext }, bulk =>
                         {

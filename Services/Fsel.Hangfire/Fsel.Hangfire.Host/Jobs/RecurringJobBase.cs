@@ -35,6 +35,7 @@ namespace Fsel.Hangfire.Host.Jobs
             //JobExtensions.SetRecurringJob<TestWorker>(WorkerSettings.JobName.TestWorkerJob, Cron.Daily);
             JobExtensions.SetRecurringJob<ChooseDailyQuizWinnersWorker>(WorkerSettings.JobName.ChooseDailyQuizWinners, Cron.Daily(13, 59));
             JobExtensions.SetRecurringJob<AggregateDataStudentsInEventWorker>(WorkerSettings.JobName.AggregateDataStudentsInEvent, Cron.Daily(17, 1));
+            JobExtensions.SetRecurringJob<JobStudentAggregateWorker>(WorkerSettings.JobName.JobStudentAggregate, Cron.Weekly(DayOfWeek.Monday, 0, 0), EnumCountryKey.Vietnam.FindSystemTimeZoneInfo());
 
             JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNoticeEveryHour, Cron.Hourly(), new PushNoticeTime(EnumPushNoticeTimeType.EveryHour));
             JobExtensions.SetRecurringJob<PushNoticeWorker, PushNoticeTime>(WorkerSettings.JobName.PushNoticeAt07h30, Cron.Daily(0, 30), new PushNoticeTime(EnumPushNoticeTimeType.At07h30));

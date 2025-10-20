@@ -95,6 +95,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
         public DbSet<Topic> Topics { get; set; }
+        public DbSet<StudentGoalAggregate> StudentGoalAggregates { get; set; }
+        public DbSet<StudentGoalSummary> StudentGoalSummaries { get; set; }
 
         #region Report
 
@@ -205,6 +207,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumDetailResultHistoryTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentGoalAggregateEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentGoalSummaryEntityTypeConfiguration());
 
             modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

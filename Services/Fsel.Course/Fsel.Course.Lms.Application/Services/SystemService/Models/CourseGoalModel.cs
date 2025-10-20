@@ -1,7 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Models.EntityModels
+namespace Fsel.Course.Lms.Application.Services.SystemService.Models
 {
+    using System.Collections.Generic;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -12,7 +13,9 @@ namespace Fsel.System.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseType CourseType { get; set; }
         public string? SchoolName { get; set; }
+        public Guid? SchoolId { get; set; }
         public string? ClassName { get; set; }
+        public Guid? ClassId { get; set; }
         public IList<CourseGoalConfigModel> CourseGoalConfigs { get; set; } = new List<CourseGoalConfigModel>();
     }
 }

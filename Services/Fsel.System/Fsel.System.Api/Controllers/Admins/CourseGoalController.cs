@@ -40,6 +40,17 @@ namespace Fsel.System.Api.Controllers.Admins
 
         /// Get CourseGoal
         /// </summary>
+        [HttpGet("gets")]
+        [ProducesResponseType(typeof(MethodResult<IList<CourseGoalModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get()
+        {
+            var commandResult = await _mediator.Send(new GetListCourseGoalQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// Get CourseGoal
+        /// </summary>
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<CourseGoalModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]

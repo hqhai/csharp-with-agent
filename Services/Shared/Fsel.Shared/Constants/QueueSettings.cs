@@ -139,6 +139,7 @@ namespace Fsel.Shared.Constants
                 public const string SpeechToTextPendingAi = $"{KeyQueue}_SpeechToTextPendingAi";
                 public const string PushNotice = $"{KeyQueue}_PushNotice";
                 public const string ExportExcelUserInformationSupportSale = $"{KeyQueue}_ExportExcelUserInformationSupportSale";
+                public const string JobStudentAggregate = $"{KeyQueue}_JobStudentAggregate";
             }
         }
 

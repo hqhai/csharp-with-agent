@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.System.Domain.Enums
+namespace Fsel.Shared.Enums
 {
     using global::System.ComponentModel;
 

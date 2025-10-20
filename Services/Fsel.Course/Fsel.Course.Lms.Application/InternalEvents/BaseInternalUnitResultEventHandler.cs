@@ -72,6 +72,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             unitResult.CompletionDate = DateTime.UtcNow;
                         }
                         unitResult.Status = EnumResultStatus.Done;
+
                         // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
                         //send mail
