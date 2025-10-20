@@ -105,7 +105,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 SurveyFormType = EnumSurveyFormType.Default
             };
 
-            if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null)
+            if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null && @eventResults.Content.Result.Any())
             {
                 var @events = @eventResults.Content?.Result;
                 var actions = @events?.Select(p => p.EventContent).Where(p => p != null && p.Actions != null && p.Actions.Count > 0).SelectMany(p => p.Actions!).ToList();
