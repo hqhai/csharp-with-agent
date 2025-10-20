@@ -65,7 +65,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
                     Occupation = nameof(Student),
                     CourseLevel = level
                 };
-                user.UserSettings ??= new List<UserSetting>()
+                user.UserSettings = new List<UserSetting>()
                 {
                     new UserSetting(true)
                 };
