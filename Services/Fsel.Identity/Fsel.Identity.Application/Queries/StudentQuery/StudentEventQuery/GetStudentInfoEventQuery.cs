@@ -76,15 +76,17 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 IsChangePassword = !isChangePassword,
                 IsStudentVerifiedForEvent = isByPassEmailConfirm,
-                IsNotShowInfoParent = competitionEvent != null && !string.IsNullOrEmpty(competitionEvent.EventCode) && competitionEvent.EventCode.Contains(EventCode, StringComparison.InvariantCultureIgnoreCase),
+                AllowParentInfoUpdate = competitionEvent == null || string.IsNullOrEmpty(competitionEvent.EventCode) || !competitionEvent.EventCode.Contains(EventCode, StringComparison.InvariantCultureIgnoreCase),
             };
 
             var schoolId = human.Student?.SchoolId ?? default;
+            var competitionEventId = competitionEvent?.Id ?? default;
 
             var query = await (from u in _userManager.Users
                                join h in _humanRepository.Queryable on u.Id equals h.UserId
                                join s in _studentRepository.Queryable on h.Id equals s.HumanId
-                               where s.SchoolId == schoolId && u.Id != _authContext.CurrentUserId
+                               join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
+                               where s.SchoolId == schoolId && u.Id != _authContext.CurrentUserId && sce.CompetitionEventId == competitionEventId
                                select new
                                {
                                    User = u,
@@ -92,7 +94,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                                    Student = s
                                }).ToListAsync(cancellationToken);
 
-            var companion = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.Student.ParentPhoneNumber) && p.Student.ParentPhoneNumber == studentInfoEvent.ParentPhoneNumber);
+            var companion = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.Student.ParentPhoneNumber) && p.Student.ParentPhoneNumber == studentInfoEvent.PhoneNumber);
             if (companion != null)
             {
                 studentInfoEvent.IsParent = true;
