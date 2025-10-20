@@ -18,7 +18,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiController]
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
-    [Route(Settings.APIDefaultRoute + "/ai-feature-coonfig")]
+    [Route(Settings.APIDefaultRoute + "/ai-feature-config")]
     //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class AiFeatureConfigController : ControllerBase
     {
