@@ -8,6 +8,9 @@ namespace Fsel.ExamPractice.Domain.Enums
         ExamPractice = 0,
 
         [Description("IELTS Mock Test")]
-        IELTS = 1
+        IELTS = 1,
+
+        [Description("Bộ đề Vstep")]
+        Vstep
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers
 {
+    using System.Text.Json.Serialization;
+
     public class ExamPracticeAnswerResponseModel
     {
         public Guid ExamPracticeSectionId { get; set; }
@@ -10,9 +12,15 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers
         public bool IsRetry { get; set; }
     }
 
-    public class ExamPracticeAIGradingModel
+    public class ExamPracticeAIGradingDataModel
     {
-        public string? BandScore { get; set; }
-        public string? BandDescriptorText { get; set; }
+        [JsonPropertyName("band_score")]
+        public double? BandScore { get; set; }
+
+        [JsonPropertyName("explanation")]
+        public string? Explanation { get; set; }
+
+        [JsonPropertyName("suggestions_for_improvement")]
+        public string? SuggestionsForImprovement { get; set; }
     }
 }

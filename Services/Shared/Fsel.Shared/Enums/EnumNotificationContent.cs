@@ -104,8 +104,10 @@ namespace Fsel.Shared.Enums
         Day7At7h30AfterDonePT,
         Day7At12h00AfterDonePT,
         Day7At17h30AfterDonePT,
-        Day7At19h30AfterDonePT
+        Day7At19h30AfterDonePT,
 
         #endregion Notify after done PT
+
+        SurveyAssignment
     }
 }

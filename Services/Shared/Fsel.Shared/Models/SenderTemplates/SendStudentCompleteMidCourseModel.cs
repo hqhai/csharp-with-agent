@@ -32,5 +32,6 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? IndexMiddleUnit { get; set; }
         public string? TotalUnit { get; set; }
         public EnumCourseType CourseType { get; set; }
+        public string? AccessLink { get; set; }
     }
 }

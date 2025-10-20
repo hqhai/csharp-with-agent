@@ -13,6 +13,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
     using Fsel.ExamPractice.Domain.Enums.ErrorCodes;
     using Fsel.ExamPractice.Domain.IRepositories;
     using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAnswers;
+    using Fsel.ExamPractice.Domain.Models.EntityModels;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.ExamPractice.Infrastructure.Common;
@@ -24,10 +25,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class CreateExamPracticeAnswerCommand : CreateExamPracticeAnswerCommandModel, IRequest<MethodResult<ExamPracticeSectionResultModel>>
-    {
-    }
+    { }
 
     public class CreateExamPracticeAnswerCommandHandler : IRequestHandler<CreateExamPracticeAnswerCommand, MethodResult<ExamPracticeSectionResultModel>>
     {
@@ -39,10 +40,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         private readonly IExamPracticeSectionResultRepository _examPracticeSectionResultRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IExamPracticeAnswerRepository _examPracticeAnswerRepository;
-        private readonly ISpeakingEvaluationAIService _speakingEvaluationAIService;
         private readonly SubmitSpeakingAIPublisher _submitSpeakingAIPublisher;
         private readonly SubmitExamPracticeAnswerPublisher _submitExamPracticeAnswerPublisher;
         private readonly ExamPracticeSectionHelper _examPracticeSectionHelper;
+        private readonly IContinuousPronunciationAssessmentService _pronuciationAssessmentService;
         private readonly IMapper _mapper;
 
         public CreateExamPracticeAnswerCommandHandler(
@@ -54,12 +55,11 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             IExamPracticeSectionResultRepository examPracticeSectionResultRepository,
             IQuestionRepository questionRepository,
             IExamPracticeAnswerRepository examPracticeAnswerRepository,
-            ISpeakingEvaluationAIService speakingEvaluationAIService,
             SubmitSpeakingAIPublisher submitSpeakingAIPublisher,
             SubmitExamPracticeAnswerPublisher submitExamPracticeAnswerPublisher,
             ExamPracticeSectionHelper examPracticeSectionHelper,
-            IMapper mapper
-            )
+            IContinuousPronunciationAssessmentService pronuciationAssessmentService,
+            IMapper mapper)
         {
             _examPracticeRepository = examPracticeRepository;
             _authContext = authContext;
@@ -69,10 +69,10 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             _examPracticeSectionResultRepository = examPracticeSectionResultRepository;
             _questionRepository = questionRepository;
             _examPracticeAnswerRepository = examPracticeAnswerRepository;
-            _speakingEvaluationAIService = speakingEvaluationAIService;
             _submitSpeakingAIPublisher = submitSpeakingAIPublisher;
             _submitExamPracticeAnswerPublisher = submitExamPracticeAnswerPublisher;
             _examPracticeSectionHelper = examPracticeSectionHelper;
+            _pronuciationAssessmentService = pronuciationAssessmentService;
             _mapper = mapper;
         }
 
@@ -80,30 +80,27 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExamPracticeSectionResultModel>();
+
             var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
-            if (!studentResult.IsSuccessStatusCode)
+            if (!studentResult.IsSuccessStatusCode || studentResult?.Content?.Result == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
-            var student = studentResult?.Content?.Result;
-            if (student == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentResult));
-                return methodResult;
-            }
+            var student = studentResult.Content.Result;
+
             var examPracticeResult = await _examPracticeResultRepository.GetByIdAsync(request.ExamPracticeResultId);
             if (examPracticeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeResult), request.ExamPracticeResultId);
                 return methodResult;
             }
-            //Note 2
             if (examPracticeResult.Status == EnumResultStatus.Done)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumExamPracticeErrorCode.TestAlreadySubmitted), nameof(examPracticeResult.Status), examPracticeResult.Status);
                 return methodResult;
             }
+
             var examPractice = await _examPracticeRepository.GetByIdAsync(examPracticeResult.ExamPracticeId);
             if (examPractice == null)
             {
@@ -118,28 +115,23 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 return methodResult;
             }
 
-            var method = await GetExamPracticeSectionResultAsync(request, examPracticeSection, examPracticeResult, examPractice);
-            if (!method.IsOK)
+            var sectionResultMethod = await GetExamPracticeSectionResultAsync(request, examPracticeSection, examPracticeResult, examPractice);
+            if (!sectionResultMethod.IsOK || sectionResultMethod.Result == null)
             {
-                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                methodResult.AddErrorBadRequest(sectionResultMethod.ErrorMessages);
                 return methodResult;
             }
-            var examPracticeSectionResult = method.Result;
-            if (examPracticeSectionResult == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSection), request.ExamPracticeSectionId);
-                return methodResult;
-            }
-            else if (examPracticeSectionResult.Status == EnumResultStatus.Done)
+            var examPracticeSectionResult = sectionResultMethod.Result;
+            if (examPracticeSectionResult.Status == EnumResultStatus.Done)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(examPracticeSectionResult), examPracticeSectionResult.Id);
                 return methodResult;
             }
 
-            if (examPractice.Type == EnumExamPracticeType.IELTS)
+            if (examPractice.Type != EnumExamPracticeType.ExamPractice)
             {
-                var isSkillTest = examPractice.SubType == EnumExamPracticeSubType.SkillMockTest;
-                if (request.Answers != null && request.Answers.Any())
+                var isSkillTest = examPractice.SubType == EnumExamPracticeSubType.SkillMockTest || examPractice.SubType == EnumExamPracticeSubType.SingleVstepSkill;
+                if (request.Answers?.Any() == true)
                 {
                     var answerResult = await SaveAnswerAsync(request, examPracticeSection, examPracticeSectionResult, examPracticeResult);
                     if (!answerResult.IsOK)
@@ -150,58 +142,59 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 }
                 if (examPracticeSection.CourseSkill == EnumCourseSkill.Speaking)
                 {
-                    await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
+                    await _examPracticeSectionResultRepository.BulkUpdateList(new[] { examPracticeSectionResult }, bulk =>
+                    bulk.ColumnInputExpression = entity => new
                     {
-                        bulk.ColumnInputExpression = entity => new { entity.CurrentExamPracticeSectionId };
+                        entity.CurrentExamPracticeSectionId
                     });
                 }
-                await _examPracticeSectionHelper.UpdateExamPracticeToIsSubmit(examPracticeSection, examPracticeSectionResult, request.IsSubmit);
+                await _examPracticeSectionHelper.UpdateExamPracticeToIsSubmit(examPractice, examPracticeSection, examPracticeSectionResult, request.IsSubmit);
                 if (examPracticeSection.CourseSkill == EnumCourseSkill.Writing && request.IsSubmit)
                 {
-                    if (request.Answers != null && request.Answers.Count > 0)
+                    var answers = request.Answers;
+                    if (answers?.Count > 0)
                     {
-                        foreach (var item in request.Answers)
+                        foreach (var item in answers)
                         {
-                            if (!item.ExamPracticeSectionId.HasValue)
+                            if (item.ExamPracticeSectionId.HasValue)
                             {
-                                continue;
+                                await SendToChatGpt(item.ExamPracticeSectionId.Value, examPracticeSectionResult.Id, item.Answer?.ToString(), cancellationToken);
                             }
-                            await SendToChatGpt(item.ExamPracticeSectionId ?? default, examPracticeSectionResult.Id, item.Answer?.ToString(), cancellationToken);
                         }
                     }
-                    else if (request.Answers == null || request.Answers.Count == 0)
+                    else
                     {
-                        var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeResult.Id && x.ExamPracticeSectionResultId == examPracticeSectionResult.Id)
-                                                                       .Where(x => x.CreatedDate >= examPracticeSectionResult.CreatedDate)
-                                                                       .ToListAsync(cancellationToken);
+                        var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable
+                            .Where(x => x.ExamPracticeResultId == examPracticeResult.Id && x.ExamPracticeSectionResultId == examPracticeSectionResult.Id && x.CreatedDate >= examPracticeSectionResult.CreatedDate)
+                            .ToListAsync(cancellationToken);
                         foreach (var item in examPracticeAnswers)
                         {
                             await SendToChatGpt(item.ExamPracticeSectionId ?? default, examPracticeSectionResult.Id, item.AnswerStr, cancellationToken);
                         }
                     }
                 }
-
-                await UpdateExamPracticeResultAsync(examPracticeResult, isSkillTest, cancellationToken);
-
-                try
+                if (request.IsSubmit)
                 {
-                    if (examPracticeSection.CourseSkill == EnumCourseSkill.Speaking && request.IsSubmit)
+                    await UpdateExamPracticeResultAsync(examPracticeResult, isSkillTest, cancellationToken);
+                }
+                if (examPracticeSection.CourseSkill == EnumCourseSkill.Speaking && request.IsSubmit)
+                {
+                    try
                     {
-                        SpeakingExamPracticeAIEvaluationModel speakingEvaluationModel = new SpeakingExamPracticeAIEvaluationModel()
+                        var speakingEvaluationModel = new SpeakingExamPracticeAIEvaluationModel
                         {
                             ExamPracticeResultId = request.ExamPracticeResultId,
                             ExamPracticeSectionId = request.ExamPracticeSectionId,
                         };
                         await _submitSpeakingAIPublisher.Publish(speakingEvaluationModel, cancellationToken);
                     }
-                }
-                catch
-                {
+                    catch
+                    { }
                 }
             }
             else
             {
-                if (request.Answers != null && request.Answers.Any())
+                if (request.Answers?.Any() == true)
                 {
                     var answerResult = await SaveAnswerExamPracticeAsync(request, examPracticeSection, examPracticeSectionResult, examPracticeResult);
                     if (!answerResult.IsOK)
@@ -216,10 +209,30 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     await UpdateExamPracticeResultAsync(examPracticeResult, examPractice, cancellationToken);
                 }
             }
-            var examPracticeSectionResultDto = _mapper.Map<ExamPracticeSectionResultModel>(await _examPracticeSectionResultRepository.GetByIdAsync(examPracticeSectionResult.Id));
+            await UpdateExamPracticeSectionResultNewAsync(examPracticeSectionResult);
+            var examPracticeSectionResultDto = _mapper.Map<ExamPracticeSectionResultModel>(examPracticeSectionResult);
             examPracticeSectionResultDto.IsTestDone = examPracticeResult.Status == EnumResultStatus.Done;
             methodResult.Result = examPracticeSectionResultDto;
             return methodResult;
+        }
+
+        private async Task UpdateExamPracticeSectionResultNewAsync(ExamPracticeSectionResult examPracticeSectionResult)
+        {
+            if (examPracticeSectionResult.Status != EnumResultStatus.New)
+            {
+                return;
+            }
+
+            try
+            {
+                examPracticeSectionResult.Status = EnumResultStatus.Process;
+                await _examPracticeSectionResultRepository.BulkUpdateList(new List<ExamPracticeSectionResult> { examPracticeSectionResult },
+                        bulk => bulk.ColumnInputExpression = entity => new { entity.Status }
+                );
+            }
+            catch
+            {
+            }
         }
 
         private async Task SendToChatGpt(Guid examPracticeSectionId, Guid examPracticeSectionResultId, string? answer, CancellationToken cancellationToken)
@@ -234,13 +247,25 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
 
         private async Task UpdateExamPracticeResultAsync(ExamPracticeResult examPracticeResult, bool isSkillTest, CancellationToken cancellationToken)
         {
-            var examPracticeSectionResults = await _examPracticeSectionResultRepository.Queryable.Where(s => s.ExamPracticeResultId == examPracticeResult.Id && s.CreatedDate >= examPracticeResult.CreatedDate).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-            var numberOfDone = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId).CountAsync(cancellationToken);
-            if (examPracticeSectionResults != null && (isSkillTest || examPracticeSectionResults.Count == numberOfDone) && examPracticeSectionResults.All(x => x.Status == EnumResultStatus.Done))
+            var sectionResults = await _examPracticeSectionResultRepository.Queryable.AsNoTracking()
+                                                                           .Where(x => x.ParentExamPracticeSectionResultId == null)
+                                                                           .Where(s => s.ExamPracticeResultId == examPracticeResult.Id && s.CreatedDate >= examPracticeResult.CreatedDate)
+                                                                           .OrderBy(x => x.CreatedDate)
+                                                                           .ToListAsync(cancellationToken);
+            var numberOfDone = await _examPracticeSectionRepository.Queryable.AsNoTracking()
+                                                                   .Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId && !x.ParentExamPracticeSectionId.HasValue)
+                                                                   .CountAsync(cancellationToken);
+            if (sectionResults != null && (isSkillTest || sectionResults.Count == numberOfDone) && sectionResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                examPracticeResult.WorkingTime = examPracticeSectionResults.Sum(x => x.WorkingTime);
-                examPracticeResult.HighestStreak = examPracticeSectionResults.Max(x => x.HighestStreak);
-                examPracticeResult = GetExamPracticeResult(examPracticeSectionResults, examPracticeResult);
+                examPracticeResult.WorkingTime = sectionResults.Sum(x => x.WorkingTime);
+                examPracticeResult.HighestStreak = sectionResults.Max(x => x.HighestStreak);
+                examPracticeResult = GetExamPracticeResult(sectionResults, examPracticeResult);
+                _examPracticeResultRepository.Update(examPracticeResult, false);
+                await _examPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                examPracticeResult = SetExamPracticeResult(sectionResults, examPracticeResult);
                 _examPracticeResultRepository.Update(examPracticeResult, false);
                 await _examPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -248,19 +273,23 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
 
         private async Task UpdateExamPracticeResultAsync(ExamPracticeResult examPracticeResult, ExamPractice examPractice, CancellationToken cancellationToken)
         {
-            var examPracticeSectionResults = await _examPracticeSectionResultRepository.Queryable.Where(s => s.ExamPracticeResultId == examPracticeResult.Id && s.CreatedDate >= examPracticeResult.CreatedDate).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
-            if (examPracticeSectionResults != null && examPracticeSectionResults.All(x => x.Status == EnumResultStatus.Done))
+            var sectionResults = await _examPracticeSectionResultRepository.Queryable
+                                        .Where(s => s.ExamPracticeResultId == examPracticeResult.Id && s.CreatedDate >= examPracticeResult.CreatedDate)
+                                        .OrderBy(x => x.CreatedDate)
+                                        .AsNoTracking()
+                                        .ToListAsync(cancellationToken);
+            if (sectionResults != null && sectionResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 examPracticeResult.HighestStreak = await _examPracticeSectionHelper.GetHighestStreak(examPracticeResult, examPractice);
-                examPracticeResult.CorrectCount = examPracticeSectionResults.Sum(x => x.CorrectCount);
-                examPracticeResult.CorrectTotal = examPracticeSectionResults.Sum(x => x.CorrectTotal);
+                examPracticeResult.CorrectCount = sectionResults.Sum(x => x.CorrectCount);
+                examPracticeResult.CorrectTotal = sectionResults.Sum(x => x.CorrectTotal);
                 examPracticeResult.Status = EnumResultStatus.Done;
                 _examPracticeResultRepository.Update(examPracticeResult, false, x => x.WorkingTime);
                 await _examPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private static ExamPracticeResult GetExamPracticeResult(IList<ExamPracticeSectionResult>? sectionGroupResults, ExamPracticeResult examPracticeResult)
+        private static ExamPracticeResult SetExamPracticeResult(IList<ExamPracticeSectionResult>? sectionGroupResults, ExamPracticeResult examPracticeResult)
         {
             var skillScores = sectionGroupResults?.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
             if (skillScores != null)
@@ -268,8 +297,14 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 examPracticeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 examPracticeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
             }
-            examPracticeResult.Status = EnumResultStatus.Done;
             examPracticeResult.SkillScores = skillScores;
+            return examPracticeResult;
+        }
+
+        private static ExamPracticeResult GetExamPracticeResult(IList<ExamPracticeSectionResult>? sectionGroupResults, ExamPracticeResult examPracticeResult)
+        {
+            SetExamPracticeResult(sectionGroupResults, examPracticeResult);
+            examPracticeResult.Status = EnumResultStatus.Done;
             return examPracticeResult;
         }
 
@@ -277,13 +312,14 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new VoidMethodResult();
-
-            var anserResult = new MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>();
+            MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)> answerResult;
 
             if (examPracticeSection.CourseSkill == EnumCourseSkill.Listening || examPracticeSection.CourseSkill == EnumCourseSkill.Reading)
             {
                 var questionIds = request.Answers.Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
-                var questions = await _questionRepository.Queryable.Include(x => x.ExamPracticeSection).Where(x => questionIds.Contains(x.Id)).ToListAsync();
+                var questions = await _questionRepository.Queryable.AsNoTracking().Include(x => x.ExamPracticeSection)
+                                                         .WhereBulkContains(questionIds, x => x.Id)
+                                                         .ToListAsync();
                 if (questions == null || !questions.Any())
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
@@ -295,71 +331,76 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(questions), nameof(request.ExamPracticeSectionId));
                     return methodResult;
                 }
-
-                anserResult = await SaveAnswerAsync(request, questions, examPracticeSectionResult, examPracticeResult);
+                answerResult = await SaveAnswerAsync(request, questions, examPracticeSectionResult, examPracticeResult);
             }
             else if (examPracticeSection.CourseSkill == EnumCourseSkill.Writing)
             {
-                var examPracticeSectionIds = request.Answers.Where(x => x.ExamPracticeSectionId.HasValue).Select(x => x.ExamPracticeSectionId!.Value).ToList();
-                var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => examPracticeSectionIds.Contains(x.Id)).ToListAsync();
-                if (examPracticeSections == null || !examPracticeSections.Any())
+                var sectionIds = request.Answers.Where(x => x.ExamPracticeSectionId.HasValue).Select(x => x.ExamPracticeSectionId!.Value).ToList();
+                var sections = await _examPracticeSectionRepository.Queryable.AsNoTracking().WhereBulkContains(sectionIds, x => x.Id).ToListAsync();
+                if (sections == null || !sections.Any())
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSections));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sections));
                     return methodResult;
                 }
-
-                if (!examPracticeSections.Any(x => x.ParentExamPracticeSectionId == examPracticeSection.Id))
+                if (!sections.Any(x => x.ParentExamPracticeSectionId == examPracticeSection.Id))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(examPracticeSections), nameof(request.ExamPracticeSectionId));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sections), nameof(request.ExamPracticeSectionId));
                     return methodResult;
                 }
-                anserResult = await SaveAnswerWritingAsync(request, examPracticeSections, examPracticeSectionResult);
+                answerResult = await SaveAnswerWritingAsync(request, sections, examPracticeSectionResult);
             }
             else
             {
-                var examPracticeSectionIds = request.Answers.Where(x => x.ExamPracticeSectionId.HasValue).Select(x => x.ExamPracticeSectionId!.Value).ToList();
-                var examPracticeSections = await _examPracticeSectionRepository.Queryable.Include(x => x.ParentExamPracticeSection).WhereBulkContains(examPracticeSectionIds, x => x.Id).ToListAsync();
-                if (examPracticeSections == null || !examPracticeSections.Any())
+                var sectionIds = request.Answers.Where(x => x.ExamPracticeSectionId.HasValue).Select(x => x.ExamPracticeSectionId!.Value).ToList();
+                var sections = await _examPracticeSectionRepository.Queryable.Where(x => sectionIds.Contains(x.Id))
+                                                                   //.WhereBulkContains(sectionIds, x => x.Id)
+                                                                   .Include(x => x.ParentExamPracticeSection)
+                                                                   .AsNoTracking()
+                                                                   .ToListAsync();
+                if (sections == null || !sections.Any())
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSections));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sections));
                     return methodResult;
                 }
-
-                if (!examPracticeSections.Select(x => x.ParentExamPracticeSection).Any(x => x != null && x.ParentExamPracticeSectionId == examPracticeSection.Id))
+                if (!sections.Select(x => x.ParentExamPracticeSection).Any(x => x != null && x.ParentExamPracticeSectionId == examPracticeSection.Id))
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(examPracticeSections), nameof(request.ExamPracticeSectionId));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(sections), nameof(request.ExamPracticeSectionId));
                     return methodResult;
                 }
-
-                anserResult = await SaveAnswerSpearkingAsync(request, examPracticeSections, examPracticeSectionResult);
+                answerResult = await SaveAnswerSpearkingAsync(request, sections, examPracticeSectionResult);
             }
 
-            var (createExamPracticeAnswers, updateExamPracticeAnswers) = anserResult.Result;
-            if (!anserResult.IsOK)
+            var (createAnswers, updateAnswers) = answerResult.Result;
+            if (!answerResult.IsOK)
             {
-                methodResult.AddErrorBadRequest(anserResult.ErrorMessages);
+                methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
                 return methodResult;
             }
             try
             {
-                if (createExamPracticeAnswers != null && createExamPracticeAnswers.Any())
+                if (createAnswers?.Any() == true)
                 {
-                    await _examPracticeAnswerRepository.BulkMergeAsync(createExamPracticeAnswers, bulk =>
+                    await _examPracticeAnswerRepository.BulkMergeAsync(createAnswers, bulk =>
+                    bulk.ColumnPrimaryKeyExpression = entity => new
                     {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExamPracticeSectionId, entity.QuestionId, entity.ExamPracticeSectionResultId };
+                        entity.ExamPracticeSectionId,
+                        entity.QuestionId,
+                        entity.ExamPracticeSectionResultId
                     });
                 }
-                if (updateExamPracticeAnswers != null && updateExamPracticeAnswers.Any())
+
+                if (updateAnswers?.Any() == true)
                 {
-                    await _examPracticeAnswerRepository.BulkUpdateList(updateExamPracticeAnswers, bulk =>
+                    await _examPracticeAnswerRepository.BulkUpdateList(updateAnswers, bulk =>
+                    bulk.IgnoreOnUpdateExpression = entity => new
                     {
-                        bulk.IgnoreOnUpdateExpression = entity => new { entity.ExamPracticeSectionId, entity.QuestionId, entity.ExamPracticeSectionResultId };
+                        entity.ExamPracticeSectionId,
+                        entity.QuestionId,
+                        entity.ExamPracticeSectionResultId
                     });
                 }
             }
-            catch
-            {
-            }
+            catch { }
             return methodResult;
         }
 
@@ -367,188 +408,195 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new VoidMethodResult();
-
-            var anserResult = new MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>();
-
             var questionIds = request.Answers.Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
-            var questions = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).ToListAsync();
+            var questions = await _questionRepository.Queryable.WhereBulkContains(questionIds, x => x.Id).AsNoTracking().ToListAsync();
             if (questions == null || !questions.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(questions));
                 return methodResult;
             }
-            var examPracticeSectionIds = questions.Select(x => x.ExamPracticeSectionId).ToList();
-            if (!examPracticeSectionIds.Any(x => x == examPracticeSection.Id))
+            var sectionIds = questions.Select(x => x.ExamPracticeSectionId).ToList();
+            if (!sectionIds.Any(x => x == examPracticeSection.Id))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(questions), nameof(request.ExamPracticeSectionId));
                 return methodResult;
             }
-
-            anserResult = await SaveAnswerAsync(request, questions, examPracticeSectionResult, examPracticeResult);
-
-            var (createExamPracticeAnswers, updateExamPracticeAnswers) = anserResult.Result;
-            if (!anserResult.IsOK)
+            var answerResult = await SaveAnswerAsync(request, questions, examPracticeSectionResult, examPracticeResult);
+            var (createAnswers, updateAnswers) = answerResult.Result;
+            if (!answerResult.IsOK)
             {
-                methodResult.AddErrorBadRequest(anserResult.ErrorMessages);
+                methodResult.AddErrorBadRequest(answerResult.ErrorMessages);
                 return methodResult;
             }
             try
             {
-                if (createExamPracticeAnswers != null && createExamPracticeAnswers.Any())
+                if (createAnswers?.Any() == true)
                 {
-                    await _examPracticeAnswerRepository.BulkMergeAsync(createExamPracticeAnswers, bulk =>
+                    await _examPracticeAnswerRepository.BulkMergeAsync(createAnswers, bulk =>
+                    bulk.ColumnPrimaryKeyExpression = entity => new
                     {
-                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExamPracticeSectionId, entity.QuestionId, entity.ExamPracticeResultId, entity.ExamPracticeSectionResultId };
+                        entity.ExamPracticeSectionId,
+                        entity.QuestionId,
+                        entity.ExamPracticeResultId,
+                        entity.ExamPracticeSectionResultId
                     });
                 }
-                if (updateExamPracticeAnswers != null && updateExamPracticeAnswers.Any())
+                if (updateAnswers?.Any() == true)
                 {
-                    await _examPracticeAnswerRepository.BulkUpdateList(updateExamPracticeAnswers, bulk =>
-                    {
-                        bulk.IgnoreOnUpdateExpression = entity => new { entity.ExamPracticeSectionId, entity.QuestionId, entity.ExamPracticeResultId, entity.ExamPracticeSectionResultId };
-                    });
+                    await _examPracticeAnswerRepository.BulkUpdateList(updateAnswers, bulk =>
+                     bulk.IgnoreOnUpdateExpression = entity => new
+                     {
+                         entity.ExamPracticeSectionId,
+                         entity.QuestionId,
+                         entity.ExamPracticeResultId,
+                         entity.ExamPracticeSectionResultId
+                     });
                 }
             }
-            catch
-            {
-            }
+            catch { }
             return methodResult;
         }
 
-        private async Task<MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>> SaveAnswerWritingAsync(CreateExamPracticeAnswerCommand request, IList<ExamPracticeSection> examPracticeSections, ExamPracticeSectionResult examPracticeSectionResult)
+        private async Task<MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>> SaveAnswerWritingAsync(CreateExamPracticeAnswerCommand request, IList<ExamPracticeSection> sections, ExamPracticeSectionResult sectionResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>();
-            var createExamPracticeAnswer = new List<ExamPracticeAnswer>();
-            var updateExamPracticeAnswer = new List<ExamPracticeAnswer>();
-            if (examPracticeSections != null && examPracticeSections.Any())
+            var createAnswers = new List<ExamPracticeAnswer>();
+            var updateAnswers = new List<ExamPracticeAnswer>();
+            if (sections?.Any() == true)
             {
-                var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.CreatedDate >= examPracticeSectionResult.CreatedDate)
-                                                              .Where(x => x.ExamPracticeSectionResultId == examPracticeSectionResult.Id)
-                                                              .ToListAsync();
-
+                var answers = await _examPracticeAnswerRepository.Queryable
+                                    .Where(x => x.CreatedDate >= sectionResult.CreatedDate && x.ExamPracticeSectionResultId == sectionResult.Id)
+                                    .ToListAsync();
                 foreach (var item in request.Answers)
                 {
-                    var examPracticeSection = examPracticeSections.FirstOrDefault(x => x.Id == item.ExamPracticeSectionId);
-                    if (examPracticeSection == null)
+                    var section = sections.FirstOrDefault(x => x.Id == item.ExamPracticeSectionId);
+                    if (section == null)
                     {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSection));
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(section));
                         return methodResult;
                     }
-                    var examPracticeAnswer = examPracticeAnswers.FirstOrDefault(x => x.ExamPracticeResultId == request.ExamPracticeResultId && x.ExamPracticeSectionId == examPracticeSection.Id);
-                    if (examPracticeAnswer == null)
+
+                    int answerLength = item.Answer?.ToString()?.Length ?? default;
+                    if (section.DisplayOrder == AnswerLength.Section0 && answerLength > AnswerLength.MaxLengthDisplayOrder0)
                     {
-                        examPracticeAnswer = GetExamPracticeAnswer(examPracticeSectionResult, examPracticeSection.Id);
-                        examPracticeAnswer = GetExamPracticeAnswer(examPracticeAnswer, item.Answer, item.SpeechTextAnswer, 0);
-                        if (!examPracticeAnswer.IsValid())
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(item.Answer), item.Answer ?? new(), answerLength);
+                        return methodResult;
+                    }
+                    if (section.DisplayOrder == AnswerLength.Section1 && answerLength > AnswerLength.MaxLengthDisplayOrder1)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(item.Answer), item.Answer ?? new(), answerLength);
+                        return methodResult;
+                    }
+                    var answer = answers.FirstOrDefault(x => x.ExamPracticeResultId == request.ExamPracticeResultId && x.ExamPracticeSectionId == section.Id);
+                    if (answer == null)
+                    {
+                        answer = GetExamPracticeAnswer(sectionResult, section.Id);
+                        answer = GetExamPracticeAnswer(answer, item.Answer, item.SpeechTextAnswer, 0);
+                        if (!answer.IsValid())
                         {
-                            methodResult.AddErrorBadRequest(examPracticeAnswer.ErrorMessages);
+                            methodResult.AddErrorBadRequest(answer.ErrorMessages);
                             return methodResult;
                         }
-                        createExamPracticeAnswer.Add(examPracticeAnswer);
+                        createAnswers.Add(answer);
                     }
                     else
                     {
-                        examPracticeAnswer = GetExamPracticeAnswer(examPracticeAnswer, item.Answer, item.SpeechTextAnswer, 0);
-                        if (!examPracticeAnswer.IsValid())
+                        answer = GetExamPracticeAnswer(answer, item.Answer, item.SpeechTextAnswer, 0);
+                        if (!answer.IsValid())
                         {
-                            methodResult.AddErrorBadRequest(examPracticeAnswer.ErrorMessages);
+                            methodResult.AddErrorBadRequest(answer.ErrorMessages);
                             return methodResult;
                         }
-                        updateExamPracticeAnswer.Add(examPracticeAnswer);
+                        updateAnswers.Add(answer);
                     }
                 }
             }
-            methodResult.Result = (createExamPracticeAnswer, updateExamPracticeAnswer);
+            methodResult.Result = (createAnswers, updateAnswers);
             return methodResult;
         }
 
-        private async Task<MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>> SaveAnswerSpearkingAsync(CreateExamPracticeAnswerCommand request, IList<ExamPracticeSection> examPracticeSections, ExamPracticeSectionResult examPracticeSectionResult)
+        private async Task<MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>> SaveAnswerSpearkingAsync(CreateExamPracticeAnswerCommand request, IList<ExamPracticeSection> sections, ExamPracticeSectionResult sectionResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             var methodResult = new MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>();
 
-            if (examPracticeSectionResult.CurrentExamPracticeSectionId.HasValue)
+            if (sectionResult.CurrentExamPracticeSectionId.HasValue)
             {
-                var currentExamPracticeSection = await _examPracticeSectionRepository.GetByIdAsync(examPracticeSectionResult.CurrentExamPracticeSectionId.Value);
-                if (currentExamPracticeSection == null)
+                var currentSection = await _examPracticeSectionRepository.GetByIdAsync(sectionResult.CurrentExamPracticeSectionId.Value);
+                if (currentSection == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(currentExamPracticeSection));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(currentSection));
                     return methodResult;
                 }
-                if (examPracticeSections.Any(x => x.Config?.DisplayTime > currentExamPracticeSection.Config?.DisplayTime))
+                if (sections.Any(x => x.Config?.DisplayTime > currentSection.Config?.DisplayTime))
                 {
-                    examPracticeSectionResult.CurrentExamPracticeSectionId = examPracticeSections.OrderByDescending(x => x.Config?.DisplayTime).FirstOrDefault()?.Id;
+                    sectionResult.CurrentExamPracticeSectionId = sections.OrderByDescending(x => x.Config?.DisplayTime).FirstOrDefault()?.Id;
                 }
             }
             else
             {
-                examPracticeSectionResult.CurrentExamPracticeSectionId = examPracticeSections.OrderByDescending(x => x.Config?.DisplayTime).FirstOrDefault()?.Id;
+                sectionResult.CurrentExamPracticeSectionId = sections.OrderByDescending(x => x.Config?.DisplayTime).FirstOrDefault()?.Id;
             }
 
-            var createExamPracticeAnswers = new List<ExamPracticeAnswer>();
-            var updateExamPracticeAnswers = new List<ExamPracticeAnswer>();
-
-            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.CreatedDate >= examPracticeSectionResult.CreatedDate)
-                                                         .Where(x => x.ExamPracticeSectionResultId == examPracticeSectionResult.Id)
-                                                         .ToListAsync();
+            var createAnswers = new List<ExamPracticeAnswer>();
+            var updateAnswers = new List<ExamPracticeAnswer>();
+            var answers = await _examPracticeAnswerRepository.Queryable
+                .Where(x => x.CreatedDate >= sectionResult.CreatedDate && x.ExamPracticeSectionResultId == sectionResult.Id)
+                .ToListAsync();
 
             foreach (var item in request.Answers)
             {
-                var examPracticeSection = examPracticeSections.FirstOrDefault(x => x.Id == item.ExamPracticeSectionId);
-                if (examPracticeSection == null)
+                var section = sections.FirstOrDefault(x => x.Id == item.ExamPracticeSectionId);
+                if (section == null)
                 {
                     continue;
                 }
-                var examPracticeAnswer = examPracticeAnswers.FirstOrDefault(x => x.ExamPracticeResultId == request.ExamPracticeResultId && x.ExamPracticeSectionId == examPracticeSection.Id);
-                if (examPracticeAnswer == null)
+                var answer = answers.FirstOrDefault(x => x.ExamPracticeResultId == request.ExamPracticeResultId && x.ExamPracticeSectionId == section.Id);
+                var pronunciationAssessment = await _pronuciationAssessmentService.AssessPronunciationFromFileContinuousAsync(item.Answer?.ToString() ?? string.Empty, item.SpeechTextAnswer ?? string.Empty);
+                double pronScore = pronunciationAssessment.PronunciationScore;
+                if (answer == null)
                 {
-                    examPracticeAnswer = GetExamPracticeAnswer(examPracticeSectionResult, examPracticeSection.Id);
-                    double pronScore = await _speakingEvaluationAIService.EvaluationSpeaking(examPracticeSection.Name, item?.Answer?.ToString() ?? default);
-
-                    examPracticeAnswer = GetExamPracticeAnswer(examPracticeAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore);
-                    if (!examPracticeAnswer.IsValid())
+                    answer = GetExamPracticeAnswer(sectionResult, section.Id);
+                    answer = GetExamPracticeAnswer(answer, item?.Answer, item?.SpeechTextAnswer, pronScore);
+                    if (!answer.IsValid())
                     {
-                        methodResult.AddErrorBadRequest(examPracticeAnswer.ErrorMessages);
+                        methodResult.AddErrorBadRequest(answer.ErrorMessages);
                         return methodResult;
                     }
-                    createExamPracticeAnswers.Add(examPracticeAnswer);
+                    createAnswers.Add(answer);
                 }
                 else
                 {
-                    double pronScore = await _speakingEvaluationAIService.EvaluationSpeaking(examPracticeSection.Name, item?.Answer?.ToString() ?? default);
-                    examPracticeAnswer = GetExamPracticeAnswer(examPracticeAnswer, item?.Answer, item?.SpeechTextAnswer, pronScore);
-                    if (!examPracticeAnswer.IsValid())
+                    answer = GetExamPracticeAnswer(answer, item?.Answer, item?.SpeechTextAnswer, pronScore);
+                    if (!answer.IsValid())
                     {
-                        methodResult.AddErrorBadRequest(examPracticeAnswer.ErrorMessages);
+                        methodResult.AddErrorBadRequest(answer.ErrorMessages);
                         return methodResult;
                     }
-                    updateExamPracticeAnswers.Add(examPracticeAnswer);
+                    updateAnswers.Add(answer);
                 }
+                answer.PronunciationAssessmentAnswer = pronunciationAssessment;
             }
-
-            methodResult.Result = (createExamPracticeAnswers, updateExamPracticeAnswers);
+            methodResult.Result = (createAnswers, updateAnswers);
             return methodResult;
         }
 
-        private async Task<MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>> SaveAnswerAsync(CreateExamPracticeAnswerCommand request, IList<Question>? questions, ExamPracticeSectionResult examPracticeSectionResult, ExamPracticeResult examPracticeResult)
+        private async Task<MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>> SaveAnswerAsync(CreateExamPracticeAnswerCommand request, IList<Question>? questions, ExamPracticeSectionResult sectionResult, ExamPracticeResult examPracticeResult)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
-
             var methodResult = new MethodResult<(IList<ExamPracticeAnswer>, IList<ExamPracticeAnswer>)>();
-            var createExamPracticeAnswers = new List<ExamPracticeAnswer>();
-            var updateExamPracticeAnswers = new List<ExamPracticeAnswer>();
-            if (questions == null || !questions.Any())
+            var createAnswers = new List<ExamPracticeAnswer>();
+            var updateAnswers = new List<ExamPracticeAnswer>();
+            if (questions?.Any() != true)
             {
-                methodResult.Result = (createExamPracticeAnswers, updateExamPracticeAnswers);
+                methodResult.Result = (createAnswers, updateAnswers);
                 return methodResult;
             }
-
-            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.CreatedDate >= examPracticeSectionResult.CreatedDate)
-                                                         .Where(x => x.ExamPracticeSectionResultId == examPracticeSectionResult.Id)
-                                                         .ToListAsync();
-
+            var answers = await _examPracticeAnswerRepository.Queryable
+                .Where(x => x.CreatedDate >= sectionResult.CreatedDate && x.ExamPracticeSectionResultId == sectionResult.Id)
+                .ToListAsync();
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
@@ -559,32 +607,30 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     return methodResult;
                 }
                 var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
-
-                var examPracticeAnswer = examPracticeAnswers.FirstOrDefault(x => x.ExamPracticeSectionResultId == examPracticeSectionResult.Id && x.QuestionId == questionItem.Id);
-                if (examPracticeAnswer == null)
+                var answer = answers.FirstOrDefault(x => x.ExamPracticeSectionResultId == sectionResult.Id && x.QuestionId == questionItem.Id);
+                if (answer == null)
                 {
-                    examPracticeAnswer = GetExamPracticeAnswer(examPracticeSectionResult, questionItem);
-                    examPracticeAnswer = GetExamPracticeAnswer(examPracticeAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount);
-                    if (!examPracticeAnswer.IsValid())
+                    answer = GetExamPracticeAnswer(sectionResult, questionItem);
+                    answer = GetExamPracticeAnswer(answer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount);
+                    if (!answer.IsValid())
                     {
-                        methodResult.AddErrorBadRequest(examPracticeAnswer.ErrorMessages);
+                        methodResult.AddErrorBadRequest(answer.ErrorMessages);
                         return methodResult;
                     }
-                    createExamPracticeAnswers.Add(examPracticeAnswer);
+                    createAnswers.Add(answer);
                 }
                 else
                 {
-                    examPracticeAnswer = GetExamPracticeAnswer(examPracticeAnswer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount);
-                    if (!examPracticeAnswer.IsValid())
+                    answer = GetExamPracticeAnswer(answer, answerConfig, questionItem, isAnswered, item.SpeechTextAnswer, correctCount);
+                    if (!answer.IsValid())
                     {
-                        methodResult.AddErrorBadRequest(examPracticeAnswer.ErrorMessages);
+                        methodResult.AddErrorBadRequest(answer.ErrorMessages);
                         return methodResult;
                     }
-                    updateExamPracticeAnswers.Add(examPracticeAnswer);
+                    updateAnswers.Add(answer);
                 }
             }
-
-            methodResult.Result = (createExamPracticeAnswers, updateExamPracticeAnswers);
+            methodResult.Result = (createAnswers, updateAnswers);
             return methodResult;
         }
 
@@ -592,49 +638,52 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<ExamPracticeSectionResult>();
-            if (examPractice.Type == EnumExamPracticeType.IELTS)
+            if (examPractice.Type != EnumExamPracticeType.ExamPractice)
             {
-                var examPracticeSectionResult = await _examPracticeSectionResultRepository.Queryable
-                                                                                 .Where(x => x.ExamPracticeSectionId == request.ExamPracticeSectionId && x.ExamPracticeResultId == examPracticeResult.Id)
-                                                                                 .FirstOrDefaultAsync();
-                if (examPracticeSectionResult == null)
+                var sectionResult = await _examPracticeSectionResultRepository.Queryable
+                    .Where(x => x.ExamPracticeSectionId == request.ExamPracticeSectionId && x.ExamPracticeResultId == examPracticeResult.Id)
+                    .FirstOrDefaultAsync();
+                if (sectionResult == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSectionResult));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionResult));
                     return methodResult;
                 }
-                methodResult.Result = examPracticeSectionResult;
-                if (!examPracticeSection.CourseSkill.HasValue || (request.Answers == null || !request.Answers.Any()))
+                methodResult.Result = sectionResult;
+                if (!examPracticeSection.CourseSkill.HasValue || request.Answers?.Any() != true)
                 {
                     return methodResult;
                 }
-                var listSkill = new List<EnumCourseSkill>() { EnumCourseSkill.Reading, EnumCourseSkill.Listening };
-                var questionIds = request.Answers.Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
 
-                var listExamPracticeSectionId = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ParentExamPracticeSectionResultId == examPracticeSectionResult.Id)
-                                                                                                    .Select(x => x.ExamPracticeSectionId)
-                                                                                                    .ToListAsync();
+                var listSkill = new[] { EnumCourseSkill.Reading, EnumCourseSkill.Listening };
+                var questionIds = request.Answers.Where(x => x.QuestionId.HasValue).Select(x => x.QuestionId!.Value).ToList();
+                var listSectionId = await _examPracticeSectionResultRepository.Queryable.AsNoTracking()
+                                                                               .Where(x => x.ParentExamPracticeSectionResultId == sectionResult.Id)
+                                                                               .Select(x => x.ExamPracticeSectionId)
+                                                                               .ToListAsync();
 
                 if (listSkill.Contains(examPracticeSection.CourseSkill.Value) && questionIds.Any())
                 {
                     var questions = await _questionRepository.GetByIdsAsync(questionIds);
-                    var examPracticeSectionIds = questions.Select(x => x.ExamPracticeSectionId).Distinct().ToList();
-
-                    var examPracticeSectionResults = examPracticeSectionIds.Where(x => !listExamPracticeSectionId.Distinct().Contains(x))
-                    .Select(examPracticeSectionId => new ExamPracticeSectionResult
-                    {
-                        ExamPracticeSectionId = examPracticeSectionId,
-                        StudentId = examPracticeResult.StudentId,
-                        ExamPracticeResultId = examPracticeResult.Id,
-                        ParentExamPracticeSectionResultId = examPracticeSectionResult.Id,
-                        Status = EnumResultStatus.New,
-                    }).ToList();
-                    if (examPracticeSectionResults.Any())
+                    var sectionIds = questions.Select(x => x.ExamPracticeSectionId).Distinct().ToList();
+                    var sectionResults = sectionIds.Where(x => !listSectionId.Distinct().Contains(x))
+                        .Select(id => new ExamPracticeSectionResult
+                        {
+                            ExamPracticeSectionId = id,
+                            StudentId = examPracticeResult.StudentId,
+                            ExamPracticeResultId = examPracticeResult.Id,
+                            ParentExamPracticeSectionResultId = sectionResult.Id,
+                            Status = EnumResultStatus.New,
+                        }).ToList();
+                    if (sectionResults.Any())
                     {
                         await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
                         {
-                            await _examPracticeSectionResultRepository.BulkMergeAsync(examPracticeSectionResults, bulk =>
+                            await _examPracticeSectionResultRepository.BulkMergeAsync(sectionResults, bulk =>
+                            bulk.ColumnPrimaryKeyExpression = entity => new
                             {
-                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.StudentId, entity.ExamPracticeSectionId, entity.ExamPracticeResultId };
+                                entity.StudentId,
+                                entity.ExamPracticeSectionId,
+                                entity.ExamPracticeResultId
                             });
                             return methodResult;
                         });
@@ -642,59 +691,62 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 }
                 else if (examPracticeSection.CourseSkill.Value == EnumCourseSkill.Speaking)
                 {
-                    var examPracticeSectionIds = request.Answers.Where(x => x.ExamPracticeSectionId.HasValue).Select(x => x.ExamPracticeSectionId!.Value).ToList();
-                    if (!examPracticeSectionIds.Any())
+                    var sectionIds = request.Answers.Where(x => x.ExamPracticeSectionId.HasValue).Select(x => x.ExamPracticeSectionId!.Value).ToList();
+                    if (!sectionIds.Any())
                     {
                         return methodResult;
                     }
-
-                    var examPracticeSections = await _examPracticeSectionRepository.GetByIdsAsync(examPracticeSectionIds);
-                    var examPracticeSectionParentId = examPracticeSections.First().ParentExamPracticeSectionId ?? default;
-                    if (listExamPracticeSectionId.Any(x => x == examPracticeSectionParentId))
+                    var sections = await _examPracticeSectionRepository.GetByIdsAsync(sectionIds);
+                    var parentId = sections.First().ParentExamPracticeSectionId ?? default;
+                    if (listSectionId.Any(x => x == parentId))
                     {
                         return methodResult;
                     }
-
-                    var examPracticeSectionChildrenResult = new ExamPracticeSectionResult
+                    var childrenResult = new ExamPracticeSectionResult
                     {
-                        ExamPracticeSectionId = examPracticeSectionParentId,
-                        ParentExamPracticeSectionResultId = examPracticeSectionResult.Id,
+                        ExamPracticeSectionId = parentId,
+                        ParentExamPracticeSectionResultId = sectionResult.Id,
                         StudentId = examPracticeResult.StudentId,
                         ExamPracticeResultId = examPracticeResult.Id,
-                        Status = EnumResultStatus.New,
+                        Status = EnumResultStatus.New
                     };
                     await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
                     {
-                        await _examPracticeSectionResultRepository.BulkMergeAsync(new List<ExamPracticeSectionResult> { examPracticeSectionChildrenResult }, bulk =>
-                        {
-                            bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExamPracticeSectionId, entity.ExamPracticeResultId };
-                        });
+                        await _examPracticeSectionResultRepository.BulkMergeAsync(new[] { childrenResult }, bulk =>
+                            bulk.ColumnPrimaryKeyExpression = entity => new
+                            {
+                                entity.ExamPracticeSectionId,
+                                entity.ExamPracticeResultId
+                            }
+                        );
                         return methodResult;
                     });
                 }
                 else if (examPracticeSection.CourseSkill.Value == EnumCourseSkill.Writing)
                 {
-                    var examPracticeSectionIds = request.Answers.Where(x => x.ExamPracticeSectionId.HasValue).Select(x => x.ExamPracticeSectionId!.Value).ToList();
-                    if (!examPracticeSectionIds.Any())
+                    var sectionIds = request.Answers.Where(x => x.ExamPracticeSectionId.HasValue).Select(x => x.ExamPracticeSectionId!.Value).ToList();
+                    if (!sectionIds.Any())
                     {
                         return methodResult;
                     }
-                    var examPracticeSectionResults = examPracticeSectionIds.Where(x => !listExamPracticeSectionId.Distinct().Contains(x))
-                    .Select(examPracticeSectionId => new ExamPracticeSectionResult
-                    {
-                        ExamPracticeSectionId = examPracticeSectionId,
-                        StudentId = examPracticeResult.StudentId,
-                        ExamPracticeResultId = examPracticeResult.Id,
-                        ParentExamPracticeSectionResultId = examPracticeSectionResult.Id,
-                        Status = EnumResultStatus.New,
-                    }).ToList();
-                    if (examPracticeSectionResults.Any())
+                    var sectionResults = sectionIds.Where(x => !listSectionId.Distinct().Contains(x))
+                        .Select(id => new ExamPracticeSectionResult
+                        {
+                            ExamPracticeSectionId = id,
+                            StudentId = examPracticeResult.StudentId,
+                            ExamPracticeResultId = examPracticeResult.Id,
+                            ParentExamPracticeSectionResultId = sectionResult.Id,
+                            Status = EnumResultStatus.New,
+                        }).ToList();
+                    if (sectionResults.Any())
                     {
                         await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
                         {
-                            await _examPracticeSectionResultRepository.BulkMergeAsync(examPracticeSectionResults, bulk =>
+                            await _examPracticeSectionResultRepository.BulkMergeAsync(sectionResults, bulk =>
+                            bulk.ColumnPrimaryKeyExpression = entity => new
                             {
-                                bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExamPracticeSectionId, entity.ExamPracticeResultId };
+                                entity.ExamPracticeSectionId,
+                                entity.ExamPracticeResultId
                             });
                             return methodResult;
                         });
@@ -703,8 +755,9 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             }
             else
             {
-                var examPracticeSectionResult = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ExamPracticeSectionId == examPracticeSection.Id && x.ExamPracticeResultId == examPracticeResult.Id)
-                                                                                   .FirstOrDefaultAsync();
+                var examPracticeSectionResult = await _examPracticeSectionResultRepository.Queryable
+                    .Where(x => x.ExamPracticeSectionId == examPracticeSection.Id && x.ExamPracticeResultId == examPracticeResult.Id)
+                    .FirstOrDefaultAsync();
                 if (examPracticeSectionResult == null)
                 {
                     examPracticeSectionResult = new ExamPracticeSectionResult
@@ -716,9 +769,11 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                     };
                     await _examPracticeSectionResultRepository.ExecuteTransactionAsync(async () =>
                     {
-                        await _examPracticeSectionResultRepository.BulkMergeAsync(new List<ExamPracticeSectionResult> { examPracticeSectionResult }, bulk =>
+                        await _examPracticeSectionResultRepository.BulkMergeAsync(new[] { examPracticeSectionResult }, bulk =>
+                        bulk.ColumnPrimaryKeyExpression = entity => new
                         {
-                            bulk.ColumnPrimaryKeyExpression = entity => new { entity.ExamPracticeSectionId, entity.ExamPracticeResultId };
+                            entity.ExamPracticeSectionId,
+                            entity.ExamPracticeResultId
                         });
                         methodResult.Result = examPracticeSectionResult;
                         return methodResult;
@@ -729,41 +784,41 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
             return methodResult;
         }
 
-        private static ExamPracticeAnswer GetExamPracticeAnswer(ExamPracticeAnswer examPracticeAnswer, object? answer, Question questionItem, bool isAnswered, string? speechText, short correctCount = default)
+        private static ExamPracticeAnswer GetExamPracticeAnswer(ExamPracticeAnswer answer, object? ans, Question questionItem, bool isAnswered, string? speechText, short correctCount = default)
         {
-            examPracticeAnswer = GetExamPracticeAnswer(examPracticeAnswer, answer, speechText, default, correctCount);
-            examPracticeAnswer.IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null;
-            return examPracticeAnswer;
+            answer = GetExamPracticeAnswer(answer, ans, speechText, default, correctCount);
+            answer.IsCorrect = isAnswered ? (questionItem == null || questionItem.CorrectTotal == correctCount) : null;
+            return answer;
         }
 
-        private static ExamPracticeAnswer GetExamPracticeAnswer(ExamPracticeAnswer examPracticeAnswer, object? answer, string? speechText, double pronsScore, short correctCount = default)
+        private static ExamPracticeAnswer GetExamPracticeAnswer(ExamPracticeAnswer answer, object? ans, string? speechText, double pronsScore, short correctCount = default)
         {
-            examPracticeAnswer.Answer = answer;
-            examPracticeAnswer.SpeechTextAnswer = speechText;
-            examPracticeAnswer.PronunciationScore = pronsScore;
-            examPracticeAnswer.CorrectCount = correctCount;
-            return examPracticeAnswer;
+            answer.Answer = ans;
+            answer.SpeechTextAnswer = speechText;
+            answer.PronunciationScore = pronsScore;
+            answer.CorrectCount = correctCount;
+            return answer;
         }
 
-        private static ExamPracticeAnswer GetExamPracticeAnswer(ExamPracticeSectionResult examPracticeSectionResult, Guid? examPracticeSectionId = null)
+        private static ExamPracticeAnswer GetExamPracticeAnswer(ExamPracticeSectionResult sectionResult, Guid? sectionId = null)
         {
             return new ExamPracticeAnswer
             {
-                ExamPracticeResultId = examPracticeSectionResult.ExamPracticeResultId,
-                ExamPracticeSectionId = examPracticeSectionId,
-                ExamPracticeSectionResultId = examPracticeSectionResult.Id,
+                ExamPracticeResultId = sectionResult.ExamPracticeResultId,
+                ExamPracticeSectionId = sectionId,
+                ExamPracticeSectionResultId = sectionResult.Id,
                 IsCorrect = null,
                 Status = EnumAnswerStatus.Process,
             };
         }
 
-        private static ExamPracticeAnswer GetExamPracticeAnswer(ExamPracticeSectionResult examPracticeSectionResult, Question questionItem)
+        private static ExamPracticeAnswer GetExamPracticeAnswer(ExamPracticeSectionResult sectionResult, Question questionItem)
         {
             return new ExamPracticeAnswer
             {
-                ExamPracticeResultId = examPracticeSectionResult.ExamPracticeResultId,
+                ExamPracticeResultId = sectionResult.ExamPracticeResultId,
                 QuestionId = questionItem.Id,
-                ExamPracticeSectionResultId = examPracticeSectionResult.Id,
+                ExamPracticeSectionResultId = sectionResult.Id,
                 Status = EnumAnswerStatus.Process,
             };
         }
