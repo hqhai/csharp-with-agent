@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiModelFeature
     {
         public EnumFeatureAi Key { get; set; }
         public Guid? FeatureObjectId { get; set; }
-        public Guid? AiModelManagerId { get; set; }
+        public Guid? AiPromptManagerId { get; set; }
         public string? UserRole { get; set; }
         public string? Config { get; set; }
         public object? JsonConfig { get; set; }

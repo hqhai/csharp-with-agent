@@ -7,8 +7,8 @@ namespace Fsel.Course.Domain.Entities
     using Common.Enums.ErrorCodes;
     using Core.Entities;
 
-    [Table("AiModelManager")]
-    public class AiModelManager : Entity
+    [Table("AiPromptManager")]
+    public class AiPromptManager : Entity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -17,6 +17,6 @@ namespace Fsel.Course.Domain.Entities
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [MaxLength(100000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? InputModel { get; set; }
-        public ICollection<AiModelFeature> AiModelFeatures { get; set; } = new List<AiModelFeature>();
+        public ICollection<AIFeatureConfig> AiModelFeatures { get; set; } = new List<AIFeatureConfig>();
     }
 }

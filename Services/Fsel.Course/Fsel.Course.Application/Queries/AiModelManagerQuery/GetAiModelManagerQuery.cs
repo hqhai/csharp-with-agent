@@ -21,9 +21,9 @@ namespace Fsel.Course.Application.Queries.AiModelManagerQuery
 
     public class GetAiModelManagerQueryHandler : IRequestHandler<GetAiModelManagerQuery, MethodResult<PagingItemsModel<AiManagerSearchModel>>>
     {
-        private readonly IAiModelManagerRepository _aiModelManagerRepository;
+        private readonly IAiPromptManagerRepository _aiModelManagerRepository;
 
-        public GetAiModelManagerQueryHandler(IAiModelManagerRepository aiModelManagerRepository)
+        public GetAiModelManagerQueryHandler(IAiPromptManagerRepository aiModelManagerRepository)
         {
             _aiModelManagerRepository = aiModelManagerRepository;
         }

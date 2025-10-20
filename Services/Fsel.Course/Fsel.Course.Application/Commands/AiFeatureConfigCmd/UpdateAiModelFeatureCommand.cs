@@ -15,25 +15,25 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateAiModelFeatureCommand : UpdateAiFeatureCommandModel, IRequest<MethodResult<AiFeatureModel>>
+    public class UpdateAiModelFeatureCommand : UpdateAiFeatureCommandModel, IRequest<MethodResult<AiFeatureConfigModel>>
     {
     }
 
-    public class UpdateAiModelFeatureCommandHandler : IRequestHandler<UpdateAiModelFeatureCommand, MethodResult<AiFeatureModel>>
+    public class UpdateAiModelFeatureCommandHandler : IRequestHandler<UpdateAiModelFeatureCommand, MethodResult<AiFeatureConfigModel>>
     {
-        private readonly IAiModelFeatureRepository _aiModelFeatureRepository;
+        private readonly IAiFeatureConfigRepository _aiModelFeatureRepository;
         private readonly IMapper _mapper;
 
-        public UpdateAiModelFeatureCommandHandler(IAiModelFeatureRepository aiModelFeatureRepository, IMapper mapper)
+        public UpdateAiModelFeatureCommandHandler(IAiFeatureConfigRepository aiModelFeatureRepository, IMapper mapper)
         {
             _aiModelFeatureRepository = aiModelFeatureRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<AiFeatureModel>> Handle(UpdateAiModelFeatureCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<AiFeatureConfigModel>> Handle(UpdateAiModelFeatureCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AiFeatureModel> methodResult = new MethodResult<AiFeatureModel>();
+            MethodResult<AiFeatureConfigModel> methodResult = new MethodResult<AiFeatureConfigModel>();
 
             var exits = await _aiModelFeatureRepository.Queryable.AsNoTracking().FirstOrDefaultAsync(x => x.FeatureAi == request.Key && x.ParentFeatureId == null && !x.IsDeleted, cancellationToken);
             if (exits == null)
@@ -58,7 +58,7 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
                     await _aiModelFeatureRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                     methodResult.StatusCode = StatusCodes.Status200OK;
-                    methodResult.Result = _mapper.Map<AiFeatureModel>(exits);
+                    methodResult.Result = _mapper.Map<AiFeatureConfigModel>(exits);
 
                     return methodResult;
                 }
@@ -74,9 +74,9 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
 
                         if (subFeature == null)
                         {
-                            subFeature = new AiModelFeature
+                            subFeature = new AIFeatureConfig
                             {
-                                AiModelManagerId = (Guid)request.AiModelManagerId,
+                                AiPromptManagerId = (Guid)request.AiPromptManagerId,
                                 ParentFeatureId = exits.Id,
                                 FeatureAi = exits.FeatureAi,
                                 TypeFeatureAi = sub.TypeFeatureAi,
@@ -97,7 +97,7 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
                     await _aiModelFeatureRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                     var map = await _aiModelFeatureRepository.Queryable.Include(x => x.SubFeatures).SingleAsync(x => x.Id == exits.Id, cancellationToken);
 
-                    methodResult.Result = _mapper.Map<AiFeatureModel>(map);
+                    methodResult.Result = _mapper.Map<AiFeatureConfigModel>(map);
                     methodResult.StatusCode = StatusCodes.Status200OK;
 
                     return methodResult;
@@ -109,7 +109,7 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
 
         }
 
-        private MethodResult<AiFeatureModel> ValidationSubFeature(UpdateAiModelFeatureCommand request, MethodResult<AiFeatureModel> methodResult)
+        private MethodResult<AiFeatureConfigModel> ValidationSubFeature(UpdateAiModelFeatureCommand request, MethodResult<AiFeatureConfigModel> methodResult)
         {
             if (request.SubFeature.Select(x => x.UserRole) == null)
             {

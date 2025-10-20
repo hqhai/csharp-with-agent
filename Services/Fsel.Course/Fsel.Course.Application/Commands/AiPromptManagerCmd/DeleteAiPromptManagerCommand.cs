@@ -9,25 +9,24 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class DeleteAiModelManagerCommand : IRequest<MethodResult<bool>>
+    public class DeleteAiPromptManagerCommand : IRequest<MethodResult<bool>>
     {
         public Guid Id { get; set; }
     }
 
-    public class DeleteAiModelManagerCommandHandler : IRequestHandler<DeleteAiModelManagerCommand, MethodResult<bool>>
+    public class DeleteAiPromptManagerCommandHandler : IRequestHandler<DeleteAiPromptManagerCommand, MethodResult<bool>>
     {
-        private readonly IAiModelManagerRepository _aiModelManagerRepository;
+        private readonly IAiPromptManagerRepository _aiModelManagerRepository;
 
-        public DeleteAiModelManagerCommandHandler(IAiModelManagerRepository aiModelManagerRepository)
+        public DeleteAiPromptManagerCommandHandler(IAiPromptManagerRepository aiModelManagerRepository)
         {
             _aiModelManagerRepository = aiModelManagerRepository;
         }
 
-        public async Task<MethodResult<bool>> Handle(DeleteAiModelManagerCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(DeleteAiPromptManagerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
@@ -60,9 +59,9 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
             return methodResult;
         }
 
-        private async Task<MethodResult<bool>> Validation(AiModelManager entity,
+        private async Task<MethodResult<bool>> Validation(AiPromptManager entity,
             MethodResult<bool> methodResult,
-            DeleteAiModelManagerCommand request)
+            DeleteAiPromptManagerCommand request)
         {
             if (entity == null)
             {

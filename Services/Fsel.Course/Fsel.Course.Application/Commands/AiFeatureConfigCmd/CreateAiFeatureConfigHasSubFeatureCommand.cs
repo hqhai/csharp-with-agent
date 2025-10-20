@@ -16,31 +16,31 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateAiModelHasSubFeatureCommand : CreateAiFeatureCommandModel, IRequest<MethodResult<AiFeatureModel>>
+    public class CreateAiFeatureConfigHasSubFeatureCommand : CreateAiFeatureConfigCommandModel, IRequest<MethodResult<AiFeatureConfigModel>>
     {
     }
 
-    public class CreateAiModelHasSubFeatureCommandHandler : IRequestHandler<CreateAiModelHasSubFeatureCommand, MethodResult<AiFeatureModel>>
+    public class CreateAiFeatureconfigHasSubFeatureCommandHandler : IRequestHandler<CreateAiFeatureConfigHasSubFeatureCommand, MethodResult<AiFeatureConfigModel>>
     {
-        private readonly IAiModelFeatureRepository _aiModelFeatureRepository;
-        private readonly IAiModelManagerRepository _aiModelManagerRepository;
+        private readonly IAiFeatureConfigRepository _aiModelFeatureRepository;
+        private readonly IAiPromptManagerRepository _aiModelManagerRepository;
         private readonly IMapper _mapper;
 
-        public CreateAiModelHasSubFeatureCommandHandler(IAiModelFeatureRepository aiModelFeatureRepository,
+        public CreateAiFeatureconfigHasSubFeatureCommandHandler(IAiFeatureConfigRepository aiModelFeatureRepository,
             IMapper mapper,
-            IAiModelManagerRepository aiModelManagerRepository)
+            IAiPromptManagerRepository aiModelManagerRepository)
         {
             _aiModelFeatureRepository = aiModelFeatureRepository;
             _mapper = mapper;
             _aiModelManagerRepository = aiModelManagerRepository;
         }
 
-        public async Task<MethodResult<AiFeatureModel>> Handle(CreateAiModelHasSubFeatureCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<AiFeatureConfigModel>> Handle(CreateAiFeatureConfigHasSubFeatureCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AiFeatureModel> methodResult = new MethodResult<AiFeatureModel>();
+            MethodResult<AiFeatureConfigModel> methodResult = new MethodResult<AiFeatureConfigModel>();
 
-            var modelExits = await _aiModelManagerRepository.GetByIdAsync(request.AiModelManagerId);
+            var modelExits = await _aiModelManagerRepository.GetByIdAsync(request.AiPromptManagerId);
 
             if (modelExits == null)
             {
@@ -52,16 +52,16 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
             {
 
                 var parent = await _aiModelFeatureRepository.Queryable.
-                    SingleOrDefaultAsync(x => x.AiModelManagerId == request.AiModelManagerId
+                    SingleOrDefaultAsync(x => x.AiPromptManagerId == request.AiPromptManagerId
                     && x.FeatureAi == request.FeatureAi
                     && x.ParentFeatureId == null && x.TypeFeatureAi == null && !x.IsDeleted, cancellationToken);
 
                 if (parent == null)
                 {
-                    parent = new AiModelFeature
+                    parent = new AIFeatureConfig
                     {
                         Id = Guid.NewGuid(),
-                        AiModelManagerId = request.AiModelManagerId,
+                        AiPromptManagerId = request.AiPromptManagerId,
                         FeatureAi = request.FeatureAi,
                         FeatureObjectId = request.FeatureObjectId,
                         UserRole = request.UserRole,
@@ -103,9 +103,9 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
 
                         if (!exits.TryGetValue(type, out var subFeature))
                         {
-                            subFeature = new AiModelFeature
+                            subFeature = new AIFeatureConfig
                             {
-                                AiModelManagerId = parent.AiModelManagerId,
+                                AiPromptManagerId = parent.AiPromptManagerId,
                                 FeatureAi = parent.FeatureAi,
                                 ParentFeatureId = parent.Id,
                                 TypeFeatureAi = type
@@ -128,7 +128,7 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
                     .Include(x => x.SubFeatures)
                     .SingleAsync(x => x.Id == parent.Id, cancellationToken);
 
-                methodResult.Result = _mapper.Map<AiFeatureModel>(parentReady);
+                methodResult.Result = _mapper.Map<AiFeatureConfigModel>(parentReady);
                 methodResult.StatusCode = StatusCodes.Status200OK;
 
                 return methodResult;

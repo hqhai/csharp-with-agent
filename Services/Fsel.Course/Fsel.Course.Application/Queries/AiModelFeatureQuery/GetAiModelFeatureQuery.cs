@@ -17,27 +17,27 @@ namespace Fsel.Course.Application.Queries.AiModelFeatureQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetAiModelFeatureQuery : IRequest<MethodResult<AiFeatureModel>>
+    public class GetAiModelFeatureQuery : IRequest<MethodResult<AiFeatureConfigModel>>
     {
         public EnumFeatureAi Key { get; set; }
         public Guid AiModelManagerId { get; set; }
         public bool IncludeChildren { get; set; } = true;
     }
 
-    public class GetAiModelFeatureQueryHandler : IRequestHandler<GetAiModelFeatureQuery, MethodResult<AiFeatureModel>>
+    public class GetAiModelFeatureQueryHandler : IRequestHandler<GetAiModelFeatureQuery, MethodResult<AiFeatureConfigModel>>
     {
-        private readonly IAiModelFeatureRepository _aiModelFeatureRepository;
+        private readonly IAiFeatureConfigRepository _aiModelFeatureRepository;
         private readonly IMapper _mapper;
 
-        public GetAiModelFeatureQueryHandler(IAiModelFeatureRepository aiModelFeatureRepository, IMapper mapper)
+        public GetAiModelFeatureQueryHandler(IAiFeatureConfigRepository aiModelFeatureRepository, IMapper mapper)
         {
             _aiModelFeatureRepository = aiModelFeatureRepository;
             _mapper = mapper;
         }
-        public async Task<MethodResult<AiFeatureModel>> Handle(GetAiModelFeatureQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<AiFeatureConfigModel>> Handle(GetAiModelFeatureQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AiFeatureModel> methodResult = new MethodResult<AiFeatureModel>();
+            MethodResult<AiFeatureConfigModel> methodResult = new MethodResult<AiFeatureConfigModel>();
 
             var aiFeature = await _aiModelFeatureRepository.Queryable
                 .AsNoTracking()
@@ -56,7 +56,7 @@ namespace Fsel.Course.Application.Queries.AiModelFeatureQuery
                 subType ??= Array.Empty<EnumTypeFeatureAi>();
 
                 var results = aiFeature is null
-                    ? new List<AiModelFeature>()
+                    ? new List<AIFeatureConfig>()
                     : await _aiModelFeatureRepository.Queryable.AsNoTracking()
                     .Where(x => x.ParentFeatureId == aiFeature.Id && !x.IsDeleted)
                     .ToListAsync(cancellationToken);
@@ -82,7 +82,7 @@ namespace Fsel.Course.Application.Queries.AiModelFeatureQuery
                 }
             }
 
-            var resultMap = _mapper.Map<AiFeatureModel>(aiFeature);
+            var resultMap = _mapper.Map<AiFeatureConfigModel>(aiFeature);
             resultMap.SubFeatures = subFeatue;
 
             methodResult.Result = resultMap;

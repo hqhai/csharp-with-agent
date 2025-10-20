@@ -10,9 +10,9 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Domain.IRepositories;
     using Microsoft.EntityFrameworkCore;
 
-    public class AiModelManagerRepository : BaseRepository<AiModelManager>, IAiModelManagerRepository
+    public class AiPromptManagerRepository : BaseRepository<AiPromptManager>, IAiPromptManagerRepository
     {
-        public AiModelManagerRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
+        public AiPromptManagerRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

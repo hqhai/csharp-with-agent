@@ -7,63 +7,53 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.AiModelManager;
     using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
+    using MailKit.Net.Smtp;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateAiModelManagerCommand : UpdateAiModelCommandManagerModel, IRequest<MethodResult<AiManagerModel>>
+    public class CreateAiPromptManagerCommand : CreateAiPromptManagerCommandModel, IRequest<MethodResult<AiPromptManagerModel>>
     {
+
     }
 
-    public class UpdateAiModelManagerCommandHanlder : IRequestHandler<UpdateAiModelManagerCommand, MethodResult<AiManagerModel>>
+    public class CreateAiPromptManagerCommandHandler : IRequestHandler<CreateAiPromptManagerCommand, MethodResult<AiPromptManagerModel>>
     {
-        private readonly IAiModelManagerRepository _aiModelManagerRepository;
+        private readonly IAiPromptManagerRepository _aiModelManagerRepository;
         private readonly IMapper _mapper;
 
-        public UpdateAiModelManagerCommandHanlder(IAiModelManagerRepository aiModelManagerRepository, IMapper mapper)
+        public CreateAiPromptManagerCommandHandler(IAiPromptManagerRepository aiModelManagerRepository, IMapper mapper)
         {
             _aiModelManagerRepository = aiModelManagerRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<AiManagerModel>> Handle(UpdateAiModelManagerCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<AiPromptManagerModel>> Handle(CreateAiPromptManagerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AiManagerModel> methodResult = new MethodResult<AiManagerModel>();
-
-            var exits = await _aiModelManagerRepository.GetByIdAsync(request.Id);
-            if (exits == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
-                return methodResult;
-            }
-
-            Validation(request, methodResult);
+            MethodResult<AiPromptManagerModel> methodResult = new MethodResult<AiPromptManagerModel>();
+            await Validation(request, methodResult, cancellationToken);
 
             await _aiModelManagerRepository.ExecuteTransactionAsync(async () =>
             {
-                _mapper.Map(request, exits);
-                if (!exits.IsValid())
-                {
-                    methodResult.AddErrorBadRequest(exits.ErrorMessages);
-                    return methodResult;
-                }
-
-                exits = _aiModelManagerRepository.Update(exits);
+                var entity = _mapper.Map<AiPromptManager>(request);
+                entity = _aiModelManagerRepository.Add(entity);
                 await _aiModelManagerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                methodResult.Result = _mapper.Map<AiPromptManagerModel>(entity);
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<AiManagerModel>(exits);
+
                 return methodResult;
             });
 
             return methodResult;
         }
 
-        private MethodResult<AiManagerModel> Validation(UpdateAiModelManagerCommand request, MethodResult<AiManagerModel> methodResult)
+        private async Task<MethodResult<AiPromptManagerModel>> Validation(CreateAiPromptManagerCommand request, MethodResult<AiPromptManagerModel> methodResult, CancellationToken cancellationToken)
         {
             if (request.AiModelName == null)
             {
@@ -74,6 +64,14 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
             if (request.InputModel == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                return methodResult;
+            }
+
+            var exits = await _aiModelManagerRepository.Queryable.FirstOrDefaultAsync(x => x.AiModelName == request.AiModelName, cancellationToken);
+
+            if (exits != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
                 return methodResult;
             }
 

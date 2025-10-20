@@ -8,18 +8,18 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Models.CommandModels.AiModelFeature;
     using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
 
-    public class AiModelFeatureProfile : Profile
+    public class AiFeatureFeatureProfile : Profile
     {
-        public AiModelFeatureProfile()
+        public AiFeatureFeatureProfile()
         {
-            CreateMap<AiModelFeature, AiFeatureModel>().IgnoreAllNonExisting()
+            CreateMap<AIFeatureConfig, AiFeatureConfigModel>().IgnoreAllNonExisting()
                 .ForMember(d => d.SubFeatures,  o => o.MapFrom(s => s.SubFeatures));
-            CreateMap<CreateAiFeatureCommandModel, AiModelFeature>().IgnoreAllNonExisting();
-            CreateMap<CreateAiFeatuerHasSubCommadModel, AiModelFeature>().IgnoreAllNonExisting();
-            CreateMap<UpdateAiFeatureCommandModel, AiModelFeature>().IgnoreAllNonExisting();
-            CreateMap<AiFeatureModel, AiModelFeature>().IgnoreAllNonExisting();
+            CreateMap<CreateAiFeatureConfigCommandModel, AIFeatureConfig>().IgnoreAllNonExisting();
+            CreateMap<CreateAiFeatuerHasSubCommadModel, AIFeatureConfig>().IgnoreAllNonExisting();
+            CreateMap<UpdateAiFeatureCommandModel, AIFeatureConfig>().IgnoreAllNonExisting();
+            CreateMap<AiFeatureConfigModel, AIFeatureConfig>().IgnoreAllNonExisting();
 
-            CreateMap<AiModelFeature, AiSubFeatueModel>()
+            CreateMap<AIFeatureConfig, AiSubFeatueModel>()
                 .ForMember(d => d.TypeFeatureAi, o => o.MapFrom(s => s.TypeFeatureAi))
                 .ForMember(d => d.UserRole, o => o.MapFrom(s => s.UserRole))
                 .ForMember(d => d.Config, o => o.MapFrom(s => s.Config))

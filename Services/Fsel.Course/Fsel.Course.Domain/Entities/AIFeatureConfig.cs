@@ -9,10 +9,10 @@ namespace Fsel.Course.Domain.Entities
     using Enums;
     using Fsel.Common.Helpers;
 
-    [Table("AiModelFeature")]
-    public class AiModelFeature : Entity
+    [Table("AIFeatureConfig")]
+    public class AIFeatureConfig : Entity
     {
-        public Guid AiModelManagerId { get; set; }
+        public Guid AiPromptManagerId { get; set; }
         public Guid FeatureObjectId { get; set; }
         public Guid? ParentFeatureId { get; set; }
         public EnumFeatureAi FeatureAi { get; set; }
@@ -47,9 +47,9 @@ namespace Fsel.Course.Domain.Entities
 
         [Range(1, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int? MaximumToken { get; set; } = 4000;
-        public AiModelManager AiModelManagers { get; set; }
-        public AiModelFeature? ParentFeature { get; set; }
-        public ICollection<AiModelFeature>? SubFeatures { get; set; } = new List<AiModelFeature>();
+        public AiPromptManager AiPromptManager { get; set; }
+        public AIFeatureConfig? ParentFeature { get; set; }
+        public ICollection<AIFeatureConfig>? SubFeatures { get; set; } = new List<AIFeatureConfig>();
 
         [NotMapped]
         public object? JsonConfig

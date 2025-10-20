@@ -7,7 +7,7 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Domain.Entities;
     using Domain.IRepositories;
 
-    public class AiFeatureConfigRepository  : BaseRepository<AiModelFeature>, IAiModelFeatureRepository
+    public class AiFeatureConfigRepository  : BaseRepository<AIFeatureConfig>, IAiFeatureConfigRepository
     {
         public AiFeatureConfigRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {

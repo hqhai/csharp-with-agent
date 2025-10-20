@@ -12,26 +12,26 @@ namespace Fsel.Course.Application.Queries.AiModelManagerQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class GetAiModelManagerByIdQuery : IRequest<MethodResult<AiManagerModel>>
+    public class GetAiModelManagerByIdQuery : IRequest<MethodResult<AiPromptManagerModel>>
     {
         public Guid Id { get; set; }
     }
 
-    public class GetAiModelManagerByIdQueryHandler : IRequestHandler<GetAiModelManagerByIdQuery, MethodResult<AiManagerModel>>
+    public class GetAiModelManagerByIdQueryHandler : IRequestHandler<GetAiModelManagerByIdQuery, MethodResult<AiPromptManagerModel>>
     {
-        private readonly IAiModelManagerRepository _aiModelManagerRepository;
+        private readonly IAiPromptManagerRepository _aiModelManagerRepository;
         private readonly IMapper _mapper;
 
-        public GetAiModelManagerByIdQueryHandler(IAiModelManagerRepository aiModelManagerRepository, IMapper mapper)
+        public GetAiModelManagerByIdQueryHandler(IAiPromptManagerRepository aiModelManagerRepository, IMapper mapper)
         {
             _aiModelManagerRepository = aiModelManagerRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<AiManagerModel>> Handle(GetAiModelManagerByIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<AiPromptManagerModel>> Handle(GetAiModelManagerByIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AiManagerModel> methodResult = new MethodResult<AiManagerModel>();
+            MethodResult<AiPromptManagerModel> methodResult = new MethodResult<AiPromptManagerModel>();
 
             var aiModelManager = await _aiModelManagerRepository.GetByIdAsync(request.Id);
 
@@ -41,7 +41,7 @@ namespace Fsel.Course.Application.Queries.AiModelManagerQuery
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<AiManagerModel>(aiModelManager);
+            methodResult.Result = _mapper.Map<AiPromptManagerModel>(aiModelManager);
             methodResult.StatusCode = StatusCodes.Status200OK;
 
             return methodResult;

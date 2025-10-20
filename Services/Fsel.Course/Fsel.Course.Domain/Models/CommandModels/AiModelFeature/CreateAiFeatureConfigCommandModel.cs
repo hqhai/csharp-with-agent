@@ -5,10 +5,10 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiModelFeature
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
 
-    public class CreateAiFeatureCommandModel
+    public class CreateAiFeatureConfigCommandModel
     {
         public Guid FeatureObjectId { get; set; }
-        public Guid AiModelManagerId { get; set; }
+        public Guid AiPromptManagerId { get; set; }
         public EnumFeatureAi FeatureAi { get; set; }
         public string? UserRole { get; set; }
         public string? Config { get; set; }

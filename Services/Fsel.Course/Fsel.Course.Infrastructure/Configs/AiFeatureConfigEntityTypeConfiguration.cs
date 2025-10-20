@@ -8,9 +8,9 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class AiModelFeatureEntityTypeConfiguration : IEntityTypeConfiguration<AiModelFeature>
+    public class AiFeatureConfigEntityTypeConfiguration : IEntityTypeConfiguration<AIFeatureConfig>
     {
-        public void Configure(EntityTypeBuilder<AiModelFeature> builder)
+        public void Configure(EntityTypeBuilder<AIFeatureConfig> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.FeatureAi)
@@ -25,9 +25,9 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumTypeFeatureAi>());
 
-            builder.HasOne(x => x.AiModelManagers)
+            builder.HasOne(x => x.AiPromptManager)
                 .WithMany(x => x.AiModelFeatures)
-                .HasForeignKey(x => x.AiModelManagerId)
+                .HasForeignKey(x => x.AiPromptManagerId)
                 .OnDelete(DeleteBehavior.NoAction);
 
 

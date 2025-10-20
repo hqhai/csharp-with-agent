@@ -14,25 +14,25 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class UpdateSettingAiModelFeature : UpdateSettingAiFeatureCommandModel, IRequest<MethodResult<AiFeatureModel>>
+    public class UpdateSettingAiModelFeature : UpdateSettingAiFeatureCommandModel, IRequest<MethodResult<AiFeatureConfigModel>>
     {
     }
 
-    public class UpdateSettingAiModelFeatureHandler : IRequestHandler<UpdateSettingAiModelFeature, MethodResult<AiFeatureModel>>
+    public class UpdateSettingAiModelFeatureHandler : IRequestHandler<UpdateSettingAiModelFeature, MethodResult<AiFeatureConfigModel>>
     {
-        private readonly IAiModelFeatureRepository _aiModelFeatureRepository;
+        private readonly IAiFeatureConfigRepository _aiModelFeatureRepository;
         private readonly IMapper _mapper;
 
-        public UpdateSettingAiModelFeatureHandler(IAiModelFeatureRepository aiModelFeatureRepository, IMapper mapper)
+        public UpdateSettingAiModelFeatureHandler(IAiFeatureConfigRepository aiModelFeatureRepository, IMapper mapper)
         {
             _aiModelFeatureRepository = aiModelFeatureRepository;
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<AiFeatureModel>> Handle(UpdateSettingAiModelFeature request, CancellationToken cancellationToken)
+        public async Task<MethodResult<AiFeatureConfigModel>> Handle(UpdateSettingAiModelFeature request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AiFeatureModel> methodResult = new MethodResult<AiFeatureModel>();
+            MethodResult<AiFeatureConfigModel> methodResult = new MethodResult<AiFeatureConfigModel>();
 
             var exits = await _aiModelFeatureRepository.Queryable.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.FeatureAi == request.Key && x.ParentFeatureId == null && !x.IsDeleted, cancellationToken);
@@ -66,7 +66,7 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
                 await _aiModelFeatureRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<AiFeatureModel>(exits);
+                methodResult.Result = _mapper.Map<AiFeatureConfigModel>(exits);
                 return methodResult;
             });
 

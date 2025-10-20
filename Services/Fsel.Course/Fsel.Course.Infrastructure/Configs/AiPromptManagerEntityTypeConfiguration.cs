@@ -6,9 +6,9 @@ namespace Fsel.Course.Infrastructure.Configs
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class AiModelManagerEntityTypeConfiguration : IEntityTypeConfiguration<AiModelManager>
+    public class AiPromptManagerEntityTypeConfiguration : IEntityTypeConfiguration<AiPromptManager>
     {
-        public void Configure(EntityTypeBuilder<AiModelManager> builder)
+        public void Configure(EntityTypeBuilder<AiPromptManager> builder)
         {
 
         }

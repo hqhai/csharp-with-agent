@@ -5,8 +5,8 @@ namespace Fsel.Course.Domain.IRepositories
     using Core.Base.Interfaces;
     using Entities;
 
-    public interface IAiModelFeatureRepository : IRepository<AiModelFeature>
+    public interface IAiPromptManagerRepository : IRepository<AiPromptManager>
     {
-
+        Task<bool> IsFeature(Guid id);
     }
 }

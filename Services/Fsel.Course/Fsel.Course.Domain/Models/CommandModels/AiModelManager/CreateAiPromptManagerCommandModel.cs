@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.AiModelManager
 {
-    public class CreateAiModelManagerCommandModel
+    public class CreateAiPromptManagerCommandModel
     {
         public string? AiModelName { get; set; }
         public string? InputModel { get; set; }

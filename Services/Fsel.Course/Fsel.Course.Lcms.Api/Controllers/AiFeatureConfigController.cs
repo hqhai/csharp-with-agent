@@ -8,7 +8,6 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Application.Commands.AiModelFeatureCmd;
     using Fsel.Course.Application.Queries.AiModelFeatureQuery;
-    using Fsel.Course.Application.Queries.AiModelManagerQuery;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
     using Fsel.Course.Domain.Models.QueryModels.AiModelFeature;
@@ -19,13 +18,13 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiController]
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
-    [Route(Settings.APIDefaultRoute + "/ai-model-feature")]
+    [Route(Settings.APIDefaultRoute + "/ai-feature-coonfig")]
     //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
-    public class AiModelFeatureController : ControllerBase
+    public class AiFeatureConfigController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public AiModelFeatureController(IMediator mediator)
+        public AiFeatureConfigController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -34,11 +33,11 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Get Ai Model Featue by Id
         /// </summary>
         [HttpGet("{key}")]
-        [ProducesResponseType(typeof(MethodResult<AiFeatureModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<AiFeatureConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] EnumFeatureAi key)
         {
-            MethodResult<AiFeatureModel> queryResult = await _mediator.Send(new GetAiModelFeatureQuery { Key = key }).ConfigureAwait(false);
+            MethodResult<AiFeatureConfigModel> queryResult = await _mediator.Send(new GetAiModelFeatureQuery { Key = key }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -46,11 +45,11 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Create a Ai Model Feature with sub
         /// </summary>
         [HttpPost()]
-        [ProducesResponseType(typeof(MethodResult<AiFeatureModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<AiFeatureConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] CreateAiModelHasSubFeatureCommand command)
+        public async Task<IActionResult> Create([FromBody] CreateAiFeatureConfigHasSubFeatureCommand command)
         {
-            MethodResult<AiFeatureModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<AiFeatureConfigModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -58,13 +57,13 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Update a Ai Model Feature
         /// </summary>
         [HttpPut("{key}")]
-        [ProducesResponseType(typeof(MethodResult<AiFeatureModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<AiFeatureConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Update([FromRoute] EnumFeatureAi key, [FromBody] UpdateAiModelFeatureCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Key = key;
-            MethodResult<AiFeatureModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<AiFeatureConfigModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -72,13 +71,13 @@ namespace Fsel.Course.Lcms.Api.Controllers
         /// Update a Setting Ai Model Feature
         /// </summary>
         [HttpPut("setting/{key}")]
-        [ProducesResponseType(typeof(MethodResult<AiFeatureModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<AiFeatureConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateSetting([FromRoute] EnumFeatureAi key, [FromBody] UpdateSettingAiModelFeature command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Key = key;
-            MethodResult<AiFeatureModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            MethodResult<AiFeatureConfigModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

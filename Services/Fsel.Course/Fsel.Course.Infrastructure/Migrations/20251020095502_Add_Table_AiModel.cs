@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AiModelManager",
+                name: "AiPromptManager",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -31,11 +31,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AiModelManager", x => x.Id);
+                    table.PrimaryKey("PK_AiPromptManager", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AiModelFeature",
+                name: "AIFeatureConfig",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -49,11 +49,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeletedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    AiModelManagerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AiPromptManagerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FeatureObjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ParentFeatureId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    FeatureAi = table.Column<int>(type: "int", nullable: false),
-                    TypeFeatureAi = table.Column<int>(type: "int", nullable: true),
+                    FeatureAi = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    TypeFeatureAi = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     UserRole = table.Column<string>(type: "nvarchar(max)", maxLength: 100000, nullable: true),
                     Config = table.Column<string>(type: "nvarchar(max)", maxLength: 100000, nullable: true),
                     Json = table.Column<string>(type: "nvarchar(max)", maxLength: 100000, nullable: true),
@@ -67,28 +67,27 @@ namespace Fsel.Course.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AiModelFeature", x => x.Id);
+                    table.PrimaryKey("PK_AIFeatureConfig", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AiModelFeature_AiModelFeature_ParentFeatureId",
+                        name: "FK_AIFeatureConfig_AIFeatureConfig_ParentFeatureId",
                         column: x => x.ParentFeatureId,
-                        principalTable: "AiModelFeature",
+                        principalTable: "AIFeatureConfig",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_AiModelFeature_AiModelManager_AiModelManagerId",
-                        column: x => x.AiModelManagerId,
-                        principalTable: "AiModelManager",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_AIFeatureConfig_AiPromptManager_AiPromptManagerId",
+                        column: x => x.AiPromptManagerId,
+                        principalTable: "AiPromptManager",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AiModelFeature_AiModelManagerId",
-                table: "AiModelFeature",
-                column: "AiModelManagerId");
+                name: "IX_AIFeatureConfig_AiPromptManagerId",
+                table: "AIFeatureConfig",
+                column: "AiPromptManagerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AiModelFeature_ParentFeatureId",
-                table: "AiModelFeature",
+                name: "IX_AIFeatureConfig_ParentFeatureId",
+                table: "AIFeatureConfig",
                 column: "ParentFeatureId");
         }
 
@@ -96,10 +95,10 @@ namespace Fsel.Course.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AiModelFeature");
+                name: "AIFeatureConfig");
 
             migrationBuilder.DropTable(
-                name: "AiModelManager");
+                name: "AiPromptManager");
         }
     }
 }

@@ -165,8 +165,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<KeyboardText> KeyboardTexts { get; set; }
         public DbSet<RubyAnnotation> RubyAnnotations { get; set; }
         public DbSet<RubyScope> RubyScopes { get; set; }
-        public DbSet<AiModelManager> AiModelManagers { get; set; }
-        public DbSet<AiModelFeature> AiModelFeatures { get; set; }
+        public DbSet<AiPromptManager> AiPromptManagers { get; set; }
+        public DbSet<AIFeatureConfig> AiFeatureConfigs { get; set; }
 
         //#region Report
 
@@ -304,6 +304,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new TestResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TestSectionResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AiPromptManagerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AiFeatureConfigEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
