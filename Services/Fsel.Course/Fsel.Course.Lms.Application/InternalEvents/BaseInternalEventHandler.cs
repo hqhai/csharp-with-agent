@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -818,6 +819,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 review = iELTDescription.Description ?? string.Empty;
             }
 
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = student?.UserId ?? Guid.Empty,
+                Template = course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
+            });
+
+            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+
             var sendStudentCompleteCourseModel = new SendStudentCompleteCourseModel
             {
                 CoursePhoto = SendMailHelper.GetCoursePhoto(course.CourseLevel),
@@ -854,7 +863,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 BandScore = bandScore,
                 Review = review,
                 BackgroundVertical = courseResult.Percent >= 67 ? SendMailSetting.BackgroundVerticalGreen : SendMailSetting.BackgroundVerticalOrange,
-                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                AccessLink = accessLink
             };
 
             var sendResult = await _mediator.Send(new SenderCommand

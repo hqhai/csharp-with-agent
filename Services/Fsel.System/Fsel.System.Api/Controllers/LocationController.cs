@@ -78,5 +78,17 @@ namespace Fsel.System.Api.Controllers
             var queryResult = await _mediator.Send(new GetLocationByLocalIdQuery { LocalId = localId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get by global id
+        /// </summary>
+        [HttpGet("get-by-global-id/{id}")]
+        [ProducesResponseType(typeof(MethodResult<LocationModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetLocationByGlobalId([FromRoute] string id)
+        {
+            var queryResult = await _mediator.Send(new GetLocationByGlobalIdQuery { GlobalId = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

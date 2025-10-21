@@ -86,10 +86,26 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 TurnOnTouchpoint = _appSetting.TouchpointConfig?.TurnOnTouchpoint ?? false,
                 UserStatus = student?.User?.Status
             };
+            var role = _authContext.Roles?.FirstOrDefault();
 
-            await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
+            if (!string.IsNullOrEmpty(role) && role == EnumRole.StudentCampus.ToString())
+            {
+                settingStudentModel.IsLockPT = true;
+                settingStudentModel.IsPlacementTest = true;
+            }
+            else
+            {
+                await GetPlacementTestAsync(settingStudentModel, student, cancellationToken);
+            }
+
             var @eventResults = await _userService.GetEventByUserId(request.UserId ?? _authContext.CurrentUserId);
-            if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null)
+
+            var requestCheckSurvey = new CheckSurveyBySurveyFormTypeModel()
+            {
+                SurveyFormType = EnumSurveyFormType.Default
+            };
+
+            if (@eventResults.IsSuccessStatusCode && @eventResults.Content?.Result != null && @eventResults.Content.Result.Any())
             {
                 var @events = @eventResults.Content?.Result;
                 var actions = @events?.Select(p => p.EventContent).Where(p => p != null && p.Actions != null && p.Actions.Count > 0).SelectMany(p => p.Actions!).ToList();
@@ -98,11 +114,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 settingStudentModel.ActionConfigs = actionConfigs;
                 settingStudentModel.IsActivedAccount = DateTime.UtcNow >= (@events?.FirstOrDefault()?.EventContent?.StartDate ?? default);
 
-                var surveyEvent = await _interactionService.CheckSurveyBySurveyFormType(new CheckSurveyBySurveyFormTypeModel { SurveyFormType = EnumSurveyFormType.Event, CompetitionEventId = events?.FirstOrDefault()?.Id });
-                if (surveyEvent.IsSuccessStatusCode)
-                {
-                    settingStudentModel.IsSurveyEvent = surveyEvent.Content?.Result ?? false;
-                }
+                requestCheckSurvey.SurveyFormType = EnumSurveyFormType.Event;
+                requestCheckSurvey.CompetitionEventId = events?.FirstOrDefault()?.Id;
+                settingStudentModel.CompetitionEventId = events?.FirstOrDefault()?.Id;
             }
 
             var status = await _orderService.GetCurrentStatusAsync(request.UserId ?? _authContext.CurrentUserId);
@@ -117,6 +131,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             {
                 var course = await _courseRepository.GetByIdAsync(student.CourseId.Value);
                 settingStudentModel.Course = _mapper.Map<CourseModel>(course);
+
+                if (course != null)
+                {
+                    requestCheckSurvey.CourseLevel = course.CourseLevel;
+                    requestCheckSurvey.CourseType = course.CourseType;
+
+                    var surveyEvent = await _interactionService.CheckSurveyPT(requestCheckSurvey);
+                    if (surveyEvent.IsSuccessStatusCode)
+                    {
+                        settingStudentModel.IsSurveyEvent = surveyEvent.Content?.Result ?? false;
+                    }
+                }
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = settingStudentModel;

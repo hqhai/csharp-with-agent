@@ -76,8 +76,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ParentEmail), request.ParentEmail);
                 return methodResult;
             }
-            var userEmail = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
-            if (userEmail != null && userEmail.Id != _authContext.CurrentUserId)
+            var userEmail = await _userManager.Users.FirstOrDefaultAsync(x => x.Id != _authContext.CurrentUserId && x.Email == request.Email && x.EmailConfirmed, cancellationToken);
+            if (userEmail != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
                 return methodResult;

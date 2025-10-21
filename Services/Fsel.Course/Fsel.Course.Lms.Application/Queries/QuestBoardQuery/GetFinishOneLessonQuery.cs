@@ -141,8 +141,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestBoardQuery
         private async Task<double> GetDoubleAsync(VideoResult videoResult, CancellationToken cancellationToken)
         {
             var answerQuery = from baseQ in _videoResultRepository.Queryable
-                              join vtcr in _videoTimeCodeResultRepository.Queryable on baseQ.Id equals vtcr.VideoResultId
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable on vtcr.Id equals vtca.VideoTimeCodeResultId
+                              join vtcr in _videoTimeCodeResultRepository.Queryable.Where(x => x.CreatedDate >= videoResult.CreatedDate && x.VideoResultId == videoResult.Id)
+                                                                                   .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate) on baseQ.Id equals vtcr.VideoResultId
+                              join vtca in _videoTimeCodeAnswerRepository.Queryable.Where(x => x.CreatedDate >= videoResult.CreatedDate && x.VideoResultId == videoResult.Id) on vtcr.Id equals vtca.VideoTimeCodeResultId
                               join e in _exerciseRepository.Queryable on vtca.ExerciseId equals e.Id
                               join te in _timeCodeExerciseRepository.Queryable on e.Id equals te.ExerciseId
                               join vt in _videoTimeCodeRepository.Queryable on te.VideoTimeCodeId equals vt.Id

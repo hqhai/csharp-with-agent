@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Services.OrderService
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Application.Services.OrderService.QueryModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -65,5 +66,11 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/v1.2/admin/order/get-users-has-order-revenue")]
         Task<IApiResponse<MethodResult<IList<OrderModel>>>> GetUserHasOrderRevenue([Body] GetUserHasOrderRevenueModel query);
+
+        [Post("/v1/campus/create-order-for-students-campus")]
+        Task<IApiResponse<MethodResult<bool>>> CreateOrderForStudentCampus([Body] CreateOrdersForStudentCampusCommandModels command);
+
+        [Post("/v1/campus/delete-order-of-students-campus")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteOrderOfStudentsCampus([Body] DeleteOrderOfStudentsCampusCommandModel command);
     }
 }

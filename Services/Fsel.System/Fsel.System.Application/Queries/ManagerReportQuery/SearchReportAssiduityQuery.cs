@@ -42,6 +42,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
                 ListDistrict = request.ListDistrict,
@@ -50,17 +51,18 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListCourseLevel = request.ListCourseLevel,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                IsLearning = request.IsLearning,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListCourseType = request.ListCourseType,
 
                 PageSize = request.PageSize,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
                 Page = request.Page,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
                 IsSearchReport = true,
             }, cancellationToken);
@@ -92,14 +94,17 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                IsLearning = request.IsLearning,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListCourseLevel = request.ListCourseLevel,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCourseType = request.ListCourseType,
+
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
                 CourseType = request.CourseType,
-                LearningStatus = request.LearningStatus,
             }, cancellationToken);
             var reportStudentAssiduity = _mapper.Map<SearchReportStudentAssiduityModel>(dataOverallResult.Result);
             var studentIds = students.Select(x => x.Id).ToList();

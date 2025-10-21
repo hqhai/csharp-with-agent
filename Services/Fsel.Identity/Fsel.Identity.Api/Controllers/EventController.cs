@@ -28,7 +28,6 @@ namespace Fsel.Identity.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/event")]
     [ApiController]
-    [Permission]
     public class EventController : BaseController
     {
         private readonly IMediator _mediator;
@@ -48,6 +47,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost()]
         [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        //[Permission]
         public async Task<IActionResult> CreateCompetitionEvents([FromBody] CreateCompetitionEventsCommand cmd)
         {
             MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
@@ -60,6 +60,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPut()]
         [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> UpdateCompetitionEvents([FromBody] UpdateCompetitionEventsCommand cmd)
         {
             MethodResult<CompetitionEventsModel> commandResult = await _mediator.Send(cmd).ConfigureAwait(false);
@@ -84,6 +85,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("schools")]
         [ProducesResponseType(typeof(MethodResult<IList<SchoolModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetSchoolsByEventCode([FromQuery] GetSchoolsByEventCodeQuery query)
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(query));
@@ -97,6 +99,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("event-by-date")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetCompetitionEventsByDate([FromQuery] GetCompetitionEventsByDateQuery query)
         {
             MethodResult<IList<CompetitionEventsModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -109,6 +112,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("execute-list-query")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> ExecuteList([FromQuery] BaseQueryModel query)
         {
             var competitionEvents = await _competitionEventsRepository.Queryable.ToListAsync(CancellationToken.None);
@@ -124,6 +128,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("export-landing-page")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> ExportLandingPageByEventCode([FromQuery] ExportLandingPageByEventCodeQuery query)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -140,6 +145,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-events-by-parent-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetEventsByParentIds([FromQuery] GetCompetitionEventsByParentIdsQuery query)
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(query));
@@ -150,6 +156,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-event-parent/{id}")]
         [ProducesResponseType(typeof(MethodResult<CompetitionEventsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetParentEvent([FromRoute] Guid id)
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(id));
@@ -160,6 +167,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-child-events/{id}")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEvent>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetChildPEvents([FromRoute] Guid id)
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(id));
@@ -173,6 +181,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("event-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetEventByIds([FromBody] GetCompetitionEventByIdsQuery query)
         {
             MethodResult<IList<CompetitionEventsModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -185,6 +194,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-events-by-event-code-str")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetEventsByEventCodeStr([FromQuery] GetCompetitionEventsToEventCodeStrQuery query)
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(query));
@@ -198,6 +208,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("aggregate-data-students-in-event")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> AggregateDataStudentsInEvent()
         {
             var commandResult = await _mediator.Send(new AggregateDataStudentsInEventCommand()).ConfigureAwait(false);
@@ -210,6 +221,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-student-event-learning-record")]
         [ProducesResponseType(typeof(MethodResult<StudentEventLearningRecordModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetStudentEventLearningRecord([FromQuery] GetStudentEventLearningRecordQuery query)
         {
             ArgumentException.ThrowIfNullOrEmpty(nameof(query));
@@ -223,6 +235,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("student-event-view-learning-record")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> UpdateStudentEventLearningRecord([FromBody] StudentEventViewLearningRecordCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -232,6 +245,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-tree-events")]
         [ProducesResponseType(typeof(MethodResult<IList<CompetitionEvent>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetTreeCompetitionEvent([FromQuery] GetTreeCompetitionEventQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -244,6 +258,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("get-student-ids-in-event-by-student-ids")]
         [ProducesResponseType(typeof(MethodResult<List<Guid>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> GetStudentsInEventByStudentIds([FromBody] GetStudentIdsInEventByStudentIdsQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);

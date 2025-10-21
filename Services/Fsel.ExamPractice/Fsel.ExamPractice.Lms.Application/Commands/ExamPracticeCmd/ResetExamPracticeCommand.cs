@@ -64,6 +64,7 @@ namespace Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPractice), request.Id);
                 return methodResult;
             }
+
             // Note 5
             if (examPractice.Status != EnumExamPracticeStatus.Active)
             {

@@ -63,7 +63,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                    .ThenInclude(x => x!.TeacherBankAccounts)
                                                    .FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
             }
-            else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
+            else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() || userRoles.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
                 userView = await _userManager.Users.Include(x => x!.Student)
                                                    .FirstOrDefaultAsync(x => x.Id == request.UserId && x.EmailConfirmed, cancellationToken);
@@ -95,7 +95,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             var userModel = _mapper.Map<UserProfileModel>(userView ?? user);
             if (userView != null)
             {
-                if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() && userView.Student?.CreatedByParent == false && userView.Student?.ParentStudents.Count > 0)
+                if ((userRoles.FirstOrDefault() == EnumRole.Student.ToString() || userRoles.FirstOrDefault() == EnumRole.StudentCampus.ToString()) && userView.Student?.CreatedByParent == false && userView.Student?.ParentStudents.Count > 0)
                 {
                     var classStudent = await _trainingService.GetClassToStudentId(userView!.Student.Id);
                     userModel!.Parent = _mapper.Map<ParentProfileModel>(userView!.Student!.ParentStudents!.FirstOrDefault()!.Parent);

@@ -51,7 +51,7 @@ namespace Fsel.Shared.Helpers
 
         public static IList<T>? ToList<T>(this string? str, char separator = ',')
         {
-            return str?.Split(separator).Select(x =>
+            return str?.Split(separator).Where(x => !string.IsNullOrEmpty(x)).Select(x =>
             {
                 if (TypeDescriptor.GetConverter(typeof(T)).IsValid(x))
                 {
@@ -367,6 +367,12 @@ namespace Fsel.Shared.Helpers
         {
             string objStr = data?.ToString() ?? string.Empty;
             return string.Format(objStr, param ?? Array.Empty<object>());
+        }
+
+        public static string FormatStringWithParam(object data, dynamic? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param);
         }
 
         public static bool ContainsSpecialChars(string input)

@@ -1524,6 +1524,20 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             TemplateLink = "/change-level",
                             TemplateMessage = "😢 Techie: “Tớ có nói gì đâu, bạn đã học đâu mà bỏ rồi?” Bài học đầu đang đợi bạn. Không vào là coin mất, Techie buồn!",
                             Type = "LinkPage"
+                        },
+                        new
+                        {
+                            Id = new Guid("edc32213-8546-4e0b-ab27-b909fb03c87e"),
+                            Content = "SurveyAssignment",
+                            CreatedDate = new DateTime(2025, 7, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Icon = "",
+                            IsDeleted = false,
+                            Priority = 1,
+                            TemplateLink = "/survey",
+                            TemplateMessage = "📢 Bạn có một bài khảo sát mới! Hoàn thành bài khảo sát ngay để giúp chúng tôi hiểu hơn về bạn và nhận xu FSEL! 🎯",
+                            Type = "LinkPage"
                         });
                 });
 
@@ -3970,6 +3984,39 @@ namespace Fsel.Notification.Infrastructure.Migrations
                             Language = "fr-FR",
                             NotificationTypeId = new Guid("62413604-f229-4e39-aa96-3b0a3acad3e3"),
                             TemplateMessage = "😢 Techie : \"Je n'ai rien dit, mais tu n'as pas encore étudié, pourquoi partir ?\" La première leçon t'attend. Si tu ne rejoins pas, les pièces sont perdues, et Techie est triste !"
+                        },
+                        new
+                        {
+                            Id = new Guid("ab66276d-1784-41c9-a5fb-60334a2e101f"),
+                            CreatedDate = new DateTime(2025, 7, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "vi-VN",
+                            NotificationTypeId = new Guid("edc32213-8546-4e0b-ab27-b909fb03c87e"),
+                            TemplateMessage = "📢 Bạn có một bài khảo sát mới! Hoàn thành bài khảo sát ngay để giúp chúng tôi hiểu hơn về bạn và nhận xu FSEL! 🎯"
+                        },
+                        new
+                        {
+                            Id = new Guid("2ee0cbb4-f4dc-4403-a906-3360fb1c85ae"),
+                            CreatedDate = new DateTime(2025, 7, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "en-US",
+                            NotificationTypeId = new Guid("edc32213-8546-4e0b-ab27-b909fb03c87e"),
+                            TemplateMessage = "📢 You have a new survey available! Complete the survey now to help us better understand you and receive FSEL points as a reward! 🎯"
+                        },
+                        new
+                        {
+                            Id = new Guid("26c8d3fb-352d-4b5e-9022-0ddef3f18b7c"),
+                            CreatedDate = new DateTime(2025, 7, 26, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Language = "fr-FR",
+                            NotificationTypeId = new Guid("edc32213-8546-4e0b-ab27-b909fb03c87e"),
+                            TemplateMessage = "📢 Un nouveau sondage est disponible ! Veuillez le remplir dès maintenant afin de nous aider à mieux vous comprendre et recevez des points FSEL en récompense ! 🎯"
                         });
                 });
 

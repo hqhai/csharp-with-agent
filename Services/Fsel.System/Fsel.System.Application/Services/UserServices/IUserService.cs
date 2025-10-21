@@ -87,9 +87,8 @@ namespace Fsel.System.Application.Services.UserServices
         [Get("/v1/user/get-user-profile")]
         Task<IApiResponse<MethodResult<UserModel>>> GetUserProfileAsync();
 
-        [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/admin/student/search")]
-        Task<IApiResponse<MethodResult<PagingItemsModel<StudentDtoModel>>>> SearchStudentSchoolAsync([FromBody] SearchStudentSchoolQueryModel query);
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentDtoModel>>>> SearchStudentSchoolAsync([FromQuery] SearchStudentSchoolQueryModel query);
 
         [RefitCache(CacheSettings.TimeCache.TenMinutes)]
         [Get("/v1/admin/student/gets")]

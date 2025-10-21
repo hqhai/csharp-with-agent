@@ -2,28 +2,48 @@
 
 namespace Fsel.ExamPractice.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Entities;
+    using Fsel.ExamPractice.Domain.Entities.SkillScoreConfigs;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.Shared.Helpers;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.ComponentModel.DataAnnotations;
-    using Fsel.ExamPractice.Domain.Entities.SkillScoreConfigs;
-    using Fsel.Core.Entities;
 
     public class ExamPracticeSectionResult : Entity
     {
+        private int _correctCount;
+
         /// <summary>
         /// Số câu trả lời đúng của Student
         /// </summary>
         [Range(0, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectCount { get; set; }
+        public int CorrectCount
+        {
+            get => _correctCount;
+            set
+            {
+                _correctCount = value;
+                UpdatePercent();
+            }
+        }
+
+        private int _correctTotal;
 
         /// <summary>
         /// Tổng số câu trả lời đúng
         /// </summary>
         [Range(0, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
-        public int CorrectTotal { get; set; }
+        public int CorrectTotal
+        {
+            get => _correctTotal;
+            set
+            {
+                _correctTotal = value;
+                UpdatePercent();
+            }
+        }
 
         /// <summary>
         /// Phần trăm câu trả lời đúng
@@ -32,17 +52,11 @@ namespace Fsel.ExamPractice.Domain.Entities
         [Range(0, 100, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public virtual double Percent { get; set; }
 
-        [NotMapped]
-        private double PercentValue
+        private void UpdatePercent()
         {
-            get
-            {
-                return CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : PercentValue;
-            }
-            set
-            {
-                Percent = CorrectTotal > 0 ? NumberHelper.GetPercent(CorrectCount, CorrectTotal) : value;
-            }
+            Percent = CorrectTotal > 0
+                ? NumberHelper.GetPercent(CorrectCount, CorrectTotal)
+                : Percent;
         }
 
         public string? SkillScoresStr { get; set; }
@@ -71,6 +85,9 @@ namespace Fsel.ExamPractice.Domain.Entities
         /// Trạng thái
         /// </summary>
         public EnumResultStatus Status { get; set; }
+
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Note { get; set; }
 
         public Guid? CurrentExamPracticeSectionId { get; set; }
 

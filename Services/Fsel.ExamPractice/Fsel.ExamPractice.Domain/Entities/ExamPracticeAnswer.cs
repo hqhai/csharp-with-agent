@@ -8,6 +8,8 @@ namespace Fsel.ExamPractice.Domain.Entities
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.ExamPractice.Domain.Models.EntityModels;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
     using Fsel.Shared.Helpers;
     using Newtonsoft.Json;
 
@@ -29,7 +31,10 @@ namespace Fsel.ExamPractice.Domain.Entities
                 _answerStr = value;
                 if (!string.IsNullOrEmpty(value) && !value.Contains(answerStr, StringComparison.InvariantCulture))
                 {
-                    TimeCount = MediaHelper.GetMediaDurationAsync(value);
+                    if (MediaHelper.IsProbablyFileUrl(answerStr))
+                    {
+                        TimeCount = MediaHelper.GetMediaDurationAsync(value);
+                    }
                     if (TimeCount == null)
                     {
                         WordCount = Shared.Helpers.StringHelper.CountWords(value);
@@ -42,14 +47,21 @@ namespace Fsel.ExamPractice.Domain.Entities
         public override object? Answer
         {
             get { return ConvertHelper.Deserialize<object>(AnswerStr); }
-            set { AnswerStr = value != null ? ConvertHelper.Serialize(value) : null; }
+            set { AnswerStr = value != null ? ConvertHelper.Serialize(value) : string.Empty; }
         }
 
         private int? _timeCount;
 
         public int? TimeCount
         {
-            get { return _timeCount == null && !string.IsNullOrEmpty(AnswerStr) && !AnswerStr.Contains(answerStr, StringComparison.InvariantCulture) ? MediaHelper.GetMediaDurationAsync(AnswerStr) : _timeCount; }
+            get
+            {
+                if (_timeCount == null && !string.IsNullOrEmpty(AnswerStr) && !AnswerStr.Contains(answerStr, StringComparison.InvariantCulture) && MediaHelper.IsProbablyFileUrl(answerStr))
+                {
+                    return MediaHelper.GetMediaDurationAsync(AnswerStr);
+                }
+                return _timeCount;
+            }
             set { _timeCount = value; }
         }
 
@@ -66,6 +78,33 @@ namespace Fsel.ExamPractice.Domain.Entities
         public string? SpeechTextAnswer { get; set; }
 
         public double? PronunciationScore { get; set; }
+        public string? PronunciationAssessmentStr { get; set; }
+
+        [NotMapped]
+        public PronunciationAssessmentModel? PronunciationAssessmentAnswer
+        {
+            get { return ConvertHelper.Deserialize<PronunciationAssessmentModel>(PronunciationAssessmentStr); }
+            set
+            {
+                if (value != null)
+                {
+                    PronunciationAssessmentStr = ConvertHelper.Serialize(value);
+                }
+            }
+        }
+
+        [NotMapped]
+        public IList<AiFeedbackItemModel>? GradingAlFeedbacks
+        {
+            get { return ConvertHelper.Deserialize<IList<AiFeedbackItemModel>>(GradingAlFeedback); }
+            set
+            {
+                if (value != null)
+                {
+                    GradingAlFeedback = ConvertHelper.Serialize(value);
+                }
+            }
+        }
 
         public int RetryTime { get; set; }
         public ExamPracticeResult? ExamPracticeResult { get; set; }
