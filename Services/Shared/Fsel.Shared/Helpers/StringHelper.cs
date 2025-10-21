@@ -49,7 +49,7 @@ namespace Fsel.Shared.Helpers
 
         public static IList<T>? ToList<T>(this string? str, char separator = ',')
         {
-            return str?.Split(separator).Select(x =>
+            return str?.Split(separator).Where(x => !string.IsNullOrEmpty(x)).Select(x =>
             {
                 if (TypeDescriptor.GetConverter(typeof(T)).IsValid(x))
                 {
