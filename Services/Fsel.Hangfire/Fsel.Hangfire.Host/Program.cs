@@ -42,7 +42,7 @@ builder.Services.AddScoped<WeeklyNoticePublisher>();
 builder.Services.AddScoped<ChooseDailyQuizWinnersPublisher>();
 builder.Services.AddScoped<AggregateDataStudentsInEventPublisher>();
 builder.Services.AddScoped<PushNoticePublisher>();
-builder.Services.AddScoped<NotificationLessonCourseTargetPublisher>();
+builder.Services.AddScoped<NotifyWeeklyReportCourseTargetPublisher>();
 builder.Services.AddScoped<NotifyWeeklyCourseGoalTargetPublisher>();
 
 builder.AddMassTransit(appSetting,

@@ -7,11 +7,11 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
     using Fsel.Course.Lms.Application.Commands.LessonCmd;
     using MediatR;
 
-    public class NotificationLessonCourseTargetConsumer : BaseConsumer<BaseQueueModel>
+    public class NotifyWeeklyReportCourseTargetConsumer : BaseConsumer<BaseQueueModel>
     {
         private readonly IMediator _mediator;
 
-        public NotificationLessonCourseTargetConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        public NotifyWeeklyReportCourseTargetConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _mediator = mediator;
         }

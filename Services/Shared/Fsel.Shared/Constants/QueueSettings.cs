@@ -140,7 +140,7 @@ namespace Fsel.Shared.Constants
                 public const string PushNotice = $"{KeyQueue}_PushNotice";
                 public const string ExportExcelUserInformationSupportSale = $"{KeyQueue}_ExportExcelUserInformationSupportSale";
                 public const string JobStudentAggregate = $"{KeyQueue}_JobStudentAggregate";
-                public const string NotificationLessonCourseTarget = $"{KeyQueue}_NotificationLessonCourseTarget";
+                public const string NotifyWeeklyReportCourseTarget = $"{KeyQueue}_NotifyWeeklyReportCourseTarget";
                 public const string NotifyWeeklyCourseGoalTarget = $"{KeyQueue}_NotifyWeeklyCourseGoalTarget";
             }
         }

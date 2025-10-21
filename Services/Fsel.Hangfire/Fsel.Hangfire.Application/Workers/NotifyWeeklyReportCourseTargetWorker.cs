@@ -6,11 +6,11 @@ namespace Fsel.Hangfire.Application.Workers
     using Fsel.Core.Base.Interfaces;
     using Fsel.Hangfire.Application.Queues.Publishers;
 
-    public class NotificationLessonCourseTargetWorker : IWorker
+    public class NotifyWeeklyReportCourseTargetWorker : IWorker
     {
-        private readonly NotificationLessonCourseTargetPublisher _notificationLessonCourseTargetPublisher;
+        private readonly NotifyWeeklyReportCourseTargetPublisher _notificationLessonCourseTargetPublisher;
 
-        public NotificationLessonCourseTargetWorker(NotificationLessonCourseTargetPublisher notificationLessonCourseTargetPublisher)
+        public NotifyWeeklyReportCourseTargetWorker(NotifyWeeklyReportCourseTargetPublisher notificationLessonCourseTargetPublisher)
         {
             _notificationLessonCourseTargetPublisher = notificationLessonCourseTargetPublisher;
         }

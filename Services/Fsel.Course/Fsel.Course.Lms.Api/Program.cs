@@ -233,8 +233,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ExportExcelUserInformationSupportSale, typeof(ExportFileUserInformationSupportSaleConsumer) },
     { QueueSettings.LmsQueue.NameQueue.JobStudentAggregate, typeof(JobStudentAggregateConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.NotificationLessonCourseTarget, typeof(NotificationLessonCourseTargetConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyCourseGoalTarget, typeof(NotificationLessonCourseTargetConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyReportCourseTarget, typeof(NotifyWeeklyReportCourseTargetConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyCourseGoalTarget, typeof(NotifyWeeklyCourseGoalTargetConsumer) },
 });
 
 var app = builder.Build();
