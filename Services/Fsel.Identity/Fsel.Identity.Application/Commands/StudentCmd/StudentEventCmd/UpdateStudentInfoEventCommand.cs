@@ -60,7 +60,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 return methodResult;
             }
 
-            if (!string.IsNullOrEmpty(request.ParentPhoneNumber) || !request.ParentPhoneNumber.IsValidPhoneNumber())
+            if (!string.IsNullOrEmpty(request.ParentPhoneNumber) && !request.ParentPhoneNumber.IsValidPhoneNumber())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ParentPhoneNumber), request.ParentPhoneNumber);
                 return methodResult;
