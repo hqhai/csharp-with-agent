@@ -74,14 +74,14 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
 
                         if (subFeature == null)
                         {
-                            subFeature = new AIFeatureConfig
+                            subFeature = new AIPromptConfigs
                             {
                                 AiPromptManagerId = (Guid)request.AiPromptManagerId,
                                 ParentFeatureId = exits.Id,
                                 FeatureAi = exits.FeatureAi,
                                 TypeFeatureAi = sub.TypeFeatureAi,
                                 UserRole = sub.UserRole,
-                                Config = sub.Config,
+                                AiConfigSetting = sub.Config,
                                 JsonConfig = sub.JsonConfig,
                             };
                             _aiModelFeatureRepository.Add(subFeature);
@@ -89,7 +89,7 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
                         }
 
                         subFeature.UserRole = sub.UserRole;
-                        subFeature.Config = sub.Config;
+                        subFeature.AiConfigSetting = sub.Config;
                         subFeature.JsonConfig = sub.JsonConfig;
 
                         subFeature = _aiModelFeatureRepository.Update(subFeature);

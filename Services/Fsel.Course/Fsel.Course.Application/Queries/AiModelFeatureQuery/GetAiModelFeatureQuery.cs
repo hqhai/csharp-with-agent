@@ -13,13 +13,14 @@ namespace Fsel.Course.Application.Queries.AiModelFeatureQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.AiModelFeature;
     using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class GetAiModelFeatureQuery : IRequest<MethodResult<AiFeatureConfigModel>>
     {
-        public EnumFeatureAi Key { get; set; }
+        public EnumFeature Key { get; set; }
         public Guid AiModelManagerId { get; set; }
         public bool IncludeChildren { get; set; } = true;
     }
@@ -55,9 +56,7 @@ namespace Fsel.Course.Application.Queries.AiModelFeatureQuery
                 FeatureModel.FeatureTypes.TryGetValue(request.Key, out var subType);
                 subType ??= Array.Empty<EnumTypeFeatureAi>();
 
-                var results = aiFeature is null
-                    ? new List<AIFeatureConfig>()
-                    : await _aiModelFeatureRepository.Queryable.AsNoTracking()
+                var results = await _aiModelFeatureRepository.Queryable.AsNoTracking()
                     .Where(x => x.ParentFeatureId == aiFeature.Id && !x.IsDeleted)
                     .ToListAsync(cancellationToken);
 
@@ -77,7 +76,7 @@ namespace Fsel.Course.Application.Queries.AiModelFeatureQuery
                                 aiFeature.MaximumNumber,
                                 aiFeature.MaximumToken
                             );
-                        subFeatue.Add(new AiSubFeatueModel(item, result.UserRole, result.Config, result.Json, subSettings));
+                        subFeatue.Add(new AiSubFeatueModel(item, result.UserRole, result.AiConfigSetting, result.Json, subSettings));
                     }
                 }
             }

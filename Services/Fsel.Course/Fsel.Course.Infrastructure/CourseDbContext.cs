@@ -166,7 +166,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<RubyAnnotation> RubyAnnotations { get; set; }
         public DbSet<RubyScope> RubyScopes { get; set; }
         public DbSet<AiPromptManager> AiPromptManagers { get; set; }
-        public DbSet<AIFeatureConfig> AiFeatureConfigs { get; set; }
+        public DbSet<AIPromptConfigs> AiFeatureConfigs { get; set; }
 
         //#region Report
 

@@ -8,23 +8,23 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Common.Constants;
     using Fsel.Course.Application.Commands.AiModelFeatureCmd;
     using Fsel.Course.Application.Queries.AiModelFeatureQuery;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
     using Fsel.Course.Domain.Models.QueryModels.AiModelFeature;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiController]
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
-    [Route(Settings.APIDefaultRoute + "/ai-feature-config")]
+    [Route(Settings.APIDefaultRoute + "/ai-prompt-config")]
     //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
-    public class AiFeatureConfigController : ControllerBase
+    public class AiPromptConfigController : ControllerBase
     {
         private readonly IMediator _mediator;
 
-        public AiFeatureConfigController(IMediator mediator)
+        public AiPromptConfigController(IMediator mediator)
         {
             _mediator = mediator;
         }
@@ -35,7 +35,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("{key}")]
         [ProducesResponseType(typeof(MethodResult<AiFeatureConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] EnumFeatureAi key)
+        public async Task<IActionResult> Get([FromRoute] EnumFeature key)
         {
             MethodResult<AiFeatureConfigModel> queryResult = await _mediator.Send(new GetAiModelFeatureQuery { Key = key }).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -59,7 +59,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPut("{key}")]
         [ProducesResponseType(typeof(MethodResult<AiFeatureConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] EnumFeatureAi key, [FromBody] UpdateAiModelFeatureCommand command)
+        public async Task<IActionResult> Update([FromRoute] EnumFeature key, [FromBody] UpdateAiModelFeatureCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Key = key;
@@ -73,7 +73,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpPut("setting/{key}")]
         [ProducesResponseType(typeof(MethodResult<AiFeatureConfigModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateSetting([FromRoute] EnumFeatureAi key, [FromBody] UpdateSettingAiModelFeature command)
+        public async Task<IActionResult> UpdateSetting([FromRoute] EnumFeature key, [FromBody] UpdateSettingAiModelFeature command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.Key = key;

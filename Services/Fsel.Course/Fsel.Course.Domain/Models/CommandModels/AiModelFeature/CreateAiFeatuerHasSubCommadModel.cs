@@ -11,7 +11,5 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiModelFeature
         public string? UserRole { get; set; }
         public string? Config { get; set; }
         public object? JsonConfig { get; set; }
-
-        public CreateAiFeatuerHasSubCommadModel() { }
     }
 }

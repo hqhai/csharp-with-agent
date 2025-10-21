@@ -5,19 +5,20 @@ namespace Fsel.Course.Infrastructure.Configs
     using Domain.Entities;
     using Domain.Enums;
     using Fsel.Common.Helpers;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-    public class AiFeatureConfigEntityTypeConfiguration : IEntityTypeConfiguration<AIFeatureConfig>
+    public class AiFeatureConfigEntityTypeConfiguration : IEntityTypeConfiguration<AIPromptConfigs>
     {
-        public void Configure(EntityTypeBuilder<AIFeatureConfig> builder)
+        public void Configure(EntityTypeBuilder<AIPromptConfigs> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
             builder.Property(e => e.FeatureAi)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumFeatureAi>());
+                    v => v.EnumParse<EnumFeature>());
 
             builder.Property(e => e.TypeFeatureAi)
                 .HasMaxLength(100)

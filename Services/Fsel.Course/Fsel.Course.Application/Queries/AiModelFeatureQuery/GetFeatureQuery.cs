@@ -6,13 +6,12 @@ namespace Fsel.Course.Application.Queries.AiModelFeatureQuery
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.CommandModels.AiModelFeature;
     using Fsel.Course.Domain.Models.QueryModels.AiModelFeature;
-    using Fsel.Course.Infrastructure.Common;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.OpenApi.Extensions;
 
     public class GetFeatureQuery : IRequest<MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>>
     {
@@ -23,7 +22,12 @@ namespace Fsel.Course.Application.Queries.AiModelFeatureQuery
         public async Task<MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>> Handle(GetFeatureQuery request, CancellationToken cancellationToken)
         {
             MethodResult<IReadOnlyList<GetFeatureAiModelQuery>> methodResult = new MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>();
-            var featue = Enum.GetValues<EnumFeatureAi>()
+
+            var min = (int)EnumFeature.ClassForumSpeakingLayout; 
+            var max = (int)EnumFeature.ShortAnswerWordCount;
+
+            var featue = Enum.GetValues<EnumFeature>()
+                .Where(x => (int)x >= min && (int)x <= max)
                 .Select(x =>
                 {
                     var types = FeatureModel.FeatureTypes.TryGetValue(x, out var type)

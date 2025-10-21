@@ -1,18 +1,17 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Infrastructure.Common
+namespace Fsel.Shared.Helpers
 {
-    using System;
     using System.ComponentModel.DataAnnotations;
 
-    public static class FeatureCommon
+    public static class EnumFeatureAiHelper
     {
         public static string DisplayName(this Enum e) =>
-        e.GetType().GetMember(e.ToString())[0]
-         .GetCustomAttributes(typeof(DisplayAttribute), false)
-         is DisplayAttribute[] { Length: > 0 } attrs
-         ? (attrs[0].GetName() ?? e.ToString())
-         : e.ToString();
+            e.GetType().GetMember(e.ToString())[0]
+             .GetCustomAttributes(typeof(DisplayAttribute), false)
+             is DisplayAttribute[] { Length: > 0 } attrs
+             ? (attrs[0].GetName() ?? e.ToString())
+             : e.ToString();
 
         public static string GroupName(this Enum e) =>
             e.GetType().GetMember(e.ToString())[0]

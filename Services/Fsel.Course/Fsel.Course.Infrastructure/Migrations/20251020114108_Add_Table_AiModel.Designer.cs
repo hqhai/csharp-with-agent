@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Course.Infrastructure.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    [Migration("20251020095502_Add_Table_AiModel")]
+    [Migration("20251020114108_Add_Table_AiModel")]
     partial class Add_Table_AiModel
     {
         /// <inheritdoc />
@@ -25,19 +25,19 @@ namespace Fsel.Course.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.AIFeatureConfig", b =>
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.AIPromptConfigs", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
-                    b.Property<Guid>("AiPromptManagerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Config")
+                    b.Property<string>("AiConfigSetting")
                         .HasMaxLength(100000)
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("AiPromptManagerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -133,7 +133,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("ParentFeatureId");
 
-                    b.ToTable("AIFeatureConfig");
+                    b.ToTable("AiFeatureConfigs");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.AiPromptManager", b =>
@@ -199,7 +199,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AiPromptManager");
+                    b.ToTable("AiPromptManagers");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.Category", b =>
@@ -8311,7 +8311,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.ToTable("WeeklyReports");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.AIFeatureConfig", b =>
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.AIPromptConfigs", b =>
                 {
                     b.HasOne("Fsel.Course.Domain.Entities.AiPromptManager", "AiPromptManager")
                         .WithMany("AiModelFeatures")
@@ -8319,7 +8319,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("Fsel.Course.Domain.Entities.AIFeatureConfig", "ParentFeature")
+                    b.HasOne("Fsel.Course.Domain.Entities.AIPromptConfigs", "ParentFeature")
                         .WithMany("SubFeatures")
                         .HasForeignKey("ParentFeatureId")
                         .OnDelete(DeleteBehavior.NoAction);
@@ -9972,7 +9972,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Navigation("VideoTimeCode");
                 });
 
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.AIFeatureConfig", b =>
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.AIPromptConfigs", b =>
                 {
                     b.Navigation("SubFeatures");
                 });

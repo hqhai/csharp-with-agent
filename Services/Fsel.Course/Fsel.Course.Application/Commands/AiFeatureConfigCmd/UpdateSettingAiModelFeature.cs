@@ -10,6 +10,7 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.AiModelFeature;
     using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -56,17 +57,40 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
                 exits.SettingTopP = request.SettingTopP;
                 exits.SettingFrequency = request.SettingFrequency;
                 exits.SettingPresence = request.SettingPresence;
-                if (request.MaximumNumber != null && request.MaximumToken != null && exits.FeatureAi == Domain.Enums.EnumFeatureAi.AiPracticeGym)
+                if (request.MaximumNumber != null && request.MaximumToken != null && exits.FeatureAi == EnumFeature.AiPracticeGym)
                 {
                     exits.MaximumNumber = request.MaximumNumber;
                     exits.MaximumToken = request.MaximumToken;
                 }
 
                 exits = _aiModelFeatureRepository.Update(exits);
+
+                if (exits.SubFeatures != null)
+                {
+                    var subFeature = await _aiModelFeatureRepository.Queryable
+                    .Where(x => x.ParentFeatureId == exits.Id && !x.IsDeleted)
+                    .ToListAsync(cancellationToken);
+
+                    foreach (var sub in subFeature)
+                    {
+                        sub.SettingTemperature = request.SettingTemperature;
+                        sub.SettingWordMaxLength = request.SettingWordMaxLength;
+                        sub.SettingTopP = request.SettingTopP;
+                        sub.SettingFrequency = request.SettingFrequency;
+                        sub.SettingPresence = request.SettingPresence;
+
+                        _aiModelFeatureRepository.Update(sub);
+                    }
+                }
+
                 await _aiModelFeatureRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                var ready = await _aiModelFeatureRepository.Queryable
+                .Include(x => x.SubFeatures)
+                .SingleAsync(x => x.Id == exits.Id, cancellationToken);
+
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<AiFeatureConfigModel>(exits);
+                methodResult.Result = _mapper.Map<AiFeatureConfigModel>(ready);
                 return methodResult;
             });
 

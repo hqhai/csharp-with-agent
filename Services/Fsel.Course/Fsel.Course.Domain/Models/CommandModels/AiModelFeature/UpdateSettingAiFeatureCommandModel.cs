@@ -2,11 +2,11 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.AiModelFeature
 {
-    using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class UpdateSettingAiFeatureCommandModel
     {
-        public EnumFeatureAi Key { get; set; }
+        public EnumFeature Key { get; set; }
         public double SettingTemperature { get; set; }
         public double SettingWordMaxLength { get; set; }
         public double SettingTopP { get; set; }

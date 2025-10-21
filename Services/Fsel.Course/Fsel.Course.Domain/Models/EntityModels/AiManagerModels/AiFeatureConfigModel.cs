@@ -4,13 +4,14 @@ namespace Fsel.Course.Domain.Models.EntityModels.AiManagerModels
 {
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class AiFeatureConfigModel : BaseModel
     {
         public Guid FeatureObjectId { get; set; }
         public Guid? ParentFeatureId { get; set; }
         public Guid AiModelManagerId { get; set; }
-        public EnumFeatureAi FeatureAi { get; set; }
+        public EnumFeature FeatureAi { get; set; }
         public EnumTypeFeatureAi? TypeFeatureAi { get; set; }
         public string? UserRole { get; set; }
         public string? Config { get; set; }

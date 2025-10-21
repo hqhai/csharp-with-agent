@@ -12,7 +12,7 @@ namespace Fsel.Course.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AiPromptManager",
+                name: "AiPromptManagers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -31,11 +31,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AiPromptManager", x => x.Id);
+                    table.PrimaryKey("PK_AiPromptManagers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "AIFeatureConfig",
+                name: "AiFeatureConfigs",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -55,7 +55,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                     FeatureAi = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     TypeFeatureAi = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     UserRole = table.Column<string>(type: "nvarchar(max)", maxLength: 100000, nullable: true),
-                    Config = table.Column<string>(type: "nvarchar(max)", maxLength: 100000, nullable: true),
+                    AiConfigSetting = table.Column<string>(type: "nvarchar(max)", maxLength: 100000, nullable: true),
                     Json = table.Column<string>(type: "nvarchar(max)", maxLength: 100000, nullable: true),
                     SettingTemperature = table.Column<double>(type: "float", nullable: true),
                     SettingWordMaxLength = table.Column<double>(type: "float", nullable: true),
@@ -67,27 +67,27 @@ namespace Fsel.Course.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AIFeatureConfig", x => x.Id);
+                    table.PrimaryKey("PK_AiFeatureConfigs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AIFeatureConfig_AIFeatureConfig_ParentFeatureId",
+                        name: "FK_AiFeatureConfigs_AiFeatureConfigs_ParentFeatureId",
                         column: x => x.ParentFeatureId,
-                        principalTable: "AIFeatureConfig",
+                        principalTable: "AiFeatureConfigs",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_AIFeatureConfig_AiPromptManager_AiPromptManagerId",
+                        name: "FK_AiFeatureConfigs_AiPromptManagers_AiPromptManagerId",
                         column: x => x.AiPromptManagerId,
-                        principalTable: "AiPromptManager",
+                        principalTable: "AiPromptManagers",
                         principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AIFeatureConfig_AiPromptManagerId",
-                table: "AIFeatureConfig",
+                name: "IX_AiFeatureConfigs_AiPromptManagerId",
+                table: "AiFeatureConfigs",
                 column: "AiPromptManagerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_AIFeatureConfig_ParentFeatureId",
-                table: "AIFeatureConfig",
+                name: "IX_AiFeatureConfigs_ParentFeatureId",
+                table: "AiFeatureConfigs",
                 column: "ParentFeatureId");
         }
 
@@ -95,10 +95,10 @@ namespace Fsel.Course.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AIFeatureConfig");
+                name: "AiFeatureConfigs");
 
             migrationBuilder.DropTable(
-                name: "AiPromptManager");
+                name: "AiPromptManagers");
         }
     }
 }

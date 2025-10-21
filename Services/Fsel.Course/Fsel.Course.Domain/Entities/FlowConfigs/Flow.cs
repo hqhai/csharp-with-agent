@@ -27,7 +27,7 @@ namespace Fsel.Course.Domain.Entities.FlowConfigs
         public EnumStatus Status { get; set; }
 
         /// <summary>
-        /// Config
+        /// AiConfigSetting
         /// </summary>
         public string? ConfigStr { get; set; }
 

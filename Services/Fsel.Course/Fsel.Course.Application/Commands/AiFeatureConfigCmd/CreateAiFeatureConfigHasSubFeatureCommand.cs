@@ -58,14 +58,14 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
 
                 if (parent == null)
                 {
-                    parent = new AIFeatureConfig
+                    parent = new AIPromptConfigs
                     {
                         Id = Guid.NewGuid(),
                         AiPromptManagerId = request.AiPromptManagerId,
                         FeatureAi = request.FeatureAi,
                         FeatureObjectId = request.FeatureObjectId,
                         UserRole = request.UserRole,
-                        Config = request.Config,
+                        AiConfigSetting = request.Config,
                         JsonConfig = request.JsonConfig,
                     };
                     parent = _aiModelFeatureRepository.Add(parent);
@@ -103,7 +103,7 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
 
                         if (!exits.TryGetValue(type, out var subFeature))
                         {
-                            subFeature = new AIFeatureConfig
+                            subFeature = new AIPromptConfigs
                             {
                                 AiPromptManagerId = parent.AiPromptManagerId,
                                 FeatureAi = parent.FeatureAi,
@@ -114,7 +114,7 @@ namespace Fsel.Course.Application.Commands.AiModelFeatureCmd
                             exits[type] = subFeature;
                         }
                         subFeature.UserRole = s.UserRole?.Trim();
-                        subFeature.Config = s.Config?.Trim();
+                        subFeature.AiConfigSetting = s.Config?.Trim();
                         subFeature.JsonConfig = s.JsonConfig ?? subFeature.JsonConfig;
 
                         //parent.SubFeatures.Add(subFeature);

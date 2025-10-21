@@ -3,10 +3,11 @@
 namespace Fsel.Course.Domain.Models.CommandModels.AiModelFeature
 {
     using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
 
     public class UpdateAiFeatureCommandModel
     {
-        public EnumFeatureAi Key { get; set; }
+        public EnumFeature Key { get; set; }
         public Guid? FeatureObjectId { get; set; }
         public Guid? AiPromptManagerId { get; set; }
         public string? UserRole { get; set; }

@@ -8,21 +8,21 @@ namespace Fsel.Course.Domain.Entities
     using Core.Entities;
     using Enums;
     using Fsel.Common.Helpers;
+    using Fsel.Shared.Enums;
 
-    [Table("AIFeatureConfig")]
-    public class AIFeatureConfig : Entity
+    public class AIPromptConfigs : Entity
     {
         public Guid AiPromptManagerId { get; set; }
         public Guid FeatureObjectId { get; set; }
         public Guid? ParentFeatureId { get; set; }
-        public EnumFeatureAi FeatureAi { get; set; }
+        public EnumFeature FeatureAi { get; set; }
         public EnumTypeFeatureAi? TypeFeatureAi { get; set; }
 
         [MaxLength(100000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? UserRole { get; set; }
 
         [MaxLength(100000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? Config { get; set; }
+        public string? AiConfigSetting { get; set; }
 
         [MaxLength(100000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Json { get; set; }
@@ -45,11 +45,11 @@ namespace Fsel.Course.Domain.Entities
         [Range(1, 10, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int? MaximumNumber { get; set; }
 
-        [Range(1, 1000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
+        [Range(1, 10000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int? MaximumToken { get; set; } = 4000;
         public AiPromptManager AiPromptManager { get; set; }
-        public AIFeatureConfig? ParentFeature { get; set; }
-        public ICollection<AIFeatureConfig>? SubFeatures { get; set; } = new List<AIFeatureConfig>();
+        public AIPromptConfigs? ParentFeature { get; set; }
+        public ICollection<AIPromptConfigs>? SubFeatures { get; set; } = new List<AIPromptConfigs>();
 
         [NotMapped]
         public object? JsonConfig

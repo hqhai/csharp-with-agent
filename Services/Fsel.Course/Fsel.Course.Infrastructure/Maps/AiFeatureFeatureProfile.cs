@@ -12,17 +12,17 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public AiFeatureFeatureProfile()
         {
-            CreateMap<AIFeatureConfig, AiFeatureConfigModel>().IgnoreAllNonExisting()
+            CreateMap<AIPromptConfigs, AiFeatureConfigModel>().IgnoreAllNonExisting()
                 .ForMember(d => d.SubFeatures,  o => o.MapFrom(s => s.SubFeatures));
-            CreateMap<CreateAiFeatureConfigCommandModel, AIFeatureConfig>().IgnoreAllNonExisting();
-            CreateMap<CreateAiFeatuerHasSubCommadModel, AIFeatureConfig>().IgnoreAllNonExisting();
-            CreateMap<UpdateAiFeatureCommandModel, AIFeatureConfig>().IgnoreAllNonExisting();
-            CreateMap<AiFeatureConfigModel, AIFeatureConfig>().IgnoreAllNonExisting();
+            CreateMap<CreateAiFeatureConfigCommandModel, AIPromptConfigs>().IgnoreAllNonExisting();
+            CreateMap<CreateAiFeatuerHasSubCommadModel, AIPromptConfigs>().IgnoreAllNonExisting();
+            CreateMap<UpdateAiFeatureCommandModel, AIPromptConfigs>().IgnoreAllNonExisting();
+            CreateMap<AiFeatureConfigModel, AIPromptConfigs>().IgnoreAllNonExisting();
 
-            CreateMap<AIFeatureConfig, AiSubFeatueModel>()
+            CreateMap<AIPromptConfigs, AiSubFeatueModel>()
                 .ForMember(d => d.TypeFeatureAi, o => o.MapFrom(s => s.TypeFeatureAi))
                 .ForMember(d => d.UserRole, o => o.MapFrom(s => s.UserRole))
-                .ForMember(d => d.Config, o => o.MapFrom(s => s.Config))
+                .ForMember(d => d.Config, o => o.MapFrom(s => s.AiConfigSetting))
                 .ForMember(d => d.Json, o => o.MapFrom(s => s.Json ?? s.JsonConfig));
 
         }

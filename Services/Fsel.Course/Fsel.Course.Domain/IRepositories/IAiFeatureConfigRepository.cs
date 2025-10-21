@@ -5,7 +5,7 @@ namespace Fsel.Course.Domain.IRepositories
     using Core.Base.Interfaces;
     using Entities;
 
-    public interface IAiFeatureConfigRepository : IRepository<AIFeatureConfig>
+    public interface IAiFeatureConfigRepository : IRepository<AIPromptConfigs>
     {
 
     }
