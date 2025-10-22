@@ -135,6 +135,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     StudentId = cr.StudentId,
                     CourseId = cr.CourseId,
                     CourseGoalId = courseGoal.Id,
+                    CombinedProgress = EnumCombinedProgress.TotalBehindWeekBehind,
+                    CurrentCombinedProgress = EnumCombinedProgress.TotalBehindWeekBehind,
                     CourseGoalConfigId = courseGoalConfig.Id,
                     SchoolId = courseGoal.SchoolId,
                     SchoolName = courseGoal.SchoolName,
