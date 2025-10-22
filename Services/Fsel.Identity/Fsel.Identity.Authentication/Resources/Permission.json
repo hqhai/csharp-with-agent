@@ -898,5 +898,41 @@
     "status": true,
     "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
     "createdDate": "2025-07-01"
+  },
+  {
+    "id": "d3d34bdf-b472-4a2c-b7c3-b6f763153efb",
+    "claimValue": "StudentProgressWeeklyManagement.Add",
+    "name": "Thêm",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "createdDate": "2025-09-24"
+  },
+  {
+    "id": "f7df2ab2-68c8-42cb-9ca8-e9f9945e3de5",
+    "claimValue": "StudentProgressWeeklyManagement.Update",
+    "name": "Sửa",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "createdDate": "2025-09-24"
+  },
+  {
+    "id": "4042a45a-8997-445e-aec8-e5dacc1bed25",
+    "claimValue": "StudentProgressWeeklyManagement.Delete",
+    "name": "Xóa",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "createdDate": "2025-09-24"
+  },
+  {
+    "id": "ba9920d2-e1bd-4e6a-938a-58470a4cdf89",
+    "claimValue": "StudentProgressWeeklyManagement.View",
+    "name": "Xem",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "createdDate": "2025-09-24"
   }
 ]
