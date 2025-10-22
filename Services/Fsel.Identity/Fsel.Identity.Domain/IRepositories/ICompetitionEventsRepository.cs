@@ -7,5 +7,6 @@ namespace Fsel.Identity.Domain.IRepositories
 
     public interface ICompetitionEventsRepository : IRepository<CompetitionEvent>
     {
+        Task<string> GetEventCodeAsync(Guid? schoolId);
     }
 }

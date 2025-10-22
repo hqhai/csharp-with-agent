@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroups));
                 return methodResult;
             }
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => sectionGroupIds.Contains(x.SectionGroupId) && x.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).WhereBulkContains(sectionGroupIds, x => x.SectionGroupId).Where(x => x.MockTestResultId == mockTestResult.Id && x.CreatedDate >= mockTestResult.CreatedDate).ToListAsync(cancellationToken);
             if (sectionGroupResults == null || !sectionGroupResults.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResults));

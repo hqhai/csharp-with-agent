@@ -97,6 +97,8 @@ builder.Services.AddScoped<IDailyQuizWinnerRepository, DailyQuizWinnerRepository
 builder.Services.AddScoped<ICourseGoalRepository, CourseGoalRepository>();
 builder.Services.AddScoped<ICourseGoalConfigRepository, CourseGoalConfigRepository>();
 
+builder.Services.AddScoped<ISenderConfigRepository, SenderConfigRepository>();
+
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
 builder.Services.AddScoped<NotificationMessagePublisher>();

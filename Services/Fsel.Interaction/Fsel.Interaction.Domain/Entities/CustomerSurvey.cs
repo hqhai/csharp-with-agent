@@ -2,22 +2,19 @@
 
 namespace Fsel.Interaction.Domain.Entities
 {
-    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
 
     public class CustomerSurvey : Entity
     {
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public string? AnswerStr { get; set; }
 
         [NotMapped]
         public object? Answer
         {
-            get { return ConvertHelper.Deserialize<object>(AnswerStr); }
-            set { AnswerStr = ConvertHelper.Serialize(value); }
+            get => string.IsNullOrEmpty(AnswerStr) ? null : ConvertHelper.Deserialize<object>(AnswerStr);
+            set => AnswerStr = value == null ? null : ConvertHelper.Serialize(value);
         }
 
         public Guid UserId { get; set; }

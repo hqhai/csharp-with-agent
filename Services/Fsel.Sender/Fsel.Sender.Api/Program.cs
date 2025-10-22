@@ -12,6 +12,7 @@ using Fsel.Sender.Application.Services.SMSServices.IRIS;
 using Fsel.Sender.Application.Services.SMSServices.GAPIT;
 using Refit;
 using Fsel.Sender.Application.Services.ZaloServices;
+using Fsel.Sender.Application.Services.UserServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +30,7 @@ builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiU
 builder.Services.AddRefitClient<IIRISServiceDC>().ConfigureHttpClient(c => c.BaseAddress = new Uri(appSetting?.Services?.IRISApiUrlDC ?? string.Empty));
 builder.Services.AddRefitClient<IIRISServiceDR>().ConfigureHttpClient(c => c.BaseAddress = new Uri(appSetting?.Services?.IRISApiUrlDR ?? string.Empty));
 builder.Services.AddRefitClient<IGAPITService>().ConfigureHttpClient(c => c.BaseAddress = new Uri(appSetting?.Services?.GAPITApiUrl ?? string.Empty));
+builder.Services.AddRefitClient<IUserService>().ConfigureHttpClient(c => c.BaseAddress = new Uri(appSetting?.Services?.UserApiUrl ?? string.Empty));
 var app = builder.Build();
 app.UseServices();
 app.Run();

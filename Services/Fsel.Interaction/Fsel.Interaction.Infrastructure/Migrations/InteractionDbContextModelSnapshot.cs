@@ -109,7 +109,6 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnOrder(0);
 
                     b.Property<string>("AnswerStr")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
@@ -958,6 +957,117 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.ToTable("SupportTickets");
                 });
 
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("ApplicableProgramStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ApplicableSubjectsStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("CompetitionEventIdsStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ProgressRequirementsStr")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("Tokens")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SurveyConfigs");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("327e645e-f09c-41ae-a8df-c797d52747b4"),
+                            ApplicableProgramStr = "[\"QuestBoard\"]",
+                            CreatedDate = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            EndDate = new DateTime(2125, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            IsDeleted = false,
+                            Name = "Survey Questboard",
+                            StartDate = new DateTime(2025, 7, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Status = "Active",
+                            Tokens = 0
+                        });
+                });
+
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyQuestion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1020,15 +1130,25 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.Property<bool?>("IsPilot")
                         .HasColumnType("bit");
 
+                    b.Property<bool?>("IsRequired")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Question")
                         .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<Guid?>("SurveyConfigId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("SurveyFormType")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Type")
                         .IsRequired()
@@ -1049,6 +1169,8 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .HasColumnOrder(102);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SurveyConfigId");
 
                     b.ToTable("SurveyQuestions");
 
@@ -2484,6 +2606,88 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.ToTable("TopicTags");
                 });
 
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.UserSurveyAssignment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<string>("CourseLevel")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("CourseType")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsDone")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSurveyQuestBoard")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsView")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ProgressRequirement")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("SurveyConfigId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SurveyConfigId");
+
+                    b.ToTable("UserSurveyAssignments");
+                });
+
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurvey", b =>
                 {
                     b.HasOne("Fsel.Interaction.Domain.Entities.CustomerSurveyGroup", "CustomerSurveyGroup")
@@ -2558,6 +2762,16 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                     b.Navigation("SupportQuestion");
                 });
 
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyQuestion", b =>
+                {
+                    b.HasOne("Fsel.Interaction.Domain.Entities.SurveyConfig", "SurveyConfig")
+                        .WithMany("SurveyQuestions")
+                        .HasForeignKey("SurveyConfigId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("SurveyConfig");
+                });
+
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyQuestionTranslation", b =>
                 {
                     b.HasOne("Fsel.Interaction.Domain.Entities.SurveyQuestion", "SurveyQuestion")
@@ -2567,6 +2781,16 @@ namespace Fsel.Interaction.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("SurveyQuestion");
+                });
+
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.UserSurveyAssignment", b =>
+                {
+                    b.HasOne("Fsel.Interaction.Domain.Entities.SurveyConfig", "SurveyConfig")
+                        .WithMany("UserSurveyAssignments")
+                        .HasForeignKey("SurveyConfigId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("SurveyConfig");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.CustomerSurveyGroup", b =>
@@ -2594,6 +2818,13 @@ namespace Fsel.Interaction.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SupportQuestion", b =>
                 {
                     b.Navigation("SupportTickets");
+                });
+
+            modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyConfig", b =>
+                {
+                    b.Navigation("SurveyQuestions");
+
+                    b.Navigation("UserSurveyAssignments");
                 });
 
             modelBuilder.Entity("Fsel.Interaction.Domain.Entities.SurveyQuestion", b =>

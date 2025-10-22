@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
 
         private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, MockTestResult mockTestResult)
         {
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == mockTestResult.StudentId).FirstOrDefaultAsync();
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == mockTestResult.StudentId && x.CreatedDate >= mockTestResult.CreatedDate).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
                 _logger.LoggerRequest(request);
