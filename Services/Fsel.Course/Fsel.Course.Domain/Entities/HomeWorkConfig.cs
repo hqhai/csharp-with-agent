@@ -13,5 +13,6 @@ namespace Fsel.Course.Domain.Entities
         public Guid CurriculumId { get; set; }
         public HomeWork? HomeWork { get; set; }
         public CurriculumConfig? CurriculumConfig { get; set; }
+        public ICollection<HomeWorkRetry> HomeWorkRetríes { get; set; } = new List<HomeWorkRetry>();
     }
 }

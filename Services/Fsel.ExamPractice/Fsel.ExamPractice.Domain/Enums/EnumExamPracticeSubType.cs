@@ -17,6 +17,12 @@ namespace Fsel.ExamPractice.Domain.Enums
         FullMockTest = 3,
 
         [Description("Skill Mock Test")]
-        SkillMockTest = 4
+        SkillMockTest = 4,
+
+        [Description("Full Vstep Skill")]
+        FullVstepSkill,
+
+        [Description("Single Vstep Skill")]
+        SingleVstepSkill
     }
 }

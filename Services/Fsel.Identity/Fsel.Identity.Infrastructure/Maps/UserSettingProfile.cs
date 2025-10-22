@@ -13,7 +13,9 @@ namespace Fsel.Identity.Infrastructure.Maps
         public UserSettingProfile()
         {
             CreateMap<UserSetting, UserSettingModel>().IgnoreAllNonExisting();
-            CreateMap<SaveUserSettingCommandModel, UserSetting>().IgnoreAllNonExisting();
+            CreateMap<SaveUserSettingCommandModel, UserSetting>().ForMember(dest => dest.UserSenderSettings, opt => opt.Ignore()).IgnoreAllNonExisting();
+            CreateMap<SaveUserSenderSetting, UserSenderSetting>().IgnoreAllNonExisting();
+            CreateMap<UserSenderSetting, UserSenderSettingModel>().IgnoreAllNonExisting();
         }
     }
 }

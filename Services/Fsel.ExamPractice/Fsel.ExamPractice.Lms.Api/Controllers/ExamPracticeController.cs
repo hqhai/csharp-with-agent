@@ -3,10 +3,14 @@
 namespace Fsel.ExamPractice.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base;
+    using Fsel.ExamPractice.Domain.Models.EntityModels;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices;
+    using Fsel.ExamPractice.Lms.Application.Commands.AiCmd;
     using Fsel.ExamPractice.Lms.Application.Commands.ExamPracticeCmd;
     using Fsel.ExamPractice.Lms.Application.Queries.ExamPracticeQuery;
     using Fsel.ExamPractice.Lms.Application.Queries.ReportQuery;
@@ -15,7 +19,6 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
@@ -58,6 +61,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
         /// Search ExamPractice
         /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<IList<ExamPracticeGroupTypeModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Search([FromQuery] SearchExamPracticeQuery query)
@@ -136,6 +140,18 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
         public async Task<IActionResult> GetReport([FromQuery] GetExamPracticeSectionResultReportQuery query)
         {
             MethodResult<ExamPracticeSectionResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create MockTestAnswers
+        /// </summary>
+        [HttpPost("test-azure")]
+        [ProducesResponseType(typeof(MethodResult<PronunciationAssessmentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> TestAzurePronunciation([FromBody] AzurePronTestCmd command)
+        {
+            MethodResult<PronunciationAssessmentModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

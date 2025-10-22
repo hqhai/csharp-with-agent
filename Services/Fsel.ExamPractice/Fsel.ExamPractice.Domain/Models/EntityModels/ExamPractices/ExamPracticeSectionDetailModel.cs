@@ -17,8 +17,11 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
         public EnumSectionExamPracticeType? Type { get; set; }
         public double ExecutionTime { get; set; }
         public IList<ExamPracticeSectionDetailModel> ExamPracticeSections { get; set; } = new List<ExamPracticeSectionDetailModel>();
+        public IList<ExamPracticeScoreModel> ExamPracticeScores { get; set; } = new List<ExamPracticeScoreModel>();
         public ExamPracticeSectionResultModel? ExamPracticeSectionResult { get; set; }
         public IList<Guid> QuestionIds { get; set; } = new List<Guid>();
         public IList<QuestionCorrectStatusModel> QuestionTests { get; set; } = new List<QuestionCorrectStatusModel>();
+        public ExamPracticeAnswerModel? ExamPracticeAnswer { get; set; }
+        public object? Answer { get; set; }
     }
 }

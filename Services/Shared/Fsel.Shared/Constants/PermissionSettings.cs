@@ -230,6 +230,16 @@ namespace Fsel.Shared.Constants
         public const string DeleteStudents = $"{ClaimType}.DeleteStudents";
     }
 
+    public static class SurveyManagement
+    {
+        public const string ClaimType = nameof(SurveyManagement);
+        public const string View = $"{ClaimType}.View";
+        public const string Update = $"{ClaimType}.Update";
+        public const string Add = $"{ClaimType}.Add";
+        public const string Delete = $"{ClaimType}.Delete";
+        public const string Export = $"{ClaimType}.Export";
+    }
+
     public static class WeeklyProgressManagement
     {
         public const string ClaimType = nameof(WeeklyProgressManagement);

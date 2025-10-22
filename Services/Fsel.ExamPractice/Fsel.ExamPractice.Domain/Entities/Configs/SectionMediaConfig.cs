@@ -2,15 +2,16 @@
 
 namespace Fsel.ExamPractice.Domain.Entities.Configs
 {
-    using Fsel.Common.Enums.ErrorCodes;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using Fsel.Common.Enums.ErrorCodes;
 
     public class SectionMediaConfig
     {
-        [MaxLength(4000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(7000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
 
-        [MaxLength(4000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(7000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Instruction { get; set; }
 
         public double? DisplayTime { get; set; }
@@ -27,5 +28,17 @@ namespace Fsel.ExamPractice.Domain.Entities.Configs
 
         public int TotalQuestion { get; set; }
         public int TargetWord { get; set; }
+
+        [NotMapped]
+        public TimeSpan DisplayTimeSpan
+        {
+            get { return TimeSpan.FromSeconds(DisplayTime ?? default); }
+        }
+
+        [NotMapped]
+        public TimeSpan ExecutionTimeSpan
+        {
+            get { return TimeSpan.FromSeconds(ExecutionTime ?? default); }
+        }
     }
 }

@@ -22,6 +22,7 @@ namespace Fsel.Interaction.Infrastructure
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);
             SeedSurveyQuestions(modelBuilder);
+            SeedSurveyQuestBoard(modelBuilder);
 
             modelBuilder.ApplyConfiguration(new SurveyQuestionEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CustomerSurveyEntityTypeConfiguration());
@@ -36,6 +37,8 @@ namespace Fsel.Interaction.Infrastructure
             modelBuilder.ApplyConfiguration(new FlagEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SurveyQuestionTranslationEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CustomerSurveyGroupEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SurveyConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UserSurveyAssignmentEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -54,6 +57,8 @@ namespace Fsel.Interaction.Infrastructure
         public DbSet<SupportCategory> SupportCategorys { get; set; }
         public DbSet<Flag> Flags { get; set; }
         public DbSet<CustomerSurveyGroup> CustomerSurveyGroups { get; set; }
+        public DbSet<SurveyConfig> SurveyConfigs { get; set; }
+        public DbSet<UserSurveyAssignment> UserSurveyAssignments { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -89,6 +94,14 @@ namespace Fsel.Interaction.Infrastructure
 
             builder.Entity<SurveyQuestion>().HasData(surveyQuestions);
             builder.Entity<SurveyQuestionTranslation>().HasData(surveyQuestionTranslations);
+        }
+
+        private static void SeedSurveyQuestBoard(ModelBuilder builder)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SurveyQuestBoardFileName);
+            var entities = ConvertHelper.DeserializeFromFilePath<IList<SurveyConfig>>(path);
+            ArgumentNullException.ThrowIfNull(entities);
+            builder.Entity<SurveyConfig>().HasData(entities);
         }
     }
 }

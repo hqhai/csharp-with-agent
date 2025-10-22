@@ -5,6 +5,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
+    using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Entities.QuestionTypeConfigs.Answers.V1i1;
     using Fsel.ExamPractice.Domain.Entities.QuestionTypeConfigs.Questions.V1i1;
     using Fsel.ExamPractice.Domain.Enums;
@@ -39,60 +40,47 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<SubQuestionModel>>();
 
-            var examPracticeSectionResult = await _examPracticeSectionResultRepository.Queryable.Include(x => x.ExamPracticeAnswers).FirstOrDefaultAsync(x => x.ExamPracticeSectionId == request.ExamPracticeSectionId && x.ExamPracticeResultId == request.ObjectResultId, cancellationToken);
+            var examPracticeSectionResult = await _examPracticeSectionResultRepository.Queryable.AsNoTracking()
+                                                                                      .Include(x => x.ExamPracticeAnswers)
+                                                                                      .Where(x => x.ExamPracticeSectionId == request.ExamPracticeSectionId)
+                                                                                      .FirstOrDefaultAsync(x => x.ExamPracticeResultId == request.ObjectResultId, cancellationToken);
             if (examPracticeSectionResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeSectionResult));
                 return methodResult;
             }
 
-            var configAnswers = examPracticeSectionResult.ExamPracticeAnswers
-                                                .Select(x => GetConfigAnswer(x.Answer))
-                                                .Where(x => x != null && x.Answers != null && x.Answers.Any())
-                                                .SelectMany(x => x!.Answers)
-                                                .ToList();
+            var flatAnswers = ExtractConfigAnswers(examPracticeSectionResult.ExamPracticeAnswers);
+            var answerById = flatAnswers
+                .GroupBy(a => a.Id)
+                .ToDictionary(g => g.Key, g => g.First()); // nếu trùng lấy cái đầu tiên
 
-            var questionIds = await _examPracticeSectionRepository.Queryable.Where(x => x.ParentExamPracticeSectionId == examPracticeSectionResult.ExamPracticeSectionId)
-                                                        .SelectMany(x => x.Questions)
-                                                        .Select(x => x.Id)
-                                                        .ToListAsync(cancellationToken);
+            var questionIds = await GetChildQuestionIdsAsync(examPracticeSectionResult.ExamPracticeSectionId, cancellationToken);
+            if (!questionIds.Any())
+            {
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = new List<SubQuestionModel>();
+                return methodResult;
+            }
+
+            var questions = await _questionRepository.Queryable.AsNoTracking()
+                                                     .WhereBulkContains(questionIds, x => x.Id)
+                                                     .OrderBy(x => x.CreatedDate)
+                                                     .ToListAsync(cancellationToken);
+
             var listSubQuestion = new List<SubQuestionModel>();
-            var questions = await _questionRepository.Queryable.WhereBulkContains(questionIds, x => x.Id).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             foreach (var item in questions)
             {
-                var subQuestions = GetConfigQuestion(item.Config, item.QuestionType); // List SubQuestion với IsExact = true // 3
+                var subQuestions = GetConfigQuestion(item.Config, item.QuestionType).ToList(); // List SubQuestion với IsExact = true // 3
+                if (subQuestions.Count == 0)
+                {
+                    continue;
+                }
                 if (item.QuestionType == EnumQuestionType.CheckListV1)
                 {
-                    var answerConfigIds = item.Config.Deserialize<CheckListQuestionV1>()?.Answers.Select(x => x.Id).ToList();
-                    var answers = configAnswers.Where(x => answerConfigIds != null && answerConfigIds.Contains(x.Id)).ToList();
-                    subQuestions = subQuestions.Select((x, index) =>
-                    {
-                        if (answers.Count > index)
-                        {
-                            x.Status = EnumCorrectStatus.Process;
-                        }
-                        return x;
-                    }).ToList();
+                    MarkChecklistProgress(item, subQuestions, flatAnswers);
                 }
-                foreach (var subQuestion in subQuestions)
-                {
-                    var configAnswer = configAnswers.FirstOrDefault(x => x.Id == subQuestion.Id);
-                    var isExact = configAnswer?.IsExact;
-                    subQuestion.QuestionId = item.Id;
-                    subQuestion.IndexSubQuestion = item.SubQuestionIndexs?[subQuestions.IndexOf(subQuestion)] ?? 0;
-                    if (examPracticeSectionResult.Status == EnumResultStatus.Done)
-                    {
-                        subQuestion.Status = isExact.HasValue && isExact.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
-                    }
-                    else if (subQuestion.Status == EnumCorrectStatus.Process)
-                    {
-                        continue;
-                    }
-                    else if (item.QuestionType != EnumQuestionType.CheckListV1)
-                    {
-                        subQuestion.Status = !(string.IsNullOrEmpty(configAnswer?.Content) && string.IsNullOrEmpty(configAnswer?.Key)) || isExact.HasValue ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
-                    }
-                }
+                ApplyMetadataAndStatus(examPracticeSectionResult.Status, item, subQuestions, answerById);
                 listSubQuestion.AddRange(subQuestions);
             }
 
@@ -101,12 +89,93 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery
             return methodResult;
         }
 
+        private static void MarkChecklistProgress(Question question, List<SubQuestionModel> subQuestions, List<ConfigAnswer> flatAnswers)
+        {
+            var conf = question.Config.Deserialize<CheckListQuestionV1>();
+            var validIds = conf?.Answers?.Where(x => x.Id.HasValue).Select(a => a.Id!.Value).ToHashSet() ?? new HashSet<Guid>();
+
+            // Đếm số câu trả lời hợp lệ map được theo Id
+            var answeredCount = flatAnswers.Count(a => validIds.Contains(a.Id));
+
+            // Đánh dấu PROCESS cho N sub đầu
+            var upto = Math.Min(answeredCount, subQuestions.Count);
+            for (var i = 0; i < upto; i++)
+            {
+                subQuestions[i].Status = EnumCorrectStatus.Process;
+            }
+        }
+
+        private static List<ConfigAnswer> ExtractConfigAnswers(IEnumerable<ExamPracticeAnswer> answers)
+        {
+            return answers
+                .Select(x => GetConfigAnswer(x.Answer))
+                .Where(cfg => cfg != null && cfg.Answers != null && cfg.Answers.Any())
+                .SelectMany(cfg => cfg!.Answers)
+                .ToList();
+        }
+
+        private static void ApplyMetadataAndStatus(EnumResultStatus sectionStatus, Question q, List<SubQuestionModel> subs, IReadOnlyDictionary<Guid, ConfigAnswer> answerById)
+        {
+            // SubQuestionIndexs có thể null/thiếu index => an toàn chỉ số
+            var hasIndexes = q.SubQuestionIndexs != null && q.SubQuestionIndexs.Count >= subs.Count;
+
+            for (var i = 0; i < subs.Count; i++)
+            {
+                var sub = subs[i];
+
+                sub.QuestionId = q.Id;
+                sub.IndexSubQuestion = hasIndexes ? q.SubQuestionIndexs![i] : 0;
+
+                // Tìm câu trả lời theo Id sub
+                answerById.TryGetValue(sub.Id, out var cfgAnswer);
+                var isExact = cfgAnswer?.IsExact;
+
+                if (sectionStatus == EnumResultStatus.Done)
+                {
+                    sub.Status = (isExact.HasValue && isExact.Value)
+                        ? EnumCorrectStatus.Correct
+                        : EnumCorrectStatus.Fail;
+                    continue;
+                }
+
+                if (sub.Status == EnumCorrectStatus.Process)
+                {
+                    // Đã set PROCESS từ bước checklist, giữ nguyên
+                    continue;
+                }
+
+                if (q.QuestionType != EnumQuestionType.CheckListV1)
+                {
+                    var hasAnsweredSignal =
+                        !string.IsNullOrEmpty(cfgAnswer?.Content) ||
+                        !string.IsNullOrEmpty(cfgAnswer?.Key) ||
+                        isExact.HasValue; // giữ semantics cũ
+
+                    sub.Status = hasAnsweredSignal ? EnumCorrectStatus.Process : EnumCorrectStatus.New;
+                }
+                // Với CheckListV1 và chưa PROCESS, giữ nguyên status mặc định.
+            }
+        }
+
+        /// <summary>
+        /// Lấy tất cả QuestionId thuộc các section con của Section cha.
+        /// </summary>
+        private async Task<List<Guid>> GetChildQuestionIdsAsync(Guid parentSectionId, CancellationToken ct)
+        {
+            // Note: AsNoTracking vì chỉ đọc
+            return await _examPracticeSectionRepository.Queryable
+                .AsNoTracking()
+                .Where(x => x.ParentExamPracticeSectionId == parentSectionId)
+                .SelectMany(x => x.Questions.Select(q => q.Id))
+                .ToListAsync(ct);
+        }
+
         private static MultipleChoiceAnswerV1? GetConfigAnswer(object? answer)
         {
             return answer.Deserialize<MultipleChoiceAnswerV1>();
         }
 
-        public IList<SubQuestionModel> GetConfigQuestion(object? config, EnumQuestionType questionType)
+        public static IList<SubQuestionModel> GetConfigQuestion(object? config, EnumQuestionType questionType)
         {
             switch (questionType)
             {

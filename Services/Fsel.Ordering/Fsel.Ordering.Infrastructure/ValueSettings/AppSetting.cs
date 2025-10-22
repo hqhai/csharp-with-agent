@@ -72,6 +72,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     public class ConstantUrl
     {
         public string? PaymentSuccessUrl { get; set; }
+        public string? UpdateSenderSettingUrl { get; set; }
     }
 
     public class UrBoxConfig
