@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Commands.AiModelManagerCmd
+namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -8,8 +8,8 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.AiModelManager;
-    using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
+    using Fsel.Course.Domain.Models.CommandModels.AiPromptManager;
+    using Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -34,6 +34,7 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
             MethodResult<AiPromptManagerModel> methodResult = new MethodResult<AiPromptManagerModel>();
 
             var exits = await _aiModelManagerRepository.GetByIdAsync(request.Id);
+
             if (exits == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -45,6 +46,7 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
             await _aiModelManagerRepository.ExecuteTransactionAsync(async () =>
             {
                 _mapper.Map(request, exits);
+
                 if (!exits.IsValid())
                 {
                     methodResult.AddErrorBadRequest(exits.ErrorMessages);
@@ -56,13 +58,14 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<AiPromptManagerModel>(exits);
+
                 return methodResult;
             });
 
             return methodResult;
         }
 
-        private MethodResult<AiPromptManagerModel> Validation(UpdateAiPromptManagerCommand request, MethodResult<AiPromptManagerModel> methodResult)
+        private static MethodResult<AiPromptManagerModel> Validation(UpdateAiPromptManagerCommand request, MethodResult<AiPromptManagerModel> methodResult)
         {
             if (request.AiModelName == null)
             {

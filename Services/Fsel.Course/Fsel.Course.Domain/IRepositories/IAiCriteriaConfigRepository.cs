@@ -5,7 +5,8 @@ namespace Fsel.Course.Domain.IRepositories
     using Core.Base.Interfaces;
     using Entities;
 
-    public interface IAiPromptManagerRepository : IRepository<AiPromptManager>
+    public interface IAiCriteriaConfigRepository : IRepository<AICriteriaConfigs>
     {
+
     }
 }

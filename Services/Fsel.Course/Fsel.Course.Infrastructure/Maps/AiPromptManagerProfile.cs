@@ -5,9 +5,8 @@ namespace Fsel.Course.Infrastructure.Maps
     using AutoMapper;
     using Core.Extensions;
     using Domain.Entities;
-    using Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.CommandModels.AiModelManager;
-    using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
+    using Fsel.Course.Domain.Models.CommandModels.AiPromptManager;
+    using Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels;
 
     public class AiPromptManagerProfile : Profile
     {

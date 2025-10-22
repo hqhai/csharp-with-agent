@@ -107,7 +107,7 @@ builder.Services.AddScoped<IRubyAnnotationRepository, RubyAnnotationRepository>(
 builder.Services.AddScoped<IRubyScopeRepository, RubyScopeRepsitory>();
 builder.Services.AddScoped<IRubyService, RubyService>();
 builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
-builder.Services.AddScoped<IAiFeatureConfigRepository, AiFeatureConfigRepository>();
+builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();

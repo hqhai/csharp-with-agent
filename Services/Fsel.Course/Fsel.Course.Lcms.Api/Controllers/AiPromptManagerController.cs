@@ -7,10 +7,12 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Application.Commands.AiModelManagerCmd;
-    using Fsel.Course.Application.Queries.AiModelManagerQuery;
-    using Fsel.Course.Domain.Models.CommandModels.AiModelManager;
-    using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
+    using Fsel.Course.Application.Commands.AiPromptManagerCmd;
+    using Fsel.Course.Application.Queries.AiPromptConfigQuery;
+    using Fsel.Course.Application.Queries.AiPromptManagerQuery;
+    using Fsel.Course.Domain.Models.CommandModels.AiPromptManager;
+    using Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels;
+    using Fsel.Course.Domain.Models.QueryModels.AiModelFeature;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
@@ -35,7 +37,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<AiManagerSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Search([FromQuery] GetAiModelManagerQuery query)
+        public async Task<IActionResult> Search([FromQuery] GetAiPromptManagerQuery query)
         {
             MethodResult<PagingItemsModel<AiManagerSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
@@ -49,7 +51,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
-            MethodResult<AiPromptManagerModel> queryResult = await _mediator.Send(new GetAiModelManagerByIdQuery { Id = id }).ConfigureAwait(false);
+            MethodResult<AiPromptManagerModel> queryResult = await _mediator.Send(new GetAiPromptManagerByIdQuery { Id = id }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -90,5 +92,40 @@ namespace Fsel.Course.Lcms.Api.Controllers
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteAiPromptManagerCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Ai Prompt child
+        /// </summary>
+        [HttpGet("child/{id}")]
+        [ProducesResponseType(typeof(MethodResult<IList<AiPromptManagerModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetPromptChild([FromRoute] Guid id)
+        {
+            MethodResult<IList<AiPromptManagerModel>> queryResult = await _mediator.Send(new GetAiPromptChidManagerQuery { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Ai Criteria by id 
+        /// </summary>
+        [HttpGet("criteria/{id}")]
+        [ProducesResponseType(typeof(MethodResult<IList<AICriteriaConfigsModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCriteriaChild([FromRoute] Guid id)
+        {
+            MethodResult<IList<AICriteriaConfigsModel>> queryResult = await _mediator.Send(new GetAiCriteriaByIdAipromptQuery { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get featue
+        /// </summary>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        [HttpGet("feature")]
+        [ProducesResponseType(typeof(MethodResult<GetFeatureAiModelQuery>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<ActionResult<IReadOnlyList<GetFeatureAiModelQuery>>> Get(CancellationToken ct)
+            => Ok(await _mediator.Send(new GetFeatureQuery(), ct));
     }
 }
