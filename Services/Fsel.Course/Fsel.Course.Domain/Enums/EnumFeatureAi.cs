@@ -12,10 +12,10 @@ namespace Fsel.Course.Domain.Enums
         [Display(Name = "Class Forum - Writing Layout", GroupName = "Class Forum", Order = 11)]
         ClassForumWritingLayout = 102,
 
-        [Display(Name = "Test Config - Speaking Layout", GroupName = "Test Config", Order = 20)]
+        [Display(Name = "Test AiConfigSetting - Speaking Layout", GroupName = "Test AiConfigSetting", Order = 20)]
         TestConfigSpeakingLayout = 201,
 
-        [Display(Name = "Test Config - Writing Layout", GroupName = "Test Config", Order = 21)]
+        [Display(Name = "Test AiConfigSetting - Writing Layout", GroupName = "Test AiConfigSetting", Order = 21)]
         TestConfigWritingLayout = 202,
 
         [Display(Name = "AI practice Gym", GroupName = "AI Practice", Order = 30)]

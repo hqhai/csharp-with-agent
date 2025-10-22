@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Commands.AiModelManagerCmd
+namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -11,6 +11,7 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
     using Fsel.Course.Domain.IRepositories;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
     public class DeleteAiPromptManagerCommand : IRequest<MethodResult<bool>>
     {
@@ -19,11 +20,11 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
 
     public class DeleteAiPromptManagerCommandHandler : IRequestHandler<DeleteAiPromptManagerCommand, MethodResult<bool>>
     {
-        private readonly IAiPromptManagerRepository _aiModelManagerRepository;
+        private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
 
         public DeleteAiPromptManagerCommandHandler(IAiPromptManagerRepository aiModelManagerRepository)
         {
-            _aiModelManagerRepository = aiModelManagerRepository;
+            _aiPromptManagerRepository = aiModelManagerRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(DeleteAiPromptManagerCommand request, CancellationToken cancellationToken)
@@ -37,7 +38,15 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
                 return methodResult;
             }
 
-            var entity = await _aiModelManagerRepository.GetIncludeByIdAsync(request.Id);
+            var entity = await _aiPromptManagerRepository.GetIncludeByIdAsync(request.Id);
+
+
+            if (entity == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(entity));
+                return methodResult;
+            }
+
             await Validation(entity, methodResult, request);
 
             if (!methodResult.IsOK)
@@ -45,10 +54,10 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
                 return methodResult;
             }
 
-            await _aiModelManagerRepository.ExecuteTransactionAsync(async () =>
+            await _aiPromptManagerRepository.ExecuteTransactionAsync(async () =>
             {
-                var result = await _aiModelManagerRepository.DeleteAsync(entity);
-                await _aiModelManagerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                var result = await _aiPromptManagerRepository.DeleteAsync(entity);
+                await _aiPromptManagerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = result;
@@ -63,23 +72,21 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
             MethodResult<bool> methodResult,
             DeleteAiPromptManagerCommand request)
         {
-            if (entity == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(entity));
-                return methodResult;
-            }
-
             if (!entity.IsValid())
             {
                 methodResult.AddErrorBadRequest(entity.ErrorMessages);
                 return methodResult;
             }
 
-            var isFeature = await _aiModelManagerRepository.IsFeature(request.Id);
+            var isCriteria = await _aiPromptManagerRepository.Queryable
+                .Include(x => x.AiPromptParent)
+                .Include(x => x.AICriteriaConfigs)
+                .AsNoTracking()
+                .AllAsync(x => x.Id == entity.Id && x.AICriteriaConfigs.Count > 0 && x.AiPromptManagers.Count > 0);
 
-            if (isFeature)
+            if (isCriteria)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumAiModelManagerErrorCode.IsFeature), nameof(request.Id), request.Id);
+                methodResult.AddErrorBadRequest(nameof(EnumAiPromptManagerErrorCode.IsFeature), nameof(request.Id), request.Id);
                 return methodResult;
             }
 

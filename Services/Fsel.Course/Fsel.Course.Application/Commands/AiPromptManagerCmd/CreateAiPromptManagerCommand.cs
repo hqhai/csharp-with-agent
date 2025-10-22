@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Commands.AiModelManagerCmd
+namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
@@ -9,9 +9,8 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.AiModelManager;
-    using Fsel.Course.Domain.Models.EntityModels.AiManagerModels;
-    using MailKit.Net.Smtp;
+    using Fsel.Course.Domain.Models.CommandModels.AiPromptManager;
+    using Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -36,7 +35,16 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<AiPromptManagerModel> methodResult = new MethodResult<AiPromptManagerModel>();
-            await Validation(request, methodResult, cancellationToken);
+
+            var exits = await _aiModelManagerRepository.Queryable.FirstOrDefaultAsync(x => x.AiModelName == request.AiModelName, cancellationToken);
+
+            if (exits != null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
+                return methodResult;
+            }
+
+            Validation(request, methodResult);
 
             await _aiModelManagerRepository.ExecuteTransactionAsync(async () =>
             {
@@ -53,7 +61,7 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
             return methodResult;
         }
 
-        private async Task<MethodResult<AiPromptManagerModel>> Validation(CreateAiPromptManagerCommand request, MethodResult<AiPromptManagerModel> methodResult, CancellationToken cancellationToken)
+        private static MethodResult<AiPromptManagerModel> Validation(CreateAiPromptManagerCommand request, MethodResult<AiPromptManagerModel> methodResult)
         {
             if (request.AiModelName == null)
             {
@@ -64,14 +72,6 @@ namespace Fsel.Course.Application.Commands.AiModelManagerCmd
             if (request.InputModel == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
-            }
-
-            var exits = await _aiModelManagerRepository.Queryable.FirstOrDefaultAsync(x => x.AiModelName == request.AiModelName, cancellationToken);
-
-            if (exits != null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist));
                 return methodResult;
             }
 

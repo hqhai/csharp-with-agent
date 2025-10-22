@@ -11,6 +11,6 @@ namespace Fsel.Shared.Enums
         FinalTest,
         DiscussionBoard,
         ChatBot,
-        Other
+        Other,
     }
 }
