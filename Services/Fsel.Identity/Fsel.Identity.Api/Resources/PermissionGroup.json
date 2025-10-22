@@ -247,14 +247,5 @@
     "status": true,
     "menuId": "d7c5e83c-5ec4-479e-b0dc-4dd3784e36e4",
     "createdDate": "2025-09-18"
-  },
-  {
-    "id": "e275d7b4-ab06-4c7a-8058-4fae05f78681",
-    "claimType": "WeeklyProgressManagement",
-    "name": "Quản lý tiến độ tuần",
-    "description": null,
-    "status": true,
-    "menuId": "715d7a0c-0691-41f6-8d0f-721d286f555a",
-    "createdDate": "2025-09-18"
   }
 ]
