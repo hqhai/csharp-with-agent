@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("weekly-management/by-class")]
         [ProducesResponseType(typeof(MethodResult<IList<StackBarChartsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(DashboardManagementByAdminSchool.ViewAttendanceReport)]
+        [Permission(DashboardManagementByAdminSchool.ViewWeeklyProgress)]
         public async Task<IActionResult> Get([FromQuery] GetWeeklyProgressByClassQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -123,7 +123,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("weekly-management/comparison")]
         [ProducesResponseType(typeof(MethodResult<StackBarChartsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(DashboardManagementByAdminSchool.ViewAttendanceReport)]
+        [Permission(DashboardManagementByAdminSchool.ViewWeeklyProgress)]
         public async Task<IActionResult> Get([FromQuery] GetWeeklyProgressComparisonQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);

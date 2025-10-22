@@ -704,5 +704,22 @@
       "children": []
     },
     "createdDate": "2025-09-18"
+  },
+  {
+    "id": "715d7a0c-0691-41f6-8d0f-721d286f555a",
+    "name": "Weekly Progress Management",
+    "category": "LMSAdmin",
+    "index": 36,
+    "config": {
+      "id": 33,
+      "code_title": "Quản lý tiến độ tuần",
+      "link": "/weekly-goal-progress-management",
+      "icon": "Star.png",
+      "parentId": 0,
+      "code": "",
+      "permission": "Admin,AdminSchool",
+      "children": []
+    },
+    "createdDate": "2025-09-18"
   }
 ]

@@ -64,9 +64,8 @@ namespace Fsel.Shared.Constants
         public const string Add = $"{ClaimType}.Add";
         public const string View = $"{ClaimType}.View";
         public const string Update = $"{ClaimType}.Update";
-        public const string DeleteStudentGoal = $"{ClaimType}.DeleteStudentGoal";
-        public const string ViewStudentGoal = $"{ClaimType}.ViewStudentGoal";
         public const string Export = $"{ClaimType}.Export";
+        public const string DeleteStudentGoal = $"{ClaimType}.DeleteStudentGoal";
     }
 
     public static class ReferralCodeManagement
@@ -188,6 +187,7 @@ namespace Fsel.Shared.Constants
         public const string ViewLearningProgressReport = $"{ClaimType}.ViewLearningProgressReport";
         public const string ViewLearningResultsReport = $"{ClaimType}.ViewLearningResultsReport";
         public const string ViewAttendanceReport = $"{ClaimType}.ViewAttendanceReport";
+        public const string ViewWeeklyProgress = $"{ClaimType}.ViewWeeklyProgress";
     }
 
     public static class SchoolStudentManagement
@@ -230,9 +230,13 @@ namespace Fsel.Shared.Constants
         public const string DeleteStudents = $"{ClaimType}.DeleteStudents";
     }
 
-    public static class StudentGoalAggregateManagement
+    public static class WeeklyProgressManagement
     {
-        public const string ClaimType = nameof(StudentGoalAggregateManagement);
+        public const string ClaimType = nameof(WeeklyProgressManagement);
         public const string View = $"{ClaimType}.View";
+        public const string ViewStudentGoal = $"{ClaimType}.ViewStudentGoal";
+        public const string AddStudentGoal = $"{ClaimType}.AddStudentGoal";
+        public const string UpdateStudentGoal = $"{ClaimType}.UpdateStudentGoal";
+        public const string DeleteStudentGoal = $"{ClaimType}.DeleteStudentGoal";
     }
 }

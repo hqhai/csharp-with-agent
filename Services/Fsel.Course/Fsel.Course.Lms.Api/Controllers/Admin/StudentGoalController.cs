@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -12,14 +13,12 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/student-goal")]
     [ApiController]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
     public class StudentGoalController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -35,6 +34,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpDelete("aggregate")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [Permission(StudentManagement.DeleteStudentGoal)]
         public async Task<IActionResult> Delete([FromBody] DeleteStudentGoalAggregateCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -47,6 +47,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("summary")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentGoalSummaryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [Permission(StudentManagement.View)]
         public async Task<IActionResult> Get([FromQuery] SearchStudentGoalSummaryQuery query)
         {
             MethodResult<PagingItemsModel<StudentGoalSummaryModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -59,6 +60,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("aggregate")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentGoalAggregateModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [Permission(WeeklyProgressManagement.View)]
         public async Task<IActionResult> Get([FromQuery] SearchStudentGoalAggregateQuery query)
         {
             MethodResult<PagingItemsModel<StudentGoalAggregateModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);

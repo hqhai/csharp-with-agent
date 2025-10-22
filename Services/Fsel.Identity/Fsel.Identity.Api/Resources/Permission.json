@@ -853,5 +853,68 @@
     "status": true,
     "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
     "createdDate": "2025-09-18"
+  },
+  {
+    "id": "89289a4e-af45-45ad-aaf1-ab7064f7d008",
+    "claimValue": "StudentManagement.DeleteStudentGoal",
+    "name": "Xóa thiết lập mục tiêu tuần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "68e5e3d2-90a1-4c60-9b8f-77a03381dc92",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "9fb7b4ae-206a-49bb-a6a2-9b35f05342e2",
+    "claimValue": "DashboardManagementByAdminSchool.ViewWeeklyProgress",
+    "name": "Xem báo cáo mục tiêu tuần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "718ed155-b71e-4a5e-aece-c78441d18ede",
+    "claimValue": "WeeklyProgressManagement.View",
+    "name": "Xem tiến độ tuần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e275d7b4-ab06-4c7a-8058-4fae05f78681",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "0ab9fdc3-44b5-4755-a29b-f6c9557492c2",
+    "claimValue": "WeeklyProgressManagement.ViewStudentGoal",
+    "name": "Xem cấu hình mục tiêu khóa học",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e275d7b4-ab06-4c7a-8058-4fae05f78681",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "310ec95e-d314-49e2-b3a3-ac3705fa9049",
+    "claimValue": "WeeklyProgressManagement.AddStudentGoal",
+    "name": "Thêm cấu hình mục tiêu khóa học",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e275d7b4-ab06-4c7a-8058-4fae05f78681",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "f9d496fe-b18c-47b0-96e8-925091bac4ff",
+    "claimValue": "WeeklyProgressManagement.UpdateStudentGoal",
+    "name": "Update cấu hình mục tiêu khóa học",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e275d7b4-ab06-4c7a-8058-4fae05f78681",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "eac0e1e4-dfdd-45fb-bda7-3f8f5ce3cecc",
+    "claimValue": "WeeklyProgressManagement.DeleteStudentGoal",
+    "name": "Xóa cấu hình mục tiêu khóa học",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "e275d7b4-ab06-4c7a-8058-4fae05f78681",
+    "createdDate": "2025-09-18"
   }
 ]
