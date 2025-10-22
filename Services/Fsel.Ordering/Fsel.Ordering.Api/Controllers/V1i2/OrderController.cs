@@ -35,7 +35,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -48,7 +48,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpPost("create-order-trial")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> Create([FromBody] CreateOrderTrialCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpPost("verify-data-from-android-app")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> VerifyDataFromAndroidApp([FromBody] VerifyDataFromAndroidAppCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -74,7 +74,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpGet("get-by-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchOrderModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> Search([FromRoute] Guid id)
         {
             var queryResult = await _mediator.Send(new GetOrderByIdQuery() { Id = id }).ConfigureAwait(false);
@@ -87,7 +87,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         [HttpGet("search-order")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<SearchOrderModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> Search([FromQuery] SearchOrderQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);

@@ -13,7 +13,7 @@ namespace Fsel.ExamPractice.Domain.Entities
 
     public class ExamPracticeSection : Entity
     {
-        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [MaxLength(750, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         public EnumCourseSkill? CourseSkill { get; set; }
@@ -28,6 +28,21 @@ namespace Fsel.ExamPractice.Domain.Entities
         {
             get { return ConvertHelper.Deserialize<SectionMediaConfig>(ConfigStr); }
             set { ConfigStr = ConvertHelper.Serialize(value); }
+        }
+
+        public string? SubQuestionIndexsStr { get; set; }
+
+        [NotMapped]
+        public int SubQuestionNumber
+        {
+            get { return SubQuestionIndexs?.Count ?? default; }
+        }
+
+        [NotMapped]
+        public IList<int>? SubQuestionIndexs
+        {
+            get { return ConvertHelper.Deserialize<IList<int>>(SubQuestionIndexsStr); }
+            set { SubQuestionIndexsStr = ConvertHelper.Serialize(value); }
         }
 
         public EnumSectionExamPracticeType? Type { get; set; }

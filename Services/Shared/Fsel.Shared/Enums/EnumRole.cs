@@ -16,6 +16,9 @@ namespace Fsel.Shared.Enums
         AdminSchool,
         DepartmentAdmin,
         EducationDepartment,
-        EducationDivision
+        EducationDivision,
+        StudentCampus,
+        TeacherCampus,
+        AdminCampus
     }
 }

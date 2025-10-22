@@ -3,6 +3,7 @@
 namespace Fsel.ExamPractice.Infrastructure.Configs
 {
     using System;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
     using Fsel.ExamPractice.Domain.Entities;
     using Fsel.ExamPractice.Domain.Enums;
@@ -37,6 +38,10 @@ namespace Fsel.ExamPractice.Infrastructure.Configs
                  .HasConversion(
                      v => v.ToString(),
                      v => (Shared.Enums.EnumCourseLevel?)v.EnumParse<EnumCourseLevel>());
+
+            builder.Property(e => e.VersionStatus)
+                   .HasMaxLength(100)
+                   .HasConversion(v => v.ToString(), v => v.EnumParse<EnumVersionStatus>());
         }
     }
 }

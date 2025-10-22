@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
 {
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/course")]
-    [Permission(role: nameof(EnumRole.Student))]
+    [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     [ApiController]
     public class CourseController : BaseController
     {

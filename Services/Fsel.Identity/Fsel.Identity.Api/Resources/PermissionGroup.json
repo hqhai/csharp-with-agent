@@ -222,6 +222,42 @@
     "createdDate": "2025-07-01"
   },
   {
+    "id": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "claimType": "CurriculumManagement",
+    "name": "Quản lý giáo trình",
+    "description": null,
+    "status": true,
+    "menuId": "40217f52-0b4b-4c95-b5f8-c1317deba995",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "642f9c9c-c338-48fa-a42a-6d22e766bfca",
+    "claimType": "StudentCampusManagement",
+    "name": "Quản lý học sinh Campus",
+    "description": null,
+    "status": true,
+    "menuId": "9b06098b-4328-43b0-a1bd-0d0d12d87d7c",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "0b734124-0372-488c-8321-2129484f8adb",
+    "claimType": "SchoolClassCampusManagement",
+    "name": "Quản lý lớp Campus",
+    "description": null,
+    "status": true,
+    "menuId": "d7c5e83c-5ec4-479e-b0dc-4dd3784e36e4",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "claimType": "SurveyManagement",
+    "name": "Quản lý khảo sát",
+    "description": null,
+    "status": true,
+    "menuId": "49dece94-b2de-4271-88ef-72f3e2461a2f",
+    "createdDate": "2025-08-05"
+  },
+  {
     "id": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
     "claimType": "StudentProgressWeeklyManagement",
     "name": "Quản lý tiến độ học sinh tuần",

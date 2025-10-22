@@ -34,6 +34,7 @@ namespace Fsel.Shared.Constants
                 public const string CheckUserDeletion = $"{KeyQueue}_CheckUserDeletion";
                 public const string CreateStudentsFromFile = $"{KeyQueue}_CreateStudentsFromFile";
                 public const string AggregateDataStudentsInEvent = $"{KeyQueue}_AggregateDataStudentsInEvent";
+                public const string CreateStudentsAndParentsFromFile = $"{KeyQueue}_CreateStudentsAndParentsFromFile";
             }
         }
 
@@ -186,6 +187,8 @@ namespace Fsel.Shared.Constants
                 public const string SendNotification = $"{KeyQueue}_SendNotification";
                 public const string InteractionAction = $"{KeyQueue}_InterationAction";
                 public const string CreateTokenHistory = $"{KeyQueue}_CreateTokenHistory";
+                public const string SaveUserSurveyAssignment = $"{KeyQueue}_SaveUserSurveyAssignment";
+                public const string SendNotifyUserHasSurvey = $"{KeyQueue}_SendNotifyUserHasSurvey";
             }
         }
 

@@ -95,6 +95,7 @@ namespace Fsel.Shared.Constants
 
             public const int Temperature = 0;
             public const string Model = "gpt-4o";
+            public const string O4MINI = "o4-mini";
             public const int PresencePenalty = 0;
             public const int TopP = 0;
         }
@@ -249,6 +250,12 @@ namespace Fsel.Shared.Constants
             public const int MaxLengthDisplayOrder1 = 3000;
             public const int Section0 = 0;
             public const int Section1 = 1;
+        }
+
+        public static class LanguageAIModule
+        {
+            public const string English = "en-US";
+            public const string Vietnamese = "vi-VN";
         }
     }
 }

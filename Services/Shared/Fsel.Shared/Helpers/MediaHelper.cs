@@ -68,6 +68,20 @@ namespace Fsel.Shared.Helpers
             }
         }
 
+        public static bool IsProbablyFileUrl(string? s)
+        {
+            if (!Uri.TryCreate(s, UriKind.Absolute, out var uri))
+            {
+                return false;
+            }
+            if (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            {
+                return false;
+            }
+            // Rất đơn giản: đường dẫn URL có phần mở rộng ở cuối
+            return Path.HasExtension(uri.AbsolutePath);
+        }
+
         public static async Task<int?> GetMediaDurationAsync(IFormFile mediaFile, ISystemFileProvider systemFileProvider)
         {
             ArgumentNullException.ThrowIfNull(systemFileProvider);
