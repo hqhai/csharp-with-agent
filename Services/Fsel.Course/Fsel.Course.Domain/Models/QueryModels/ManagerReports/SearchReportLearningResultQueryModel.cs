@@ -8,5 +8,6 @@ namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
     public class SearchReportLearningResultQueryModel : SearchStudentSchoolQueryModel
     {
         public EnumOverallScore? OverallScore { get; set; }
+        public bool? StatusLearning { get; set; }
     }
 }

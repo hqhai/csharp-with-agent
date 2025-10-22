@@ -249,6 +249,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 datas.Add(learningResult);
             }
 
+            if (request.StatusLearning.HasValue)
+            {
+                datas = datas.Where(p => p.LearningStatus == request.StatusLearning).ToList();
+            }
+
             reportLearningResult.PagingItems = new PagingItemsModel<LearningResultModel>(datas, request, reportLearningResult.TotalStudent);
             methodResult.Result = reportLearningResult;
             methodResult.StatusCode = StatusCodes.Status200OK;
