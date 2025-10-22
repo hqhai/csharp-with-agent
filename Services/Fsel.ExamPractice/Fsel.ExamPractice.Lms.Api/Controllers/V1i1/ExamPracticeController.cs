@@ -21,7 +21,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers.V1i1
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [ApiController]
     [Route(Settings.APIDefaultRoute + "/exam-practice")]
-    [Permission(role: nameof(EnumRole.Student))]
+    [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class ExamPracticeController : BaseController
     {
         private readonly IMediator _mediator;
