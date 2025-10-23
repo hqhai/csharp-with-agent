@@ -261,12 +261,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             // 2) Lấy "bản ghi tuần mới nhất" theo Aggregate
             var latestWeeklyByAggId = PickLatestWeeklyByAggregateId(weeklySummaries);
 
-            // 3) Chuẩn bị key (StudentId, CourseId)
-            var studentCourseKeys = aggregates.Select(a => (a.StudentId, a.CourseId)).Distinct().ToList();
-            var courseIds = aggregates.Select(a => a.CourseId).Distinct().ToList();
-
             // 4) Nạp dữ liệu phụ trợ
-            var doneLessonResultsMap = await LoadDoneLessonResultsMapAsync(studentCourseKeys, ct);
+            var doneLessonResultsMap = await LoadDoneLessonResultsMapAsync(aggregates, ct);
 
             // 5) Tính toán
             foreach (var ag in aggregates)
@@ -277,7 +273,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 }
                 var results = doneLessonResultsMap.TryGetValue((ag.StudentId, ag.CourseId), out var r)
                     ? r
-                    : Enumerable.Empty<LessonResultLite>();
+                    : Enumerable.Empty<LessonResult>();
 
                 ApplyWeeklyAndTotalProgress(nowVn, weekly, ag, results);
                 ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(ag.TotalCompletedLessons, ag.TotalTargetLessons, weekly.ProgressStatus);
@@ -326,16 +322,25 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                        .ToDictionary(g => g.Key, g => g.Sum(x => x.Count));
         }
 
-        private sealed record LessonResultLite(Guid StudentId, Guid CourseId, DateTime? CompletionDate, DateTime? UpdatedDate);
-
-        private async Task<Dictionary<(Guid StudentId, Guid CourseId), IEnumerable<LessonResultLite>>>
-            LoadDoneLessonResultsMapAsync(IEnumerable<(Guid StudentId, Guid CourseId)> keys, CancellationToken ct)
+        private async Task<Dictionary<(Guid StudentId, Guid CourseId), IEnumerable<LessonResult>>>
+            LoadDoneLessonResultsMapAsync(IList<StudentGoalAggregate> aggregates, CancellationToken ct)
         {
+            var studentCourseKeys = aggregates.Select(a => new
+            {
+                a.StudentId,
+                a.CourseId
+            }).Distinct().ToList();
+
             var rows = await _lessonResultRepository.Queryable
-                .AsNoTracking()
                 .Where(x => x.Status == EnumResultStatus.Done)
-                .WhereBulkContains(keys, new[] { nameof(CourseResult.StudentId), nameof(CourseResult.CourseId) })
-                .Select(x => new LessonResultLite(x.StudentId, x.CourseId, x.CompletionDate, x.UpdatedDate))
+                .WhereBulkContains(studentCourseKeys, new[] { "StudentId", "CourseId" })
+                .Select(x => new LessonResult
+                {
+                    StudentId = x.StudentId,
+                    CourseId = x.CourseId,
+                    CompletionDate = x.CompletionDate,
+                    UpdatedDate = x.UpdatedDate
+                })
                 .ToListAsync(ct);
 
             return rows.GroupBy(x => (x.StudentId, x.CourseId))
@@ -346,7 +351,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             DateTime nowVn,
             StudentGoalSummary weekly,
             StudentGoalAggregate agg,
-            IEnumerable<LessonResultLite> results)
+            IEnumerable<LessonResult> results)
         {
             // Lần hoàn thành gần nhất
             var last = results.OrderByDescending(x => x.CompletionDate ?? x.UpdatedDate).FirstOrDefault();

@@ -1,12 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
-using System.Threading.Tasks;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
+using Fsel.Course.Lms.Application.Commands.OtherFeatureCmd;
 using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
 using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
@@ -165,6 +166,19 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetOverallParam([FromQuery] GetParamOverallScoreQuery query)
         {
             MethodResult<object> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update goal aggregate
+        /// </summary>
+        [HttpPost("goal-aggregate")]
+        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin) })]
+        public async Task<IActionResult> UpdateAggregate()
+        {
+            var queryResult = await _mediator.Send(new RebuildLearningGoalAggregateCommand()).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
