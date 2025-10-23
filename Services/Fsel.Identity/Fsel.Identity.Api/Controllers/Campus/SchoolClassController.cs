@@ -91,6 +91,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
         [ProducesResponseType(typeof(MethodResult<SchoolClassModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(SchoolClassCampusManagement.View)]
+        [ServerCache(CacheSettings.TimeCache.TenMinutes)]
         public async Task<IActionResult> GetSchoolClassById([FromQuery] GetSchoolClassByIdQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
