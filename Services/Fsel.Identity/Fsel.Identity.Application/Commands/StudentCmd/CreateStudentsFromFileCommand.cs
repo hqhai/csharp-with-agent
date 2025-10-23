@@ -74,7 +74,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 }
             }
 
-            if (flag)
+            if (flag && request.Category == EnumCompetitionEventCategory.Student)
             {
                 await _createStudentsAndParentsFromFilePublisher.Publish(new CreateStudentsToEventFromByteModel
                 {
