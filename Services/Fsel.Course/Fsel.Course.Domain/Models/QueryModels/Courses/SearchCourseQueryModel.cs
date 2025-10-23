@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.Courses
     public class SearchCourseQueryModel : BaseQueryModel
     {
         public Guid? TeacherId { get; set; }
-
         public EnumCourseLevel? CourseLevel { get; set; }
+        public EnumCourseType? CourseType { get; set; }
     }
 }

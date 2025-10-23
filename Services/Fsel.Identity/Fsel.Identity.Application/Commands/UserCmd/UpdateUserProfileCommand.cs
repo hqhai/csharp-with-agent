@@ -81,7 +81,7 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 }
                 userView = method.Result;
             }
-            else if (role == EnumRole.Student.ToString())
+            else if (role == EnumRole.Student.ToString() || role == EnumRole.StudentCampus.ToString())
             {
                 var method = await UpdateStudentAsync(user.Id, request, cancellationToken).ConfigureAwait(false);
                 if (!method.IsOK)

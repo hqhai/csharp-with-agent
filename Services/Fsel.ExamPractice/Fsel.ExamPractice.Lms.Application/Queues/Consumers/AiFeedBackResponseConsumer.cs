@@ -3,8 +3,8 @@
 namespace Fsel.ExamPractice.Lms.Application.Queues.Consumers
 {
     using Fsel.Core.Base;
-    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.ExamPractice.Domain.Models.EntityModels.ExamPracticeAnswers;
+    using Fsel.ExamPractice.Lms.Application.Commands.AiCmd;
     using MediatR;
 
     public class AiFeedBackResponseConsumer : BaseConsumer<ExamPracticeAnswerResponseModel>

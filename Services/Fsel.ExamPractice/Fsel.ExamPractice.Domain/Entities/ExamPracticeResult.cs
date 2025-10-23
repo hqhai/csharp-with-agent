@@ -88,7 +88,7 @@ namespace Fsel.ExamPractice.Domain.Entities
         {
             get
             {
-                return NumberHelper.RoundToQuarter(NumberHelper.GetScore(CorrectCount, CorrectTotal));
+                return NumberHelper.RoundNumberDouble(NumberHelper.GetScore(CorrectCount, CorrectTotal));
             }
         }
 

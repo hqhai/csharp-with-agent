@@ -2,11 +2,22 @@
 
 namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
 {
+    using System.Text.Json.Serialization;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.QueryModels;
 
     public class SearchReportLearningResultQueryModel : SearchStudentSchoolQueryModel
     {
-        public EnumOverallScore? OverallScore { get; set; }
+        [JsonIgnore]
+        public IList<EnumOverallScore>? OverallScores
+        {
+            get
+            {
+                return ListOverallScore.ToList<EnumOverallScore>();
+            }
+        }
+
+        public override EnumCourseType? CourseType { get; set; } = EnumCourseType.Academic;
     }
 }

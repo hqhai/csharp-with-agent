@@ -8,5 +8,7 @@ namespace Fsel.Interaction.Domain.Enums.ErrorCodes
         /// You haven't entered enough questions
         /// </summary>
         NotEnoughQuestions,
+
+        DuplicateAnswers,
     }
 }

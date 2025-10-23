@@ -44,6 +44,11 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         /// <summary>
         /// Student hasn't not expired Date
         /// </summary>
-        StudentHasNotExpiredDate
+        StudentHasNotExpiredDate,
+
+        /// <summary>
+        /// User Sender Setting Not Null
+        /// </summary>
+        UserSenderSettingNotNull
     }
 }

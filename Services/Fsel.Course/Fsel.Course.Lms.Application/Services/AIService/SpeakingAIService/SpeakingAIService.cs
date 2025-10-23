@@ -76,15 +76,15 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                                                         };
 
             var criteria = new List<EnumMockTestScoreCriteria>
-                                {
-                                    EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy,
-                                    EnumMockTestScoreCriteria.LexicalResource,
-                                    EnumMockTestScoreCriteria.FluencyAndCoherence
+            {
+                EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy,
+                EnumMockTestScoreCriteria.LexicalResource,
+                EnumMockTestScoreCriteria.FluencyAndCoherence
             };
 
             var sectionGroup = await _sectionGroupRepository.Queryable.Where(x => x.Id == sectionGroupId).FirstOrDefaultAsync(cancellationToken);
 
-            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == sectionGroupId && x.MockTestResultId == mockTestResultId).FirstOrDefault();
+            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == sectionGroupId && x.MockTestResultId == mockTestResultId && x.CreatedDate >= mockTestResult.CreatedDate).FirstOrDefault();
 
             if (sectionGroupResult == null)
             {
