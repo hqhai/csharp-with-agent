@@ -49,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 FlowTestResult.Status = EnumResultStatus.Process;
             }
 
-            if (FlowTestResult.TestResults == null || !FlowTestResult.TestResults.Any() || FlowTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done))
+            if (!FlowTestResult.TestResults.Any() || FlowTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 var flowService = ServiceProvider.GetService<IFlowService>();
                 var stepId = await flowService.GetNextStep(x => x.Id == FlowTestResult.FlowId, FlowTestResult.TestResults);
@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 await AddNewTest(newTestResultTree);
             }
 
-            if (TestResultComposites == null || !TestResultComposites.Any())
+            if (!TestResultComposites.Any())
             {
                await InitAggregate();
             }
