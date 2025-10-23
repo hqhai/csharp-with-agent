@@ -34,7 +34,10 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             var subjects = await _categoryCachingService.GetOrSetAsync("all", async (ctx, _) =>
             {
                 var categories = await _categoryRepository.ReadQueryable
-                .Where(x => x.Type == EnumTypeCategory.Subject && !x.ParentId.HasValue && x.Status != EnumStatus.Archive)
+                .Where(x => x.Type == EnumTypeCategory.Program
+                            && x.Status == EnumStatus.Active
+                            && x.ParentId != null
+                            && x.Flows.Any())
                 .ToListAsync(cancellationToken);
 
                 return categories;
