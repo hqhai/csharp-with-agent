@@ -24,6 +24,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.BaseChartModels
     public class StackBarChartsModel : BaseChartResultModel
     {
         public WeekSummary? Summary { get; set; }
+        public DateTime? StartDate { get; set; }
         public new IList<StackBarChartModel> DataCharts { get; set; } = new List<StackBarChartModel>();
     }
 
@@ -40,8 +41,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.BaseChartModels
 
     public class WeekSummary
     {
-        public int CurrentOnTrack { get; set; }
-        public int PrevOnTrack { get; set; }
+        public int CurrentBehind { get; set; }
+        public int PrevBehind { get; set; }
         public int ChangeAbs { get; set; }
         public int ChangePercent { get; set; }      // -18 => -18%
     }

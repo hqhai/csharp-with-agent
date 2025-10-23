@@ -204,16 +204,18 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         private static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeUtc()
         {
             var nowUtc = DateTime.UtcNow;
-            var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
 
-            int delta = ((int)nowVn.DayOfWeek + 6) % 7; // Mon=0..Sun=6
-            var startVn = nowVn.Date.AddDays(-delta);
-            var endVn = startVn.AddDays(7);
+            var startVn = GetWeekStartMonday(nowVn);
+            var endVn = startVn.AddDays(6);
+            return (startVn, endVn);
+        }
 
-            return (
-                startVn.ConvertTimeToUtc(EnumCountryKey.Vietnam).Date,
-                endVn.ConvertTimeToUtc(EnumCountryKey.Vietnam).Date
-            );
+        private static DateTime GetWeekStartMonday(DateTime date)
+        {
+            var day = (int)date.DayOfWeek; // Sunday=0 ... Monday=1 ... Saturday=6
+            var offset = day == 0 ? -6 : 1 - day; // về thứ 2
+            return date.AddDays(offset);
         }
 
         private static CourseGoalModel? GetCourseGoal(IList<CourseGoalModel> courseGoals, EnumCourseLevel courseLevel, EnumCourseType courseType, Guid? schoolClassId = default)

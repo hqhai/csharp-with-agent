@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.BaseChartModels;
     using Fsel.Shared.Enums;
@@ -14,8 +15,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     public class GetWeeklyProgressByClassQuery : IRequest<MethodResult<IList<StackBarChartsModel>>>
     {
         public Guid SchoolId { get; set; }
-        public string? ClassIdStr { get; set; }
-        public string? CourseTypeStr { get; set; }
+        public Guid? ClassId { get; set; }
+        public EnumCourseType? CourseType { get; set; }
     }
 
     public class GetWeeklyProgressByClassQueryHandler : IRequestHandler<GetWeeklyProgressByClassQuery, MethodResult<IList<StackBarChartsModel>>>
@@ -35,85 +36,135 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<StackBarChartsModel>>();
 
-            var classIds = request.ClassIdStr.ToList<Guid>();
-            var courseTypes = request.CourseTypeStr.ToList<EnumCourseType>();
+            var (currentWeekStartUtc, previousWeekStartUtc) = GetWeekBoundariesUtc();
 
-            var nowUtc = DateTime.UtcNow;
-            int diff = ((int)nowUtc.DayOfWeek + 6) % 7;
-            var weekStartUtc = nowUtc.Date.AddDays(-diff - 7).Date;
+            var query = BuildBaseQuery(request);
+            var data = await GetDataForWeekAsync(query, request.SchoolId, currentWeekStartUtc, cancellationToken)
+                     ?? await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken)
+                     ?? new List<ProgressRow>();
 
-            var query = _studentGoalAggregateRepository.Queryable;
-            if (!string.IsNullOrEmpty(request.ClassIdStr))
-            {
-                query = query.WhereBulkContains(classIds, x => x.ClassId);
-            }
-            if (!string.IsNullOrEmpty(request.CourseTypeStr))
-            {
-                query = query.WhereBulkContains(courseTypes, x => x.CourseType);
-            }
+            var stackBar = BuildStackBarChart(data);
+            var pie = BuildPieChart(data);
 
-            var data = await (from baseQ in query
-                              join sgs in _studentGoalSummaryRepository.Queryable on baseQ.Id equals sgs.StudentGoalAggregateId
-                              where baseQ.SchoolId == request.SchoolId
-                              && sgs.StartDate.Date <= weekStartUtc && sgs.EndDate.Date >= weekStartUtc
-                              select new
-                              {
-                                  SchoolId = baseQ.SchoolId,
-                                  ClassId = baseQ.ClassId,
-                                  SchoolName = baseQ.SchoolName,
-                                  ClassName = baseQ.ClassName,
-                                  ProgressStatus = sgs.ProgressStatus,
-                                  StudentId = baseQ.StudentId
-                              }).ToListAsync(cancellationToken);
-            var stackBar = new StackBarChartsModel
+            methodResult.Result = new List<StackBarChartsModel> { stackBar, pie };
+            return methodResult;
+        }
+
+        private static StackBarChartsModel BuildStackBarChart(List<ProgressRow> data)
+        {
+            var grouped = data
+                .GroupBy(x => new { x.ClassId, x.ClassName })
+                .Select(g => new
+                {
+                    g.Key.ClassId,
+                    g.Key.ClassName,
+                    OnTrack = g.Count(s => s.ProgressStatus == EnumProgressStatus.OnTrack || s.ProgressStatus == EnumProgressStatus.Ahead),
+                    Behind = g.Count(s => s.ProgressStatus == EnumProgressStatus.Behind)
+                })
+                .OrderByDescending(x => x.OnTrack + x.Behind)
+                .ThenBy(x => x.ClassName)
+                .ToList();
+
+            var models = grouped.Select(g => new StackBarChartModel
             {
-                Type = EnumChartType.StackbarChart
+                Label = g.ClassName,
+                Value = g.ClassId.ToString(),
+                DataColumns = new List<DataChartModel>
+                {
+                    new DataChartModel { Label = EnumProgressStatus.OnTrack.GetDescription(), Value = g.OnTrack },
+                    new DataChartModel { Label = EnumProgressStatus.Behind.GetDescription(),  Value = g.Behind  }
+                }
+            }).ToList();
+
+            return new StackBarChartsModel
+            {
+                Type = EnumChartType.StackbarChart,
+                DataCharts = models
             };
-            stackBar.DataCharts = data
-                            .GroupBy(x => new { x.ClassId, x.ClassName })
-                            .OrderBy(g => g.Count()) // tuỳ bạn sort theo tên hoặc mã lớp
-                            .Select(g =>
-                            {
-                                var onTrack = g.Count(s => s.ProgressStatus == EnumProgressStatus.OnTrack || s.ProgressStatus == EnumProgressStatus.Ahead);
-                                var behind = g.Count(s => s.ProgressStatus == EnumProgressStatus.Behind);
-                                return new StackBarChartModel
-                                {
-                                    Label = g.Key.ClassName,
-                                    Value = g.Key.ClassId.ToString(),
-                                    DataColumns = new List<DataChartModel>
-                                    {
-                                        new DataChartModel { Label = EnumProgressStatus.OnTrack.GetDescription(),  Value = onTrack },
-                                        new DataChartModel { Label = EnumProgressStatus.Behind.GetDescription(), Value = behind  }
-                                    }
-                                };
-                            })
-                            .ToList();
+        }
+
+        private static StackBarChartsModel BuildPieChart(List<ProgressRow> data)
+        {
             var totalOnTrack = data.Count(s => s.ProgressStatus == EnumProgressStatus.OnTrack || s.ProgressStatus == EnumProgressStatus.Ahead);
             var totalBehind = data.Count(s => s.ProgressStatus == EnumProgressStatus.Behind);
             var grandTotal = totalOnTrack + totalBehind;
-            var pie = new StackBarChartsModel
+
+            return new StackBarChartsModel
             {
                 Type = EnumChartType.PieChart,
                 DataCharts = new List<StackBarChartModel>
+            {
+                new StackBarChartModel
                 {
-                    new StackBarChartModel
-                    {
-                        Label = EnumProgressStatus.OnTrack.GetDescription(),
-                        Value =$"{totalOnTrack}",
-                        Percent = (int)NumberHelper.GetPercent(totalOnTrack, grandTotal)
-                    },
-                    new StackBarChartModel
-                    {
-                        Label = EnumProgressStatus.Behind.GetDescription(),
-                        Value = $"{totalBehind}",
-                        Percent = (int)NumberHelper.GetPercent(totalBehind, grandTotal)
-                    }
+                    Label = EnumProgressStatus.OnTrack.GetDescription(),
+                    Value = totalOnTrack.ToString(),
+                    NumericValue = totalOnTrack,
+                    Percent = (int)NumberHelper.GetPercent(totalOnTrack, grandTotal)
+                },
+                new StackBarChartModel
+                {
+                    Label = EnumProgressStatus.Behind.GetDescription(),
+                    Value = totalBehind.ToString(),
+                    NumericValue = totalBehind,
+                    Percent = (int)NumberHelper.GetPercent(totalBehind, grandTotal)
                 }
+            }
             };
+        }
 
-            // ----- Tuỳ chọn: gộp vào DTO trả về cho API -----
-            methodResult.Result = new List<StackBarChartsModel> { stackBar, pie };
-            return methodResult;
+        private static (DateTime currentWeekStartUtc, DateTime previousWeekStartUtc) GetWeekBoundariesUtc()
+        {
+            var nowUtc = DateTime.UtcNow.Date;
+            int delta = ((int)nowUtc.DayOfWeek + 6) % 7; // Monday=0
+            var currentWeekStartUtc = nowUtc.AddDays(-delta);
+            var previousWeekStartUtc = currentWeekStartUtc.AddDays(-7);
+            return (currentWeekStartUtc, previousWeekStartUtc);
+        }
+
+        private IQueryable<StudentGoalAggregate> BuildBaseQuery(GetWeeklyProgressByClassQuery request)
+        {
+            var query = _studentGoalAggregateRepository.Queryable.AsNoTracking();
+
+            if (request.ClassId.HasValue)
+            {
+                query = query.Where(x => x.ClassId == request.ClassId.Value);
+            }
+
+            if (request.CourseType.HasValue)
+            {
+                query = query.Where(x => x.CourseType == request.CourseType.Value);
+            }
+            return query;
+        }
+
+        private async Task<List<ProgressRow>?> GetDataForWeekAsync(
+            IQueryable<StudentGoalAggregate> query,
+            Guid schoolId,
+            DateTime weekStartUtc,
+            CancellationToken ct)
+        {
+            var data = await (
+                from baseQ in query
+                join sgs in _studentGoalSummaryRepository.Queryable.AsNoTracking()
+                    on baseQ.Id equals sgs.StudentGoalAggregateId
+                where baseQ.SchoolId == schoolId
+                      && sgs.StartDate <= weekStartUtc
+                      && sgs.EndDate >= weekStartUtc
+                select new ProgressRow
+                {
+                    ClassId = baseQ.ClassId,
+                    ClassName = baseQ.ClassName,
+                    ProgressStatus = sgs.ProgressStatus
+                }).ToListAsync(ct);
+
+            return data.Any() ? data : null;
+        }
+
+        private class ProgressRow
+        {
+            public Guid? ClassId { get; set; }
+            public string? ClassName { get; set; }
+            public EnumProgressStatus ProgressStatus { get; set; }
         }
     }
 }
