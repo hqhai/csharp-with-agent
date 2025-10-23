@@ -17,8 +17,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public bool IsChangePassword { get; set; }
         public bool EmailConfirmed { get; set; }
         public bool IsStudentVerifiedForEvent { get; set; }
-        public bool IsParent { get; set; }
-        public bool AllowParentInfoUpdate { get; set; }
-        public CompanionInfoEventModel? CompanionInfo { get; set; }
+        //public bool IsParent { get; set; }
+        //public bool AllowParentInfoUpdate { get; set; }
+        //public CompanionInfoEventModel? CompanionInfo { get; set; }
     }
 }

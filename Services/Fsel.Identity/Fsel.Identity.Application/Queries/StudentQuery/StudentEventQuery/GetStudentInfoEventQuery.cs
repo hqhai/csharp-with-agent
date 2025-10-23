@@ -76,56 +76,56 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 IsChangePassword = !isChangePassword,
                 IsStudentVerifiedForEvent = isByPassEmailConfirm,
-                AllowParentInfoUpdate = competitionEvent == null || string.IsNullOrEmpty(competitionEvent.EventCode) || !competitionEvent.EventCode.Contains(EventCode, StringComparison.InvariantCultureIgnoreCase),
+                //AllowParentInfoUpdate = competitionEvent == null || string.IsNullOrEmpty(competitionEvent.EventCode) || !competitionEvent.EventCode.Contains(EventCode, StringComparison.InvariantCultureIgnoreCase),
             };
 
-            var schoolId = human.Student?.SchoolId ?? default;
-            var competitionEventId = competitionEvent?.Id ?? default;
+            //var schoolId = human.Student?.SchoolId ?? default;
+            //var competitionEventId = competitionEvent?.Id ?? default;
 
-            var query = await (from u in _userManager.Users
-                               join h in _humanRepository.Queryable on u.Id equals h.UserId
-                               join s in _studentRepository.Queryable on h.Id equals s.HumanId
-                               join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
-                               where s.SchoolId == schoolId && u.Id != _authContext.CurrentUserId && sce.CompetitionEventId == competitionEventId
-                               select new
-                               {
-                                   User = u,
-                                   Human = h,
-                                   Student = s
-                               }).ToListAsync(cancellationToken);
+            //var query = await (from u in _userManager.Users
+            //                   join h in _humanRepository.Queryable on u.Id equals h.UserId
+            //                   join s in _studentRepository.Queryable on h.Id equals s.HumanId
+            //                   join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
+            //                   where s.SchoolId == schoolId && u.Id != _authContext.CurrentUserId && sce.CompetitionEventId == competitionEventId
+            //                   select new
+            //                   {
+            //                       User = u,
+            //                       Human = h,
+            //                       Student = s
+            //                   }).ToListAsync(cancellationToken);
 
-            var companion = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.Student.ParentPhoneNumber) && p.Student.ParentPhoneNumber == studentInfoEvent.PhoneNumber);
-            if (companion != null)
-            {
-                studentInfoEvent.IsParent = true;
-                studentInfoEvent.CompanionInfo = new CompanionInfoEventModel()
-                {
-                    FullName = companion.User.FullName,
-                    Email = companion.User.Email,
-                    Birthday = companion.Human.Birthday,
-                    School = companion.Student.School,
-                    SchoolGrade = companion.Student.SchoolGrade,
-                    SchoolClass = companion.Student.SchoolClass,
-                    PhoneNumber = companion.User.PhoneNumber
-                };
-            }
-            else if (!string.IsNullOrEmpty(studentInfoEvent.ParentPhoneNumber))
-            {
-                var parent = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.User.PhoneNumber) && p.User.PhoneNumber == studentInfoEvent.ParentPhoneNumber);
-                if (parent != null)
-                {
-                    studentInfoEvent.CompanionInfo = new CompanionInfoEventModel()
-                    {
-                        FullName = parent.User.FullName,
-                        Email = parent.User.Email,
-                        Birthday = parent.Human.Birthday,
-                        School = parent.Student.School,
-                        SchoolGrade = parent.Student.SchoolGrade,
-                        SchoolClass = parent.Student.SchoolClass,
-                        PhoneNumber = parent.User.PhoneNumber
-                    };
-                }
-            }
+            //var companion = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.Student.ParentPhoneNumber) && p.Student.ParentPhoneNumber == studentInfoEvent.PhoneNumber);
+            //if (companion != null)
+            //{
+            //    studentInfoEvent.IsParent = true;
+            //    studentInfoEvent.CompanionInfo = new CompanionInfoEventModel()
+            //    {
+            //        FullName = companion.User.FullName,
+            //        Email = companion.User.Email,
+            //        Birthday = companion.Human.Birthday,
+            //        School = companion.Student.School,
+            //        SchoolGrade = companion.Student.SchoolGrade,
+            //        SchoolClass = companion.Student.SchoolClass,
+            //        PhoneNumber = companion.User.PhoneNumber
+            //    };
+            //}
+            //else if (!string.IsNullOrEmpty(studentInfoEvent.ParentPhoneNumber))
+            //{
+            //    var parent = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.User.PhoneNumber) && p.User.PhoneNumber == studentInfoEvent.ParentPhoneNumber);
+            //    if (parent != null)
+            //    {
+            //        studentInfoEvent.CompanionInfo = new CompanionInfoEventModel()
+            //        {
+            //            FullName = parent.User.FullName,
+            //            Email = parent.User.Email,
+            //            Birthday = parent.Human.Birthday,
+            //            School = parent.Student.School,
+            //            SchoolGrade = parent.Student.SchoolGrade,
+            //            SchoolClass = parent.Student.SchoolClass,
+            //            PhoneNumber = parent.User.PhoneNumber
+            //        };
+            //    }
+            //}
 
             methodResult.Result = studentInfoEvent;
             methodResult.StatusCode = StatusCodes.Status200OK;
