@@ -133,6 +133,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 item.FullName = student?.Human?.FullName;
                 item.Email = student?.Human?.Email;
+                item.UserId = student?.Human?.UserId;
             }
 
             methodResult.Result = new PagingItemsModel<StudentGoalAggregateModel>(lists, request, totalItem);
