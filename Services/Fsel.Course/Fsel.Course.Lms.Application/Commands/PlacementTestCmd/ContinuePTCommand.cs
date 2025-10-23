@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             return new MethodResult<PTStateModel>
             {
-                Result = aggregate.ExpotStateData()
+                Result = await aggregate.ExpotStateData()
             };
         }
     }
