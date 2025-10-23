@@ -176,6 +176,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<UserProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(UserManagement.View)]
+        [ServerCache(CacheSettings.TimeCache.FiveMinutes)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserQuery { UserId = id }).ConfigureAwait(false);
