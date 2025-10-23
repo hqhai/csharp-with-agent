@@ -9,7 +9,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Shared.Enums;
@@ -73,14 +72,14 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
+                ListOverallScore = request.ListOverallScore,
+                IsLearning = request.IsLearning,
+                ListCurrentLevel = request.ListCurrentLevel,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
-                CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
-                OverallScore = request.OverallScore,
-                LearningStatus = request.LearningStatus,
             }, cancellationToken);
             var reportLearningResult = _mapper.Map<SearchReportLearningResultModel>(dataOverallResult.Result);
             var userResults = await _mediator.Send(new GetStudentReportQuery
@@ -91,9 +90,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListCurrentLevel = request.ListCurrentLevel,
+                ListOverallScore = request.ListOverallScore,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
                 PageSize = request.PageSize,
                 Filters = request.Filters,
@@ -101,10 +103,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 SortBy = request.SortBy,
                 Keyword = request.Keyword,
                 Page = request.Page,
-                CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
-                OverallScore = request.OverallScore,
-                LearningStatus = request.LearningStatus,
                 ManagerReportType = EnumManagerReportType.ReportLearningResults,
                 IsSearchReport = true
             }, cancellationToken);

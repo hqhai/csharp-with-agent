@@ -64,9 +64,8 @@ namespace Fsel.Shared.Constants
         public const string Add = $"{ClaimType}.Add";
         public const string View = $"{ClaimType}.View";
         public const string Update = $"{ClaimType}.Update";
-        public const string DeleteStudentGoal = $"{ClaimType}.DeleteStudentGoal";
-        public const string ViewStudentGoal = $"{ClaimType}.ViewStudentGoal";
         public const string Export = $"{ClaimType}.Export";
+        public const string Delete = $"{ClaimType}.Delete";
     }
 
     public static class ReferralCodeManagement
@@ -188,6 +187,7 @@ namespace Fsel.Shared.Constants
         public const string ViewLearningProgressReport = $"{ClaimType}.ViewLearningProgressReport";
         public const string ViewLearningResultsReport = $"{ClaimType}.ViewLearningResultsReport";
         public const string ViewAttendanceReport = $"{ClaimType}.ViewAttendanceReport";
+        public const string ViewWeeklyProgress = $"{ClaimType}.ViewWeeklyProgress";
     }
 
     public static class SchoolStudentManagement
@@ -230,9 +230,22 @@ namespace Fsel.Shared.Constants
         public const string DeleteStudents = $"{ClaimType}.DeleteStudents";
     }
 
-    public static class StudentGoalAggregateManagement
+    public static class SurveyManagement
     {
-        public const string ClaimType = nameof(StudentGoalAggregateManagement);
+        public const string ClaimType = nameof(SurveyManagement);
         public const string View = $"{ClaimType}.View";
+        public const string Update = $"{ClaimType}.Update";
+        public const string Add = $"{ClaimType}.Add";
+        public const string Delete = $"{ClaimType}.Delete";
+        public const string Export = $"{ClaimType}.Export";
+    }
+
+    public static class StudentProgressWeeklyManagement
+    {
+        public const string ClaimType = nameof(StudentProgressWeeklyManagement);
+        public const string View = $"{ClaimType}.View";
+        public const string Add = $"{ClaimType}.Add";
+        public const string Update = $"{ClaimType}.Update";
+        public const string Delete = $"{ClaimType}.Delete";
     }
 }

@@ -45,5 +45,6 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? IsLessonDone { get; set; }
         public string? SkillMockTestDisplay { get; set; }
         public string? SkillMockTest { get; set; }
+        public string? AccessLink { get; set; }
     }
 }

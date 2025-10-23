@@ -68,16 +68,6 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 queryStudent = queryStudent.WhereBulkContains(request.SchoolClasses, x => x.SchoolClass);
             }
-            if (!string.IsNullOrEmpty(request.SchoolGrade))
-            {
-                request.SchoolGrade = request.SchoolGrade.Trim().ToLower(CultureInfo.CurrentCulture);
-                queryStudent = queryStudent.Where(x => x.SchoolGrade == request.SchoolGrade);
-            }
-            if (!string.IsNullOrEmpty(request.SchoolClass))
-            {
-                request.SchoolClass = request.SchoolClass.Trim().ToLower(CultureInfo.CurrentCulture);
-                queryStudent = queryStudent.Where(x => x.SchoolClass == request.SchoolClass);
-            }
 
             if (_authContext.Roles != null && (_authContext.Roles.Contains(EnumRole.AdminSchool.ToString()) || _authContext.Roles.Contains(EnumRole.AdminCampus.ToString())))
             {
@@ -91,15 +81,22 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 queryStudent = queryStudent.Where(x => x.SchoolClassId.HasValue && schoolClassIds.Contains(x.SchoolClassId.Value));
             }
 
-            if (request.LearningStatus.HasValue)
+            if (request.LearningStatuses?.Any() == true)
             {
-                if (request.LearningStatus.Value == EnumLearningStatus.InProgress)
+                var hasInProgress = request.LearningStatuses.Contains(EnumLearningStatus.InProgress);
+                var hasExpired = request.LearningStatuses.Contains(EnumLearningStatus.Expired);
+
+                if (hasInProgress && !hasExpired)
                 {
                     queryStudent = queryStudent.Where(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value > DateTime.UtcNow);
                 }
-                else
+                else if (!hasInProgress && hasExpired)
                 {
                     queryStudent = queryStudent.Where(x => x.ExpiredDate.HasValue && x.ExpiredDate.Value <= DateTime.UtcNow);
+                }
+                else if (hasInProgress && hasExpired)
+                {
+                    queryStudent = queryStudent.Where(x => x.ExpiredDate.HasValue);
                 }
             }
             if (request.IsLearning.HasValue)

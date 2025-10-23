@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpDelete("aggregate")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        [Permission(StudentManagement.DeleteStudentGoal)]
+        [Permission(StudentManagement.Delete)]
         public async Task<IActionResult> Delete([FromBody] DeleteStudentGoalAggregateCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("summary")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentGoalSummaryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        [Permission(StudentManagement.ViewStudentGoal)]
+        [Permission(StudentManagement.View)]
         public async Task<IActionResult> Get([FromQuery] SearchStudentGoalSummaryQuery query)
         {
             MethodResult<PagingItemsModel<StudentGoalSummaryModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("aggregate")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentGoalAggregateModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        [Permission(StudentGoalAggregateManagement.View)]
+        [Permission(StudentProgressWeeklyManagement.View)]
         public async Task<IActionResult> Get([FromQuery] SearchStudentGoalAggregateQuery query)
         {
             MethodResult<PagingItemsModel<StudentGoalAggregateModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);

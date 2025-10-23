@@ -34,8 +34,7 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
             MethodResult<IList<CourseGoalModel>> methodResult = new MethodResult<IList<CourseGoalModel>>();
 
             var courseGoals = await _courseGoalRepository.Queryable.Include(x => x.CourseGoalConfigs)
-                                                        .ToListAsync(cancellationToken);
-
+                                                         .ToListAsync(cancellationToken);
             methodResult.Result = _mapper.Map<IList<CourseGoalModel>>(courseGoals);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

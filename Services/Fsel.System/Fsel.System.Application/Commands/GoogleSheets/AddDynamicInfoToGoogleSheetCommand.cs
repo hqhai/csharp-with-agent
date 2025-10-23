@@ -5,18 +5,11 @@ namespace Fsel.System.Application.Commands.GoogleSheets
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.System.Application.Services.GoogleSheetServices;
-    using Fsel.System.Domain.Models.CommandModels.GoogleSheets;
-    using Fsel.System.Infrastructure.ValueSettings;
     using global::System;
     using global::System.Globalization;
     using global::System.Threading.Tasks;
-    using Google.Apis.Auth.OAuth2;
-    using Google.Apis.Services;
-    using Google.Apis.Sheets.v4;
-    using Google.Apis.Sheets.v4.Data;
     using MediatR;
 
     public class AddDynamicInfoToGoogleSheetFileCommand : IRequest<MethodResult<bool>>
@@ -24,7 +17,7 @@ namespace Fsel.System.Application.Commands.GoogleSheets
         public IList<Dictionary<string, object>>? Model { get; set; }
         public string? OverrideSpreadSheetId { get; set; }
         public string? OverrideSheet { get; set; }
-        public IList<string> ColumnOrder { get; set; }
+        public IList<string>? ColumnOrder { get; set; }
     }
 
     public class AddDynamicInfoToGoogleSheetFileCommandHandler : IRequestHandler<AddDynamicInfoToGoogleSheetFileCommand, MethodResult<bool>>
@@ -72,7 +65,7 @@ namespace Fsel.System.Application.Commands.GoogleSheets
             return methodResult;
         }
 
-        private IList<object> BuildRowFromItem(Dictionary<string, object> item, IList<string> columnOrder)
+        private static IList<object> BuildRowFromItem(Dictionary<string, object> item, IList<string> columnOrder)
         {
             var row = new List<object>();
             foreach (var col in columnOrder)

@@ -853,5 +853,104 @@
     "status": true,
     "permissionGroupId": "0b734124-0372-488c-8321-2129484f8adb",
     "createdDate": "2025-09-18"
+  },
+  {
+    "id": "63b8f5af-7432-4ad2-9499-95eb9368612d",
+    "claimValue": "SurveyManagement.View",
+    "name": "Xem khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "22751359-1559-4b69-962b-cb401a4abc36",
+    "claimValue": "SurveyManagement.Update",
+    "name": "Cập nhật khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "3ac8acfd-aa22-418e-9937-120196778127",
+    "claimValue": "SurveyManagement.Add",
+    "name": "Thêm khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "21243a48-7cf4-40bd-8f65-0209e97ebd9e",
+    "claimValue": "SurveyManagement.Delete",
+    "name": "Xóa khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "af2ea7ab-77dc-487c-bda2-082baa34d4e8",
+    "claimValue": "SurveyManagement.Export",
+    "name": "Xuất dữ liệu khảo sát",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "d3d34bdf-b472-4a2c-b7c3-b6f763153efb",
+    "claimValue": "StudentProgressWeeklyManagement.Add",
+    "name": "Thêm",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "createdDate": "2025-09-24"
+  },
+  {
+    "id": "f7df2ab2-68c8-42cb-9ca8-e9f9945e3de5",
+    "claimValue": "StudentProgressWeeklyManagement.Update",
+    "name": "Sửa",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "createdDate": "2025-09-24"
+  },
+  {
+    "id": "4042a45a-8997-445e-aec8-e5dacc1bed25",
+    "claimValue": "StudentProgressWeeklyManagement.Delete",
+    "name": "Xóa",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "createdDate": "2025-09-24"
+  },
+  {
+    "id": "ba9920d2-e1bd-4e6a-938a-58470a4cdf89",
+    "claimValue": "StudentProgressWeeklyManagement.View",
+    "name": "Xem",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "createdDate": "2025-09-24"
+  },
+  {
+    "id": "f0bf2b43-f5b9-490b-8c8f-822fa70188a4",
+    "claimValue": "DashboardManagementByAdminSchool.ViewWeeklyProgress",
+    "name": "Xem báo cáo mục tiêu tuần",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "f4d1e599-553a-4cbe-ae13-8aaa61785978",
+    "claimValue": "StudentManagement.Delete",
+    "name": "Xóa",
+    "description": null,
+    "status": true,
+    "permissionGroupId": "68e5e3d2-90a1-4c60-9b8f-77a03381dc92",
+    "createdDate": "2025-10-22"
   }
 ]

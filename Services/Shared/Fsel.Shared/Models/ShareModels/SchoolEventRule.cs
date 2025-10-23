@@ -38,6 +38,7 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<string>? HowToParticipate { get; set; }
 
         public string? InstructionalVideo { get; set; }
+        public string? InstructionalTitle { get; set; }
 
         public string? FormDescription { get; set; }
         public string? AwardPromotional { get; set; }

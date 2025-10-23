@@ -88,5 +88,8 @@ namespace Fsel.Identity.Application.Services.SystemService
 
         [Get("/v1/location/get-by-global-id/{id}")]
         Task<IApiResponse<MethodResult<SchoolModel>>> GetLocationByGlobalId([FromRoute] string id);
+
+        [Get("/v1/sender-config")]
+        Task<IApiResponse<MethodResult<IList<SenderConfigModel>>>> GetSenderConfigs();
     }
 }

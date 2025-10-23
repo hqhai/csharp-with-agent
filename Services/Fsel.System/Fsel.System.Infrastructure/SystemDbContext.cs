@@ -80,6 +80,7 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new DailyQuizHistoryEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new DailyQuizAnswerEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new DictionaryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SenderConfigEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseGoalEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new CourseGoalConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
@@ -136,6 +137,7 @@ namespace Fsel.System.Infrastructure
         public DbSet<DailyQuizWinner> DailyQuizWinners { get; set; }
         public DbSet<Dictionary> Dictionaries { get; set; }
         public DbSet<UnknownWord> UnknownWords { get; set; }
+        public DbSet<SenderConfig> SenderConfigs { get; set; }
         public DbSet<CourseGoal> CourseGoals { get; set; }
         public DbSet<CourseGoalConfig> CourseGoalConfigs { get; set; }
 

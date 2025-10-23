@@ -6,12 +6,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.StudentProgress;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -26,14 +28,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
         private readonly IStudentGoalAggregateRepository _studentGoalAggregateRepository;
         private readonly IStudentGoalSummaryRepository _studentGoalSummaryRepository;
         private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
 
         public SearchStudentGoalAggregateQueryHandler(IStudentGoalAggregateRepository studentGoalAggregateRepository,
             IStudentGoalSummaryRepository studentGoalSummaryRepository,
-            IUserService userService)
+            IUserService userService,
+            AuthContext authContext)
         {
             _studentGoalAggregateRepository = studentGoalAggregateRepository;
             _studentGoalSummaryRepository = studentGoalSummaryRepository;
             _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentGoalAggregateModel>>> Handle(SearchStudentGoalAggregateQuery request, CancellationToken cancellationToken)
@@ -51,7 +56,21 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             var weekStartUtc = nowUtc.Date.AddDays(-diff).Date;
             var weekEndUtc = weekStartUtc.AddDays(7).Date;
 
+            Guid? schoolId = null;
+            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            {
+                schoolId = (await _userService.GetSchoolIdAsync()).Content?.Result;
+            }
+
             var query = _studentGoalAggregateRepository.Queryable;
+            if (schoolId.HasValue)
+            {
+                query = query.Where(x => x.SchoolId == schoolId);
+            }
+            if (request.CourseType.HasValue)
+            {
+                query = query.Where(x => x.CourseType == request.CourseType);
+            }
             if (request.SchoolId.HasValue)
             {
                 query = query.Where(x => x.SchoolId == request.SchoolId);
@@ -67,8 +86,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             }
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                var studentResult = await _userService.GetStudentByEmailAsync(request.Keyword);
-                var studentId = studentResult.Content?.Result?.Id;
+                var studentResult = await _userService.SearchStudentAsync(new Services.UserServices.QueryModels.SearchStudentsQueryModel
+                {
+                    Keyword = request.Keyword
+                });
+                var studentId = studentResult.Content?.Result?.Items?.FirstOrDefault()?.Id;
 
                 query = query.Where(x => x.StudentId == studentId);
             }
@@ -91,6 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                                 CompletedLessons = sum.CompletedLessons,
                                 CreatedUserId = baseQ.CreatedUserId,
                                 StudentId = baseQ.StudentId,
+                                ProgressStatus = sum.ProgressStatus,
                                 UpdatedDate = baseQ.UpdatedDate,
                                 UpdatedFullName = baseQ.UpdatedFullName,
                                 UpdatedUserId = baseQ.UpdatedUserId,

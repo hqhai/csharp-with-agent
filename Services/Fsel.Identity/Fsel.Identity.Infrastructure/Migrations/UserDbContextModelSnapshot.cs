@@ -1152,6 +1152,30 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             Index = 35,
                             IsDeleted = false,
                             Name = "School Class Management"
+                        },
+                        new
+                        {
+                            Id = new Guid("49dece94-b2de-4271-88ef-72f3e2461a2f"),
+                            Category = "LMSAdmin",
+                            ConfigStr = "{\"id\":27,\"code_title\":\"Quản lý khảo sát\",\"link\":\"/config-servey\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin\",\"children\":[]}",
+                            CreatedDate = new DateTime(2025, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 33,
+                            IsDeleted = false,
+                            Name = "Survey management"
+                        },
+                        new
+                        {
+                            Id = new Guid("b40fbc8d-355c-47f2-ad01-cc5655fcd66a"),
+                            Category = "LMSAdmin",
+                            ConfigStr = "{\"id\":28,\"code_title\":\"Quản lý tiến độ học sinh tuần\",\"link\":\"/weekly-goal-progress-management\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin,CSO,AdminSchool\",\"children\":[]}",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 33,
+                            IsDeleted = false,
+                            Name = "Weekly Student Progress Management"
                         });
                 });
 
@@ -2503,6 +2527,138 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             Name = "Xóa học sinh khỏi lớp",
                             PermissionGroupId = new Guid("0b734124-0372-488c-8321-2129484f8adb"),
                             Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("63b8f5af-7432-4ad2-9499-95eb9368612d"),
+                            ClaimValue = "SurveyManagement.View",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xem khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("22751359-1559-4b69-962b-cb401a4abc36"),
+                            ClaimValue = "SurveyManagement.Update",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Cập nhật khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("3ac8acfd-aa22-418e-9937-120196778127"),
+                            ClaimValue = "SurveyManagement.Add",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Thêm khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("21243a48-7cf4-40bd-8f65-0209e97ebd9e"),
+                            ClaimValue = "SurveyManagement.Delete",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xóa khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("af2ea7ab-77dc-487c-bda2-082baa34d4e8"),
+                            ClaimValue = "SurveyManagement.Export",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xuất dữ liệu khảo sát",
+                            PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("d3d34bdf-b472-4a2c-b7c3-b6f763153efb"),
+                            ClaimValue = "StudentProgressWeeklyManagement.Add",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Thêm",
+                            PermissionGroupId = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("f7df2ab2-68c8-42cb-9ca8-e9f9945e3de5"),
+                            ClaimValue = "StudentProgressWeeklyManagement.Update",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Sửa",
+                            PermissionGroupId = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("4042a45a-8997-445e-aec8-e5dacc1bed25"),
+                            ClaimValue = "StudentProgressWeeklyManagement.Delete",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xóa",
+                            PermissionGroupId = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("ba9920d2-e1bd-4e6a-938a-58470a4cdf89"),
+                            ClaimValue = "StudentProgressWeeklyManagement.View",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xem",
+                            PermissionGroupId = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("f0bf2b43-f5b9-490b-8c8f-822fa70188a4"),
+                            ClaimValue = "DashboardManagementByAdminSchool.ViewWeeklyProgress",
+                            CreatedDate = new DateTime(2025, 7, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xem báo cáo mục tiêu tuần",
+                            PermissionGroupId = new Guid("933dca96-a6a7-4b37-870b-b423f3c2165c"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("f4d1e599-553a-4cbe-ae13-8aaa61785978"),
+                            ClaimValue = "StudentManagement.Delete",
+                            CreatedDate = new DateTime(2025, 10, 22, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xóa",
+                            PermissionGroupId = new Guid("68e5e3d2-90a1-4c60-9b8f-77a03381dc92"),
+                            Status = true
                         });
                 });
 
@@ -2917,6 +3073,30 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             IsDeleted = false,
                             MenuId = new Guid("d7c5e83c-5ec4-479e-b0dc-4dd3784e36e4"),
                             Name = "Quản lý lớp Campus",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
+                            ClaimType = "SurveyManagement",
+                            CreatedDate = new DateTime(2025, 8, 5, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            MenuId = new Guid("49dece94-b2de-4271-88ef-72f3e2461a2f"),
+                            Name = "Quản lý khảo sát",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            ClaimType = "StudentProgressWeeklyManagement",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            MenuId = new Guid("b40fbc8d-355c-47f2-ad01-cc5655fcd66a"),
+                            Name = "Quản lý tiến độ học sinh tuần",
                             Status = true
                         });
                 });
@@ -4233,6 +4413,68 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("StudentTrialRegistrations");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.SystemConfig", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SystemConfigs");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Teacher", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5173,6 +5415,73 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.ToTable("UserSchools");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSenderSetting", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(0);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(107);
+
+                    b.Property<string>("CreatedFullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(104);
+
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(101);
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(109);
+
+                    b.Property<string>("DeletedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(106);
+
+                    b.Property<Guid?>("DeletedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(103);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnOrder(110);
+
+                    b.Property<Guid>("SenderConfigId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnOrder(108);
+
+                    b.Property<string>("UpdatedFullName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnOrder(105);
+
+                    b.Property<Guid?>("UpdatedUserId")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnOrder(102);
+
+                    b.Property<Guid>("UserSettingId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserSettingId");
+
+                    b.ToTable("UserSenderSettings");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSetting", b =>
                 {
                     b.Property<Guid>("Id")
@@ -5673,6 +5982,17 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSenderSetting", b =>
+                {
+                    b.HasOne("Fsel.Identity.Domain.Entities.UserSetting", "UserSetting")
+                        .WithMany("UserSenderSettings")
+                        .HasForeignKey("UserSettingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("UserSetting");
+                });
+
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSetting", b =>
                 {
                     b.HasOne("Fsel.Identity.Domain.Entities.User", "User")
@@ -5799,6 +6119,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserGroup", b =>
                 {
                     b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSetting", b =>
+                {
+                    b.Navigation("UserSenderSettings");
                 });
 #pragma warning restore 612, 618
         }

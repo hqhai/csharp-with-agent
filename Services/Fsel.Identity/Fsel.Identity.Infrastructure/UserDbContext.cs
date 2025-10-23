@@ -74,6 +74,7 @@ namespace Fsel.Identity.Infrastructure
             builder.ApplyConfiguration(new PermissionGroupEntityTypeConfiguration());
             builder.ApplyConfiguration(new UserGroupMemberShipEntityTypeConfiguration());
             builder.ApplyConfiguration(new StudentEditHistoryEntityTypeConfiguration());
+            builder.ApplyConfiguration(new UserSenderSettingEntityTypeConfiguration());
         }
 
         #region Db Set
@@ -113,6 +114,8 @@ namespace Fsel.Identity.Infrastructure
         public DbSet<StudentEditHistory> StudentEditHistories { get; set; }
         public DbSet<Menu> Menus { get; set; }
         public DbSet<SchoolClass> SchoolClasses { get; set; }
+        public DbSet<UserSenderSetting> UserSenderSettings { get; set; }
+        public DbSet<SystemConfig> SystemConfigs { get; set; }
 
         #endregion Db Set
 
