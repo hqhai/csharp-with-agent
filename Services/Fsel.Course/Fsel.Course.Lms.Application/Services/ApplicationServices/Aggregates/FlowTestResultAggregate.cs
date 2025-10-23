@@ -62,8 +62,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         FlowTestResult.Status = EnumResultStatus.Done;
                         await Commit();
                     }
+
                     return;
                 }
+
                 var testService = ServiceProvider.GetService<ITestService>();
 
                 var newTestResultTree = await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, stepId.Value, FlowTestResult.Id, FlowTestResult.ProgramId.Value);
@@ -73,7 +75,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             if (!TestResultComposites.Any())
             {
-               await InitAggregate();
+                await InitAggregate();
             }
 
 
@@ -86,20 +88,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         public async Task AddNewTest(TestResult testResult)
         {
             FlowTestResult.TestResults.Add(testResult);
-            var testResultComposite = new TestResultComposite()
-            {
-                Result = testResult,
-                ServiceProvider = ServiceProvider
-            };
+            var testResultComposite = new TestResultComposite() { Result = testResult, ServiceProvider = ServiceProvider };
             TestResultComposites.Add(testResultComposite);
             testResultComposite.GenerateChildren();
             await testResultComposite.LoadTotalScoreData();
             testResult.Status = EnumResultStatus.Process;
         }
 
-        public PTStateModel ExpotStateData()
+        public async Task<PTStateModel> ExpotStateData()
         {
-            return new PTStateModel
+            var ptResult = new PTStateModel
             {
                 TestGroupResultId = FlowTestResult.Id,
                 FlowId = FlowTestResult.FlowId,
@@ -107,6 +105,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 StudentId = FlowTestResult.StudentId,
                 TestStates = TestResultComposites.Select(c => c.ExportState()).ToList()
             };
+
+            foreach (var testResult in ptResult.TestStates)
+            {
+                if (testResult is TestStateModel testStateModel)
+                {
+                    await UpdateTestResultDetailInfo(testStateModel);
+                }
+            }
+
+            return ptResult;
         }
 
         public async Task MakeAnswers(SubmitAnswerCommandModel request)
@@ -129,11 +137,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             foreach (var testResult in FlowTestResult.TestResults)
             {
-                var testResultComposite = new TestResultComposite()
-                {
-                    Result = testResult,
-                    ServiceProvider = ServiceProvider
-                };
+                var testResultComposite = new TestResultComposite() { Result = testResult, ServiceProvider = ServiceProvider };
                 TestResultComposites.Add(testResultComposite);
                 if (testResult.Status == EnumResultStatus.Process)
                 {
@@ -144,6 +148,23 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                 testResultComposite.GenerateChildren();
             }
+        }
+
+        public async Task UpdateTestResultDetailInfo(TestStateModel? testStateModel)
+        {
+            if (testStateModel?.TestId == null)
+            {
+                return;
+            }
+
+            var testService = ServiceProvider.GetRequiredService<ITestService>();
+            var test = await testService.GetHierachicalTestById(testStateModel.TestId.Value);
+            if (test == null)
+            {
+                return;
+            }
+
+            testStateModel.UpdateDetailInfo(test);
         }
 
         private async Task Commit()

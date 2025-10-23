@@ -21,6 +21,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 SectionId = TestSectionResult.TestSectionId,
                 SectionResultId = TestSectionResult.Id,
                 Status = TestSectionResult.Status,
+                CorrectCount = TestSectionResult.CorrectCount,
+                TotalCount = TestSectionResult.SkillScores.Sum(x=>x.TotalCount),
                 Children = new List<BaseTestStateModel>()
             };
             if (Children != null && Children.Count > 0)

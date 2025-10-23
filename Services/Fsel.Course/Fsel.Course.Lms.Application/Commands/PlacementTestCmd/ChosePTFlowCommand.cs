@@ -88,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
             await aggregate.Start();
-            methodResult.Result = aggregate.ExpotStateData();
+            methodResult.Result = await aggregate.ExpotStateData();
 
             return methodResult;
         }
