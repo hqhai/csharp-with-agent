@@ -13,6 +13,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
+    using Fsel.Identity.Application.Services.LmsCourseService.QueryModels;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models;
@@ -63,6 +64,14 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             if (request.FormFile == null)
             {
                 methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
+                return methodResult;
+            }
+
+            var curriculumResult = await _lmsCourseService.GetCurriculumById(new GetCurriculumByIdQueryModel() { Id = request.CurriculumId });
+            var curriculum = curriculumResult.Content?.Result;
+            if (curriculum == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(curriculum));
                 return methodResult;
             }
 

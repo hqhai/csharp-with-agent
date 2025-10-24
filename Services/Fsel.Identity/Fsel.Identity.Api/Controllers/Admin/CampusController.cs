@@ -34,7 +34,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("add-students-to-curriculum")]
         [ProducesResponseType(typeof(MethodResult<AddStudentIntoSchoolClassCommandModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(CurriculumManagement.AddStudents)]
         public async Task<IActionResult> ImportStudentsIntoPlatform([FromForm] AddStudentsToCurriculumActiveCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
