@@ -52,7 +52,7 @@ namespace Fsel.Identity.Application.Middlewares
                 await _next(context);
                 return;
             }
-            
+
             var tenantProvider = serviceProvider.GetRequiredService<ITenantProvider>();
             var tenant = await tenantProvider.GetTenantAsync(username, userId);
             if (tenant != null)
