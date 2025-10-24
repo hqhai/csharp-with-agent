@@ -73,6 +73,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly AppSetting _appSetting;
+        private readonly ITenantProvider _tenantProvider;
         private readonly IServiceProvider _serviceProvider;
 
         public AccountController(
@@ -98,6 +99,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             ICompetitionEventsRepository competitionEventsRepository,
             IHttpClientFactory httpClientFactory,
             AppSetting appSetting,
+            ITenantProvider tenantProvider,
             IServiceProvider serviceProvider)
         {
             UserSession = userSession;
@@ -122,6 +124,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             _competitionEventsRepository = competitionEventsRepository;
             _httpClientFactory = httpClientFactory;
             _appSetting = appSetting;
+            _tenantProvider = tenantProvider;
             _serviceProvider = serviceProvider;
         }
 
@@ -1040,6 +1043,9 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 IsRegister = bool.TryParse(context?.Parameters[RequestHeaderSetting.IsRegister], out var isRegister) && isRegister,
             };
 
+
+            var tenant = await _tenantProvider.GetCurrentTenantAsync();
+            var tenantConfig = tenant?.GetConfig<TenantConfig>();
             if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
             {
                 var local = context.IdP == IdentityServerConstants.LocalIdentityProvider;
@@ -1048,6 +1054,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 if (!local)
                 {
                     vm.ExternalProviders = new[] { new ExternalProvider { AuthenticationScheme = context!.IdP } };
+                    if (tenantConfig?.ExcludeExternalLogins != null)
+                    {
+                        vm.ExternalProviders = vm.ExternalProviders.Where(x => !tenantConfig.ExcludeExternalLogins
+                        .Any(l => string.Equals(l, x.AuthenticationScheme, StringComparison.OrdinalIgnoreCase)));
+                    }
                 }
 
                 return vm;
@@ -1062,6 +1073,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     DisplayName = x.DisplayName ?? x.Name,
                     AuthenticationScheme = x.Name
                 }).ToList();
+            providers.Add(new ExternalProvider
+            {
+                AuthenticationScheme = LoginProvider.VnEdu,
+                DisplayName = LoginProvider.VnEdu
+            });
 
             var allowLocal = true;
             if (context?.Client.ClientId != null)
@@ -1081,6 +1097,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             vm.AllowRememberLogin = AccountOptions.AllowRememberLogin;
             vm.EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin;
             vm.ExternalProviders = providers.ToArray();
+            if (tenantConfig?.ExcludeExternalLogins != null)
+            {
+                vm.ExternalProviders = vm.ExternalProviders.Where(x => !tenantConfig.ExcludeExternalLogins
+                .Any(l => string.Equals(l, x.AuthenticationScheme, StringComparison.OrdinalIgnoreCase)));
+            }
             return vm;
         }
 

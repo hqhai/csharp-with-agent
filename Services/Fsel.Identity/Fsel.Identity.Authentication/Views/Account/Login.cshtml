@@ -103,11 +103,26 @@
 
                 <div class="or-separate">@Localizer["i18n_or"]</div>
                 <div class="social">
-                    <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Google", Model.ReturnUrl})"><img src="/assets/icons/google-icon.svg" alt="google" /></a>
-                    <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Apple", Model.ReturnUrl })"><img src="/assets/icons/apple-icon.svg" alt="apple" /></a>
-                    <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Facebook", Model.ReturnUrl})"><img src="/assets/icons/facebook-icon.svg" alt="facebook" /></a>
-                    <a href="@Url.Action("ExternalLogin", "Account", new { provider = "Zalo", Model.ReturnUrl})"><img src="/assets/icons/zalo-icon.svg" alt="zalo" /></a>
-                    <a href="@Url.Action("ExternalLogin", "Account", new { provider = LoginProvider.VnEdu, Model.ReturnUrl })"><img style="width:40px;height:40px" src="/assets/icons/vnedu.png" alt="vnedu" /></a>
+                    @if (Model.ExternalProviders.Any(x => x.AuthenticationScheme == LoginProvider.Google))
+                    {
+                        <a href="@Url.Action("ExternalLogin", "Account", new { provider = LoginProvider.Google, Model.ReturnUrl })"><img src="/assets/icons/google-icon.svg" alt="google" /></a>
+                    }
+                    @if (Model.ExternalProviders.Any(x => x.AuthenticationScheme == LoginProvider.Apple))
+                    {
+                        <a href="@Url.Action("ExternalLogin", "Account", new { provider = LoginProvider.Apple, Model.ReturnUrl })"><img src="/assets/icons/apple-icon.svg" alt="apple" /></a>
+                    }
+                    @if (Model.ExternalProviders.Any(x => x.AuthenticationScheme == LoginProvider.Facebook))
+                    {
+                        <a href="@Url.Action("ExternalLogin", "Account", new { provider = LoginProvider.Facebook, Model.ReturnUrl })"><img src="/assets/icons/facebook-icon.svg" alt="facebook" /></a>
+                    }
+                    @if (Model.ExternalProviders.Any(x => x.AuthenticationScheme == LoginProvider.Zalo))
+                    {
+                        <a href="@Url.Action("ExternalLogin", "Account", new { provider = LoginProvider.Zalo, Model.ReturnUrl })"><img src="/assets/icons/zalo-icon.svg" alt="zalo" /></a>
+                    }
+                    @if (Model.ExternalProviders.Any(x => x.AuthenticationScheme == LoginProvider.VnEdu))
+                    {
+                        <a href="@Url.Action("ExternalLogin", "Account", new { provider = LoginProvider.VnEdu, Model.ReturnUrl })"><img style="width:40px;height:40px" src="/assets/icons/vnedu.png" alt="vnedu" /></a>
+                    }
                 </div>
 
                 <button type="submit" class="btn" id="loginButton">@Localizer["i18nSigninButtonSignIn"]</button>
