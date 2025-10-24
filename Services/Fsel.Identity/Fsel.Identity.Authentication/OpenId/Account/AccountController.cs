@@ -1073,6 +1073,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     DisplayName = x.DisplayName ?? x.Name,
                     AuthenticationScheme = x.Name
                 }).ToList();
+            providers.Add(new ExternalProvider
+            {
+                AuthenticationScheme = LoginProvider.VnEdu,
+                DisplayName = LoginProvider.VnEdu
+            });
 
             var allowLocal = true;
             if (context?.Client.ClientId != null)
@@ -1091,11 +1096,6 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
             vm.AllowRememberLogin = AccountOptions.AllowRememberLogin;
             vm.EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin;
-            providers.Add(new ExternalProvider
-            {
-                AuthenticationScheme = LoginProvider.VnEdu,
-                DisplayName = LoginProvider.VnEdu
-            });
             vm.ExternalProviders = providers.ToArray();
             if (tenantConfig?.ExcludeExternalLogins != null)
             {
