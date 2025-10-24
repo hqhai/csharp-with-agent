@@ -6,6 +6,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using MediatR;
@@ -30,7 +31,8 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<string?>();
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(p => p.Id.ToString() == request.UserId, cancellationToken);
+            var userId = request.UserId.Parse<Guid>();
+            var user = await _userManager.Users.FirstOrDefaultAsync(p => p.Id == userId, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.UserId), request.UserId);
