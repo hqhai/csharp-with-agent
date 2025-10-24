@@ -98,5 +98,8 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Get("/v1/curriculum-student/get-student-ids-by-curriculum-id/{id}")]
         Task<IApiResponse<MethodResult<IList<Guid>>>> GetStudentIdsByCurriculumId([FromRoute] Guid id);
+
+        [Get("/v1/curriculum/get-by-id")]
+        Task<IApiResponse<MethodResult<CurriculumModel>>> GetCurriculumById([FromQuery] GetCurriculumByIdQueryModel model);
     }
 }
