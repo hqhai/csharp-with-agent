@@ -99,12 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 {
                     var placementTestScore = await _placementTestResultRepository.Queryable.OrderByDescending(x => x.CreatedDate)
                                                                                  .FirstOrDefaultAsync(x => x.StudentId == student.Id && x.Status == EnumResultStatus.Done, cancellationToken);
-                    if (placementTestScore == null)
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(placementTestScore));
-                        return methodResult;
-                    }
-                    competencyRadar.SkillScores = placementTestScore.SkillScores;
+                    competencyRadar.SkillScores = placementTestScore?.SkillScores;
                 }
             }
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.DashboardI18n);
