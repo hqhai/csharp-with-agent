@@ -4,6 +4,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
+    using Core.Base.Interfaces;
+    using Domain.Entities.TestConfigs;
+    using Domain.Enums;
+    using Domain.Enums.ErrorCodes;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -15,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class ChosePTFlowCommand : IRequest<MethodResult<PTStateModel>>
     {
@@ -33,8 +38,14 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
         private readonly AuthContext _authContext;
         private readonly IFlowService _flowService;
         private readonly ITestService _testService;
+        private readonly IRepository<TestGroupResult> _testGroupResult;
 
-        public ChosePTFlowCommandHandler(AuthContext authContext, IFlowService flowService, ITestService testService, IUserService userService, IServiceProvider serviceProvider)
+        public ChosePTFlowCommandHandler(AuthContext authContext,
+            IFlowService flowService,
+            ITestService testService,
+            IUserService userService,
+            IRepository<TestGroupResult> testGroupResult,
+            IServiceProvider serviceProvider)
         {
             _authContext = authContext;
             _flowService = flowService;
@@ -53,23 +64,33 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
+
             var student = studentResult?.Content?.Result;
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+
             if (student.Human == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human));
                 return methodResult;
             }
 
+            var isExistPt = await _testGroupResult.Queryable.AnyAsync(x => x.StudentId == student.Id && x.TestType == EnumTestType.PlacementTest, cancellationToken);
+            if (isExistPt)
+            {
+                methodResult.AddErrorBadRequest("PT is started or completed");
+                return methodResult;
+            }
+
+
             var age = DateTimeHelper.GetYearOld(student.Human.Birthday);
 
             var flowMatch = await _flowService.GetHierarchicalFlowByCondition(x => x.ProgramId == request.ProgramId
-            && x.Status == EnumStatus.Active
-            && x.FromAge <= age && x.ToAge >= age);
+                                                                                   && x.Status == EnumStatus.Active
+                                                                                   && x.FromAge <= age && x.ToAge >= age);
 
             if (flowMatch?.StepFlows.FirstOrDefault() == null)
             {
