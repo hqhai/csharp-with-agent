@@ -18,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using NetTopologySuite.Index.HPRtree;
 
     public class SearchStudentGoalAggregateQuery : SearchStudentGoalAggregateQueryModel, IRequest<MethodResult<PagingItemsModel<StudentGoalAggregateModel>>>
     {
@@ -125,15 +126,30 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                              .AsNoTracking()
                              .ToListAsync(cancellationToken: cancellationToken)
                              .ConfigureAwait(false);
+
             var studentIds = lists.Select(l => l.StudentId).ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             var students = studentResults.Content?.Result;
+
+            var studentGoalAggregateIds = lists.Select(x => x.Id).ToList();
+            var summarys = await _studentGoalSummaryRepository.Queryable
+                .AsNoTracking()
+                .WhereBulkContains(studentGoalAggregateIds, x => x.StudentGoalAggregateId)
+                .ToListAsync(cancellationToken);
+
+            var summarySumMap = summarys.GroupBy(s => s.StudentGoalAggregateId)
+                                        .ToDictionary(g => g.Key, g => g.Sum(x => x.LessonsPerWeek)); // hoặc x.TotalPercent
+
             foreach (var item in lists)
             {
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 item.FullName = student?.Human?.FullName;
                 item.Email = student?.Human?.Email;
                 item.UserId = student?.Human?.UserId;
+                if (summarySumMap.TryGetValue(item.Id, out var totalScore))
+                {
+                    item.IsActive = totalScore <= item.TotalTargetLessons; // hoặc logic khác tùy ngưỡng bạn muốn
+                }
             }
 
             methodResult.Result = new PagingItemsModel<StudentGoalAggregateModel>(lists, request, totalItem);
