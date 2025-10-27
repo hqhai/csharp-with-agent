@@ -8,16 +8,20 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.SenderTemplates;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly ICourseRepository _courseRepository;
         private readonly ISenderService _senderService;
+        private readonly IMediator _mediator;
 
         private const string VideoScore = "Điểm trong video tương tác:";
         private const string ClassForumScore = "Điểm trong Diễn đàn lớp hợp:";
@@ -46,8 +51,10 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
         private const string SkillMockTestScore = "Điểm bài tập về nhà:";
 
         private const string Subject = "[FSEL] Hãy quay lại nhịp học nhé – bạn có thể làm tốt hơn nhiều!";
+        private const string Success = "https://s3-sgn10.fptcloud.com/fsel/Files/priority_24dp_75FB4C_FILL1_wght400_GRAD0_opsz24_3424_1761098926527.png";
+        private const string Warning = "https://s3-sgn10.fptcloud.com/fsel/Files/warning_26dp_F7B27A_FILL1_wght400_GRAD0_opsz24_2950_1761039817809.png";
 
-        public SendEmailLearningProgressWarningCommandHandler(IUserService userService, IUnitResultRepository unitResultRepository, IClassForumResultRepository classForumResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, IMockTestResultRepository mockTestResultRepository, ICourseRepository courseRepository, ISenderService senderService)
+        public SendEmailLearningProgressWarningCommandHandler(IUserService userService, IUnitResultRepository unitResultRepository, IClassForumResultRepository classForumResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IVideoResultRepository videoResultRepository, ILessonResultRepository lessonResultRepository, IMockTestResultRepository mockTestResultRepository, ICourseRepository courseRepository, ISenderService senderService, IMediator mediator)
         {
             _userService = userService;
             _unitResultRepository = unitResultRepository;
@@ -58,6 +65,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             _mockTestResultRepository = mockTestResultRepository;
             _courseRepository = courseRepository;
             _senderService = senderService;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<bool>> Handle(SendEmailLearningProgressWarningCommand request, CancellationToken cancellationToken)
@@ -77,6 +85,37 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             {
                 return methodResult;
             }
+
+            var userIds = students.Where(p => p.Human != null && p.Human.UserId.HasValue).Select(p => p.Human?.UserId ?? default).ToList();
+
+            var historiesSendMailResult = await _senderService.GetHistoriesSendMailLearningProgress(new GetHistoriesSendMailLearningProgressModel()
+            {
+                UserIds = userIds
+            });
+
+            var historiesSendMail = historiesSendMailResult.Content?.Result;
+
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            var deleteStudents = new List<StudentModel>();
+
+            students.ForEach(p =>
+            {
+                var historySendMail = historiesSendMail?.Where(x => x.ReceiverId.HasValue && p.Human != null && p.Human.UserId.HasValue && p.Human.UserId == x.ReceiverId).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
+                if (historySendMail != null && historySendMail.CreatedDate.HasValue)
+                {
+                    TimeSpan timeDifference = currentDate - historySendMail.CreatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+                    int hours = (int)timeDifference.TotalHours;
+
+                    if (hours < 24)
+                    {
+                        deleteStudents.Add(p);
+                    }
+                }
+            });
+
+            deleteStudents.ForEach(p => students.Remove(p));
 
             var studentIds = students.Select(p => p.Id).ToList();
             var courseIds = students.Select(p => p.CourseId ?? default).ToList();
@@ -99,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
             foreach (var student in students)
             {
-                var course = courses.FirstOrDefault(p => p.Id == student.Id);
+                var course = courses.FirstOrDefault(p => p.Id == student.CourseId);
                 if (course == null || string.IsNullOrEmpty(student.Human?.Email))
                 {
                     continue;
@@ -154,17 +193,17 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                 if (videoResultSkillScores.Any())
                 {
-                    GetSection(sections, videoResultSkillScores, skillPercentTemplate, sectionTemplate, VideoScore);
+                    sections = GetSection(sections, videoResultSkillScores, skillPercentTemplate, sectionTemplate, VideoScore);
                 }
 
                 if (classForumResultSkillScores.Any())
                 {
-                    GetSection(sections, classForumResultSkillScores, skillPercentTemplate, sectionTemplate, ClassForumScore);
+                    sections = GetSection(sections, classForumResultSkillScores, skillPercentTemplate, sectionTemplate, ClassForumScore);
                 }
 
                 if (homeworkResultSkillScores.Any())
                 {
-                    GetSection(sections, homeworkResultSkillScores, skillPercentTemplate, sectionTemplate, HomeworkScore);
+                    sections = GetSection(sections, homeworkResultSkillScores, skillPercentTemplate, sectionTemplate, HomeworkScore);
                 }
 
                 if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
@@ -183,7 +222,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                     if (unitTestSkillScores.Any())
                     {
-                        GetSection(sections, unitTestSkillScores, skillPercentTemplate, sectionTemplate, UnitTestScore);
+                        sections = GetSection(sections, unitTestSkillScores, skillPercentTemplate, sectionTemplate, UnitTestScore);
                     }
 
                     var skillTestScores = videoResults
@@ -200,7 +239,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                     if (skillTestSkillScores.Any())
                     {
-                        GetSection(sections, skillTestSkillScores, skillPercentTemplate, sectionTemplate, SkillTestScore);
+                        sections = GetSection(sections, skillTestSkillScores, skillPercentTemplate, sectionTemplate, SkillTestScore);
                     }
                 }
                 else
@@ -218,7 +257,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                     if (skillMockTestResultSkillScores.Any())
                     {
-                        GetSection(sections, skillMockTestResultSkillScores, skillPercentTemplate, sectionTemplate, SkillMockTestScore);
+                        sections = GetSection(sections, skillMockTestResultSkillScores, skillPercentTemplate, sectionTemplate, SkillMockTestScore);
                     }
                 }
 
@@ -227,7 +266,8 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                     Email = student.Human.Email,
                     FullName = student.Human.FullName,
                     SkillScore = sections,
-                    TotalPercent = 70
+                    TotalPercent = 70,
+                    UserId = student.Human.UserId,
                 });
 
                 if (learningProgressWarningModels.Any())
@@ -238,7 +278,15 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                                  ToEmails = new List<string> { p.Email ?? string.Empty },
                                  Subject = Subject,
                                  Template = EnumSenderTemplate.LearningProgressWarning,
-                                 Params = p
+                                 Params = p,
+                                 Receivers = new List<SendReceiverCommandModel>()
+                                 {
+                                     new SendReceiverCommandModel()
+                                     {
+                                         Email = p.Email,
+                                         ReceiverId = p.UserId
+                                     }
+                                 }
                              }))
                              .ToList();
 
@@ -256,7 +304,10 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             skills.ForEach(p =>
             {
                 var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
-                var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Percent, p.Percent);
+
+                var image = p.Percent >= 70 ? Success : Warning;
+
+                var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Percent, image, p.Percent, color);
                 skillScoreHtml += html;
             });
 

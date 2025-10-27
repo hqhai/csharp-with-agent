@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
     using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -89,6 +90,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                     var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                     item.FullName = student?.Human?.FullName;
                     item.Email = student?.Human?.Email;
+                    item.UserId = student?.Human?.UserId;
                 }
 
                 var tasks = queryData
@@ -104,6 +106,14 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                                      NumberLesson = p.CompletedLessons,
                                      TargetLesson = p.LessonsPerWeek,
                                      TotalLesson = p.TotalTargetLessons
+                                 },
+                                 Receivers = new List<SendReceiverCommandModel>()
+                                 {
+                                     new SendReceiverCommandModel()
+                                     {
+                                         Email = p.Email,
+                                         ReceiverId = p.UserId
+                                     }
                                  }
                              }))
                              .ToList();

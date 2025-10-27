@@ -44,5 +44,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
         }
 
         public DateTime? ExpiredDate { get; set; }
+
+        public int NumberOfEmailsSent { get; set; }
     }
 }

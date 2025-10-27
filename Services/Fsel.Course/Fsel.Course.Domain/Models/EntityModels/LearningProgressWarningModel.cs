@@ -8,5 +8,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? FullName { get; set; }
         public string? SkillScore { get; set; }
         public int TotalPercent { get; set; }
+        public Guid? UserId { get; set; }
     }
 }

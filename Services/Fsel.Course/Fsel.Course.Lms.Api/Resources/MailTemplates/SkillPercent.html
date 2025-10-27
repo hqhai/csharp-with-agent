@@ -4,7 +4,6 @@
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  background: #bd86e3;
                   width: 32px;
                   height: 32px;
                   border-radius: 50%;
@@ -22,12 +21,13 @@
                   font-weight: 600;
                   line-height: 24px;
                   margin: 0;
+                  padding-top: 5px
                 ">
             {1}
         </p>
 
         <p style="
-                  margin: 0 0 0 auto;
+                  margin: 7px 4px 3px auto;
                   color: #535862;
                   text-align: right;
                   font-size: 14px;
@@ -37,7 +37,9 @@
                 ">
             {2}%
         </p>
-        <span style="margin-left: 4px; margin-bottom: 6px">{3}</span>
+        <img src="{3}"
+             alt=""
+             style="width: 20px; height:20px; margin-top:6px" />
     </div>
 
     <div style="
@@ -47,9 +49,9 @@
                 border-radius: 100px;
               ">
         <div style="
-                  width: {3}%;
+                  width: {4}%;
                   height: 100%;
-                  background-color: #bd86e3;
+                  background-color: {5};
                   border-radius: 100px;
                 "></div>
     </div>
