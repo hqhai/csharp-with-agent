@@ -12,12 +12,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CheckDonePTByStudentIdQuery : IRequest<MethodResult<bool>>
+    public class CheckDonePTByStudentIdQuery : IRequest<MethodResult<EnumResultStatus>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class CheckDonePTByStudentIdHandler : IRequestHandler<CheckDonePTByStudentIdQuery, MethodResult<bool>>
+    public class CheckDonePTByStudentIdHandler : IRequestHandler<CheckDonePTByStudentIdQuery, MethodResult<EnumResultStatus>>
     {
         private readonly IRepository<TestGroupResult> _testGroupResult;
 
@@ -26,20 +26,15 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             _testGroupResult = testGroupResult;
         }
 
-        public async Task<MethodResult<bool>> Handle(CheckDonePTByStudentIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<EnumResultStatus>> Handle(CheckDonePTByStudentIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var isDone = await _testGroupResult.Queryable.AnyAsync(x => x.Status == EnumResultStatus.Done
-            && x.StudentId == request.StudentId
-            && x.TestType == EnumTestType.PlacementTest,
+            var testGroupResult = await _testGroupResult.Queryable.FirstAsync(x => x.StudentId == request.StudentId
+                                                                                   && x.TestType == EnumTestType.PlacementTest,
                 cancellationToken);
 
-            return new MethodResult<bool>
-            {
-                StatusCode = StatusCodes.Status200OK,
-                Result = isDone
-            };
+            return new MethodResult<EnumResultStatus> { StatusCode = StatusCodes.Status200OK, Result = testGroupResult?.Status ?? EnumResultStatus.NotStarted };
         }
     }
 }

@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
     using Asp.Versioning;
+    using Domain.Enums;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -136,12 +137,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Check done pt by StudentId
         /// </summary>
         [HttpGet("check-done-pt/{studentId}")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<EnumResultStatus>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
         public async Task<IActionResult> CheckDonePTByStudentId([FromRoute] Guid studentId)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(new CheckDonePTByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new CheckDonePTByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
