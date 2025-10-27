@@ -53,13 +53,16 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
-            await RebuildStudentLearningProgressAsync(cancellationToken);
-            await CreateStudentLearningGoalsAsync(cancellationToken);
+            var courseGoalRes = await _systemService.GetListCourseGoalAsync();
+            var courseGoals = courseGoalRes.Content?.Result ?? new List<CourseGoalModel>();
+
+            await RebuildStudentLearningProgressAsync(courseGoals, cancellationToken);
+            await CreateStudentLearningGoalsAsync(courseGoals, cancellationToken);
             methodResult.Result = true;
             return methodResult;
         }
 
-        public async Task CreateStudentLearningGoalsAsync(CancellationToken ct = default)
+        public async Task CreateStudentLearningGoalsAsync(IList<CourseGoalModel> courseGoals, CancellationToken ct = default)
         {
             // 1) Lấy CourseResult chưa liên kết Aggregate
             var unlinkedCourseResults = await GetUnlinkedCourseResultsAsync(ct);
@@ -68,8 +71,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 return;
             }
             // 2) Lấy CourseGoal + đếm tổng lesson của các course liên quan
-            var courseGoalRes = await _systemService.GetListCourseGoalAsync();
-            var courseGoals = courseGoalRes.Content?.Result ?? new List<CourseGoalModel>();
 
             var courseIds = unlinkedCourseResults.Select(c => c.CourseId).Distinct().ToList();
             var studentIds = unlinkedCourseResults.Select(c => c.StudentId).Distinct().ToList();
@@ -247,7 +248,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             return await query.AsNoTracking().ToListAsync(ct);
         }
 
-        private async Task RebuildStudentLearningProgressAsync(CancellationToken ct = default)
+        private async Task RebuildStudentLearningProgressAsync(IList<CourseGoalModel> courseGoals, CancellationToken ct = default)
         {
             var nowVn = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
@@ -260,6 +261,10 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var aggregates = aggAndWeekly.Select(p => p.Aggregate).Distinct().ToList();
             var weeklySummaries = aggAndWeekly.Select(p => p.Weekly).ToList();
 
+            var studentIds = aggregates.Select(a => a.StudentId).Distinct().ToList();
+            var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
+            var students = studentResults.Content?.Result ?? new List<StudentModel>();
+
             // 2) Lấy "bản ghi tuần mới nhất" theo Aggregate
             var latestWeeklyByAggId = PickLatestWeeklyByAggregateId(weeklySummaries);
 
@@ -269,10 +274,23 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             // 5) Tính toán
             foreach (var ag in aggregates)
             {
+                var student = students.FirstOrDefault(x => x.Id == ag.StudentId);
+                if (student == null)
+                {
+                    continue;
+                }
+
                 if (!latestWeeklyByAggId.TryGetValue(ag.Id, out var weekly) || weekly is null)
                 {
                     continue;
                 }
+
+                var level = ag.CourseLevel;
+                var type = ag.CourseType;
+
+                var courseGoal = GetCourseGoal(courseGoals, level, type, student.SchoolClassId); // hoặc GetCourseGoalOrNull(...)
+                var courseGoalConfig = courseGoal?.CourseGoalConfigs.FirstOrDefault(x => x.CourseId == ag.CourseId);
+
                 var results = doneLessonResultsMap.TryGetValue((ag.StudentId, ag.CourseId), out var r)
                     ? r
                     : Enumerable.Empty<LessonResult>();
