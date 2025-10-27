@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/homework")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class HomeWorkController : ControllerBase
     {
         private readonly IMediator _mediator;

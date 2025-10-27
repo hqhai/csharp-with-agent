@@ -46,5 +46,6 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? UnitDisplay { get; set; }
         public string? SkillDisplay { get; set; }
         public string? LinkReport { get; set; }
+        public string? AccessLink { get; set; }
     }
 }

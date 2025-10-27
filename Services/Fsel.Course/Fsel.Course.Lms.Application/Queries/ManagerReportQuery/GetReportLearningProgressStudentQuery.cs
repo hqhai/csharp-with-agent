@@ -41,15 +41,13 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                ListCourseType = request.ListCourseType,
                 ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
-                LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
-                CourseLevel = request.CourseLevel,
                 ManagerReportType = EnumManagerReportType.ReportLearningProgress,
                 SortBy = request.SortBy,
             }, cancellationToken);

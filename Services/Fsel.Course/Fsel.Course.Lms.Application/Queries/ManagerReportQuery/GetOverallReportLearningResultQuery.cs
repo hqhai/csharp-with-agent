@@ -61,15 +61,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListCurrentLevel = request.ListCurrentLevel,
+                ListOverallScore = request.ListOverallScore,
+                ListLearningStatus = request.ListLearningStatus,
 
-                SchoolClass = request.SchoolClass,
-                SchoolGrade = request.SchoolGrade,
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
-                LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
-                CourseLevel = request.CourseLevel,
-                OverallScore = request.OverallScore,
                 ManagerReportType = EnumManagerReportType.ReportLearningResults,
             }, cancellationToken);
             if (!userResults.IsOK)
@@ -87,67 +87,17 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         private async Task<OverallReportLearningResultModel> GetOverallReportAsync(GetOverallReportLearningResultQuery request, List<StudentDtoModel> students)
         {
             var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(request.CourseType);
-
             var overallModules = new List<OverallModuleReportModel>();
+
+            (var unitModules, students, var overallAvgPercent) = await GetUnitResultGroups(request, students, courseLevels);
+            var studentIds = students.Select(x => x.Id).ToList();
             var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
 
-            var unitGroups = (await _courseUnitMockTestRepository.Queryable.WhereBulkContains(courseIds, x => x.CourseId)
-                                     .Where(x => x.UnitId.HasValue).ToListAsync())
-                                     .GroupBy(x => x.Number)
-                                     .Select(x => new
-                                     {
-                                         Number = x.Key,
-                                         UnitIds = x.Where(u => u.UnitId.HasValue).Select(u => new
-                                         {
-                                             CourseId = u.CourseId,
-                                             UnitId = u.UnitId.GetValueOrDefault()
-                                         }).Distinct().ToList()
-                                     })
-                                     .ToList();
-
-            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
-                                          join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
-                                          join ur in _unitResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done)
-                                          .Where(x => (!request.EndDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= request.EndDate.Value.Date))
-                                          on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
-                                          from ur in unitGroup.DefaultIfEmpty()
-                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active
-                                          group new { baseQ, ur }
-                                          by new { baseQ.CourseId, baseQ.StudentId } into g
-                                          select new
-                                          {
-                                              StudentId = g.Key.StudentId,
-                                              OverallPercent = g.Where(x => x.ur != null).Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default,
-                                              UnitResults = g.Where(x => x.ur != null).Select(x => x.ur).ToList()
-                                          })
-                                          .ToListAsync();
-            unitResultGroups = unitResultGroups.Where(x => !request.OverallScore.HasValue || (request.OverallScore == EnumOverallScore.Accuracy75OrMore ? x.OverallPercent >= (int)EnumOverallScore.Accuracy75OrMore : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore)).ToList();
-
-            var unitResults = unitResultGroups.Where(x => x.UnitResults != null && x.UnitResults.Any()).SelectMany(x => x.UnitResults).ToList();
-            students = students.Where(x => !request.OverallScore.HasValue || unitResultGroups.Select(x => x.StudentId).Distinct().Contains(x.Id)).ToList();
-            var studentIds = students.Select(x => x.Id).ToList();
             var overallReport = new OverallReportLearningResultModel
             {
                 TotalStudent = students.Count,
-                CourseLevelProgresses = courseLevels.Select(x => new CourseLevelProgressModel
-                {
-                    CourseLevel = x,
-                    TotalStudent = students.Count(y => y.CourseLevel == x)
-                }).ToList()
+                CourseLevelProgresses = BuildCourseLevelProgress(courseLevels, students)
             };
-            var countUnit = request.CourseType == EnumCourseType.Academic ? CourseProgressValue.CountUnitAca : request.CourseType == EnumCourseType.Ielts ? CourseProgressValue.CountUnitIELTS : CourseProgressValue.CountUnitRFIA2;
-            var unitModules = Enumerable.Range(1, countUnit).Select(i =>
-            {
-                var courseUnits = unitGroups.Where(x => x.Number == i).SelectMany(x => x.UnitIds).ToList();
-                var resultPercents = unitResults.Where(x => courseUnits.Any(y => y.UnitId == x.UnitId && y.CourseId == x.CourseId)).Select(x => x.Percent).ToList();
-                return new OverallModuleReportModel
-                {
-                    Percent = resultPercents.Any() ? NumberHelper.ConvertRound(resultPercents.Average()) : ValueDefault,
-                    Index = i,
-                    TotalStudent = resultPercents.Count,
-                    Type = nameof(Domain.Entities.Unit)
-                };
-            });
 
             if (request.CourseType == EnumCourseType.Academic || request.CourseType == EnumCourseType.EnglishFoundation)
             {
@@ -227,8 +177,104 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 
             overallModules.AddRange(unitModules);
             overallReport.OverallModules = overallModules;
-            overallReport.OverallAvgPercent = unitResults.Any() ? NumberHelper.ConvertRound(unitResults.Average(x => x.Percent)) : ValueDefault;
+            overallReport.OverallAvgPercent = overallAvgPercent;
             return overallReport;
+        }
+
+        private async Task<(IList<OverallModuleReportModel>, List<StudentDtoModel>, double)> GetUnitResultGroups(GetOverallReportLearningResultQuery request, List<StudentDtoModel> students, IList<EnumCourseLevel> courseLevels)
+        {
+            var courseIds = students.Select(x => x.CourseId).Distinct().ToList();
+            var unitGroups = (await _courseUnitMockTestRepository.Queryable.WhereBulkContains(courseIds, x => x.CourseId)
+                                   .Where(x => x.UnitId.HasValue).AsNoTracking().ToListAsync())
+                                   .GroupBy(x => x.Number)
+                                   .Select(x => new
+                                   {
+                                       Number = x.Key,
+                                       UnitIds = x.Where(u => u.UnitId.HasValue).Select(u => new
+                                       {
+                                           CourseId = u.CourseId,
+                                           UnitId = u.UnitId.GetValueOrDefault()
+                                       }).Distinct().ToList()
+                                   })
+                                   .ToList();
+
+            var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(students.Select(x => x.Id), x => x.StudentId)
+                                          join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
+                                          join ur in _unitResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done)
+                                          .Where(x => (!request.EndDate.HasValue || (x.UpdatedDate ?? x.CreatedDate).Date <= request.EndDate.Value.Date))
+                                          on new { baseQ.StudentId, baseQ.CourseId, UnitId = cum.UnitId } equals new { ur.StudentId, ur.CourseId, UnitId = (Guid?)ur.UnitId } into unitGroup
+                                          from ur in unitGroup.DefaultIfEmpty()
+                                          where baseQ.WorkingStatus == EnumWorkingStatus.Active
+                                          group new { baseQ, ur }
+                                          by new { baseQ.CourseId, baseQ.StudentId } into g
+                                          select new
+                                          {
+                                              StudentId = g.Key.StudentId,
+                                              OverallPercent = g.Where(x => x.ur != null).Select(x => x.ur).Any() ? Math.Round(g.Select(x => x.ur).Average(x => x.Percent)) : default,
+                                              UnitResults = g.Where(x => x.ur != null).Select(x => x.ur).ToList()
+                                          })
+                                          .ToListAsync();
+
+            if (request.OverallScores != null && request.OverallScores.Any())
+            {
+                unitResultGroups = unitResultGroups
+                    .Where(x => request.OverallScores.Any(score =>
+                        score == EnumOverallScore.Accuracy75OrMore
+                            ? x.OverallPercent >= (int)EnumOverallScore.Accuracy75OrMore
+                            : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore))
+                    .ToList();
+            }
+
+            var unitResults = unitResultGroups.Where(x => x.UnitResults != null && x.UnitResults.Any()).SelectMany(x => x.UnitResults).ToList();
+            if (request.OverallScores?.Any() == true)
+            {
+                var matchedStudentIds = unitResultGroups.Select(x => x.StudentId).Distinct().ToHashSet();
+                students = students.Where(s => matchedStudentIds.Contains(s.Id)).ToList();
+            }
+
+            var countUnit = GetUnitCountByCourseType(request.CourseType ?? default);
+            var unitModules = Enumerable.Range(1, countUnit).Select(i =>
+            {
+                var courseUnits = unitGroups.Where(x => x.Number == i).SelectMany(x => x.UnitIds).ToList();
+                var resultPercents = unitResults.Where(x => courseUnits.Any(y => y.UnitId == x.UnitId && y.CourseId == x.CourseId)).Select(x => x.Percent).ToList();
+                return new OverallModuleReportModel
+                {
+                    Percent = resultPercents.Any() ? NumberHelper.ConvertRound(resultPercents.Average()) : ValueDefault,
+                    Index = i,
+                    TotalStudent = resultPercents.Count,
+                    Type = nameof(Domain.Entities.Unit)
+                };
+            }).ToList();
+            return (unitModules, students, unitResults.Any() ? NumberHelper.ConvertRound(unitResults.Average(x => x.Percent)) : ValueDefault);
+        }
+
+        private static IList<CourseLevelProgressModel> BuildCourseLevelProgress(IList<EnumCourseLevel> courseLevels, List<StudentDtoModel> students)
+        {
+            return courseLevels.Select(level => new CourseLevelProgressModel
+            {
+                CourseLevel = level,
+                TotalStudent = students.Count(s => s.CourseLevel == level)
+            }).ToList();
+        }
+
+        private static int GetUnitCountByCourseType(EnumCourseType courseType)
+        {
+            return courseType switch
+            {
+                EnumCourseType.Academic => CourseProgressValue.CountUnitAca,
+                EnumCourseType.Ielts => CourseProgressValue.CountUnitIELTS,
+                _ => CourseProgressValue.CountUnitRFIA2
+            };
+        }
+
+        private static IList<dynamic> FilterUnitResultsByScore(IList<dynamic> unitResultGroups, List<EnumOverallScore> scores)
+        {
+            return unitResultGroups
+                .Where(x => scores.Any(score =>
+                    score == EnumOverallScore.Accuracy75OrMore
+                        ? x.OverallPercent >= (int)EnumOverallScore.Accuracy75OrMore
+                        : x.OverallPercent < (int)EnumOverallScore.Accuracy75OrMore))
+                .ToList();
         }
     }
 }

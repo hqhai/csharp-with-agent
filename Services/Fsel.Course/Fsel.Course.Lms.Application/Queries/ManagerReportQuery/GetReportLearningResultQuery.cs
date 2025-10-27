@@ -59,17 +59,17 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCurrentLevel = request.ListCurrentLevel,
+                ListOverallScore = request.ListOverallScore,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
-                CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
-                OverallScore = request.OverallScore,
-                LearningStatus = request.LearningStatus,
                 ManagerReportType = EnumManagerReportType.ReportLearningResults,
                 SortBy = request.SortBy
             }, cancellationToken);
