@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var testGroupResult = await _testGroupResult.Queryable.FirstAsync(x => x.StudentId == request.StudentId
+            var testGroupResult = await _testGroupResult.Queryable.FirstOrDefaultAsync(x => x.StudentId == request.StudentId
                                                                                    && x.TestType == EnumTestType.PlacementTest,
                 cancellationToken);
 
