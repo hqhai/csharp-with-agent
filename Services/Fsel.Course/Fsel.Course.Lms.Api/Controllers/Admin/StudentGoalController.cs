@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpPost("send-email-learning-progress-warning")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendEmailLearningProgressWarning([FromQuery] SendEmailLearningProgressWarningCommand command)
+        public async Task<IActionResult> SendEmailLearningProgressWarning([FromBody] SendEmailLearningProgressWarningCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
