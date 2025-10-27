@@ -52,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _testService = testService;
             _userService = userService;
             _serviceProvider = serviceProvider;
+            _testGroupResult = testGroupResult;
         }
 
         public async Task<MethodResult<PTStateModel>> Handle(ChosePTFlowCommand request, CancellationToken cancellationToken)
