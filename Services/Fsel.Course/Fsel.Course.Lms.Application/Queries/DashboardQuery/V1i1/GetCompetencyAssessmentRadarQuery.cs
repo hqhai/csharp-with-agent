@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
 {
+    using System.Data;
+    using FFMpegCore.Enums;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -166,28 +168,37 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 return string.Empty;
             }
 
-            var t = now ?? DateTimeOffset.UtcNow;
+            var t = now ?? DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
             var periodSeconds = Math.Max(1, config.PeriodMinutes) * 60.0;
             var slot = (long)Math.Floor(t.ToUnixTimeSeconds() / periodSeconds);
 
             // Chỉ lấy rule hợp lệ (có message)
             var rules = config.Rules
                              .Where(r => r != null && r.Messages != null && r.Messages.Count > 0)
+                             .OrderBy(x => x.Min).ThenBy(x => x.Max)
                              .ToList();
 
-            // 1) Ưu tiên rule mà TẤT CẢ skills nằm trong khoảng → Aggregate
             foreach (var rule in rules)
             {
-                if (AllInRange(skills, rule))
+                var matchedSkills = skills.Where(s => InRangeInclusive(s.Percent, rule.Min ?? default, rule.Max ?? default)).ToList();
+                var isMatch = rule.MatchMode == RuleMatchMode.All
+                                ? matchedSkills.Count == skills.Count
+                                : matchedSkills.Count > 0;
+
+                if (!isMatch)
                 {
-                    return PickAggregate(rule, slot);
+                    continue;
                 }
+                return PickAggregate(rule, slot);
             }
 
-            // 2) Fallback: chọn rule đầu tiên có message (rất hiếm khi xảy ra nếu cấu hình đủ)
-            var firstRule = rules.FirstOrDefault();
-            return firstRule != null ? PickAggregate(firstRule, slot) : string.Empty;
+            // 4) Fallback: nếu không có rule nào match, lấy rule đầu tiên
+            var fallback = rules.First();
+            return PickAggregate(fallback, slot);
         }
+
+        private static bool InRangeInclusive(double value, double min, double max)
+           => value >= min && value < max;
 
         private static bool AllInRange(IReadOnlyList<SkillScores> skills, RangeConfigModel rule)
            => skills.All(s => InRange(s.Percent, rule.Min, rule.Max));

@@ -4,6 +4,7 @@
     {
       "min": 0,
       "max": 30,
+      "matchMode": "All",
       "messages": [
         "i18nProgressChartStart",
         "i18nProgressChartSmallSteps",
@@ -12,8 +13,9 @@
       ]
     },
     {
-      "min": 30,
+      "min": 0,
       "max": 50,
+      "matchMode": "All",
       "messages": [
         "i18nProgressChartRightDirection",
         "i18nProgressChartProgressing",
@@ -24,6 +26,7 @@
     {
       "min": 51,
       "max": 75,
+      "matchMode": "Any",
       "messages": [
         "i18nProgressChartSkillImproving",
         "i18nProgressChartFastProgress",
@@ -32,6 +35,7 @@
     },
     {
       "min": 75,
+      "matchMode": "Any",
       "messages": [
         "i18nProgressChartHighLevel",
         "i18nProgressChartTopNotch",

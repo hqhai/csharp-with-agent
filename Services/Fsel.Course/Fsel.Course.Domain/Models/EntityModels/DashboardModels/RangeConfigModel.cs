@@ -12,8 +12,15 @@ namespace Fsel.Course.Domain.Models.EntityModels.DashboardModels
 
     public class RangeConfigModel
     {
+        public RuleMatchMode MatchMode { get; set; }
         public double? Min { get; set; }
         public double? Max { get; set; }
         public IList<string> Messages { get; set; } = new List<string>();
+    }
+
+    public enum RuleMatchMode
+    {
+        All,
+        Any
     }
 }
