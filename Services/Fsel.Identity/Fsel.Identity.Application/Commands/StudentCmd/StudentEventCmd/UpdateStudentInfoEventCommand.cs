@@ -71,6 +71,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ParentEmail), request.ParentEmail);
                 return methodResult;
             }
+
             var userEmail = await _userManager.Users.FirstOrDefaultAsync(x => x.Id != _authContext.CurrentUserId && x.Email == request.Email && x.EmailConfirmed, cancellationToken);
             if (userEmail != null)
             {
@@ -170,8 +171,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             {
                 student.CourseLevel = EnumCourseLevel.B1;
             }
-            student.ParentEmail = request.ParentEmail;
-            student.ParentPhoneNumber = request.ParentPhoneNumber;
+
+            if (!string.IsNullOrEmpty(request.ParentEmail))
+            {
+                student.ParentEmail = request.ParentEmail;
+            }
+
+            if (!string.IsNullOrEmpty(request.ParentPhoneNumber))
+            {
+                student.ParentPhoneNumber = request.ParentPhoneNumber;
+            }
+
             if (!student.IsValid())
             {
                 methodResult.AddErrorBadRequest(student.ErrorMessages);
