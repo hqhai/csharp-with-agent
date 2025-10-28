@@ -19,5 +19,13 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? ResponseBody { get; set; }
         public EnumSenderTemplate? Template { get; set; }
         public Guid? ReceiverId { get; set; }
+
+        public string? TemplateStr
+        {
+            get
+            {
+                return Template.HasValue && Template.Value == EnumSenderTemplate.LearningProgressWarning ? "Mail tiến độ" : "Email cảnh báo trạng thái học tập bất ổn";
+            }
+        }
     }
 }
