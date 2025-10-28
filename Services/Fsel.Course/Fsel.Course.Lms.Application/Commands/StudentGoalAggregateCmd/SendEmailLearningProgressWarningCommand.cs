@@ -197,17 +197,17 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                 if (videoResultSkillScores.Any())
                 {
-                    sections = GetSection(course.CourseLevel, sections, videoResultSkillScores, skillPercentTemplate, sectionTemplate, VideoScore);
+                    sections = GetSection(sections, videoResultSkillScores, skillPercentTemplate, sectionTemplate, VideoScore);
                 }
 
                 if (classForumResultSkillScores.Any())
                 {
-                    sections = GetSection(course.CourseLevel, sections, classForumResultSkillScores, skillPercentTemplate, sectionTemplate, ClassForumScore);
+                    sections = GetSection(sections, classForumResultSkillScores, skillPercentTemplate, sectionTemplate, ClassForumScore);
                 }
 
                 if (homeworkResultSkillScores.Any())
                 {
-                    sections = GetSection(course.CourseLevel, sections, homeworkResultSkillScores, skillPercentTemplate, sectionTemplate, HomeworkScore);
+                    sections = GetSection(sections, homeworkResultSkillScores, skillPercentTemplate, sectionTemplate, HomeworkScore);
                 }
 
                 if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
@@ -226,7 +226,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                     if (unitTestSkillScores.Any())
                     {
-                        sections = GetSection(course.CourseLevel, sections, unitTestSkillScores, skillPercentTemplate, sectionTemplate, UnitTestScore);
+                        sections = GetSection(sections, unitTestSkillScores, skillPercentTemplate, sectionTemplate, UnitTestScore);
                     }
 
                     var skillTestScores = videoResults
@@ -243,7 +243,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                     if (skillTestSkillScores.Any())
                     {
-                        sections = GetSection(course.CourseLevel, sections, skillTestSkillScores, skillPercentTemplate, sectionTemplate, SkillTestScore);
+                        sections = GetSection(sections, skillTestSkillScores, skillPercentTemplate, sectionTemplate, SkillTestScore);
                     }
                 }
                 else
@@ -258,7 +258,13 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                     var skillMockTests = skills.Select(p =>
                     {
                         var score = skillMockTestResults.Where(x => x.Skill == p).Max(n => n.Scores);
-                        var percent = NumberHelper.GetPercent(score, 9);
+
+                        var bandScore = TargetBandScoreHelper.GetBandScore(course.CourseLevel);
+
+                        var percent = NumberHelper.GetPercent(score, bandScore);
+
+                        percent = percent >= 100 ? 100 : percent;
+
                         return new SkillPercentModel
                         {
                             Skill = p,
@@ -269,7 +275,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                     if (skillMockTests.Any())
                     {
-                        sections = GetSection(course.CourseLevel, sections, skillMockTests, skillPercentTemplate, sectionTemplate, SkillMockTestScore, true);
+                        sections = GetSection(sections, skillMockTests, skillPercentTemplate, sectionTemplate, SkillMockTestScore, true);
                     }
                 }
 
@@ -318,7 +324,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             return methodResult;
         }
 
-        private static string GetSection(EnumCourseLevel courseLevel, string section, IList<SkillPercentModel> skills, string skillPercentTemplate, string sectionTemplate, string sectionName, bool isSkillMockTest = false)
+        private static string GetSection(string section, IList<SkillPercentModel> skills, string skillPercentTemplate, string sectionTemplate, string sectionName, bool isSkillMockTest = false)
         {
             var skillScoreHtml = string.Empty;
 
@@ -326,19 +332,15 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             {
                 var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
 
+                var image = p.Percent >= 70 ? Success : Warning;
+
                 if (!isSkillMockTest)
                 {
-                    var image = p.Percent >= 70 ? Success : Warning;
-
                     var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Percent, image, p.Percent, color);
                     skillScoreHtml += html;
                 }
                 else
                 {
-                    var bandScore = TargetBandScoreHelper.GetBandScore(courseLevel);
-
-                    var image = p.Score >= bandScore ? Success : Warning;
-
                     var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Score, image, p.Percent, color);
                     skillScoreHtml += html;
                 }
