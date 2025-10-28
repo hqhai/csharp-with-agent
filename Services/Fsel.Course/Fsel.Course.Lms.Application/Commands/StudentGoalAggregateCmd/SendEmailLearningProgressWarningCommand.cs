@@ -134,6 +134,10 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
             var mockTestResultEntities = await _mockTestResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).Where(p => p.UnitId.HasValue && p.Status == EnumResultStatus.Done).ToListAsync(cancellationToken);
 
+            var unitResultEntities = await _unitResultRepository.Queryable
+                                                            .Where(x => studentIds.Contains(x.StudentId) && x.Status == EnumResultStatus.Done)
+                                                            .ToListAsync(cancellationToken);
+
             var learningProgressWarningModels = new List<LearningProgressWarningModel>();
 
             foreach (var student in students)
@@ -261,12 +265,21 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                     }
                 }
 
+                var unitResults = unitResultEntities.Where(p => p.StudentId == student.Id && p.CourseId == course.Id);
+
+                double totalPercent = 0;
+
+                if (unitResults != null && unitResults.Any())
+                {
+                    totalPercent = NumberHelper.ConvertRound(unitResults.Any() ? unitResults.Average(x => x.Percent) : default);
+                }
+
                 learningProgressWarningModels.Add(new LearningProgressWarningModel()
                 {
                     Email = student.Human.Email,
                     FullName = student.Human.FullName,
                     SkillScore = sections,
-                    TotalPercent = 70,
+                    TotalPercent = (int)totalPercent,
                     UserId = student.Human.UserId,
                 });
 
