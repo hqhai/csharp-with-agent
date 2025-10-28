@@ -8,5 +8,6 @@ namespace Fsel.Shared.Models.ShareModels
     {
         public EnumCourseSkill Skill { get; set; }
         public int Percent { get; set; }
+        public double Score { get; set; }
     }
 }

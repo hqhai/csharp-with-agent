@@ -44,11 +44,11 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
         private readonly IMediator _mediator;
 
         private const string VideoScore = "Điểm trong video tương tác:";
-        private const string ClassForumScore = "Điểm trong Diễn đàn lớp hợp:";
+        private const string ClassForumScore = "Điểm trong Diễn đàn lớp học:";
         private const string HomeworkScore = "Điểm bài tập về nhà:";
         private const string SkillTestScore = "Điểm bài kiểm tra Skill Test:";
         private const string UnitTestScore = "Điểm bài kiểm tra Unit Test:";
-        private const string SkillMockTestScore = "Điểm bài tập về nhà:";
+        private const string SkillMockTestScore = "Điểm bài kiểm tra Skill Mock Test (Kỹ năng....):";
 
         private const string Subject = "[FSEL] Hãy quay lại nhịp học nhé – bạn có thể làm tốt hơn nhiều!";
         private const string Success = "https://s3-sgn10.fptcloud.com/fsel/Files/priority_24dp_75FB4C_FILL1_wght400_GRAD0_opsz24_3424_1761098926527.png";
@@ -197,17 +197,17 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                 if (videoResultSkillScores.Any())
                 {
-                    sections = GetSection(sections, videoResultSkillScores, skillPercentTemplate, sectionTemplate, VideoScore);
+                    sections = GetSection(course.CourseLevel, sections, videoResultSkillScores, skillPercentTemplate, sectionTemplate, VideoScore);
                 }
 
                 if (classForumResultSkillScores.Any())
                 {
-                    sections = GetSection(sections, classForumResultSkillScores, skillPercentTemplate, sectionTemplate, ClassForumScore);
+                    sections = GetSection(course.CourseLevel, sections, classForumResultSkillScores, skillPercentTemplate, sectionTemplate, ClassForumScore);
                 }
 
                 if (homeworkResultSkillScores.Any())
                 {
-                    sections = GetSection(sections, homeworkResultSkillScores, skillPercentTemplate, sectionTemplate, HomeworkScore);
+                    sections = GetSection(course.CourseLevel, sections, homeworkResultSkillScores, skillPercentTemplate, sectionTemplate, HomeworkScore);
                 }
 
                 if (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation)
@@ -226,7 +226,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                     if (unitTestSkillScores.Any())
                     {
-                        sections = GetSection(sections, unitTestSkillScores, skillPercentTemplate, sectionTemplate, UnitTestScore);
+                        sections = GetSection(course.CourseLevel, sections, unitTestSkillScores, skillPercentTemplate, sectionTemplate, UnitTestScore);
                     }
 
                     var skillTestScores = videoResults
@@ -243,25 +243,33 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                     if (skillTestSkillScores.Any())
                     {
-                        sections = GetSection(sections, skillTestSkillScores, skillPercentTemplate, sectionTemplate, SkillTestScore);
+                        sections = GetSection(course.CourseLevel, sections, skillTestSkillScores, skillPercentTemplate, sectionTemplate, SkillTestScore);
                     }
                 }
                 else
                 {
                     var skillMockTestResults = mockTestResultEntities
-                                         .Where(p => p.StudentId == student.Id)
+                                         .Where(p => p.StudentId == student.Id && p.CourseId == course.Id)
                                          .Where(p => p.SkillScores != null && p.SkillScores.Any())
                                          .SelectMany(p => p.SkillScores ?? new List<SkillScores>()).ToList();
 
-                    var skillMockTestResultSkillScores = skillMockTestResults.GroupBy(p => p.Skill).Select(p => new SkillPercentModel
+                    var skills = skillMockTestResults.Select(p => p.Skill).Distinct();
+
+                    var skillMockTests = skills.Select(p =>
                     {
-                        Skill = p.Key,
-                        Percent = (int)p.Average(x => x.Percent)
+                        var score = skillMockTestResults.Where(x => x.Skill == p).Max(n => n.Scores);
+                        var percent = NumberHelper.GetPercent(score, 9);
+                        return new SkillPercentModel
+                        {
+                            Skill = p,
+                            Percent = (int)percent,
+                            Score = score
+                        };
                     }).ToList();
 
-                    if (skillMockTestResultSkillScores.Any())
+                    if (skillMockTests.Any())
                     {
-                        sections = GetSection(sections, skillMockTestResultSkillScores, skillPercentTemplate, sectionTemplate, SkillMockTestScore);
+                        sections = GetSection(course.CourseLevel, sections, skillMockTests, skillPercentTemplate, sectionTemplate, SkillMockTestScore, true);
                     }
                 }
 
@@ -310,7 +318,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             return methodResult;
         }
 
-        private static string GetSection(string section, IList<SkillPercentModel> skills, string skillPercentTemplate, string sectionTemplate, string sectionName)
+        private static string GetSection(EnumCourseLevel courseLevel, string section, IList<SkillPercentModel> skills, string skillPercentTemplate, string sectionTemplate, string sectionName, bool isSkillMockTest = false)
         {
             var skillScoreHtml = string.Empty;
 
@@ -318,10 +326,22 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             {
                 var (color, skillName, icon) = SendMailHelper.ConvertEnum(p.Skill);
 
-                var image = p.Percent >= 70 ? Success : Warning;
+                if (!isSkillMockTest)
+                {
+                    var image = p.Percent >= 70 ? Success : Warning;
 
-                var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Percent, image, p.Percent, color);
-                skillScoreHtml += html;
+                    var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Percent, image, p.Percent, color);
+                    skillScoreHtml += html;
+                }
+                else
+                {
+                    var bandScore = TargetBandScoreHelper.GetBandScore(courseLevel);
+
+                    var image = p.Score >= bandScore ? Success : Warning;
+
+                    var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Score, image, p.Percent, color);
+                    skillScoreHtml += html;
+                }
             });
 
             var html = string.Format(CultureInfo.InvariantCulture, sectionTemplate, sectionName, skillScoreHtml);
