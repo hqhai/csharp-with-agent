@@ -54,7 +54,7 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
                 schoolId = schoolIdResult.Content?.Result;
             }
 
-            var query = _courseGoalRepository.Queryable;
+            var query = _courseGoalRepository.Queryable.Where(x => x.GoalCategory != EnumCourseGoalCategory.All);
             if (schoolId.HasValue)
             {
                 query = query.Where(x => x.SchoolId == schoolId);

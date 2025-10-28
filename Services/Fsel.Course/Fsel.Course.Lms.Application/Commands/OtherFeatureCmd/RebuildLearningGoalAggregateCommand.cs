@@ -96,7 +96,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var aggregates = await _studentLearningGoalAggregateRepository.Queryable
                 .AsNoTracking() // chỉ đọc để tạo summary
                 .Include(x => x.StudentGoalSummaries)
-                .Where(x => createdAggregateIds.Contains(x.Id) && x.IsActive)
+                .WhereBulkContains(createdAggregateIds, x => x.Id)
+                .Where(x => x.IsActive)
                 .ToListAsync(ct);
 
             // 6) Tạo weekly summaries cho tuần hiện tại nếu thiếu
@@ -202,6 +203,87 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }
         }
 
+        private async Task EnsureWeeklySummariesForAggregatesAsync(
+            IList<StudentGoalAggregate> aggregates,
+            IList<StudentModel> students,
+            IList<CourseGoalModel> allCourseGoals,
+            CancellationToken ct)
+        {
+            if (aggregates.Count == 0)
+            {
+                return;
+            }
+            var (weekStartUtc, weekEndUtc) = GetCurrentWeekRangeUtc();
+            var toInsert = new List<StudentGoalSummary>();
+            var updatedAggregates = new List<StudentGoalAggregate>();
+            // Dựng lookup CourseGoal theo Id để khỏi FirstOrDefault nhiều lần
+            var courseGoalById = allCourseGoals.ToDictionary(g => g.Id);
+            var courseStudents = aggregates.Select(a => new { a.CourseId, a.StudentId }).Distinct().ToList();
+
+            var courseResults = await _courseResultRepository.Queryable
+                                                            .WhereBulkContains(courseStudents, new[] { "CourseId", "StudentId" })
+                                                            .AsNoTracking()
+                                                            .ToListAsync(ct);
+
+            foreach (var ag in aggregates)
+            {
+                var courseResult = courseResults.FirstOrDefault(cr => cr.CourseId == ag.CourseId && cr.StudentId == ag.StudentId);
+                if (courseResult != null && courseResult.Status == EnumResultStatus.Done)
+                {
+                    continue;
+                }
+                var student = students.FirstOrDefault(x => x.Id == ag.StudentId);
+                if (student == null)
+                {
+                    continue;
+                }
+
+                var hasThisWeek = ag.StudentGoalSummaries?
+                    .Any(s => s.StartDate >= weekStartUtc && s.EndDate <= weekEndUtc) == true;
+
+                if (hasThisWeek)
+                {
+                    continue;
+                }
+                var courseGoal = GetCourseGoal(allCourseGoals, ag.CourseLevel, ag.CourseType, student.SchoolClassId); // hoặc GetCourseGoalOrNull(...)
+                var courseGoalConfig = courseGoal?.CourseGoalConfigs.FirstOrDefault(x => x.CourseId == ag.CourseId);
+                if (courseGoal == null || courseGoalConfig == null)
+                {
+                    continue;
+                }
+
+                toInsert.Add(new StudentGoalSummary
+                {
+                    ProgressStatus = EnumProgressStatus.Behind,
+                    StartDate = weekStartUtc,
+                    EndDate = weekEndUtc,
+                    StudentGoalAggregateId = ag.Id,
+                    LessonsPerWeek = courseGoalConfig.LessonsPerWeek,
+                    TotalTargetLessons = ag.TotalTargetLessons,
+                    TotalCompletedLessons = ag.TotalCompletedLessons,
+                });
+
+                if (ag.CourseGoalConfigId != courseGoalConfig.Id || ag.CourseGoalId != courseGoal.Id)
+                {
+                    ag.CourseGoalConfigId = courseGoalConfig.Id;
+                    ag.CourseGoalId = courseGoal.Id;
+                    updatedAggregates.Add(ag);
+                }
+            }
+
+            if (toInsert.Count > 0)
+            {
+                await _studentLearningGoalSummaryRepository.AddList(toInsert);
+                await _studentLearningGoalSummaryRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
+            }
+
+            if (updatedAggregates.Any())
+            {
+                _studentLearningGoalAggregateRepository.UpdateList(updatedAggregates);
+                await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
+            }
+        }
+
         private static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeUtc()
         {
             var nowUtc = DateTime.UtcNow;
@@ -237,7 +319,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         private async Task<IList<CourseResult>> GetUnlinkedCourseResultsAsync(CancellationToken ct = default)
         {
             var query = from cr in _courseResultRepository.Queryable.Include(x => x.Course)
-                        where cr.WorkingStatus != EnumWorkingStatus.NotWorking
+                        where cr.WorkingStatus != EnumWorkingStatus.NotWorking && cr.Status != EnumResultStatus.Done
                         join ag0 in _studentLearningGoalAggregateRepository.Queryable.AsNoTracking().Where(x => x.IsActive)
                             on new { cr.CourseId, cr.StudentId }
                             equals new { ag0.CourseId, ag0.StudentId } into agGroup
@@ -288,9 +370,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 var level = ag.CourseLevel;
                 var type = ag.CourseType;
 
-                var courseGoal = GetCourseGoal(courseGoals, level, type, student.SchoolClassId); // hoặc GetCourseGoalOrNull(...)
-                var courseGoalConfig = courseGoal?.CourseGoalConfigs.FirstOrDefault(x => x.CourseId == ag.CourseId);
-
                 var results = doneLessonResultsMap.TryGetValue((ag.StudentId, ag.CourseId), out var r)
                     ? r
                     : Enumerable.Empty<LessonResult>();
@@ -298,6 +377,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 ApplyWeeklyAndTotalProgress(nowVn, weekly, ag, results);
                 ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(ag.TotalCompletedLessons, ag.TotalTargetLessons, weekly.ProgressStatus);
                 ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(ag.TotalCompletedLessons, ag.TotalTargetLessons);
+                UpdateBehindStreak(ag, weeklySummaries.Where(x => x.StudentGoalAggregateId == ag.Id).Where(x => x.EndDate <= nowVn).ToList());
             }
 
             // 6) Lưu
@@ -306,6 +386,47 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
             _studentLearningGoalAggregateRepository.UpdateList(aggregates);
             await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
+
+            // 6) Tạo weekly summaries cho tuần hiện tại nếu thiếu
+            await EnsureWeeklySummariesForAggregatesAsync(aggregates, students, courseGoals, ct);
+        }
+
+        private static void UpdateBehindStreak(StudentGoalAggregate agg, IReadOnlyList<StudentGoalSummary> weeklySummaries)
+        {
+            if (weeklySummaries == null || weeklySummaries.Count == 0)
+            {
+                agg.ConsecutiveBehindWeeks = 0;
+                return;
+            }
+
+            // Sắp xếp theo mốc thời gian để chắc chắn tuần cuối là mới nhất.
+            // Ưu tiên EndDate, fallback StartDate/CreatedDate.
+            var ordered = weeklySummaries
+                .Where(w => w != null)
+                .OrderBy(w => w.EndDate != default ? w.EndDate
+                         : w.StartDate != default ? w.StartDate
+                         : w.CreatedDate)
+                .ToList();
+
+            var streak = 0;
+
+            for (int i = ordered.Count - 1; i >= 0; i--)
+            {
+                var status = ordered[i].ProgressStatus;
+
+                // Nếu cần bỏ qua các tuần "không đánh giá", có thể thay thế điều kiện dưới đây
+                // bằng check cụ thể (vd: status == EnumProgressStatus.Unknown => break hoặc continue).
+                if (status == EnumProgressStatus.Behind)
+                {
+                    streak++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            agg.ConsecutiveBehindWeeks = streak;
         }
 
         private sealed record AggWeeklyPair(StudentGoalAggregate Aggregate, StudentGoalSummary Weekly);
@@ -392,14 +513,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var totalCompleted = results.Count();
             weekly.TotalCompletedLessons = totalCompleted;
             agg.TotalCompletedLessons = totalCompleted;
-
-            UpdateBehindStreak(agg, weekly.ProgressStatus);
-        }
-
-        private static void UpdateBehindStreak(StudentGoalAggregate agg, EnumProgressStatus weekStatus)
-        {
-            agg.ConsecutiveBehindWeeks = weekStatus == EnumProgressStatus.Behind
-                ? agg.ConsecutiveBehindWeeks + 1 : 0;
         }
     }
 }
