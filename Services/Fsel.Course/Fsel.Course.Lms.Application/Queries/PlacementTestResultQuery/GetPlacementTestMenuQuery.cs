@@ -317,7 +317,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
 
                 // Calculate isLockPT using the same logic as in Command
                 var (currentLevel, isLockPT) = IeltsScoreHelper.GetLevelInScore(
-                    placementTest.PlacementTestLevel,
+                    placementTest.Level,
                     placementTestResult.Percent,
                     IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
 
