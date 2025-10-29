@@ -366,6 +366,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 {
                     continue;
                 }
+                var weeklies = weeklySummaries.Where(x => x.StudentGoalAggregateId == ag.Id).Where(x => x.EndDate <= nowVn).ToList();
 
                 var level = ag.CourseLevel;
                 var type = ag.CourseType;
@@ -375,9 +376,9 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     : Enumerable.Empty<LessonResult>();
 
                 ApplyWeeklyAndTotalProgress(nowVn, weekly, ag, results);
-                ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(ag.TotalCompletedLessons, ag.TotalTargetLessons, weekly.ProgressStatus);
-                ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(ag.TotalCompletedLessons, ag.TotalTargetLessons);
-                UpdateBehindStreak(ag, weeklySummaries.Where(x => x.StudentGoalAggregateId == ag.Id).Where(x => x.EndDate <= nowVn).ToList());
+                ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(weeklies.Sum(x => x.CompletedLessons), weeklies.Sum(x => x.LessonsPerWeek), weekly.ProgressStatus);
+                ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(weeklies.Sum(x => x.CompletedLessons), weeklies.Sum(x => x.LessonsPerWeek));
+                UpdateBehindStreak(ag, weeklies);
             }
 
             // 6) Lưu

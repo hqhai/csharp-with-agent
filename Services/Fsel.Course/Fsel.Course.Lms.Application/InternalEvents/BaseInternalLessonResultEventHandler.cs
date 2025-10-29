@@ -121,15 +121,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private async Task UpdateStudentAggregateAsync(LessonResult lessonResult)
         {
             var todayUtc = DateTime.UtcNow.Date;
-            var studentAggregate = await _studentGoalAggregateRepository.Queryable
+            var studentAggregate = await _studentGoalAggregateRepository.Queryable.Include(x => x.StudentGoalSummaries)
                                     .FirstOrDefaultAsync(x => x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId);
             if (studentAggregate == null)
             {
                 return;
             }
-            var studentSummary = await _studentGoalSummaryRepository.Queryable
+            var studentSummaries = studentAggregate.StudentGoalSummaries.Where(x => x.EndDate <= todayUtc);
+            var studentSummary = studentAggregate.StudentGoalSummaries
                                     .Where(x => x.StartDate.Date <= todayUtc.Date && x.EndDate.Date >= todayUtc.Date)
-                                    .FirstOrDefaultAsync(x => x.StudentGoalAggregateId == studentAggregate.Id);
+                                    .FirstOrDefault();
             if (studentSummary == null)
             {
                 return;
@@ -145,7 +146,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             });
 
             studentAggregate.TotalCompletedLessons += 1;
-            studentAggregate.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(studentAggregate.TotalCompletedLessons, studentAggregate.TotalTargetLessons);
+            studentAggregate.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(studentSummaries.Sum(x => x.CompletedLessons), studentSummaries.Sum(x => x.LessonsPerWeek), studentSummary.ProgressStatus);
             await _studentGoalAggregateRepository.BulkUpdateList(new List<StudentGoalAggregate> { studentAggregate }, bulk =>
             {
                 bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CombinedProgress };
