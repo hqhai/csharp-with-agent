@@ -197,7 +197,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
                 usernamesDoesNotExist.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.ToLower(CultureInfo.CurrentCulture)));
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty())
+                                                  .FirstOrDefault
+                                                  (x =>
+                                                  !string.IsNullOrEmpty(user)
+                                                  && x.Username?.ToLower(CultureInfo.InvariantCulture).Trim() == user.ToLower(CultureInfo.InvariantCulture).Trim()
+                                                  );
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
@@ -207,8 +212,13 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
                 query.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user.User.UserName) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.User.UserName.ToLower(CultureInfo.CurrentCulture)));
-                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.CurrentCulture) != user.User.FullName?.ToLower(CultureInfo.CurrentCulture))
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty())
+                                                  .FirstOrDefault
+                                                  (x =>
+                                                  !string.IsNullOrEmpty(user.User.UserName)
+                                                  && x.Username?.ToLower(CultureInfo.InvariantCulture).Trim() == user.User.UserName.ToLower(CultureInfo.InvariantCulture).Trim());
+
+                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.InvariantCulture).Trim() != user.User.FullName?.ToLower(CultureInfo.InvariantCulture).Trim())
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Username), Message = MismatchedData });
