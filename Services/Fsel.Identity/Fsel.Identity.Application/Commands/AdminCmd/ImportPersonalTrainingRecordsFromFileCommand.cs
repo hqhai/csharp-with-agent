@@ -103,7 +103,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             foreach (var item in result.Datas)
             {
-                var user = users.FirstOrDefault(x => x.User.Email == item.Email);
+                var user = users.FirstOrDefault(x => x.User.Email?.ToLower(System.Globalization.CultureInfo.CurrentCulture) == item.Email?.ToLower(System.Globalization.CultureInfo.CurrentCulture));
                 if (user == null)
                 {
                     continue;

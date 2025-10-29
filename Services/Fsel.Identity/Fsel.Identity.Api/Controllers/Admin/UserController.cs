@@ -433,7 +433,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("personal-training/import-records")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.Add)]
+        [Permission(UserManagement.Add)]
         public async Task<IActionResult> Import([FromQuery] ImportPersonalTrainingRecordsFromFileCommand command)
         {
             MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -450,7 +450,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("personal-training/export-template")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.Export)]
+        [Permission(UserManagement.Add)]
         public async Task<IActionResult> ExportTemplateRecord()
         {
             MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplatePersonalTrainingRecordCommand()).ConfigureAwait(false);
