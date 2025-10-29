@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
 {
     using System.Linq.Dynamic.Core;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
@@ -61,7 +62,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
 
             var isByPassEmailConfirm = competitionEvent?.EventContent?.IsByPassEmailComfirm ?? default;
 
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
             var isChangePassword = await _userManager.CheckPasswordAsync(user, user.DefaultPassword ?? string.Empty);
+
             var studentInfoEvent = new StudentInfoEventModel
             {
                 Birthday = human.Birthday,
@@ -79,6 +83,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                 IsStudentVerifiedForEvent = isByPassEmailConfirm,
                 AllowParentInfoUpdate = competitionEvent == null || string.IsNullOrEmpty(competitionEvent.EventCode) || !competitionEvent.EventCode.Contains(EventCode, StringComparison.InvariantCultureIgnoreCase),
             };
+
+            if (studentInfoEvent.Birthday.HasValue)
+            {
+                studentInfoEvent.Age = Shared.Helpers.DateTimeHelper.CalculateAge(studentInfoEvent.Birthday.Value, currentDate);
+            }
 
             var schoolId = human.Student?.SchoolId ?? default;
             var competitionEventId = competitionEvent?.Id ?? default;
