@@ -25,6 +25,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
         private const string EventCode = "EVHoChiMinh";
+        private const string Parent = "Phụ Huynh";
 
         public GetStudentInfoEventQueryHandler(
             IHumanRepository humanRepository,
@@ -111,7 +112,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
             }
             else if (!string.IsNullOrEmpty(studentInfoEvent.ParentPhoneNumber))
             {
-                var parent = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.User.PhoneNumber) && p.User.PhoneNumber == studentInfoEvent.ParentPhoneNumber);
+                var parent = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.User.PhoneNumber) && p.User.PhoneNumber == studentInfoEvent.ParentPhoneNumber && p.Student.SchoolGrade == Parent);
+
                 if (parent != null)
                 {
                     studentInfoEvent.CompanionInfo = new CompanionInfoEventModel()

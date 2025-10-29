@@ -64,6 +64,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string SchoolDoesNotExistInEvent = "Trường học chưa được gắn vào sự kiện";
         private const string ExpiredDate = "Đã hết thời gian tạo tài khoản";
 
+        private const string Parent = "Phụ Huynh";
+
         private const string DefaultPassword = "Fsel@";
         private const int MinYear = 1900;
         private static readonly Random s_random = new Random();
@@ -576,7 +578,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                                 Occupation = nameof(Student),
                                                 School = school.Name,
                                                 SchoolClass = student.SchoolClass,
-                                                SchoolGrade = student.SchoolGrade,
+                                                SchoolGrade = Parent,
                                                 SchoolId = schoolId,
                                                 CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
                                             }
