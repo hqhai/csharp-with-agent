@@ -11,6 +11,7 @@ namespace Fsel.System.Domain.Entities.CourseGoals
         [Range(0, int.MaxValue, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int LessonsPerWeek { get; set; }
 
+        public int DisplayOrder { get; set; }
         public Guid CourseId { get; set; }
         public Guid CourseGoalId { get; set; }
         public CourseGoal? CourseGoal { get; set; }

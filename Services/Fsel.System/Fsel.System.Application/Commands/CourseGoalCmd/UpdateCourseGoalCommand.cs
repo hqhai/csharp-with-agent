@@ -65,6 +65,7 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                     methodResult.AddErrorBadRequest(courseGoalConfig.ErrorMessages);
                     return methodResult;
                 }
+                courseGoalConfig.DisplayOrder = request.CourseGoalConfigs.IndexOf(item);
             }
 
             await _courseGoalRepository.ExecuteTransactionAsync(async () =>

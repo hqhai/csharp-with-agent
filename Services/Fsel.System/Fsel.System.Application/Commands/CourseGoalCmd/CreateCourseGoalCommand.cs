@@ -70,10 +70,21 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
             if (courseGoal == null)
             {
                 courseGoal = _mapper.Map<CourseGoal>(request);
+                courseGoal.Name = courseGoal.GoalCategory.GetDescription();
                 if (!courseGoal.IsValid())
                 {
                     methodResult.AddErrorBadRequest(courseGoal.ErrorMessages);
                     return methodResult;
+                }
+                foreach (var item in courseGoal.CourseGoalConfigs)
+                {
+                    var courseGoalConfig = _mapper.Map<CourseGoalConfig>(item);
+                    if (!courseGoalConfig.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(courseGoalConfig.ErrorMessages);
+                        return methodResult;
+                    }
+                    item.DisplayOrder = courseGoal.CourseGoalConfigs.ToList().IndexOf(item);
                 }
                 _courseGoalRepository.Add(courseGoal);
             }
@@ -99,6 +110,7 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                         courseGoalConfig = _mapper.Map<CourseGoalConfig>(item);
                         courseGoal.CourseGoalConfigs.Add(courseGoalConfig);
                     }
+                    courseGoalConfig.DisplayOrder = request.CourseGoalConfigs.IndexOf(item);
                     if (!courseGoalConfig.IsValid())
                     {
                         methodResult.AddErrorBadRequest(courseGoalConfig.ErrorMessages);
@@ -155,6 +167,7 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                         courseGoalConfig = _mapper.Map<CourseGoalConfig>(item);
                         courseGoal.CourseGoalConfigs.Add(courseGoalConfig);
                     }
+                    courseGoalConfig.DisplayOrder = request.CourseGoalConfigs.IndexOf(item);
                 }
             }
             await _courseGoalRepository.ExecuteTransactionAsync(async () =>
@@ -213,6 +226,7 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                             methodResult.AddErrorBadRequest(courseGoalConfig.ErrorMessages);
                             return methodResult;
                         }
+                        courseGoalConfig.DisplayOrder = request.CourseGoalConfigs.IndexOf(item);
                     }
 
                     toUpdate.Add(entity);
@@ -229,6 +243,16 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                         return methodResult;
                     }
 
+                    foreach (var item in entity.CourseGoalConfigs)
+                    {
+                        var courseGoalConfig = _mapper.Map<CourseGoalConfig>(item);
+                        if (!courseGoalConfig.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(courseGoalConfig.ErrorMessages);
+                            return methodResult;
+                        }
+                        item.DisplayOrder = entity.CourseGoalConfigs.ToList().IndexOf(item);
+                    }
                     toAdd.Add(entity);
                 }
             }
