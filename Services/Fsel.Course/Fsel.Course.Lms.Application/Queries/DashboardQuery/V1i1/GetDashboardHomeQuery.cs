@@ -110,7 +110,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                                               LessonNote = ln,
                                               LessonResult = baseQ,
                                           }).AsNoTracking().ToListAsync(cancellationToken);
-            return (lessonNoteQuerys.Count, lessonNoteQuerys.OrderBy(x => (x.LessonNote.UpdatedDate ?? x.LessonNote.CreatedDate)).Select(x => x.LessonResult).FirstOrDefault());
+            return (lessonNoteQuerys.Count, lessonNoteQuerys.OrderByDescending(x => (x.LessonNote.UpdatedDate ?? x.LessonNote.CreatedDate)).Select(x => x.LessonResult).FirstOrDefault());
         }
 
         private async Task<int> GetTotalLessonCompleteAsync(CourseResult courseResult, CancellationToken cancellationToken)
