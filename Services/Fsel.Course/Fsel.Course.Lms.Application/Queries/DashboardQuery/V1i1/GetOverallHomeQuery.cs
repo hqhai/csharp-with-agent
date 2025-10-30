@@ -89,7 +89,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             // 4) UnitResult mới nhất
             var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit)
                 .Where(x => x.StudentId == student.Id && x.CourseId == courseResult.CourseId)
-                .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                .OrderByDescending(x => x.NewDate)
+                .ThenByDescending(x => x.CreatedDate)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
