@@ -54,29 +54,29 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                                                             .Where(x => x.WorkingStatus == EnumWorkingStatus.Active)
                                                             .FirstOrDefaultAsync(cancellationToken);
 
-            if (courseResult == null)
+            var courseId = courseResult?.CourseId ?? student.CourseId;
+            if (!courseId.HasValue)
             {
                 return methodResult;
             }
-
             var featureAccessTimeResult = await _systemService.GetFeatureAccessTimeByUserIdsAsync(new List<Guid> { request.UserId });
             var featureAccessTime = featureAccessTimeResult?.Content?.Result?.FirstOrDefault();
 
             var courseCompletes = await _managerProgressHelper.GetProgressCompleteLessonAsync(new List<CourseResultModel>
             {
-                new CourseResultModel { CourseId = courseResult.CourseId, StudentId = courseResult.StudentId  }
+                new CourseResultModel { CourseId = courseId.Value, StudentId = student.Id  }
             });
 
             var courseComplete = courseCompletes.FirstOrDefault();
             methodResult.Result = new StudentCourseProgressModel
             {
-                StudentId = courseResult.StudentId,
-                CourseId = courseResult.CourseId,
+                StudentId = student.Id,
+                CourseId = courseId.Value,
                 CurrentLessonIndex = courseComplete?.TotalLessonDone ?? default,
                 TotalLessons = courseComplete?.TotalLesson ?? default,
-                UnitName = courseResult.Status == EnumResultStatus.Done ? CourseDone : courseComplete?.UnitName,
-                IsCourseCompleted = courseResult.Status == EnumResultStatus.Done,
-                StartDate = courseResult.ProcessDate.HasValue ? courseResult.ProcessDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : null,
+                UnitName = courseResult?.Status == EnumResultStatus.Done ? CourseDone : courseComplete?.UnitName,
+                IsCourseCompleted = courseResult?.Status == EnumResultStatus.Done,
+                StartDate = courseResult != null && courseResult.ProcessDate.HasValue ? courseResult.ProcessDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : null,
                 TotalActiveDuration = featureAccessTime?.AccessTime,
                 LastAccessedDate = featureAccessTime?.LastVisited
             };
