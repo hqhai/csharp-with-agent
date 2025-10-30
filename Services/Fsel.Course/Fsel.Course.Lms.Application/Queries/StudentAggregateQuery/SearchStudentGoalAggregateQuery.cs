@@ -122,7 +122,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                                 LessonsPerWeek = sum.LessonsPerWeek,
                             };
             var totalItem = await queryData.CountAsync(cancellationToken);
-            var lists = await queryData.ApplySortAndPaging(request)
+            var lists = await queryData.OrderByDescending(x => x.TotalCompletedLessons).ApplyPaging(request)
                              .AsNoTracking()
                              .ToListAsync(cancellationToken: cancellationToken)
                              .ConfigureAwait(false);
