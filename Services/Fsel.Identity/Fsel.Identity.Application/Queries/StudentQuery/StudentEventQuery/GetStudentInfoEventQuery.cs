@@ -25,8 +25,9 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
         private readonly UserManager<User> _userManager;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
-        private const string EventCode = "EVHoChiMinh";
+
         private const string Parent = "Phụ Huynh";
+        private const string Teacher = "Giáo Viên";
 
         public GetStudentInfoEventQueryHandler(
             IHumanRepository humanRepository,
@@ -81,12 +82,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 IsChangePassword = !isChangePassword,
                 IsStudentVerifiedForEvent = isByPassEmailConfirm,
-                AllowParentInfoUpdate = competitionEvent == null || string.IsNullOrEmpty(competitionEvent.EventCode) || !competitionEvent.EventCode.Contains(EventCode, StringComparison.InvariantCultureIgnoreCase),
             };
 
             if (studentInfoEvent.Birthday.HasValue)
             {
                 studentInfoEvent.Age = Shared.Helpers.DateTimeHelper.CalculateAge(studentInfoEvent.Birthday.Value, currentDate);
+                studentInfoEvent.AllowParentInfoUpdate = student.SchoolGrade != Parent && student.SchoolGrade != Teacher && studentInfoEvent.Age < 25;
             }
 
             var schoolId = human.Student?.SchoolId ?? default;
