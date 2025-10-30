@@ -130,8 +130,8 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumHomeWorkType>();
                     break;
 
-                case EnumCourseSourceData.Language:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumLanguage>();
+                case EnumCourseSourceData.SubtitleLanguage:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumSubtitleLanguage>();
                     break;
             }
 

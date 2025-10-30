@@ -30,6 +30,6 @@ namespace Fsel.Shared.Enums
         OverallScore,
         LearningProgress,
         HomeWorkType,
-        Language
+        SubtitleLanguage
     }
 }

@@ -110,8 +110,8 @@ namespace Fsel.Course.Application.Queries.CategoryQuery.V1i1
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumMockTestScoreCriteria>();
                     break;
 
-                case EnumCourseSourceData.Language:
-                    methodResult.Result = ConvertHelper.EnumToListModel<EnumLanguage>();
+                case EnumCourseSourceData.SubtitleLanguage:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumSubtitleLanguage>();
                     break;
             }
 

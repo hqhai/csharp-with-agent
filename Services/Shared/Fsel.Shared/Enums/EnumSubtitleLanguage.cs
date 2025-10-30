@@ -4,7 +4,7 @@ namespace Fsel.Shared.Enums
 {
     using System.ComponentModel;
 
-    public enum EnumLanguage
+    public enum EnumSubtitleLanguage
     {
         /// <summary>Tiếng Việt</summary>
         [Description("vi-VN")]
