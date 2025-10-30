@@ -109,6 +109,10 @@ namespace Fsel.Course.Application.Queries.CategoryQuery.V1i1
                 case EnumCourseSourceData.MockTestScoreCriteria:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumMockTestScoreCriteria>();
                     break;
+
+                case EnumCourseSourceData.Language:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumLanguage>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;
