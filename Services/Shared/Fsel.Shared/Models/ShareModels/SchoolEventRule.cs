@@ -84,7 +84,8 @@ namespace Fsel.Shared.Models.ShareModels
         WarningScreen,
         DailyQuiz,
         EventRegistrationSuccess,
-        EventGiftDisplay
+        EventGiftDisplay,
+        DisableChangePasswordToEvent,
     }
 
     public enum EnumByPassPaymentType
