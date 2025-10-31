@@ -720,7 +720,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                     var result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
-                        return Redirect(returnUrl ?? string.Empty);
+                        return  this.RedirectWithQuery(returnUrl, new { successMessage = _localizer["i18n_connect_account_success"] });
                     }
                 }
 
@@ -732,7 +732,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 var result = await _userManager.AddLoginAsync(user, info);
                 if (result.Succeeded)
                 {
-                    return Redirect(returnUrl ?? string.Empty);
+                    return  this.RedirectWithQuery(returnUrl, new { successMessage = _localizer["i18n_connect_account_success"] });
                 }
                 else
                 {
@@ -947,7 +947,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
                     if (info.LoginProvider == LoginProvider.Zalo)
                     {
-                        user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
+                        user.Email = $"Emaildefault_{Guid.NewGuid()}@fsel.openid";
                         user.UserName = request.PhoneNumber;
                         user.PhoneNumberConfirmed = true;
                     }
