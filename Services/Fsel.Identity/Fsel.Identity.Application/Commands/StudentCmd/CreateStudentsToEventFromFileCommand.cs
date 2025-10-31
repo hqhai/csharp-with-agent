@@ -69,7 +69,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string ExpiredDate = "Đã hết thời gian tạo tài khoản";
 
         private const string DefaultPassword = "Fsel@";
-        private const string DefaultDomainEmail = "@fsel.openid";
+        private const string DefaultDomainEmail = "@fsel.edu.vn";
         private const int MinYear = 1900;
 
         private static readonly Random s_random = new Random();
