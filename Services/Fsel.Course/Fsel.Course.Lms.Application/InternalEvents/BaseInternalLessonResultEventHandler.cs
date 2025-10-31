@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 {
     using System.Linq.Dynamic.Core;
     using System.Threading;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -127,10 +128,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 return;
             }
-            var studentSummaries = studentAggregate.StudentGoalSummaries.Where(x => x.EndDate <= todayUtc);
             var studentSummary = studentAggregate.StudentGoalSummaries
                                     .Where(x => x.StartDate.Date <= todayUtc.Date && x.EndDate.Date >= todayUtc.Date)
                                     .FirstOrDefault();
+
             if (studentSummary == null)
             {
                 return;
@@ -145,8 +146,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CompletedLessons, c.LastCompletedAt, c.ProgressStatus };
             });
 
+            // các tuần trước tuần hiện tại
+            var pastSummaries = studentAggregate.StudentGoalSummaries
+                                                .Where(x => x.EndDate.Date < studentSummary.StartDate.Date)
+                                                .ToList();
+
+            var totalDone = pastSummaries.Sum(x => x.CompletedLessons) + studentSummary.CompletedLessons;
+            var totalPlan = pastSummaries.Sum(x => x.LessonsPerWeek) + studentSummary.LessonsPerWeek;
+
             studentAggregate.TotalCompletedLessons += 1;
-            studentAggregate.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(studentSummaries.Sum(x => x.CompletedLessons), studentSummaries.Sum(x => x.LessonsPerWeek), studentSummary.ProgressStatus);
+            studentAggregate.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, studentSummary.ProgressStatus);
             await _studentGoalAggregateRepository.BulkUpdateList(new List<StudentGoalAggregate> { studentAggregate }, bulk =>
             {
                 bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CombinedProgress };
