@@ -119,7 +119,7 @@ namespace Fsel.Identity.Application.Handlers.Implementations
                     user.PhoneNumber = phoneNumber;
                     user.UserName = phoneNumber;
                     user.Id = Guid.NewGuid();
-                    user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
+                    user.Email = $"Emaildefault_{Guid.NewGuid()}@fsel.openid";
                     user.PhoneNumberConfirmed = true;
                     user.EmailConfirmed = true;
 

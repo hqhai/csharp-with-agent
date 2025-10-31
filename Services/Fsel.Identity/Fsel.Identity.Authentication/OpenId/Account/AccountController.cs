@@ -923,7 +923,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
 
                     if (info.LoginProvider == LoginProvider.Zalo)
                     {
-                        user.Email = $"Emaildefault_{Guid.NewGuid()}@atlantic.edu.vn";
+                        user.Email = $"Emaildefault_{Guid.NewGuid()}@fsel.openid";
                         user.UserName = request.PhoneNumber;
                         user.PhoneNumberConfirmed = true;
                     }
