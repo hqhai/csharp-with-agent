@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
 
     {
         public Guid AiPromptManagerId { get; set; }
-        public EnumCriteriaAi TypeCriteriaAi { get; set; }
+        public EnumCriteriaAi? TypeCriteriaAi { get; set; }
         public string? UserRole { get; set; }
         public string? SettingAiConfig { get; set; }
         public object? JsonConfig { get; set; }
