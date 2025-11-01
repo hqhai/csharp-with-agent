@@ -42,9 +42,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var data = await GetDataForWeekAsync(query, request.SchoolId, currentWeekStartUtc, cancellationToken)
                      ?? await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken)
                      ?? new List<ProgressRow>();
-
+            var dataPre = await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken) ?? new List<ProgressRow>();
             var stackBar = BuildStackBarChart(data);
-            var pie = BuildPieChart(data);
+            var pie = BuildPieChart(data, dataPre);
 
             methodResult.Result = new List<StackBarChartsModel> { stackBar, pie };
             return methodResult;
@@ -83,32 +83,54 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             };
         }
 
-        private static StackBarChartsModel BuildPieChart(List<ProgressRow> data)
+        private static StackBarChartsModel BuildPieChart(List<ProgressRow> data, List<ProgressRow> dataPre)
         {
             var totalOnTrack = data.Count(s => s.ProgressStatus == EnumProgressStatus.OnTrack || s.ProgressStatus == EnumProgressStatus.Ahead);
             var totalBehind = data.Count(s => s.ProgressStatus == EnumProgressStatus.Behind);
             var grandTotal = totalOnTrack + totalBehind;
 
+            var totalOnTrackPre = dataPre.Count(s => s.ProgressStatus == EnumProgressStatus.OnTrack || s.ProgressStatus == EnumProgressStatus.Ahead);
+            var totalBehindPre = dataPre.Count(s => s.ProgressStatus == EnumProgressStatus.Behind);
+
+            var onTrackDelta = totalOnTrack - totalOnTrackPre;
+            var behindDelta = totalBehind - totalBehindPre;
+
             return new StackBarChartsModel
             {
                 Type = EnumChartType.PieChart,
                 DataCharts = new List<StackBarChartModel>
-            {
-                new StackBarChartModel
                 {
-                    Label = EnumProgressStatus.OnTrack.GetDescription(),
-                    Value = totalOnTrack.ToString(),
-                    NumericValue = totalOnTrack,
-                    Percent = (int)NumberHelper.GetPercent(totalOnTrack, grandTotal)
+                    new StackBarChartModel
+                    {
+                        Label = EnumProgressStatus.OnTrack.GetDescription(),
+                        Value = totalOnTrack.ToString(),
+                        NumericValue = totalOnTrack,
+                        DataColumns = new List<DataChartModel>
+                        {
+                            new DataChartModel
+                            {
+                                Label = onTrackDelta < 0?  EnumProgressStatus.Behind.ToString() : EnumProgressStatus.OnTrack.ToString(),
+                                Value = (int)NumberHelper.GetPercentChart(onTrackDelta, totalOnTrackPre)
+                            }
+                        },
+                        Percent = (int)NumberHelper.GetPercent(totalOnTrack, grandTotal)
+                    },
+                    new StackBarChartModel
+                    {
+                        Label = EnumProgressStatus.Behind.GetDescription(),
+                        Value = totalBehind.ToString(),
+                        NumericValue = totalBehind,
+                        DataColumns = new List<DataChartModel>
+                        {
+                            new DataChartModel
+                            {
+                                Label = behindDelta < 0?  EnumProgressStatus.Behind.ToString() : EnumProgressStatus.OnTrack.ToString(),
+                                Value = (int)NumberHelper.GetPercentChart(behindDelta, totalBehindPre)
+                            }
+                        },
+                        Percent = (int)NumberHelper.GetPercent(totalBehind, grandTotal)
+                    }
                 },
-                new StackBarChartModel
-                {
-                    Label = EnumProgressStatus.Behind.GetDescription(),
-                    Value = totalBehind.ToString(),
-                    NumericValue = totalBehind,
-                    Percent = (int)NumberHelper.GetPercent(totalBehind, grandTotal)
-                }
-            }
             };
         }
 

@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         public EnumCourseStatus? DifferentStatus { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public bool? IsDefault { get; set; }
+        public Guid? SchoolId { get; set; }
     }
 
     public class GetCoursesByLevelQueryHandler : IRequestHandler<GetCoursesByLevelQuery, MethodResult<IList<CourseModel>>>
@@ -57,6 +58,11 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                 var schoolId = (await _userService.GetSchoolIdAsync()).Content?.Result;
                 queryCurriculum = queryCurriculum.Where(m => m.SchoolId == schoolId);
             }
+            else if (request.SchoolId.HasValue)
+            {
+                queryCurriculum = queryCurriculum.Where(m => m.SchoolId == request.SchoolId.Value);
+            }
+
             IQueryable<CourseModel> query;
             var baseQuery = from c in queryCourse
                             join cu in queryCurriculum on c.Id equals cu.CourseCloneId into g

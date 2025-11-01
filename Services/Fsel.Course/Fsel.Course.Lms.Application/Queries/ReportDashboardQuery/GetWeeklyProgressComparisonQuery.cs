@@ -183,7 +183,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 CurrentBehind = current,
                 PrevBehind = prev,
                 ChangeAbs = current - prev,
-                ChangePercent = (int)NumberHelper.GetPercent(current, prev)
+                ChangePercent = (int)NumberHelper.GetPercentChart(current, prev)
             };
         }
     }
