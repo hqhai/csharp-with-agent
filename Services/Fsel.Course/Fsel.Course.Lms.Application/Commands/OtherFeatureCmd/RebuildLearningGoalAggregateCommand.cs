@@ -401,7 +401,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 ApplyWeeklyAndTotalProgress(nowVn, weekly, ag, results);
                 var totalDone = weeklies.Sum(x => x.CompletedLessons);
                 var totalPlan = weeklies.Sum(x => x.LessonsPerWeek);
-                if (weekly.EndDate <= nowVn)
+                if (weekly.StartDate <= nowVn && weekly.EndDate >= nowVn)
                 {
                     ag.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, weekly.ProgressStatus);
                     if (weeklDaily == null)
