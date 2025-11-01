@@ -58,7 +58,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             var weekEndUtc = weekStartUtc.AddDays(7).Date;
 
             Guid? schoolId = null;
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 schoolId = (await _userService.GetSchoolIdAsync()).Content?.Result;
             }
