@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     public interface IUserService
     {
         [Get("/v1/student/execute-list-query")]
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> ExecuteListQueryAsync([Query] BaseQueryModel query);
 
         [Put("/v1/student/update-student-token")]

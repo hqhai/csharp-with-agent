@@ -5,7 +5,10 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     using System.Collections.Generic;
     using System.Threading;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
+    using Fsel.Common.Models;
+    using Fsel.Core.Base.BaseModels;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -57,15 +60,23 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var courseGoalRes = await _systemService.GetListCourseGoalAsync();
             var courseGoals = courseGoalRes.Content?.Result ?? new List<CourseGoalModel>();
 
+            var baseQuery = new BaseQueryModel
+            {
+                Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "CourseId", Operator = EnumFilterOperator.NotEmpty } },
+            };
+            baseQuery.SetIsQueryAll(true);
+            var studentResults = await _userService.ExecuteListQueryAsync(baseQuery);
+            var students = studentResults.Content?.Result ?? new List<StudentModel>();
+
             // 1) Tạo mới các Aggregate chưa có
-            await CreateStudentAggregateAsync(courseGoals, cancellationToken);
+            await CreateStudentAggregateAsync(students, courseGoals, cancellationToken);
             // 2) Tái xây dựng tiến độ học tập
             await RebuildStudentLearningProgressAsync(courseGoals, cancellationToken);
             methodResult.Result = true;
             return methodResult;
         }
 
-        private async Task CreateStudentAggregateAsync(IList<CourseGoalModel> courseGoals, CancellationToken cancellationToken)
+        private async Task CreateStudentAggregateAsync(IList<StudentModel> students, IList<CourseGoalModel> courseGoals, CancellationToken cancellationToken)
         {
             // 1) Lấy CourseResult chưa liên kết Aggregate
             var unlinkedCourseResults = await GetUnlinkedCourseResultsAsync(cancellationToken);
@@ -73,23 +84,33 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
+            var unlinkedStudentIds = unlinkedCourseResults
+                                    .Select(x => x.StudentId)
+                                    .Distinct()
+                                    .ToHashSet();
+
             // 2) Lấy CourseGoal + đếm tổng lesson của các course liên quan
+            var studentIdsWithCourseResult = await GetStudentIdsWithCourseResultAsync(cancellationToken);
+            var studentsWithoutCourse = students.Where(s => !studentIdsWithCourseResult.Contains(s.Id)   // chưa có CourseResult
+                                                  || unlinkedStudentIds.Contains(s.Id))        // có CourseResult nhưng chưa liên kết Aggregate
+                                                .ToList();
 
-            var courseIds = unlinkedCourseResults.Select(c => c.CourseId).Distinct().ToList();
-            var studentIds = unlinkedCourseResults.Select(c => c.StudentId).Distinct().ToList();
-            var courseResults = unlinkedCourseResults.Select(cr => new CourseResultModel
-            {
-                StudentId = cr.StudentId,
-                CourseId = cr.CourseId
-            }).ToList();
-
-            var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
-            var students = studentResults.Content?.Result ?? new List<StudentModel>();
+            var courseIds = studentsWithoutCourse.Where(x => x.CourseId.HasValue)
+                            .Select(s => s.CourseId!.Value)
+                            .Distinct()
+                            .ToList();
 
             var totalLessonsPerCourse = await LoadCourseLessonCountsAsync(courseIds, cancellationToken);
+
+            var courseResults = studentsWithoutCourse.Select(s => new CourseResultModel
+            {
+                StudentId = s.Id,
+                CourseId = s.CourseId ?? default
+            }).ToList();
+
             var doneLessonResultsMap = await LoadDoneLessonResultsMapAsync(courseResults, cancellationToken);
 
-            var aggregatesToInsert = BuildAggregates(unlinkedCourseResults, courseGoals, students, totalLessonsPerCourse, doneLessonResultsMap);
+            var aggregatesToInsert = BuildAggregates(courseResults, courseGoals, students, totalLessonsPerCourse, doneLessonResultsMap);
             if (aggregatesToInsert.Count == 0)
             {
                 return;
@@ -100,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         }
 
         private static List<StudentGoalAggregate> BuildAggregates(
-            IEnumerable<CourseResult> courseResults,
+            IEnumerable<CourseResultModel> courseResults,
             IList<CourseGoalModel> courseGoals,
             IList<StudentModel> students,
             IDictionary<Guid, int> totalLessonsPerCourse,
@@ -116,13 +137,12 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 {
                     continue;
                 }
-                var level = cr.Course!.CourseLevel;
-                var type = cr.Course!.CourseType;
+                var level = cr.CourseLevel ?? default;
+                var type = cr.CourseLevel.GetEnumCourseType();
 
                 // Chọn CourseGoal đúng ưu tiên (đã có helper GetCourseGoal* của bạn)
                 var courseGoal = GetCourseGoal(courseGoals, level, type, student.SchoolClassId); // hoặc GetCourseGoalOrNull(...)
                 var courseGoalConfig = courseGoal?.CourseGoalConfigs.FirstOrDefault(x => x.CourseId == cr.CourseId);
-
                 if (courseGoal == null || courseGoalConfig == null)
                 {
                     continue;
@@ -335,6 +355,14 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 return list.FirstOrDefault(x => x.GoalCategory == EnumCourseGoalCategory.DefaultExcludeSchoolAndClass)
                     ?? list.FirstOrDefault(x => x.GoalCategory == EnumCourseGoalCategory.All);
             }
+        }
+
+        private async Task<IList<Guid>> GetStudentIdsWithCourseResultAsync(CancellationToken ct = default)
+        {
+            return await _courseResultRepository.Queryable
+                .Select(x => x.StudentId)
+                .Distinct()
+                .ToListAsync(ct);
         }
 
         private async Task<IList<CourseResult>> GetUnlinkedCourseResultsAsync(CancellationToken ct = default)

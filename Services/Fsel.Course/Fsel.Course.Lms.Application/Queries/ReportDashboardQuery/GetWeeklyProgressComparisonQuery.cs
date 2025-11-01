@@ -15,8 +15,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     public class GetWeeklyProgressComparisonQuery : IRequest<MethodResult<StackBarChartsModel>>
     {
         public Guid SchoolId { get; set; }
-        public Guid? ClassId { get; set; }
-        public EnumCourseType? CourseType { get; set; }
+        public Guid? ClassIdStr { get; set; }
+        public EnumCourseType? CourseTypeStr { get; set; }
         public DateTime? EndDate { get; set; }
     }
 
@@ -104,14 +104,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         {
             var query = _studentGoalAggregateRepository.Queryable;
 
-            if (request.ClassId.HasValue)
+            if (request.ClassIdStr.HasValue)
             {
-                query = query.Where(x => x.ClassId == request.ClassId);
+                query = query.Where(x => x.ClassId == request.ClassIdStr);
             }
 
-            if (request.CourseType.HasValue)
+            if (request.CourseTypeStr.HasValue)
             {
-                query = query.Where(x => x.CourseType == request.CourseType);
+                query = query.Where(x => x.CourseType == request.CourseTypeStr);
             }
             var firstGoalStartDate = await (from baseQ in query
                                             join sgs in _studentGoalSummaryRepository.Queryable

@@ -15,8 +15,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
     public class GetWeeklyProgressByClassQuery : IRequest<MethodResult<IList<StackBarChartsModel>>>
     {
         public Guid SchoolId { get; set; }
-        public Guid? ClassId { get; set; }
-        public EnumCourseType? CourseType { get; set; }
+        public Guid? ClassIdStr { get; set; }
+        public EnumCourseType? CourseTypeStr { get; set; }
     }
 
     public class GetWeeklyProgressByClassQueryHandler : IRequestHandler<GetWeeklyProgressByClassQuery, MethodResult<IList<StackBarChartsModel>>>
@@ -125,14 +125,14 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         {
             var query = _studentGoalAggregateRepository.Queryable.AsNoTracking();
 
-            if (request.ClassId.HasValue)
+            if (request.ClassIdStr.HasValue)
             {
-                query = query.Where(x => x.ClassId == request.ClassId.Value);
+                query = query.Where(x => x.ClassId == request.ClassIdStr.Value);
             }
 
-            if (request.CourseType.HasValue)
+            if (request.CourseTypeStr.HasValue)
             {
-                query = query.Where(x => x.CourseType == request.CourseType.Value);
+                query = query.Where(x => x.CourseType == request.CourseTypeStr.Value);
             }
             return query;
         }
