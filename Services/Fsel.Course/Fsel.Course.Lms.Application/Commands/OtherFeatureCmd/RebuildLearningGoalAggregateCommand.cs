@@ -16,7 +16,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
-    using JWT.Builder;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -389,6 +388,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     continue;
                 }
                 var weeklies = weeklySummaries.Where(x => x.StudentGoalAggregateId == ag.Id).Where(x => x.EndDate <= nowVn).ToList();
+                var weeklDaily = weeklySummaries.Where(x => x.StudentGoalAggregateId == ag.Id).Where(x => x.EndDate <= nowVn)
+                                                .OrderByDescending(x => x.StartDate).FirstOrDefault();
 
                 var level = ag.CourseLevel;
                 var type = ag.CourseType;
@@ -400,9 +401,23 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 ApplyWeeklyAndTotalProgress(nowVn, weekly, ag, results);
                 var totalDone = weeklies.Sum(x => x.CompletedLessons);
                 var totalPlan = weeklies.Sum(x => x.LessonsPerWeek);
-
-                ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, weekly.ProgressStatus);
-                ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(totalDone, totalPlan);
+                if (weekly.EndDate <= nowVn)
+                {
+                    ag.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, weekly.ProgressStatus);
+                    if (weeklDaily == null)
+                    {
+                        ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(totalDone, totalPlan);
+                    }
+                    else
+                    {
+                        ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, weeklDaily.ProgressStatus);
+                    }
+                }
+                else
+                {
+                    ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, weekly.ProgressStatus);
+                    ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(totalDone, totalPlan);
+                }
                 UpdateBehindStreak(ag, weeklies);
             }
 
@@ -439,9 +454,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             for (int i = ordered.Count - 1; i >= 0; i--)
             {
                 var status = ordered[i].ProgressStatus;
-
-                // Nếu cần bỏ qua các tuần "không đánh giá", có thể thay thế điều kiện dưới đây
-                // bằng check cụ thể (vd: status == EnumProgressStatus.Unknown => break hoặc continue).
                 if (status == EnumProgressStatus.Behind)
                 {
                     streak++;
@@ -523,13 +535,11 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var last = results.OrderByDescending(x => x.CompletionDate ?? x.UpdatedDate).FirstOrDefault();
             weekly.LastCompletedAt = last?.CompletionDate ?? last?.UpdatedDate;
 
-            // Tuần hiện tại (từ CreatedDate weekly → now)
-            var start = weekly.CreatedDate;
-            var end = nowVn;
+            var (weekStartUtc, weekEndUtc) = GetCurrentWeekRangeUtc();
 
             var completedThisWeek = results.Count(x =>
-                (x.CompletionDate ?? x.UpdatedDate) >= start &&
-                (x.CompletionDate ?? x.UpdatedDate) <= end);
+                (x.CompletionDate ?? x.UpdatedDate) >= weekStartUtc &&
+                (x.CompletionDate ?? x.UpdatedDate) <= weekEndUtc);
 
             weekly.CompletedLessons = completedThisWeek;
             weekly.ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(completedThisWeek, weekly.LessonsPerWeek);
