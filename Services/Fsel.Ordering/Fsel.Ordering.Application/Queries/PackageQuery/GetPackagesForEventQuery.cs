@@ -77,7 +77,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
                 packageModels.Add(packageModel);
             }
 
-            methodResult.Result = packageModels.OrderBy(p => p.MonthNumber).ToList();
+            methodResult.Result = packageModels.OrderBy(p => p.MonthNumber).ThenBy(x => x.Price).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
