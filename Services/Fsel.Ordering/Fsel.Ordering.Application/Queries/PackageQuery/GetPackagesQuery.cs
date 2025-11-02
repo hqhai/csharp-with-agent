@@ -19,7 +19,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
 
     public class GetPackagesQuery : IRequest<MethodResult<List<PackageModel>>>
     {
-        public bool? IsDefault { get; set; }
+        public bool? IsDefault { get; set; } = true;
     }
 
     public class GetPackagesQueryHandler : IRequestHandler<GetPackagesQuery, MethodResult<List<PackageModel>>>

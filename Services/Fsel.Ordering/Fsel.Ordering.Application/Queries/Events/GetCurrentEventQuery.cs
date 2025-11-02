@@ -40,9 +40,7 @@ namespace Fsel.Ordering.Application.Queries.Events
                                                   .AsNoTracking();
             if (request.IsDefault.HasValue && request.IsDefault.Value)
             {
-                var defaultEvent = await query
-                    .FirstOrDefaultAsync(p => p.IsDefault, cancellationToken);
-
+                var defaultEvent = await query.FirstOrDefaultAsync(p => p.IsDefault, cancellationToken);
                 methodResult.Result = _mapper.Map<EventModel>(defaultEvent);
                 return methodResult;
             }
