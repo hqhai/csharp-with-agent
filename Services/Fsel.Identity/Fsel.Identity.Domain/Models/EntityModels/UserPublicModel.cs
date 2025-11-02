@@ -12,5 +12,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? Email { get; set; }
         public DateTime? ExpiredDate { get; set; }
         public EnumPaymentRevenueType? RevenueType { get; set; }
+        public EnumCourseLevel? CourseLevel { get; set; }
+        public string? CourseName { get; set; }
+        public bool IsDefaultPackage { get; set; }
     }
 }

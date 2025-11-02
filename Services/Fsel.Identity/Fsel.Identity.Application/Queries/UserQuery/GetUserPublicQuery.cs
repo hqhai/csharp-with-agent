@@ -5,6 +5,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.QueryModels;
     using Fsel.Identity.Domain.Entities;
@@ -24,16 +25,19 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IOrderService _orderService;
+        private readonly ILmsCourseService _lmsCourseService;
 
         public GetUserPublicQueryHandler(UserManager<User> userManager,
             IHumanRepository humanRepository,
             IStudentRepository studentRepository,
-            IOrderService orderService)
+            IOrderService orderService,
+            ILmsCourseService lmsCourseService)
         {
             _userManager = userManager;
             _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _orderService = orderService;
+            _lmsCourseService = lmsCourseService;
         }
 
         public async Task<MethodResult<UserPublicModel>> Handle(GetUserPublicQuery request, CancellationToken cancellationToken)
@@ -60,15 +64,27 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 UserId = user.User.Id
             });
             var order = orderResult.Content?.Result;
-            methodResult.Result = new UserPublicModel
+            var userModel = new UserPublicModel
             {
                 Id = user.User.Id,
                 FullName = user.User.FullName,
                 PhoneNumber = user.User.PhoneNumber,
                 Email = user.User.Email,
                 ExpiredDate = user.Student.ExpiredDate,
-                RevenueType = order?.RevenueType
+                RevenueType = order?.RevenueType,
+                CourseLevel = user.Student.CourseLevel,
+                IsDefaultPackage = order?.IsDefault ?? default
             };
+
+            var courseId = user.Student.CourseId;
+            if (courseId.HasValue)
+            {
+                var courseResult = await _lmsCourseService.GetCourseByIdAsync(courseId.Value);
+                var course = courseResult.Content?.Result;
+                userModel.CourseName = course?.Name;
+            }
+
+            methodResult.Result = userModel;
             return methodResult;
         }
     }
