@@ -8,9 +8,11 @@ using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.LandingPages;
 using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Commands.UserReferrals;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Application.Queries.UserReferrals;
+using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -257,6 +259,30 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> Get([FromRoute] Guid userId)
         {
             var commandResult = await _mediator.Send(new GetUserPublicQuery { Id = userId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Send Otp SMS
+        /// </summary>
+        [HttpPost("send-otp-sms-check-user")]
+        [ProducesResponseType(typeof(MethodResult<SaveOTPForUserEventHaNoiCommandModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendOtpSMS([FromBody] SendOtpForPhoneCheckUserCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Verify Otp SMS
+        /// </summary>
+        [HttpPost("verify-otp-sms-check-user")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> VerifyOtpSMS([FromBody] VerifyOtpToSMSCheckUserCommand command)
+        {
+            MethodResult<Guid> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

@@ -305,30 +305,6 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
-        /// Send Otp SMS
-        /// </summary>
-        [HttpPost("send-otp-sms-check-user")]
-        [ProducesResponseType(typeof(MethodResult<SaveOTPForUserEventHaNoiCommandModel>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> SendOtpSMS([FromBody] SendOtpForPhoneCheckUserCommand command)
-        {
-            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
-        /// Verify Otp SMS
-        /// </summary>
-        [HttpPost("verify-otp-sms-check-user")]
-        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> VerifyOtpSMS([FromBody] VerifyOtpToSMSCheckUserCommand command)
-        {
-            MethodResult<Guid> commandResult = await _mediator.Send(command).ConfigureAwait(false);
-            return commandResult.GetActionResult();
-        }
-
-        /// <summary>
         /// Verify Otp SMS
         /// </summary>
         [HttpPost("verify-otp-sms")]
