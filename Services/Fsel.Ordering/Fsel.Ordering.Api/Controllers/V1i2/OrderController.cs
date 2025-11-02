@@ -45,7 +45,7 @@ namespace Fsel.Ordering.Api.Controllers.V1i2
         /// <summary>
         /// Create Order By UserId
         /// </summary>
-        [HttpPost]
+        [HttpPost("by-userid")]
         [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateOrderByUserIdCommand command)
