@@ -3,7 +3,6 @@
 
 using System.Globalization;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Transactions;
@@ -11,8 +10,7 @@ using Fsel.Common.Constants;
 using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
-using Fsel.Core.Extensions;
-using Fsel.Identity.Application.Attributes;
+using Fsel.Core.Applications.Attributes;
 using Fsel.Identity.Application.Commands.UserDeletionCmd;
 using Fsel.Identity.Application.Handlers.Implementations;
 using Fsel.Identity.Application.Handlers.Interfaces;
@@ -39,11 +37,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
-using PhoneNumbers;
 using static IdentityServer4.IdentityServerConstants;
+using Fsel.Identity.Application.Attributes;
 
 namespace Fsel.Identity.Authentication.OpenId.Account
 {

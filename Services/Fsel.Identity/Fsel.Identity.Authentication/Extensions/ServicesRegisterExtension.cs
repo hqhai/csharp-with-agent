@@ -5,12 +5,9 @@ namespace Fsel.Identity.Authentication.Extensions
 {
     using System;
     using System.Globalization;
-    using System.IdentityModel.Tokens.Jwt;
     using System.Reflection;
     using System.Security.Claims;
-    using System.Security.Cryptography;
     using System.Text.Json;
-    using AspNet.Security.OAuth.Apple;
     using Fsel.Authentication.Infrastructure.Configs;
     using Fsel.Common.Constants;
     using Fsel.Core.Extensions;
@@ -31,13 +28,12 @@ namespace Fsel.Identity.Authentication.Extensions
     using Fsel.Identity.Infrastructure;
     using Fsel.Identity.Infrastructure.Providers;
     using Fsel.Identity.Infrastructure.Repositories;
+    using Fsel.Core.Middlewares.Authentication;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
-    using IdentityServer4;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authentication.OAuth;
-    using Microsoft.AspNetCore.Authentication.OpenIdConnect;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Http.Extensions;
     using Microsoft.AspNetCore.Identity;
@@ -45,14 +41,7 @@ namespace Fsel.Identity.Authentication.Extensions
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.FileProviders;
-    using Microsoft.Extensions.FileProviders.Physical;
-    using Microsoft.IdentityModel.JsonWebTokens;
-    using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-    using Microsoft.IdentityModel.Tokens;
-    using Org.BouncyCastle.Crypto.Parameters;
-    using Org.BouncyCastle.OpenSsl;
-    using Org.BouncyCastle.Security;
-    using Refit;
+    using Microsoft.Extensions.Options;
     using static IdentityServer4.IdentityServerConstants;
 
     public static class ServicesRegisterExtension
@@ -176,8 +165,13 @@ namespace Fsel.Identity.Authentication.Extensions
                 options.EnableTokenCleanup = true;
                 options.TokenCleanupInterval = 3600;
             })
-            .AddDeveloperSigningCredential()
-            .AddProfileService<UserProfileService>();
+                .AddDeveloperSigningCredential()
+                .AddProfileService<UserProfileService>();
+
+            // Post-configure cookie options với tenant-aware events
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<TenantAwareCookieEvents>();
+            builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, TenantAwareCookieOptionsPostConfigure>();
 
             builder.Services.AddAuthentication()
                 .AddGoogle(options =>

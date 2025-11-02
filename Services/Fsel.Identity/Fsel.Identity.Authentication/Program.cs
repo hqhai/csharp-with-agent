@@ -6,7 +6,7 @@ using Fsel.Common.Constants;
 using Fsel.Core.Entities;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Events;
-using Fsel.Identity.Application.Middlewares;
+using Fsel.Core.Middlewares;
 using Fsel.Identity.Application.Queries.IntegrationQuery;
 using Fsel.Identity.Authentication.Extensions;
 using Fsel.Identity.Domain.Entities;

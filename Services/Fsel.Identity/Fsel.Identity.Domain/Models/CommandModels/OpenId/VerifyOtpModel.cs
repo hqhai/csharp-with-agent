@@ -2,6 +2,8 @@
 
 namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 {
+    using Fsel.Core.Base.Interfaces;
+
     public class VerifyOtpModel : IRequestBodyTenantAware
     {
         //[Required(ErrorMessage = "i18n_OTP_cannot_be_empty")]

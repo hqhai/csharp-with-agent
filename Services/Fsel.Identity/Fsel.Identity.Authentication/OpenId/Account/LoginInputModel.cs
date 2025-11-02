@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
-using Fsel.Identity.Domain.Models.CommandModels.OpenId;
+using Fsel.Core.Base.Interfaces;
 
 namespace Fsel.Identity.Authentication.OpenId.Account
 {
