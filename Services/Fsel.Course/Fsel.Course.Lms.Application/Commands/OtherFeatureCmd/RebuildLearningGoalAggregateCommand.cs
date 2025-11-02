@@ -381,7 +381,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
         private async Task RebuildStudentLearningProgressAsync(IList<CourseGoalModel> courseGoals, CancellationToken cancellationToken)
         {
-            var nowVn = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+            var nowVn = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
 
             var aggAndWeekly = await FetchActiveAggWeeklyPairsAsync(cancellationToken);
 
@@ -446,7 +446,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, weekly.ProgressStatus);
                     ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(totalDone, totalPlan);
                 }
-                UpdateBehindStreak(ag, weeklies);
+                UpdateBehindStreak(ag, nowVn, weeklies);
             }
 
             // 6) Lưu
@@ -460,7 +460,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             await EnsureWeeklySummariesForAggregatesAsync(aggregates, students, courseGoals, doneLessonResultsMap, cancellationToken);
         }
 
-        private static void UpdateBehindStreak(StudentGoalAggregate agg, IReadOnlyList<StudentGoalSummary> weeklySummaries)
+        private static void UpdateBehindStreak(StudentGoalAggregate agg, DateTime nowVn, IReadOnlyList<StudentGoalSummary> weeklySummaries)
         {
             if (weeklySummaries == null || weeklySummaries.Count == 0)
             {
@@ -471,7 +471,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             // Sắp xếp theo mốc thời gian để chắc chắn tuần cuối là mới nhất.
             // Ưu tiên EndDate, fallback StartDate/CreatedDate.
             var ordered = weeklySummaries
-                .Where(w => w != null)
+                .Where(w => w != null && w.EndDate < nowVn)
                 .OrderBy(w => w.EndDate != default ? w.EndDate
                          : w.StartDate != default ? w.StartDate
                          : w.CreatedDate)
@@ -512,7 +512,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         {
             return weeklies
                 .GroupBy(s => s.StudentGoalAggregateId)
-                .Select(g => g.OrderByDescending(x => x.CreatedDate).First())
+                .Select(g => g.OrderByDescending(x => x.StartDate).First())
                 .ToDictionary(x => x.StudentGoalAggregateId, x => x);
         }
 
