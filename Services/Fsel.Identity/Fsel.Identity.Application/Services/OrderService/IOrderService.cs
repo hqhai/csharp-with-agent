@@ -69,5 +69,8 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/v1/campus/delete-order-of-students-campus")]
         Task<IApiResponse<MethodResult<bool>>> DeleteOrderOfStudentsCampus([Body] DeleteOrderOfStudentsCampusCommandModel command);
+
+        [Get("/v1/order/current-by-userid")]
+        Task<IApiResponse<MethodResult<OrderModel>>> GetCurrentByUserIdAsync([Query] GetCurrentOrderByUserIdQueryModel query);
     }
 }

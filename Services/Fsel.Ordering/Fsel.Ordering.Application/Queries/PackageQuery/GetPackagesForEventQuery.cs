@@ -2,9 +2,6 @@
 
 namespace Fsel.Ordering.Application.Queries.PackageQuery
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
@@ -17,18 +14,19 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetPackagesQuery : IRequest<MethodResult<List<PackageModel>>>
+    public class GetPackagesForEventQuery : IRequest<MethodResult<List<PackageModel>>>
     {
+        public Guid? EventId { get; set; }
         public bool? IsDefault { get; set; }
     }
 
-    public class GetPackagesQueryHandler : IRequestHandler<GetPackagesQuery, MethodResult<List<PackageModel>>>
+    public class GetPackagesForEventQueryHandler : IRequestHandler<GetPackagesForEventQuery, MethodResult<List<PackageModel>>>
     {
         private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
 
-        public GetPackagesQueryHandler(IPackageRepository packageRepository,
+        public GetPackagesForEventQueryHandler(IPackageRepository packageRepository,
                                        IMapper mapper,
                                        IMediator mediator)
         {
@@ -37,7 +35,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
             _mediator = mediator;
         }
 
-        public async Task<MethodResult<List<PackageModel>>> Handle(GetPackagesQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<List<PackageModel>>> Handle(GetPackagesForEventQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<List<PackageModel>>();
@@ -46,7 +44,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            var eventResult = await _mediator.Send(new GetCurrentEventQuery { IsDefault = request.IsDefault }, cancellationToken).ConfigureAwait(false);
+            var eventResult = await _mediator.Send(new GetCurrentEventQuery { IsDefault = request.IsDefault, EventId = request.EventId }, cancellationToken).ConfigureAwait(false);
             var @event = eventResult.Result;
 
             if (@event == null || @event.PackageEvents == null)
@@ -56,7 +54,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
             }
 
             var eventModel = _mapper.Map<EventModel>(@event);
-            var packages = await _packageRepository.Queryable.ToListAsync(cancellationToken);
+            var packages = await _packageRepository.Queryable.Where(x => x.Status == EnumPackageStatus.Active).ToListAsync(cancellationToken);
 
             @event.PackageEvents = @event.PackageEvents.Where(p => p.Status == EnumEventPackageStatus.Active).ToList();
 

@@ -55,6 +55,30 @@ namespace Fsel.Identity.Authentication.Controllers
         }
 
         /// <summary>
+        /// Sign Up
+        /// </summary>
+        [HttpPost("sign-up-sms")]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SignUp([FromBody] SignUpSMSCommand command)
+        {
+            MethodResult<UserModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Confirm OTP SignUp
+        /// </summary>
+        [HttpPost("confirm-otp-sign-up-sms")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ConfirmOTPSignUp([FromBody] ConFirmOtpSignUpSMSCommand command)
+        {
+            MethodResult<Guid> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Forgot Password
         /// </summary>
         [HttpPost("forgot-password")]

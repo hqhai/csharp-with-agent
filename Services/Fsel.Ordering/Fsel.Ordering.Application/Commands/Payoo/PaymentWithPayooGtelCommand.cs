@@ -3,8 +3,6 @@
 namespace Fsel.Ordering.Application.Commands.Payoo
 {
     using System.Globalization;
-    using System.Threading;
-    using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -20,12 +18,12 @@ namespace Fsel.Ordering.Application.Commands.Payoo
     using Fsel.Shared.Helpers;
     using MediatR;
 
-    public class PaymentWithPayooCommand : IRequest<MethodResult<PayooModel>>
+    public class PaymentWithPayooGtelCommand : IRequest<MethodResult<PayooModel>>
     {
         public Guid OrderId { get; set; }
     }
 
-    public class PaymentWithPayooCommandHandler : IRequestHandler<PaymentWithPayooCommand, MethodResult<PayooModel>>
+    public class PaymentWithPayooGtelCommandHandler : IRequestHandler<PaymentWithPayooGtelCommand, MethodResult<PayooModel>>
     {
         private readonly IPayooService _payooService;
         private readonly AppSetting _appSetting;
@@ -34,7 +32,12 @@ namespace Fsel.Ordering.Application.Commands.Payoo
         private readonly AuthContext _authContext;
         private readonly IOrderTransactionRepository _orderTransactionRepository;
 
-        public PaymentWithPayooCommandHandler(IPayooService payooService, AppSetting appSetting, IOrderRepository orderRepository, IUserService userService, AuthContext authContext, IOrderTransactionRepository orderTransactionRepository)
+        public PaymentWithPayooGtelCommandHandler(IPayooService payooService,
+            AppSetting appSetting,
+            IOrderRepository orderRepository,
+            IUserService userService,
+            AuthContext authContext,
+            IOrderTransactionRepository orderTransactionRepository)
         {
             _payooService = payooService;
             _appSetting = appSetting;
@@ -44,7 +47,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             _orderTransactionRepository = orderTransactionRepository;
         }
 
-        public async Task<MethodResult<PayooModel>> Handle(PaymentWithPayooCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PayooModel>> Handle(PaymentWithPayooGtelCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PayooModel>();
@@ -68,22 +71,27 @@ namespace Fsel.Ordering.Application.Commands.Payoo
 
             await _orderTransactionRepository.ExecuteTransactionAsync(async () =>
             {
-                var orderTransaction = new OrderTransaction() { Type = EnumOrderTransactionType.Payoo, Status = EnumOrderTransactionStatus.Fail, OrderId = order.Id };
+                var orderTransaction = new OrderTransaction()
+                {
+                    Type = EnumOrderTransactionType.Payoo,
+                    Status = EnumOrderTransactionStatus.Fail,
+                    OrderId = order.Id
+                };
                 orderTransaction = _orderTransactionRepository.Add(orderTransaction);
                 await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var orderDescription = string.Format(CultureInfo.InvariantCulture, PaymentSetting.Payoo.OrderDescription, order.Code);
+                var orderDescription = string.Format(CultureInfo.InvariantCulture, PaymentSetting.Payoo.OrderGtelDescription, order.Code);
 
                 var param = new
                 {
-                    UserName = _appSetting.PayooConfig?.Username,
-                    ShopId = _appSetting.PayooConfig?.ShopId,
-                    ShopTitle = _appSetting.PayooConfig?.ShopTitle,
-                    ShopDomain = _appSetting.PayooConfig?.ShopDomain,
-                    ShopBackUrl = _appSetting.PayooConfig?.ShopBackUrl,
+                    UserName = _appSetting.PayooGtelConfig?.Username,
+                    ShopId = _appSetting.PayooGtelConfig?.ShopId,
+                    ShopTitle = _appSetting.PayooGtelConfig?.ShopTitle,
+                    ShopDomain = _appSetting.PayooGtelConfig?.ShopDomain,
+                    ShopBackUrl = _appSetting.PayooGtelConfig?.ShopBackUrl,
                     OrderCashAmount = order.TotalPrice,
                     OrderDescription = orderDescription,
-                    NotifyUrl = _appSetting.PayooConfig?.NotifyUrl,
+                    NotifyUrl = _appSetting.PayooGtelConfig?.NotifyUrl,
                     ValidityTime = validityTime,
                     OrderCode = order.Code,
                     CustomerName = student?.Human?.FullName,
@@ -112,12 +120,12 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 orderTransaction = _orderTransactionRepository.Update(orderTransaction);
                 await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                var checkSum = EncodeHelper.GenerateChecksum(_appSetting.PayooConfig?.Key ?? string.Empty, body);
+                var checkSum = EncodeHelper.GenerateChecksum(_appSetting.PayooGtelConfig?.Key ?? string.Empty, body);
                 var payooResult = await _payooService.Create(new CreatePayooModel
                 {
                     Data = body,
                     CheckSum = checkSum,
-                    Refer = _appSetting.PayooConfig?.ShopDomain,
+                    Refer = _appSetting.PayooGtelConfig?.ShopDomain,
                 });
 
                 methodResult.Result = payooResult.Content;
