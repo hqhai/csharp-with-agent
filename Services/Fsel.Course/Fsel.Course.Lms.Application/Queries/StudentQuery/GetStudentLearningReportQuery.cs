@@ -68,6 +68,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             });
 
             var courseComplete = courseCompletes.FirstOrDefault();
+            var lastDate = featureAccessTime?.LastVisited;
             methodResult.Result = new StudentCourseProgressModel
             {
                 StudentId = student.Id,
@@ -78,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 IsCourseCompleted = courseResult?.Status == EnumResultStatus.Done,
                 StartDate = courseResult != null && courseResult.ProcessDate.HasValue ? courseResult.ProcessDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : null,
                 TotalActiveDuration = featureAccessTime?.AccessTime,
-                LastAccessedDate = featureAccessTime?.LastVisited
+                LastAccessedDate = lastDate.HasValue ? lastDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : default,
             };
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
