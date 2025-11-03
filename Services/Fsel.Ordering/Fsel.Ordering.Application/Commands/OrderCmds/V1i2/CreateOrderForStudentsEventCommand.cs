@@ -27,17 +27,19 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
         private readonly IPackageRepository _packageRepository;
         private readonly IUserService _userService;
         private readonly IEventRepository _eventRepository;
+        private readonly IPackageEventRepository _packageEventRepository;
 
         private const string Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
         private const string Digits = "0123456789";
 
-        public CreateOrderForStudentsEventCommandHandler(IOrderRepository orderRepository, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository)
+        public CreateOrderForStudentsEventCommandHandler(IOrderRepository orderRepository, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository, IPackageEventRepository packageEventRepository)
         {
             _orderRepository = orderRepository;
             _packageRepository = packageRepository;
             _userService = userService;
             _eventRepository = eventRepository;
+            _packageEventRepository = packageEventRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(CreateOrderForStudentsEventCommand request, CancellationToken cancellationToken)
@@ -45,25 +47,23 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            var package = await _packageRepository.Queryable.OrderBy(p => p.MonthNumber).FirstOrDefaultAsync(cancellationToken);
+            var query = await (from e in _eventRepository.Queryable
+                               join pe in _packageEventRepository.Queryable on e.Id equals pe.EventId
+                               join p in _packageRepository.Queryable on pe.PackageId equals p.Id
+                               select new
+                               {
+                                   Event = e,
+                                   PackageEvent = pe,
+                                   Package = p,
+                               }).ToListAsync(cancellationToken);
 
-            if (package == null)
+            if (query == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(package));
+                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(query));
                 return methodResult;
             }
 
-            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-
-            var @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.IsDefault, cancellationToken);
-
-            if (@event == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(@event));
-                return methodResult;
-            }
-
-            var packageEvent = @event.PackageEvents.FirstOrDefault(p => p.PackageId == package.Id);
+            var packageEvent = query.OrderBy(p => p.Package.MonthNumber).ThenBy(p => p.PackageEvent.CreatedDate).FirstOrDefault()?.PackageEvent;
 
             if (packageEvent == null)
             {
