@@ -248,7 +248,14 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
                 emailsAlreadyExist.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Email.ToLower().Trim() == user));
+                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty())
+                                                  .FirstOrDefault
+                                                  (x =>
+                                                  !string.IsNullOrEmpty(user)
+                                                  &&
+                                                  x.Email?.ToLower(CultureInfo.InvariantCulture).Trim() == user.ToLower(CultureInfo.InvariantCulture).Trim()
+                                                  );
+
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
@@ -258,7 +265,13 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
                 phoneNumbersAlreadyExist.ForEach(user =>
                 {
-                    var dataByPhoneNumber = datas.Values.Where(x => !x.PhoneNumber.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.PhoneNumber.ToLower().Trim() == user));
+                    var dataByPhoneNumber = datas.Values.Where(x => !x.PhoneNumber.IsNullOrEmpty())
+                                                        .FirstOrDefault
+                                                        (x =>
+                                                        !string.IsNullOrEmpty(user)
+                                                        && x.PhoneNumber?.Trim() == user.Trim()
+                                                        );
+
                     if (dataByPhoneNumber != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByPhoneNumber).Key;

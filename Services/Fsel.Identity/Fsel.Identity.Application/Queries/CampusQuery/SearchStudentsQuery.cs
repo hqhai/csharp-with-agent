@@ -82,7 +82,8 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                             Gender = h.Gender,
                             School = s.School,
                             Birthday = h.Birthday,
-                            DefaultPassword = u.DefaultPassword
+                            DefaultPassword = u.DefaultPassword,
+                            StudentCode = h.Code
                         };
 
             if (!string.IsNullOrEmpty(request.Keyword))
