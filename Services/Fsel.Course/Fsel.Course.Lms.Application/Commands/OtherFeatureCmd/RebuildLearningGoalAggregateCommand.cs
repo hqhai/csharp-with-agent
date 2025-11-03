@@ -62,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
             var baseQuery = new BaseQueryModel
             {
-                Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = "CourseId", Operator = EnumFilterOperator.NotEmpty } },
+                Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = nameof(StudentModel.SchoolClassId), Operator = EnumFilterOperator.NotEmpty } },
             };
             baseQuery.SetIsQueryAll(true);
             var studentResults = await _userService.ExecuteListQueryAsync(baseQuery);
@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
             var totalLessonsPerCourse = await LoadCourseLessonCountsAsync(courseIds, cancellationToken);
 
-            var courseResults = studentsWithoutCourse.Select(s => new CourseResultModel
+            var courseResults = studentsWithoutCourse.Where(x => x.CourseId.HasValue && x.CourseId != Guid.Empty).Select(s => new CourseResultModel
             {
                 StudentId = s.Id,
                 CourseId = s.CourseId ?? default
@@ -115,9 +115,30 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            await _studentLearningGoalAggregateRepository.AddList(aggregatesToInsert);
-            await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-            await EnsureWeeklySummariesForAggregatesAsync(aggregatesToInsert, courseGoals, doneLessonResultsMap, cancellationToken);
+            var studentCourseKeys = studentsWithoutCourse.Where(x => x.CourseId.HasValue && x.CourseId != Guid.Empty).Select(s => new
+            {
+                StudentId = s.Id,
+                CourseId = s.CourseId ?? default
+            }).ToList();
+
+            var existingKeys = await _studentLearningGoalAggregateRepository.Queryable
+                       .AsNoTracking()
+                       .WhereBulkContains(studentCourseKeys, new[] { "StudentId", "CourseId" })
+                       .Select(a => new { a.StudentId, a.CourseId })
+                       .ToListAsync(cancellationToken)
+                       .ConfigureAwait(false);
+
+            var existingKeySet = existingKeys.Select(k => (k.StudentId, k.CourseId))
+                                .ToHashSet();
+
+            aggregatesToInsert = aggregatesToInsert.Where(a => !existingKeySet.Contains((a.StudentId, a.CourseId)))
+                                             .ToList();
+            if (aggregatesToInsert.Any())
+            {
+                await _studentLearningGoalAggregateRepository.AddList(aggregatesToInsert);
+                await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await EnsureWeeklySummariesForAggregatesAsync(aggregatesToInsert, courseGoals, doneLessonResultsMap, cancellationToken);
+            }
         }
 
         private static List<StudentGoalAggregate> BuildAggregates(
