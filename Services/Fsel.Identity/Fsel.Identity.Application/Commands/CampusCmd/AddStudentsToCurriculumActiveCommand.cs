@@ -19,7 +19,6 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
     using Fsel.Identity.Domain.Models;
     using Fsel.Identity.Domain.Models.CommandModels.Campus;
     using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using Kros.Extensions;
     using MediatR;
@@ -28,12 +27,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
 
-    public class AddStudentsToCurriculumCommand : BaseImportCommandModel, IRequest<MethodResult<AddStudentIntoSchoolClassCommandModel>>
+    public class AddStudentsToCurriculumActiveCommand : BaseImportCommandModel, IRequest<MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
         public Guid CurriculumId { get; set; }
     }
 
-    public class AddStudentsToCurriculumCommandHandler : IRequestHandler<AddStudentsToCurriculumCommand, MethodResult<AddStudentIntoSchoolClassCommandModel>>
+    public class AddStudentsToCurriculumActiveCommandHandler : IRequestHandler<AddStudentsToCurriculumActiveCommand, MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
         private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
@@ -48,9 +47,8 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
         private const string MismatchedData = "Dữ liệu không trùng khớp";
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
         private const string DataAlreadyExist = "Học sinh đã được thêm vào giáo trình này rồi";
-        private const string CurriculumIsActive = "Giáo trình đang diễn ra";
 
-        public AddStudentsToCurriculumCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService)
+        public AddStudentsToCurriculumActiveCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService)
         {
             _humanRepository = humanRepository;
             _studentRepository = studentRepository;
@@ -58,7 +56,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             _lmsCourseService = lmsCourseService;
         }
 
-        public async Task<MethodResult<AddStudentIntoSchoolClassCommandModel>> Handle(AddStudentsToCurriculumCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<AddStudentIntoSchoolClassCommandModel>> Handle(AddStudentsToCurriculumActiveCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<AddStudentIntoSchoolClassCommandModel>();
@@ -71,9 +69,9 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
             var curriculumResult = await _lmsCourseService.GetCurriculumById(new GetCurriculumByIdQueryModel() { Id = request.CurriculumId });
             var curriculum = curriculumResult.Content?.Result;
-            if (curriculum == null || curriculum.CurriculumStatus == EnumCurriculumStatus.Progress)
+            if (curriculum == null)
             {
-                methodResult.AddErrorBadRequest(CurriculumIsActive);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(curriculum));
                 return methodResult;
             }
 
@@ -208,12 +206,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
                 usernamesDoesNotExist.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty())
-                                                  .FirstOrDefault
-                                                  (x =>
-                                                  !string.IsNullOrEmpty(user)
-                                                  && x.Username?.ToLower(CultureInfo.InvariantCulture).Trim() == user.ToLower(CultureInfo.InvariantCulture).Trim()
-                                                  );
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.ToLower(CultureInfo.CurrentCulture)));
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
@@ -223,13 +216,8 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
                 query.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty())
-                                                  .FirstOrDefault
-                                                  (x =>
-                                                  !string.IsNullOrEmpty(user.User.UserName)
-                                                  && x.Username?.ToLower(CultureInfo.InvariantCulture).Trim() == user.User.UserName.ToLower(CultureInfo.InvariantCulture).Trim());
-
-                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.InvariantCulture).Trim() != user.User.FullName?.ToLower(CultureInfo.InvariantCulture).Trim())
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user.User.UserName) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.User.UserName.ToLower(CultureInfo.CurrentCulture)));
+                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.CurrentCulture) != user.User.FullName?.ToLower(CultureInfo.CurrentCulture))
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Username), Message = MismatchedData });
