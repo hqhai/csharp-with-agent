@@ -3,7 +3,6 @@
 namespace Fsel.Course.Domain.Models.EntityModels
 {
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Enums;
     using Fsel.Shared.Enums;
 
     public class StudentGoalAggregateModel : BaseModel
@@ -17,8 +16,11 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int CompletedLessons { get; set; }
         public int ConsecutiveBehindWeeks { get; set; }
         public EnumCombinedProgress? CombinedProgress { get; set; }
+        public EnumProgressStatus ProgressStatus { get; set; }
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public bool IsActive { get; set; }
+        public Guid? UserId { get; set; }
         public Guid StudentId { get; set; }
         public Guid CourseId { get; set; }
     }

@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 {
     using System.Linq.Dynamic.Core;
     using System.Threading;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -121,15 +122,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private async Task UpdateStudentAggregateAsync(LessonResult lessonResult)
         {
             var todayUtc = DateTime.UtcNow.Date;
-            var studentAggregate = await _studentGoalAggregateRepository.Queryable
+            var studentAggregate = await _studentGoalAggregateRepository.Queryable.Include(x => x.StudentGoalSummaries)
                                     .FirstOrDefaultAsync(x => x.StudentId == lessonResult.StudentId && x.CourseId == lessonResult.CourseId);
             if (studentAggregate == null)
             {
                 return;
             }
-            var studentSummary = await _studentGoalSummaryRepository.Queryable
+            var studentSummary = studentAggregate.StudentGoalSummaries
                                     .Where(x => x.StartDate.Date <= todayUtc.Date && x.EndDate.Date >= todayUtc.Date)
-                                    .FirstOrDefaultAsync(x => x.StudentGoalAggregateId == studentAggregate.Id);
+                                    .FirstOrDefault();
+
             if (studentSummary == null)
             {
                 return;
@@ -144,8 +146,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CompletedLessons, c.LastCompletedAt, c.ProgressStatus };
             });
 
+            // các tuần trước tuần hiện tại
+            var pastSummaries = studentAggregate.StudentGoalSummaries
+                                                .Where(x => x.EndDate.Date < studentSummary.StartDate.Date)
+                                                .ToList();
+
+            var totalDone = pastSummaries.Sum(x => x.CompletedLessons) + studentSummary.CompletedLessons;
+            var totalPlan = pastSummaries.Sum(x => x.LessonsPerWeek) + studentSummary.LessonsPerWeek;
+
             studentAggregate.TotalCompletedLessons += 1;
-            studentAggregate.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(studentAggregate.TotalCompletedLessons, studentAggregate.TotalTargetLessons);
+            studentAggregate.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, studentSummary.ProgressStatus);
             await _studentGoalAggregateRepository.BulkUpdateList(new List<StudentGoalAggregate> { studentAggregate }, bulk =>
             {
                 bulk.ColumnInputExpression = c => new { c.TotalCompletedLessons, c.CombinedProgress };

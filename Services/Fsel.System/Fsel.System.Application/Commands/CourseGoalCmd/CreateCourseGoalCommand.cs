@@ -17,6 +17,7 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using NetTopologySuite.Index.HPRtree;
 
     public class CreateCourseGoalCommand : CreateCourseGoalCommandModel, IRequest<MethodResult<IList<CourseGoalModel>>>
     {
@@ -40,9 +41,11 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
         public async Task<MethodResult<IList<CourseGoalModel>>> Handle(CreateCourseGoalCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var isAdmin = _authContext.Roles != null && _authContext.Roles.Contains(EnumRole.Admin.ToString());
-            var isRequiredAdmin = new List<EnumCourseGoalCategory> { EnumCourseGoalCategory.All, EnumCourseGoalCategory.All }.Contains(request.GoalCategory);
-            if (!isAdmin && isRequiredAdmin)
+            var targetRoles = new List<string> { EnumRole.Admin.ToString(), EnumRole.DepartmentAdmin.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+
+            var isRequiredAdmin = new List<EnumCourseGoalCategory> { EnumCourseGoalCategory.All, EnumCourseGoalCategory.DefaultExcludeSchoolAndClass }.Contains(request.GoalCategory);
+            if (!hasMatchedRole && isRequiredAdmin)
             {
                 var methodResult = new MethodResult<IList<CourseGoalModel>>();
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(_authContext.Roles), request.GoalCategory);
@@ -70,10 +73,21 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
             if (courseGoal == null)
             {
                 courseGoal = _mapper.Map<CourseGoal>(request);
+                courseGoal.Name = courseGoal.GoalCategory.GetDescription();
                 if (!courseGoal.IsValid())
                 {
                     methodResult.AddErrorBadRequest(courseGoal.ErrorMessages);
                     return methodResult;
+                }
+                foreach (var item in courseGoal.CourseGoalConfigs)
+                {
+                    var courseGoalConfig = _mapper.Map<CourseGoalConfig>(item);
+                    if (!courseGoalConfig.IsValid())
+                    {
+                        methodResult.AddErrorBadRequest(courseGoalConfig.ErrorMessages);
+                        return methodResult;
+                    }
+                    item.DisplayOrder = courseGoal.CourseGoalConfigs.ToList().IndexOf(item);
                 }
                 _courseGoalRepository.Add(courseGoal);
             }
@@ -99,6 +113,7 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                         courseGoalConfig = _mapper.Map<CourseGoalConfig>(item);
                         courseGoal.CourseGoalConfigs.Add(courseGoalConfig);
                     }
+                    courseGoalConfig.DisplayOrder = request.CourseGoalConfigs.IndexOf(item);
                     if (!courseGoalConfig.IsValid())
                     {
                         methodResult.AddErrorBadRequest(courseGoalConfig.ErrorMessages);
@@ -134,26 +149,12 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                                                       .ToListAsync();
             foreach (var courseGoal in courseGoals)
             {
-                var courseGoalConfigs = courseGoal.CourseGoalConfigs
-                                                  .ExceptBy(request.CourseGoalConfigs.Select(x => x.CourseId), x => x.CourseId)
-                                                  .ToList();
-
-                foreach (var courseGoalConfig in courseGoalConfigs)
+                foreach (var courseGoalConfig in courseGoal.CourseGoalConfigs)
                 {
-                    courseGoal.CourseGoalConfigs.Remove(courseGoalConfig);
-                }
-
-                foreach (var item in request.CourseGoalConfigs)
-                {
-                    var courseGoalConfig = courseGoal.CourseGoalConfigs.FirstOrDefault(x => x.CourseId == item.CourseId);
-                    if (courseGoalConfig != null)
+                    var courseGoalConfigRequest = request.CourseGoalConfigs.FirstOrDefault(x => x.CourseId == courseGoalConfig.CourseId);
+                    if (courseGoalConfigRequest != null)
                     {
-                        courseGoalConfig.LessonsPerWeek = item.LessonsPerWeek;
-                    }
-                    else
-                    {
-                        courseGoalConfig = _mapper.Map<CourseGoalConfig>(item);
-                        courseGoal.CourseGoalConfigs.Add(courseGoalConfig);
+                        courseGoalConfig.LessonsPerWeek = courseGoalConfigRequest.LessonsPerWeek;
                     }
                 }
             }
@@ -213,6 +214,7 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                             methodResult.AddErrorBadRequest(courseGoalConfig.ErrorMessages);
                             return methodResult;
                         }
+                        courseGoalConfig.DisplayOrder = request.CourseGoalConfigs.IndexOf(item);
                     }
 
                     toUpdate.Add(entity);
@@ -229,6 +231,16 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                         return methodResult;
                     }
 
+                    foreach (var item in entity.CourseGoalConfigs)
+                    {
+                        var courseGoalConfig = _mapper.Map<CourseGoalConfig>(item);
+                        if (!courseGoalConfig.IsValid())
+                        {
+                            methodResult.AddErrorBadRequest(courseGoalConfig.ErrorMessages);
+                            return methodResult;
+                        }
+                        item.DisplayOrder = entity.CourseGoalConfigs.ToList().IndexOf(item);
+                    }
                     toAdd.Add(entity);
                 }
             }

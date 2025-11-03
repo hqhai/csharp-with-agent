@@ -59,7 +59,7 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
                     x.CourseName = course.Name;
                 }
             });
-            courseGoalModel.CourseGoalConfigs = courseGoalModel.CourseGoalConfigs.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).ToList();
+            courseGoalModel.CourseGoalConfigs = courseGoalModel.CourseGoalConfigs.OrderBy(x => x.DisplayOrder).ToList();
             methodResult.Result = courseGoalModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
