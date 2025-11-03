@@ -158,8 +158,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 {
                     continue;
                 }
-                var level = cr.CourseLevel ?? default;
-                var type = cr.CourseLevel.GetEnumCourseType();
+                var level = cr.CourseLevel ?? student.CourseLevel ?? default;
+                var type = level.GetEnumCourseType();
 
                 // Chọn CourseGoal đúng ưu tiên (đã có helper GetCourseGoal* của bạn)
                 var courseGoal = GetCourseGoal(courseGoals, level, type, student.SchoolClassId); // hoặc GetCourseGoalOrNull(...)

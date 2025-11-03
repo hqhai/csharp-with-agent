@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("summary")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentGoalSummaryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new string[] { StudentManagement.View, StudentCampusManagement.View })]
         public async Task<IActionResult> Get([FromQuery] SearchStudentGoalSummaryQuery query)
         {
             MethodResult<PagingItemsModel<StudentGoalSummaryModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
