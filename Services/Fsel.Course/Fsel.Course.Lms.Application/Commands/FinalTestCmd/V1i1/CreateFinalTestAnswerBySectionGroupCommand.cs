@@ -284,7 +284,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
         {
             var skillScores = sectionGroupResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).OrderBy(x => x.Skill).ToList();
             var token = await GetTokenConfig(courseType);
-
+            finalTestResult.CompletionDate = DateTime.UtcNow;
             finalTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
             finalTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
             finalTestResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);

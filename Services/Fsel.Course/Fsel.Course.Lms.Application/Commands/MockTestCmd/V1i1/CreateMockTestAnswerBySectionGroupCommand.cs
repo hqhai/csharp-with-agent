@@ -296,6 +296,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.MockTestResultId == mockTestResult.Id && s.CreatedDate >= mockTestResult.CreatedDate).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             if (sectionGroupResults != null && (isSkillTest || sectionGroupResults.Count == numberOfDone) && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
             {
+                mockTestResult.CompletionDate = DateTime.UtcNow;
                 mockTestResult.WorkingTime = sectionGroupResults.Sum(x => x.WorkingTime);
                 mockTestResult.HighestStreak = sectionGroupResults.Max(x => x.HighestStreak);
                 mockTestResult = GetMockTestResult(sectionGroupResults, mockTestResult);

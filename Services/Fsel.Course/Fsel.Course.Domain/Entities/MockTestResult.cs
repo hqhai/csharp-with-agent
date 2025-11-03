@@ -26,7 +26,9 @@ namespace Fsel.Course.Domain.Entities
 
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
-
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
         public DateTime? GradingStartDate { get; set; }
         public bool IsViewed { get; set; }
         public ICollection<MockTestAnswer> MockTestAnswers { get; set; } = new List<MockTestAnswer>();

@@ -1164,6 +1164,18 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             Index = 33,
                             IsDeleted = false,
                             Name = "Survey management"
+                        },
+                        new
+                        {
+                            Id = new Guid("b40fbc8d-355c-47f2-ad01-cc5655fcd66a"),
+                            Category = "LMSAdmin",
+                            ConfigStr = "{\"id\":28,\"code_title\":\"Quản lý tiến độ học sinh tuần\",\"link\":\"/weekly-goal-progress-management\",\"icon\":\"Star.png\",\"parentId\":0,\"code\":\"\",\"permission\":\"Admin,CSO,AdminSchool\",\"children\":[]}",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Index = 33,
+                            IsDeleted = false,
+                            Name = "Weekly Student Progress Management"
                         });
                 });
 
@@ -2575,6 +2587,54 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             Name = "Xuất dữ liệu khảo sát",
                             PermissionGroupId = new Guid("d99eb96a-55dd-4fed-b755-9f33fe52f0e7"),
                             Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("d3d34bdf-b472-4a2c-b7c3-b6f763153efb"),
+                            ClaimValue = "StudentProgressWeeklyManagement.Add",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Thêm",
+                            PermissionGroupId = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("f7df2ab2-68c8-42cb-9ca8-e9f9945e3de5"),
+                            ClaimValue = "StudentProgressWeeklyManagement.Update",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Sửa",
+                            PermissionGroupId = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("4042a45a-8997-445e-aec8-e5dacc1bed25"),
+                            ClaimValue = "StudentProgressWeeklyManagement.Delete",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xóa",
+                            PermissionGroupId = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("ba9920d2-e1bd-4e6a-938a-58470a4cdf89"),
+                            ClaimValue = "StudentProgressWeeklyManagement.View",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            Name = "Xem",
+                            PermissionGroupId = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            Status = true
                         });
                 });
 
@@ -3001,6 +3061,18 @@ namespace Fsel.Identity.Infrastructure.Migrations
                             IsDeleted = false,
                             MenuId = new Guid("49dece94-b2de-4271-88ef-72f3e2461a2f"),
                             Name = "Quản lý khảo sát",
+                            Status = true
+                        },
+                        new
+                        {
+                            Id = new Guid("bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5"),
+                            ClaimType = "StudentProgressWeeklyManagement",
+                            CreatedDate = new DateTime(2025, 9, 24, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            CreatedFullName = "",
+                            CreatedUserId = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsDeleted = false,
+                            MenuId = new Guid("b40fbc8d-355c-47f2-ad01-cc5655fcd66a"),
+                            Name = "Quản lý tiến độ học sinh tuần",
                             Status = true
                         });
                 });

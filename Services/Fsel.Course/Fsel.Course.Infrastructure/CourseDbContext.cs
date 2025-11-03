@@ -100,6 +100,8 @@ namespace Fsel.Course.Infrastructure
         public DbSet<HomeWorkExtraPracticeResult> HomeWorkExtraPracticeResults { get; set; }
         public DbSet<HomeWorkRetry> HomeWorkRetries { get; set; }
         public DbSet<Topic> Topics { get; set; }
+        public DbSet<StudentGoalAggregate> StudentGoalAggregates { get; set; }
+        public DbSet<StudentGoalSummary> StudentGoalSummaries { get; set; }
 
         #region Report
 
@@ -213,6 +215,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new HomeWorkRetryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new VideoSubFilePathEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentGoalAggregateEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentGoalSummaryEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

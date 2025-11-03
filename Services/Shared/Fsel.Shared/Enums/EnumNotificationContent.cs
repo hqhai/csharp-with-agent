@@ -108,6 +108,15 @@ namespace Fsel.Shared.Enums
 
         #endregion Notify after done PT
 
-        SurveyAssignment
+        SurveyAssignment,
+
+        #region CourseGoal
+
+        BelowTargetCourseGoal,
+        AchievedCourseGoal,
+        ExceededCourseGoal,
+        CourseGoalStudent
+
+        #endregion CourseGoal
     }
 }

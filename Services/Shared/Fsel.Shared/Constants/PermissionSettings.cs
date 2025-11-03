@@ -64,6 +64,8 @@ namespace Fsel.Shared.Constants
         public const string Add = $"{ClaimType}.Add";
         public const string View = $"{ClaimType}.View";
         public const string Update = $"{ClaimType}.Update";
+        public const string DeleteStudentGoal = $"{ClaimType}.DeleteStudentGoal";
+        public const string ViewStudentGoal = $"{ClaimType}.ViewStudentGoal";
         public const string Export = $"{ClaimType}.Export";
     }
 

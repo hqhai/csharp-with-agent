@@ -77,7 +77,7 @@ namespace Fsel.System.Application.Queries.SchoolQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<SchoolModel>(model.ToList(), request, totalItem);
+            methodResult.Result = new PagingItemsModel<SchoolModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

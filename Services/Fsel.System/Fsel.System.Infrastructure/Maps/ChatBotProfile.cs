@@ -20,7 +20,6 @@ namespace Fsel.System.Infrastructure.Maps
             CreateMap<ChatBotMessage, ChatbotResponseModel>().IgnoreAllNonExisting();
             CreateMap<SaveChatBotMessageModel, ChatBot>().IgnoreAllNonExisting();
             CreateMap<ChatBot, ChatBotModel>().IgnoreAllNonExisting();
-
         }
     }
 }
