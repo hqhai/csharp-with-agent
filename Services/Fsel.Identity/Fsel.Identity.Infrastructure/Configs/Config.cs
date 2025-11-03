@@ -71,7 +71,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lms-testing.fsel.edu.vn",
                         "http://lms-testing.fsel.edu.vn",
                         "https://lms-testing-ufm.fsel.edu.vn",
-                        "http://lms-testing-ufm.fsel.edu.vn"
+                        "http://lms-testing-ufm.fsel.edu.vn",
+                        "https://lms-beta.fsel.edu.vn",
+                        "http://lms-beta.fsel.edu.vn",
+                        "https://lms-beta-ufm.fsel.edu.vn",
+                        "http://lms-beta-ufm.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
@@ -90,7 +94,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lms-testing.fsel.edu.vn/auth/login",
                         "http://lms-testing.fsel.edu.vn/auth/login",
                         "https://lms-testing-ufm.fsel.edu.vn/auth/login",
-                        "http://lms-testing-ufm.fsel.edu.vn/auth/login"
+                        "http://lms-testing-ufm.fsel.edu.vn/auth/login",
+                        "https://lms-beta.fsel.edu.vn/auth/login",
+                        "http://lms-beta.fsel.edu.vn/auth/login",
+                        "https://lms-beta-ufm.fsel.edu.vn/auth/login",
+                        "http://lms-beta-ufm.fsel.edu.vn/auth/login"
                     },
 
                     AllowOfflineAccess = true,
@@ -139,7 +147,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-web-testing.fsel.edu.vn",
                         "https://lcms-web-testing.fsel.edu.vn",
                         "http://lcms-web-testing-ufm.fsel.edu.vn",
-                        "https://lcms-web-testing-ufm.fsel.edu.vn"
+                        "https://lcms-web-testing-ufm.fsel.edu.vn",
+                        "http://lcms-web-beta.fsel.edu.vn",
+                        "https://lcms-web-beta.fsel.edu.vn",
+                        "http://lcms-web-beta-ufm.fsel.edu.vn",
+                        "https://lcms-web-beta-ufm.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
@@ -152,7 +164,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-web-testing.fsel.edu.vn",
                         "https://lcms-web-testing.fsel.edu.vn",
                         "http://lcms-web-testing-ufm.fsel.edu.vn",
-                        "https://lcms-web-testing-ufm.fsel.edu.vn"
+                        "https://lcms-web-testing-ufm.fsel.edu.vn",
+                        "http://lcms-web-beta.fsel.edu.vn",
+                        "https://lcms-web-beta.fsel.edu.vn",
+                        "http://lcms-web-beta-ufm.fsel.edu.vn",
+                        "https://lcms-web-beta-ufm.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
@@ -197,7 +213,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-admin-testing.fsel.edu.vn",
                         "https://lms-admin-testing.fsel.edu.vn",
                         "http://lms-admin-testing-ufm.fsel.edu.vn",
-                        "https://lms-admin-testing-ufm.fsel.edu.vn"
+                        "https://lms-admin-testing-ufm.fsel.edu.vn",
+                        "http://lms-admin-beta.fsel.edu.vn",
+                        "https://lms-admin-beta.fsel.edu.vn",
+                        "http://lms-admin-beta-ufm.fsel.edu.vn",
+                        "https://lms-admin-beta-ufm.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
@@ -210,7 +230,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-admin-testing.fsel.edu.vn",
                         "https://lms-admin-testing.fsel.edu.vn",
                         "http://lms-admin-testing-ufm.fsel.edu.vn",
-                        "https://lms-admin-testing-ufm.fsel.edu.vn"
+                        "https://lms-admin-testing-ufm.fsel.edu.vn",
+                        "http://lms-admin-beta.fsel.edu.vn",
+                        "https://lms-admin-beta.fsel.edu.vn",
+                        "http://lms-admin-beta-ufm.fsel.edu.vn",
+                        "https://lms-admin-beta-ufm.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
@@ -248,6 +272,42 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     AllowOfflineAccess = true,
                     RequireConsent = false,
                     AllowAccessTokensViaBrowser = true,
+                    AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
+                },
+                new Client
+                {
+                    ClientId = "com.fsel.lmsapp.staging",
+                    AllowedGrantTypes = GrantTypes.Code,
+
+                    ClientSecrets =
+                    {
+                        new Secret("com.fsel.lmsapp.staging_secret".Sha256())
+                    },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
+                    },
+
+                    RequireClientSecret = false,
+                    RequirePkce = false,
+                    RedirectUris = { "https://lms-beta.fsel.edu.vn/auth/login", "http://lms-beta.fsel.edu.vn/auth/login", "fsel-staging://lms-beta.fsel.edu.vn" },
+                    PostLogoutRedirectUris = { "https://lms-beta.fsel.edu.vn/auth/login", "http://lms-beta.fsel.edu.vn/auth/login", "fsel-staging://lms-beta.fsel.edu.vn" },
+
+                    AllowOfflineAccess = true,
+                    AccessTokenLifetime = 120,
+                    AllowAccessTokensViaBrowser = true,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
+                    RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
+                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
