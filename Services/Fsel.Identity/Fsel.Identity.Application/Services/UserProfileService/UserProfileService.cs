@@ -5,13 +5,11 @@ namespace Fsel.Identity.Application.Services.UserProfileService
     using System;
     using System.Data;
     using System.Globalization;
-    using System.IdentityModel.Tokens.Jwt;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Fsel.Common.Constants;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.Interfaces;
-    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.OrderService;
@@ -19,6 +17,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Constants;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using IdentityModel;
     using IdentityServer4;
@@ -39,9 +38,12 @@ namespace Fsel.Identity.Application.Services.UserProfileService
         private readonly ITrainingService _trainingService;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IOrderService _orderService;
+        private readonly ISystemConfigRepository _systemConfigRepository;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IUserSchoolRepository _userSchoolRepository;
 
-        public UserProfileService(Core.Base.Managers.UserManager<User> usermanager, Core.Base.Managers.RoleManager<Role> roleManager, IUserClaimsPrincipalFactory<User> userClaimsPrincipalFactory, IInteractionService interactionService, ITrainingService trainingService, ILmsCourseService lmsCourseService, IOrderService orderService, IServiceProvider serviceProvider)
+        public UserProfileService(Core.Base.Managers.UserManager<User> usermanager, Core.Base.Managers.RoleManager<Role> roleManager, IUserClaimsPrincipalFactory<User> userClaimsPrincipalFactory, IInteractionService interactionService, ITrainingService trainingService, ILmsCourseService lmsCourseService, IOrderService orderService, ISystemConfigRepository systemConfigRepository, IServiceProvider serviceProvider, ICompetitionEventsRepository competitionEventsRepository, IUserSchoolRepository userSchoolRepository)
             : base(usermanager, userClaimsPrincipalFactory)
         {
             _userManager = usermanager;
@@ -50,7 +52,10 @@ namespace Fsel.Identity.Application.Services.UserProfileService
             _trainingService = trainingService;
             _lmsCourseService = lmsCourseService;
             _orderService = orderService;
+            _systemConfigRepository = systemConfigRepository;
             _serviceProvider = serviceProvider;
+            _competitionEventsRepository = competitionEventsRepository;
+            _userSchoolRepository = userSchoolRepository;
         }
 
         public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
@@ -85,6 +90,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                     }
                 }
 
+                var isEnabledExtra = await _systemConfigRepository.Queryable.Select(x => x.IsEnabled).FirstOrDefaultAsync();
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Profile))
                 {
                     claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString(), ClaimValueTypes.String));
@@ -92,6 +98,13 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                     claims.Add(new Claim(JwtClaimNames.FullName, user.FullName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.Surname, user.LastName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.GivenName, user.FirstName ?? string.Empty, ClaimValueTypes.String));
+                    claims.Add(new Claim(JwtApiClaimNames.IsEnabledExtra, isEnabledExtra.ToString(), ClaimValueTypes.Boolean));
+
+                    var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                    if (schoolId.HasValue)
+                    {
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.SchoolId, schoolId.Value.ToString()));
+                    }
 
                     #region Custom Profile
 
@@ -129,14 +142,10 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                     }
                     else if (roles.Contains(EnumRole.AdminSchool.ToString()))
                     {
-                        var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
-                        if (schoolId.HasValue)
-                        {
-                            claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.SchoolId, schoolId.Value.ToString()));
-                        }
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.EventCode, await _competitionEventsRepository.GetEventCodeAsync(schoolId)));
                     }
 
-                    #endregion
+                    #endregion Custom Profile
                 }
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Email))

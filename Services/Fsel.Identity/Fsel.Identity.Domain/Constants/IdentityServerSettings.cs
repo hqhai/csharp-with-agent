@@ -20,6 +20,8 @@ namespace Fsel.Identity.Domain.Constants
             public const string IsOrder = "is_order";
             public const string IsSurvey = "is_survey";
             public const string SchoolId = "SchoolId";
+            public const string IsEnabledExtra = "IsEnabledExtra";
+            public const string EventCode = "EventCode";
         }
     }
 }
