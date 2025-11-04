@@ -175,6 +175,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     Gender,
                     ManageUserId,
                     Position,
+                    FullName,
                     FirstName,
                     LastName,
                     CreatedDate,
@@ -197,6 +198,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     H.Gender,
                     H.ManageUserId,
                     H.Position,
+                    H.FullName,
                     -- FirstName
                     TRIM(
                         CASE
@@ -289,8 +291,14 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 DROP TABLE #HumansWithoutUser;
             ");
 
-            migrationBuilder.Sql("DROP FULLTEXT INDEX ON AspNetUsers;", suppressTransaction: true);
-            migrationBuilder.Sql("DROP FULLTEXT CATALOG ftCatalog_AspNetUsers;", suppressTransaction: true);
+            migrationBuilder.Sql(@"IF EXISTS (SELECT * FROM sys.fulltext_indexes WHERE object_id = OBJECT_ID('AspNetUsers'))
+                DROP FULLTEXT INDEX ON AspNetUsers;
+            ", suppressTransaction: true);
+
+            migrationBuilder.Sql(@"
+            IF EXISTS (SELECT * FROM sys.fulltext_catalogs WHERE name = 'ftCatalog_AspNetUsers')
+                DROP FULLTEXT CATALOG ftCatalog_AspNetUsers;
+            ", suppressTransaction: true);
 
             migrationBuilder.AlterColumn<string>(
                 name: "FullName",
