@@ -104,9 +104,9 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                     BccEmails = request.BccEmails,
                     Content = request.Content,
                     Status = EnumMessageHistoryStatus.Success,
-                    Template = request.Template
+                    Template = request.Template,
+                    Receivers = request.Receivers,
                 }, cancellationToken);
-
             }
             catch (Exception)
             {
