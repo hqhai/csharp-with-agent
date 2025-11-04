@@ -190,7 +190,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 .Where(x => x.StudentId == courseResult.StudentId &&
                             x.CourseId == courseResult.CourseId &&
                             x.Status != EnumResultStatus.Unfinished)
-                .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                .OrderByDescending(x => x.CreatedDate).ThenBy(x => x.UpdatedDate)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(ct);
         }
