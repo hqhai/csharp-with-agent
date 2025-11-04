@@ -176,7 +176,8 @@ namespace Fsel.System.Application.Commands.CourseGoalCmd
                 return methodResult;
             }
             var existing = await _courseGoalRepository.Queryable.Include(x => x.CourseGoalConfigs).WhereBulkContains(request.Classes.Select(x => x.ClassId), x => x.ClassId)
-                .Where(x => x.SchoolId == request.SchoolId)
+                .Where(x => x.SchoolId == request.SchoolId && x.GoalCategory == request.GoalCategory)
+                .Where(x => x.CourseLevel == request.CourseLevel && x.CourseType == request.CourseType)
                 .ToListAsync(cancellationToken);
 
             var existingByClassId = existing.ToDictionary(x => x.ClassId ?? Guid.Empty, x => x);
