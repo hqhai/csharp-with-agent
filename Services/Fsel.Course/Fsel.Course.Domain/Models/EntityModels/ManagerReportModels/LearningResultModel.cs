@@ -38,6 +38,13 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
             }
         }
 
+        public bool LearningStatus
+        {
+            get { return OverallPercent >= 70; }
+        }
+
         public DateTime? ExpiredDate { get; set; }
+
+        public int NumberOfEmailsSent { get; set; }
     }
 }
