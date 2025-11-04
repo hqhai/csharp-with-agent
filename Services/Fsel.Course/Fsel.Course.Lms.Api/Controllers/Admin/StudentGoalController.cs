@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Refit;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/student-goal")]
@@ -65,6 +66,30 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         {
             MethodResult<PagingItemsModel<StudentGoalAggregateModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>s
+        /// send notify after pt
+        /// </summary>
+        [HttpPost("send-email-weekly-progress-report")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendEmailWeeklyProgressReport([FromBody] SendEmailWeeklyProgressReportCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>s
+        /// send notify after pt
+        /// </summary>
+        [HttpPost("send-email-learning-progress-warning")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendEmailLearningProgressWarning([FromBody] SendEmailLearningProgressWarningCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

@@ -19,5 +19,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
         }
 
         public override EnumCourseType? CourseType { get; set; } = EnumCourseType.Academic;
+        public bool? LearningStatus { get; set; }
+        public IList<Guid>? StudentIds { get; set; }
     }
 }
