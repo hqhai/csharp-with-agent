@@ -226,5 +226,13 @@ namespace Fsel.Shared.Helpers
             }
             return DateTime.UtcNow;
         }
+
+        public static int CalculateAge(DateTime birthday, DateTime currentDate)
+        {
+            int age = currentDate.Year - birthday.Year;
+            if (currentDate < birthday.AddYears(age))
+                age--;
+            return age;
+        }
     }
 }

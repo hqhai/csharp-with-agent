@@ -108,6 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestQuery
 
         private async Task UpdateFinalTestResult(FinalTestResult finalTestResult)
         {
+            finalTestResult.ProcessDate = DateTime.UtcNow;
             finalTestResult.Status = EnumResultStatus.Process;
             await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult> { finalTestResult }, bulk =>
             {

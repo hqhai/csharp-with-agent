@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 {
+    using System.Linq.Dynamic.Core;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -38,8 +39,25 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly IVideoTimeCodeAnswerRepository _videoTimeCodeAnswerRepository;
         private readonly AuthContext _authContext;
+        private readonly IStudentGoalAggregateRepository _studentGoalAggregateRepository;
 
-        public ResetCurriculumByStudentCommandHandler(IUserService userService, ICourseResultRepository courseResultRepository, IPlacementTestResultRepository placementTestResultRepository, IFinalTestResultRepository finalTestResultRepository, IUnitResultRepository unitResultRepository, ILessonResultRepository lessonResultRepository, IMockTestResultRepository mockTestResultRepository, IExtraPracticeResultRepository extraPracticeResultRepository, IClassForumResultRepository classForumResultRepository, IHomeWorkResultRepository homeWorkResultRepository, IVideoResultRepository videoResultRepository, ISectionGroupResultRepository sectionGroupResultRepository, IHomeWorkAnswerRepository homeWorkAnswerRepository, IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository, AuthContext authContext)
+        public ResetCurriculumByStudentCommandHandler(IUserService userService,
+                                                      ICourseResultRepository courseResultRepository,
+                                                      IPlacementTestResultRepository placementTestResultRepository,
+                                                      IFinalTestResultRepository finalTestResultRepository,
+                                                      IUnitResultRepository unitResultRepository,
+                                                      ILessonResultRepository lessonResultRepository,
+                                                      IMockTestResultRepository mockTestResultRepository,
+                                                      IExtraPracticeResultRepository extraPracticeResultRepository,
+                                                      IClassForumResultRepository classForumResultRepository,
+                                                      IHomeWorkResultRepository homeWorkResultRepository,
+                                                      IVideoResultRepository videoResultRepository,
+                                                      ISectionGroupResultRepository sectionGroupResultRepository,
+                                                      IHomeWorkAnswerRepository homeWorkAnswerRepository,
+                                                      IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
+                                                      IVideoTimeCodeAnswerRepository videoTimeCodeAnswerRepository,
+                                                      AuthContext authContext,
+                                                      IStudentGoalAggregateRepository studentGoalAggregateRepository)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
@@ -57,6 +75,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _authContext = authContext;
+            _studentGoalAggregateRepository = studentGoalAggregateRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(ResetCurriculumByStudentCommand request, CancellationToken cancellationToken)
@@ -205,6 +224,15 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
                 await _mockTestResultRepository.DeleteListAsync(mockTestResults);
                 await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
+            }
+
+            var studentGoalAggregates = await _studentGoalAggregateRepository.Queryable.Include(x => x.StudentGoalSummaries)
+                                                        .Where(x => x.CourseId == student.Id && x.CourseId == student.CourseId)
+                                                        .ToListAsync(cancellationToken);
+            if (studentGoalAggregates.Count != 0)
+            {
+                await _studentGoalAggregateRepository.DeleteListAsync(studentGoalAggregates);
+                await _studentGoalAggregateRepository.UnitOfWork.SaveChangesAsync(true, false, cancellationToken).ConfigureAwait(false);
             }
 
             //delete course result

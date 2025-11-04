@@ -24,7 +24,52 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ILogger<ClassForumResultInputThenUpdateLessonResultHandler> _logger;
 
-        public ClassForumResultInputThenUpdateLessonResultHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, ILogger<ClassForumResultInputThenUpdateLessonResultHandler> logger, ILessonResultRepository lessonResultRepository, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, lessonResultRepository, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, notificationMessagePublisher)
+        public ClassForumResultInputThenUpdateLessonResultHandler(ISystemService systemService,
+            AppSetting appSetting,
+            ICourseUnitMockTestRepository courseUnitMockTestRepository,
+            IMediator mediator,
+            IUserService userService,
+            ILogger<ClassForumResultInputThenUpdateLessonResultHandler> logger,
+            ILessonResultRepository lessonResultRepository,
+            SaveUserCourseSettingPublisher saveUserCourseSettingPublisher,
+            IVideoResultRepository videoResultRepository,
+            IClassForumResultRepository classForumResultRepository,
+            IUnitResultRepository unitResultRepository,
+            ICourseResultRepository courseResultRepository,
+            ICourseRepository courseRepository,
+            IUnitRepository unitRepository,
+            IFinalTestResultRepository finalTestResultRepository,
+            IMockTestResultRepository mockTestResultRepository,
+            IHomeWorkResultRepository homeWorkResultRepository,
+            QuestBoardPublisher questBoardPublisher,
+            IOrderService orderService,
+            ILessonNoteRepository lessonNoteRepository,
+            NotificationMessagePublisher notificationMessagePublisher,
+            IStudentGoalAggregateRepository studentGoalAggregateRepository,
+            IStudentGoalSummaryRepository studentGoalSummaryRepository) : base(systemService,
+                appSetting,
+                courseUnitMockTestRepository,
+                mediator,
+                userService,
+                logger,
+                lessonResultRepository,
+                saveUserCourseSettingPublisher,
+                videoResultRepository,
+                classForumResultRepository,
+                unitResultRepository,
+                courseResultRepository,
+                courseRepository,
+                unitRepository,
+                finalTestResultRepository,
+                mockTestResultRepository,
+                homeWorkResultRepository,
+                questBoardPublisher,
+                orderService,
+                lessonNoteRepository,
+                notificationMessagePublisher,
+                studentGoalAggregateRepository,
+                studentGoalSummaryRepository
+                )
         {
             _lessonResultRepository = lessonResultRepository;
             _logger = logger;
@@ -71,7 +116,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             {
                 return;
             }
-            homeWorkResults = homeWorkResults.Select(x => { x.Status = EnumResultStatus.New; return x; }).ToList();
+            homeWorkResults = homeWorkResults.Select(x => { x.NewDate = DateTime.UtcNow; x.Status = EnumResultStatus.New; return x; }).ToList();
             await _homeWorkResultRepository.BulkUpdateList(homeWorkResults, bulk =>
             {
                 bulk.IgnoreOnUpdateExpression = c => new { c.HomeWorkId, c.StudentId, c.LessonResultId };

@@ -3,9 +3,11 @@
 namespace Fsel.System.Application.Queries.SchoolQuery
 {
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Shared.Enums;
+    using Fsel.System.Application.Services.UserServices;
     using Fsel.System.Domain.Entities;
     using Fsel.System.Domain.IRepositories;
     using Fsel.System.Domain.Models.EntityModels;
@@ -23,13 +25,18 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 
     public class SearchSchoolQueryHandler : IRequestHandler<SearchSchoolQuery, MethodResult<PagingItemsModel<SchoolModel>>>
     {
-        private readonly ISchoolRepository _schoolRepository;
         private readonly ICrmLocationRepository _crmLocationRepository;
+        private readonly IUserService _userService;
+        private readonly AuthContext _authContext;
 
-        public SearchSchoolQueryHandler(ISchoolRepository schoolRepository, ICrmLocationRepository crmLocationRepository)
+        public SearchSchoolQueryHandler(
+            ICrmLocationRepository crmLocationRepository,
+            IUserService userService,
+            AuthContext authContext)
         {
-            _schoolRepository = schoolRepository;
             _crmLocationRepository = crmLocationRepository;
+            _userService = userService;
+            _authContext = authContext;
         }
 
         public async Task<MethodResult<PagingItemsModel<SchoolModel>>> Handle(SearchSchoolQuery request, CancellationToken cancellationToken)
@@ -41,7 +48,15 @@ namespace Fsel.System.Application.Queries.SchoolQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                query = query.Where(m => m.GlobalId.ToString() == request.Keyword || (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                query = query.Where(m => m.GlobalId.ToString() == request.Keyword || (m.Name ?? string.Empty).Trim().Contains(request.Keyword.Trim()));
+            }
+
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
+            {
+                var schoolId = (await _userService.GetSchoolIdAsync()).Content?.Result;
+                query = query.Where(m => m.GlobalId == schoolId);
             }
 
             if (request.LocationId != null)
@@ -77,7 +92,7 @@ namespace Fsel.System.Application.Queries.SchoolQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            methodResult.Result = new PagingItemsModel<SchoolModel>(model.ToList(), request, totalItem);
+            methodResult.Result = new PagingItemsModel<SchoolModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
