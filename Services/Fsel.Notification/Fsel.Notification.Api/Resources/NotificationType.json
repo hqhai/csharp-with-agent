@@ -2566,5 +2566,137 @@
         "language": "fr-FR"
       }
     ]
+  },
+  {
+    "id": "b65e04cc-3d38-42a7-b7d1-8f66241f166a",
+    "type": "LinkPage",
+    "content": "BelowTargetCourseGoal",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Thời gian hoạt động trung bình trong tuần trước của bạn là {0} giờ {1} phút mỗi ngày. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Bạn gần đạt rồi! Chỉ cần thêm chút nỗ lực nữa là hoàn thành mục tiêu thôi!",
+    "templateLink": "",
+    "createdDate": "2024-08-28",
+    "translations": [
+      {
+        "id": "b7a4107e-f59f-48de-9c93-41d39a6c3a80",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "b65e04cc-3d38-42a7-b7d1-8f66241f166a",
+        "templateMessage": "Thời gian hoạt động trung bình trong tuần trước của bạn là {0} giờ {1} phút mỗi ngày. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Bạn gần đạt rồi! Chỉ cần thêm chút nỗ lực nữa là hoàn thành mục tiêu thôi!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "c89f46a5-c352-4668-bf28-166cb49ee05e",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "b65e04cc-3d38-42a7-b7d1-8f66241f166a",
+        "templateMessage": "Your average activity time last week was {0} hours and {1} minutes per day. Lessons completed: {2} (Goal: {3}). You're almost there! Just a bit more effort, and you'll reach your goal!",
+        "language": "en-US"
+      },
+      {
+        "id": "a6fb1965-4f1a-4819-994d-3bea1183ada8",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "b65e04cc-3d38-42a7-b7d1-8f66241f166a",
+        "templateMessage": "Votre temps moyen d'activité la semaine dernière était de {0} heures et {1} minutes par jour. Leçons terminées : {2} (Objectif : {3}). Vous y êtes presque ! Avec un peu plus d’effort, vous atteindrez votre objectif !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "3e2f86ad-f8de-4d33-b3a8-49bb2511ec73",
+    "type": "LinkPage",
+    "content": "AchievedCourseGoal",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Thời gian hoạt động trung bình trong tuần trước của bạn là {0} giờ {1} phút mỗi ngày. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Tuyệt vời! Bạn đã hoàn thành mục tiêu của mình tuần này. Tiếp tục cố gắng nhé!",
+    "templateLink": "",
+    "createdDate": "2024-08-28",
+    "translations": [
+      {
+        "id": "a88b0eb9-2d63-4373-94b1-1cf2a212ad89",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "3e2f86ad-f8de-4d33-b3a8-49bb2511ec73",
+        "templateMessage": "Thời gian hoạt động trung bình trong tuần trước của bạn là {0} giờ {1} phút mỗi ngày. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Tuyệt vời! Bạn đã hoàn thành mục tiêu của mình tuần này. Tiếp tục cố gắng nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "f32f74a1-1b8b-4a13-970b-b0327e5cb839",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "3e2f86ad-f8de-4d33-b3a8-49bb2511ec73",
+        "templateMessage": "Your average activity time last week was {0} hours and {1} minutes per day. Lessons completed: {2} (Goal: {3}). Great job! You have achieved your goal this week. Keep up the good work!",
+        "language": "en-US"
+      },
+      {
+        "id": "f402c9fb-3581-439d-b530-e6b2c89df125",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "3e2f86ad-f8de-4d33-b3a8-49bb2511ec73",
+        "templateMessage": "Votre temps moyen d'activité la semaine dernière était de {0} heures et {1} minutes par jour. Leçons terminées : {2} (Objectif : {3}). Excellent travail ! Vous avez atteint votre objectif cette semaine. Continuez ainsi !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "9bcbce1d-22a4-4b33-bf6c-53140a4a7732",
+    "type": "LinkPage",
+    "content": "ExceededCourseGoal",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Thời gian hoạt động trung bình tuần trước của bạn là {0} giờ {1} phút mỗi ngày. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Xuất sắc! Bạn đã vượt qua mục tiêu tuần này. Tiếp tục phong độ ấn tượng này nhé!",
+    "templateLink": "",
+    "createdDate": "2024-08-28",
+    "translations": [
+      {
+        "id": "36f0d5e9-67b9-4901-86ee-2f1e60b4b199",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9bcbce1d-22a4-4b33-bf6c-53140a4a7732",
+        "templateMessage": "Thời gian hoạt động trung bình tuần trước của bạn là {0} giờ {1} phút mỗi ngày. Số bài học đã hoàn thành: {2} (Mục tiêu: {3}). Xuất sắc! Bạn đã vượt qua mục tiêu tuần này. Tiếp tục phong độ ấn tượng này nhé!",
+        "language": "vi-VN"
+      },
+      {
+        "id": "b9984fcb-f6e1-4899-97a2-0fc539b9a8d1",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9bcbce1d-22a4-4b33-bf6c-53140a4a7732",
+        "templateMessage": "Your average activity time last week was {0} hours and {1} minutes per day. Lessons completed: {2} (Goal: {3}). Excellent! You have exceeded your goal for the week. Keep up the impressive performance!",
+        "language": "en-US"
+      },
+      {
+        "id": "fc4570c8-6e40-4b5a-b9d6-9f1e21aac7b5",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "9bcbce1d-22a4-4b33-bf6c-53140a4a7732",
+        "templateMessage": "Votre temps moyen d'activité la semaine dernière était de {0} heures et {1} minutes par jour. Leçons terminées : {2} (Objectif : {3}). Excellent ! Vous avez dépassé votre objectif de la semaine. Continuez sur cette belle lancée !",
+        "language": "fr-FR"
+      }
+    ]
+  },
+  {
+    "id": "50b4314c-2c85-4f3a-82ad-c4f3e93947a1",
+    "type": "LinkPage",
+    "content": "CourseGoalStudent",
+    "icon": "",
+    "priority": 1,
+    "templateMessage": "Tuần này, giáo viên của bạn đã đặt mục tiêu cho b{0}ạn là hoàn thành {0} bài học 📚. Hãy cố gắng hết mình để hoàn thành nhé! 💪",
+    "templateLink": "",
+    "createdDate": "2024-08-28",
+    "translations": [
+      {
+        "id": "b8e6d8d5-2e72-4ecf-bf0a-fccaf989c8c2",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "50b4314c-2c85-4f3a-82ad-c4f3e93947a1",
+        "templateMessage": "Tuần này, giáo viên của bạn đã đặt mục tiêu cho bạn là hoàn thành {0} bài học 📚. Hãy cố gắng hết mình để hoàn thành nhé! 💪",
+        "language": "vi-VN"
+      },
+      {
+        "id": "e70f4a44-3bb5-4b9a-bcc1-5f7d5f9f0b0b",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "50b4314c-2c85-4f3a-82ad-c4f3e93947a1",
+        "templateMessage": "This week, your teacher has set a goal for you to complete {0} lessons 📚. Give it your best effort to accomplish it! 💪",
+        "language": "en-US"
+      },
+      {
+        "id": "4a5a8e72-adcf-4e5a-b95d-4b9fb028e5da",
+        "createdDate": "2024-08-28",
+        "notificationTypeId": "50b4314c-2c85-4f3a-82ad-c4f3e93947a1",
+        "templateMessage": "Cette semaine, votre enseignant(e) vous a fixé comme objectif de terminer {0} leçons 📚. Donnez le meilleur de vous-même pour y parvenir ! 💪",
+        "language": "fr-FR"
+      }
+    ]
   }
 ]

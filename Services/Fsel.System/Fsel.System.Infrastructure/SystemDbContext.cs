@@ -7,6 +7,7 @@ using Fsel.System.Domain.Entities.BlindBoxs;
 using Fsel.System.Domain.Entities.ChatBot;
 using Fsel.System.Domain.Entities.Chatbots;
 using Fsel.System.Domain.Entities.Configs;
+using Fsel.System.Domain.Entities.CourseGoals;
 using Fsel.System.Domain.Entities.DailyQuiz;
 using Fsel.System.Domain.Entities.QuestBoards;
 using Fsel.System.Infrastructure.Configs;
@@ -80,6 +81,8 @@ namespace Fsel.System.Infrastructure
             modelBuilder.ApplyConfiguration(new DailyQuizAnswerEntityTypeConfigConfiguration());
             modelBuilder.ApplyConfiguration(new DictionaryEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new SenderConfigEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseGoalEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseGoalConfigEntityTypeConfiguration());
             base.OnModelCreating(modelBuilder);
         }
 
@@ -135,6 +138,8 @@ namespace Fsel.System.Infrastructure
         public DbSet<Dictionary> Dictionaries { get; set; }
         public DbSet<UnknownWord> UnknownWords { get; set; }
         public DbSet<SenderConfig> SenderConfigs { get; set; }
+        public DbSet<CourseGoal> CourseGoals { get; set; }
+        public DbSet<CourseGoalConfig> CourseGoalConfigs { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

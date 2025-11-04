@@ -4,6 +4,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
 {
     using System.Linq.Dynamic.Core;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
@@ -24,7 +25,9 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
         private readonly UserManager<User> _userManager;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly IStudentRepository _studentRepository;
-        private const string EventCode = "EVHoChiMinh";
+
+        private const string Parent = "Phụ Huynh";
+        private const string Teacher = "Giáo Viên";
 
         public GetStudentInfoEventQueryHandler(
             IHumanRepository humanRepository,
@@ -60,7 +63,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
 
             var isByPassEmailConfirm = competitionEvent?.EventContent?.IsByPassEmailComfirm ?? default;
 
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
             var isChangePassword = await _userManager.CheckPasswordAsync(user, user.DefaultPassword ?? string.Empty);
+
             var studentInfoEvent = new StudentInfoEventModel
             {
                 Birthday = human.Birthday,
@@ -76,56 +82,62 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 IsChangePassword = !isChangePassword,
                 IsStudentVerifiedForEvent = isByPassEmailConfirm,
-                //AllowParentInfoUpdate = competitionEvent == null || string.IsNullOrEmpty(competitionEvent.EventCode) || !competitionEvent.EventCode.Contains(EventCode, StringComparison.InvariantCultureIgnoreCase),
             };
 
-            //var schoolId = human.Student?.SchoolId ?? default;
-            //var competitionEventId = competitionEvent?.Id ?? default;
+            if (studentInfoEvent.Birthday.HasValue)
+            {
+                studentInfoEvent.Age = Shared.Helpers.DateTimeHelper.CalculateAge(studentInfoEvent.Birthday.Value, currentDate);
+                studentInfoEvent.AllowParentInfoUpdate = student.SchoolGrade != Parent && student.SchoolGrade != Teacher && studentInfoEvent.Age < 25;
+            }
 
-            //var query = await (from u in _userManager.Users
-            //                   join h in _humanRepository.Queryable on u.Id equals h.UserId
-            //                   join s in _studentRepository.Queryable on h.Id equals s.HumanId
-            //                   join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
-            //                   where s.SchoolId == schoolId && u.Id != _authContext.CurrentUserId && sce.CompetitionEventId == competitionEventId
-            //                   select new
-            //                   {
-            //                       User = u,
-            //                       Human = h,
-            //                       Student = s
-            //                   }).ToListAsync(cancellationToken);
+            var schoolId = human.Student?.SchoolId ?? default;
+            var competitionEventId = competitionEvent?.Id ?? default;
 
-            //var companion = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.Student.ParentPhoneNumber) && p.Student.ParentPhoneNumber == studentInfoEvent.PhoneNumber);
-            //if (companion != null)
-            //{
-            //    studentInfoEvent.IsParent = true;
-            //    studentInfoEvent.CompanionInfo = new CompanionInfoEventModel()
-            //    {
-            //        FullName = companion.User.FullName,
-            //        Email = companion.User.Email,
-            //        Birthday = companion.Human.Birthday,
-            //        School = companion.Student.School,
-            //        SchoolGrade = companion.Student.SchoolGrade,
-            //        SchoolClass = companion.Student.SchoolClass,
-            //        PhoneNumber = companion.User.PhoneNumber
-            //    };
-            //}
-            //else if (!string.IsNullOrEmpty(studentInfoEvent.ParentPhoneNumber))
-            //{
-            //    var parent = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.User.PhoneNumber) && p.User.PhoneNumber == studentInfoEvent.ParentPhoneNumber);
-            //    if (parent != null)
-            //    {
-            //        studentInfoEvent.CompanionInfo = new CompanionInfoEventModel()
-            //        {
-            //            FullName = parent.User.FullName,
-            //            Email = parent.User.Email,
-            //            Birthday = parent.Human.Birthday,
-            //            School = parent.Student.School,
-            //            SchoolGrade = parent.Student.SchoolGrade,
-            //            SchoolClass = parent.Student.SchoolClass,
-            //            PhoneNumber = parent.User.PhoneNumber
-            //        };
-            //    }
-            //}
+            var query = await (from u in _userManager.Users
+                               join h in _humanRepository.Queryable on u.Id equals h.UserId
+                               join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                               join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
+                               where s.SchoolId == schoolId && u.Id != _authContext.CurrentUserId && sce.CompetitionEventId == competitionEventId
+                               select new
+                               {
+                                   User = u,
+                                   Human = h,
+                                   Student = s
+                               }).ToListAsync(cancellationToken);
+
+            var companion = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.Student.ParentPhoneNumber) && p.Student.ParentPhoneNumber == studentInfoEvent.PhoneNumber);
+            if (companion != null)
+            {
+                studentInfoEvent.IsParent = true;
+                studentInfoEvent.CompanionInfo = new CompanionInfoEventModel()
+                {
+                    FullName = companion.User.FullName,
+                    Email = companion.User.Email,
+                    Birthday = companion.Human.Birthday,
+                    School = companion.Student.School,
+                    SchoolGrade = companion.Student.SchoolGrade,
+                    SchoolClass = companion.Student.SchoolClass,
+                    PhoneNumber = companion.User.PhoneNumber
+                };
+            }
+            else if (!string.IsNullOrEmpty(studentInfoEvent.ParentPhoneNumber))
+            {
+                var parent = query.FirstOrDefault(p => !string.IsNullOrEmpty(p.User.PhoneNumber) && p.User.PhoneNumber == studentInfoEvent.ParentPhoneNumber && p.Student.SchoolGrade == Parent);
+
+                if (parent != null)
+                {
+                    studentInfoEvent.CompanionInfo = new CompanionInfoEventModel()
+                    {
+                        FullName = parent.User.FullName,
+                        Email = parent.User.Email,
+                        Birthday = parent.Human.Birthday,
+                        School = parent.Student.School,
+                        SchoolGrade = parent.Student.SchoolGrade,
+                        SchoolClass = parent.Student.SchoolClass,
+                        PhoneNumber = parent.User.PhoneNumber
+                    };
+                }
+            }
 
             methodResult.Result = studentInfoEvent;
             methodResult.StatusCode = StatusCodes.Status200OK;

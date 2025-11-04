@@ -89,6 +89,8 @@ builder.Services.AddScoped<IHomeWorkExtraPracticeResultRepository, HomeWorkExtra
 builder.Services.AddScoped<IHomeWorkRetryRepository, HomeWorkRetryRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IVideoSubFilePathRepository, VideoSubFilePathRepository>();
+builder.Services.AddScoped<IStudentGoalAggregateRepository, StudentGoalAggregateRepository>();
+builder.Services.AddScoped<IStudentGoalSummaryRepository, StudentGoalSummaryRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();

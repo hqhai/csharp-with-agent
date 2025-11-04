@@ -29,6 +29,8 @@ namespace Fsel.Shared.Enums
         LearningStatus,
         OverallScore,
         LearningProgress,
-        HomeWorkType
+        HomeWorkType,
+        ProcessedStatus,
+        ProgressStatus
     }
 }

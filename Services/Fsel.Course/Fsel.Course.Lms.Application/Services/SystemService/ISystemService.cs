@@ -88,5 +88,8 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/feature-access-time/get-last-feature-access-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetLastFeatureAccessByUserIdsAsync([Body] GetFeatureAccessTimesByUserIdsQueryModel model);
+
+        [Get("/v1/admin/course-goal/gets")]
+        Task<IApiResponse<MethodResult<IList<CourseGoalModel>>>> GetListCourseGoalAsync();
     }
 }
