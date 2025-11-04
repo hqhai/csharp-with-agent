@@ -79,7 +79,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 Children = childStates,
                 StepFlowId = TestResult.StepFlowId
             };
-
             return stateModel;
         }
     }

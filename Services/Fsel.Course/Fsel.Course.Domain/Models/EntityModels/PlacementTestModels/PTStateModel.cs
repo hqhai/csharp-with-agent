@@ -114,9 +114,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     {
         public Guid? QuestionId { get; set; }
 
-        public Guid? QuestionResultId { get; set; }
-
-        public QuestionModel Question { get; set; }
+        public Guid? TestAnswerId { get; set; }
 
         public AnswerModel Answer { get; set; }
     }

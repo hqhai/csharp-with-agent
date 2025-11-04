@@ -20,7 +20,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return new QuestionStateModel
             {
                 QuestionId = TestAnswer.QuestionId,
-                QuestionResultId = TestAnswer.Id,
+                TestAnswerId = TestAnswer.Id,
                 Answer = new AnswerModel { Answer = TestAnswer.Answer, CorrectCount = TestAnswer.CorrectCount, IsCorrect = TestAnswer.IsCorrect, },
                 Status = TestAnswer.Status == EnumAnswerStatus.Done ? EnumResultStatus.Done : EnumResultStatus.Process
             };

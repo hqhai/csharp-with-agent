@@ -3,6 +3,8 @@
 namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 {
     using AutoMapper;
+    using Core.Base.Interfaces;
+    using Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -20,13 +22,14 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     {
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly DateTimeConverter _dateTimeConverter;
-        private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly IRepository<TestSectionResult> _testSectionResultRepository;
 
-        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
+        public SetTimeModuleCommandHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, IMapper mapper, DateTimeConverter dateTimeConverter,
+            IRepository<TestSectionResult> testSectionResultRepository)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _dateTimeConverter = dateTimeConverter;
-            _sectionGroupResultRepository = sectionGroupResultRepository;
+            _testSectionResultRepository = testSectionResultRepository;
         }
 
         public async Task<bool> Handle(SetTimeModuleCommand request, CancellationToken cancellationToken)
@@ -60,10 +63,13 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            if (videoTimeCodeResult.Status == EnumResultStatus.Done && videoTimeCodeResult.UpdatedDate.HasValue && videoTimeCodeResult.UpdatedDate.Value.AddMinutes(3) < DateTime.UtcNow)
+
+            if (videoTimeCodeResult.Status == EnumResultStatus.Done && videoTimeCodeResult.UpdatedDate.HasValue &&
+                videoTimeCodeResult.UpdatedDate.Value.AddMinutes(3) < DateTime.UtcNow)
             {
                 return;
             }
+
             if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
             {
                 videoTimeCodeResult.WorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.WorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
@@ -91,6 +97,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     {
                         request.AccessTime = accessTime;
                     }
+
                     videoTimeCodeResult.RetryWorkingTime = _dateTimeConverter.SetWorkingTime(videoTimeCodeResult.RetryWorkingTime, request.AccessTime, videoTimeCode.ExecutionTime);
                 }
             }
@@ -103,24 +110,28 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
         private async Task UpdateSectionGroupResultAsync(SetTimeModuleCommand request)
         {
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
+            var sectionGroupResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
 
-            if (sectionGroupResult == null || sectionGroupResult.SectionGroup == null)
-            {
-                return;
-            }
-            if (sectionGroupResult.Status == EnumResultStatus.Done && sectionGroupResult.UpdatedDate.HasValue && sectionGroupResult.UpdatedDate.Value.AddMinutes(3) < DateTime.UtcNow)
+            if (sectionGroupResult?.TestSection?.Config?.ExecutionTime == null)
             {
                 return;
             }
 
-            sectionGroupResult.WorkingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.SectionGroup.ExecutionTime);
+            if (sectionGroupResult.Status == EnumResultStatus.Done && sectionGroupResult.UpdatedDate.HasValue &&
+                sectionGroupResult.UpdatedDate.Value.AddMinutes(3) < DateTime.UtcNow)
+            {
+                return;
+            }
+
+            sectionGroupResult.WorkingTime =
+                _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.TestSection.Config.ExecutionTime.Value);
             var workingTime = (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalMilliseconds;
             if (sectionGroupResult.WorkingTime > workingTime)
             {
                 sectionGroupResult.WorkingTime = workingTime;
             }
-            await _sectionGroupResultRepository.BulkUpdateList(new List<SectionGroupResult> { sectionGroupResult }, bulk =>
+
+            await _testSectionResultRepository.BulkUpdateList(new List<TestSectionResult> { sectionGroupResult }, bulk =>
             {
                 bulk.ColumnInputExpression = entity => new { entity.WorkingTime, entity.UpdatedDate };
             });
