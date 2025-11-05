@@ -56,27 +56,112 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         public async Task<MethodResult<bool>> Handle(RebuildLearningGoalAggregateCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
-            var courseGoalRes = await _systemService.GetListCourseGoalAsync();
-            var courseGoals = courseGoalRes.Content?.Result ?? new List<CourseGoalModel>();
 
-            var baseQuery = new BaseQueryModel
-            {
-                Filters = new List<GenericFilterModel>() { new GenericFilterModel { Property = nameof(StudentModel.SchoolClassId), Operator = EnumFilterOperator.NotEmpty } },
-            };
-            baseQuery.SetIsQueryAll(true);
-            var studentResults = await _userService.ExecuteListQueryAsync(baseQuery);
-            var students = studentResults.Content?.Result ?? new List<StudentModel>();
+            var methodResult = new MethodResult<bool>();
 
-            // 1) Tạo mới các Aggregate chưa có
-            await CreateStudentAggregateAsync(students, courseGoals, cancellationToken);
-            // 2) Tái xây dựng tiến độ học tập
-            await RebuildStudentLearningProgressAsync(courseGoals, cancellationToken);
+            // 0) Lấy CourseGoals
+            var courseGoals = await GetCourseGoalsAsync(cancellationToken).ConfigureAwait(false);
+
+            // 1) Lấy toàn bộ học viên theo cấu hình hiện tại (QueryAll)
+            var studentModels = await GetAllStudentsQueryAllAsync(cancellationToken).ConfigureAwait(false);
+
+            // 2) Tạo mới các Aggregate chưa có
+            await CreateStudentAggregateAsync(studentModels, courseGoals, cancellationToken).ConfigureAwait(false);
+
+            // 3) Tái xây dựng tiến độ học tập
+            await RebuildStudentLearningProgressAsync(courseGoals, cancellationToken).ConfigureAwait(false);
+
             methodResult.Result = true;
             return methodResult;
         }
 
-        private async Task CreateStudentAggregateAsync(IList<StudentModel> students, IList<CourseGoalModel> courseGoals, CancellationToken cancellationToken)
+        private async Task<IList<CourseGoalModel>> GetCourseGoalsAsync(CancellationToken ct)
+        {
+            var courseGoalRes = await _systemService.GetListCourseGoalAsync().ConfigureAwait(false);
+            return courseGoalRes?.Content?.Result ?? new List<CourseGoalModel>(0);
+        }
+
+        private async Task<List<StudentDetailModel>> GetAllStudentsQueryAllAsync(CancellationToken ct)
+        {
+            var baseQuery = new BaseQueryModel
+            {
+                Filters = new List<GenericFilterModel>
+                {
+                    new GenericFilterModel
+                    {
+                        Property = nameof(StudentModel.SchoolClassId),
+                        Operator = EnumFilterOperator.NotEmpty
+                    }
+                }
+            };
+            baseQuery.SetIsQueryAll(true);
+            var studentResults = await _userService.ExecuteListQueryDataAsync(baseQuery).ConfigureAwait(false);
+
+            #region Legacy (kept commented) - Paged concurrent alternative to restore later
+
+            //int pageSize = 10000;          // tuỳ nhu cầu
+            //var baseFilter = new List<GenericFilterModel>
+            //{
+            //    new GenericFilterModel
+            //    {
+            //        Property = "CourseId",
+            //        Operator = EnumFilterOperator.NotEmpty
+            //    }
+            //};
+            //var baseQuery = new BaseQueryModel
+            //{
+            //    Filters = baseFilter
+            //};
+
+            //var firstResp = await _userService.SearchAsync(baseQuery).ConfigureAwait(false);
+            //var first = firstResp?.Content?.Result;
+            //int totalPages = Math.Max(1, (int)Math.Ceiling((first?.PagingInfo?.TotalItems ?? 1) / (double)pageSize));
+
+            //var bag = new System.Collections.Concurrent.ConcurrentBag<StudentDetailModel>();
+            //var maxConcurrency = 3; // giới hạn song song an toàn
+            //int nextPage = 2;
+            //var workers = Enumerable.Range(0, maxConcurrency).Select(async _ =>
+            //{
+            //    while (true)
+            //    {
+            //        int page = Interlocked.Increment(ref nextPage) - 1;
+            //        if (page > totalPages)
+            //        {
+            //            break;
+            //        }
+            //        var pageQuery = new BaseQueryModel
+            //        {
+            //            Page = page,
+            //            PageSize = pageSize,
+            //            Filters = baseFilter
+            //        };
+
+            //        var pageResp = await _userService.SearchAsync(pageQuery).ConfigureAwait(false);
+            //        var pageResult = pageResp?.Content?.Result;
+            //        if (pageResult?.Items == null || pageResult.Items.Count == 0)
+            //        {
+            //            continue;
+            //        }
+            //        foreach (var s in pageResult.Items)
+            //        {
+            //            bag.Add(s);
+            //        }
+            //    }
+            //});
+
+            //await Task.WhenAll(workers).ConfigureAwait(false);
+            //var studentModels = bag.ToList();
+            //if (first != null && first.Items != null)
+            //{
+            //    studentModels.AddRange(first.Items);
+            //}
+
+            #endregion Legacy (kept commented) - Paged concurrent alternative to restore later
+
+            return studentResults?.Content?.Result?.ToList() ?? new List<StudentDetailModel>(0);
+        }
+
+        private async Task CreateStudentAggregateAsync(IList<StudentDetailModel> students, IList<CourseGoalModel> courseGoals, CancellationToken cancellationToken)
         {
             // 1) Lấy CourseResult chưa liên kết Aggregate
             var unlinkedCourseResults = await GetUnlinkedCourseResultsAsync(cancellationToken);
@@ -108,13 +193,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 CourseId = s.CourseId ?? default
             }).ToList();
 
-            var doneLessonResultsMap = await LoadDoneLessonResultsMapAsync(courseResults, cancellationToken);
-
-            var aggregatesToInsert = BuildAggregates(courseResults, courseGoals, students, totalLessonsPerCourse, doneLessonResultsMap);
-            if (aggregatesToInsert.Count == 0)
-            {
-                return;
-            }
             var studentCourseKeys = studentsWithoutCourse.Where(x => x.CourseId.HasValue && x.CourseId != Guid.Empty).Select(s => new
             {
                 StudentId = s.Id,
@@ -122,17 +200,23 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }).ToList();
 
             var existingKeys = await _studentLearningGoalAggregateRepository.Queryable
-                       .AsNoTracking()
-                       .WhereBulkContains(studentCourseKeys, new[] { "StudentId", "CourseId" })
-                       .Select(a => new { a.StudentId, a.CourseId })
-                       .ToListAsync(cancellationToken)
-                       .ConfigureAwait(false);
+                        .AsNoTracking()
+                        .WhereBulkContains(studentCourseKeys, new[] { "StudentId", "CourseId" })
+                        .Select(a => new { a.StudentId, a.CourseId })
+                        .ToListAsync(cancellationToken)
+                        .ConfigureAwait(false);
 
+            var doneLessonResultsMap = await LoadDoneLessonResultsMapAsync(courseResults, cancellationToken);
+
+            var aggregatesToInsert = BuildAggregates(courseResults, courseGoals, students, totalLessonsPerCourse, doneLessonResultsMap);
+            if (aggregatesToInsert.Count == 0)
+            {
+                return;
+            }
             var existingKeySet = existingKeys.Select(k => (k.StudentId, k.CourseId))
-                                .ToHashSet();
-
+                                            .ToHashSet();
             aggregatesToInsert = aggregatesToInsert.Where(a => !existingKeySet.Contains((a.StudentId, a.CourseId)))
-                                             .ToList();
+                                            .ToList();
             if (aggregatesToInsert.Any())
             {
                 await _studentLearningGoalAggregateRepository.AddList(aggregatesToInsert);
@@ -144,7 +228,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         private static List<StudentGoalAggregate> BuildAggregates(
             IEnumerable<CourseResultModel> courseResults,
             IList<CourseGoalModel> courseGoals,
-            IList<StudentModel> students,
+            IList<StudentDetailModel> students,
             IDictionary<Guid, int> totalLessonsPerCourse,
             IDictionary<(Guid StudentId, Guid CourseId), IEnumerable<LessonResult>> doneLessonResultsMap
             )
@@ -189,7 +273,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 if (student.SchoolClassId.HasValue)
                 {
                     studentGoalAggregate.SchoolId = student.SchoolId;
-                    studentGoalAggregate.SchoolName = student.School;
+                    studentGoalAggregate.SchoolName = student.School ?? courseGoal.SchoolName;
                     studentGoalAggregate.ClassId = student.SchoolClassId;
                     studentGoalAggregate.ClassName = student.SchoolClass;
                 }
