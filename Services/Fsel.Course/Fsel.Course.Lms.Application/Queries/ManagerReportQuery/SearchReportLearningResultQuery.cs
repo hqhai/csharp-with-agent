@@ -11,8 +11,10 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
+    using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly ISenderService _senderService;
 
         public SearchReportLearningResultQueryHandler(
             IMediator mediator,
@@ -42,7 +45,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             IMockTestResultRepository mockTestResultRepository,
             IFinalTestResultRepository finalTestResultRepository,
             ICourseUnitMockTestRepository courseUnitMockTestRepository
-            )
+,
+            ISenderService senderService)
         {
             _mediator = mediator;
             _mapper = mapper;
@@ -52,6 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             _mockTestResultRepository = mockTestResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _senderService = senderService;
         }
 
         public async Task<MethodResult<SearchReportLearningResultModel>> Handle(SearchReportLearningResultQuery request, CancellationToken cancellationToken)
@@ -119,9 +124,23 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 methodResult.Result = reportLearningResult;
                 return methodResult;
             }
+
+            if (request.StudentIds != null && request.StudentIds.Any())
+            {
+                students = students.Where(p => request.StudentIds.Contains(p.Id)).ToList();
+            }
+
+            var userIds = students.Where(p => p.UserId.HasValue).Select(x => x.UserId ?? default).ToList();
             var studentIds = students.Select(x => x.Id).ToList();
             var courseIds = students.Select(x => x.CourseId).ToList();
             var dataStudent = students.Select(x => new { StudentId = x.Id, CourseId = x.CourseId.GetValueOrDefault() }).ToList();
+
+            var historiesSendMailResult = await _senderService.GetHistoriesSendMailLearningProgress(new GetHistoriesSendMailLearningProgressModel()
+            {
+                UserIds = userIds
+            });
+
+            var historiesSendMail = historiesSendMailResult.Content?.Result;
 
             var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
@@ -243,9 +262,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     UserName = item.UserName,
                     OverallPercent = overallPercent,
                     OverallModules = overallModuleReports.OrderBy(x => x.DisplayOrder).ToList(),
+                    NumberOfEmailsSent = historiesSendMail?.Where(p => item.UserId.HasValue && item.UserId == p.ReceiverId && p.Template == EnumSenderTemplate.LearningProgressWarning).Count() ?? 0,
                 };
 
                 datas.Add(learningResult);
+            }
+
+            if (request.LearningStatus.HasValue)
+            {
+                datas = datas.Where(p => p.LearningStatus == request.LearningStatus).ToList();
             }
 
             reportLearningResult.PagingItems = new PagingItemsModel<LearningResultModel>(datas, request, reportLearningResult.TotalStudent);

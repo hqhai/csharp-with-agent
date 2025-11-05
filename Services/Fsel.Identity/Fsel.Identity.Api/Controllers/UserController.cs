@@ -77,6 +77,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-user-profile")]
         [ProducesResponseType(typeof(MethodResult<UserProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ServerCache(CacheSettings.TimeCache.OneMinutes)]
         public async Task<IActionResult> GetProfileUser()
         {
             MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
@@ -239,6 +240,7 @@ namespace Fsel.Identity.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<string?>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission]
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
         public async Task<IActionResult> GetRoleByUserId([FromRoute] string userId)
         {
             var commandResult = await _mediator.Send(new GetRoleByUserIdQuery() { UserId = userId }).ConfigureAwait(false);

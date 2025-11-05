@@ -82,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkExtraQuery
             var now = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
             var curriculumConfigId = await GetCurriculumConfigIdAsync(student, cancellationToken);
 
-            var hwcQ = _homeWorkConfigRepository.Queryable.Where(x => x.CurriculumId == curriculumConfigId);
+            var hwcQ = _homeWorkConfigRepository.Queryable.Where(x => x.CurriculumId == curriculumConfigId && x.StartDate <= now);
 
             var herQ = from baseQResult in _homeWorkExtraPracticeResultRepository.Queryable.Where(x => x.WorkingStatus == EnumWorkingStatus.Active && x.StudentId == student.Id)
                        join hwr in _homeWorkRetryRepository.Queryable on baseQResult.HomeWorkRetryId equals hwr.Id

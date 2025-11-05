@@ -13,11 +13,13 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
+    using Fsel.Identity.Application.Services.LmsCourseService.QueryModels;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models;
     using Fsel.Identity.Domain.Models.CommandModels.Campus;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using Kros.Extensions;
     using MediatR;
@@ -46,6 +48,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
         private const string MismatchedData = "Dữ liệu không trùng khớp";
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
         private const string DataAlreadyExist = "Học sinh đã được thêm vào giáo trình này rồi";
+        private const string CurriculumIsActive = "Giáo trình đang diễn ra";
 
         public AddStudentsToCurriculumCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService)
         {
@@ -63,6 +66,14 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             if (request.FormFile == null)
             {
                 methodResult.AddError(nameof(EnumSystemErrorCode.ImportFileRequired));
+                return methodResult;
+            }
+
+            var curriculumResult = await _lmsCourseService.GetCurriculumById(new GetCurriculumByIdQueryModel() { Id = request.CurriculumId });
+            var curriculum = curriculumResult.Content?.Result;
+            if (curriculum == null || curriculum.CurriculumStatus == EnumCurriculumStatus.Progress)
+            {
+                methodResult.AddErrorBadRequest(CurriculumIsActive);
                 return methodResult;
             }
 
@@ -197,7 +208,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
                 usernamesDoesNotExist.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.ToLower(CultureInfo.CurrentCulture)));
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty())
+                                                  .FirstOrDefault
+                                                  (x =>
+                                                  !string.IsNullOrEmpty(user)
+                                                  && x.Username?.ToLower(CultureInfo.InvariantCulture).Trim() == user.ToLower(CultureInfo.InvariantCulture).Trim()
+                                                  );
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
@@ -207,8 +223,13 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
                 query.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user.User.UserName) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.User.UserName.ToLower(CultureInfo.CurrentCulture)));
-                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.CurrentCulture) != user.User.FullName?.ToLower(CultureInfo.CurrentCulture))
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty())
+                                                  .FirstOrDefault
+                                                  (x =>
+                                                  !string.IsNullOrEmpty(user.User.UserName)
+                                                  && x.Username?.ToLower(CultureInfo.InvariantCulture).Trim() == user.User.UserName.ToLower(CultureInfo.InvariantCulture).Trim());
+
+                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.InvariantCulture).Trim() != user.User.FullName?.ToLower(CultureInfo.InvariantCulture).Trim())
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Username), Message = MismatchedData });

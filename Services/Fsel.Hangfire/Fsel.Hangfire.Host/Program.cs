@@ -41,6 +41,7 @@ builder.Services.AddScoped<CheckUserDeletionPublisher>();
 builder.Services.AddScoped<WeeklyNoticePublisher>();
 builder.Services.AddScoped<ChooseDailyQuizWinnersPublisher>();
 builder.Services.AddScoped<AggregateDataStudentsInEventPublisher>();
+builder.Services.AddScoped<AggregateDataWeeklyReportPublisher>();
 builder.Services.AddScoped<PushNoticePublisher>();
 builder.Services.AddScoped<NotifyWeeklyReportCourseTargetPublisher>();
 builder.Services.AddScoped<NotifyWeeklyCourseGoalTargetPublisher>();

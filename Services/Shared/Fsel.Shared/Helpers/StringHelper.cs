@@ -534,5 +534,10 @@ namespace Fsel.Shared.Helpers
                 return s;
             }
         }
+
+        public static string GenerateEmail(string localPath, string domainPath)
+        {
+            return localPath + domainPath;
+        }
     }
 }
