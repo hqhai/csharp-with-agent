@@ -293,7 +293,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            var (weekStartUtc, weekEndUtc) = GetCurrentWeekRangeUtc();
+            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow();
             var toInsert = new List<StudentGoalSummary>();
 
             var courseGoalById = allCourseGoals.ToDictionary(g => g.Id);
@@ -350,7 +350,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            var (weekStartUtc, weekEndUtc) = GetCurrentWeekRangeUtc();
+            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow();
             var toInsert = new List<StudentGoalSummary>();
             var updatedAggregates = new List<StudentGoalAggregate>();
 
@@ -428,23 +428,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 _studentLearningGoalAggregateRepository.UpdateList(updatedAggregates);
                 await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
             }
-        }
-
-        private static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeUtc()
-        {
-            var nowUtc = DateTime.UtcNow;
-            var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
-
-            var startVn = GetWeekStartMonday(nowVn);
-            var endVn = startVn.AddDays(6);
-            return (startVn, endVn);
-        }
-
-        private static DateTime GetWeekStartMonday(DateTime date)
-        {
-            var day = (int)date.DayOfWeek; // Sunday=0 ... Monday=1 ... Saturday=6
-            var offset = day == 0 ? -6 : 1 - day; // về thứ 2
-            return date.AddDays(offset);
         }
 
         private static CourseGoalModel? GetCourseGoal(IList<CourseGoalModel> courseGoals, EnumCourseLevel courseLevel, EnumCourseType courseType, Guid? schoolClassId = default)
@@ -668,7 +651,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var last = results.OrderByDescending(x => x.CompletionDate ?? x.UpdatedDate).FirstOrDefault();
             weekly.LastCompletedAt = last?.CompletionDate ?? last?.UpdatedDate;
 
-            var (weekStartUtc, weekEndUtc) = GetCurrentWeekRangeUtc();
+            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow();
 
             var completedThisWeek = results.Count(x =>
                 (x.CompletionDate ?? x.UpdatedDate) >= weekStartUtc &&

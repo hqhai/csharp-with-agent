@@ -17,14 +17,14 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
     {
     }
 
-    public class SendWeeklyLessonCourseTargetCommandHandler : IRequestHandler<SendWeeklyLessonCourseTargetCommand, MethodResult<bool>>
+    public class SendWeeklyCourseGoalTargetCommandHandler : IRequestHandler<SendWeeklyCourseGoalTargetCommand, MethodResult<bool>>
     {
         private readonly IStudentGoalSummaryRepository _studentGoalSummaryRepository;
         private readonly IStudentGoalAggregateRepository _studentGoalAggregateRepository;
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly IUserService _userService;
 
-        public SendWeeklyLessonCourseTargetCommandHandler(IStudentGoalSummaryRepository studentGoalSummaryRepository,
+        public SendWeeklyCourseGoalTargetCommandHandler(IStudentGoalSummaryRepository studentGoalSummaryRepository,
         IStudentGoalAggregateRepository studentGoalAggregateRepository,
         NotificationMessagePublisher notificationMessagePublisher,
         IUserService userService)
@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             _userService = userService;
         }
 
-        public async Task<MethodResult<bool>> Handle(SendWeeklyLessonCourseTargetCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<bool>> Handle(SendWeeklyCourseGoalTargetCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
