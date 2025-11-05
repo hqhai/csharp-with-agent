@@ -169,9 +169,9 @@ namespace Fsel.Identity.Authentication.Extensions
                 .AddProfileService<UserProfileService>();
 
             // Post-configure cookie options với tenant-aware events
-            builder.Services.AddHttpContextAccessor();
-            builder.Services.AddScoped<TenantAwareCookieEvents>();
-            builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, TenantAwareCookieOptionsPostConfigure>();
+            //builder.Services.AddHttpContextAccessor();
+            //builder.Services.AddScoped<TenantAwareCookieEvents>();
+            //builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, TenantAwareCookieOptionsPostConfigure>();
 
             builder.Services.AddAuthentication()
                 .AddGoogle(options =>
