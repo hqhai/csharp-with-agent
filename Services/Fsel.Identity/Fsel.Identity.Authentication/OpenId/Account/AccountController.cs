@@ -450,7 +450,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 var user = await _signInManager.UserManager.FindByNameAsync(model.Username.ToSafeString());
                 if (user is not null)
                 {
-                    if (await ValidateLogin(user))
+                    if (await ValidateLogin(user, isByPassConfirmEmailOrPhoneNumber: true))
                     {
                         var userLogin = await _signInManager.PasswordSignInAsync(user, model.Password ?? string.Empty, model.RememberLogin, lockoutOnFailure: true);
 
@@ -956,7 +956,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             return View(request);
         }
 
-        private async Task<bool> ValidateLogin(User? user)
+        private async Task<bool> ValidateLogin(User? user, bool isByPassConfirmEmailOrPhoneNumber = false)
         {
             if (user != null)
             {
@@ -974,7 +974,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
                 {
                     ModelState.AddModelError(string.Empty, _localizer[nameof(EnumAuthUserErrorCode.AccountHasBeenLocked)]);
                 }
-                else if (!IsAccountConfirmed(user) && !await IsByPassByCompetionEvent(user.Id))
+                else if (!isByPassConfirmEmailOrPhoneNumber && !IsAccountConfirmed(user) && !await IsByPassByCompetionEvent(user.Id))
                 {
                     ModelState.AddModelError(string.Empty, _localizer["i18n_account_not_verify_yet"]);
                 }
