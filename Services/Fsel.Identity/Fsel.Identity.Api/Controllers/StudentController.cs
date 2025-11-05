@@ -53,6 +53,19 @@ namespace Fsel.Identity.Api.Controllers
         }
 
         /// <summary>
+        /// Execute-list-query
+        /// </summary>
+        [HttpGet("search-query")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentDetailModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Search([FromQuery] BaseQueryModel query)
+        {
+            SetQuery(query);
+            var result = await _studentRepository.GetListByPageResultAsync<StudentDetailModel>(query);
+            return result.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Student by UserId
         /// </summary>
         [HttpGet("get-by-user-id/{id}")]

@@ -48,7 +48,9 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
             }
             Guid? schoolId = null;
 
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 var schoolIdResult = await _userService.GetSchoolIdAsync();
                 schoolId = schoolIdResult.Content?.Result;
@@ -75,6 +77,14 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
                 query = query.Where(x => courseTypes.Contains(x.CourseType));
             }
 
+            if (request.CourseType.HasValue)
+            {
+                query = query.Where(x => x.CourseType == request.CourseType);
+            }
+            if (request.CourseLevel.HasValue)
+            {
+                query = query.Where(x => x.CourseLevel == request.CourseLevel);
+            }
             if (schoolIds != null && schoolIds.Any())
             {
                 query = query.Where(x => x.SchoolId != null).WhereBulkContains(schoolIds, x => x.SchoolId);

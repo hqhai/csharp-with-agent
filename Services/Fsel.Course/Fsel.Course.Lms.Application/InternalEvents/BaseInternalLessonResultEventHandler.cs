@@ -151,8 +151,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                                 .Where(x => x.EndDate.Date < studentSummary.StartDate.Date)
                                                 .ToList();
 
-            var totalDone = pastSummaries.Sum(x => x.CompletedLessons) + studentSummary.CompletedLessons;
-            var totalPlan = pastSummaries.Sum(x => x.LessonsPerWeek) + studentSummary.LessonsPerWeek;
+            var totalDone = pastSummaries.Sum(x => x.CompletedLessons);
+            var totalPlan = pastSummaries.Sum(x => x.LessonsPerWeek);
 
             studentAggregate.TotalCompletedLessons += 1;
             studentAggregate.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, studentSummary.ProgressStatus);
