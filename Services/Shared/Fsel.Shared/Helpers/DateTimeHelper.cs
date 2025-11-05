@@ -236,9 +236,9 @@ namespace Fsel.Shared.Helpers
             return age;
         }
 
-        public static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeNow()
+        public static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeNow(DateTime? dateTime = default)
         {
-            var nowUtc = DateTime.UtcNow;
+            var nowUtc = dateTime ?? DateTime.UtcNow;
             var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
 
             var startVn = GetWeekStartMonday(nowVn);

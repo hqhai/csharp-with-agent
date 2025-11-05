@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow();
+            var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow(DateTime.UtcNow.AddDays(-7));
 
             var studentGoalSummaries = await (from baseQ in _studentGoalSummaryRepository.Queryable.Where(x => x.StartDate.Date <= weekStartUtc && x.EndDate.Date >= weekEndUtc)
                                               join sga in _studentGoalAggregateRepository.Queryable on baseQ.StudentGoalAggregateId equals sga.Id
