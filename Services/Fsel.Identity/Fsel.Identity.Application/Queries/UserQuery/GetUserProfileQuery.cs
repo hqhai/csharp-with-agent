@@ -68,6 +68,9 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = targetRoles.Any(r => r == userRoles.FirstOrDefault());
+
             User? userView = null;
             if (userRoles.FirstOrDefault() == EnumRole.CSO.ToString())
             {
@@ -119,7 +122,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                                       .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
-            else if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            else if (hasMatchedRole)
             {
                 userView = await _userManager.Users.Include(x => x.Human)
                                                    .Include(x => x.UserSchools)
@@ -257,7 +260,8 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 _mapper.Map(userView?.Human?.CSO, userModel);
             }
-            if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+
+            if (hasMatchedRole)
             {
                 var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
                 if (schoolId.HasValue)
