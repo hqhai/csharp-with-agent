@@ -51,22 +51,24 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             if (!FlowTestResult.TestResults.Any() || FlowTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                var flowService = ServiceProvider.GetService<IFlowService>();
+                var flowService = ServiceProvider.GetRequiredService<IFlowService>();
                 var stepId = await flowService.GetNextStep(x => x.Id == FlowTestResult.FlowId, FlowTestResult.TestResults);
 
                 if (stepId == null)
                 {
                     var isDoneTest = FlowTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done);
-                    if (isDoneTest)
+                    if (!isDoneTest)
                     {
-                        FlowTestResult.Status = EnumResultStatus.Done;
-                        await Commit();
+                        return;
                     }
+
+                    FlowTestResult.Status = EnumResultStatus.Done;
+                    await Commit();
 
                     return;
                 }
 
-                var testService = ServiceProvider.GetService<ITestService>();
+                var testService = ServiceProvider.GetRequiredService<ITestService>();
 
                 var newTestResultTree = await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, stepId.Value, FlowTestResult.Id, FlowTestResult.ProgramId.Value);
 
@@ -119,7 +121,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public async Task MakeAnswers(SubmitAnswerCommandModel request)
         {
-            var testService = ServiceProvider.GetService<ITestService>();
+            var testService = ServiceProvider.GetRequiredService<ITestService>();
             await testService.CreateAnswers(request);
 
             if (request.IsSubmit)
@@ -141,7 +143,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TestResultComposites.Add(testResultComposite);
                 if (testResult.Status == EnumResultStatus.Process)
                 {
-                    var testService = ServiceProvider.GetService<ITestService>();
+                    var testService = ServiceProvider.GetRequiredService<ITestService>();
                     var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == testResult.Id);
                     testResult.SectionResults = hierarchicalTestResult.SectionResults;
                 }
@@ -169,7 +171,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         private async Task Commit()
         {
-            var repository = ServiceProvider.GetService<IRepository<TestGroupResult>>();
+            var repository = ServiceProvider.GetRequiredService<IRepository<TestGroupResult>>();
             if (repository.DbContext.ChangeTracker.HasChanges())
             {
                 await repository.UnitOfWork.SaveChangesAsync();

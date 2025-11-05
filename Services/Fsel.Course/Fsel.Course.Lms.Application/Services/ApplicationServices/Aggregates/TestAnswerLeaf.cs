@@ -28,7 +28,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public override bool IsBelongTo(Guid id)
         {
-            return Result.Id == id;
+            return Result != null && Result.Id == id;
         }
 
         public override async Task Submit()
