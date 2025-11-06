@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
             students.ForEach(p =>
             {
-                var historySendMail = historiesSendMail?.Where(x => x.ReceiverId.HasValue && p.Human != null && p.Human.UserId.HasValue && p.Human.UserId == x.ReceiverId).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
+                var historySendMail = historiesSendMail?.Where(x => x.ReceiverId.HasValue && p.Human != null && p.Human.UserId.HasValue && p.Human.UserId == x.ReceiverId && x.Template == EnumSenderTemplate.LearningProgressWarning).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
                 if (historySendMail != null && historySendMail.CreatedDate.HasValue)
                 {
                     TimeSpan timeDifference = currentDate - historySendMail.CreatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
