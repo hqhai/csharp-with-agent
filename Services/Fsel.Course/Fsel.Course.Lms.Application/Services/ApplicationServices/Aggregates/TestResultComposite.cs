@@ -18,6 +18,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
             {
                 TestResult.Status = EnumResultStatus.Done;
+                TestResult.CorrectCount = TestResult.SectionResults.Sum(x => x.CorrectCount);
+                TestResult.SkillScores = TestResult.SectionResults.SelectMany(x => x.SkillScores).ToList();
             }
         }
 
@@ -28,28 +30,27 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TestResult.Status = EnumResultStatus.Process;
             }
 
-            if (Children != null && Children.Count > 0)
+            if (Children.Count <= 0)
             {
-                var childCanStart = Children.FirstOrDefault(x => x is TestSectionResultComposite tsr
-                && (tsr.TestSectionResult.Status == EnumResultStatus.New || tsr.TestSectionResult.Status == EnumResultStatus.Unfinished)) as TestSectionResultComposite;
-
-                childCanStart?.Start();
+                return;
             }
+
+            var childCanStart =
+                Children.FirstOrDefault(x => x is TestSectionResultComposite
+                {
+                    TestSectionResult.Status: EnumResultStatus.New or EnumResultStatus.Unfinished
+                }) as TestSectionResultComposite;
+
+            childCanStart?.Start();
         }
 
         public override void GenerateChildren()
         {
-            if (TestResult.SectionResults != null && TestResult.SectionResults.Any())
+            if (TestResult.SectionResults.Any())
             {
                 foreach (var sectionResult in TestResult.SectionResults)
                 {
-                    var sectionComposite = new TestSectionResultComposite
-                    {
-                        Result = sectionResult,
-                        Parent = this,
-                        ServiceProvider = ServiceProvider,
-                        Name = "Skill"
-                    };
+                    var sectionComposite = new TestSectionResultComposite { Result = sectionResult, Parent = this, ServiceProvider = ServiceProvider, Name = "Skill" };
                     Children.Add(sectionComposite);
                     sectionComposite.GenerateChildren();
                 }
@@ -79,7 +80,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 Children = childStates,
                 StepFlowId = TestResult.StepFlowId
             };
-
             return stateModel;
         }
     }

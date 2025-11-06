@@ -19,7 +19,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public override bool IsBelongTo(Guid id)
         {
-            if (Result.Id == id)
+            if (Result != null && Result.Id == id)
             {
                 return true;
             }
@@ -29,12 +29,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public override async Task Submit()
         {
-            if (Children != null)
+            foreach (var child in Children)
             {
-                foreach (var child in Children)
-                {
-                    await child.Submit();
-                }
+                await child.Submit();
             }
         }
     }

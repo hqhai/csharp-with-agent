@@ -477,3 +477,11 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+.idea/.idea.Fsel.Src/.idea/.name
+.idea/.idea.Fsel.Src/.idea/copilot.data.migration.agent.xml
+.idea/.idea.Fsel.Src/.idea/copilot.data.migration.ask.xml
+.idea/.idea.Fsel.Src/.idea/copilot.data.migration.ask2agent.xml
+.idea/.idea.Fsel.Src/.idea/copilot.data.migration.edit.xml
+.idea/.idea.Fsel.Src/.idea/encodings.xml
+.idea/.idea.Fsel.Src/.idea/indexLayout.xml
+.idea/.idea.Fsel.Src/.idea/vcs.xml
