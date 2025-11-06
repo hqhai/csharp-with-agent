@@ -20,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class GetOverallHomeQuery : IRequest<MethodResult<OverallHomeModel>>
     {
@@ -89,8 +90,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             // 4) UnitResult mới nhất
             var unitResult = await _unitResultRepository.Queryable.Include(x => x.Unit)
                 .Where(x => x.StudentId == student.Id && x.CourseId == courseResult.CourseId)
-                .OrderByDescending(x => x.NewDate)
-                .ThenByDescending(x => x.CreatedDate)
+                .OrderBy(x => x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+                                      x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+                                      x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone : ValueOrderIndex.OrderIndexOther)
+                .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
 
