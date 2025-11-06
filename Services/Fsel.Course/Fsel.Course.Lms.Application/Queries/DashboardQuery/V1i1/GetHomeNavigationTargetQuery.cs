@@ -18,6 +18,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using static Fsel.Shared.Constants.ValueSettings;
 
     public class GetHomeNavigationTargetQuery : IRequest<MethodResult<HomeNavigationTargetModel>>
     {
@@ -190,7 +191,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 .Where(x => x.StudentId == courseResult.StudentId &&
                             x.CourseId == courseResult.CourseId &&
                             x.Status != EnumResultStatus.Unfinished)
-                .OrderByDescending(x => x.CreatedDate).ThenBy(x => x.UpdatedDate)
+                .OrderBy(x =>
+                 x.Status == EnumResultStatus.Process ? ValueOrderIndex.OrderIndexProcess :
+                 x.Status == EnumResultStatus.New ? ValueOrderIndex.OrderIndexNew :
+                 x.Status == EnumResultStatus.Done ? ValueOrderIndex.OrderIndexDone : ValueOrderIndex.OrderIndexOther)
+                .ThenByDescending(x => x.UpdatedDate ?? x.CreatedDate)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(ct);
         }
