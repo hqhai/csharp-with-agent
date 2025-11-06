@@ -45,6 +45,7 @@ builder.Services.AddScoped<AggregateDataWeeklyReportPublisher>();
 builder.Services.AddScoped<PushNoticePublisher>();
 builder.Services.AddScoped<NotifyWeeklyReportCourseTargetPublisher>();
 builder.Services.AddScoped<NotifyWeeklyCourseGoalTargetPublisher>();
+builder.Services.AddScoped<JobStudentAggregatePublisher>();
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>

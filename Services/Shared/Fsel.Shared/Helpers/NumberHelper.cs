@@ -100,6 +100,22 @@ namespace Fsel.Shared.Helpers
 
         public static double GetPercentChart(this int correctCount, int correctTotal, int digits = 0)
         {
+            if (correctTotal == 0)
+            {
+                if (correctCount == 0)
+                {
+                    return default;
+                }
+                else if (correctCount > 0)
+                {
+                    return MaxPercent;
+                }
+                else
+                {
+                    return -MaxPercent;
+                }
+            }
+
             return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal, digits) : MaxPercent;
         }
 
