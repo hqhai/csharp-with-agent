@@ -171,8 +171,9 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             LoadDoneLessonStatsAsync(IList<(Guid StudentId, Guid CourseId)> keys, CancellationToken ct)
         {
             if (keys == null || keys.Count == 0)
+            {
                 return new();
-
+            }
             var (weekStart, weekEnd) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow();
             var keyDtos = keys.Distinct().Select(k => new { k.StudentId, k.CourseId }).ToList();
 
@@ -248,7 +249,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         private async Task CreateStudentAggregateAsync(IList<StudentDetailModel> students, IList<CourseGoalModel> courseGoals, CancellationToken ct)
         {
             var studentIds = students.Select(x => x.Id).ToList();
-            var unlinkedCourseResults = await GetUnlinkedCourseResultsAsync(students.Select(x => x.Id).ToList(), ct).ConfigureAwait(false);
+            var unlinkedCourseResults = await GetUnlinkedCourseResultsAsync(studentIds, ct).ConfigureAwait(false);
             var unlinkedStudentIds = unlinkedCourseResults
                 .Select(x => x.StudentId)
                 .Distinct()
