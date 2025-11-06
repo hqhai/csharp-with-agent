@@ -103,5 +103,9 @@ namespace Fsel.System.Application.Services.UserServices
         [Get("/v1/admin-school/student/schoolId")]
         [RefitCache(CacheSettings.TimeCache.OneHour)]
         Task<IApiResponse<MethodResult<Guid>>> GetSchoolIdAsync();
+
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        [Get("/v1/student/get-by-user-id/{id}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByUserIdWithCacheAsync([FromRoute] Guid id);
     }
 }

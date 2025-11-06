@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SystemService;
+    using Fsel.Course.Lms.Application.Services.SystemService.QueryModels;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
@@ -44,15 +45,16 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var startDate = DateTime.UtcNow.Date.AddDays(-7);
+            var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow(DateTime.UtcNow.AddDays(-7));
 
-            var studentGoalSummaries = await (from baseQ in _studentGoalSummaryRepository.Queryable.Where(x => x.StartDate.Date <= startDate.Date && x.EndDate.Date >= startDate.Date)
+            var studentGoalSummaries = await (from baseQ in _studentGoalSummaryRepository.Queryable.Where(x => x.StartDate.Date <= weekStartUtc && x.EndDate.Date >= weekEndUtc)
                                               join sga in _studentGoalAggregateRepository.Queryable on baseQ.StudentGoalAggregateId equals sga.Id
                                               select new
                                               {
                                                   StudentGoalSummary = baseQ,
                                                   StudentId = sga.StudentId,
                                               }).ToListAsync(cancellationToken);
+
             var studentIds = studentGoalSummaries.Select(x => x.StudentId).ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             var students = studentResults?.Content?.Result ?? new List<StudentModel>();
@@ -60,7 +62,12 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                                    .Where(x => x.UserId.HasValue)
                                    .Select(x => x.UserId!.Value).ToList();
 
-            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimeByUserIdsAsync(userIds);
+            var featureAccessTimeResults = await _systemService.GetFeatureAccessTimeRangeByUserIds(new GetFeatureAccessTimesByUserIdsQueryModel
+            {
+                UserIds = userIds,
+                StartDate = weekStartUtc,
+                EndDate = weekEndUtc
+            });
             if (!featureAccessTimeResults.IsSuccessStatusCode)
             {
                 methodResult.AddError(featureAccessTimeResults.Error);
@@ -75,9 +82,10 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                 {
                     continue;
                 }
+
                 var userId = student.Human?.UserId ?? default;
                 var sgs = studentGoalSummary.StudentGoalSummary;
-                var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.UserId == userId);
+                var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.CreatedUserId == userId);
                 var (hours, minutes) = (featureAccessTime?.AccessTime ?? default).ConvertHoursAndMinutesBySeconds();
                 var paramsMessage = new List<object> { hours, minutes, sgs.CompletedLessons, sgs.LessonsPerWeek };
                 await SendNotificationAsync(new List<Guid> { userId }, paramsMessage, EnumNotificationType.LinkPage, GetProgressStatus(sgs.ProgressStatus));
