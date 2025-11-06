@@ -33,6 +33,9 @@ namespace Fsel.Shared.Constants
             public const string PushNoticeAt12h00 = "PushNoticeAt12h00";
             public const string PushNoticeAt17h30 = "PushNoticeAt17h30";
             public const string PushNoticeAt19h30 = "PushNoticeAt19h30";
+            public const string JobStudentAggregate = "JobStudentAggregate";
+            public const string NotifyWeeklyReportCourseTarget = "NotifyWeeklyReportCourseTarget";
+            public const string NotifyWeeklyCourseGoalTarget = "NotifyWeeklyCourseGoalTarget";
         }
     }
 }

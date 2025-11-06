@@ -47,7 +47,8 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPracticeResult), request.ExamPracticeResultId);
                 return methodResult;
             }
-            var examPractice = await _examPracticeRepository.Queryable.Include(x => x.ExamPracticeSections).FirstOrDefaultAsync(x => x.Id == examPracticeResult.ExamPracticeId, cancellationToken);
+            var examPractice = await _examPracticeRepository.Queryable.AsNoTracking().Include(x => x.ExamPracticeSections)
+                                                            .FirstOrDefaultAsync(x => x.Id == examPracticeResult.ExamPracticeId, cancellationToken);
             if (examPractice == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(examPractice), examPracticeResult.ExamPracticeId);
@@ -59,7 +60,6 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
                 (examPracticeResultReport.IsCheckScoreColor, examPracticeResultReport.TargetBandScore) = examPractice.CourseLevel.Value.CheckScoreColor(examPracticeResultReport.Score ?? default);
             }
             examPracticeResultReport.IsTeacherGraded = await IsTeacherGraded(examPracticeResult, examPractice.ExamPracticeSections.Where(x => x.CourseSkill.HasValue).Select(x => x.CourseSkill.GetValueOrDefault()).ToList());
-
             methodResult.Result = examPracticeResultReport;
             return methodResult;
         }
@@ -75,8 +75,11 @@ namespace Fsel.ExamPractice.Lms.Application.Queries.ReportQuery
             }
             if (isAIGraded.HasValue && isAIGraded.Value)
             {
-                var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeResult.Id).ToListAsync();
-                return examPracticeAnswers.All(x => !string.IsNullOrEmpty(x.GradingAlFeedback));
+                var gradingAlFeedbacks = await _examPracticeAnswerRepository.Queryable.AsNoTracking()
+                                                                             .Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
+                                                                             .Select(x => x.GradingAlFeedback)
+                                                                             .ToListAsync();
+                return gradingAlFeedbacks.All(x => !string.IsNullOrEmpty(x));
             }
             return true;
         }

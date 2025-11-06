@@ -39,5 +39,7 @@ namespace Fsel.Shared.Models.SenderTemplates
         public string? ContinueLearn { get; set; }
         public string? Display { get; set; }
         public string? BackgroundVertical { get; set; }
+
+        public string? AccessLink { get; set; }
     }
 }

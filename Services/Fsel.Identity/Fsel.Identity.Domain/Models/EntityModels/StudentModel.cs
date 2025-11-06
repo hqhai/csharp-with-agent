@@ -30,6 +30,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? District { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
+        public Guid? SchoolClassId { get; set; }
         public Guid? SchoolId { get; set; }
         public Guid? CourseId { get; set; }
         public Guid? SenderId { get; set; }

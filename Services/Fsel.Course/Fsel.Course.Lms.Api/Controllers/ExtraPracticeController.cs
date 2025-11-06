@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/extraPractice")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class ExtraPracticeController : ControllerBase
     {
         private readonly IMediator _mediator;

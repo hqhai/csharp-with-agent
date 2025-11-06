@@ -3,11 +3,13 @@
 using Fsel.Common.Constants;
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
+using Fsel.Interaction.Application.Queues.Consumers;
 using Fsel.Interaction.Application.Queues.Publishers;
 using Fsel.Interaction.Application.Services.AIService;
 using Fsel.Interaction.Application.Services.CourseServices;
 using Fsel.Interaction.Application.Services.HarmfulContentService;
 using Fsel.Interaction.Application.Services.NotificationService;
+using Fsel.Interaction.Application.Services.OrderService;
 using Fsel.Interaction.Application.Services.SenderServices;
 using Fsel.Interaction.Application.Services.SystemService;
 using Fsel.Interaction.Application.Services.TrainingServices;
@@ -16,6 +18,7 @@ using Fsel.Interaction.Domain.IRepositories;
 using Fsel.Interaction.Infrastructure;
 using Fsel.Interaction.Infrastructure.Repositories;
 using Fsel.Interaction.Infrastructure.ValueSettings;
+using Fsel.Shared.Constants;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -41,6 +44,9 @@ builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
 builder.Services.AddScoped<ISupportTicketRepository, SupportTicketRepository>();
 builder.Services.AddScoped<IFlagRepository, FlagRepository>();
 builder.Services.AddScoped<ICustomerSurveyGroupRepository, CustomerSurveyGroupRepository>();
+builder.Services.AddScoped<ISurveyConfigRepository, SurveyConfigRepository>();
+builder.Services.AddScoped<IUserSurveyAssignmentRepository, UserSurveyAssignmentRepository>();
+
 builder.Services.AddScoped<DiscussionBoardCommentPublisher>();
 builder.Services.AddScoped<DiscussionBoardLikePublisher>();
 builder.Services.AddScoped<InterationActionPublisher>();
@@ -49,6 +55,7 @@ builder.Services.AddScoped<DeleteClassForumByFlagPublisher>();
 builder.Services.AddScoped<CompleteApprovalPostPublisher>();
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
+builder.Services.AddScoped<SendNotifyUserHasSurveyPublisher>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.TrainingApiUrl);
@@ -56,6 +63,7 @@ builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseA
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
@@ -84,7 +92,12 @@ builder.Services.AddRefitClient<IHarmfulContentImageService>().ConfigureHttpClie
     }
 });
 
-builder.AddMassTransit(appSetting);
+builder.AddMassTransit(appSetting,
+queues: new Dictionary<string, Type>
+{
+    { QueueSettings.InteractionQueue.NameQueue.SaveUserSurveyAssignment, typeof(SaveUserSurveyAssignmentConsumer) },
+    { QueueSettings.InteractionQueue.NameQueue.SendNotifyUserHasSurvey, typeof(SendNotifyUserHasSurveyConsumer) },
+});
 
 var app = builder.Build();
 app.UseServices();

@@ -1,5 +1,4 @@
 using Fsel.Core.Base;
-using Fsel.Core.Base.BaseModels;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
 using Fsel.Shared.Constants;
@@ -22,7 +21,7 @@ namespace Fsel.Realtime.Application.Queues.Consumers
         {
             if (message != null)
             {
-                var mockTestResultId = message?.MockTestResultId.ToString();
+                var mockTestResultId = message.MockTestResultId.ToString();
                 await _classForumFeedBackHubContext.GetGroup(mockTestResultId!).SendAsync(RealtimeSettings.MockTestWritingAIFeedBackHub.Methods.MockTestWritingAIFeedBack, message);
             }
         }

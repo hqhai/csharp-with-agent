@@ -9,6 +9,7 @@ using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
 using MediatR;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Application.Commands.VideoCmd
 {
@@ -21,14 +22,17 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         private readonly IVideoRepository _videoRepository;
         private readonly IMapper _mapper;
         private readonly VideoConverter _videoConverter;
+        private readonly IVideoSubFilePathRepository _videoSubFilePathRepository;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
-            , VideoConverter videoConverter)
+            , VideoConverter videoConverter,
+IVideoSubFilePathRepository videoSubFilePathRepository)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
             _videoConverter = videoConverter;
+            _videoSubFilePathRepository = videoSubFilePathRepository;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
@@ -66,6 +70,12 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 {
                     methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
+                }
+
+                var videoSubFilePaths = await _videoSubFilePathRepository.Queryable.Where(p => p.VideoId == video.Id).ToListAsync(cancellationToken);
+                if (videoSubFilePaths.Any())
+                {
+                    await _videoSubFilePathRepository.DeleteListAsync(videoSubFilePaths);
                 }
 
                 _mapper.Map(request, video);

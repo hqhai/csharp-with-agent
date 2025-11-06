@@ -3,12 +3,15 @@
 using System.Net;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Interfaces;
+using Fsel.Course.Lms.Application.Commands.OtherFeatureCmd;
 using Fsel.Course.Lms.Application.Commands.TestCmd;
 using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
 using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
+using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
 using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
@@ -26,12 +29,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         private readonly IMediator _mediator;
         private readonly IQueueProvider _queueProvider;
         private readonly ILogger<TestController> _logger;
+        private readonly ISpeakingEvaluationAIService _speakingEvaluationAIService;
 
-        public TestController(IMediator mediator, IQueueProvider queueProvider, ILogger<TestController> logger)
+        public TestController(IMediator mediator, IQueueProvider queueProvider, ILogger<TestController> logger, ISpeakingEvaluationAIService speakingEvaluationAIService)
         {
             _mediator = mediator;
             _queueProvider = queueProvider;
             _logger = logger;
+            _speakingEvaluationAIService = speakingEvaluationAIService;
         }
 
         /// <summary>
@@ -165,6 +170,32 @@ namespace Fsel.Course.Lms.Api.Controllers
         }
 
         /// <summary>
+        /// Update goal aggregate
+        /// </summary>
+        [HttpPost("goal-aggregate")]
+        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin) })]
+        public async Task<IActionResult> UpdateAggregate()
+        {
+            var queryResult = await _mediator.Send(new RebuildLearningGoalAggregateCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update goal aggregate
+        /// </summary>
+        [HttpPost("test-goal-aggregate")]
+        [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin) })]
+        public async Task<IActionResult> UpdateAggregateTest()
+        {
+            var queryResult = await _mediator.Send(new TestDataRebuildCommand()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Import Module Process
         /// </summary>
         [HttpGet("unauthorized")]
@@ -175,6 +206,18 @@ namespace Fsel.Course.Lms.Api.Controllers
             MethodResult<string> commandResult = new MethodResult<string>();
             commandResult.AddError(StatusCodes.Status401Unauthorized, "Unauthorized");
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Import Module Process
+        /// </summary>
+        [HttpGet("test-ai")]
+        [ProducesResponseType(typeof(MethodResult<string>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin) })]
+        public async Task<double> TestAi([FromQuery] string? question, [FromQuery] string? file)
+        {
+            return await _speakingEvaluationAIService.EvaluationSpeakingV1(question, file);
         }
     }
 

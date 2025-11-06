@@ -23,6 +23,7 @@ namespace Fsel.Shared.Constants
         public const string PermissionName = "Resources//Permission.json";
         public const string RoleClaimName = "Resources//RoleClaim.json";
         public const string MenuName = "Resources//Menu.json";
+        public const string SurveyQuestBoardFileName = "Resources//SurveyQuestBoards.json";
 
         public const string PackageFileName = "Resources//Packages.json";
         public const string TechieActionFileName = "Resources//TechieAction.json";
@@ -111,6 +112,7 @@ namespace Fsel.Shared.Constants
         public const string ReportSurveyQuestionEventSchool = "Resources//ExportExcelTemplates//SurveyQuestionReportSchool.xlsx";
 
         public const string RevenueReport = "Resources//ExportExcelTemplates//TemplateRevenueReport.xlsx";
+        public const string HistoriesSurveyReport = "Resources//ExportExcelTemplates//HistoriesSurveyReport.xlsx";
 
         public const string ReportStudentsByAdminSchool = "Resources//ExportExcelTemplates//Template_Export_Data_Student_By_Admin_School.xlsx";
 
@@ -129,6 +131,12 @@ namespace Fsel.Shared.Constants
         public const string ForbiddenClassForumSchema = "Resources//AIPrompt//JsonSchemas//ForbiddenClassForumSchema.json";
 
         public const string ProductFileName = "Resources//Products.json";
+        public const string ExamScoringSkill = "Resources//ExamScoringSkill.json";
+        public const string ExamBandScores = "Resources//ExamBandScores.json";
+        public const string StudentsCampusInfo = "Resources//Campus//StudentsInfo.xlsx";
+
+        public const string TranslateAiInstruction = "Resources//AIPrompt//Instruction//TranslateAiInstruction.txt";
+        public const string TranslateAiRole = "Resources//AIPrompt//Role//TranslateAiRole.txt";
         public const string DashboardI18n = "Resources//DashboardI18n.json";
     }
 }

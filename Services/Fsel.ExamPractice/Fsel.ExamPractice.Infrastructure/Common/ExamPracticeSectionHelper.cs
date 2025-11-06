@@ -9,6 +9,8 @@ namespace Fsel.ExamPractice.Infrastructure.Common
     using Fsel.ExamPractice.Domain.Entities.SkillScoreConfigs;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.ExamPractice.Domain.IRepositories;
+    using Fsel.ExamPractice.Domain.Models.EntityModels.Configs;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -31,7 +33,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             _examPracticeSectionResultRepository = examPracticeSectionResultRepository;
         }
 
-        public async Task UpdateExamPracticeToIsSubmit(ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult, bool isSubmit)
+        public async Task UpdateExamPracticeToIsSubmit(ExamPractice examPractice, ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult, bool isSubmit)
         {
             if (isSubmit)
             {
@@ -42,7 +44,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                 {
                     await UpdateExamPracticeSectionResultChildrenAsync(examPracticeSection, examPracticeSectionResult);
                 }
-                await UpdateExamPracticeSectionResultAsync(examPracticeSection, examPracticeSectionResult);
+                await UpdateExamPracticeSectionResultAsync(examPractice, examPracticeSection, examPracticeSectionResult);
             }
         }
 
@@ -60,8 +62,8 @@ namespace Fsel.ExamPractice.Infrastructure.Common
                                                                                                .ToListAsync();
             var examPracticeSectionIds = examPracticeSectionResultChildrens.Select(x => x.ExamPracticeSectionId).ToList();
 
-            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.ExamPracticeSectionResultId == examPracticeSectionResult.Id).ToListAsync();
-            var questions = await _questionRepository.Queryable.WhereBulkContains(examPracticeSectionIds, x => x.ExamPracticeSectionId).ToListAsync();
+            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.ExamPracticeSectionResultId == examPracticeSectionResult.Id).AsNoTracking().ToListAsync();
+            var questions = await _questionRepository.Queryable.WhereBulkContains(examPracticeSectionIds, x => x.ExamPracticeSectionId).AsNoTracking().ToListAsync();
 
             foreach (var item in examPracticeSectionResultChildrens)
             {
@@ -93,10 +95,16 @@ namespace Fsel.ExamPractice.Infrastructure.Common
         public async Task CreateUnansweredExamPracticeSectionResultsAsync(ExamPracticeResult examPracticeResult)
         {
             ArgumentNullException.ThrowIfNull(examPracticeResult);
-            var examPracticeSectionResults = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeResult.Id).ToListAsync();
-            var examPracticeSectionIds = examPracticeSectionResults.Select(x => x.ExamPracticeSectionId).ToList();
-            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId).ToListAsync();
-            var examPracticeUnansweredSectionIds = examPracticeSections.Select(x => x.Id).Except(examPracticeSectionIds);
+            var resultExamPracticeSectionIds = await _examPracticeSectionResultRepository.Queryable
+                                                    .Where(x => x.ExamPracticeResultId == examPracticeResult.Id).AsNoTracking()
+                                                    .Select(x => x.ExamPracticeSectionId)
+                                                    .ToListAsync();
+            var examPracticeSectionIds = await _examPracticeSectionRepository.Queryable
+                                                .Where(x => x.ExamPracticeId == examPracticeResult.ExamPracticeId)
+                                                .AsNoTracking()
+                                                .Select(x => x.Id)
+                                                .ToListAsync();
+            var examPracticeUnansweredSectionIds = examPracticeSectionIds.Except(resultExamPracticeSectionIds);
             var createExamPracticeSectionResults = new List<ExamPracticeSectionResult>();
 
             foreach (var item in examPracticeUnansweredSectionIds)
@@ -118,10 +126,15 @@ namespace Fsel.ExamPractice.Infrastructure.Common
         public async Task CreateUnansweredExamPracticeSectionResultsAsync(ExamPracticeSectionResult examPracticeSectionResult)
         {
             ArgumentNullException.ThrowIfNull(examPracticeSectionResult);
-            var examPracticeSectionResults = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ParentExamPracticeSectionResultId == examPracticeSectionResult.Id).ToListAsync();
-            var examPracticeSectionIds = examPracticeSectionResults.Select(x => x.ExamPracticeSectionId).ToList();
-            var examPracticeSections = await _examPracticeSectionRepository.Queryable.Where(x => x.ParentExamPracticeSectionId == examPracticeSectionResult.ExamPracticeSectionId).ToListAsync();
-            var examPracticeUnansweredSectionIds = examPracticeSections.Select(x => x.Id).Except(examPracticeSectionIds);
+            var resultExamPracticeSectionIds = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ParentExamPracticeSectionResultId == examPracticeSectionResult.Id)
+                                                                        .AsNoTracking()
+                                                                        .Select(x => x.ExamPracticeSectionId)
+                                                                        .ToListAsync();
+            var examPracticeSectionIds = await _examPracticeSectionRepository.Queryable.Where(x => x.ParentExamPracticeSectionId == examPracticeSectionResult.ExamPracticeSectionId)
+                                                                        .AsNoTracking()
+                                                                        .Select(x => x.Id).ToListAsync();
+
+            var examPracticeUnansweredSectionIds = examPracticeSectionIds.Except(resultExamPracticeSectionIds);
             var createExamPracticeSectionResults = new List<ExamPracticeSectionResult>();
 
             foreach (var item in examPracticeUnansweredSectionIds)
@@ -143,27 +156,55 @@ namespace Fsel.ExamPractice.Infrastructure.Common
 
         public async Task UpdateExamPracticeSectionResultsAsync(ExamPracticeResult examPracticeResult)
         {
-            var examPracticeSectionResults = await _examPracticeSectionResultRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
-                                                                                               .ToListAsync();
-            var examPracticeSectionIds = examPracticeSectionResults.Select(x => x.ExamPracticeSectionId).ToList();
+            // Get all section results for the exam
+            var examPracticeSectionResults = await _examPracticeSectionResultRepository.Queryable
+                .Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
+                .ToListAsync();
 
-            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.ExamPracticeResultId == examPracticeResult.Id).ToListAsync();
-            var questions = await _questionRepository.Queryable.WhereBulkContains(examPracticeSectionIds, x => x.ExamPracticeSectionId).ToListAsync();
-
-            foreach (var item in examPracticeSectionResults)
+            if (!examPracticeSectionResults.Any())
             {
-                var listQuestion = questions.Where(x => x.ExamPracticeSectionId == item.ExamPracticeSectionId).ToList();
-                var answers = examPracticeAnswers.Where(x => x.QuestionId.HasValue && listQuestion.Select(x => x.Id).Contains(x.QuestionId.Value)).ToList();
-                var countQuestion = 0;
+                return;
+            }
+            // Get all answers for the exam, grouped by QuestionId for fast lookup
+            var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable
+                .Where(x => x.ExamPracticeResultId == examPracticeResult.Id && x.QuestionId.HasValue)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var answersByQuestionId = examPracticeAnswers
+                .GroupBy(x => x.QuestionId!.Value)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // Get all questions for the sections, grouped by SectionId for fast lookup
+            var examPracticeSectionIds = examPracticeSectionResults.Select(x => x.ExamPracticeSectionId).Distinct().ToList();
+
+            var questions = await _questionRepository.Queryable
+                .WhereBulkContains(examPracticeSectionIds, x => x.ExamPracticeSectionId)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var questionsBySectionId = questions
+                .GroupBy(q => q.ExamPracticeSectionId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (var sectionResult in examPracticeSectionResults)
+            {
+                var listQuestion = questionsBySectionId.TryGetValue(sectionResult.ExamPracticeSectionId, out var qs) ? qs : new List<Question>();
+                var questionIds = listQuestion.Select(q => q.Id).ToHashSet();
+
+                // Get answers for questions in this section
+                var answers = questionIds.SelectMany(qid => answersByQuestionId.TryGetValue(qid, out var ans) ? ans : Enumerable.Empty<ExamPracticeAnswer>()).ToList();
+
+                int countQuestion = 0;
                 foreach (var answer in answers)
                 {
                     var question = listQuestion.FirstOrDefault(x => x.Id == answer.QuestionId);
                     countQuestion += AnswerTypeHelper.GetTotalCorrectByAnswerType(question, answer?.Answer);
                 }
 
-                item.CorrectCount = answers.Sum(x => x.CorrectCount);
-                item.CorrectTotal = listQuestion.Sum(x => x.CorrectTotal);
-                item.Status = EnumResultStatus.Done;
+                sectionResult.CorrectCount = answers.Sum(x => x.CorrectCount);
+                sectionResult.CorrectTotal = listQuestion.Sum(x => x.CorrectTotal);
+                sectionResult.Status = EnumResultStatus.Done;
             }
 
             _examPracticeSectionResultRepository.UpdateList(examPracticeSectionResults);
@@ -186,29 +227,20 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             });
         }
 
-        public SkillScores GetSkillScore(ExamPracticeSection examPracticeSection, IList<BaseAnswer>? baseAnswers)
-        {
-            ArgumentNullException.ThrowIfNull(examPracticeSection);
-            var skill = examPracticeSection.CourseSkill ?? default;
-            return new SkillScores
-            {
-                CorrectCount = baseAnswers?.Sum(x => x.CorrectCount) ?? default,
-                CountQuestion = baseAnswers?.Count ?? default,
-                Skill = skill,
-                Scores = baseAnswers?.Sum(x => x.CorrectCount).GetIeltsScore(skill) ?? default
-            };
-        }
-
-        private async Task<SkillScores> GetSkillScores(ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult)
+        private async Task<SkillScores> GetSkillScores(ExamPractice examPractice, ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult)
         {
             ArgumentNullException.ThrowIfNull(examPracticeSection);
             var maxTotalCorrect = 36;
+            if (examPractice.Type == EnumExamPracticeType.Vstep)
+            {
+                maxTotalCorrect = examPracticeSection.CourseSkill == EnumCourseSkill.Writing ? 40 : 50;
+            }
             int totalQuestion = default;
             var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Include(x => x.Question)
                                                                          .Where(x => x.CreatedDate >= examPracticeSectionResult.CreatedDate)
                                                                          .Where(x => x.ExamPracticeSectionResultId == examPracticeSectionResult.Id).ToListAsync();
 
-            var skillScore = GetSkillScore(examPracticeSection, new List<BaseAnswer>(examPracticeAnswers));
+            var skillScore = GetSkillScore(examPractice, examPracticeSection, new List<BaseAnswer>(examPracticeAnswers));
             var countQuestion = 0;
             foreach (var item in examPracticeAnswers)
             {
@@ -226,10 +258,76 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             {
                 totalQuestion = examPracticeAnswers.Select(x => x.ExamPracticeSectionId).Count();
             }
-
             skillScore.TotalCount = maxTotalCorrect;
             skillScore.TotalQuestion = totalQuestion;
             return skillScore;
+        }
+
+        #region BuildSkillScores
+
+        public SkillScores GetSkillScore(
+            ExamPractice examPractice,
+            ExamPracticeSection examPracticeSection,
+            IList<BaseAnswer>? baseAnswers)
+        {
+            ArgumentNullException.ThrowIfNull(examPracticeSection);
+            ArgumentNullException.ThrowIfNull(examPractice);
+
+            var skill = GetSkill(examPracticeSection);
+            var correctCount = GetCorrectCount(baseAnswers);
+            var score = CalculateScore(examPractice, skill, correctCount);
+
+            return BuildSkillScores(skill, correctCount, baseAnswers, score);
+        }
+
+        private static EnumCourseSkill GetSkill(ExamPracticeSection examPracticeSection)
+        {
+            return examPracticeSection.CourseSkill ?? default;
+        }
+
+        private static int GetCorrectCount(IList<BaseAnswer>? baseAnswers)
+        {
+            return baseAnswers?.Sum(x => x.CorrectCount) ?? default;
+        }
+
+        private static double CalculateScore(ExamPractice examPractice, EnumCourseSkill skill, int correctCount)
+        {
+            if (examPractice.Type == EnumExamPracticeType.Vstep)
+            {
+                return GetBandScore(examPractice.Type, skill, correctCount);
+            }
+            else if (examPractice.Type == EnumExamPracticeType.IELTS)
+            {
+                return correctCount.GetIeltsScore(skill);
+            }
+            return default;
+        }
+
+        private static SkillScores BuildSkillScores(
+            EnumCourseSkill skill,
+            int correctCount,
+            IList<BaseAnswer>? baseAnswers,
+            double score)
+        {
+            return new SkillScores
+            {
+                CorrectCount = correctCount,
+                CountQuestion = baseAnswers?.Count ?? default,
+                Skill = skill,
+                Scores = score
+            };
+        }
+
+        #endregion BuildSkillScores
+
+        private static double GetBandScore(EnumExamPracticeType type, EnumCourseSkill courseSkill, double correctCount)
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.ExamScoringSkill);
+            var examBandScores = ConvertHelper.DeserializeFromFilePath<IList<ExamBandScoreSkill>>(path);
+
+            return examBandScores?.FirstOrDefault(x => x.Type == type && x.CourseSkill == courseSkill)?.BandScores
+                                  .OrderByDescending(x => x.Score)
+                                  .FirstOrDefault(x => correctCount >= x.Score)?.Band ?? 0;
         }
 
         public async Task<int> GetHighestStreak(ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult)
@@ -257,6 +355,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
         public async Task<int> GetHighestStreak(ExamPracticeResult examPracticeResult, ExamPractice examPractice)
         {
             ArgumentNullException.ThrowIfNull(examPracticeResult);
+            ArgumentNullException.ThrowIfNull(examPractice);
             var isHighestStreaks = new List<bool>();
             var examPracticeAnswers = await _examPracticeAnswerRepository.Queryable.Where(x => x.CreatedDate >= examPracticeResult.CreatedDate)
                                                                      .Where(x => x.ExamPracticeResultId == examPracticeResult.Id)
@@ -279,16 +378,29 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             return LinQHelper.GetHighestStreak(isHighestStreaks);
         }
 
-        public async Task UpdateExamPracticeSectionResultAsync(ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult)
+        public async Task UpdateExamPracticeSectionResultAsync(ExamPractice examPractice, ExamPracticeSection examPracticeSection, ExamPracticeSectionResult examPracticeSectionResult)
         {
+            ArgumentNullException.ThrowIfNull(examPractice);
             ArgumentNullException.ThrowIfNull(examPracticeSection);
             ArgumentNullException.ThrowIfNull(examPracticeSectionResult);
-            var skillScore = await GetSkillScores(examPracticeSection, examPracticeSectionResult);
+            var skillScore = await GetSkillScores(examPractice, examPracticeSection, examPracticeSectionResult);
             examPracticeSectionResult.CorrectCount = (int)skillScore.CorrectCount;
             examPracticeSectionResult.CorrectTotal = (int)skillScore.TotalCount;
             examPracticeSectionResult.Status = EnumResultStatus.Done;
             examPracticeSectionResult.HighestStreak = await GetHighestStreak(examPracticeSection, examPracticeSectionResult);
-            if (examPracticeSection.CourseSkill != EnumCourseSkill.Writing)
+
+            if (examPracticeSection.CourseSkill == EnumCourseSkill.Writing)
+            {
+                examPracticeSectionResult.SkillScores = new List<SkillScores> {
+                    new SkillScores
+                    {
+                       Skill = EnumCourseSkill.Writing,
+                       CountQuestion = skillScore.CountQuestion,
+                       TotalQuestion = skillScore.TotalQuestion,
+                    }
+                };
+            }
+            else
             {
                 if (examPracticeSectionResult.SkillScores != null && examPracticeSectionResult.SkillScores.Any())
                 {
@@ -395,7 +507,7 @@ namespace Fsel.ExamPractice.Infrastructure.Common
             {
                 await _examPracticeAnswerRepository.BulkMergeAsync(examPracticeAnswers, bulk =>
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.ExamPracticeSectionId, c.ExamPracticeResultId, c.ExamPracticeSectionResultId };
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.ExamPracticeSectionId, c.ExamPracticeResultId, c.ExamPracticeSectionResultId, c.QuestionId };
                 });
             }
             catch (Exception ex)

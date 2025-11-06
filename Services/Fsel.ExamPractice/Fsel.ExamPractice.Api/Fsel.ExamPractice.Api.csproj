@@ -15,4 +15,8 @@
     <ProjectReference Include="..\Fsel.ExamPractice.Application\Fsel.ExamPractice.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Resources\" />
+  </ItemGroup>
+
 </Project>

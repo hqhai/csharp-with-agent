@@ -3,6 +3,7 @@
 using System.Net;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.LandingPages;
@@ -76,6 +77,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpGet("get-user-profile")]
         [ProducesResponseType(typeof(MethodResult<UserProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ServerCache(CacheSettings.TimeCache.OneMinutes)]
         public async Task<IActionResult> GetProfileUser()
         {
             MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
@@ -183,7 +185,7 @@ namespace Fsel.Identity.Api.Controllers
         /// get user referrals
         /// </summary>
         [HttpGet("get-user-referrals")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<UserReferralsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUserReferral([FromQuery] GetUserReferralsByUserQuery query)
@@ -208,7 +210,7 @@ namespace Fsel.Identity.Api.Controllers
         /// check user referral code
         /// </summary>
         [HttpGet("get-sender-by-code")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<SenderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetSenderByCode([FromQuery] GetSenderByCodeQuery query)
@@ -228,6 +230,20 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> ToolGetOtp([FromQuery] ToolGetOtpQuery query)
         {
             MethodResult<UserOtpCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get role by user ud
+        /// </summary>
+        [HttpGet("get-role-by-user-id/{userId}")]
+        [ProducesResponseType(typeof(MethodResult<string?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
+        public async Task<IActionResult> GetRoleByUserId([FromRoute] string userId)
+        {
+            var commandResult = await _mediator.Send(new GetRoleByUserIdQuery() { UserId = userId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

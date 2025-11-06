@@ -3,8 +3,8 @@
 namespace Fsel.ExamPractice.Lms.Api.Controllers
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.ExamPractice.Domain.Models.EntityModels.Questions;
     using Fsel.ExamPractice.Lms.Application.Queries.QuestionQuery;
@@ -17,7 +17,7 @@ namespace Fsel.ExamPractice.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [ApiController]
     [Route(Settings.APIDefaultRoute + "/question")]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class QuestionController : ControllerBase
     {
         private readonly IMediator _mediator;
