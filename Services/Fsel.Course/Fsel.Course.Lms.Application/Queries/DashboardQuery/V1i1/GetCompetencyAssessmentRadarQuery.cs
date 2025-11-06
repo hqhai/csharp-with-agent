@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
 {
     using System.Data;
-    using FFMpegCore.Enums;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -193,10 +192,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
         }
 
         private static bool InRangeInclusive(double value, double min, double max)
-           => value >= min && value < max;
-
-        private static bool AllInRange(IReadOnlyList<SkillScores> skills, RangeConfigModel rule)
-           => skills.All(s => InRange(s.Percent, rule.Min, rule.Max));
+           => value >= min && value <= max;
 
         private static bool InRange(double value, double? min, double? max)
         {
