@@ -2,8 +2,12 @@
 
 namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 {
+    using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
     using System.Threading;
+    using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums;
     using Fsel.Common.Helpers;
@@ -36,7 +40,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
 
-        public RebuildLearningGoalAggregateCommandHandler(IStudentGoalAggregateRepository studentLearningGoalAggregateRepository,
+        public RebuildLearningGoalAggregateCommandHandler(
+            IStudentGoalAggregateRepository studentLearningGoalAggregateRepository,
             ICourseResultRepository courseResultRepository,
             ILessonResultRepository lessonResultRepository,
             ICourseUnitMockTestRepository courseUnitMockTestRepository,
@@ -59,21 +64,36 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
             var methodResult = new MethodResult<bool>();
 
-            // 0) Lấy CourseGoals
+            // 0) CourseGoals
             var courseGoals = await GetCourseGoalsAsync(cancellationToken).ConfigureAwait(false);
 
-            // 1) Lấy toàn bộ học viên theo cấu hình hiện tại (QueryAll)
-            var studentModels = await GetAllStudentsQueryAllAsync(cancellationToken).ConfigureAwait(false);
+            // 1-2) Stream học viên theo trang → tạo Aggregate cho từng batch (giảm RAM)
+            await foreach (var studentBatch in StreamStudentsByPageAsync(cancellationToken))
+            {
+                var studentsWithCourse = studentBatch
+                    .Where(s => s.CourseId.HasValue && s.CourseId != Guid.Empty)
+                    .ToList();
+                if (studentsWithCourse.Count == 0)
+                {
+                    continue;
+                }
+                await CreateStudentAggregateAsync(studentsWithCourse, courseGoals, cancellationToken).ConfigureAwait(false);
 
-            // 2) Tạo mới các Aggregate chưa có
-            await CreateStudentAggregateAsync(studentModels, courseGoals, cancellationToken).ConfigureAwait(false);
+                // Clear tracking giữa các batch
+                // No direct DbContext available from UnitOfWork; skip explicit ChangeTracker.Clear()
+                // Rely on: AsNoTracking for reads + chunked saves for writes to keep tracker small.
+            }
 
-            // 3) Tái xây dựng tiến độ học tập
+            // 3) Tái xây dựng tiến độ học tập (dùng số liệu gộp, no-tracking)
             await RebuildStudentLearningProgressAsync(courseGoals, cancellationToken).ConfigureAwait(false);
 
             methodResult.Result = true;
             return methodResult;
         }
+
+        // =========================
+        // Data loaders (memory-safe)
+        // =========================
 
         private async Task<IList<CourseGoalModel>> GetCourseGoalsAsync(CancellationToken ct)
         {
@@ -81,147 +101,215 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             return courseGoalRes?.Content?.Result ?? new List<CourseGoalModel>(0);
         }
 
-        private async Task<List<StudentDetailModel>> GetAllStudentsQueryAllAsync(CancellationToken ct)
+        private async IAsyncEnumerable<IList<StudentDetailModel>> StreamStudentsByPageAsync(
+            [EnumeratorCancellation] CancellationToken ct)
         {
-            var baseQuery = new BaseQueryModel
+            const int pageSize = 5000; // tune theo RAM/DB
+            var baseFilter = new List<GenericFilterModel>
             {
-                Filters = new List<GenericFilterModel>
-                {
-                    new GenericFilterModel
-                    {
-                        Property = nameof(StudentModel.SchoolClassId),
-                        Operator = EnumFilterOperator.NotEmpty
-                    }
-                }
+                new() { Property = nameof(StudentModel.SchoolClassId), Operator = EnumFilterOperator.NotEmpty }
             };
-            baseQuery.SetIsQueryAll(true);
-            var studentResults = await _userService.ExecuteListQueryDataAsync(baseQuery).ConfigureAwait(false);
 
-            #region Legacy (kept commented) - Paged concurrent alternative to restore later
+            var page = 1;
+            while (true)
+            {
+                var q = new BaseQueryModel { Page = page, PageSize = pageSize, Filters = baseFilter };
+                var resp = await _userService.SearchAsync(q).ConfigureAwait(false);
+                var result = resp?.Content?.Result;
+                var items = result?.Items;
 
-            //int pageSize = 10000;          // tuỳ nhu cầu
-            //var baseFilter = new List<GenericFilterModel>
-            //{
-            //    new GenericFilterModel
-            //    {
-            //        Property = "CourseId",
-            //        Operator = EnumFilterOperator.NotEmpty
-            //    }
-            //};
-            //var baseQuery = new BaseQueryModel
-            //{
-            //    Filters = baseFilter
-            //};
+                if (items == null || items.Count == 0)
+                {
+                    yield break;
+                }
+                yield return items;
 
-            //var firstResp = await _userService.SearchAsync(baseQuery).ConfigureAwait(false);
-            //var first = firstResp?.Content?.Result;
-            //int totalPages = Math.Max(1, (int)Math.Ceiling((first?.PagingInfo?.TotalItems ?? 1) / (double)pageSize));
-
-            //var bag = new System.Collections.Concurrent.ConcurrentBag<StudentDetailModel>();
-            //var maxConcurrency = 3; // giới hạn song song an toàn
-            //int nextPage = 2;
-            //var workers = Enumerable.Range(0, maxConcurrency).Select(async _ =>
-            //{
-            //    while (true)
-            //    {
-            //        int page = Interlocked.Increment(ref nextPage) - 1;
-            //        if (page > totalPages)
-            //        {
-            //            break;
-            //        }
-            //        var pageQuery = new BaseQueryModel
-            //        {
-            //            Page = page,
-            //            PageSize = pageSize,
-            //            Filters = baseFilter
-            //        };
-
-            //        var pageResp = await _userService.SearchAsync(pageQuery).ConfigureAwait(false);
-            //        var pageResult = pageResp?.Content?.Result;
-            //        if (pageResult?.Items == null || pageResult.Items.Count == 0)
-            //        {
-            //            continue;
-            //        }
-            //        foreach (var s in pageResult.Items)
-            //        {
-            //            bag.Add(s);
-            //        }
-            //    }
-            //});
-
-            //await Task.WhenAll(workers).ConfigureAwait(false);
-            //var studentModels = bag.ToList();
-            //if (first != null && first.Items != null)
-            //{
-            //    studentModels.AddRange(first.Items);
-            //}
-
-            #endregion Legacy (kept commented) - Paged concurrent alternative to restore later
-
-            return studentResults?.Content?.Result?.ToList() ?? new List<StudentDetailModel>(0);
+                page++;
+                var totalPages = result?.PagingInfo?.TotalItems / pageSize ?? page;
+                if (page > totalPages)
+                {
+                    yield break;
+                }
+            }
         }
 
-        private async Task CreateStudentAggregateAsync(IList<StudentDetailModel> students, IList<CourseGoalModel> courseGoals, CancellationToken cancellationToken)
+        private async Task<IList<Guid>> GetStudentIdsWithCourseResultAsync(IList<Guid> studentIds, CancellationToken ct = default)
         {
-            // 1) Lấy CourseResult chưa liên kết Aggregate
-            var unlinkedCourseResults = await GetUnlinkedCourseResultsAsync(cancellationToken);
-            if (!unlinkedCourseResults.Any())
+            return await _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+                .AsNoTracking()
+                .Select(x => x.StudentId)
+                .Distinct()
+                .ToListAsync(ct);
+        }
+
+        private async Task<IList<CourseResult>> GetUnlinkedCourseResultsAsync(IList<Guid> studentIds, CancellationToken ct = default)
+        {
+            var query = from cr in _courseResultRepository.Queryable.Include(x => x.Course).WhereBulkContains(studentIds, x => x.StudentId)
+                        where cr.WorkingStatus != EnumWorkingStatus.NotWorking && cr.Status != EnumResultStatus.Done
+                        join ag0 in _studentLearningGoalAggregateRepository.Queryable.AsNoTracking().Where(x => x.IsActive)
+                            on new { cr.CourseId, cr.StudentId }
+                            equals new { ag0.CourseId, ag0.StudentId } into agGroup
+                        from ag in agGroup.DefaultIfEmpty()
+                        where ag == null
+                        select cr;
+
+            return await query.AsNoTracking().ToListAsync(ct);
+        }
+
+        // Đếm lesson của khóa học trực tiếp từ bảng UnitLesson (tránh nạp navigation)
+        private async Task<Dictionary<Guid, int>> LoadCourseLessonCountsAsync(IEnumerable<Guid> courseIds, CancellationToken ct)
+        {
+            var rows = await _courseUnitMockTestRepository.Queryable.AsNoTracking()
+                                                          .WhereBulkContains(courseIds, x => x.CourseId)
+                                                          .Select(x => new { x.CourseId, Count = x.Unit!.UnitLessons.Count })
+                                                          .ToListAsync(ct);
+            return rows.GroupBy(x => x.CourseId).ToDictionary(g => g.Key, g => g.Sum(x => x.Count));
+        }
+
+        // Lấy số liệu gộp LessonResult: total, week, last
+        private async Task<Dictionary<(Guid StudentId, Guid CourseId), (int total, int week, DateTime? last)>>
+            LoadDoneLessonStatsAsync(IList<(Guid StudentId, Guid CourseId)> keys, CancellationToken ct)
+        {
+            if (keys == null || keys.Count == 0)
             {
-                return;
+                return new();
             }
+            var (weekStart, weekEnd) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow();
+            var keyDtos = keys.Distinct().Select(k => new { k.StudentId, k.CourseId }).ToList();
+
+            var rows = await _lessonResultRepository.Queryable
+                .AsNoTracking()
+                .Where(x => x.Status == EnumResultStatus.Done)
+                .WhereBulkContains(keyDtos, new[] { "StudentId", "CourseId" })
+                .Select(x => new
+                {
+                    x.StudentId,
+                    x.CourseId,
+                    CompletedAt = x.CompletionDate ?? x.UpdatedDate,
+                    IsInWeek = (x.CompletionDate ?? x.UpdatedDate) >= weekStart && (x.CompletionDate ?? x.UpdatedDate) <= weekEnd
+                })
+                .GroupBy(g => new { g.StudentId, g.CourseId })
+                .Select(g => new
+                {
+                    g.Key.StudentId,
+                    g.Key.CourseId,
+                    Total = g.Count(),
+                    Week = g.Count(r => r.IsInWeek),
+                    Last = g.Max(r => r.CompletedAt)
+                })
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+
+            return rows.ToDictionary(
+                k => (k.StudentId, k.CourseId),
+                v => (v.Total, v.Week, v.Last));
+        }
+
+        // Weekly mới nhất mỗi Aggregate (no-tracking)
+        private async Task<Dictionary<Guid, StudentGoalSummary>> FetchLatestWeeklyByAggregateIdAsync(CancellationToken ct)
+        {
+            var latest = await _studentLearningGoalSummaryRepository.Queryable
+                .AsNoTracking()
+                .GroupBy(s => s.StudentGoalAggregateId)
+                .Select(g => g.OrderByDescending(x => x.StartDate).First())
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+
+            return latest.ToDictionary(x => x.StudentGoalAggregateId, x => x);
+        }
+
+        // Tổng weekly (<= today) theo AggregateId
+        private async Task<Dictionary<Guid, (int totalDone, int totalPlan)>> LoadWeeklyTotalsAsync(
+            IEnumerable<Guid> aggregateIds, DateTime today, CancellationToken ct)
+        {
+            var ids = aggregateIds.Distinct().ToList();
+            if (ids.Count == 0)
+                return new();
+
+            var rows = await _studentLearningGoalSummaryRepository.Queryable
+                .AsNoTracking()
+                .Where(x => ids.Contains(x.StudentGoalAggregateId) && x.EndDate <= today)
+                .GroupBy(x => x.StudentGoalAggregateId)
+                .Select(g => new
+                {
+                    AggregateId = g.Key,
+                    TotalDone = g.Sum(s => s.CompletedLessons),
+                    TotalPlan = g.Sum(s => s.LessonsPerWeek)
+                })
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+
+            return rows.ToDictionary(k => k.AggregateId, v => (v.TotalDone, v.TotalPlan));
+        }
+
+        // =========================
+        // Build/Ensure helpers
+        // =========================
+
+        private async Task CreateStudentAggregateAsync(IList<StudentDetailModel> students, IList<CourseGoalModel> courseGoals, CancellationToken ct)
+        {
+            var studentIds = students.Select(x => x.Id).ToList();
+            var unlinkedCourseResults = await GetUnlinkedCourseResultsAsync(studentIds, ct).ConfigureAwait(false);
             var unlinkedStudentIds = unlinkedCourseResults
-                                    .Select(x => x.StudentId)
-                                    .Distinct()
-                                    .ToHashSet();
+                .Select(x => x.StudentId)
+                .Distinct()
+                .ToHashSet();
 
-            // 2) Lấy CourseGoal + đếm tổng lesson của các course liên quan
-            var studentIdsWithCourseResult = await GetStudentIdsWithCourseResultAsync(cancellationToken);
-            var studentsWithoutCourse = students.Where(s => !studentIdsWithCourseResult.Contains(s.Id)   // chưa có CourseResult
-                                                  || unlinkedStudentIds.Contains(s.Id))        // có CourseResult nhưng chưa liên kết Aggregate
-                                                .ToList();
+            var studentIdsWithCourseResult = await GetStudentIdsWithCourseResultAsync(studentIds, ct).ConfigureAwait(false);
+            var studentsWithoutCourse = students
+                .Where(s => !studentIdsWithCourseResult.Contains(s.Id) || unlinkedStudentIds.Contains(s.Id))
+                .ToList();
 
-            var courseIds = studentsWithoutCourse.Where(x => x.CourseId.HasValue)
-                            .Select(s => s.CourseId!.Value)
-                            .Distinct()
-                            .ToList();
+            var courseIds = studentsWithoutCourse
+                .Where(x => x.CourseId.HasValue)
+                .Select(s => s.CourseId!.Value)
+                .Distinct()
+                .ToList();
 
-            var totalLessonsPerCourse = await LoadCourseLessonCountsAsync(courseIds, cancellationToken);
+            var totalLessonsPerCourse = await LoadCourseLessonCountsAsync(courseIds, ct).ConfigureAwait(false);
 
-            var courseResults = studentsWithoutCourse.Where(x => x.CourseId.HasValue && x.CourseId != Guid.Empty).Select(s => new CourseResultModel
-            {
-                StudentId = s.Id,
-                CourseId = s.CourseId ?? default
-            }).ToList();
+            var courseResults = studentsWithoutCourse
+                .Where(x => x.CourseId.HasValue && x.CourseId != Guid.Empty)
+                .Select(s => new CourseResultModel { StudentId = s.Id, CourseId = s.CourseId ?? default })
+                .ToList();
 
-            var studentCourseKeys = studentsWithoutCourse.Where(x => x.CourseId.HasValue && x.CourseId != Guid.Empty).Select(s => new
-            {
-                StudentId = s.Id,
-                CourseId = s.CourseId ?? default
-            }).ToList();
+            var studentCourseKeys = studentsWithoutCourse
+                .Where(x => x.CourseId.HasValue && x.CourseId != Guid.Empty)
+                .Select(s => new { StudentId = s.Id, CourseId = s.CourseId ?? default })
+                .ToList();
 
             var existingKeys = await _studentLearningGoalAggregateRepository.Queryable
-                        .AsNoTracking()
-                        .WhereBulkContains(studentCourseKeys, new[] { "StudentId", "CourseId" })
-                        .Select(a => new { a.StudentId, a.CourseId })
-                        .ToListAsync(cancellationToken)
-                        .ConfigureAwait(false);
+                .AsNoTracking()
+                .WhereBulkContains(studentCourseKeys, new[] { "StudentId", "CourseId" })
+                .Select(a => new { a.StudentId, a.CourseId })
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
 
-            var doneLessonResultsMap = await LoadDoneLessonResultsMapAsync(courseResults, cancellationToken);
+            var pairs = courseResults.Select(s => (s.StudentId, s.CourseId)).Distinct().ToList();
+            var doneStats = await LoadDoneLessonStatsAsync(pairs, ct).ConfigureAwait(false);
 
-            var aggregatesToInsert = BuildAggregates(courseResults, courseGoals, students, totalLessonsPerCourse, doneLessonResultsMap);
+            var aggregatesToInsert = BuildAggregates(courseResults, courseGoals, students, totalLessonsPerCourse, doneStats);
             if (aggregatesToInsert.Count == 0)
             {
                 return;
             }
-            var existingKeySet = existingKeys.Select(k => (k.StudentId, k.CourseId))
-                                            .ToHashSet();
-            aggregatesToInsert = aggregatesToInsert.Where(a => !existingKeySet.Contains((a.StudentId, a.CourseId)))
-                                            .ToList();
+            var existingKeySet = existingKeys.Select(k => (k.StudentId, k.CourseId)).ToHashSet();
+            aggregatesToInsert = aggregatesToInsert
+                .Where(a => !existingKeySet.Contains((a.StudentId, a.CourseId)))
+                .ToList();
+
             if (aggregatesToInsert.Any())
             {
-                await _studentLearningGoalAggregateRepository.AddList(aggregatesToInsert);
-                await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                await EnsureWeeklySummariesForAggregatesAsync(aggregatesToInsert, courseGoals, doneLessonResultsMap, cancellationToken);
+                // No direct DbContext from UnitOfWork → save in chunks
+                const int batch = 2000;
+                for (int i = 0; i < aggregatesToInsert.Count; i += batch)
+                {
+                    var slice = aggregatesToInsert.Skip(i).Take(batch).ToList();
+                    await _studentLearningGoalAggregateRepository.AddList(slice);
+                    await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
+                }
+
+                await EnsureWeeklySummariesForAggregatesAsync(aggregatesToInsert, courseGoals, doneStats, ct).ConfigureAwait(false);
             }
         }
 
@@ -230,40 +318,55 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             IList<CourseGoalModel> courseGoals,
             IList<StudentDetailModel> students,
             IDictionary<Guid, int> totalLessonsPerCourse,
-            IDictionary<(Guid StudentId, Guid CourseId), IEnumerable<LessonResult>> doneLessonResultsMap
-            )
+            IDictionary<(Guid StudentId, Guid CourseId), (int total, int week, DateTime? last)> doneStats)
         {
             var aggregates = new List<StudentGoalAggregate>();
+            var studentMap = students.ToDictionary(s => s.Id);
+
+            var cgLookup = courseGoals
+                .GroupBy(g => (g.CourseLevel, g.CourseType))
+                .ToDictionary(k => k.Key, v => v.ToList());
 
             foreach (var cr in courseResults)
             {
-                var student = students.FirstOrDefault(x => x.Id == cr.StudentId);
-                if (student == null)
+                if (!studentMap.TryGetValue(cr.StudentId, out var student))
                 {
                     continue;
                 }
                 var level = cr.CourseLevel ?? student.CourseLevel ?? default;
                 var type = level.GetEnumCourseType();
 
-                // Chọn CourseGoal đúng ưu tiên (đã có helper GetCourseGoal* của bạn)
-                var courseGoal = GetCourseGoal(courseGoals, level, type, student.SchoolClassId); // hoặc GetCourseGoalOrNull(...)
+                if (!cgLookup.TryGetValue((level, type), out var list))
+                {
+                    continue;
+                }
+                CourseGoalModel? courseGoal;
+                if (student.SchoolClassId.HasValue)
+                {
+                    courseGoal = list.FirstOrDefault(x => x.GoalCategory == EnumCourseGoalCategory.School && x.ClassId == student.SchoolClassId.Value)
+                               ?? list.FirstOrDefault(x => x.GoalCategory == EnumCourseGoalCategory.All);
+                }
+                else
+                {
+                    courseGoal = list.FirstOrDefault(x => x.GoalCategory == EnumCourseGoalCategory.DefaultExcludeSchoolAndClass)
+                               ?? list.FirstOrDefault(x => x.GoalCategory == EnumCourseGoalCategory.All);
+                }
                 var courseGoalConfig = courseGoal?.CourseGoalConfigs.FirstOrDefault(x => x.CourseId == cr.CourseId);
                 if (courseGoal == null || courseGoalConfig == null)
                 {
                     continue;
                 }
                 var totalTargetLessons = totalLessonsPerCourse.TryGetValue(cr.CourseId, out var total) ? total : 0;
+                var stat = doneStats.TryGetValue((cr.StudentId, cr.CourseId), out var s) ? s : default;
 
-                var results = doneLessonResultsMap.TryGetValue((cr.StudentId, cr.CourseId), out var r) ? r
-                                                  : Enumerable.Empty<LessonResult>();
-                var studentGoalAggregate = new StudentGoalAggregate
+                var ag = new StudentGoalAggregate
                 {
                     CombinedProgress = EnumCombinedProgress.TotalBehindWeekBehind,
                     CurrentCombinedProgress = EnumCombinedProgress.TotalBehindWeekBehind,
                     StudentId = cr.StudentId,
                     CourseId = cr.CourseId,
                     CourseGoalId = courseGoal.Id,
-                    TotalCompletedLessons = results.Count(),
+                    TotalCompletedLessons = stat.total,
                     CourseGoalConfigId = courseGoalConfig.Id,
                     TotalTargetLessons = totalTargetLessons,
                     CourseLevel = level,
@@ -272,12 +375,12 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 };
                 if (student.SchoolClassId.HasValue)
                 {
-                    studentGoalAggregate.SchoolId = student.SchoolId;
-                    studentGoalAggregate.SchoolName = student.School ?? courseGoal.SchoolName;
-                    studentGoalAggregate.ClassId = student.SchoolClassId;
-                    studentGoalAggregate.ClassName = student.SchoolClass;
+                    ag.SchoolId = student.SchoolId;
+                    ag.SchoolName = student.School ?? courseGoal.SchoolName;
+                    ag.ClassId = student.SchoolClassId;
+                    ag.ClassName = student.SchoolClass;
                 }
-                aggregates.Add(studentGoalAggregate);
+                aggregates.Add(ag);
             }
 
             return aggregates;
@@ -286,16 +389,15 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         private async Task EnsureWeeklySummariesForAggregatesAsync(
             IList<StudentGoalAggregate> aggregates,
             IList<CourseGoalModel> allCourseGoals,
-            IDictionary<(Guid StudentId, Guid CourseId), IEnumerable<LessonResult>> doneLessonResultsMap,
+            IDictionary<(Guid StudentId, Guid CourseId), (int total, int week, DateTime? last)> doneStats,
             CancellationToken ct)
         {
             if (aggregates.Count == 0)
             {
                 return;
             }
-            var (weekStartUtc, weekEndUtc) = GetCurrentWeekRangeUtc();
+            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow();
             var toInsert = new List<StudentGoalSummary>();
-
             var courseGoalById = allCourseGoals.ToDictionary(g => g.Id);
 
             foreach (var ag in aggregates)
@@ -305,30 +407,28 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 {
                     continue;
                 }
-                CourseGoalModel? courseGoal = courseGoalById.TryGetValue(ag.CourseGoalId, out var cg) ? cg : null;
+                if (!courseGoalById.TryGetValue(ag.CourseGoalId, out var courseGoal))
+                {
+                    continue;
+                }
                 var cfg = courseGoal?.CourseGoalConfigs?.FirstOrDefault(c => c.Id == ag.CourseGoalConfigId);
                 if (cfg == null)
                 {
                     continue;
                 }
-                var results = doneLessonResultsMap.TryGetValue((ag.StudentId, ag.CourseId), out var r)
-                                                  ? r
-                                                  : Enumerable.Empty<LessonResult>();
-
-                var completedThisWeek = results.Count(x =>
-                    (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date >= weekStartUtc &&
-                    (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= weekEndUtc);
+                var stat = doneStats.TryGetValue((ag.StudentId, ag.CourseId), out var s) ? s : default;
 
                 toInsert.Add(new StudentGoalSummary
                 {
-                    ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(completedThisWeek, cfg.LessonsPerWeek),
+                    ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(stat.week, cfg.LessonsPerWeek),
                     StartDate = weekStartUtc,
                     EndDate = weekEndUtc,
                     StudentGoalAggregateId = ag.Id,
-                    CompletedLessons = completedThisWeek,
+                    CompletedLessons = stat.week,
                     LessonsPerWeek = cfg.LessonsPerWeek,
                     TotalTargetLessons = ag.TotalTargetLessons,
                     TotalCompletedLessons = ag.TotalCompletedLessons,
+                    LastCompletedAt = stat.last
                 });
             }
 
@@ -343,25 +443,23 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             IList<StudentGoalAggregate> aggregates,
             IList<StudentModel> students,
             IList<CourseGoalModel> allCourseGoals,
-            IDictionary<(Guid StudentId, Guid CourseId), IEnumerable<LessonResult>> doneLessonResultsMap,
+            IDictionary<(Guid StudentId, Guid CourseId), (int total, int week, DateTime? last)> doneStats,
             CancellationToken ct)
         {
             if (aggregates.Count == 0)
             {
                 return;
             }
-            var (weekStartUtc, weekEndUtc) = GetCurrentWeekRangeUtc();
+            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow();
             var toInsert = new List<StudentGoalSummary>();
             var updatedAggregates = new List<StudentGoalAggregate>();
-
-            // Dựng lookup CourseGoal theo Id để khỏi FirstOrDefault nhiều lần
             var courseGoalById = allCourseGoals.ToDictionary(g => g.Id);
             var courseStudents = aggregates.Select(a => new { a.CourseId, a.StudentId }).Distinct().ToList();
 
             var courseResults = await _courseResultRepository.Queryable
-                                                            .WhereBulkContains(courseStudents, new[] { "CourseId", "StudentId" })
-                                                            .AsNoTracking()
-                                                            .ToListAsync(ct);
+                .AsNoTracking()
+                .WhereBulkContains(courseStudents, new[] { "CourseId", "StudentId" })
+                .ToListAsync(ct);
 
             foreach (var ag in aggregates)
             {
@@ -375,43 +473,35 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 {
                     continue;
                 }
-
-                var hasThisWeek = ag.StudentGoalSummaries?
-                    .Any(s => s.StartDate >= weekStartUtc && s.EndDate <= weekEndUtc) == true;
-
+                var hasThisWeek = ag.StudentGoalSummaries?.Any(s => s.StartDate >= weekStartUtc && s.EndDate <= weekEndUtc) == true;
                 if (hasThisWeek)
                 {
                     continue;
                 }
-                var courseGoal = GetCourseGoal(allCourseGoals, ag.CourseLevel, ag.CourseType, student.SchoolClassId); // hoặc GetCourseGoalOrNull(...)
-                var courseGoalConfig = courseGoal?.CourseGoalConfigs.FirstOrDefault(x => x.CourseId == ag.CourseId);
-                if (courseGoal == null || courseGoalConfig == null)
+                var courseGoal = GetCourseGoal(allCourseGoals, ag.CourseLevel, ag.CourseType, student.SchoolClassId);
+                var cfg = courseGoal?.CourseGoalConfigs.FirstOrDefault(x => x.CourseId == ag.CourseId);
+                if (courseGoal == null || cfg == null)
                 {
                     continue;
                 }
-
-                var results = doneLessonResultsMap.TryGetValue((ag.StudentId, ag.CourseId), out var r)
-                                               ? r
-                                               : Enumerable.Empty<LessonResult>();
-
-                var completedThisWeek = results.Count(x =>
-                    (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date >= weekStartUtc &&
-                    (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= weekEndUtc);
+                var stat = doneStats.TryGetValue((ag.StudentId, ag.CourseId), out var s) ? s : default;
 
                 toInsert.Add(new StudentGoalSummary
                 {
-                    ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(completedThisWeek, courseGoalConfig.LessonsPerWeek),
+                    ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(stat.week, cfg.LessonsPerWeek),
                     StartDate = weekStartUtc,
                     EndDate = weekEndUtc,
                     StudentGoalAggregateId = ag.Id,
-                    LessonsPerWeek = courseGoalConfig.LessonsPerWeek,
+                    LessonsPerWeek = cfg.LessonsPerWeek,
                     TotalTargetLessons = ag.TotalTargetLessons,
                     TotalCompletedLessons = ag.TotalCompletedLessons,
+                    CompletedLessons = stat.week,
+                    LastCompletedAt = stat.last
                 });
 
-                if (ag.CourseGoalConfigId != courseGoalConfig.Id || ag.CourseGoalId != courseGoal.Id)
+                if (ag.CourseGoalConfigId != cfg.Id || ag.CourseGoalId != courseGoal.Id)
                 {
-                    ag.CourseGoalConfigId = courseGoalConfig.Id;
+                    ag.CourseGoalConfigId = cfg.Id;
                     ag.CourseGoalId = courseGoal.Id;
                     updatedAggregates.Add(ag);
                 }
@@ -430,23 +520,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }
         }
 
-        private static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeUtc()
-        {
-            var nowUtc = DateTime.UtcNow;
-            var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
-
-            var startVn = GetWeekStartMonday(nowVn);
-            var endVn = startVn.AddDays(6);
-            return (startVn, endVn);
-        }
-
-        private static DateTime GetWeekStartMonday(DateTime date)
-        {
-            var day = (int)date.DayOfWeek; // Sunday=0 ... Monday=1 ... Saturday=6
-            var offset = day == 0 ? -6 : 1 - day; // về thứ 2
-            return date.AddDays(offset);
-        }
-
         private static CourseGoalModel? GetCourseGoal(IList<CourseGoalModel> courseGoals, EnumCourseLevel courseLevel, EnumCourseType courseType, Guid? schoolClassId = default)
         {
             var list = courseGoals.Where(x => x.CourseLevel == courseLevel && x.CourseType == courseType).ToList();
@@ -462,225 +535,82 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }
         }
 
-        private async Task<IList<Guid>> GetStudentIdsWithCourseResultAsync(CancellationToken ct = default)
+        // =========================
+        // Rebuild progress (memory-light)
+        // =========================
+
+        private async Task RebuildStudentLearningProgressAsync(IList<CourseGoalModel> courseGoals, CancellationToken ct)
         {
-            return await _courseResultRepository.Queryable
-                .Select(x => x.StudentId)
-                .Distinct()
+            var today = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
+
+            var aggregates = await _studentLearningGoalAggregateRepository.Queryable
+                .AsNoTracking()
+                .Where(x => x.IsActive)
                 .ToListAsync(ct);
-        }
-
-        private async Task<IList<CourseResult>> GetUnlinkedCourseResultsAsync(CancellationToken ct = default)
-        {
-            var query = from cr in _courseResultRepository.Queryable.Include(x => x.Course)
-                        where cr.WorkingStatus != EnumWorkingStatus.NotWorking && cr.Status != EnumResultStatus.Done
-                        join ag0 in _studentLearningGoalAggregateRepository.Queryable.AsNoTracking().Where(x => x.IsActive)
-                            on new { cr.CourseId, cr.StudentId }
-                            equals new { ag0.CourseId, ag0.StudentId } into agGroup
-                        from ag in agGroup.DefaultIfEmpty()
-                        where ag == null
-                        select cr;
-
-            return await query.AsNoTracking().ToListAsync(ct);
-        }
-
-        private async Task RebuildStudentLearningProgressAsync(IList<CourseGoalModel> courseGoals, CancellationToken cancellationToken)
-        {
-            var nowVn = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
-
-            var aggAndWeekly = await FetchActiveAggWeeklyPairsAsync(cancellationToken);
-
-            var aggregates = aggAndWeekly.Select(p => p.Aggregate).Distinct().ToList();
-            var weeklySummaries = aggAndWeekly.Select(p => p.Weekly).ToList();
-
-            var courseResults = aggregates.Select(cr => new CourseResultModel
+            if (aggregates.Count == 0)
             {
-                StudentId = cr.StudentId,
-                CourseId = cr.CourseId
-            }).ToList();
+                return;
+            }
+            var latestWeeklyByAggId = await FetchLatestWeeklyByAggregateIdAsync(ct);
+            var totalsByAggId = await LoadWeeklyTotalsAsync(latestWeeklyByAggId.Keys, today, ct);
 
             var studentIds = aggregates.Select(a => a.StudentId).Distinct().ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
-            var students = studentResults.Content?.Result ?? new List<StudentModel>();
+            var studentMap = (studentResults.Content?.Result ?? new List<StudentModel>()).ToDictionary(s => s.Id);
 
-            // 2) Lấy "bản ghi tuần mới nhất" theo Aggregate
-            var latestWeeklyByAggId = PickLatestWeeklyByAggregateId(weeklySummaries);
-            var doneLessonResultsMap = await LoadDoneLessonResultsMapAsync(courseResults, cancellationToken);
+            var pairs = aggregates.Select(a => (a.StudentId, a.CourseId)).Distinct().ToList();
+            var doneStats = await LoadDoneLessonStatsAsync(pairs, ct);
 
-            // 5) Tính toán
+            var weeklyToUpdate = new List<StudentGoalSummary>();
             foreach (var ag in aggregates)
             {
-                var student = students.FirstOrDefault(x => x.Id == ag.StudentId);
-                if (student == null)
+                if (!studentMap.ContainsKey(ag.StudentId))
                 {
                     continue;
                 }
-
-                if (!latestWeeklyByAggId.TryGetValue(ag.Id, out var weekly) || weekly is null)
+                if (!latestWeeklyByAggId.TryGetValue(ag.Id, out var w) || w == null)
                 {
                     continue;
                 }
-                var weeklies = weeklySummaries.Where(x => x.StudentGoalAggregateId == ag.Id).Where(x => x.EndDate <= nowVn).ToList();
-                var weeklDaily = weeklySummaries.Where(x => x.StudentGoalAggregateId == ag.Id).Where(x => x.EndDate <= nowVn)
-                                                .OrderByDescending(x => x.StartDate).FirstOrDefault();
+                var stat = doneStats.TryGetValue((ag.StudentId, ag.CourseId), out var s) ? s : default;
+                var totals = totalsByAggId.TryGetValue(ag.Id, out var t) ? t : (0, 0);
 
-                var level = ag.CourseLevel;
-                var type = ag.CourseType;
+                // cập nhật weekly mới nhất
+                w.CompletedLessons = stat.week;
+                w.TotalCompletedLessons = stat.total;
+                w.LastCompletedAt = stat.last;
+                w.ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(w.CompletedLessons, w.LessonsPerWeek);
+                weeklyToUpdate.Add(w);
 
-                var results = doneLessonResultsMap.TryGetValue((ag.StudentId, ag.CourseId), out var r)
-                    ? r
-                    : Enumerable.Empty<LessonResult>();
+                // cập nhật aggregate
+                ag.TotalCompletedLessons = stat.total;
 
-                ApplyWeeklyAndTotalProgress(nowVn, weekly, ag, results);
-                var totalDone = weeklies.Sum(x => x.CompletedLessons);
-                var totalPlan = weeklies.Sum(x => x.LessonsPerWeek);
-                if (weekly.StartDate <= nowVn && weekly.EndDate >= nowVn)
+                if (w.StartDate <= today && w.EndDate >= today)
                 {
-                    ag.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, weekly.ProgressStatus);
-                    if (weeklDaily == null)
-                    {
-                        ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(totalDone, totalPlan);
-                    }
-                    else
-                    {
-                        ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, weeklDaily.ProgressStatus);
-                    }
+                    ag.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totals.Item1, totals.Item2, w.ProgressStatus);
+                    ag.CurrentCombinedProgress = ag.CombinedProgress;
                 }
                 else
                 {
-                    ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totalDone, totalPlan, weekly.ProgressStatus);
-                    ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(totalDone, totalPlan);
-                }
-                UpdateBehindStreak(ag, nowVn, weeklies);
-            }
-
-            // 6) Lưu
-            _studentLearningGoalSummaryRepository.UpdateList(latestWeeklyByAggId.Values);
-            await _studentLearningGoalSummaryRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            _studentLearningGoalAggregateRepository.UpdateList(aggregates);
-            await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            // 6) Tạo weekly summaries cho tuần hiện tại nếu thiếu
-            await EnsureWeeklySummariesForAggregatesAsync(aggregates, students, courseGoals, doneLessonResultsMap, cancellationToken);
-        }
-
-        private static void UpdateBehindStreak(StudentGoalAggregate agg, DateTime nowVn, IReadOnlyList<StudentGoalSummary> weeklySummaries)
-        {
-            if (weeklySummaries == null || weeklySummaries.Count == 0)
-            {
-                agg.ConsecutiveBehindWeeks = 0;
-                return;
-            }
-
-            // Sắp xếp theo mốc thời gian để chắc chắn tuần cuối là mới nhất.
-            // Ưu tiên EndDate, fallback StartDate/CreatedDate.
-            var ordered = weeklySummaries
-                .Where(w => w != null && w.EndDate < nowVn)
-                .OrderBy(w => w.EndDate != default ? w.EndDate
-                         : w.StartDate != default ? w.StartDate
-                         : w.CreatedDate)
-                .ToList();
-
-            var streak = 0;
-
-            for (int i = ordered.Count - 1; i >= 0; i--)
-            {
-                var status = ordered[i].ProgressStatus;
-                if (status == EnumProgressStatus.Behind)
-                {
-                    streak++;
-                }
-                else
-                {
-                    break;
+                    ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totals.Item1, totals.Item2, w.ProgressStatus);
+                    ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(totals.Item1, totals.Item2);
                 }
             }
 
-            agg.ConsecutiveBehindWeeks = streak;
-        }
-
-        private sealed record AggWeeklyPair(StudentGoalAggregate Aggregate, StudentGoalSummary Weekly);
-
-        private async Task<List<AggWeeklyPair>> FetchActiveAggWeeklyPairsAsync(CancellationToken ct)
-        {
-            return await (
-                from ag in _studentLearningGoalAggregateRepository.Queryable.Where(x => x.IsActive)
-                join sm in _studentLearningGoalSummaryRepository.Queryable
-                     on ag.Id equals sm.StudentGoalAggregateId
-                select new AggWeeklyPair(ag, sm)
-            ).ToListAsync(ct);
-        }
-
-        private static Dictionary<Guid, StudentGoalSummary> PickLatestWeeklyByAggregateId(
-            IEnumerable<StudentGoalSummary> weeklies)
-        {
-            return weeklies
-                .GroupBy(s => s.StudentGoalAggregateId)
-                .Select(g => g.OrderByDescending(x => x.StartDate).First())
-                .ToDictionary(x => x.StudentGoalAggregateId, x => x);
-        }
-
-        private async Task<Dictionary<Guid, int>> LoadCourseLessonCountsAsync(
-            IEnumerable<Guid> courseIds, CancellationToken ct)
-        {
-            var rows = await _courseUnitMockTestRepository.Queryable
-                .AsNoTracking()
-                .WhereBulkContains(courseIds, x => x.CourseId)
-                .Select(x => new { x.CourseId, Count = x.Unit!.UnitLessons.Count })
-                .ToListAsync(ct);
-
-            return rows.GroupBy(x => x.CourseId)
-                       .ToDictionary(g => g.Key, g => g.Sum(x => x.Count));
-        }
-
-        private async Task<Dictionary<(Guid StudentId, Guid CourseId), IEnumerable<LessonResult>>> LoadDoneLessonResultsMapAsync(IList<CourseResultModel> aggregates, CancellationToken ct)
-        {
-            var studentCourseKeys = aggregates.Select(a => new
+            // No direct DbContext from UnitOfWork → save in chunks instead of toggling AutoDetectChanges/clearing tracker
+            const int chunkSizeUpdate = 2000;
+            foreach (var chunk in weeklyToUpdate.Chunk(chunkSizeUpdate))
             {
-                a.StudentId,
-                a.CourseId
-            }).Distinct().ToList();
+                _studentLearningGoalSummaryRepository.UpdateList(chunk.ToList());
+                await _studentLearningGoalSummaryRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
+            }
 
-            var rows = await _lessonResultRepository.Queryable
-                .Where(x => x.Status == EnumResultStatus.Done)
-                .WhereBulkContains(studentCourseKeys, new[] { "StudentId", "CourseId" })
-                .Select(x => new LessonResult
-                {
-                    StudentId = x.StudentId,
-                    CourseId = x.CourseId,
-                    CompletionDate = x.CompletionDate,
-                    UpdatedDate = x.UpdatedDate
-                })
-                .ToListAsync(ct);
-
-            return rows.GroupBy(x => (x.StudentId, x.CourseId))
-                       .ToDictionary(g => g.Key, g => g.AsEnumerable());
-        }
-
-        private static void ApplyWeeklyAndTotalProgress(
-            DateTime nowVn,
-            StudentGoalSummary weekly,
-            StudentGoalAggregate agg,
-            IEnumerable<LessonResult> results)
-        {
-            // Lần hoàn thành gần nhất
-            var last = results.OrderByDescending(x => x.CompletionDate ?? x.UpdatedDate).FirstOrDefault();
-            weekly.LastCompletedAt = last?.CompletionDate ?? last?.UpdatedDate;
-
-            var (weekStartUtc, weekEndUtc) = GetCurrentWeekRangeUtc();
-
-            var completedThisWeek = results.Count(x =>
-                (x.CompletionDate ?? x.UpdatedDate) >= weekStartUtc &&
-                (x.CompletionDate ?? x.UpdatedDate) <= weekEndUtc);
-
-            weekly.CompletedLessons = completedThisWeek;
-            weekly.ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(completedThisWeek, weekly.LessonsPerWeek);
-
-            // Tổng
-            var totalCompleted = results.Count();
-            weekly.TotalCompletedLessons = totalCompleted;
-            agg.TotalCompletedLessons = totalCompleted;
+            foreach (var chunk in aggregates.Chunk(chunkSizeUpdate))
+            {
+                _studentLearningGoalAggregateRepository.UpdateList(chunk.ToList());
+                await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
+            }
+            await EnsureWeeklySummariesForAggregatesAsync(aggregates, studentMap.Values.ToList(), courseGoals, doneStats, ct).ConfigureAwait(false);
         }
     }
 }
