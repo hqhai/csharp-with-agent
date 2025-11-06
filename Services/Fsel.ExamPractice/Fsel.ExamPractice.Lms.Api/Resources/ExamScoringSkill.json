@@ -1,0 +1,322 @@
+[
+  {
+    "courseSkill": "Reading",
+    "type": "Vstep",
+    "bandScores": [
+      {
+        "score": 0,
+        "band": 0
+      },
+      {
+        "score": 1,
+        "band": 0.5
+      },
+      {
+        "score": 2,
+        "band": 0.5
+      },
+      {
+        "score": 3,
+        "band": 1
+      },
+      {
+        "score": 4,
+        "band": 1
+      },
+      {
+        "score": 5,
+        "band": 1.5
+      },
+      {
+        "score": 6,
+        "band": 1.5
+      },
+      {
+        "score": 7,
+        "band": 2
+      },
+      {
+        "score": 8,
+        "band": 2
+      },
+      {
+        "score": 9,
+        "band": 2.5
+      },
+      {
+        "score": 10,
+        "band": 2.5
+      },
+      {
+        "score": 11,
+        "band": 3
+      },
+      {
+        "score": 12,
+        "band": 3
+      },
+      {
+        "score": 13,
+        "band": 3.5
+      },
+      {
+        "score": 14,
+        "band": 3.5
+      },
+      {
+        "score": 15,
+        "band": 4
+      },
+      {
+        "score": 16,
+        "band": 4
+      },
+      {
+        "score": 17,
+        "band": 4.5
+      },
+      {
+        "score": 18,
+        "band": 4.5
+      },
+      {
+        "score": 19,
+        "band": 5
+      },
+      {
+        "score": 20,
+        "band": 5
+      },
+      {
+        "score": 21,
+        "band": 5.5
+      },
+      {
+        "score": 22,
+        "band": 5.5
+      },
+      {
+        "score": 23,
+        "band": 6
+      },
+      {
+        "score": 24,
+        "band": 6
+      },
+      {
+        "score": 25,
+        "band": 6.5
+      },
+      {
+        "score": 26,
+        "band": 6.5
+      },
+      {
+        "score": 27,
+        "band": 7
+      },
+      {
+        "score": 28,
+        "band": 7
+      },
+      {
+        "score": 29,
+        "band": 7.5
+      },
+      {
+        "score": 30,
+        "band": 7.5
+      },
+      {
+        "score": 31,
+        "band": 8
+      },
+      {
+        "score": 32,
+        "band": 8
+      },
+      {
+        "score": 33,
+        "band": 8.5
+      },
+      {
+        "score": 34,
+        "band": 8.5
+      },
+      {
+        "score": 35,
+        "band": 9
+      },
+      {
+        "score": 36,
+        "band": 9
+      },
+      {
+        "score": 37,
+        "band": 9.5
+      },
+      {
+        "score": 38,
+        "band": 9.5
+      },
+      {
+        "score": 39,
+        "band": 10
+      },
+      {
+        "score": 40,
+        "band": 10
+      }
+    ]
+  },
+  {
+    "courseSkill": "Listening",
+    "type": "Vstep",
+    "bandScores": [
+      {
+        "score": 0,
+        "band": 0
+      },
+      {
+        "score": 1,
+        "band": 0.5
+      },
+      {
+        "score": 2,
+        "band": 0.5
+      },
+      {
+        "score": 3,
+        "band": 1
+      },
+      {
+        "score": 4,
+        "band": 1
+      },
+      {
+        "score": 5,
+        "band": 1.5
+      },
+      {
+        "score": 6,
+        "band": 1.5
+      },
+      {
+        "score": 7,
+        "band": 2
+      },
+      {
+        "score": 8,
+        "band": 2.5
+      },
+      {
+        "score": 9,
+        "band": 2.5
+      },
+      {
+        "score": 10,
+        "band": 3
+      },
+      {
+        "score": 11,
+        "band": 3
+      },
+      {
+        "score": 12,
+        "band": 3.5
+      },
+      {
+        "score": 13,
+        "band": 3.5
+      },
+      {
+        "score": 14,
+        "band": 4
+      },
+      {
+        "score": 15,
+        "band": 4.5
+      },
+      {
+        "score": 16,
+        "band": 4.5
+      },
+      {
+        "score": 17,
+        "band": 5
+      },
+      {
+        "score": 18,
+        "band": 5
+      },
+      {
+        "score": 19,
+        "band": 5.5
+      },
+      {
+        "score": 20,
+        "band": 5.5
+      },
+      {
+        "score": 21,
+        "band": 6
+      },
+      {
+        "score": 22,
+        "band": 6.5
+      },
+      {
+        "score": 23,
+        "band": 6.5
+      },
+      {
+        "score": 24,
+        "band": 7
+      },
+      {
+        "score": 25,
+        "band": 7
+      },
+      {
+        "score": 26,
+        "band": 7.5
+      },
+      {
+        "score": 27,
+        "band": 7.5
+      },
+      {
+        "score": 28,
+        "band": 8
+      },
+      {
+        "score": 29,
+        "band": 8.5
+      },
+      {
+        "score": 30,
+        "band": 8.5
+      },
+      {
+        "score": 31,
+        "band": 9
+      },
+      {
+        "score": 32,
+        "band": 9
+      },
+      {
+        "score": 33,
+        "band": 9.5
+      },
+      {
+        "score": 34,
+        "band": 9.5
+      },
+      {
+        "score": 35,
+        "band": 10
+      }
+    ]
+  }
+]

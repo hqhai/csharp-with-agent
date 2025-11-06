@@ -36,7 +36,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPost("create-lucky-ticket")]
         [ProducesResponseType(typeof(MethodResult<VoidMethodResult>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> Create([FromBody] CreateLuckyTicketCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -86,7 +86,7 @@ namespace Fsel.System.Api.Controllers
         [HttpGet("get-tickets-by-student")]
         [ProducesResponseType(typeof(MethodResult<IList<string>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetTicketsByStudent()
         {
             var commandResult = await _mediator.Send(new GetLuckyTicketsByStudentQuery()).ConfigureAwait(false);

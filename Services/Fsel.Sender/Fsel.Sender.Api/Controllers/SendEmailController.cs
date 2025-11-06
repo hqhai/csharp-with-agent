@@ -5,7 +5,9 @@ using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Constants;
 using Fsel.Sender.Application.Commands.SendEmailCmd;
+using Fsel.Sender.Application.Queries;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Models.SenderTemplates;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -89,6 +91,18 @@ namespace Fsel.Sender.Api.Controllers
                 Subject = subject,
                 Attachments = attachments
             }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get history send mail learning progress
+        /// </summary>
+        [HttpPost("get-histories-send-mail-learning-progress")]
+        [ProducesResponseType(typeof(MethodResult<IList<HistorySendMailLearningProgressModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetHistorySendMailLearningProgress([FromBody] GetHistoriesSendMailLearningProgressQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

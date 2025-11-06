@@ -27,6 +27,12 @@ namespace Fsel.ExamPractice.Domain.Enums.ErrorCodes
         /// <summary>
         /// This test was just submitted from another device. Please reload the page to view the latest result.
         /// </summary>
-        TestJustSubmittedOnAnotherDevice
+        TestJustSubmittedOnAnotherDevice,
+
+        InvalidReadingQuestionCount,
+
+        InvalidListenningQuestionCount,
+
+        AlreadyExistsLearningData
     }
 }

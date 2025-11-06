@@ -36,13 +36,16 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
             {
                 foreach (var toEmail in request.ToEmails)
                 {
+                    var receiver = request.Receivers.FirstOrDefault(p => p.Email == toEmail);
+
                     MessageHistory messageHistory = new MessageHistory
                     {
                         To = toEmail,
                         Type = EnumMessageHistoryType.Email,
                         Status = request.Status,
                         RequestBody = request.Content,
-                        Template = request.Template
+                        Template = request.Template,
+                        ReceiverId = receiver?.ReceiverId
                     };
 
                     messageHistories.Add(messageHistory);

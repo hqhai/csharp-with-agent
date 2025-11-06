@@ -9,6 +9,7 @@ namespace Fsel.Interaction.Application.Services.UserServices
     using Fsel.Interaction.Application.Services.UserServices.Models;
     using Fsel.Interaction.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Models.ShareModels.EntityModels;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -49,5 +50,8 @@ namespace Fsel.Interaction.Application.Services.UserServices
 
         [Get("/v1/event/get-events-by-event-code-str")]
         Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventToEventCodeStrAsync([Query] GetReportCompetitionEventQueryModel query);
+
+        [Post("/v1/admin/student/search-students-by-user-ids")]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> SearchStudentsByUserIds([Body] SearchStudentsByUserIdsQueryModel model);
     }
 }

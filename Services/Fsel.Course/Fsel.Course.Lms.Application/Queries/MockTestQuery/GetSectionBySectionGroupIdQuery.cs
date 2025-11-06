@@ -133,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
         private async Task UpdateMockTestResultAsync(MockTestResult mockTestResult, CancellationToken cancellationToken)
         {
             mockTestResult.Status = EnumResultStatus.Process;
-
+            mockTestResult.ProcessDate = DateTime.UtcNow;
             await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
             {
                 bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };
@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Queries.MockTestQuery
 
         private async Task<SectionGroupResult> GetAndAddSectionGroupResult(GetSectionBySectionGroupIdQuery request, MockTestResult mockTestResult)
         {
-            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == mockTestResult.StudentId).FirstOrDefaultAsync();
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.StudentId == mockTestResult.StudentId && x.CreatedDate >= mockTestResult.CreatedDate).FirstOrDefaultAsync();
             if (sectionGroupResult == null)
             {
                 _logger.LoggerRequest(request);

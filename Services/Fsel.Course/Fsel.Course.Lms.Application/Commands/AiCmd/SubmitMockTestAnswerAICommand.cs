@@ -24,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Kros.Extensions;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using SharedStringHelper = Shared.Helpers.StringHelper;
 
     public class SubmitMockTestAnswerAICommand : MockTestAnswerResponseModel, IRequest<bool>
     {
@@ -99,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     }
 
                     var aIResponse = await SendChatGPT(aiConfig, item.SystemRoleAlConfig!, userAiConfig, cancellationToken);
-
+                    aIResponse = SharedStringHelper.RemoveMarkdownFromJson(aIResponse);
                     resultDictionary[item.Prompts![0].Type] = aIResponse!;
 
                     await SendWebSocket(aIResponse, item.Prompts![0].Type.ToString(), section.DisplayOrder, request.MockTestResultId, cancellationToken);
@@ -121,6 +122,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     }
 
                     var aIResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig, userAiConfig, cancellationToken);
+                    aIResponse = SharedStringHelper.RemoveMarkdownFromJson(aIResponse);
 
                     resultDictionary[item.Type] = aIResponse!;
 
@@ -146,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 return true;
             }
-            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId);
+            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.CreatedDate >= mockTestResult.CreatedDate);
             if (sectionGroupResult == null)
             {
                 return true;

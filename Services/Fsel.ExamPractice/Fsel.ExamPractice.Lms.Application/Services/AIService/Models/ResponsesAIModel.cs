@@ -58,7 +58,7 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.Models
         public string? Type { get; set; }
 
         [AliasAs("text")]
-        [JsonPropertyName("text")]
+        [JsonPropertyName("text")]  //refusal
         public string? Text { get; set; }
     }
 }

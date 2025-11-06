@@ -120,7 +120,7 @@ namespace Fsel.Identity.Authentication.Controllers
         [HttpPost("sign-up-as-guest")]
         [ProducesResponseType(typeof(MethodResult<TokenModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(roles: new string[] { nameof(EnumRole.Student) })]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> SignUpAsGuest([FromBody] CreateGuestAccountCommand command)
         {
             MethodResult<TokenModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);

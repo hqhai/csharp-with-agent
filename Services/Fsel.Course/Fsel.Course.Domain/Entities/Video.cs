@@ -68,5 +68,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
         public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
+        public ICollection<VideoSubFilePath> VideoSubFilePaths { get; set; } = new List<VideoSubFilePath>();
     }
 }

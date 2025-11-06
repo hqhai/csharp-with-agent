@@ -153,7 +153,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpDelete("delete-user/{id}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        [Permission(StudentManagement.Update)]
+        [Permission(permissionCodes: new[] { StudentManagement.Update, SchoolStudentManagement.Update })]
         public async Task<IActionResult> DeleteStudentFromClass([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteListDataStudentCommand { UserId = id }).ConfigureAwait(false);
@@ -244,7 +244,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpDelete("delete-user-by-userid/{userId}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
-        [Permission(StudentManagement.Update)]
+        [Permission(permissionCodes: new[] { StudentManagement.Update, SchoolStudentManagement.Update })]
         public async Task<IActionResult> DeleteStudentByStudentId([FromRoute] Guid userId)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteStudentByUserIdCommand { UserId = userId }).ConfigureAwait(false);
@@ -445,6 +445,18 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// search students by user ids
+        /// </summary>
+        [HttpPost("search-students-by-user-ids")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SearchStudentsByUserIds([FromBody] SearchStudentsByUserIdsQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

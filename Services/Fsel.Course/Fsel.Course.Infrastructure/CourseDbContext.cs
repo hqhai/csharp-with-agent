@@ -87,11 +87,21 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
+        public DbSet<CurriculumConfig> CurriculumConfigs { get; set; }
+        public DbSet<CurriculumStudent> CurriculumStudents { get; set; }
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
         public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
+        public DbSet<HomeWorkConfig> HomeWorkConfigs { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
+        public DbSet<VideoSubFilePath> VideoSubFilePaths { get; set; }
+        public DbSet<HomeWorkExtraPracticeAnswer> HomeWorkExtraPracticeAnswers { get; set; }
+        public DbSet<HomeWorkExtraPracticeResult> HomeWorkExtraPracticeResults { get; set; }
+        public DbSet<HomeWorkRetry> HomeWorkRetries { get; set; }
+        public DbSet<Topic> Topics { get; set; }
+        public DbSet<StudentGoalAggregate> StudentGoalAggregates { get; set; }
+        public DbSet<StudentGoalSummary> StudentGoalSummaries { get; set; }
 
         #region Report
 
@@ -139,6 +149,8 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ExtraPracticeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CurriculumEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CurriculumStudentTypeConfiguration());
 
             modelBuilder.ApplyConfiguration(new HomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
@@ -198,6 +210,13 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ClassForumDetailResultHistoryTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkExtraPracticeAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkExtraPracticeResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkRetryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoSubFilePathEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentGoalAggregateEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentGoalSummaryEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

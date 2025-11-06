@@ -4,8 +4,8 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections
 {
     using Fsel.ExamPractice.Domain.Entities.Configs;
     using Fsel.ExamPractice.Domain.Enums;
+    using Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeAISettings;
     using Fsel.ExamPractice.Domain.Models.CommandModels.Questions;
-    using Fsel.ExamPractice.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
 
     public class UpdateExamPracticeSectionCommandModel
@@ -17,6 +17,6 @@ namespace Fsel.ExamPractice.Domain.Models.CommandModels.ExamPracticeSections
         public SectionMediaConfig? Config { get; set; }
         public IList<UpdateExamPracticeSectionCommandModel> ChildrenExamPracticeSections { get; set; } = new List<UpdateExamPracticeSectionCommandModel>();
         public IList<UpdateQuestionCommandModel> Questions { get; set; } = new List<UpdateQuestionCommandModel>();
-        public IList<ExamPracticeAISettingModel> ExamPracticeAISettings { get; set; } = new List<ExamPracticeAISettingModel>();
+        public IList<ExamPracticeAISettingCommandModel> ExamPracticeAISettings { get; set; } = new List<ExamPracticeAISettingCommandModel>();
     }
 }

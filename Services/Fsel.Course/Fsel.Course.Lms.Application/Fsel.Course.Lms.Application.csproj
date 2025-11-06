@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Commands\LearningGoalCmd\" />
     <Folder Include="Services\SystemService\QueryModels\Schools\" />
   </ItemGroup>
 
