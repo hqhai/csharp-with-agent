@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -64,7 +65,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 return methodResult;
             }
 
-            var startingLevel = student.CourseLevel.Value.GetPlacementTestLevelByCourseLevel();
+            int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+            var courseLevel = age >= ValueSettings.AgeMilestone.StudentAge ? EnumCourseLevel.B1 : EnumCourseLevel.A2;
+            var startingLevel = courseLevel.GetPlacementTestLevelByCourseLevel();
+
             await SavePlacementTestDoneAsync(student, request.CourseLevel, startingLevel, cancellationToken);
             return methodResult;
         }
