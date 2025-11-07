@@ -26,6 +26,9 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<Fsel.Course.Domain.Models.CommandModels.Lessons.V1i1.UpdateLessonCommandModel, Lesson>()
                     .ForMember(p => p.LessonModules, x => x.Ignore())
                     .ForMember(p => p.LessonInstructions, x => x.Ignore());
+
+            CreateMap<Lesson, Fsel.Course.Domain.Models.EntityModels.V1i2.LessonModel>().IgnoreAllNonExisting()
+                ?.ForMember(p => p.LessonModules, x => x.Ignore());
         }
     }
 }

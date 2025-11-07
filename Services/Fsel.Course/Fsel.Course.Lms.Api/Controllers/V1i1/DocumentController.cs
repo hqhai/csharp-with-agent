@@ -1,0 +1,41 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Lms.Api.Controllers.V1i1
+{
+    using System.Net;
+    using Application.Queries.DocumentQuery;
+    using Common.ActionResults;
+    using Common.Constants;
+    using Domain.Models.EntityModels.V1i1;
+    using MediatR;
+    using Microsoft.AspNetCore.Mvc;
+    using Shared.Attributes;
+    using Shared.Constants;
+
+    [ApiVersions(ApiSettings.APIVersion1i1)]
+    [Route(Settings.APIDefaultRoute + "/document")]
+    //[Permission(role: nameof(EnumRole.Student))]
+    [ApiController]
+    public class DocumentController : ControllerBase
+    {
+        private readonly IMediator _mediator;
+
+        public DocumentController(IMediator mediator)
+        {
+            _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Get List Document for lesson
+        /// </summary>
+        [HttpGet("{originalId}")]
+        [ProducesResponseType(typeof(MethodResult<DocumentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetDocument([FromRoute] Guid originalId)
+        {
+            var getDocument = new SearchDocumentQuery { OriginalId = originalId };
+            MethodResult<DocumentModel> queryResult = await _mediator.Send(getDocument).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+    }
+}

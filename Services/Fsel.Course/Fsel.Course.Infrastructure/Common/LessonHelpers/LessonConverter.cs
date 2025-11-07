@@ -99,6 +99,18 @@ namespace Fsel.Course.Infrastructure.Common.LessonHelpers
                 return methodResult;
             }
 
+            if (string.IsNullOrEmpty(request.Description))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotNullOrEmpty), request.Description);
+                return methodResult;
+            }
+
+            if (string.IsNullOrEmpty(request.Thumbnail))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotNullOrEmpty), request.Thumbnail);
+                return methodResult;
+            }
+
             if (!s_regexCode.IsMatch(request.Name))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumLessonErrorCode.CodeNotValid), request.Name);

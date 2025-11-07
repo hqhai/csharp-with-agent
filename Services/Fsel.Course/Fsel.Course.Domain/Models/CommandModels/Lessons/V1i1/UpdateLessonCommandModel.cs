@@ -15,6 +15,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons.V1i1
 
         public string? InstructionContent { get; set; }
 
+        public string? Description { get; set; }
+
+        public string? Thumbnail { get; set; }
         public Guid LevelId { get; set; }
 
         public Guid ProgramId { get; set; }
