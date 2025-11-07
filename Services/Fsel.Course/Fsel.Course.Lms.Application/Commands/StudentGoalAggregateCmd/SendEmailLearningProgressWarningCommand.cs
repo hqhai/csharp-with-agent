@@ -120,6 +120,11 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             var studentIds = students.Select(p => p.Id).ToList();
             var courseIds = students.Select(p => p.CourseId ?? default).ToList();
 
+            if (studentIds == null || studentIds.Count == 0)
+            {
+                return methodResult;
+            }
+
             var courses = await _courseRepository.Queryable.WhereBulkContains(courseIds, p => p.Id).ToListAsync(cancellationToken);
 
             var lessonResultEntities = await _lessonResultRepository.Queryable.WhereBulkContains(studentIds, p => p.StudentId).ToListAsync(cancellationToken);
@@ -336,7 +341,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                 if (!isSkillMockTest)
                 {
-                    var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Percent, image, p.Percent, color);
+                    var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, $"{p.Percent}%", image, p.Percent, color);
                     skillScoreHtml += html;
                 }
                 else
