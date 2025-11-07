@@ -54,6 +54,7 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<GetAccountDashboardQueryModel, ExportAccountDashboardCommandModel>().IgnoreAllNonExisting();
             CreateMap<CreateUserToLmsAdminPlatCommandModel, User>().IgnoreAllNonExisting();
             CreateMap<UpdateUserInLmsAdminPlatCommandModel, User>().IgnoreAllNonExisting();
+            CreateMap<SignUpSMSCommandModel, User>().IgnoreAllNonExisting();
         }
     }
 }
