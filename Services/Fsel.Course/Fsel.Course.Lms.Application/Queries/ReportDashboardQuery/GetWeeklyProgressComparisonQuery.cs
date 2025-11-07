@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             DateTime nowVn,
             CancellationToken cancellationToken)
         {
-            var query = _studentGoalAggregateRepository.Queryable;
+            var query = _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive);
 
             if (request.ClassIdStr.HasValue)
             {
@@ -183,7 +183,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 CurrentBehind = current,
                 PrevBehind = prev,
                 ChangeAbs = Math.Abs(current - prev),
-                ChangePercent = (int)NumberHelper.GetPercentChart(current, prev)
+                ChangePercent = (int)NumberHelper.GetPercentChart(current - prev, prev)
             };
         }
     }

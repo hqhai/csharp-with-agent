@@ -564,7 +564,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var weeklyToUpdate = new List<StudentGoalSummary>();
             foreach (var ag in aggregates)
             {
-                if (!studentMap.ContainsKey(ag.StudentId))
+                if (!studentMap.TryGetValue(ag.StudentId, out var student))
                 {
                     continue;
                 }
@@ -574,6 +574,11 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 }
                 var stat = doneStats.TryGetValue((ag.StudentId, ag.CourseId), out var s) ? s : default;
                 var totals = totalsByAggId.TryGetValue(ag.Id, out var t) ? t : (0, 0);
+
+                if (ag.StudentId == student.Id && ag.CourseId != student.CourseId)
+                {
+                    ag.IsActive = false;
+                }
 
                 // cập nhật weekly mới nhất
                 w.CompletedLessons = stat.week;
@@ -610,7 +615,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 _studentLearningGoalAggregateRepository.UpdateList(chunk.ToList());
                 await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
             }
-            await EnsureWeeklySummariesForAggregatesAsync(aggregates, studentMap.Values.ToList(), courseGoals, doneStats, ct).ConfigureAwait(false);
+            await EnsureWeeklySummariesForAggregatesAsync(aggregates.Where(x => x.IsActive).ToList(), studentMap.Values.ToList(), courseGoals, doneStats, ct).ConfigureAwait(false);
         }
     }
 }
