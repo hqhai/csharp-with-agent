@@ -5,7 +5,6 @@ namespace Fsel.Ordering.Application.Queues.Consumers
     using System.Threading.Tasks;
     using Fsel.Core.Base;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Ordering.Application.Commands.Events;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -24,8 +23,7 @@ namespace Fsel.Ordering.Application.Queues.Consumers
             {
                 return;
             }
-            await _mediator.Send(new JobActiveEventCommand()
-            ).ConfigureAwait(false);
+            //await _mediator.Send(new JobActiveEventCommand()).ConfigureAwait(false);
         }
     }
 }
