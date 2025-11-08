@@ -142,5 +142,6 @@ namespace Fsel.Shared.Constants
 
         public const string TranslateAiInstruction = "Resources//AIPrompt//Instruction//TranslateAiInstruction.txt";
         public const string TranslateAiRole = "Resources//AIPrompt//Role//TranslateAiRole.txt";
+        public const string DashboardI18n = "Resources//DashboardI18n.json";
     }
 }

@@ -5,7 +5,6 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
@@ -101,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             var authToken = tokenResult.Content?.Result;
             if (authToken != null && _httpContextAccessor.HttpContext != null)
             {
-                _httpContextAccessor.HttpContext.SetHeader(HeaderNames.Authorization, "Bearer " + authToken.AccessToken);
+                _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = "Bearer " + authToken.AccessToken;
                 _authContext.CurrentUsername = authToken.FullName;
                 _authContext.CurrentUserId = userId;
                 _authContext.CurrentFullName = authToken.FullName;

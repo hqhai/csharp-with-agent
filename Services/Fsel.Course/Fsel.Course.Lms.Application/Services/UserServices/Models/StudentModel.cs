@@ -21,12 +21,14 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public string? SchoolClass { get; set; }
         public string? SchoolGrade { get; set; }
         public double NumberOfToken { get; set; }
+        public long NumberOfTokenReceived { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public string? District { get; set; }
         public string? Province { get; set; }
         public Guid? CourseId { get; set; }
         public Guid? SchoolId { get; set; }
+        public Guid? SchoolClassId { get; set; }
         public Guid? SenderId { get; set; }
         public DateTime? ExpiredDate { get; set; }
         public Guid UserId { get; set; }

@@ -68,6 +68,9 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = targetRoles.Any(r => r == userRoles.FirstOrDefault());
+
             User? userView = null;
             if (userRoles.FirstOrDefault() == EnumRole.CSO.ToString())
             {
@@ -106,13 +109,13 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 if (parentStudents != null && parentStudents.Count > 0)
                 {
                     userView = await _userManager.Users.Include(x => x!.Parent)
-                                                        .ThenInclude(x => x!.ParentStudents)
-                                                        .ThenInclude(x => x.Student)
-                                                        .ThenInclude(x => x!.User)
-                                                        .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
+                                                                      .ThenInclude(x => x!.ParentStudents)
+                                                                      .ThenInclude(x => x.Student)
+                                                                      .ThenInclude(x => x!.User)
+                                                                      .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
-            else if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            else if (hasMatchedRole)
             {
                 userView = await _userManager.Users.Include(x => x.UserSchools)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId && x.EmailConfirmed, cancellationToken);
@@ -184,6 +187,21 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             return methodResult;
                         }
                         userModel.Membership = package.Content?.Result?.FirstOrDefault(p => p.Id == userModel.PackageId)?.Code;
+
+                        /*var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
+                        {
+                            Filters = new List<GenericFilterModel>
+                            {
+                                new GenericFilterModel
+                                {
+                                    Property = nameof(student.SchoolId),
+                                    Value = student.SchoolId,
+                                    Operator = Common.Enums.EnumFilterOperator.Equal
+                                }
+                            }
+                        });
+                        var school = schoolResult.Content?.Result;
+                        userModel.SchoolName = school?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name;*/
                     }
                     if (userView?.Receiver?.Sender != null)
                     {
@@ -234,7 +252,8 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             {
                 _mapper.Map(userView?.CSO, userModel);
             }
-            if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+
+            if (hasMatchedRole)
             {
                 var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
                 if (schoolId.HasValue)

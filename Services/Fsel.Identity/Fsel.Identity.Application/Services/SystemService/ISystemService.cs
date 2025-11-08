@@ -44,9 +44,6 @@ namespace Fsel.Identity.Application.Services.SystemService
         [Post("/v1/google-sheet/register-student-for-event")]
         Task<IApiResponse<MethodResult<bool>>> RegisterStudentForEvent([Body] RegisterStudentForEventCommandModel model);
 
-        [Post("/v1/location/execute-list-query")]
-        Task<IApiResponse<MethodResult<IList<LocationModel>>>> ExecuteLocationQuery([Body] BaseQueryModel query);
-
         [Get("/v1/location/get-by-ids")]
         Task<IApiResponse<MethodResult<IList<SchoolModel>>>> GetLocationByIdsAsync([Query] GetLocationsByIdsQueryModel query);
 

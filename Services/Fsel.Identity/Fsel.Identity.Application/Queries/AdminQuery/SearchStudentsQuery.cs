@@ -77,7 +77,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             {
                 queryStudent = queryStudent.Where(m => m.CourseLevel == request.CourseLevel);
             }
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
                 queryStudent = queryStudent.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);

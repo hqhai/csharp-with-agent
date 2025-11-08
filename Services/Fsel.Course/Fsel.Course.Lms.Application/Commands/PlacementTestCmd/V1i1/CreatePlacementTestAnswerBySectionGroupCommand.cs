@@ -59,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly IPlacementTestRepository _placementTestRepository;
         private readonly IMapper _mapper;
+        private readonly ICourseRepository _courseRepository;
         private readonly AppSetting _appSetting;
         private readonly ILogger<CreatePlacementTestAnswerBySectionGroupCommand> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
@@ -100,6 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             _sectionGroupRepository = sectionGroupRepository;
             _placementTestRepository = placementTestRepository;
             _mapper = mapper;
+            _courseRepository = courseRepository;
             _appSetting = appSetting;
             _logger = logger;
             _questBoardPublisher = questBoardPublisher;

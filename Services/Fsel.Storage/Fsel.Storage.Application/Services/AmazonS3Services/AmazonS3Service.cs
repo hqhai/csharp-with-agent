@@ -190,28 +190,28 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 return result;
             }
 
-            //if (isValidEmpty && (file.IsFileType(Common.Enums.EnumFileType.Video) || file.IsFileType(Common.Enums.EnumFileType.Audio)))
-            //{
-            //    var text = await _cognitiveProvider.GetTranscriptionAsync(file);
-            //    if (string.IsNullOrEmpty(text))
-            //    {
-            //        result.AddErrorBadRequest(nameof(EnumMediaErrorCode.EmptyMediaFile), nameof(file), text);
-            //        return result;
-            //    }
+            if (isValidEmpty && (file.IsFileType(Common.Enums.EnumFileType.Video) || file.IsFileType(Common.Enums.EnumFileType.Audio)))
+            {
+                var text = await _cognitiveProvider.GetTranscriptionAsync(file);
+                if (string.IsNullOrEmpty(text))
+                {
+                    result.AddErrorBadRequest(nameof(EnumMediaErrorCode.EmptyMediaFile), nameof(file), text);
+                    return result;
+                }
 
-            //    var time = await MediaHelper.GetMediaDurationAsync(file, _systemFileProvider);
-            //    if (!time.HasValue)
-            //    {
-            //        result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(time), time);
-            //        return result;
-            //    }
+                var time = await MediaHelper.GetMediaDurationAsync(file, _systemFileProvider);
+                if (!time.HasValue)
+                {
+                    result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(time), time);
+                    return result;
+                }
 
-            //    if (time / Shared.Helpers.StringHelper.CountWords(text) > 5)
-            //    {
-            //        result.AddErrorBadRequest(nameof(EnumMediaErrorCode.NotEnough1WordEvery5Seconds), nameof(time), time);
-            //        return result;
-            //    }
-            //}
+                if (time / Shared.Helpers.StringHelper.CountWords(text) > 5)
+                {
+                    result.AddErrorBadRequest(nameof(EnumMediaErrorCode.NotEnough1WordEvery5Seconds), nameof(time), time);
+                    return result;
+                }
+            }
 
             return result;
         }

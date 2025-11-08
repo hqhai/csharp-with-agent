@@ -109,8 +109,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                                 CreatedDate = baseQ.CreatedDate,
                                 UpdatedDate = baseQ.UpdatedDate,
                             };
-
-                if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+                var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+                var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+                if (hasMatchedRole)
                 {
                     var studentSchoolResult = await _userService.GetStudentsToAdminSchoolAsync();
                     if (!studentSchoolResult.IsSuccessStatusCode)
