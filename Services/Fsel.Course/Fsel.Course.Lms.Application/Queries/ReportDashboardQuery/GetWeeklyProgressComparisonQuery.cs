@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 {
+    using System.Linq;
+    using System.Threading;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
@@ -25,7 +27,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         private readonly IStudentGoalAggregateRepository _studentGoalAggregateRepository;
         private readonly IStudentGoalSummaryRepository _studentGoalSummaryRepository;
 
-        public GetWeeklyProgressComparisonQueryHandler(IStudentGoalAggregateRepository studentGoalAggregateRepository,
+        public GetWeeklyProgressComparisonQueryHandler(
+            IStudentGoalAggregateRepository studentGoalAggregateRepository,
             IStudentGoalSummaryRepository studentGoalSummaryRepository)
         {
             _studentGoalAggregateRepository = studentGoalAggregateRepository;
@@ -38,12 +41,30 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             var methodResult = new MethodResult<StackBarChartsModel>();
 
-            var (weeks, startDate, endDate, now) = GetWeeksCoveringMonth(request);
+            // Chuẩn hóa "now" theo VN (cho cả chart + summary)
+            var nowUtc = request.EndDate ?? DateTime.UtcNow;
+            var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
 
-            var (data, startDateGoal) = await GetGoalSummariesAsync(request, startDate, endDate, now, cancellationToken);
+            // Các tuần cover full month của nowVn để build chart
+            var (weeksInMonth, startDate, endDate) = GetWeeksCoveringMonth(nowVn);
 
-            var points = BuildWeeklyPoints(data, weeks);
-            var summary = BuildWeeklySummary(points, now);
+            // Lấy data trong khoảng tuần của tháng (tối ưu: query 1 lần)
+            var (goalSummaries, startDateGoal) = await GetGoalSummariesAsync(
+                request,
+                startDate,
+                endDate,
+                nowVn,
+                cancellationToken);
+
+            // Build dữ liệu cho toàn bộ tuần trong tháng
+            var points = BuildWeeklyPoints(goalSummaries, weeksInMonth);
+
+            // Xác định tuần hiện tại và tuần trước (2 tuần để tính summary)
+            var (currentWeek, previousWeek) = GetCurrentAndPreviousWeeksFromNow(nowVn);
+
+            // Tính summary dựa trên goalSummaries + 2 tuần
+            var summary = BuildWeeklySummary(goalSummaries, currentWeek, previousWeek);
+
             methodResult.Result = new StackBarChartsModel
             {
                 Type = EnumChartType.BarChart,
@@ -55,7 +76,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             return methodResult;
         }
 
-        private static (List<(DateTime start, DateTime end)> weeks, DateTime startDate, DateTime endDate, DateTime now) GetWeeksCoveringMonth(GetWeeklyProgressComparisonQuery request)
+        #region Weeks helpers
+
+        private static (List<(DateTime start, DateTime end)> weeks, DateTime startDate, DateTime endDate)
+            GetWeeksCoveringMonth(DateTime nowVn)
         {
             static DateTime GetMonday(DateTime d)
             {
@@ -69,40 +93,63 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                 var mon = GetMonday(d);
                 return mon.AddDays(6).Date;
             }
-            // Ngày đầu và cuối tháng
-            var nowUtc = request.EndDate ?? DateTime.UtcNow;
-            var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
             var firstDay = new DateTime(nowVn.Year, nowVn.Month, 1);
             var lastDay = new DateTime(nowVn.Year, nowVn.Month, DateTime.DaysInMonth(nowVn.Year, nowVn.Month));
 
-            // Tìm thứ Hai đầu tiên trước hoặc bằng ngày đầu tháng
             var startOfFirstWeek = GetMonday(firstDay);
-            // Tìm Chủ nhật cuối cùng sau hoặc bằng ngày cuối tháng
             var endOfLastWeek = GetSunday(lastDay);
 
-            // Lặp từ startOfFirstWeek → endOfLastWeek
             var weeks = new List<(DateTime start, DateTime end)>();
             var curStart = startOfFirstWeek;
 
             while (curStart <= endOfLastWeek)
             {
-                var curEnd = curStart.AddDays(6);
-                weeks.Add((curStart.Date, curEnd.Date));
+                var curEnd = curStart.AddDays(6).Date;
+                weeks.Add((curStart.Date, curEnd));
                 curStart = curStart.AddDays(7);
             }
 
-            return (weeks, weeks.First().Item1.Date, weeks.Last().Item2.Date, nowVn);
+            return (weeks, weeks.First().start, weeks.Last().end);
         }
 
-        private async Task<(List<StudentGoalSummary>, DateTime?)> GetGoalSummariesAsync(
-            GetWeeklyProgressComparisonQuery request,
-            DateTime startDate,
-            DateTime endDate,
-            DateTime nowVn,
-            CancellationToken cancellationToken)
+        private static (
+            (DateTime start, DateTime end)? currentWeek,
+            (DateTime start, DateTime end)? previousWeek)
+            GetCurrentAndPreviousWeeksFromNow(DateTime nowVn)
         {
-            var query = _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive);
+            static DateTime GetMonday(DateTime d)
+            {
+                int dow = (int)d.DayOfWeek;
+                int offset = dow == 0 ? -6 : 1 - dow;
+                return d.AddDays(offset).Date;
+            }
+
+            var currentWeekStart = GetMonday(nowVn);
+            var currentWeekEnd = currentWeekStart.AddDays(6);
+
+            var previousWeekStart = currentWeekStart.AddDays(-7);
+            var previousWeekEnd = previousWeekStart.AddDays(6);
+
+            return (
+                (currentWeekStart, currentWeekEnd),
+                (previousWeekStart, previousWeekEnd));
+        }
+
+        #endregion Weeks helpers
+
+        #region Data query
+
+        private async Task<(List<StudentGoalSummary> summaries, DateTime? firstGoalStartDate)>
+            GetGoalSummariesAsync(
+                GetWeeklyProgressComparisonQuery request,
+                DateTime startDate,
+                DateTime endDate,
+                DateTime nowVn,
+                CancellationToken cancellationToken)
+        {
+            var query = _studentGoalAggregateRepository.Queryable
+                .Where(x => x.IsActive);
 
             if (request.ClassIdStr.HasValue)
             {
@@ -113,33 +160,51 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             {
                 query = query.Where(x => x.CourseType == request.CourseTypeStr);
             }
-            var firstGoalStartDate = await (from baseQ in query
-                                            join sgs in _studentGoalSummaryRepository.Queryable
-                                              on baseQ.Id equals sgs.StudentGoalAggregateId
-                                            where baseQ.SchoolId == request.SchoolId
-                                            orderby sgs.StartDate
-                                            select sgs.StartDate)
-                                        .FirstOrDefaultAsync(cancellationToken);
-            if ((nowVn.Month < firstGoalStartDate.Month && nowVn.Year <= firstGoalStartDate.Year) || nowVn.Year < firstGoalStartDate.Year)
+
+            // Lấy mốc bắt đầu goal sớm nhất
+            var firstGoalStartDate = await (
+                    from baseQ in query
+                    join sgs in _studentGoalSummaryRepository.Queryable
+                        on baseQ.Id equals sgs.StudentGoalAggregateId
+                    where baseQ.SchoolId == request.SchoolId
+                    orderby sgs.StartDate
+                    select sgs.StartDate
+                ).FirstOrDefaultAsync(cancellationToken);
+
+            // Nếu chưa có dữ liệu thì trả luôn rỗng
+            if (firstGoalStartDate == default)
+            {
+                return (new List<StudentGoalSummary>(), null);
+            }
+
+            // Nếu now trước thời điểm có goal thì không cần load thêm
+            if (nowVn < firstGoalStartDate.Date)
             {
                 return (new List<StudentGoalSummary>(), firstGoalStartDate);
             }
 
-            var studentGoals = await (from baseQ in query
-                                      join sgs in _studentGoalSummaryRepository.Queryable.AsNoTracking()
-                                        on baseQ.Id equals sgs.StudentGoalAggregateId
-                                      where baseQ.SchoolId == request.SchoolId
-                                            && sgs.StartDate.Date >= startDate
-                                            && sgs.EndDate.Date <= endDate
-                                      select new StudentGoalSummary
-                                      {
-                                          StartDate = sgs.StartDate,
-                                          EndDate = sgs.EndDate,
-                                          ProgressStatus = sgs.ProgressStatus
-                                      }).ToListAsync(cancellationToken);
+            // Load summaries trong khoảng tuần để dùng cho cả chart + summary
+            var summaries = await (
+                    from baseQ in query
+                    join sgs in _studentGoalSummaryRepository.Queryable.AsNoTracking()
+                        on baseQ.Id equals sgs.StudentGoalAggregateId
+                    where baseQ.SchoolId == request.SchoolId
+                          && sgs.StartDate.Date >= startDate
+                          && sgs.EndDate.Date <= endDate
+                    select new StudentGoalSummary
+                    {
+                        StartDate = sgs.StartDate,
+                        EndDate = sgs.EndDate,
+                        ProgressStatus = sgs.ProgressStatus
+                    }
+                ).ToListAsync(cancellationToken);
 
-            return (studentGoals, firstGoalStartDate);
+            return (summaries, firstGoalStartDate);
         }
+
+        #endregion Data query
+
+        #region Build chart + summary
 
         private static List<StackBarChartModel> BuildWeeklyPoints(
             IEnumerable<StudentGoalSummary> data,
@@ -166,25 +231,34 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
         }
 
         private static WeekSummary BuildWeeklySummary(
-            List<StackBarChartModel> points,
-            DateTime now)
+            IEnumerable<StudentGoalSummary> data,
+            (DateTime start, DateTime end)? currentWeek,
+            (DateTime start, DateTime end)? previousWeek)
         {
-            var currentPoint = points.FirstOrDefault(p => p.WeekStart <= now && p.WeekEnd >= now);
-            var prevPoint = points
-                .Where(p => p.WeekEnd < now)
-                .OrderByDescending(p => p.WeekEnd)
-                .FirstOrDefault();
+            var summary = new WeekSummary();
 
-            var current = currentPoint?.NumericValue ?? 0;
-            var prev = prevPoint?.NumericValue ?? 0;
-
-            return new WeekSummary
+            if (data == null || !data.Any() || currentWeek == null)
             {
-                CurrentBehind = current,
-                PrevBehind = prev,
-                ChangeAbs = Math.Abs(current - prev),
-                ChangePercent = (int)NumberHelper.GetPercentChart(current - prev, prev)
-            };
+                return summary;
+            }
+
+            int CountBehind((DateTime start, DateTime end) w) =>
+                data.Count(x =>
+                    x.ProgressStatus == EnumProgressStatus.Behind &&
+                    x.StartDate <= w.end &&
+                    x.EndDate >= w.start);
+
+            var current = CountBehind(currentWeek.Value);
+            var prev = previousWeek.HasValue ? CountBehind(previousWeek.Value) : 0;
+
+            summary.CurrentBehind = current;
+            summary.PrevBehind = prev;
+            summary.ChangeAbs = Math.Abs(current - prev);
+            summary.ChangePercent = (int)NumberHelper.GetPercentChart(current - prev, prev);
+
+            return summary;
         }
+
+        #endregion Build chart + summary
     }
 }

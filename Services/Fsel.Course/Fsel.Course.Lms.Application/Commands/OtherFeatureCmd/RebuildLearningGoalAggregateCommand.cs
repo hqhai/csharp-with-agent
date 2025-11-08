@@ -545,7 +545,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
             var aggregates = await _studentLearningGoalAggregateRepository.Queryable
                 .AsNoTracking()
-                .Where(x => x.IsActive)
                 .ToListAsync(ct);
             if (aggregates.Count == 0)
             {
@@ -579,26 +578,33 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 {
                     ag.IsActive = false;
                 }
-
-                // cập nhật weekly mới nhất
-                w.CompletedLessons = stat.week;
-                w.TotalCompletedLessons = stat.total;
-                w.LastCompletedAt = stat.last;
-                w.ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(w.CompletedLessons, w.LessonsPerWeek);
-                weeklyToUpdate.Add(w);
-
-                // cập nhật aggregate
-                ag.TotalCompletedLessons = stat.total;
-
-                if (w.StartDate <= today && w.EndDate >= today)
-                {
-                    ag.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totals.Item1, totals.Item2, w.ProgressStatus);
-                    ag.CurrentCombinedProgress = ag.CombinedProgress;
-                }
                 else
                 {
-                    ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totals.Item1, totals.Item2, w.ProgressStatus);
-                    ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(totals.Item1, totals.Item2);
+                    ag.IsActive = true;
+                }
+
+                if (ag.IsActive)
+                {
+                    // cập nhật weekly mới nhất
+                    w.CompletedLessons = stat.week;
+                    w.TotalCompletedLessons = stat.total;
+                    w.LastCompletedAt = stat.last;
+                    w.ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(w.CompletedLessons, w.LessonsPerWeek);
+                    weeklyToUpdate.Add(w);
+
+                    // cập nhật aggregate
+                    ag.TotalCompletedLessons = stat.total;
+
+                    if (w.StartDate <= today && w.EndDate >= today)
+                    {
+                        ag.CombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totals.Item1, totals.Item2, w.ProgressStatus);
+                        ag.CurrentCombinedProgress = ag.CombinedProgress;
+                    }
+                    else
+                    {
+                        ag.CurrentCombinedProgress = EnumCombinedProgressHelper.GetCurrentCombineProgress(totals.Item1, totals.Item2, w.ProgressStatus);
+                        ag.CombinedProgress = EnumCombinedProgressHelper.GetCombineProgress(totals.Item1, totals.Item2);
+                    }
                 }
             }
 
