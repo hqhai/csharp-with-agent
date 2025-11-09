@@ -39,8 +39,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var (currentWeekStartUtc, previousWeekStartUtc) = GetWeekBoundariesUtc();
 
             var query = BuildBaseQuery(request);
-            var data = await GetDataForWeekAsync(query, request.SchoolId, currentWeekStartUtc, cancellationToken)
-                     ?? await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken)
+            var data = await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken)
+                     ?? await GetDataForWeekAsync(query, request.SchoolId, currentWeekStartUtc, cancellationToken)
                      ?? new List<ProgressRow>();
             var dataPre = await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken) ?? new List<ProgressRow>();
             var stackBar = BuildStackBarChart(data);
@@ -145,7 +145,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
         private IQueryable<StudentGoalAggregate> BuildBaseQuery(GetWeeklyProgressByClassQuery request)
         {
-            var query = _studentGoalAggregateRepository.Queryable.AsNoTracking();
+            var query = _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive).AsNoTracking();
 
             if (request.ClassIdStr.HasValue)
             {
