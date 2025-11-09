@@ -18,7 +18,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using NetTopologySuite.Index.HPRtree;
 
     public class SearchStudentGoalAggregateQuery : SearchStudentGoalAggregateQueryModel, IRequest<MethodResult<PagingItemsModel<StudentGoalAggregateModel>>>
     {
@@ -67,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 schoolId = (await _userService.GetSchoolIdAsync()).Content?.Result;
             }
 
-            var query = _studentGoalAggregateRepository.Queryable;
+            var query = _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive);
             if (schoolId.HasValue)
             {
                 query = query.Where(x => x.SchoolId == schoolId);

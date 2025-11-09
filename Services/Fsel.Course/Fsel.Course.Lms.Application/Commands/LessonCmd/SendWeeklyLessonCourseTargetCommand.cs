@@ -26,18 +26,21 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
         private readonly NotificationMessagePublisher _notificationMessagePublisher;
         private readonly ISystemService _systemService;
         private readonly IUserService _userService;
+        private readonly ICourseResultRepository _courseResultRepository;
 
         public SendWeeklyLessonCourseTargetCommandHandler(IStudentGoalSummaryRepository studentGoalSummaryRepository,
         IStudentGoalAggregateRepository studentGoalAggregateRepository,
         NotificationMessagePublisher notificationMessagePublisher,
         ISystemService systemService,
-        IUserService userService)
+        IUserService userService,
+        ICourseResultRepository courseResultRepository)
         {
             _studentGoalSummaryRepository = studentGoalSummaryRepository;
             _studentGoalAggregateRepository = studentGoalAggregateRepository;
             _notificationMessagePublisher = notificationMessagePublisher;
             _systemService = systemService;
             _userService = userService;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(SendWeeklyLessonCourseTargetCommand request, CancellationToken cancellationToken)
@@ -47,8 +50,9 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
 
             var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow(DateTime.UtcNow.AddDays(-7));
 
-            var studentGoalSummaries = await (from baseQ in _studentGoalSummaryRepository.Queryable.Where(x => x.StartDate.Date <= weekStartUtc && x.EndDate.Date >= weekEndUtc)
-                                              join sga in _studentGoalAggregateRepository.Queryable on baseQ.StudentGoalAggregateId equals sga.Id
+            var querySum = _studentGoalSummaryRepository.Queryable.Where(x => x.StartDate.Date <= weekStartUtc && x.EndDate.Date >= weekEndUtc);
+            var studentGoalSummaries = await (from baseQ in querySum
+                                              join sga in _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive) on baseQ.StudentGoalAggregateId equals sga.Id
                                               select new
                                               {
                                                   StudentGoalSummary = baseQ,
@@ -100,7 +104,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             {
                 return EnumNotificationContent.BelowTargetCourseGoal;
             }
-            if (progressStatus == EnumProgressStatus.Ahead)
+            if (progressStatus == EnumProgressStatus.OnTrack)
             {
                 return EnumNotificationContent.AchievedCourseGoal;
             }

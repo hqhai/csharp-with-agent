@@ -52,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             var weekStartUtc = nowUtc.Date.AddDays(-diff).Date;
             var weekEndUtc = weekStartUtc.AddDays(7).Date;
 
-            var queryData = await (from baseQ in _studentGoalAggregateRepository.Queryable
+            var queryData = await (from baseQ in _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive)
                                    join sum in _studentGoalSummaryRepository.Queryable on baseQ.Id equals sum.StudentGoalAggregateId
                                    where sum.StartDate.Date <= weekEndUtc && sum.EndDate.Date >= weekStartUtc
                                    select new StudentGoalAggregateModel
