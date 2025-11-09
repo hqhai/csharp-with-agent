@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<ReportPTResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(DashboardManagementByAdminSchool.ViewPTResultsReport)]
         public async Task<IActionResult> ReportDashboardPT([FromQuery] GetReportPTResultQuery query)
         {
             MethodResult<ReportPTResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -44,6 +45,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("learning-result-statistical")]
         [ProducesResponseType(typeof(MethodResult<DashBoardLearningResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(DashboardManagementByAdminSchool.ViewLearningResultsReport)]
         public async Task<IActionResult> ReportLearningResult([FromQuery] GetReportLearningResultQuery query)
         {
             MethodResult<DashBoardLearningResultModel> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -108,6 +110,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("weekly-management/by-class")]
         [ProducesResponseType(typeof(MethodResult<IList<StackBarChartsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(DashboardManagementByAdminSchool.ViewWeeklyProgress)]
         public async Task<IActionResult> Get([FromQuery] GetWeeklyProgressByClassQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -120,6 +123,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("weekly-management/comparison")]
         [ProducesResponseType(typeof(MethodResult<StackBarChartsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(DashboardManagementByAdminSchool.ViewWeeklyProgress)]
         public async Task<IActionResult> Get([FromQuery] GetWeeklyProgressComparisonQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
