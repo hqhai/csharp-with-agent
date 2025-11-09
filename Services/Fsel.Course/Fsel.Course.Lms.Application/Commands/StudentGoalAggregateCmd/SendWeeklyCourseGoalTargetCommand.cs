@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 {
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Lms.Application.Commands.LessonCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
@@ -43,7 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             var startDate = DateTime.UtcNow.Date;
 
             var studentGoalSummaries = await (from baseQ in _studentGoalSummaryRepository.Queryable.Where(x => x.StartDate.Date <= startDate.Date && x.EndDate.Date >= startDate.Date)
-                                              join sga in _studentGoalAggregateRepository.Queryable on baseQ.StudentGoalAggregateId equals sga.Id
+                                              join sga in _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive) on baseQ.StudentGoalAggregateId equals sga.Id
                                               select new
                                               {
                                                   StudentGoalSummary = baseQ,
