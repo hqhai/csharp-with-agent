@@ -228,7 +228,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
             var rows = await _studentLearningGoalSummaryRepository.Queryable
                 .AsNoTracking()
-                .Where(x => ids.Contains(x.StudentGoalAggregateId) && x.EndDate <= today)
+                .Where(x => ids.Contains(x.StudentGoalAggregateId) && x.EndDate < today)
                 .GroupBy(x => x.StudentGoalAggregateId)
                 .Select(g => new
                 {
