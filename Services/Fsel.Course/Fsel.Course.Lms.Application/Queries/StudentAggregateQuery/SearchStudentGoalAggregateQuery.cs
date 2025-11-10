@@ -51,10 +51,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var nowUtc = DateTime.UtcNow;
-            int diff = ((int)nowUtc.DayOfWeek + 6) % 7;
-            var weekStartUtc = nowUtc.Date.AddDays(-diff).Date;
-            var weekEndUtc = weekStartUtc.AddDays(7).Date;
+            var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow();
 
             Guid? schoolId = null;
 
@@ -101,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
             var queryData = from baseQ in query
                             join sum in _studentGoalSummaryRepository.Queryable.AsNoTracking() on baseQ.Id equals sum.StudentGoalAggregateId
-                            where sum.StartDate.Date <= weekEndUtc && sum.EndDate.Date >= weekStartUtc
+                            where sum.StartDate.Date <= weekStartUtc && sum.EndDate.Date >= weekEndUtc
                             select new StudentGoalAggregateModel
                             {
                                 Id = baseQ.Id,

@@ -246,12 +246,14 @@ namespace Fsel.Shared.Helpers
             return (startVn, endVn);
         }
 
-        public static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeUtc()
+        public static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeUtc(DateTime? dateTime = default)
         {
-            var nowUtc = DateTime.UtcNow.Date;
-            var startVn = GetWeekStartMonday(nowUtc);
+            var nowUtc = dateTime ?? DateTime.UtcNow.Date;
+            var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
+
+            var startVn = GetWeekStartMonday(nowVn);
             var endVn = startVn.AddDays(6);
-            return (startVn, endVn);
+            return (startVn.ConvertTimeToUtc(EnumCountryKey.UTC), endVn.ConvertTimeToUtc(EnumCountryKey.UTC));
         }
 
         public static DateTime GetWeekStartMonday(DateTime date)
