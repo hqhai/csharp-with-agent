@@ -18,8 +18,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
             {
                 TestResult.Status = EnumResultStatus.Done;
-                TestResult.CorrectCount = TestResult.SectionResults.Sum(x => x.CorrectCount);
-                TestResult.SkillScores = TestResult.SectionResults.SelectMany(x => x.SkillScores).ToList();
+                TestResult.CorrectCount = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.CorrectCount);
+                TestResult.SkillScores = Children.Cast<TestSectionResultComposite>().SelectMany(x => x.TestSectionResult.SkillScores).ToList();
             }
         }
 
@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         {
             if (TestResult.SectionResults.Any())
             {
-                foreach (var sectionResult in TestResult.SectionResults)
+                foreach (var sectionResult in TestResult.SectionResults.Where(x => x.ParentTestSectionResultId == null && x.ParentTestSectionResult == null))
                 {
                     var sectionComposite = new TestSectionResultComposite { Result = sectionResult, Parent = this, ServiceProvider = ServiceProvider, Name = "Skill" };
                     Children.Add(sectionComposite);

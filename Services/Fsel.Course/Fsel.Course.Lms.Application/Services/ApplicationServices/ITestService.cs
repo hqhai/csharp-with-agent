@@ -175,6 +175,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             foreach (var child in parentTestSection.TestSections)
             {
                 var testSectionResult = new TestSectionResult { TestSectionId = child.Id, StudentId = parentSectionResult.StudentId, Status = EnumResultStatus.New, };
+                testSectionResult.ParentTestSectionResult = parentSectionResult;
                 parentSectionResult.SectionResults.Add(testSectionResult);
                 testResult.SectionResults.Add(testSectionResult);
                 CreateTestSectionResultTree(child, testSectionResult, testResult);
@@ -185,34 +186,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         {
             var queryable = isReadOnly ? _testResultRepository.ReadQueryable : _testResultRepository.Queryable;
 
-            var testResult = await queryable
+            return await queryable
                 .Where(predicate)
                 .Include(x => x.SectionResults)
                 .ThenInclude(x => x.TestAnswers)
                 .FirstOrDefaultAsync();
-            if (testResult == null)
-            {
-                return null;
-            }
-
-            var inventory = testResult.SectionResults.Where(x => x.ParentTestSectionResultId != null).ToList();
-            testResult.SectionResults = testResult.SectionResults.Where(x => x.ParentTestSectionResultId == null).ToList();
-            foreach (var sectionResult in testResult.SectionResults)
-            {
-                LoadTestSectionResultTreeRecursive(sectionResult, inventory);
-            }
-
-            return testResult;
-        }
-
-        private static void LoadTestSectionResultTreeRecursive(TestSectionResult testSectionResult, List<TestSectionResult> inventory)
-        {
-            testSectionResult.SectionResults = inventory.Where(x => x.ParentTestSectionResultId == testSectionResult.Id).ToList();
-            inventory = inventory.Except(testSectionResult.SectionResults).ToList();
-            foreach (var child in testSectionResult.SectionResults)
-            {
-                LoadTestSectionResultTreeRecursive(child, inventory);
-            }
         }
 
         public async Task CreateAnswers(SubmitAnswerCommandModel request)
@@ -262,5 +240,3 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         }
     }
 }
-
-
