@@ -140,7 +140,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     Code = request.VoucherCode,
                     PackageId = request.PackageId,
                     EventId = request.EventId,
+                    UserId = request.UserId,
                 }, cancellationToken);
+
                 if (!checkVoucher.IsOK)
                 {
                     methodResult.AddError(checkVoucher.ErrorMessages);
