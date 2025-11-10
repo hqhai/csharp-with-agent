@@ -73,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<LessonModel>>();
+
             var userId = request.UserId ?? _authContext.CurrentUserId;
             var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(userId);
 
@@ -103,12 +104,14 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             }
 
             var unitResult = unit.UnitResults.FirstOrDefault();
+
             if (unitResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
-            else if (unitResult.Status == EnumResultStatus.Unfinished)
+
+            if (unitResult.Status == EnumResultStatus.Unfinished)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusUnfinished), nameof(unitResult.Status));
                 return methodResult;
@@ -116,16 +119,17 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
 
             string cacheKey = $"Lesson_{request.UserId}";
 
-            var result = await _listLessonCachingService.GetOrSetAsync(cacheKey, async (ctx, token) =>
+            var data = new List<LessonModel>();
+
+            data.AddRange(await UpdateLessonResults(request, student.Id, unit, cancellationToken));
+
+            if (unit.UnitSkillMockTests.Any())
             {
-                var data = new List<LessonModel>();
+                data.Add(await UpdateMockTestResults(request, student.Id, unit, course, cancellationToken));
+            }
 
-                data.AddRange(await UpdateLessonResults(request, student.Id, unit, token));
-                if (unit.UnitSkillMockTests.Any())
-                {
-                    data.Add(await UpdateMockTestResults(request, student.Id, unit, course, token));
-                }
-
+            await _listLessonCachingService.GetOrSetAsync(cacheKey, async (ctx, token) =>
+            {
                 var lessonIds = await _lessonResultRepository.Queryable
                     .AsNoTracking()
                     .Where(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId)
@@ -151,30 +155,47 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                         lesson.LessonModules.AddRange(_mapper.Map<List<LessonModuleModel>>(lessonModules));
                     }
                 }
-
                 return data;
             }, default, null, cancellationToken);
 
-            methodResult.Result = result;
+            methodResult.Result = data;
             methodResult.StatusCode = StatusCodes.Status200OK;
+
             return methodResult;
         }
+
         private async Task<IList<LessonModel>> UpdateLessonResults(SearchLessonQuery request, Guid? studentId, Unit unit, CancellationToken cancellationToken)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId).ToListAsync(cancellationToken);
-            if (!lessonResults.Any())
+            var lessonResults = await _lessonResultRepository.Queryable
+                .AsNoTracking()
+                .Where(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId)
+                .ToListAsync(cancellationToken);
+
+            if (lessonResults.Any())
             {
-                lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder).Select((x, index) => new LessonResult
+                var ordered = lessonResults.OrderBy(x => x.CreatedDate).ToList();
+                return _mapper.Map<IList<LessonModel>>(ordered);
+            }
+
+            lessonResults = unit.UnitLessons.OrderBy(x => x.DisplayOrder)
+                .Select((x, index) => new LessonResult
                 {
                     UnitId = x.UnitId,
                     LessonId = x.LessonId,
                     CourseId = request.CourseId,
-                    Status = index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished,
+                    Status = ResolveInitialStatus(index),
                     StudentId = studentId ?? Guid.Empty
                 }).ToList();
-                lessonResults = await CreateLessonResultsAsync(lessonResults);
-            }
-            return _mapper.Map<IList<LessonModel>>(lessonResults.OrderBy(x => x.CreatedDate).ToList());
+
+            lessonResults = await CreateLessonResultsAsync(lessonResults);
+
+            var orderedResult = lessonResults.OrderBy(x => x.CreatedDate).ToList();
+            return _mapper.Map<IList<LessonModel>>(orderedResult);
+        }
+
+        private static EnumResultStatus ResolveInitialStatus(int index)
+        {
+            return index == 0 ? EnumResultStatus.New : EnumResultStatus.Unfinished;
         }
 
         private async Task<List<LessonResult>> CreateLessonResultsAsync(List<LessonResult> lessonResults)
@@ -183,34 +204,46 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             {
                 return lessonResults;
             }
+
             foreach (var lessonResult in lessonResults)
             {
-                await CreateLessonResultAsync(lessonResult);
-            }
-            return lessonResults;
-        }
-
-        private async Task CreateLessonResultAsync(LessonResult lessonResult)
-        {
-            try
-            {
-                await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>
+                try
                 {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId, c.IsDeleted };
-                });
+                    await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new
+                        {
+                            c.CourseId,
+                            c.StudentId,
+                            c.UnitId,
+                            c.LessonId,
+                            c.IsDeleted
+                        };
+                    }).ConfigureAwait(false);
+                }
+                catch (DbUpdateException ex)
+                {
+                    _logger.LogWarning(ex, "Duplicate during CreateLessonResults");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error during CreateLessonResults");
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex,"Log Duplicate LessonResult : {Error}", ex.Message);
-            }
+
+            return lessonResults;
         }
 
         private async Task<LessonModel> UpdateMockTestResults(SearchLessonQuery request, Guid? studentId, Unit unit, Course course, CancellationToken cancellationToken)
         {
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
+            var mockTestResult = await _mockTestResultRepository.Queryable
+                .Include(x => x.MockTestScores)
+                .FirstOrDefaultAsync(x => x.UnitId == request.UnitId && x.CourseId == request.CourseId && x.StudentId == studentId, cancellationToken);
+
             if (mockTestResult == null)
             {
                 var unitSkillMockTest = unit.UnitSkillMockTests.FirstOrDefault();
+
                 mockTestResult = new MockTestResult
                 {
                     UnitId = unitSkillMockTest?.UnitId,
@@ -221,31 +254,47 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 };
 
                 _mockTestResultRepository.Add(mockTestResult);
+
                 try
                 {
                     await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
                 }
+                catch (DbUpdateException ex)
+                {
+                    _logger.LogInformation(ex, "Log Duplicate Skill MockTestResult");
+                }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex,"Log Duplicate Skill MockTestResult : {Error}", ex.Message);
+                    _logger.LogError(ex, "Failed to create MockTestResult");
+                    throw;
                 }
             }
 
             var mockTest = await _mockTestRepository.Queryable.Where(x => x.Id == mockTestResult.MockTestId)
-                                        .Include(x => x!.MockTestSections)
-                                        .ThenInclude(x => x.SectionGroup)
-                                        .FirstOrDefaultAsync(cancellationToken);
+                .Include(x => x!.MockTestSections)
+                .ThenInclude(x => x.SectionGroup)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
+
             if (mockTest == null)
             {
                 return new LessonModel();
             }
 
-            var scores = mockTestResult.SkillScores?.Select(x => x.Scores).FirstOrDefault() ?? 0;
+            var scores = mockTestResult.SkillScores?
+                .Select(x => x.Scores)
+                .FirstOrDefault() ?? 0;
+
             var lessonMockTestResult = _mapper.Map<LessonModel>(mockTestResult);
-            var courseSkills = mockTest.MockTestSections.Select(x => x.SectionGroup!.CourseSkill).ToList();
+
+            var courseSkills = mockTest.MockTestSections
+                .Select(x => x.SectionGroup!.CourseSkill)
+                .ToList();
+
             lessonMockTestResult.CourseSkill = courseSkills.FirstOrDefault();
             lessonMockTestResult.IsTeacherGraded = await _sectionGroupConverter.IsTeacherGraded(mockTestResult, courseSkills);
             (lessonMockTestResult.IsCheckScoreColor, lessonMockTestResult.TargetBandScore) = course.CourseLevel.CheckScoreColor(scores);
+
             return lessonMockTestResult;
         }
     }

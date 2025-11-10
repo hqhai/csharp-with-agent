@@ -36,6 +36,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i2
         public EnumCourseSkill? CourseSkill { get; set; }
 
         public double? Scores { get; set; }
+
         public List<LessonModuleModel> LessonModules { get; set; } = new();
     }
 }

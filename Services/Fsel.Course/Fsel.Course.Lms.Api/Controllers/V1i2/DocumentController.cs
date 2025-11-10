@@ -1,20 +1,22 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers.V1i1
+namespace Fsel.Course.Lms.Api.Controllers.V1i2
 {
     using System.Net;
     using Application.Queries.DocumentQuery;
     using Common.ActionResults;
+    using Common.Attributes;
     using Common.Constants;
     using Domain.Models.EntityModels.V1i1;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Shared.Attributes;
     using Shared.Constants;
+    using Shared.Enums;
 
-    [ApiVersions(ApiSettings.APIVersion1i1)]
+    [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/document")]
-    //[Permission(role: nameof(EnumRole.Student))]
+    [Permission(role: nameof(EnumRole.Student))]
     [ApiController]
     public class DocumentController : ControllerBase
     {
@@ -34,7 +36,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         public async Task<IActionResult> GetDocument([FromRoute] Guid originalId)
         {
             var getDocument = new SearchDocumentQuery { OriginalId = originalId };
-            MethodResult<DocumentModel> queryResult = await _mediator.Send(getDocument).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(getDocument).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

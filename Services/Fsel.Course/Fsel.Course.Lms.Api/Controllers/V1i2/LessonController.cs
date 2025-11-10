@@ -3,17 +3,13 @@
 namespace Fsel.Course.Lms.Api.Controllers.V1i2
 {
     using System.Net;
-    using Application.Queries.HomeWorkQuery;
     using Application.Queries.LessonQuery.V1i2;
     using Common.ActionResults;
-    using Common.Attributes;
     using Common.Constants;
-    using Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Shared.Attributes;
     using Shared.Constants;
-    using Shared.Enums;
     using LessonModel = Domain.Models.EntityModels.V1i2.LessonModel;
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
@@ -37,7 +33,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLessons([FromQuery] SearchLessonQuery query)
         {
-            MethodResult<IList<LessonModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

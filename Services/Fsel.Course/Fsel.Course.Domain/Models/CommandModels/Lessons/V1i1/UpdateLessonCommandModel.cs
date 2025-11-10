@@ -18,6 +18,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons.V1i1
         public string? Description { get; set; }
 
         public string? Thumbnail { get; set; }
+
         public Guid LevelId { get; set; }
 
         public Guid ProgramId { get; set; }
@@ -27,7 +28,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Lessons.V1i1
         public IList<CreateLessonInstructionCommandModel>? LessonInstructions { get; set; }
 
         public IList<UpdateLessonModuleModel>? LessonModules { get; set; }
-
     }
 
     public class UpdateLessonModuleModel
