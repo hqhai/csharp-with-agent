@@ -80,7 +80,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                     ShopId = _appSetting.PayooConfig?.ShopId,
                     ShopTitle = _appSetting.PayooConfig?.ShopTitle,
                     ShopDomain = _appSetting.PayooConfig?.ShopDomain,
-                    ShopBackUrl = _appSetting.PayooConfig?.ShopBackUrl,
+                    ShopBackUrl = _appSetting.PayooConfig?.ShopBackUrl + $"?orderCode={order.Code}",
                     OrderCashAmount = order.TotalPrice,
                     OrderDescription = orderDescription,
                     NotifyUrl = _appSetting.PayooConfig?.NotifyUrl,
