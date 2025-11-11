@@ -63,7 +63,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 return methodResult;
             }
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdAsync(order.UserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddError(studentResult.Error);
@@ -92,7 +92,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                     ShopId = _appSetting.PayooGtelConfig?.ShopId,
                     ShopTitle = _appSetting.PayooGtelConfig?.ShopTitle,
                     ShopDomain = _appSetting.PayooGtelConfig?.ShopDomain,
-                    ShopBackUrl = _appSetting.PayooGtelConfig?.ShopBackUrl,
+                    ShopBackUrl = _appSetting.PayooGtelConfig?.ShopBackUrl + $"?orderCode={order.Code}",
                     OrderCashAmount = order.TotalPrice,
                     OrderDescription = orderDescription,
                     NotifyUrl = _appSetting.PayooGtelConfig?.NotifyUrl,
