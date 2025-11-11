@@ -17,6 +17,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.Extensions.Logging;
 
     public class PaymentWithPayooGtelCommand : IRequest<MethodResult<PayooModel>>
     {
@@ -31,13 +32,15 @@ namespace Fsel.Ordering.Application.Commands.Payoo
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
         private readonly IOrderTransactionRepository _orderTransactionRepository;
+        private readonly ILogger<PaymentWithPayooGtelCommandHandler> _logger;
 
         public PaymentWithPayooGtelCommandHandler(IPayooService payooService,
             AppSetting appSetting,
             IOrderRepository orderRepository,
             IUserService userService,
             AuthContext authContext,
-            IOrderTransactionRepository orderTransactionRepository)
+            IOrderTransactionRepository orderTransactionRepository,
+            ILogger<PaymentWithPayooGtelCommandHandler> logger)
         {
             _payooService = payooService;
             _appSetting = appSetting;
@@ -45,6 +48,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
             _userService = userService;
             _authContext = authContext;
             _orderTransactionRepository = orderTransactionRepository;
+            _logger = logger;
         }
 
         public async Task<MethodResult<PayooModel>> Handle(PaymentWithPayooGtelCommand request, CancellationToken cancellationToken)
@@ -102,6 +106,8 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                     Email = _appSetting.ResourceContent?.Email,
                     Hotline = _appSetting.ResourceContent?.HotLine,
                 };
+                _logger.LogInformation("param", param.Serialize());
+                _logger.LogInformation("PayooGtelConfig", _appSetting.PayooGtelConfig.Serialize());
 
                 using StreamReader streamReader = new StreamReader(ResourceSettings.Payoo);
 
@@ -121,6 +127,7 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                 await _orderTransactionRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 var checkSum = EncodeHelper.GenerateChecksum(_appSetting.PayooGtelConfig?.Key ?? string.Empty, body);
+
                 var payooResult = await _payooService.Create(new CreatePayooModel
                 {
                     Data = body,
