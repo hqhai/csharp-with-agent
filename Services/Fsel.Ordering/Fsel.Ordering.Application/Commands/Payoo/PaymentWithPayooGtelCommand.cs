@@ -106,8 +106,8 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                     Email = _appSetting.ResourceContent?.Email,
                     Hotline = _appSetting.ResourceContent?.HotLine,
                 };
-                _logger.LogInformation("param", param.Serialize());
-                _logger.LogInformation("PayooGtelConfig", _appSetting.PayooGtelConfig.Serialize());
+                _logger.LogInformation($"param {param.Serialize()}");
+                _logger.LogInformation($"PayooGtelConfig {_appSetting.PayooGtelConfig.Serialize()}");
 
                 using StreamReader streamReader = new StreamReader(ResourceSettings.Payoo);
 
