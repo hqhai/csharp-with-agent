@@ -17,6 +17,7 @@ using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Fsel.Identity.Application.Queries.AuthQuery;
+using Fsel.Core.Applications.Attributes;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -62,6 +63,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update Code Student
         /// </summary>
+        [TenantAware]
         [HttpPut("update-code-student")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
