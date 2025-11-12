@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 
             sectionStateModel.CorrectCount = testSectionResult.CorrectCount;
             sectionStateModel.TotalCount = testSectionResult.CorrectTotal;
+            sectionStateModel.Config = testSectionResult.TestSection.Config;
 
             if (testSectionResult.TestSection?.TestSectionQuestions != null)
             {
