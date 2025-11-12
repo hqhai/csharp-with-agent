@@ -117,73 +117,95 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 return methodResult;
             }
 
-            string cacheKey = $"Lesson_{request.UserId}";
+            string cacheKey = $"lesson:{userId}:{request.CourseId}:{request.UnitId}";
 
-            var data = new List<LessonModel>();
+            var baseList = new List<LessonModel>();
 
-            data.AddRange(await UpdateLessonResults(request, student.Id, unit, cancellationToken));
+            baseList.AddRange(await UpdateLessonResults(request, student.Id, unit, cancellationToken));
 
             if (unit.UnitSkillMockTests.Any())
             {
-                data.Add(await UpdateMockTestResults(request, student.Id, unit, course, cancellationToken));
+                baseList.Add(await UpdateMockTestResults(request, student.Id, unit, course, cancellationToken));
             }
 
-            await _listLessonCachingService.GetOrSetAsync(cacheKey, async (ctx, token) =>
+            var data = await _listLessonCachingService.GetOrSetAsync(cacheKey, async (_, token) =>
             {
-                var lessonIds = await _lessonResultRepository.Queryable
-                    .AsNoTracking()
-                    .Where(x => x.CourseId == request.CourseId && x.UnitId == request.UnitId)
-                    .Select(x => x.LessonId)
+                var lessonIds = baseList
+                    .Where(_ => true)
+                    .Select(x => x.ObjectId)
                     .Distinct()
+                    .ToList();
+
+                if (!lessonIds.Any())
+                {
+                    return baseList;
+                }
+
+                var moduleEntities = await _lessonModuleRepository.Queryable
+                    .Where(m => lessonIds.Contains(m.LessonId))
+                    .AsNoTracking()
+                    .OrderBy(m => m.DisplayNumber)
                     .ToListAsync(token);
 
-                foreach (var lessonId in lessonIds)
+                var modulesByLessonId = moduleEntities
+                    .GroupBy(m => m.LessonId)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => _mapper.Map<List<LessonModuleModel>>(g.ToList())
+                    );
+
+                var lessonResultsForStudent = await _lessonResultRepository.Queryable
+                    .Where(x => x.CourseId == request.CourseId
+                                && x.UnitId == request.UnitId
+                                && x.StudentId == student.Id
+                                && lessonIds.Contains(x.LessonId))
+                    .Include(x => x.VideoResult)
+                    .Include(x => x.HomeWorkResults)
+                    .Include(x => x.ClassForumResults)
+                    .AsNoTracking()
+                    .ToListAsync(token);
+
+                var resultByLessonId = lessonResultsForStudent
+                    .GroupBy(x => x.LessonId)
+                    .ToDictionary(g => g.Key, g => g.First());
+
+                foreach (var lesson in baseList.Where(lesson => lessonIds.Contains(lesson.ObjectId)))
                 {
-                    var lessonModules = await _lessonModuleRepository.Queryable
-                        .Where(x => x.LessonId == lessonId)
-                        .AsNoTracking()
-                        .OrderBy(x => x.DisplayNumber)
-                        .ToListAsync(token);
-
-                    var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult)
-                        .Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == lessonId))
-                        .Include(x => x.ClassForumResults.Where(x => x.LessonResultId == lessonId))
-                        .Where(x => x.Id == lessonId)
-                        .AsNoTracking()
-                        .FirstOrDefaultAsync(token);
-
-                    var result = _mapper.Map<List<LessonModuleModel>>(lessonModules);
-                    if (lessonResult != null)
+                    if (modulesByLessonId.TryGetValue(lesson.ObjectId, out var mods) && mods != null && mods.Count > 0)
                     {
-                        var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
-                        foreach (var check in result)
-                        {
-                            if (lessonResult.VideoResult?.Status == EnumResultStatus.Done)
-                            {
-                                check.IsClassForumLock = false;
-                                check.IsDocumentLock = false;
-                            }
-
-                            if (lessonResult.HomeWorkResults.Any(x => x.Status != EnumResultStatus.Unfinished) ||
-                                (classForumResult != null && classForumResult.Status.HasValue && classForumResult.Status != EnumClassForumResultStatus.Draft))
-                            {
-                                check.IsHomeWorkLock = false;
-                            }
-                        }
+                        lesson.LessonModules.AddRange(mods);
                     }
 
-                    if (lessonModules.Count == 0)
+                    if (!resultByLessonId.TryGetValue(lesson.ObjectId, out var lr))
                     {
                         continue;
                     }
 
-                    foreach (var lesson in data.Where(d => d.ObjectId == lessonId))
+                    bool videoDone = lr.VideoResult?.Status == EnumResultStatus.Done;
+                    var classForumResult = lr.ClassForumResults.FirstOrDefault();
+
+                    bool? any = lr.HomeWorkResults.Any(x => x.Status != EnumResultStatus.Unfinished);
+
+                    bool homeworkUnlocked =
+                        ((bool)any)
+                        || (classForumResult is { Status: not null } &&
+                            classForumResult.Status != EnumClassForumResultStatus.Draft);
+
+                    foreach (var m in lesson.LessonModules)
                     {
-                        lesson.LessonModules.AddRange(_mapper.Map<List<LessonModuleModel>>(lessonModules));
+                        if (videoDone)
+                        {
+                            m.IsClassForumLock = false;
+                            m.IsDocumentLock = false;
+                        }
+
+                        if (homeworkUnlocked)
+                        {
+                            m.IsHomeWorkLock = false;
+                        }
                     }
                 }
-
-                return data;
+                return baseList;
             }, default, null, cancellationToken);
 
             methodResult.Result = data;
@@ -233,30 +255,27 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 return lessonResults;
             }
 
-            foreach (var lessonResult in lessonResults)
+            try
             {
-                try
+                await _lessonResultRepository.BulkMergeAsync(lessonResults, bulk =>
                 {
-                    await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>
+                    bulk.ColumnPrimaryKeyExpression = c => new
                     {
-                        bulk.ColumnPrimaryKeyExpression = c => new
-                        {
-                            c.CourseId,
-                            c.StudentId,
-                            c.UnitId,
-                            c.LessonId,
-                            c.IsDeleted
-                        };
-                    }).ConfigureAwait(false);
-                }
-                catch (DbUpdateException ex)
-                {
-                    _logger.LogWarning(ex, "Duplicate during CreateLessonResults");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error during CreateLessonResults");
-                }
+                        c.CourseId,
+                        c.StudentId,
+                        c.UnitId,
+                        c.LessonId,
+                        c.IsDeleted
+                    };
+                }).ConfigureAwait(false);
+            }
+            catch (DbUpdateException ex)
+            {
+                _logger.LogWarning(ex, "Duplicate during CreateLessonResults");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during CreateLessonResults");
             }
 
             return lessonResults;
@@ -299,7 +318,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             }
 
             var mockTest = await _mockTestRepository.Queryable.Where(x => x.Id == mockTestResult.MockTestId)
-                .Include(x => x!.MockTestSections)
+                .Include(x => x.MockTestSections)
                 .ThenInclude(x => x.SectionGroup)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
