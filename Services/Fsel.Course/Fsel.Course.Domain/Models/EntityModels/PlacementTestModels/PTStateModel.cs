@@ -76,6 +76,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public string? Name { get; set; }
         public Guid? SectionId { get; set; }
 
+        public TestSectionConfig? Config { get; set; }
+
         public Guid? SectionResultId { get; set; }
 
         public int CorrectCount { get; set; }
@@ -90,9 +92,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
             {
                 return;
             }
-
             Name = section.Name ?? section.Skill?.Name;
-
+            Config = section.Config;
             foreach (var sectionResult in Children)
             {
                 if (sectionResult is not SectionStateModel sectionStateModel)
