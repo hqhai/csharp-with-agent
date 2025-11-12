@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
 {
@@ -145,6 +145,33 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                         .OrderBy(x => x.DisplayNumber)
                         .ToListAsync(token);
 
+                    var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.VideoResult)
+                        .Include(x => x.HomeWorkResults.Where(x => x.LessonResultId == lessonId))
+                        .Include(x => x.ClassForumResults.Where(x => x.LessonResultId == lessonId))
+                        .Where(x => x.Id == lessonId)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(token);
+
+                    var result = _mapper.Map<List<LessonModuleModel>>(lessonModules);
+                    if (lessonResult != null)
+                    {
+                        var classForumResult = lessonResult.ClassForumResults.FirstOrDefault();
+                        foreach (var check in result)
+                        {
+                            if (lessonResult.VideoResult?.Status == EnumResultStatus.Done)
+                            {
+                                check.IsClassForumLock = false;
+                                check.IsDocumentLock = false;
+                            }
+
+                            if (lessonResult.HomeWorkResults.Any(x => x.Status != EnumResultStatus.Unfinished) ||
+                                (classForumResult != null && classForumResult.Status.HasValue && classForumResult.Status != EnumClassForumResultStatus.Draft))
+                            {
+                                check.IsHomeWorkLock = false;
+                            }
+                        }
+                    }
+
                     if (lessonModules.Count == 0)
                     {
                         continue;
@@ -155,6 +182,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                         lesson.LessonModules.AddRange(_mapper.Map<List<LessonModuleModel>>(lessonModules));
                     }
                 }
+
                 return data;
             }, default, null, cancellationToken);
 
