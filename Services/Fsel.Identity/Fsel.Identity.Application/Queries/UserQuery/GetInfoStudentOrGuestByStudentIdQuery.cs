@@ -37,7 +37,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
 
-            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(p => p.Id == request.StudentId, cancellationToken);
+            var student = await _studentRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(p => p.Id == request.StudentId, cancellationToken);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
