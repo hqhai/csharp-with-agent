@@ -719,7 +719,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             {
                 user = await _userRepository.GetUserByIdentity(email ?? string.Empty);
 
-                var canConnect = user != null && user.UserName == User?.Identity?.Name && user.UserName == requestUser?.UserName;
+                var canConnect = user != null && (user.UserName == User?.Identity?.Name || user.UserName == requestUser?.UserName);
 
                 if (canConnect)
                 {
