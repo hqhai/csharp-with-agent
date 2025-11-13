@@ -64,6 +64,8 @@ namespace Fsel.Identity.Infrastructure.Maps
                 .ForMember(m => m.Id, opt => opt.Ignore())
                 .AfterMap<ParseFullNameMappingAction<UpdateUserProfileCommandModel>>();
 
+            CreateMap<UpdateCodeStudentCommandModel, User>().AfterMap<ParseFullNameMappingAction<UpdateCodeStudentCommandModel>>().IgnoreAllNonExisting();
+
             CreateMap<UpdateStudentProfileCommandModel, User>()
                 .AfterMap<ParseFullNameMappingAction<UpdateStudentProfileCommandModel>>()
                 .IgnoreAllNonExisting();
