@@ -649,11 +649,11 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             }
         }
 
-        public IActionResult ExternalConnect(string provider, string? returnUrl = null)
+        public IActionResult ExternalConnect(string provider, string? returnUrl = null, Guid? userId = null)
         {
             ArgumentNullException.ThrowIfNull(provider);
 
-            var redirectUrl = Url.Action(nameof(ExternalConnectHandle), new { returnUrl });
+            var redirectUrl = Url.Action(nameof(ExternalConnectHandle), new { returnUrl, userId });
 
             AuthenticationProperties properties;
             if (provider == LoginProvider.Zalo)
@@ -670,12 +670,21 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         }
 
         [HttpGet]
-        [Authorize]
-        public async Task<IActionResult> ExternalConnectHandle(string? returnUrl = null)
+        public async Task<IActionResult> ExternalConnectHandle(string? returnUrl = null, Guid? userId = null)
         {
+            User requestUser = null;
             if (!User.IsAuthenticated())
             {
-                return Unauthorized();
+                if (userId == null)
+                {
+                    return Unauthorized();
+                }
+
+                requestUser = await _userManager.FindByIdAsync(userId.Value.ToString());
+                if (requestUser == null)
+                {
+                    return Unauthorized();
+                }
             }
             returnUrl ??= "~/";
 
@@ -695,7 +704,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             {
                 user = await _userRepository.GetUserByIdentity(email ?? string.Empty);
 
-                var canConnect = user?.UserName == User.Identity.Name;
+                var canConnect = user != null && user.UserName == User?.Identity?.Name && user.UserName == requestUser?.UserName;
 
                 if (canConnect)
                 {
@@ -710,7 +719,7 @@ namespace Fsel.Identity.Authentication.OpenId.Account
             }
             else
             {
-                user = await _userManager.GetUserAsync(User);
+                user =User.IsAuthenticated() ? await _userManager.GetUserAsync(User) : requestUser;
                 var result = await _userManager.AddLoginAsync(user, info);
                 if (result.Succeeded)
                 {
