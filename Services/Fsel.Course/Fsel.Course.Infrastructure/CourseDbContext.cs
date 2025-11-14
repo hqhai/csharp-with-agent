@@ -133,11 +133,6 @@ namespace Fsel.Course.Infrastructure
 
         #endregion Report
 
-        public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
-        public DbSet<WeeklyReport> WeeklyReports { get; set; }
-        public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
-        public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             ArgumentNullException.ThrowIfNull(modelBuilder);

@@ -44,99 +44,11 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         }
 
         /// <summary>
-        /// #FSEL-5683 , Issue File
-        /// Kiểm tra và chuyển đổi file âm thanh sang WAV PCM nếu cần
-        /// Xử lý lỗi SPXERR_INVALID_HEADER (0xa) của Azure Speech Services
-        /// </summary>
-        /// <param name="inputFile">Đường dẫn file âm thanh đầu vào</param>
-        /// <returns>Đường dẫn đến file WAV PCM (có thể là file gốc hoặc file đã chuyển đổi)</returns>
-        private async Task<string> EnsureWavPcmFormat(string inputFile)
-        {
-            // Tạo tên file output nếu cần chuyển đổi
-            var outputFile = Path.Combine(Path.GetDirectoryName(inputFile)!, $"converted_{Path.GetFileName(inputFile)}");
-
-            try
-            {
-                // Kiểm tra header của file WAV để xác định có phải WAV PCM không
-                using (var reader = new BinaryReader(File.OpenRead(inputFile)))
-                {
-                    // Đọc RIFF header - 4 bytes đầu tiên phải là "RIFF"
-                    var riff = new string(reader.ReadChars(4));
-                    var size = reader.ReadInt32();  // Kích thước file
-                    var wave = new string(reader.ReadChars(4));  // Phải là "WAVE"
-
-                    // Đọc fmt chunk - chứa thông tin về format
-                    var fmt = new string(reader.ReadChars(4));  // Phải là "fmt "
-                    var fmtSize = reader.ReadInt32();  // Kích thước của fmt chunk
-                    var format = reader.ReadInt16();   // 1 = PCM
-                    var channels = reader.ReadInt16(); // 1 = mono
-                    var sampleRate = reader.ReadInt32();  // 16000 = 16kHz
-                    var byteRate = reader.ReadInt32();    // Tốc độ byte
-                    var blockAlign = reader.ReadInt16();  // Căn chỉnh block
-                    var bitsPerSample = reader.ReadInt16();  // 16 = 16-bit
-
-                    // Kiểm tra tất cả điều kiện của WAV PCM format
-                    // - RIFF header
-                    // - WAVE format
-                    // - PCM format (1)
-                    // - Mono channel
-                    // - 16kHz sample rate
-                    // - 16-bit per sample
-                    if (riff == "RIFF" && wave == "WAVE" && format == 1
-                        && channels == 1 && sampleRate == 16000 && bitsPerSample == 16)
-                    {
-                        // File đã đúng định dạng, không cần chuyển đổi
-                        return inputFile;
-                    }
-                }
-            }
-            catch
-            {
-                // Nếu không đọc được header hoặc không phải file WAV
-                // Tiếp tục để chuyển đổi file
-            }
-
-            // Chuyển đổi sang WAV PCM với FFmpeg
-            using (var process = new System.Diagnostics.Process())
-            {
-                process.StartInfo = new System.Diagnostics.ProcessStartInfo
-                {
-                    FileName = "ffmpeg",  // Đảm bảo FFmpeg đã được cài đặt
-                    // Các tham số chuyển đổi:
-                    // -y: Tự động ghi đè file output
-                    // -i: File input
-                    // -acodec pcm_s16le: Chuyển sang PCM 16-bit
-                    // -ar 16000: Sample rate 16kHz
-                    // -ac 1: 1 channel (mono)
-                    Arguments = $"-y -i \"{inputFile}\" -acodec pcm_s16le -ar 16000 -ac 1 \"{outputFile}\"",
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    CreateNoWindow = true
-                };
-
-                _logger.LogError("Đang chuyển đổi file âm thanh sang WAV PCM: {InputFile}", inputFile);
-
-                process.Start();
-                var error = await process.StandardError.ReadToEndAsync();
-                await process.WaitForExitAsync();
-
-                if (process.ExitCode != 0)
-                {
-                    _logger.LogError("Lỗi khi chuyển đổi với FFmpeg: {Error}", error);
-                    throw new InvalidOperationException($"Không thể chuyển đổi file âm thanh sang định dạng WAV PCM. Chi tiết: {error}");
-                }
-            }
-
-            return outputFile;
-        }
-
-        /// <summary>
         /// Đánh giá phát âm từ microphone (original method - sử dụng RecognizeOnceAsync)
         /// </summary>
         /// <param name="referenceText">Văn bản tham chiếu</param>
         /// <returns>Kết quả đánh giá phát âm</returns>
-        public async Task<PronunciationAssessmentModel> AssessPronunciationFromMicrophoneAsync(string referenceText, Guid unitId = default)
+        public async Task<PronunciationAssessmentModel> AssessPronunciationFromMicrophoneAsync(string referenceText)
         {
             if (string.IsNullOrEmpty(referenceText))
             {
@@ -247,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// <param name="audioFilePath">Đường dẫn đến file âm thanh</param>
         /// <param name="referenceText">Văn bản tham chiếu</param>
         /// <returns>Kết quả đánh giá phát âm</returns>
-        public async Task<PronunciationAssessmentModel> AssessPronunciationFromFileAsync(string audioFilePath, string referenceText, Guid unitId = default)
+        public async Task<PronunciationAssessmentModel> AssessPronunciationFromFileAsync(string audioFilePath, string referenceText)
         {
             if (string.IsNullOrEmpty(audioFilePath))
                 throw new ArgumentNullException(nameof(audioFilePath), "Đường dẫn file âm thanh không được để trống");
@@ -694,7 +606,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 if (completedTask != stopRecognition.Task)
                 {
                     _logger.LogError("Recognition timed out after 1 minute");
-                }
+                 }
 
                 // Stop recognition
                 await speechRecognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);

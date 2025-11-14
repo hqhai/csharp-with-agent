@@ -194,12 +194,6 @@ builder.Services.AddScoped<ErrorExplainPublisher>();
 builder.Services.AddScoped<ExportFileExcelSchoolLearningProcessPublisher>();
 builder.Services.AddScoped<SpeechToTextPendingAiPublisher>();
 builder.Services.AddScoped<ClassForumPronunciationPublisher>();
-builder.Services.AddScoped<SubmitAiHomeWorkPublisher>();
-builder.Services.AddScoped<SubmitAiVideoPublisher>();
-builder.Services.AddScoped<AiFeedbackHomeWorkReponsePublisher>();
-builder.Services.AddScoped<AiFeedbackVideoResponsePublisher>();
-builder.Services.AddScoped<SubmitHomeWorkResultPublisher>();
-builder.Services.AddScoped<SubmitQuestionShortAnswerWordBasePublisher>();
 builder.Services.AddScoped<ExportFileUserInformationSupportSalePublisher>();
 
 // Refit
@@ -244,11 +238,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.ExportExcelSchoolLearningProcess, typeof(ExportExcelSchoolLearningProcessConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.SubmitAIVideo, typeof(SubmitAIVideoConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.SubmitAIHomeWork, typeof(SubmitAiHomeWorkConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.SubmitHomeWorkResult, typeof(SubmitHomeWorkResultConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.SubmitQuestionShortAnswerWordBase, typeof(SubmitQuestionShortAnswerWordBaseConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.ClassForumPronunciationAi, typeof(ClassForumPronunciationConsumer) }
+    { QueueSettings.LmsQueue.NameQueue.ClassForumPronunciationAi, typeof(ClassForumPronunciationConsumer) },
     { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
     { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ExportExcelUserInformationSupportSale, typeof(ExportFileUserInformationSupportSaleConsumer) },
