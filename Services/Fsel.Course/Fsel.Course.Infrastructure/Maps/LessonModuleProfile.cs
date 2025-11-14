@@ -13,6 +13,9 @@ namespace Fsel.Course.Infrastructure.Maps
         public LessonModuleProfile()
         {
             CreateMap<LessonModule, LessonModuleModel>().IgnoreAllNonExisting();
+            CreateMap<LessonModule, Domain.Models.EntityModels.V1i2.LessonModuleModel>()
+                .ForMember(d => d.IsLocked, o => o.Ignore())
+                .ForMember(d => d.IsDone,   o => o.Ignore());;
         }
     }
 }

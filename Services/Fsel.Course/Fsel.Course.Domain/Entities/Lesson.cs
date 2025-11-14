@@ -54,6 +54,18 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public int DocumentCount { get; set; }
 
+        /// <summary>
+        /// Mô tả ngắn về bài học
+        /// </summary>
+        [MaxLength(2000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// Ảnh cho bài học
+        /// </summary>
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Thumbnail { get; set; }
+
         public EnumStatus Status { get; set; }
 
         public Guid? LevelId { get; set; }

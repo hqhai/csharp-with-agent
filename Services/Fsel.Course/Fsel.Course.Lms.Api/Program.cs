@@ -46,6 +46,7 @@ builder.Services.AddScoped<ITestService, TestService>();
 builder.Services.AddScoped<ITestCachingService, TestCachingService>();
 builder.Services.AddScoped<IFlowCachingService, FlowCachingService>();
 builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
+builder.Services.AddScoped<IDocumentCachingService, DocumentCachingService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
