@@ -39,7 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.DocumentQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<DocumentModel>();
 
-            if (request.OriginalId == Guid.Empty)
+            if (request.OriginalId == Guid.Empty && request.OriginalId == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
                 return methodResult;

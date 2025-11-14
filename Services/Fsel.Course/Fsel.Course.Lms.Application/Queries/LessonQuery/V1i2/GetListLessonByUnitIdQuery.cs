@@ -21,21 +21,20 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
 
     public class GetListLessonByUnitIdQueryHandler : IRequestHandler<GetListLessonByUnitIdQuery, MethodResult<IList<LessonModel>>>
     {
-        private readonly ILessonRepository _lessonRepository;
         private readonly IMapper _mapper;
-        private readonly ILessonModuleRepository _lessonModuleRepository;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUnitLessonRepository _unitLessonRepository;
+        private const string VIDEOTYPE =  "Video bài giảng";
+        private const string CLASSFORUMTYPE =  "Diễn dàn";
+        private const string HOMEWORKTYPE =  "Bài tập về nhà";
+        private const string DOCUMENTTYPE =  "Tài liệu";
 
-        public GetListLessonByUnitIdQueryHandler(ILessonRepository lessonRepository,
+        public GetListLessonByUnitIdQueryHandler(
             IMapper mapper,
-            ILessonModuleRepository lessonModuleRepository,
             ILessonResultRepository lessonResultRepository,
             IUnitLessonRepository unitLessonRepository)
         {
-            _lessonRepository = lessonRepository;
             _mapper = mapper;
-            _lessonModuleRepository = lessonModuleRepository;
             _lessonResultRepository = lessonResultRepository;
             _unitLessonRepository = unitLessonRepository;
         }
@@ -90,27 +89,15 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 lessonResultByLessonId.TryGetValue(lesson.Id, out var lessonResult);
 
                 bool previousModuleCompleted = previousLessonCompleted;
-
-                for (int i = 0; i < lessonModulesModel.Count; i++)
-                {
-                    var moduleEntity = orderModules[i];
-                    var moduleModel = lessonModulesModel[i];
-
-                    bool isDone = IsModuleDone(moduleEntity, lessonResult);
-                    bool isLocked = !previousModuleCompleted;
-
-                    moduleModel.IsDone = isDone;
-                    moduleModel.IsLocked = isLocked;
-
-                    previousModuleCompleted = previousModuleCompleted && isDone;
-                }
+                SetDataForModule(lessonModulesModel, previousModuleCompleted, orderModules, lessonResult);
                 bool lessonCompleted = lessonModulesModel.Any() && lessonModulesModel.All(m => m.IsDone);
 
                 var lessonModel = _mapper.Map<LessonModel>(lesson);
+
                 lessonModel.UnitId = request.UnitId;
                 lessonModel.DisplayOrder = ul.DisplayOrder;
                 lessonModel.IsLocked = !previousLessonCompleted;
-                lessonModel.Status = lessonResult?.Status ?? default;
+                lessonModel.Status = lessonResult.Status;
                 lessonModel.LessonModules = lessonModulesModel;
 
                 response.Add(lessonModel);
@@ -142,11 +129,34 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
         {
             return type switch
             {
-                EnumLessonConfigType.Video => "Video bài giảng",
-                EnumLessonConfigType.ClassForum => "Diễn đàn",
-                EnumLessonConfigType.HomeWork => "Bài tập về nhà",
+                EnumLessonConfigType.Video => VIDEOTYPE,
+                EnumLessonConfigType.ClassForum => CLASSFORUMTYPE,
+                EnumLessonConfigType.HomeWork => HOMEWORKTYPE,
+                EnumLessonConfigType.Document => DOCUMENTTYPE,
                 _ => type.ToString()
             };
+        }
+
+        private static void SetDataForModule(List<LessonModuleModel> lessonModulesModel, bool previousModuleCompleted, List<LessonModule> orderModules, LessonResult lessonResult)
+        {
+            for (int i = 0; i < lessonModulesModel.Count; i++)
+            {
+                var moduleEntity = orderModules[i];
+                var moduleModel = lessonModulesModel[i];
+
+                bool isDone = IsModuleDone(moduleEntity, lessonResult);
+                bool isLocked = !previousModuleCompleted;
+
+                if (string.IsNullOrEmpty(moduleModel.Name))
+                {
+                    moduleModel.Name = GetDefaultModuleName(moduleModel.LessonConfigType);
+                }
+
+                moduleModel.IsDone = isDone;
+                moduleModel.IsLocked = isLocked;
+
+                previousModuleCompleted = previousModuleCompleted && isDone;
+            }
         }
     }
 }

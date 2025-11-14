@@ -31,6 +31,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i2
 
         public bool IsLocked { get; set; }
 
-        public List<LessonModuleModel> LessonModules { get; set; } = new();
+        public List<LessonModuleModel> LessonModules { get; set; }
     }
 }
