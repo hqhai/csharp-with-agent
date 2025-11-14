@@ -19,7 +19,6 @@ namespace Fsel.Course.Infrastructure.Maps
             .ForMember(x => x.ObjectId, p => p.MapFrom(o => o.LessonId));
 
             CreateMap<LessonResult, LessonModel>()
-                .ForMember(x => x.Type, p => p.MapFrom(o => nameof(Lesson)))
                 .ForMember(x => x.ObjectId, p => p.MapFrom(o => o.LessonId));
         }
     }

@@ -2,10 +2,10 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.V1i2
 {
-    using Shared.Enums;
-    using V1i1;
+    using Core.Base.BaseModels;
+    using Enums;
 
-    public class LessonModel : BaseScoreResultModel
+    public class LessonModel : BaseModel
     {
         public string? Name { get; set; }
 
@@ -19,23 +19,17 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i2
 
         public string? CourseLevel { get; set; }
 
-        public Guid CourseId { get; set; }
-
         public Guid UnitId { get; set; }
 
         public Guid ObjectId { get; set; }
 
-        public string? Type { get; set; }
+        public EnumResultStatus Status { get; set; }
 
-        public bool? IsCheckScoreColor { get; set; }
+        public int? DisplayOrder { get; set; }
 
-        public double? TargetBandScore { get; set; }
+        public int? Number => DisplayOrder;
 
-        public bool? IsTeacherGraded { get; set; }
-
-        public EnumCourseSkill? CourseSkill { get; set; }
-
-        public double? Scores { get; set; }
+        public bool IsLocked { get; set; }
 
         public List<LessonModuleModel> LessonModules { get; set; } = new();
     }

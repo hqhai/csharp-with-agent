@@ -28,10 +28,10 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         /// <summary>
         /// Get Lesson
         /// </summary>
-        [HttpGet("v2")]
+        [HttpGet("interface")]
         [ProducesResponseType(typeof(MethodResult<IList<LessonModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetLessons([FromQuery] SearchLessonQuery query)
+        public async Task<IActionResult> GetLessons([FromQuery] GetListLessonByUnitIdQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
