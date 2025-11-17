@@ -8,6 +8,7 @@ namespace Fsel.Course.Domain.Enums
         Done,
         Unfinished,
         New,
-        NotStarted
+        NotStarted,
+        ByPass
     }
 }

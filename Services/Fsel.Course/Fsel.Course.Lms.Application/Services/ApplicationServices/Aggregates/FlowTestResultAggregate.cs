@@ -3,11 +3,11 @@
 namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 {
     using System.Threading.Tasks;
-    using Fsel.Core.Base.Interfaces;
-    using Fsel.Course.Domain.Entities.TestConfigs;
-    using Fsel.Course.Domain.Enums;
-    using Fsel.Course.Domain.Models.CommandModels.Tests;
-    using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Core.Base.Interfaces;
+    using Domain.Entities.TestConfigs;
+    using Domain.Enums;
+    using Domain.Models.CommandModels.Tests;
+    using Domain.Models.EntityModels.PlacementTestModels;
     using Microsoft.Extensions.DependencyInjection;
 
     public class FlowTestResultAggregate
@@ -52,25 +52,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (!FlowTestResult.TestResults.Any() || FlowTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 var flowService = ServiceProvider.GetRequiredService<IFlowService>();
-                var stepId = await flowService.GetNextStep(x => x.Id == FlowTestResult.FlowId, FlowTestResult.TestResults);
+                var node = await flowService.GetNextStep(x => x.Id == FlowTestResult.FlowId, FlowTestResult.TestResults);
 
-                if (stepId == null)
+                if (node?.StepFlow?.Id == null || node?.IsLeft == true)
                 {
-                    var isDoneTest = FlowTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done);
-                    if (!isDoneTest)
-                    {
-                        return;
-                    }
-
+                    FlowTestResult.CurrentLevelId = node?.StepFlow?.LevelId;
                     FlowTestResult.Status = EnumResultStatus.Done;
                     await Commit();
-
                     return;
                 }
 
                 var testService = ServiceProvider.GetRequiredService<ITestService>();
 
-                var newTestResultTree = await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, stepId.Value, FlowTestResult.Id, FlowTestResult.ProgramId.Value);
+                var newTestResultTree = await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, node.StepFlow.Id, FlowTestResult.Id, FlowTestResult.ProgramId.Value);
 
                 await AddNewTest(newTestResultTree);
             }
@@ -97,9 +91,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             testResult.Status = EnumResultStatus.Process;
         }
 
-        public async Task<PTStateModel> ExpotStateData()
+        public async Task<PtStateModel> ExpotStateData()
         {
-            var ptResult = new PTStateModel
+            var ptResult = new PtStateModel
             {
                 TestGroupResultId = FlowTestResult.Id,
                 FlowId = FlowTestResult.FlowId,
