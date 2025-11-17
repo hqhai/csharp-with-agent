@@ -103,7 +103,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
             if (isEmail)
             {
-                var user = await _userManager.FindByEmailAsync(identity);
+                var user = await Queryable.FirstOrDefaultAsync(x => x.Email == identity && x.EmailConfirmed);
                 if (user != null && user.EmailConfirmed)
                 {
                     return user;
