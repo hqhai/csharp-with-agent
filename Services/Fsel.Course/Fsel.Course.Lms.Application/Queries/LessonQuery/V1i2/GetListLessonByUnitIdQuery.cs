@@ -99,6 +99,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 lessonModel.IsLocked = !previousLessonCompleted;
                 lessonModel.Status = lessonResult.Status;
                 lessonModel.LessonModules = lessonModulesModel;
+                lessonModel.CourseId =  request.CourseId;
 
                 response.Add(lessonModel);
 
