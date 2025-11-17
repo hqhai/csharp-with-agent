@@ -25,6 +25,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i2
 
         public Guid CourseId { get; set; }
 
+        public Guid LessonResult { get; set; }
+
         public EnumResultStatus Status { get; set; }
 
         public int? DisplayOrder { get; set; }
