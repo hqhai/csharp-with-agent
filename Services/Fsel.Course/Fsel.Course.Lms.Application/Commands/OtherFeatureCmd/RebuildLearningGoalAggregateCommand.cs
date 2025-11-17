@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
     using System.Runtime.CompilerServices;
     using System.Threading;
@@ -22,7 +23,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
-    using Kros.Utils;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var keyDtos = keys.Distinct().Select(k => new { k.StudentId, k.CourseId }).ToList();
 
             var rows = await _lessonResultRepository.Queryable.AsNoTracking()
-                .Where(x => (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate) >= weekStart && (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate) <= weekEnd)
+                .Where(x => (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date >= weekStart && (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= weekEnd)
                 .Where(x => x.Status == EnumResultStatus.Done)
                 .WhereBulkContains(keyDtos, new[] { "StudentId", "CourseId" })
                 .Select(x => new
@@ -159,7 +159,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     x.StudentId,
                     x.CourseId,
                     CompletedAt = x.CompletionDate ?? x.UpdatedDate,
-                    IsInWeek = (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate) >= weekStart && (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate) <= weekEnd
+                    IsInWeek = (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date >= weekStart && (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= weekEnd
                 })
                 .GroupBy(g => new { g.StudentId, g.CourseId })
                 .Select(g => new
@@ -174,6 +174,39 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 .ConfigureAwait(false);
 
             return rows.ToDictionary(k => (k.StudentId, k.CourseId), v => (v.Total, v.Week, v.Last));
+        }
+
+        private async Task<Dictionary<(Guid StudentId, Guid CourseId), (int total, DateTime? last)>> LoadDoneLessonStatsCourseAsync(IList<(Guid StudentId, Guid CourseId)> keys, DateTime dateNow, CancellationToken ct)
+        {
+            if (keys == null || keys.Count == 0)
+            {
+                return new();
+            }
+            var keyDtos = keys.Distinct().Select(k => new { k.StudentId, k.CourseId }).ToList();
+            var (weekStart, weekEnd) = DateTimeHelper.GetCurrentWeekRangeUtc(dateNow);
+
+            var rows = await _lessonResultRepository.Queryable.AsNoTracking()
+                .Where(x => (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= weekEnd)
+                .Where(x => x.Status == EnumResultStatus.Done)
+                .WhereBulkContains(keyDtos, new[] { "StudentId", "CourseId" })
+                .Select(x => new
+                {
+                    x.StudentId,
+                    x.CourseId,
+                    CompletedAt = x.CompletionDate ?? x.UpdatedDate,
+                })
+                .GroupBy(g => new { g.StudentId, g.CourseId })
+                .Select(g => new
+                {
+                    g.Key.StudentId,
+                    g.Key.CourseId,
+                    Total = g.Count(),
+                    Last = g.Max(r => r.CompletedAt)
+                })
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+
+            return rows.ToDictionary(k => (k.StudentId, k.CourseId), v => (v.Total, v.Last));
         }
 
         private static void UpdateBehindStreak(StudentGoalAggregate agg, IReadOnlyList<EnumProgressStatus> orderedStatuses)
@@ -244,7 +277,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
             var pairs = courseResults.Select(s => (s.StudentId, s.CourseId)).Distinct().ToList();
 
-            var doneStats = await LoadDoneLessonStatsAsync(pairs, today, ct).ConfigureAwait(false);
+            var doneStats = await LoadDoneLessonStatsCourseAsync(pairs, today, ct).ConfigureAwait(false);
 
             var aggregatesToInsert = BuildAggregates(courseResults, courseGoals, students, totalLessonsPerCourse, doneStats);
             if (aggregatesToInsert.Count == 0)
@@ -266,8 +299,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     await _studentLearningGoalAggregateRepository.AddList(slice);
                 }
                 await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
-
-                await EnsureWeeklySummariesForAggregatesAsync(aggregatesToInsert, courseGoals, today, doneStats, ct).ConfigureAwait(false);
+                await EnsureWeeklySummariesForAggregatesAsync(aggregatesToInsert, courseGoals, today, pairs, ct).ConfigureAwait(false);
             }
         }
 
@@ -299,7 +331,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
          IList<CourseGoalModel> courseGoals,
          IList<StudentDetailModel> students,
          IDictionary<Guid, int> totalLessonsPerCourse,
-         IDictionary<(Guid StudentId, Guid CourseId), (int total, int week, DateTime? last)> doneStats)
+         IDictionary<(Guid StudentId, Guid CourseId), (int total, DateTime? last)> doneStats)
         {
             var aggregates = new List<StudentGoalAggregate>();
             var studentMap = students.ToDictionary(s => s.Id);
@@ -371,7 +403,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
          IList<StudentGoalAggregate> aggregates,
          IList<CourseGoalModel> allCourseGoals,
          DateTime today,
-         IDictionary<(Guid StudentId, Guid CourseId), (int total, int week, DateTime? last)> doneStats,
+         IList<(Guid, Guid)> pairs,
          CancellationToken ct)
         {
             if (aggregates.Count == 0)
@@ -381,6 +413,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow(today);
             var toInsert = new List<StudentGoalSummary>();
             var courseGoalById = allCourseGoals.ToDictionary(g => g.Id);
+
+            var doneStats = await LoadDoneLessonStatsAsync(pairs, today, ct).ConfigureAwait(false);
 
             foreach (var ag in aggregates)
             {
@@ -435,6 +469,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 .Select(x => new
                 {
                     x.StudentGoalAggregateId,
+                    x.StartDate,
                     x.ProgressStatus
                 })
                 .ToListAsync(cancellationToken)
@@ -445,7 +480,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 .GroupBy(x => x.StudentGoalAggregateId)
                 .ToDictionary(
                     g => g.Key,
-                    g => (IReadOnlyList<EnumProgressStatus>)g
+                    g => (IReadOnlyList<EnumProgressStatus>)g.OrderBy(x => x.StartDate)
                             .Select(x => x.ProgressStatus)
                             .ToList());
 
@@ -478,9 +513,9 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             return result;
         }
 
-        private async Task<Dictionary<Guid, StudentGoalSummary>> FetchLatestWeeklyByAggregateIdAsync(CancellationToken ct)
+        private async Task<Dictionary<Guid, StudentGoalSummary>> FetchLatestWeeklyByAggregateIdAsync(DateTime todate, CancellationToken ct)
         {
-            var latest = await _studentLearningGoalSummaryRepository.Queryable
+            var latest = await _studentLearningGoalSummaryRepository.Queryable.Where(x => x.StartDate.Date <= todate.Date)
                 .GroupBy(s => s.StudentGoalAggregateId)
                 .Select(g => g.OrderByDescending(x => x.StartDate).First())
                 .ToListAsync(ct)
@@ -532,7 +567,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             DateTime toDate,
             IList<StudentModel> students,
             IList<CourseGoalModel> allCourseGoals,
-            IDictionary<(Guid StudentId, Guid CourseId), (int total, int week, DateTime? last)> doneStats,
             CancellationToken ct)
         {
             if (aggregates.Count == 0)
@@ -575,19 +609,16 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 {
                     continue;
                 }
-                var stat = doneStats.TryGetValue((ag.StudentId, ag.CourseId), out var s) ? s : default;
 
                 toInsert.Add(new StudentGoalSummary
                 {
-                    ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(stat.week, cfg.LessonsPerWeek),
+                    ProgressStatus = EnumProgressStatus.Behind,
                     StartDate = weekStartUtc,
                     EndDate = weekEndUtc,
                     StudentGoalAggregateId = ag.Id,
                     LessonsPerWeek = cfg.LessonsPerWeek,
                     TotalTargetLessons = ag.TotalTargetLessons,
                     TotalCompletedLessons = ag.TotalCompletedLessons,
-                    CompletedLessons = stat.week,
-                    LastCompletedAt = stat.last
                 });
 
                 if (ag.CourseGoalConfigId != cfg.Id || ag.CourseGoalId != courseGoal.Id)
@@ -618,7 +649,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            var latestWeeklyByAggId = await FetchLatestWeeklyByAggregateIdAsync(ct);
+            var latestWeeklyByAggId = await FetchLatestWeeklyByAggregateIdAsync(toDate, ct);
             var totalsByAggId = await LoadWeeklyTotalsAsync(latestWeeklyByAggId.Keys, toDate, ct);
 
             var studentIds = aggregates.Select(a => a.StudentId).Distinct().ToList();
@@ -626,6 +657,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             var studentMap = (studentResults.Content?.Result ?? new List<StudentModel>()).ToDictionary(s => s.Id);
 
             var pairs = aggregates.Select(a => (a.StudentId, a.CourseId)).Distinct().ToList();
+
+            var doneCourse = await LoadDoneLessonStatsCourseAsync(pairs, toDate, ct);
             var doneStats = await LoadDoneLessonStatsAsync(pairs, toDate, ct);
 
             var allStatuses = await GetOrderedProgressStatusesBeforeAsync(toDate, ct);
@@ -642,6 +675,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     continue;
                 }
                 var stat = doneStats.TryGetValue((ag.StudentId, ag.CourseId), out var s) ? s : default;
+                var course = doneCourse.TryGetValue((ag.StudentId, ag.CourseId), out var sv) ? sv : default;
                 var totals = totalsByAggId.TryGetValue(ag.Id, out var t) ? t : (0, 0);
 
                 if (ag.StudentId == student.Id && ag.CourseId != student.CourseId)
@@ -663,7 +697,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                     weeklyToUpdate.Add(w);
 
                     // cập nhật aggregate
-                    ag.TotalCompletedLessons = stat.total;
+                    ag.TotalCompletedLessons = course.total;
 
                     if (w.StartDate <= toDate && w.EndDate >= toDate)
                     {
@@ -688,7 +722,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             _studentLearningGoalAggregateRepository.UpdateList(aggregates);
             await _studentLearningGoalAggregateRepository.UnitOfWork.SaveChangesAsync(ct).ConfigureAwait(false);
 
-            await EnsureWeeklySummariesForAggregatesAsync(aggregates.Where(x => x.IsActive).ToList(), toDate, studentMap.Values.ToList(), courseGoals, doneStats, ct).ConfigureAwait(false);
+            await EnsureWeeklySummariesForAggregatesAsync(aggregates.Where(x => x.IsActive).ToList(), toDate, studentMap.Values.ToList(), courseGoals, ct).ConfigureAwait(false);
         }
 
         #endregion Update

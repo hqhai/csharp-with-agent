@@ -87,7 +87,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [EncryptResponse]
-        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View, StudentProgressWeeklyManagement.View })]
         public async Task<IActionResult> GetProfileStudent([FromRoute] Guid studentId)
         {
             MethodResult<StudentModel> queryResult = await _mediator.Send(new GetStudentProfileQuery { StudentId = studentId }).ConfigureAwait(false);
