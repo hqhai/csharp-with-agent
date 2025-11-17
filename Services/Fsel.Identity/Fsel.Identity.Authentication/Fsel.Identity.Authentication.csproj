@@ -39,6 +39,15 @@
     <None Update="Resources\Apple\ApplePrivateKey.Development.p8">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\Apple\ApplePrivateKey.Production.p8">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Apple\ApplePrivateKey.Staging.p8">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Apple\ApplePrivateKey.Testing.p8">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\CertificateSSL\certificate.crt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
