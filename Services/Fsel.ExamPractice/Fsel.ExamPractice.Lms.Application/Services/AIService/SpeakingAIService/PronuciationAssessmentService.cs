@@ -404,7 +404,15 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                 throw new ArgumentNullException(nameof(referenceText), "Văn bản tham chiếu không được để trống");
             }
 
-            var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Word\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true}}");
+            var pronunciationConfig = new PronunciationAssessmentConfig(
+                referenceText: referenceText,
+                gradingSystem: GradingSystem.HundredMark,
+                granularity: Granularity.Word,
+                enableMiscue: false
+            );
+
+            // Đảm bảo sử dụng IPA
+            pronunciationConfig.PhonemeAlphabet = "IPA";
 
             return await PerformContinuousRecognitionAsync(pronunciationConfig, isFromFile: false, cancellationToken: cancellationToken);
         }
@@ -524,6 +532,13 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                 // Sử dụng recognizer và audioConfig đã được tạo từ file method
                 speechRecognizer = recognizer;
                 audioConfiguration = audioConfig;
+
+                // Tăng silence timeout cho file processing để đảm bảo xử lý hết audio buffer
+                // File audio được đọc nhanh hơn realtime, cần thời gian để recognition pipeline xử lý
+                speechRecognizer.Properties.SetProperty(
+                    PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "5000");
+                speechRecognizer.Properties.SetProperty(
+                    PropertyId.Speech_SegmentationSilenceTimeoutMs, "5000");
             }
             else
             {
@@ -587,15 +602,17 @@ namespace Fsel.ExamPractice.Lms.Application.Services.AIService.SpeakingAIService
                 // Start continuous recognition
                 await speechRecognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                // Wait for completion or cancellation (reduced timeout for server compatibility)
+                // Wait for completion or cancellation
+                // Timeout 3 phút để đảm bảo recognition pipeline xử lý hết audio buffer
+                // Đặc biệt quan trọng cho file audio dài hoặc có nhiều im lặng
                 var completedTask = await Task.WhenAny(
                     stopRecognition.Task,
-                    Task.Delay(TimeSpan.FromMinutes(1), cancellationToken) // Timeout sau 1 phút để tương thích với server
+                    Task.Delay(TimeSpan.FromSeconds(90), cancellationToken)
                 ).ConfigureAwait(false);
 
                 if (completedTask != stopRecognition.Task)
                 {
-                    _logger.LogWarning("Recognition timed out after 1 minute");
+                    _logger.LogWarning("Recognition timed out after 3 minutes");
                 }
 
                 // Stop recognition

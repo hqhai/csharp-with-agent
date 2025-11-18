@@ -417,7 +417,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             if (string.IsNullOrEmpty(audioFilePath))
                 throw new ArgumentNullException(nameof(audioFilePath), "Đường dẫn file âm thanh không được để trống");
 
-            if (string.IsNullOrEmpty(referenceText))
+            if (string.IsNullOrEmpty(referenceText)) 
                 throw new ArgumentNullException(nameof(referenceText), "Văn bản tham chiếu không được để trống");
 
             string? convertedFilePath = null;
@@ -463,8 +463,13 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 }
 
                 // Bước 3: Cấu hình và thực hiện đánh giá phát âm với continuous recognition
-                var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true,\"enableMiscue\":\"true\"}}");
-
+                //var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true,\"enableMiscue\":\"true\"}}");
+                var pronunciationConfig = new PronunciationAssessmentConfig(
+                referenceText: referenceText,
+                gradingSystem: GradingSystem.HundredMark,
+                granularity: Granularity.Word,
+                enableMiscue: false
+            );
                 // Đảm bảo sử dụng IPA
                 pronunciationConfig.PhonemeAlphabet = "IPA";
 
@@ -534,6 +539,13 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 // Sử dụng recognizer và audioConfig đã được tạo từ file method
                 speechRecognizer = recognizer;
                 audioConfiguration = audioConfig;
+
+                // Tăng silence timeout cho file processing để đảm bảo xử lý hết audio buffer
+                // File audio được đọc nhanh hơn realtime, cần thời gian để recognition pipeline xử lý
+                speechRecognizer.Properties.SetProperty(
+                    PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs, "5000");
+                speechRecognizer.Properties.SetProperty(
+                    PropertyId.Speech_SegmentationSilenceTimeoutMs, "5000");
             }
             else
             {
@@ -552,19 +564,19 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 // Subscribe to events
                 speechRecognizer.Recognizing += (s, e) =>
                 {
-                    _logger.LogError($"RECOGNIZING: Text={e.Result.Text}");
+                    _logger.LogInformation($"RECOGNIZING: Text={e.Result.Text}");
                 };
 
                 speechRecognizer.Recognized += (s, e) =>
                 {
                     if (e.Result.Reason == ResultReason.RecognizedSpeech)
                     {
-                        _logger.LogError($"RECOGNIZED: Text={e.Result.Text}");
+                        _logger.LogInformation($"RECOGNIZED: Text={e.Result.Text}");
                         recognitionResults.Add(e.Result);
                     }
                     else if (e.Result.Reason == ResultReason.NoMatch)
                     {
-                        _logger.LogError($"NOMATCH: Speech could not be recognized.");
+                        _logger.LogWarning($"NOMATCH: Speech could not be recognized.");
                     }
                 };
 
@@ -584,28 +596,30 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 
                 speechRecognizer.SessionStarted += (s, e) =>
                 {
-                    _logger.LogError("Session started event.");
+                    _logger.LogInformation("Session started event.");
                 };
 
                 speechRecognizer.SessionStopped += (s, e) =>
                 {
-                    _logger.LogError("Session stopped event.");
-                    _logger.LogError("Stop recognition.");
+                    _logger.LogInformation("Session stopped event.");
+                    _logger.LogInformation("Stop recognition.");
                     stopRecognition.TrySetResult(0);
                 };
 
                 // Start continuous recognition
                 await speechRecognizer.StartContinuousRecognitionAsync().ConfigureAwait(false);
 
-                // Wait for completion or cancellation (reduced timeout for server compatibility)
+                // Wait for completion or cancellation
+                // Timeout 3 phút để đảm bảo recognition pipeline xử lý hết audio buffer
+                // Đặc biệt quan trọng cho file audio dài hoặc có nhiều im lặng
                 var completedTask = await Task.WhenAny(
                     stopRecognition.Task,
-                    Task.Delay(TimeSpan.FromMinutes(1), cancellationToken) // Timeout sau 1 phút để tương thích với server
+                    Task.Delay(TimeSpan.FromSeconds(90), cancellationToken)
                 ).ConfigureAwait(false);
 
                 if (completedTask != stopRecognition.Task)
                 {
-                    _logger.LogError("Recognition timed out after 1 minute");
+                    _logger.LogError("Recognition timed out after 3 minutes");
                  }
 
                 // Stop recognition
