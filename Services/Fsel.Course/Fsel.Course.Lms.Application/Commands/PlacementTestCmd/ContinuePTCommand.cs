@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return result;
             }
 
-            if (flowTestResult.Status == Domain.Enums.EnumResultStatus.Done)
+            if (flowTestResult.Status == Domain.Enums.EnumResultStatus.Done || flowTestResult.Status == Domain.Enums.EnumResultStatus.ByPass)
             {
                 return new MethodResult<PTStateModel>
                 {
