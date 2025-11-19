@@ -8,6 +8,7 @@ namespace Fsel.Identity.Infrastructure.Configs
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
+    using RestSharp.Extensions;
 
     public class StudentEntityTypeConfiguration : IEntityTypeConfiguration<Student>
     {

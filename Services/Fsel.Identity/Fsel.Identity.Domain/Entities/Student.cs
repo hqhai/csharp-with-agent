@@ -65,6 +65,11 @@ namespace Fsel.Identity.Domain.Entities
         public Guid HumanId { get; set; }
         public DateTime? ExpiredDate { get; set; }
         public Guid? SchoolClassId { get; set; }
+
+        public string? StudentCampusCode { get; set; }
+
+        public string? ClassCampusCode { get; set; }
+
         public SchoolClass? SchoolClassCampus { get; set; }
 
 
