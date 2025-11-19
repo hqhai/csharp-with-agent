@@ -4,61 +4,62 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Core.Base.Interfaces;
     using Domain.Entities.TestConfigs;
     using Domain.Enums;
-    using Domain.Enums.ErrorCodes;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Core.Base;
-    using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
-    using Fsel.Course.Lms.Application.Services.UserServices;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Enums.ErrorCodes;
-    using Fsel.Shared.Helpers;
+    using Common.ActionResults;
+    using Common.Enums.ErrorCodes;
+    using Core.Base;
+    using Domain.Models.EntityModels.PlacementTestModels;
+    using Services.ApplicationServices;
+    using Services.ApplicationServices.Aggregates;
+    using Services.UserServices;
+    using Shared.Enums;
+    using Shared.Enums.ErrorCodes;
+    using Shared.Helpers;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Nest;
 
-    public class ChosePTFlowCommand : IRequest<MethodResult<PTStateModel>>
+    public class ChosePtFlowCommand : MediatR.IRequest<MethodResult<PtStateModel>>
     {
-        public ChosePTFlowCommand(Guid programId)
+        public ChosePtFlowCommand(Guid projectId)
         {
-            ProgramId = programId;
+            ProjectId = projectId;
         }
 
-        public Guid ProgramId { get; set; }
+        public Guid ProjectId { get; set; }
     }
 
-    public class ChosePTFlowCommandHandler : IRequestHandler<ChosePTFlowCommand, MethodResult<PTStateModel>>
+    public class ChosePtFlowCommandHandler : IRequestHandler<ChosePtFlowCommand, MethodResult<PtStateModel>>
     {
         private readonly IUserService _userService;
         private readonly IServiceProvider _serviceProvider;
         private readonly AuthContext _authContext;
         private readonly IFlowService _flowService;
         private readonly ITestService _testService;
-        private readonly IRepository<TestGroupResult> _testGroupResult;
+        private readonly Core.Base.Interfaces.IRepository<TestGroupResult> _testGroupResult;
+        private readonly ICategoryService _categoryService;
 
-        public ChosePTFlowCommandHandler(AuthContext authContext,
+        public ChosePtFlowCommandHandler(AuthContext authContext,
             IFlowService flowService,
             ITestService testService,
-            IUserService userService,
-            IRepository<TestGroupResult> testGroupResult,
+            IUserService userService, Core.Base.Interfaces.IRepository<TestGroupResult> testGroupResult,
+            ICategoryService categoryService,
             IServiceProvider serviceProvider)
         {
             _authContext = authContext;
             _flowService = flowService;
             _testService = testService;
             _userService = userService;
+            _categoryService = categoryService;
             _serviceProvider = serviceProvider;
             _testGroupResult = testGroupResult;
         }
 
-        public async Task<MethodResult<PTStateModel>> Handle(ChosePTFlowCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PtStateModel>> Handle(ChosePtFlowCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PTStateModel>();
+            var methodResult = new MethodResult<PtStateModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -86,33 +87,41 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return methodResult;
             }
 
-
-            var age = DateTimeHelper.GetYearOld(student.Human.Birthday);
-
-            var flowMatch = await _flowService.GetHierarchicalFlowByCondition(x => x.ProgramId == request.ProgramId
-                                                                                   && x.Status == EnumStatus.Active
-                                                                                   && x.FromAge <= age && x.ToAge >= age);
-
-            if (flowMatch?.StepFlows.FirstOrDefault() == null)
+            var programContainPtFound = await _categoryService.GetProgramContainPtBySelectedProject(request.ProjectId, cancellationToken);
+            if (programContainPtFound != null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(flowMatch));
+                var age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+                var flowMatch = await _flowService.GetHierarchicalFlowByCondition(x => x.ProgramId == programContainPtFound.Id
+                                                                                       && x.Status == EnumStatus.Active
+                                                                                       && x.FromAge <= age && x.ToAge >= age);
+
+                if (flowMatch?.StepFlows.FirstOrDefault() == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(flowMatch));
+                    return methodResult;
+                }
+
+                var firstStepFlow = flowMatch.StepFlows?.FirstOrDefault();
+                if (firstStepFlow == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(firstStepFlow));
+                    return methodResult;
+                }
+
+                var testGroupResult = await _testService.InitTestGroupResultForFlow(flowMatch.Id, programContainPtFound.Id, student.Id, EnumTestType.PlacementTest);
+
+                var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
+                await aggregate.Start();
+                methodResult.Result = await aggregate.ExpotStateData();
+
                 return methodResult;
             }
-
-            var firstStepFlow = flowMatch.StepFlows?.FirstOrDefault();
-            if (firstStepFlow == null)
+            else
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(firstStepFlow));
+                var testGroupResult = await _testService.InitTestGroupResultForFlow(null, request.ProjectId, student.Id, EnumTestType.PlacementTest, isByPass: true);
+                methodResult.Result = new PtStateModel { Status = EnumResultStatus.ByPass, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
                 return methodResult;
             }
-
-            var testGroupResult = await _testService.InitTestGroupResultForFlow(flowMatch.Id, request.ProgramId, student.Id, Domain.Enums.EnumTestType.PlacementTest);
-
-            var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
-            await aggregate.Start();
-            methodResult.Result = await aggregate.ExpotStateData();
-
-            return methodResult;
         }
     }
 }

@@ -139,10 +139,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("check-done-pt/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<EnumResultStatus>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO),  nameof(EnumRole.Student) })]
-        public async Task<IActionResult> CheckDonePTByStudentId([FromRoute] Guid studentId)
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO), nameof(EnumRole.Student) })]
+        public async Task<IActionResult> CheckDonePtByStudentId([FromRoute] Guid studentId)
         {
-            var queryResult = await _mediator.Send(new CheckDonePTByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new CheckDonePtByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -154,7 +154,7 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpGet("get-section-result-detail/{id}")]
+        [HttpGet("get-section-result-detail/{id:guid}")]
         public async Task<IActionResult> GetTestSectionResultDetail(Guid id)
         {
             var getSectionResultDetailQuery = new GetSectionResultDetailQuery { SectionResultId = id };
@@ -162,17 +162,17 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpPost("select/{programId}")]
-        public async Task<IActionResult> SelectPTFlowByProgramId(Guid programId)
+        [HttpPost("select/{projectId:guid}")]
+        public async Task<IActionResult> SelectPtFlowByProgramId(Guid projectId)
         {
-            var chosePtFlowCommand = new ChosePTFlowCommand(programId);
+            var chosePtFlowCommand = new ChosePtFlowCommand(projectId);
             var queryResult = await _mediator.Send(chosePtFlowCommand).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
 
-        [HttpPost("continue/{studentId}")]
-        public async Task<IActionResult> GetPTFlowForStudent(Guid studentId)
+        [HttpPost("continue/{studentId:guid}")]
+        public async Task<IActionResult> GetPtFlowForStudent(Guid studentId)
         {
             var continueCommand = new ContinuePTCommand { StudentId = studentId };
             var queryResult = await _mediator.Send(continueCommand).ConfigureAwait(false);
@@ -183,6 +183,13 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetPtState([FromBody] SubmitAnswerCommand submitCommand)
         {
             var queryResult = await _mediator.Send(submitCommand).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-levels-by-selected-program")]
+        public async Task<IActionResult> GetLevelsBySelectedProgram([FromQuery] GetLevelsByProgramQuery request)
+        {
+            var queryResult = await _mediator.Send(request).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -51,5 +51,7 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
         }
 
         public double TokenReceived { get; set; }
+
+        public Guid? SkillId { get; set; }
     }
 }

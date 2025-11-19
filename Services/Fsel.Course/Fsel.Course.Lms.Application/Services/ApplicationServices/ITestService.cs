@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false);
 
-        Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid programId, Guid studentId, EnumTestType enumTestType);
+        Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass =false);
 
         Task<TestResult> MakeNewTestResultTree(Guid studentId, Guid stepFlowId, Guid testGroupResultId, Guid programId, Guid? actionFlowId = default);
 
@@ -155,7 +155,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return null;
         }
 
-        public async Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid programId, Guid studentId, EnumTestType enumTestType)
+        public async Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass = false)
         {
             var testGroupResult = new TestGroupResult
             {
@@ -163,7 +163,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 FlowId = flowId,
                 StudentId = studentId,
                 TestType = enumTestType,
-                Status = EnumResultStatus.New
+                Status = isByPass ? EnumResultStatus.ByPass : EnumResultStatus.New
             };
             _testGroupResultRepository.Add(testGroupResult);
             await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();

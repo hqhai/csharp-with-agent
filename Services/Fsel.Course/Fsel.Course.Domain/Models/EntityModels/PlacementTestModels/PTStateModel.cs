@@ -8,13 +8,15 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     using Newtonsoft.Json;
     using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 
-    public class PTStateModel
+    public class PtStateModel
     {
         public Guid? FlowId { get; set; }
 
         public Guid? StudentId { get; set; }
 
         public Guid? TestGroupResultId { get; set; }
+
+        public string? Level { get; set; }
 
         public EnumResultStatus? Status { get; set; }
 

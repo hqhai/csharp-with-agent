@@ -13,5 +13,19 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public IList<CategoryTreeModel>? Children { get; set; }
+
+        public void RemoveChildByCodition(Predicate<CategoryTreeModel> condtion)
+        {
+            Children = Children?.Where(x => condtion(x)).ToList();
+            if (Children == null)
+            {
+                return;
+            }
+
+            foreach (var child in Children)
+            {
+                child.RemoveChildByCodition(condtion);
+            }
+        }
     }
 }

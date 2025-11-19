@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     {
         Task<Flow> GetHierarchicalFlowByCondition(Expression<Func<Flow, bool>> predicate);
 
-        Task<Guid?> GetNextStep(Expression<Func<Flow, bool>> predicate, ICollection<TestResult> testResults);
+        Task<Node?> GetNextStep(Expression<Func<Flow, bool>> predicate, ICollection<TestResult> testResults);
     }
 
     public class FlowService : IFlowService
@@ -72,7 +72,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             });
         }
 
-        public async Task<Guid?> GetNextStep(Expression<Func<Flow, bool>> predicate, ICollection<TestResult>? testResults)
+        public async Task<Node?> GetNextStep(Expression<Func<Flow, bool>> predicate, ICollection<TestResult>? testResults)
         {
             var flow = await GetHierarchicalFlowByCondition(predicate);
 
@@ -88,7 +88,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
             var node = startNode.TestResult == null ? startNode : startNode.GetNextNode();
 
-            return node?.StepFlow?.Id;
+            // return node?.StepFlow?.Id;
+            return node;
         }
 
         private async Task LoadStepFlowRecursively(StepFlow stepFlow)
