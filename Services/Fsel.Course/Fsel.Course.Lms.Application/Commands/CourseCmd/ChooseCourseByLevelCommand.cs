@@ -89,6 +89,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             }
 
             await _userService.UpdateCourseToStudentAsync(course.Id);
+            methodResult.Result = new CourseModel { Id = course.Id, Name = course.Name, LevelId = course.LevelId, ProgramId = course.ProgramId };
             return methodResult;
         }
     }
