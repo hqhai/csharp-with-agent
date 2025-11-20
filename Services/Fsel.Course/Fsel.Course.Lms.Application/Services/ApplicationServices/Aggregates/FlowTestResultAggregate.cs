@@ -6,8 +6,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Core.Base.Interfaces;
     using Domain.Entities.TestConfigs;
     using Domain.Enums;
+    using Domain.IRepositories;
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.PlacementTestModels;
+    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
     public class FlowTestResultAggregate
@@ -64,7 +66,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                 var testService = ServiceProvider.GetRequiredService<ITestService>();
 
-                var newTestResultTree = await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, node.StepFlow.Id, FlowTestResult.Id, FlowTestResult.ProgramId.Value);
+                var newTestResultTree =
+                    await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, node.StepFlow.Id, FlowTestResult.Id, FlowTestResult.ProgramId.Value);
 
                 await AddNewTest(newTestResultTree);
             }
@@ -154,13 +157,33 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             }
 
             var testService = ServiceProvider.GetRequiredService<ITestService>();
+            var testSectionResultRepository = ServiceProvider.GetRequiredService<IRepository<TestSectionResult>>();
             var test = await testService.GetHierachicalTestById(testStateModel.TestId.Value);
-            if (test == null)
-            {
-                return;
-            }
 
             testStateModel.UpdateDetailInfo(test);
+
+            if (testStateModel?.Status == EnumResultStatus.Done && !testStateModel.Children.Any())
+            {
+                var testSectionResults = await testSectionResultRepository.ReadQueryable
+                    .Include(x => x.TestSection)
+                    .ThenInclude(x => x.Skill)
+                    .Where(x => x.TestResultId == testStateModel.TestResultId && x.ParentTestSectionResultId == null)
+                    .ToListAsync();
+
+                testStateModel.Children = testSectionResults.Select(BaseTestStateModel (skill) =>
+                {
+                    var sectionStateModel = new SectionStateModel
+                    {
+                        Name = skill.TestSection?.Skill?.Name,
+                        SectionResultId = skill.Id,
+                        CorrectCount = skill.CorrectCount,
+                        TotalCount = skill.CorrectTotal,
+                        Status = skill.Status,
+                    };
+
+                    return sectionStateModel;
+                }).ToList();
+            }
         }
 
         private async Task Commit()
