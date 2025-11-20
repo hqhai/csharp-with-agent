@@ -3,21 +3,22 @@
 namespace Fsel.Course.Lms.Api.Controllers.V1i2
 {
     using System.Net;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Attributes;
-    using Fsel.Common.Constants;
-    using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Queries.VideoQuery;
-    using Fsel.Shared.Attributes;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Enums;
+    using Application.Queries.VideoQuery;
+    using Common.ActionResults;
+    using Common.Attributes;
+    using Common.Constants;
+    using Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Shared.Attributes;
+    using Shared.Constants;
+    using Shared.Enums;
+    using GetVideoTimeCodeQuery = Application.Queries.VideoQuery.V1i2.GetVideoTimeCodeQuery;
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/video")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Student))]
+    //[Permission(role: nameof(EnumRole.Student))]
     public class VideoController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -25,6 +26,18 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         public VideoController(IMediator mediator)
         {
             _mediator = mediator;
+        }
+
+        /// <summary>
+        /// Get Video Time Code
+        /// </summary>
+        [HttpGet("time-code-v2")]
+        [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetTimeCode([FromQuery] GetVideoTimeCodeQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
 
         /// <summary>
