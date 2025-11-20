@@ -88,6 +88,10 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
 
+        public double? WorkingTime { get; set; }
+
+        public double? PercentResult { get; set; }
+
         public void UpdateDetailInfo(TestSection? section)
         {
             if (section == null)

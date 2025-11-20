@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 Status = TestSectionResult.Status,
                 CorrectCount = TestSectionResult.CorrectCount,
                 TotalCount = TestSectionResult.SkillScores.Sum(x => x.TotalCount),
+                WorkingTime = TestSectionResult.WorkingTime,
                 Children = new List<BaseTestStateModel>()
             };
             if (Children.Count > 0)
