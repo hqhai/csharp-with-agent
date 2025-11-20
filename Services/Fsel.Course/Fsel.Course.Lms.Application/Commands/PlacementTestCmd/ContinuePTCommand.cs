@@ -48,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             }
 
             var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
+            await  aggregate.InitAggregate();
 
             if (flowTestResult.Status != Domain.Enums.EnumResultStatus.Done && flowTestResult.Status != Domain.Enums.EnumResultStatus.ByPass)
             {
