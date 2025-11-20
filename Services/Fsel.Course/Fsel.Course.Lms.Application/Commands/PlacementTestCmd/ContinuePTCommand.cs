@@ -47,21 +47,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return result;
             }
 
-            if (flowTestResult.Status == Domain.Enums.EnumResultStatus.Done || flowTestResult.Status == Domain.Enums.EnumResultStatus.ByPass)
-            {
-                return new MethodResult<PtStateModel>
-                {
-                    Result = new PtStateModel
-                    {
-                        FlowId = flowTestResult.FlowId,
-                        Status = flowTestResult.Status,
-                    }
-                };
-            }
-
             var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
 
-            await aggregate.Start();
+            if (flowTestResult.Status != Domain.Enums.EnumResultStatus.Done && flowTestResult.Status != Domain.Enums.EnumResultStatus.ByPass)
+            {
+                await aggregate.Start();
+            }
 
             return new MethodResult<PtStateModel>
             {
