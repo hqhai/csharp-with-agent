@@ -20,6 +20,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
+    using Application.Commands.CourseCmd;
+
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
@@ -124,6 +126,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetCourseForChooseLevel([FromQuery] GetCourseForChooseLevelQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpPost("select-course-by-choose-level")]
+        [Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetLevelsBySelectedProgram([FromBody] ChooseCourseByLevelCommand request)
+        {
+            var queryResult = await _mediator.Send(request).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }
