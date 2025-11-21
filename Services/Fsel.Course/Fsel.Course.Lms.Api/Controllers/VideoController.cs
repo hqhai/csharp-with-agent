@@ -45,6 +45,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Video Time Code
         /// </summary>
         [HttpGet("time-code")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetTimeCode([FromQuery] GetVideoTimeCodeQuery query)

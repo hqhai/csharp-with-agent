@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/video")]
     [ApiController]
-    //[Permission(role: nameof(EnumRole.Student))]
+    [Permission(role: nameof(EnumRole.Student))]
     public class VideoController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         /// <summary>
         /// Get Video Time Code
         /// </summary>
-        [HttpGet("time-code-v2")]
+        [HttpGet("time-code")]
         [ProducesResponseType(typeof(MethodResult<VideoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetTimeCode([FromQuery] GetVideoTimeCodeQuery query)
