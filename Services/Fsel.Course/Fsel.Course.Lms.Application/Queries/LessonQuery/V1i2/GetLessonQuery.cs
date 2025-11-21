@@ -18,7 +18,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
 
     public class GetLessonQuery : IRequest<MethodResult<LessonDtoModel>>
     {
-        public Guid LessonResultId { get; set; }
+        public Guid LessonId { get; set; }
+        public Guid? LessonResultId { get; set; }
     }
 
     public class GetLessonQueryHandler : IRequestHandler<GetLessonQuery, MethodResult<LessonDtoModel>>
@@ -30,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
         private readonly IClassForumRepository _classForumRepository;
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IDocumentRepository _documentRepository;
+        private readonly ILessonRepository _lessonRepository;
         private readonly IMapper _mapper;
 
         public GetLessonQueryHandler(
@@ -40,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             IVideoRepository videoRepository,
             IClassForumRepository classForumRepository,
             IDocumentRepository documentRepository,
+            ILessonRepository lessonRepository,
             IMapper mapper)
         {
             _lessonModuleRepository = lessonModuleRepository;
@@ -49,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             _classForumRepository = classForumRepository;
             _homeWorkRepository = homeWorkRepository;
             _documentRepository = documentRepository;
+            _lessonRepository = lessonRepository;
             _mapper = mapper;
         }
 
@@ -57,34 +61,42 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<LessonDtoModel>();
 
-            var lessonResult = await GetLessonResultAsync(request, methodResult);
-            if (lessonResult == null || !methodResult.IsOK)
+            LessonResult? lessonResult = null;
+            if (request.LessonResultId.HasValue)
             {
+                lessonResult = await GetLessonResultAsync(request, methodResult);
+                if (lessonResult == null || !methodResult.IsOK)
+                {
+                    return methodResult;
+                }
+            }
+            var lesson = await _lessonRepository.GetByIdAsync(request.LessonId);
+            if (lesson == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson), request.LessonId);
                 return methodResult;
             }
 
-            var lessonModules = await GetLessonModulesAsync(lessonResult.LessonId);
+            var lessonModules = await GetLessonModulesAsync(lesson.Id);
             if (!lessonModules.Any())
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = new LessonDtoModel();
                 return methodResult;
             }
-            var moduleLessons = await GetLessonModelsAsync(lessonResult, lessonModules, cancellationToken);
+            var moduleLessons = await GetLessonModelsAsync(lessonResult, lesson, lessonModules);
 
-            var lesson = _mapper.Map<LessonDtoModel>(lessonResult.Lesson);
-            if (lesson != null)
+            var lessonDto = _mapper.Map<LessonDtoModel>(lesson);
+            if (lessonDto != null)
             {
-                lesson.ModuleLessons = moduleLessons;
+                lessonDto.Result = _mapper.Map<ResultModel>(lessonResult);
+                lessonDto.ModuleLessons = moduleLessons;
             }
-            methodResult.Result = lesson;
+            methodResult.Result = lessonDto;
             return methodResult;
         }
 
-        private async Task<IList<ModuleLessonModel>> GetLessonModelsAsync(
-        LessonResult lessonResult,
-        IList<LessonModule> lessonModules,
-        CancellationToken cancellationToken)
+        private async Task<IList<ModuleLessonModel>> GetLessonModelsAsync(LessonResult? lessonResult, Lesson lesson, IList<LessonModule> lessonModules)
         {
             // Lookup theo từng type
             var (videoResultsByOriginalId, videoDics) = await _videoRepository.BuildVideoLookupsAsync(lessonResult, lessonModules);
@@ -106,7 +118,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                         break;
 
                     case EnumLessonConfigType.ClassForum:
-                        BuildClassForumModuleLesson(module, lessonResult, classForumResultsByOriginalId, classForumDics, moduleResults);
+                        BuildClassForumModuleLesson(module, lesson, classForumResultsByOriginalId, classForumDics, moduleResults);
                         break;
 
                     case EnumLessonConfigType.HomeWork:
@@ -114,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                         break;
 
                     case EnumLessonConfigType.Document:
-                        BuildDocumentModuleLesson(module, lessonResult, documentResultsByOriginalId, documentDics, moduleResults);
+                        BuildDocumentModuleLesson(module, lesson, documentResultsByOriginalId, documentDics, moduleResults);
                         break;
                 }
             }
@@ -149,7 +161,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
 
         private void BuildClassForumModuleLesson(
         LessonModule module,
-        LessonResult lessonResult,
+        Lesson lesson,
         IDictionary<Guid, (ClassForum ClassForum, ClassForumResult ClassForumResult)> classForumResultsByOriginalId,
         IDictionary<Guid, ClassForum> classForumDics,
         IList<ModuleLessonModel> moduleResults)
@@ -157,7 +169,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (classForumResultsByOriginalId.TryGetValue(module.OriginalId, out var forumResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lessonResult.Lesson?.Name;
+                dto.Name = lesson.Name;
                 dto.ObjectId = forumResult.ClassForum.Id;
                 dto.Result = _mapper.Map<ResultModel>(forumResult.ClassForumResult);
                 moduleResults.Add(dto);
@@ -167,7 +179,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (classForumDics.TryGetValue(module.OriginalId, out var forum))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lessonResult.Lesson?.Name;
+                dto.Name = lesson.Name;
                 dto.ObjectId = forum.Id;
                 moduleResults.Add(dto);
             }
@@ -201,7 +213,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
 
         private void BuildDocumentModuleLesson(
             LessonModule module,
-            LessonResult lessonResult,
+            Lesson lesson,
             IDictionary<Guid, (Document Document, DocumentResult DocumentResult)> documentResultsByOriginalId,
             IDictionary<Guid, Document> documentDics,
             IList<ModuleLessonModel> moduleResults)
@@ -209,7 +221,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (documentResultsByOriginalId.TryGetValue(module.OriginalId, out var docResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lessonResult.Lesson?.Name;
+                dto.Name = lesson.Name;
                 dto.ObjectId = docResult.Document.Id;
                 dto.Result = _mapper.Map<ResultModel>(docResult.DocumentResult);
                 moduleResults.Add(dto);
@@ -219,7 +231,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             if (documentDics.TryGetValue(module.OriginalId, out var doc))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
-                dto.Name = lessonResult.Lesson?.Name;
+                dto.Name = lesson.Name;
                 dto.ObjectId = doc.Id;
                 moduleResults.Add(dto);
             }

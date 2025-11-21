@@ -39,9 +39,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         }
 
         public async Task<(IDictionary<Guid, (ClassForum, ClassForumResult)>, IDictionary<Guid, ClassForum>)>
-        BuildClassForumLookupsAsync(
-        LessonResult lessonResult,
-        IList<LessonModule> lessonModules)
+        BuildClassForumLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules)
         {
             var classForumOriginalIds = lessonModules
                 .Where(x => x.LessonConfigType == EnumLessonConfigType.ClassForum)
@@ -55,32 +53,41 @@ namespace Fsel.Course.Infrastructure.Repositories
                         new Dictionary<Guid, ClassForum>());
             }
 
-            var classForumResults = await (from baseQ in _classForumResultRepository.ReadQueryable
-                                           where baseQ.LessonResultId == lessonResult.Id
-                                           join classForum in ReadQueryable
-                                               on baseQ.ClassForumId equals classForum.Id
-                                           select new
-                                           {
-                                               ClassForum = classForum,
-                                               ClassForumResult = baseQ
-                                           }).ToListAsync();
+            var classForumResultsByOriginalId = new Dictionary<Guid, (ClassForum, ClassForumResult)>();
+            var pendingClassForumOriginalIds = new List<Guid>();
+            if (lessonResult != null)
+            {
+                var classForumResults = await (from baseQ in _classForumResultRepository.ReadQueryable
+                                               where baseQ.LessonResultId == lessonResult.Id
+                                               join classForum in ReadQueryable
+                                                   on baseQ.ClassForumId equals classForum.Id
+                                               select new
+                                               {
+                                                   ClassForum = classForum,
+                                                   ClassForumResult = baseQ
+                                               }).ToListAsync();
 
-            var classForumOriginalIdsHasResult = classForumResults
-                .Where(x => x.ClassForum != null)
-                .Select(x => x.ClassForum!.OriginalId)
-                .Distinct();
+                var classForumOriginalIdsHasResult = classForumResults
+                    .Where(x => x.ClassForum != null)
+                    .Select(x => x.ClassForum!.OriginalId)
+                    .Distinct();
 
-            var pendingClassForumOriginalIds = classForumOriginalIds
-                .Except(classForumOriginalIdsHasResult)
-                .ToList();
+                pendingClassForumOriginalIds = classForumOriginalIds
+                   .Except(classForumOriginalIdsHasResult)
+                   .ToList();
+
+                classForumResultsByOriginalId = classForumResults
+                       .Where(x => x.ClassForum != null)
+                       .ToDictionary(
+                           x => x.ClassForum!.OriginalId,
+                           x => (ClassForum: x.ClassForum!, ClassForumResult: x.ClassForumResult));
+            }
+            else
+            {
+                pendingClassForumOriginalIds = classForumOriginalIds;
+            }
 
             var classForumDics = await GetClassForumDicAsync(pendingClassForumOriginalIds);
-
-            var classForumResultsByOriginalId = classForumResults
-                .Where(x => x.ClassForum != null)
-                .ToDictionary(
-                    x => x.ClassForum!.OriginalId,
-                    x => (ClassForum: x.ClassForum!, ClassForumResult: x.ClassForumResult));
 
             return (classForumResultsByOriginalId, classForumDics);
         }

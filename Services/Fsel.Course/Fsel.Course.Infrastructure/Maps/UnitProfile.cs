@@ -10,6 +10,7 @@ using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Domain.Models.EntityModels.ModuleModels;
 using Fsel.Course.Domain.Models.EntityModels.V1i2;
 using Fsel.Shared.Helpers;
 
@@ -36,6 +37,8 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<UnitModule, UnitModuleDTO>().IgnoreAllNonExisting();
 
             CreateMap<UnitResult, ResultModel>().IgnoreAllNonExisting();
+            CreateMap<UnitModule, ModuleUnitModel>().IgnoreAllNonExisting();
+            CreateMap<Unit, UnitDtoModel>().IgnoreAllNonExisting();
         }
     }
 

@@ -44,7 +44,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         }
 
         public async Task<(IDictionary<Guid, (HomeWork, HomeWorkResult)>, IDictionary<Guid, HomeWork>)>
-        BuildHomeWorkLookupsAsync(LessonResult lessonResult, IList<LessonModule> lessonModules)
+        BuildHomeWorkLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules)
         {
             var homeWorkOriginalIds = lessonModules
                 .Where(x => x.LessonConfigType == EnumLessonConfigType.HomeWork)
@@ -58,33 +58,40 @@ namespace Fsel.Course.Infrastructure.Repositories
                         new Dictionary<Guid, HomeWork>());
             }
 
-            var homeWorkResults = await (from baseQ in _homeWorkResultRepository.ReadQueryable
-                                         where baseQ.LessonResultId == lessonResult.Id
-                                         join homeWork in ReadQueryable
-                                             on baseQ.HomeWorkId equals homeWork.Id
-                                         select new
-                                         {
-                                             HomeWork = homeWork,
-                                             HomeWorkResult = baseQ
-                                         }).ToListAsync();
+            var homeWorkResultsByOriginalId = new Dictionary<Guid, (HomeWork, HomeWorkResult)>();
+            var pendingHomeWorkOriginalIds = new List<Guid>();
+            if (lessonResult != null)
+            {
+                var homeWorkResults = await (from baseQ in _homeWorkResultRepository.ReadQueryable
+                                             where baseQ.LessonResultId == lessonResult.Id
+                                             join homeWork in ReadQueryable
+                                                 on baseQ.HomeWorkId equals homeWork.Id
+                                             select new
+                                             {
+                                                 HomeWork = homeWork,
+                                                 HomeWorkResult = baseQ
+                                             }).ToListAsync();
 
-            var homeWorkOriginalIdsHasResult = homeWorkResults
-                .Where(x => x.HomeWork != null)
-                .Select(x => x.HomeWork!.OriginalId)
-                .Distinct();
+                var homeWorkOriginalIdsHasResult = homeWorkResults
+                    .Where(x => x.HomeWork != null)
+                    .Select(x => x.HomeWork!.OriginalId)
+                    .Distinct();
 
-            var pendingHomeWorkOriginalIds = homeWorkOriginalIds
-                .Except(homeWorkOriginalIdsHasResult)
-                .ToList();
+                pendingHomeWorkOriginalIds = homeWorkOriginalIds
+                   .Except(homeWorkOriginalIdsHasResult)
+                   .ToList();
 
+                homeWorkResultsByOriginalId = homeWorkResults
+                   .Where(x => x.HomeWork != null)
+                   .ToDictionary(
+                       x => x.HomeWork!.OriginalId,
+                       x => (HomeWork: x.HomeWork!, HomeWorkResult: x.HomeWorkResult));
+            }
+            else
+            {
+                pendingHomeWorkOriginalIds = homeWorkOriginalIds;
+            }
             var homeWorkDics = await GetHomeWorkDicAsync(pendingHomeWorkOriginalIds);
-
-            var homeWorkResultsByOriginalId = homeWorkResults
-                .Where(x => x.HomeWork != null)
-                .ToDictionary(
-                    x => x.HomeWork!.OriginalId,
-                    x => (HomeWork: x.HomeWork!, HomeWorkResult: x.HomeWorkResult));
-
             return (homeWorkResultsByOriginalId, homeWorkDics);
         }
 

@@ -54,8 +54,8 @@ namespace Fsel.Course.Lms.Application.Services.LessonItemServices
             {
                 LessonResultId = lessonResult.Id,
                 StudentId = lessonResult.StudentId,
-                Status = EnumClassForumResultStatus.Draft,
                 ClassForumId = classForum.Id,
+                ResultStatus = EnumResultStatus.New,
                 LessonModuleId = lessonModule.Id,
             };
 

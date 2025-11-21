@@ -43,7 +43,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         }
 
         public async Task<(IDictionary<Guid, (Document, DocumentResult)>, IDictionary<Guid, Document>)>
-        BuildDocumentLookupsAsync(LessonResult lessonResult, IList<LessonModule> lessonModules)
+        BuildDocumentLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules)
         {
             var documentOriginalIds = lessonModules
                 .Where(x => x.LessonConfigType == EnumLessonConfigType.Document)
@@ -56,33 +56,40 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return (new Dictionary<Guid, (Document, DocumentResult)>(),
                         new Dictionary<Guid, Document>());
             }
+            var documentResultsByOriginalId = new Dictionary<Guid, (Document, DocumentResult)>();
+            var pendingDocumentOriginalIds = new List<Guid>();
+            if (lessonResult != null)
+            {
+                var documentResults = await (from baseQ in _documentResultRepository.ReadQueryable
+                                             where baseQ.LessonResultId == lessonResult.Id
+                                             join document in ReadQueryable
+                                                 on baseQ.DocumentId equals document.Id
+                                             select new
+                                             {
+                                                 Document = document,
+                                                 DocumentResult = baseQ
+                                             }).ToListAsync();
 
-            var documentResults = await (from baseQ in _documentResultRepository.ReadQueryable
-                                         where baseQ.LessonResultId == lessonResult.Id
-                                         join document in ReadQueryable
-                                             on baseQ.DocumentId equals document.Id
-                                         select new
-                                         {
-                                             Document = document,
-                                             DocumentResult = baseQ
-                                         }).ToListAsync();
+                var documentOriginalIdsHasResult = documentResults
+                    .Where(x => x.Document != null)
+                    .Select(x => x.Document!.OriginalId)
+                    .Distinct();
 
-            var documentOriginalIdsHasResult = documentResults
-                .Where(x => x.Document != null)
-                .Select(x => x.Document!.OriginalId)
-                .Distinct();
+                pendingDocumentOriginalIds = documentOriginalIds
+                   .Except(documentOriginalIdsHasResult)
+                   .ToList();
 
-            var pendingDocumentOriginalIds = documentOriginalIds
-                .Except(documentOriginalIdsHasResult)
-                .ToList();
-
+                documentResultsByOriginalId = documentResults
+                   .Where(x => x.Document != null)
+                   .ToDictionary(
+                       x => x.Document!.OriginalId,
+                       x => (Document: x.Document!, DocumentResult: x.DocumentResult));
+            }
+            else
+            {
+                pendingDocumentOriginalIds = documentOriginalIds;
+            }
             var documentDics = await GetDocumentDicAsync(pendingDocumentOriginalIds);
-
-            var documentResultsByOriginalId = documentResults
-                .Where(x => x.Document != null)
-                .ToDictionary(
-                    x => x.Document!.OriginalId,
-                    x => (Document: x.Document!, DocumentResult: x.DocumentResult));
 
             return (documentResultsByOriginalId, documentDics);
         }

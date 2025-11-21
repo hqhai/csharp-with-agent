@@ -71,6 +71,7 @@ namespace Fsel.Course.Lms.Application.Queries.UnitQuery.V1i2
             var unit = _mapper.Map<UnitDtoModel>(unitResult.Unit);
             if (unit != null)
             {
+                unit.Result = _mapper.Map<ResultModel>(unitResult);
                 unit.ModuleUnits = moduleUnits;
             }
             methodResult.Result = unit;
