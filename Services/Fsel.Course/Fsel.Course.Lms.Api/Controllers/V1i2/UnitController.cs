@@ -18,8 +18,8 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/unit")]
-    [Permission(role: nameof(EnumRole.Student))]
     [ApiController]
+    [Permission(role: nameof(EnumRole.Student))]
     public class UnitController : ControllerBase
     {
         private readonly IMediator _mediator;
