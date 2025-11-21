@@ -10,6 +10,6 @@ namespace Fsel.Course.Domain.IRepositories
     {
         Task<IDictionary<Guid, ClassForum>> GetClassForumDicAsync(IList<Guid>? originalIds);
 
-        Task<(IDictionary<Guid, (ClassForum, ClassForumResult)>, IDictionary<Guid, ClassForum>)> BuildClassForumLookupsAsync(LessonResult lessonResult, IList<LessonModule> lessonModules);
+        Task<(IDictionary<Guid, (ClassForum, ClassForumResult)>, IDictionary<Guid, ClassForum>)> BuildClassForumLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules);
     }
 }

@@ -43,9 +43,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             _lessonModuleRepository = lessonModuleRepository;
         }
 
-        public async Task<(IDictionary<Guid, (Video, VideoResult)>, IDictionary<Guid, Video>)> BuildVideoLookupsAsync(
-        LessonResult lessonResult,
-        IList<LessonModule> lessonModules)
+        public async Task<(IDictionary<Guid, (Video, VideoResult)>, IDictionary<Guid, Video>)> BuildVideoLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules)
         {
             var videoOriginalIds = lessonModules
                 .Where(x => x.LessonConfigType == EnumLessonConfigType.Video)
@@ -58,33 +56,40 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return (new Dictionary<Guid, (Video, VideoResult)>(),
                         new Dictionary<Guid, Video>());
             }
+            var videoResultsByOriginalId = new Dictionary<Guid, (Video, VideoResult)>();
+            var pendingVideoOriginalIds = new List<Guid>();
+            if (lessonResult != null)
+            {
+                var videoResults = await (from baseQ in _videoResultRepository.ReadQueryable
+                                          where baseQ.LessonResultId == lessonResult.Id
+                                          join video in ReadQueryable on baseQ.VideoId equals video.Id
+                                          select new
+                                          {
+                                              Video = video,
+                                              VideoResult = baseQ
+                                          }).ToListAsync();
 
-            var videoResults = await (from baseQ in _videoResultRepository.ReadQueryable
-                                      where baseQ.LessonResultId == lessonResult.Id
-                                      join video in ReadQueryable on baseQ.VideoId equals video.Id
-                                      select new
-                                      {
-                                          Video = video,
-                                          VideoResult = baseQ
-                                      }).ToListAsync();
+                var videoOriginalIdsHasResult = videoResults
+                          .Where(x => x.Video != null && x.Video.OriginalId.HasValue)
+                          .Select(x => x.Video!.OriginalId!.Value)
+                          .Distinct();
 
-            var videoOriginalIdsHasResult = videoResults
-                .Where(x => x.Video != null && x.Video.OriginalId.HasValue)
-                .Select(x => x.Video!.OriginalId!.Value)
-                .Distinct();
+                videoResultsByOriginalId = videoResults
+                          .Where(x => x.Video != null && x.Video.OriginalId.HasValue)
+                          .ToDictionary(
+                              x => x.Video!.OriginalId!.Value,
+                              x => (Video: x.Video!, VideoResult: x.VideoResult));
 
-            var pendingVideoOriginalIds = videoOriginalIds
-                .Except(videoOriginalIdsHasResult)
-                .ToList();
+                pendingVideoOriginalIds = videoOriginalIds
+                          .Except(videoOriginalIdsHasResult)
+                          .ToList();
+            }
+            else
+            {
+                pendingVideoOriginalIds = videoOriginalIds;
+            }
 
             var videoDics = await GetVideoDicAsync(pendingVideoOriginalIds);
-
-            var videoResultsByOriginalId = videoResults
-                .Where(x => x.Video != null && x.Video.OriginalId.HasValue)
-                .ToDictionary(
-                    x => x.Video!.OriginalId!.Value,
-                    x => (Video: x.Video!, VideoResult: x.VideoResult));
-
             return (videoResultsByOriginalId, videoDics);
         }
 

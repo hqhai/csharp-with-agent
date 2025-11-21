@@ -43,12 +43,12 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         /// <summary>
         /// Get Lesson
         /// </summary>
-        [HttpGet("{LessonResultId}")]
+        [HttpGet]
         [ProducesResponseType(typeof(MethodResult<LessonDtoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid lessonResultId)
+        public async Task<IActionResult> Get([FromQuery] GetLessonQuery query)
         {
-            var queryResult = await _mediator.Send(new GetLessonQuery { LessonResultId = lessonResultId }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

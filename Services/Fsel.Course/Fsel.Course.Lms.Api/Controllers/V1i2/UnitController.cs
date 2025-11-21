@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         /// <summary>
         /// Get units by course Id
         /// </summary>
-        [HttpGet("{UnitResultId}")]
+        [HttpGet("{unitResultId}")]
         [ProducesResponseType(typeof(MethodResult<UnitDtoModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromRoute] Guid unitResultId)
@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         /// <summary>
         /// Start Unit Result
         /// </summary>
-        [HttpPost("start/{UnitResultId}")]
+        [HttpPost("start/{unitResultId}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Start([FromRoute] Guid unitResultId)

@@ -10,6 +10,6 @@ namespace Fsel.Course.Domain.IRepositories
     {
         Task<IDictionary<Guid, Document>> GetDocumentDicAsync(IList<Guid>? originalIds);
 
-        Task<(IDictionary<Guid, (Document, DocumentResult)>, IDictionary<Guid, Document>)> BuildDocumentLookupsAsync(LessonResult lessonResult, IList<LessonModule> lessonModules);
+        Task<(IDictionary<Guid, (Document, DocumentResult)>, IDictionary<Guid, Document>)> BuildDocumentLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules);
     }
 }

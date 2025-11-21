@@ -31,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
         private readonly ILessonModuleRepository _lessonModuleRepository;
         private readonly ITestRepository _testRepository;
         private readonly ILessonItemInitializerFactory _lessonItemInitializerFactory;
+        private readonly ICourseResultRepository _courseResultRepository;
 
         public StartUnitResultCommandHandler(IUnitResultRepository unitResultRepository,
             IUnitModuleRepository unitModuleRepository,
@@ -39,9 +40,9 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
             ITestGroupResultRepository testGroupResultRepository,
             ITestResultRepository testResultRepository,
             ILessonModuleRepository lessonModuleRepository,
-            IMediator mediator,
             ITestRepository testRepository,
-            ILessonItemInitializerFactory lessonItemInitializerFactory)
+            ILessonItemInitializerFactory lessonItemInitializerFactory,
+            ICourseResultRepository courseResultRepository)
         {
             _unitResultRepository = unitResultRepository;
             _unitModuleRepository = unitModuleRepository;
@@ -52,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
             _lessonModuleRepository = lessonModuleRepository;
             _testRepository = testRepository;
             _lessonItemInitializerFactory = lessonItemInitializerFactory;
+            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<bool>> Handle(StartUnitResultCommand request, CancellationToken cancellationToken)
@@ -59,18 +61,24 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<bool> methodResult = new MethodResult<bool>();
 
-            var unitResult = await _unitResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == request.UnitResultId, cancellationToken);
+            var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.UnitResultId, cancellationToken);
             if (unitResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitResult));
                 return methodResult;
             }
-
+            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == unitResult.CourseResultId, cancellationToken);
+            if (courseResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
+                return methodResult;
+            }
             if (unitResult.Status != EnumResultStatus.New)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(unitResult.Status), unitResult.Status);
                 return methodResult;
             }
+
             var unitModule = await _unitModuleRepository.ReadQueryable.Where(x => x.UnitId == unitResult.UnitId)
                                                          .OrderBy(x => x.OpenOrder)
                                                          .FirstOrDefaultAsync(cancellationToken);
@@ -101,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
 
                 if (lessonModule == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(Enum));
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonModule));
                     return methodResult;
                 }
 
@@ -116,7 +124,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
                         CourseResultId = unitResult.CourseResultId,
                         UnitId = unitResult.UnitId,
                         StudentId = unitResult.StudentId,
-                        Status = EnumResultStatus.New,
+                        Status = EnumResultStatus.Process,
                     };
                     try
                     {
@@ -184,6 +192,28 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
                     }
                     catch { }
                 }
+            }
+            try
+            {
+                unitResult.Status = EnumResultStatus.Process;
+                await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.Status };
+                });
+            }
+            catch { }
+
+            if (courseResult.Status == EnumResultStatus.New)
+            {
+                try
+                {
+                    courseResult.Status = EnumResultStatus.Process;
+                    await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.Status };
+                    });
+                }
+                catch { }
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

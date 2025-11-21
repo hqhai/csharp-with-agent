@@ -36,7 +36,7 @@ namespace Fsel.Course.Infrastructure.Configs
 
             builder.HasOne(a => a.UnitResult)
                    .WithMany(b => b.LessonResults)
-                   .HasForeignKey(b => b.UnitModuleId)
+                   .HasForeignKey(b => b.UnitResultId)
                    .OnDelete(DeleteBehavior.NoAction);
 
             builder.Property(e => e.Status)
