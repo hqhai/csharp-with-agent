@@ -10,6 +10,7 @@ using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Domain.Models.EntityModels.V1i2;
 using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Infrastructure.Maps
@@ -29,13 +30,15 @@ namespace Fsel.Course.Infrastructure.Maps
             ));
             CreateMap<Unit, UnitModel>()
                 .ForMember(x => x.IsActive, p => p.MapFrom(o => o.CourseUnitMockTests.Any()))
-                .ForMember(x => x.HighlightRanges,opt => opt.ConvertUsing(new JsonToObjectConverter<IList<HighlightRange>>(), src => src.HighlightRange));
+                .ForMember(x => x.HighlightRanges, opt => opt.ConvertUsing(new JsonToObjectConverter<IList<HighlightRange>>(), src => src.HighlightRange));
 
             CreateMap<UnitResult, CourseUnitMockTestResultModel>().IgnoreAllNonExisting();
-
             CreateMap<UnitModule, UnitModuleDTO>().IgnoreAllNonExisting();
+
+            CreateMap<UnitResult, ResultModel>().IgnoreAllNonExisting();
         }
     }
+
     public class JsonToObjectConverter<T> : IValueConverter<string, T>
     {
         public T Convert(string sourceMember, ResolutionContext context)
@@ -47,7 +50,7 @@ namespace Fsel.Course.Infrastructure.Maps
             return JsonSerializer.Deserialize<T>(sourceMember, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true,
-                Converters = { new JsonStringEnumConverter() } 
+                Converters = { new JsonStringEnumConverter() }
             });
         }
     }

@@ -29,6 +29,16 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasForeignKey(b => b.LessonId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.HasOne(a => a.UnitModule)
+                   .WithMany(b => b.LessonResults)
+                   .HasForeignKey(b => b.UnitModuleId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.UnitResult)
+                   .WithMany(b => b.LessonResults)
+                   .HasForeignKey(b => b.UnitModuleId)
+                   .OnDelete(DeleteBehavior.NoAction);
+
             builder.Property(e => e.Status)
                 .HasMaxLength(20)
                 .HasConversion(

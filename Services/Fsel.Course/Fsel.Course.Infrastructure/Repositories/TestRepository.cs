@@ -3,17 +3,29 @@
 namespace Fsel.Course.Infrastructure.Repositories
 {
     using AutoMapper;
+    using Fsel.Common.Enums;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Entities.V1i1;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Microsoft.EntityFrameworkCore;
 
     public class TestRepository : BaseRepository<Test>, ITestRepository
     {
-        public TestRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
+        private readonly ITestResultRepository _testResultRepository;
+        private readonly ITestGroupResultRepository _testGroupResultRepository;
+
+        public TestRepository(CourseDbContext dbContext,
+            CourseReadDbContext readDbContext,
+            AuthContext authContext,
+            IMapper mapper,
+            ITestResultRepository testResultRepository,
+            ITestGroupResultRepository testGroupResultRepository) : base(dbContext, readDbContext, authContext, mapper)
         {
+            _testResultRepository = testResultRepository;
+            _testGroupResultRepository = testGroupResultRepository;
         }
 
         public async Task<bool> IsUsingByClient(Guid originalId)
@@ -99,6 +111,111 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 BuildSectionTreeRecursive(child, allSections, testSectionQuestionDict, testAISettingDict);
             }
+        }
+
+        public async Task<(IDictionary<Guid, (Test, TestGroupResult, TestResult)>, IDictionary<Guid, Test>)> BuildTestLookupsAsync(UnitResult unitResult, IList<UnitModule> unitModules)
+        {
+            var testOriginalIds = unitModules
+                .Where(x => x.UnitConfigType == EnumUnitConfigType.Test)
+                .Select(x => x.OriginalId)
+                .Distinct()
+                .ToList();
+
+            if (!testOriginalIds.Any())
+            {
+                return (new Dictionary<Guid, (Test, TestGroupResult, TestResult)>(),
+                        new Dictionary<Guid, Test>());
+            }
+
+            var testResults = await (from baseQ in _testGroupResultRepository.ReadQueryable
+                                     where baseQ.UnitResultId == unitResult.Id
+                                     join result in _testResultRepository.ReadQueryable on baseQ.Id equals result.TestGroupResultId
+                                     select new
+                                     {
+                                         Test = result.Test,
+                                         TestGroupResult = baseQ,
+                                         TestResult = result
+                                     })
+                                     .ToListAsync();
+
+            var testOriginalIdsHasResult = testResults
+                .Where(x => x.Test != null)
+                .Select(x => x.Test!.OriginalId)
+                .Distinct();
+
+            var pendingTestOriginalIds = testOriginalIds
+                .Except(testOriginalIdsHasResult)
+                .ToList();
+
+            var testDics = await GetTestDicAsync(pendingTestOriginalIds);
+
+            var testResultsByOriginalId = testResults
+                .Where(x => x.Test != null)
+                .ToDictionary(
+                    x => x.Test!.OriginalId,
+                    x => (Test: x.Test, TestGroupResult: x.TestGroupResult, TestResult: x.TestResult));
+
+            return (testResultsByOriginalId, testDics);
+        }
+
+        public async Task<IDictionary<Guid, Test>> GetTestDicAsync(IList<Guid>? originalIds)
+        {
+            if (originalIds == null || originalIds.Count == 0)
+            {
+                return new Dictionary<Guid, Test>();
+            }
+
+            var tests = await ReadQueryable.WhereBulkContains(originalIds, x => x.OriginalId)
+                                         .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                         .ToListAsync();
+
+            return tests.ToDictionary(x => x.OriginalId);
+        }
+
+        public async Task<(IDictionary<Guid, (Test, TestGroupResult, TestResult)>, IDictionary<Guid, Test>)> BuildTestLookupsAsync(CourseResult courseResult, IList<CourseModule> courseModules)
+        {
+            var testOriginalIds = courseModules
+                .Where(x => x.CourseConfigType == EnumCourseConfigType.Test)
+                .Select(x => x.OriginalId)
+                .Distinct()
+                .ToList();
+
+            if (!testOriginalIds.Any())
+            {
+                return (new Dictionary<Guid, (Test, TestGroupResult, TestResult)>(),
+                        new Dictionary<Guid, Test>());
+            }
+
+            var testResults = await (from baseQ in _testGroupResultRepository.ReadQueryable
+                                     where baseQ.CourseResultId == courseResult.Id
+                                     join result in _testResultRepository.ReadQueryable
+                                         on baseQ.Id equals result.TestGroupResultId
+                                     select new
+                                     {
+                                         Test = result.Test,
+                                         TestGroupResult = baseQ,
+                                         TestResult = result
+                                     })
+                                     .ToListAsync();
+
+            var testOriginalIdsHasResult = testResults
+                .Where(x => x.Test != null)
+                .Select(x => x.Test!.OriginalId)
+                .Distinct();
+
+            var pendingTestOriginalIds = testOriginalIds
+                .Except(testOriginalIdsHasResult)
+                .ToList();
+
+            var testDics = await GetTestDicAsync(pendingTestOriginalIds);
+
+            var testResultsByOriginalId = testResults
+                .Where(x => x.Test != null)
+                .ToDictionary(
+                    x => x.Test!.OriginalId,
+                    x => (Test: x.Test, TestGroupResult: x.TestGroupResult, TestResult: x.TestResult));
+
+            return (testResultsByOriginalId, testDics);
         }
     }
 }

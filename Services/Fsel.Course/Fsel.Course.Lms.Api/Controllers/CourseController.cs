@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
@@ -25,7 +26,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Student))]
     public class CourseController : BaseController
     {
         private readonly IMediator _mediator;
@@ -68,6 +68,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get units by course Id
         /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Student))]
@@ -107,6 +109,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Start Course Result
         /// </summary>
         [HttpPost("start/{courseResultId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Student))]
