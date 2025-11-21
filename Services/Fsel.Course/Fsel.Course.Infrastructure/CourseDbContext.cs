@@ -6,9 +6,6 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Entities.FlowConfigs;
 using Fsel.Course.Domain.Entities.TestConfigs;
 using Fsel.Course.Domain.Entities.V1i1;
-using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
-using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
-using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -167,6 +164,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<RubyScope> RubyScopes { get; set; }
         public DbSet<AiPromptManager> AiPromptManagers { get; set; }
         public DbSet<AICriteriaConfigs> AICriteriaConfigs { get; set; }
+        public DbSet<DocumentResult> DocumentResults { get; set; }
 
         //#region Report
 
@@ -218,6 +216,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ExtraPracticeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DocumentResultEntityTypeConfiguration());
 
             modelBuilder.ApplyConfiguration(new HomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());

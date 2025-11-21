@@ -374,7 +374,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
                 return skillScores;
-            };
+            }
+            ;
             return skillScores;
         }
 

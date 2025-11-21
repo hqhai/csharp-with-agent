@@ -34,5 +34,9 @@ namespace Fsel.Course.Domain.Entities.V1i1
         public Lesson? Lesson { get; set; }
 
         public Guid OriginalId { get; set; }
+        public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
+        public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
+        public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();
+        public ICollection<DocumentResult> DocumentResults { get; set; } = new List<DocumentResult>();
     }
 }

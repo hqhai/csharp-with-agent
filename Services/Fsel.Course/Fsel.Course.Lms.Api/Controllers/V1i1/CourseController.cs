@@ -6,7 +6,6 @@ using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
 using Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
 using Fsel.Shared.Attributes;

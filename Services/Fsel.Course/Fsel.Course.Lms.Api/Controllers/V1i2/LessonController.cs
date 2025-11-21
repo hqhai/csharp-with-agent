@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Lms.Api.Controllers.V1i2
 {
@@ -6,6 +6,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     using Application.Queries.LessonQuery.V1i2;
     using Common.ActionResults;
     using Common.Constants;
+    using Fsel.Course.Domain.Models.EntityModels.V1i2;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Shared.Attributes;
@@ -15,8 +16,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/lesson")]
     [ApiController]
-    //[Permission(role: nameof(EnumRole.Student))]
-    public class LessonController: ControllerBase
+    public class LessonController : ControllerBase
     {
         private readonly IMediator _mediator;
 
@@ -34,6 +34,18 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         public async Task<IActionResult> GetLessons([FromQuery] GetListLessonByUnitIdQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Lesson
+        /// </summary>
+        [HttpGet("{LessonResultId}")]
+        [ProducesResponseType(typeof(MethodResult<LessonDtoModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromRoute] Guid lessonResultId)
+        {
+            var queryResult = await _mediator.Send(new GetLessonQuery { LessonResultId = lessonResultId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

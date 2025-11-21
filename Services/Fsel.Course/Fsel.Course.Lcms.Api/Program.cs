@@ -108,6 +108,7 @@ builder.Services.AddScoped<IRubyScopeRepository, RubyScopeRepsitory>();
 builder.Services.AddScoped<IRubyService, RubyService>();
 builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
 builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
+builder.Services.AddScoped<ICourseModuleRepository, CourseModuleRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();

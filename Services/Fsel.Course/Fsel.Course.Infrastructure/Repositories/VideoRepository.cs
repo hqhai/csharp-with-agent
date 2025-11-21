@@ -1,8 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using AutoMapper;
+using Fsel.Common.Enums;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
@@ -18,23 +20,86 @@ namespace Fsel.Course.Infrastructure.Repositories
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IMapper _mapper;
         private readonly ILessonRepository _lessonRepository;
+        private readonly IVideoResultRepository _videoResultRepository;
         private readonly ILogger<VideoRepository> _logger;
         private readonly ILessonModuleRepository _lessonModuleRepository;
 
-        public VideoRepository(CourseDbContext dbContext,
+        public VideoRepository(
+            ILessonResultRepository lessonResultRepository,
+            ILessonRepository lessonRepository,
+            IVideoResultRepository videoResultRepository,
+            ILogger<VideoRepository> logger,
+            ILessonModuleRepository lessonModuleRepository,
+            CourseDbContext dbContext,
             CourseReadDbContext courseReadDbContext,
             AuthContext authContext,
-            ILessonResultRepository lessonResultRepository,
-            AutoMapper.IMapper mapper,
-            ILessonRepository lessonRepository,
-            ILogger<VideoRepository> logger,
-            ILessonModuleRepository lessonModuleRepository) : base(dbContext, courseReadDbContext, authContext, mapper)
+            IMapper mapper) : base(dbContext, courseReadDbContext, authContext, mapper)
         {
             _lessonResultRepository = lessonResultRepository;
             _mapper = mapper;
             _lessonRepository = lessonRepository;
+            _videoResultRepository = videoResultRepository;
             _logger = logger;
             _lessonModuleRepository = lessonModuleRepository;
+        }
+
+        public async Task<(IDictionary<Guid, (Video, VideoResult)>, IDictionary<Guid, Video>)> BuildVideoLookupsAsync(
+        LessonResult lessonResult,
+        IList<LessonModule> lessonModules)
+        {
+            var videoOriginalIds = lessonModules
+                .Where(x => x.LessonConfigType == EnumLessonConfigType.Video)
+                .Select(x => x.OriginalId)
+                .Distinct()
+                .ToList();
+
+            if (!videoOriginalIds.Any())
+            {
+                return (new Dictionary<Guid, (Video, VideoResult)>(),
+                        new Dictionary<Guid, Video>());
+            }
+
+            var videoResults = await (from baseQ in _videoResultRepository.ReadQueryable
+                                      where baseQ.LessonResultId == lessonResult.Id
+                                      join video in ReadQueryable on baseQ.VideoId equals video.Id
+                                      select new
+                                      {
+                                          Video = video,
+                                          VideoResult = baseQ
+                                      }).ToListAsync();
+
+            var videoOriginalIdsHasResult = videoResults
+                .Where(x => x.Video != null && x.Video.OriginalId.HasValue)
+                .Select(x => x.Video!.OriginalId!.Value)
+                .Distinct();
+
+            var pendingVideoOriginalIds = videoOriginalIds
+                .Except(videoOriginalIdsHasResult)
+                .ToList();
+
+            var videoDics = await GetVideoDicAsync(pendingVideoOriginalIds);
+
+            var videoResultsByOriginalId = videoResults
+                .Where(x => x.Video != null && x.Video.OriginalId.HasValue)
+                .ToDictionary(
+                    x => x.Video!.OriginalId!.Value,
+                    x => (Video: x.Video!, VideoResult: x.VideoResult));
+
+            return (videoResultsByOriginalId, videoDics);
+        }
+
+        public async Task<IDictionary<Guid, Video>> GetVideoDicAsync(IList<Guid>? originalIds)
+        {
+            if (originalIds == null || originalIds.Count == 0)
+            {
+                return new Dictionary<Guid, Video>();
+            }
+
+            var videos = await ReadQueryable.WhereBulkContains(originalIds, x => x.OriginalId)
+                                            .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                            .ToListAsync();
+
+            return videos.Where(x => x.OriginalId.HasValue).ToDictionary(x => x.OriginalId!.Value);
         }
 
         public async Task<bool> IsVideoUsed(Guid? id)

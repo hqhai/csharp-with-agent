@@ -25,5 +25,6 @@ namespace Fsel.Course.Domain.Entities
         public int Version { get; set; }
 
         public EnumVersionStatus VersionStatus { get; set; }
+        public ICollection<DocumentResult> DocumentResults { get; set; } = new List<DocumentResult>();
     }
 }
