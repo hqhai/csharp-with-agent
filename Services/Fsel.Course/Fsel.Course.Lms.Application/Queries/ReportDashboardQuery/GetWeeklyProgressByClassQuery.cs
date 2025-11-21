@@ -39,9 +39,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var (currentWeekStartUtc, previousWeekStartUtc) = GetWeekBoundariesUtc();
 
             var query = BuildBaseQuery(request);
-            var data = await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken)
-                     ?? await GetDataForWeekAsync(query, request.SchoolId, currentWeekStartUtc, cancellationToken)
-                     ?? new List<ProgressRow>();
+            var data = await GetDataForWeekAsync(query, request.SchoolId, currentWeekStartUtc, cancellationToken) ?? new List<ProgressRow>();
             var dataPre = await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken) ?? new List<ProgressRow>();
             var stackBar = BuildStackBarChart(data);
             var pie = BuildPieChart(data, dataPre);
