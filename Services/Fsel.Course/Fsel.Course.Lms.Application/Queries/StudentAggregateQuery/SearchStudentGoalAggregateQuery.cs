@@ -95,7 +95,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     Keyword = request.Keyword
                 });
                 var studentId = studentResult.Content?.Result?.Items?.FirstOrDefault()?.Id;
-
                 query = query.Where(x => x.StudentId == studentId);
             }
 
@@ -123,6 +122,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                                 UpdatedUserId = baseQ.UpdatedUserId,
                                 TotalTargetLessons = sum.TotalTargetLessons,
                                 LessonsPerWeek = sum.LessonsPerWeek,
+                                StatusStudentGoal = baseQ.StatusStudentGoal
+
                             };
             var totalItem = await queryData.CountAsync(cancellationToken);
             var lists = await queryData.OrderByDescending(x => x.TotalCompletedLessons).ApplyPaging(request)
@@ -148,7 +149,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 item.FullName = student?.User?.FullName;
                 item.Email = student?.User?.Email;
-                item.UserId = student?.UserId;
+                item.UserId = student?.User?.Id;
+                item.ClassCampusCode = student!.ClassCampusCode;
+                item.StudentCampusCode = student.StudentCampusCode;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
                     item.IsActive = totalScore <= item.TotalTargetLessons; // hoặc logic khác tùy ngưỡng bạn muốn

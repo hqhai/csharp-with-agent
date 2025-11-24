@@ -39,5 +39,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public ParentProfileModel? Parent { get; set; }
         public Guid UserId { get; set; }
         public UserModel? User { get; set; }
+        public string? StudentCampusCode { get; set; }
+        public string? ClassCampusCode { get; set; }
     }
 }
