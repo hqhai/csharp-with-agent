@@ -13,6 +13,16 @@ namespace Fsel.Course.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<AICriteriaConfigs> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+            builder.Property(e => e.FeatureMultiple)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumFeatureMultiple>());
+            builder.Property(e => e.SubFeatureType)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumSubFeatureType>());
             builder.Property(e => e.TypeCriteriaAi)
                 .HasMaxLength(100)
                 .HasConversion(

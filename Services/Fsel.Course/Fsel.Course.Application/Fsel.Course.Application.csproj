@@ -16,4 +16,13 @@
     <Folder Include="Queues\Publishers\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Queries\AiPromptManagerQuery\GetAiPromptChidManagerQuery.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Queries\AiPromptManagerQuery\GetAiCriteriaByIdAipromptQuery.cs" />
+    <Compile Remove="Queries\AiPromptManagerQuery\GetAiPromptChidManagerQuery.cs" />
+  </ItemGroup>
+
 </Project>

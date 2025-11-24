@@ -3,23 +3,23 @@
 namespace Fsel.Course.Lcms.Api.Controllers
 {
     using System.Net;
+    using Application.Commands.AiCriteriaConfigCmd;
+    using Application.Queries.AiCriteriaConfigQuery;
     using Asp.Versioning;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Constants;
-    using Fsel.Course.Application.Commands.AiCriteriaConfigCmd;
-    using Fsel.Course.Application.Commands.AiFeatureConfigCmd;
-    using Fsel.Course.Application.Queries.AiPromptConfigQuery;
-    using Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels;
-    using Fsel.Course.Domain.Models.QueryModels.AiModelFeature;
-    using Fsel.Shared.Constants;
+    using Common.ActionResults;
+    using Common.Constants;
+    using Domain.Enums;
+    using Domain.Models.EntityModels.AiPromptManagerModels;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using Shared.Constants;
+    using Shared.Enums;
 
     [ApiController]
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/ai-criteria-config")]
-    //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
+    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class AiCriteriaConfigController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -30,54 +30,56 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Get ai criteria by id
+        /// Get ai criteria
         /// </summary>
-        [HttpGet("{id}")]
+        [HttpGet("{projectId}")]
         [ProducesResponseType(typeof(MethodResult<AICriteriaConfigsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid id)
+        public async Task<IActionResult> Get([FromRoute] Guid projectId,[FromHeader] GetAiCriteriaConfigQuery query)
         {
-            MethodResult<AICriteriaConfigsModel> queryResult = await _mediator.Send(new GetAiCriteriaConfigQuery { Id = id }).ConfigureAwait(false);
+            ArgumentNullException.ThrowIfNull(query);
+            query.ProjectId = projectId;
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
         /// <summary>
         /// Create ai criteria
         /// </summary>
-        [HttpPost()]
+        [HttpPost]
         [ProducesResponseType(typeof(MethodResult<AICriteriaConfigsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateAiCriteriaConfigCommand command)
         {
-            MethodResult<AICriteriaConfigsModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
         /// Update a ai criteria
         /// </summary>
-        [HttpPut("{id}")]
+        [HttpPut("{projectId}")]
         [ProducesResponseType(typeof(MethodResult<AICriteriaConfigsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateAiModelFeatureCommand command)
+        public async Task<IActionResult> Update([FromRoute] Guid projectId, [FromBody] UpdateAiModelFeatureCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
-            MethodResult<AICriteriaConfigsModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            command.Project = projectId;
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
         /// <summary>
         /// Update a Setting ai criteria
         /// </summary>
-        [HttpPut("setting/{id}")]
+        [HttpPut("setting/{projectId}")]
         [ProducesResponseType(typeof(MethodResult<AICriteriaConfigsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateSetting([FromRoute] Guid id, [FromBody] UpdateSettingAiModelFeature command)
+        public async Task<IActionResult> UpdateSetting([FromRoute] Guid projectId, [FromBody] UpdateSettingAiModelFeature command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            command.Id = id;
-            MethodResult<AICriteriaConfigsModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            command.ProjectId = projectId;
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
