@@ -33,7 +33,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
             var existing = await _aiCriteriaConfigRepository.ReadQueryable
-                .Where(x => x.ProjectId == request.ProjectId && x.SubFeatureType == request.SubFeatureType && !x.IsDeleted)//&& x.SubFeatureType == request.SubFeatureType && x.FeatureMultiple == request.FeatureMultiple)
+                .Where(x => x.ProjectId == request.ProjectId && x.SubFeatureType == request.SubFeatureType && !x.IsDeleted)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 

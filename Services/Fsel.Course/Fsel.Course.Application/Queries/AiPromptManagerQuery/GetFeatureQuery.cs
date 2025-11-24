@@ -2,17 +2,13 @@
 
 namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
 {
-    using System.Collections.Generic;
-    using System.Threading;
-    using System.Threading.Tasks;
+    using Common.ActionResults;
     using Domain.Enums;
+    using Domain.Models.CommandModels.AiCriteriaConfig;
     using Domain.Models.QueryModels.AiPromptConfig;
-    using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Shared.Helpers;
 
     public class GetFeatureQuery : IRequest<MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>>
     {
@@ -24,19 +20,26 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
         {
             var methodResult = new MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>();
 
+            var featureTypeLookup = FeatureModel.FeatureTypes
+                .GroupBy(x => x.Feature)
+                .ToDictionary(g => g.Key, g => g.SelectMany(x => x.SubFeatures).ToList());
+
+            var criteriaLookup = FeatureModel.FeatureCriteria
+                .ToDictionary(x => x.SubFeature, x => x.Criterias);
+
             var features = Enum.GetValues<EnumFeatureMultiple>()
                 .Select(feature =>
                 {
-                    var subTypes = FeatureModel.FeatureTypes.TryGetValue(feature, out var subArray)
-                        ? subArray
-                        : Array.Empty<EnumSubFeatureType>();
+                    var subTypes = featureTypeLookup.TryGetValue(feature, out var subs)
+                        ? subs
+                        : new List<EnumSubFeatureType>();
 
                     var typeItems = subTypes
                         .Select(sub =>
                         {
-                            var criteriaEnums = FeatureModel.FeatureCriteria.TryGetValue(sub, out var crits)
+                            var criteriaEnums = criteriaLookup.TryGetValue(sub, out var crits)
                                 ? crits
-                                : Array.Empty<EnumCriteriaAi>();
+                                : new List<EnumCriteriaAi>();
 
                             var criteriaItems = criteriaEnums
                                 .Select(c => new GetFeatureCriteriaQuery(

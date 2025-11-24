@@ -55,7 +55,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 items.Add(request.AiCriteriaConfig);
             }
 
-            if (request.AiCriteriaConfigs is { Count: > 0 })
+            if (request.AiCriteriaConfigs != null && request.AiCriteriaConfigs.Count > 0 )
             {
                 items.AddRange(request.AiCriteriaConfigs);
             }
