@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 {
+    using AutoMapper;
     using Common.ActionResults;
     using Common.Enums.ErrorCodes;
     using Domain.IRepositories;
@@ -18,10 +19,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
     public class GetStudentGoalStatusHistoryQueryHandler : IRequestHandler<GetStudentGoalStatusHistoryQuery, MethodResult<StausStudentGoalHistoryModel>>
     {
         private readonly IStatusStudentGoalRepository _statusStudentGoalRepository;
+        private readonly IMapper  _mapper;
 
-        public GetStudentGoalStatusHistoryQueryHandler(IStatusStudentGoalRepository statusStudentGoalRepository)
+        public GetStudentGoalStatusHistoryQueryHandler(IStatusStudentGoalRepository statusStudentGoalRepository, IMapper mapper)
         {
             _statusStudentGoalRepository = statusStudentGoalRepository;
+            _mapper = mapper;
         }
 
         public async Task<MethodResult<StausStudentGoalHistoryModel>> Handle(GetStudentGoalStatusHistoryQuery request, CancellationToken cancellationToken)
@@ -38,14 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 return methodResult;
             }
 
-            var result = new StausStudentGoalHistoryModel();
-
-            result.StudentId = studentGoalHistory.StudentId;
-            result.StatusStudentGoal =  studentGoalHistory.StatusStudentGoal;
-            result.CreatedDate = studentGoalHistory.CreatedDate;
-            result.CreatedFullName = studentGoalHistory.CreatedFullName;
-
-            methodResult.Result = result;
+            methodResult.Result = _mapper.Map<StausStudentGoalHistoryModel>(studentGoalHistory);
             methodResult.StatusCode = StatusCodes.Status200OK;
 
             return methodResult;
