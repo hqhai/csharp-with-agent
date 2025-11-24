@@ -46,9 +46,7 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
                     AiModelName = x.AiModelName,
                     CreatedDate = x.CreatedDate,
                     UpdatedDate = x.UpdatedDate,
-                    FeatureAi = x.FeatureAi,
                     InputModel = x.InputModel,
-                    ParentId = x.ParentId,
                     FeatureObjectId = x.FeatureObjectId,
                 });
 

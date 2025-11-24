@@ -2,20 +2,21 @@
 
 namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using AutoMapper;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig;
-    using Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels;
+    using Common.ActionResults;
+    using Common.Enums.ErrorCodes;
+    using Domain.Entities;
+    using Domain.IRepositories;
+    using Domain.Models.CommandModels.AiCriteriaConfig;
+    using Domain.Models.EntityModels.AiPromptManagerModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
-    public class CreateAiCriteriaConfigCommand : CreateAiCriteriaConfigCommandModel, IRequest<MethodResult<AICriteriaConfigsModel>>
+    public class CreateAiCriteriaConfigCommand : IRequest<MethodResult<AICriteriaConfigsModel>>
     {
+        public Guid AiPromptManagerId { get; set; }
+        public CreateAiCriteriaConfigCommandModel? AiCriteriaConfig { get; set; }
+        public IList<CreateAiCriteriaConfigCommandModel>? AiCriteriaConfigs { get; set; }
     }
 
     public class CreateAiCriteriaConfigHasSubFeatureCommandHandler : IRequestHandler<CreateAiCriteriaConfigCommand, MethodResult<AICriteriaConfigsModel>>
@@ -36,7 +37,8 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
         public async Task<MethodResult<AICriteriaConfigsModel>> Handle(CreateAiCriteriaConfigCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AICriteriaConfigsModel> methodResult = new MethodResult<AICriteriaConfigsModel>();
+
+            var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
             var modelExits = await _aiPromptManagerRepository.GetByIdAsync(request.AiPromptManagerId);
 
@@ -46,17 +48,46 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 return methodResult;
             }
 
-            Validation(methodResult, request);
+            var items = new List<CreateAiCriteriaConfigCommandModel>();
+
+            if (request.AiCriteriaConfig != null)
+            {
+                items.Add(request.AiCriteriaConfig);
+            }
+
+            if (request.AiCriteriaConfigs is { Count: > 0 })
+            {
+                items.AddRange(request.AiCriteriaConfigs);
+            }
+
+            if (items.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                return methodResult;
+            }
+
+            foreach (var item in items)
+            {
+                Validation(methodResult, item);
+            }
+
+            if (!methodResult.IsOK)
+            {
+                return methodResult;
+            }
 
             await _aiCriteriaConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                var entity = _mapper.Map<AICriteriaConfigs>(request);
-                entity = _aiCriteriaConfigRepository.Add(entity);
-
+                var entities = _mapper.Map<List<AICriteriaConfigs>>(items);
+                await _aiCriteriaConfigRepository.AddList(entities);
                 await _aiCriteriaConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken)
-                .ConfigureAwait(false);
-
-                methodResult.Result = _mapper.Map<AICriteriaConfigsModel>(entity);
+                    .ConfigureAwait(false);
+                var result = new AICriteriaConfigsModel
+                {
+                    AiPromptManagerId    = request.AiPromptManagerId,
+                    AiCriteriaModel      = _mapper.Map<IList<AiCriteriaModel>>(entities)
+                };
+                methodResult.Result = result;
                 methodResult.StatusCode = StatusCodes.Status200OK;
 
                 return methodResult;
@@ -65,24 +96,11 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             return methodResult;
         }
 
-        private static MethodResult<AICriteriaConfigsModel> Validation(MethodResult<AICriteriaConfigsModel> methodResult, CreateAiCriteriaConfigCommand request)
+        private static MethodResult<AICriteriaConfigsModel> Validation(MethodResult<AICriteriaConfigsModel> methodResult, CreateAiCriteriaConfigCommandModel request)
         {
-            if (request.UserRole == null)
+            if (request.UserRole == null || request.SettingAiConfig == null || request.JsonConfig == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
-            }
-
-            if (request.SettingAiConfig == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
-            }
-
-            if (request.JsonConfig == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
             }
 
             return methodResult;

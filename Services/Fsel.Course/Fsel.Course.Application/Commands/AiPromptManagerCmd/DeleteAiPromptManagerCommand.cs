@@ -30,7 +30,7 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
         public async Task<MethodResult<bool>> Handle(DeleteAiPromptManagerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
+            var methodResult = new MethodResult<bool>();
 
             if (request.Id == Guid.Empty)
             {
@@ -68,29 +68,17 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
             return methodResult;
         }
 
-        private async Task<MethodResult<bool>> Validation(AiPromptManager entity,
+        private Task<MethodResult<bool>> Validation(AiPromptManager entity,
             MethodResult<bool> methodResult,
             DeleteAiPromptManagerCommand request)
         {
             if (!entity.IsValid())
             {
                 methodResult.AddErrorBadRequest(entity.ErrorMessages);
-                return methodResult;
+                return Task.FromResult(methodResult);
             }
 
-            var isCriteria = await _aiPromptManagerRepository.Queryable
-                .Include(x => x.AiPromptParent)
-                .Include(x => x.AICriteriaConfigs)
-                .AsNoTracking()
-                .AllAsync(x => x.Id == entity.Id && x.AICriteriaConfigs.Count > 0 && x.AiPromptManagers.Count > 0);
-
-            if (isCriteria)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAiPromptManagerErrorCode.IsFeature), nameof(request.Id), request.Id);
-                return methodResult;
-            }
-
-            return methodResult;
+            return Task.FromResult(methodResult);
         }
     }
 }

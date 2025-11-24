@@ -5,9 +5,10 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
     using System.Collections.Generic;
     using System.Threading;
     using System.Threading.Tasks;
+    using Domain.Enums;
+    using Domain.Models.QueryModels.AiPromptConfig;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig;
-    using Fsel.Course.Domain.Models.QueryModels.AiModelFeature;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -19,35 +20,57 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
 
     public class GetFeatureQueryHandler : IRequestHandler<GetFeatureQuery, MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>>
     {
-        public async Task<MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>> Handle(GetFeatureQuery request, CancellationToken cancellationToken)
+        public Task<MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>> Handle(GetFeatureQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<IReadOnlyList<GetFeatureAiModelQuery>> methodResult = new MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>();
+            var methodResult = new MethodResult<IReadOnlyList<GetFeatureAiModelQuery>>();
 
-
-            var featue = Enum.GetValues<EnumFeature>()
-                .Select(x =>
+            var features = Enum.GetValues<EnumFeatureMultiple>()
+                .Select(feature =>
                 {
-                    var types = FeatureModel.FeatureTypes.TryGetValue(x, out var type)
-                    ? type.Select(t => new GetTypeFeatureQuery((int)t, t.ToString(), t.DisplayName())) : null;
+                    var subTypes = FeatureModel.FeatureTypes.TryGetValue(feature, out var subArray)
+                        ? subArray
+                        : Array.Empty<EnumSubFeatureType>();
 
-                    var featureModel = new GetFeatureAiModelQuery(
-                        Id: (int)x,
-                        Key: x.ToString(),
-                        Label: ((Enum)x).DisplayName(),
-                        Group: ((Enum)x).GroupName(),
-                        Order: ((Enum)x).Order(),
-                        Types: types
-                        );
-                    return featureModel;
+                    var typeItems = subTypes
+                        .Select(sub =>
+                        {
+                            var criteriaEnums = FeatureModel.FeatureCriteria.TryGetValue(sub, out var crits)
+                                ? crits
+                                : Array.Empty<EnumCriteriaAi>();
+
+                            var criteriaItems = criteriaEnums
+                                .Select(c => new GetFeatureCriteriaQuery(
+                                    Id: (int)c,
+                                    Key: c.ToString(),
+                                    Label: c.DisplayName()
+                                ))
+                                .ToList()
+                                .AsReadOnly();
+
+                            return new GetTypeFeatureQuery(
+                                Id: (int)sub,
+                                Key: sub.ToString(),
+                                Label: sub.DisplayName(),
+                                SubFeatures: criteriaItems
+                            );
+                        })
+                        .ToList()
+                        .AsReadOnly();
+
+                    return new GetFeatureAiModelQuery(
+                        Id: (int)feature,
+                        Key: feature.ToString(),
+                        Label: feature.DisplayName(),
+                        SubFeatures: typeItems
+                    );
                 })
-                .OrderBy(x => x.Order)
+                .OrderBy(x => x.Key)
                 .ToList()
                 .AsReadOnly();
 
             methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = featue;
-
-            return methodResult;
+            methodResult.Result = features;
+            return Task.FromResult(methodResult);
         }
     }
 }
