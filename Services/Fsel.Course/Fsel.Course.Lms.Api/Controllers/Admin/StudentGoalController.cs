@@ -91,5 +91,33 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// update status student goal
+        /// </summary>
+        [HttpPut("update-status/{id}")]
+        [ProducesResponseType(typeof(MethodResult<StausStudentGoalHistoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [Permission(StudentProgressWeeklyManagement.View)]
+        public async Task<IActionResult> Get([FromRoute] Guid id, [FromBody] UpdateStudentGoalStatusCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.StudentGoalId = id;
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get status history of student
+        /// </summary>
+        [HttpGet("status-history/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<StausStudentGoalHistoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [Permission(StudentProgressWeeklyManagement.View)]
+        public async Task<IActionResult> Get([FromRoute] Guid studentId)
+        {
+            var commandResult = await _mediator.Send(new GetStudentGoalStatusHistoryQuery {StudentId = studentId}).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

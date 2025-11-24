@@ -20,6 +20,7 @@ namespace Fsel.Course.Domain.Entities
         public EnumCombinedProgress? CombinedProgress { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseType CourseType { get; set; }
+        public EnumStatusStudentGoal StatusStudentGoal { get; set; }
         public bool IsActive { get; set; }
 
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]

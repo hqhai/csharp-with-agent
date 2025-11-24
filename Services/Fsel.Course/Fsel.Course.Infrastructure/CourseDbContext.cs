@@ -102,6 +102,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<Topic> Topics { get; set; }
         public DbSet<StudentGoalAggregate> StudentGoalAggregates { get; set; }
         public DbSet<StudentGoalSummary> StudentGoalSummaries { get; set; }
+        public DbSet<StatusStudentGoalHistory> StatusStudentGoalHistories { get; set; }
 
         #region Report
 
@@ -217,6 +218,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new VideoSubFilePathEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentGoalAggregateEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new StudentGoalSummaryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StausStudentGoalHistoryTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
