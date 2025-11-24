@@ -72,6 +72,9 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<UserRegisterModel, User>()
                 .AfterMap<ParseFullNameMappingAction<UserRegisterModel>>()
                 .IgnoreAllNonExisting();
+            CreateMap<ParentProfileModel, User>()
+                .AfterMap<ParseFullNameMappingAction<ParentProfileModel>>()
+                .IgnoreAllNonExisting();
         }
     }
 
