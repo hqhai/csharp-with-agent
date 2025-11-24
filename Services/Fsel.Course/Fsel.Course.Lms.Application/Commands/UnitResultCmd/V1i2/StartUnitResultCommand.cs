@@ -198,7 +198,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
                 unitResult.Status = EnumResultStatus.Process;
                 await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult }, bulk =>
                 {
-                    bulk.IgnoreOnUpdateExpression = c => new { c.Status };
+                    bulk.ColumnInputExpression = c => new { c.Status };
                 });
             }
             catch { }
@@ -210,7 +210,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
                     courseResult.Status = EnumResultStatus.Process;
                     await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
                     {
-                        bulk.IgnoreOnUpdateExpression = c => new { c.Status };
+                        bulk.ColumnInputExpression = c => new { c.Status };
                     });
                 }
                 catch { }
