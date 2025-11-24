@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             {
                 throw new ArgumentNullException(nameof(referenceText), "Văn bản tham chiếu không được để trống");
             }
-            var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Word\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true}}");
+            var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true}}");
 
             using var audioConfig = AudioConfig.FromDefaultMicrophoneInput();
             using var recognizer = new SpeechRecognizer(_speechConfig, audioConfig);
@@ -395,7 +395,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             }
 
             var unit = await _unitRepository.GetByIdAsync(unitId);
-            var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Word\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true}}");
+            var pronunciationConfig = PronunciationAssessmentConfig.FromJson($"{{\"referenceText\":\"{referenceText}\",\"gradingSystem\":\"HundredMark\",\"granularity\":\"Phoneme\",\"enableSyllableLevelAssessment\":true,\"enablePhonemeLevelAssessment\":true,\"enableProsodyAssessment\":true}}");
 
             return await PerformContinuousRecognitionAsync(pronunciationConfig, unit, isFromFile: false, cancellationToken: cancellationToken);
         }
@@ -417,7 +417,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             if (string.IsNullOrEmpty(audioFilePath))
                 throw new ArgumentNullException(nameof(audioFilePath), "Đường dẫn file âm thanh không được để trống");
 
-            if (string.IsNullOrEmpty(referenceText)) 
+            if (string.IsNullOrEmpty(referenceText))
                 throw new ArgumentNullException(nameof(referenceText), "Văn bản tham chiếu không được để trống");
 
             string? convertedFilePath = null;
@@ -467,7 +467,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 var pronunciationConfig = new PronunciationAssessmentConfig(
                 referenceText: referenceText,
                 gradingSystem: GradingSystem.HundredMark,
-                granularity: Granularity.Word,
+                granularity: Granularity.Phoneme,
                 enableMiscue: false
             );
                 // Đảm bảo sử dụng IPA
@@ -620,7 +620,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 if (completedTask != stopRecognition.Task)
                 {
                     _logger.LogError("Recognition timed out after 3 minutes");
-                 }
+                }
 
                 // Stop recognition
                 await speechRecognizer.StopContinuousRecognitionAsync().ConfigureAwait(false);
@@ -780,6 +780,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             return response;
         }
 
-        #endregion
+        #endregion Continuous Recognition Methods (IContinuousPronunciationAssessmentService)
     }
 }
