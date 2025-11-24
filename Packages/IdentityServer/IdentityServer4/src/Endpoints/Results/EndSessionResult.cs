@@ -92,6 +92,10 @@ namespace IdentityServer4.Endpoints.Results
                 redirect = redirect.AddQueryString(_options.UserInteraction.LogoutIdParameter, id);
             }
 
+            if (!string.IsNullOrEmpty(_result?.ValidatedRequest?.PostLogOutUri))
+            {
+                redirect = redirect.AddQueryString("post_logout_redirect_uri", _result.ValidatedRequest.PostLogOutUri);
+            }
             context.Response.Redirect(redirect);
         }
     }
