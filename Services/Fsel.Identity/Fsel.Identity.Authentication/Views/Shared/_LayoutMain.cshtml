@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+
+    @* <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="-1" /> *@
+
+    <title>Fsel OpenID</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter">
+    <link rel="icon" type="image/x-icon" href="~/favicon-fsel.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/favicon-fsel.ico" />
+    
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap-grid.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <!-- Fonts -->
+    <link rel="stylesheet" href="~/assets/fonts/stylesheet.css" />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="~/assets/css/main.css" />
+    @* <link rel="stylesheet" href="~/assets/css/base/index.css" /> *@
+    @* <link rel="stylesheet" href="~/assets/css/components/index.css" /> *@
+    <link rel="stylesheet" href="~/assets/css/pages/common.css" />
+
+    <link href="~/lib/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="~/lib/font-awesome/css/all.min.css" rel="stylesheet" />
+
+    @* <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css" /> *@
+    @* <link href="~/lib/boxicons/css/boxicons.min.css" rel="stylesheet" /> *@
+    @RenderSection("meta", required: false)
+    @RenderSection("styles", required: false)
+</head>
+<body>
+    @* <partial name="_Nav" /> *@
+
+    <div class="container">
+        @RenderBody()
+    </div>
+
+    <div class="loading hidden" @* style="display: none !important" *@>
+        <div class="icon-loading">
+            <img src="/assets/gif/loading.gif" alt="" />
+        </div>
+    </div>
+   
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    @* <script src="~/lib/jquery/dist/jquery.slim.min.js"></script> *@
+    <script src="~/lib/jquery-cookie/dist/jquery.cookie.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/assets/js/main.js"></script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

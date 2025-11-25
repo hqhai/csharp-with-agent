@@ -11,11 +11,10 @@ namespace Fsel.Identity.Infrastructure.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql("CREATE FULLTEXT CATALOG ftCatalog_AspNetUsers AS DEFAULT;", suppressTransaction: true);
-            migrationBuilder.Sql(@"
-                CREATE FULLTEXT INDEX ON AspNetUsers(FullName)
+            migrationBuilder.Sql(@"CREATE FULLTEXT INDEX ON AspNetUsers(FullName)
                 KEY INDEX PK_AspNetUsers
-                ON ftCatalog_AspNetUsers;
-            ", suppressTransaction: true);
+                ON ftCatalog_AspNetUsers;",
+                suppressTransaction: true);
         }
 
         /// <inheritdoc />

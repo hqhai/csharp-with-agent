@@ -75,7 +75,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 return methodResult;
             }
 
-            if (userOtpCode.OTPCode != request.OTP)
+            if (userOtpCode.OtpCode != request.OTP)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.WrongOTP), nameof(request.OTP), request.OTP);
                 return methodResult;

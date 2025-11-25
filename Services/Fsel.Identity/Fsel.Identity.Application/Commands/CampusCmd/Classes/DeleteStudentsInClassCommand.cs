@@ -23,15 +23,13 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
     {
         private readonly IStudentRepository _studentRepository;
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IOrderService _orderService;
 
-        public DeleteStudentsInClassCommandHandler(IStudentRepository studentRepository, UserManager<User> userManager, IHumanRepository humanRepository, ILmsCourseService lmsCourseService, IOrderService orderService)
+        public DeleteStudentsInClassCommandHandler(IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService, IOrderService orderService)
         {
             _studentRepository = studentRepository;
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
             _orderService = orderService;
         }
@@ -47,18 +45,15 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
             }
 
             var query = await (from u in _userManager.Users
-                               join h in _humanRepository.Queryable on u.Id equals h.UserId
-                               join s in _studentRepository.Queryable.WhereBulkContains(request.StudentIds, x => x.Id) on h.Id equals s.HumanId
+                               join s in _studentRepository.Queryable.WhereBulkContains(request.StudentIds, x => x.Id) on u.Id equals s.UserId
                                where s.SchoolClassId == request.SchoolClassId
                                select new
                                {
                                    User = u,
-                                   Human = h,
                                    Student = s
                                }).ToListAsync(cancellationToken);
 
             var students = query.Select(x => x.Student).ToList();
-            var humans = query.Select(x => x.Human).ToList();
             var users = query.Select(x => x.User).ToList();
 
             var studentIds = students.Select(x => x.Id).ToList();
@@ -69,10 +64,6 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                 if (students.Any())
                 {
                     await _studentRepository.BulkDeleteList(students, true);
-                }
-                if (humans.Any())
-                {
-                    await _humanRepository.BulkDeleteList(humans, true);
                 }
                 if (users.Any())
                 {

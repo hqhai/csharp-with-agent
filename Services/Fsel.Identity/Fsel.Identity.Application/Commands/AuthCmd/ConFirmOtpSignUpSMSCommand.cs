@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
@@ -26,22 +25,16 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
         private readonly UserManager<User> _userManager;
         private readonly IMediator _mediator;
         private readonly AppSetting _appSetting;
-        private readonly IHumanRepository _humanRepository;
-        private readonly IMapper _mapper;
         private readonly IParentRepository _parentRepository;
 
         public ConFirmOtpSignUpSMSCommandHandler(UserManager<User> userManager
             , IMediator mediator
             , AppSetting appSetting
-            , IHumanRepository humanRepository
-            , IMapper mapper
             , IParentRepository parentRepository)
         {
             _userManager = userManager;
             _mediator = mediator;
             _appSetting = appSetting;
-            _humanRepository = humanRepository;
-            _mapper = mapper;
             _parentRepository = parentRepository;
         }
 
@@ -68,7 +61,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddError(method.ErrorMessages);
                 return methodResult;
             }
-            var user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
+            var user = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == method.Result.UserId, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
@@ -77,40 +70,33 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             await _userManager.ConfirmEmailAsync(user, token);
-            if (user.Human == null)
+            if (user.Student == null && user.Parent == null)
             {
                 var roles = await _userManager.GetRolesAsync(user);
 
-                var human = await CreateHuman(roles, user);
-                if (!human.IsValid())
+                user = await UpdateUserAsync(roles, user);
+                if (!user.IsValid())
                 {
-                    methodResult.AddError(human.ErrorMessages);
+                    methodResult.AddError(user.ErrorMessages);
                     return methodResult;
                 }
-                await _humanRepository.ExecuteTransactionAsync(async () =>
-                {
-                    human = _humanRepository.Add(human);
-                    await _humanRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-                    return methodResult;
-                });
+                await _userManager.UpdateAsync(user);
             }
 
             methodResult.Result = user.Id;
             return methodResult;
         }
 
-        private async Task<Human> CreateHuman(IList<string> roles, User user)
+        private async Task<User> UpdateUserAsync(IList<string> roles, User user)
         {
-            Human human = _mapper.Map<Human>(user);
-            human.UserId = user.Id;
             var currentDate = DateTime.UtcNow;
             var weekNumber = (currentDate.DayOfYear - 1) / 7 + 1;
 
             if (roles.Contains(EnumRoleRegister.Student.ToString()))
             {
-                human.Student = new Student
+                user.Student = new Student
                 {
-                    HumanId = human.Id,
+                    UserId = user.Id,
                     CreatedByParent = false,
                     Occupation = "Student"
                 };
@@ -118,13 +104,13 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             else if (roles.Contains(EnumRoleRegister.Parent.ToString()))
             {
                 var stt = await _parentRepository.Queryable.CountAsync();
-                human.Parent = new Parent
+                user.Parent = new Parent
                 {
-                    HumanId = human.Id,
+                    UserId = user.Id,
                 };
-                human.Code = $"PH_{weekNumber}{stt:0000}";
+                user.Code = $"PH_{weekNumber}{stt:0000}";
             }
-            return human;
+            return user;
         }
     }
 }

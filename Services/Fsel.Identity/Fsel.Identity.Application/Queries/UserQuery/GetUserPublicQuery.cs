@@ -22,19 +22,16 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     public class GetUserPublicQueryHandler : IRequestHandler<GetUserPublicQuery, MethodResult<UserPublicModel>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IOrderService _orderService;
         private readonly ILmsCourseService _lmsCourseService;
 
         public GetUserPublicQueryHandler(UserManager<User> userManager,
-            IHumanRepository humanRepository,
             IStudentRepository studentRepository,
             IOrderService orderService,
             ILmsCourseService lmsCourseService)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _orderService = orderService;
             _lmsCourseService = lmsCourseService;
@@ -45,13 +42,11 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<UserPublicModel> methodResult = new MethodResult<UserPublicModel>();
             var user = await (from u in _userManager.Users
-                              join h in _humanRepository.Queryable on u.Id equals h.UserId
-                              join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                              join s in _studentRepository.Queryable on u.Id equals s.UserId
                               where u.Id == request.Id
                               select new
                               {
                                   User = u,
-                                  Human = h,
                                   Student = s
                               }).FirstOrDefaultAsync(cancellationToken);
             if (user == null)

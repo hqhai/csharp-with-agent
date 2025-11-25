@@ -86,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 return methodResult;
             }
 
-            var userIds = students.Where(p => p.Human != null && p.Human.UserId.HasValue).Select(p => p.Human?.UserId ?? default).ToList();
+            var userIds = students.Select(p => p.UserId).ToList();
 
             var historiesSendMailResult = await _senderService.GetHistoriesSendMailLearningProgress(new GetHistoriesSendMailLearningProgressModel()
             {
@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
             students.ForEach(p =>
             {
-                var historySendMail = historiesSendMail?.Where(x => x.ReceiverId.HasValue && p.Human != null && p.Human.UserId.HasValue && p.Human.UserId == x.ReceiverId && x.Template == EnumSenderTemplate.LearningProgressWarning).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
+                var historySendMail = historiesSendMail?.Where(x => x.ReceiverId.HasValue && p.UserId == x.ReceiverId && x.Template == EnumSenderTemplate.LearningProgressWarning).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
                 if (historySendMail != null && historySendMail.CreatedDate.HasValue)
                 {
                     TimeSpan timeDifference = currentDate - historySendMail.CreatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
@@ -148,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             foreach (var student in students)
             {
                 var course = courses.FirstOrDefault(p => p.Id == student.CourseId);
-                if (course == null || string.IsNullOrEmpty(student.Human?.Email))
+                if (course == null || string.IsNullOrEmpty(student.User?.Email))
                 {
                     continue;
                 }
@@ -295,11 +295,11 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                 learningProgressWarningModels.Add(new LearningProgressWarningModel()
                 {
-                    Email = student.Human.Email,
-                    FullName = student.Human.FullName,
+                    Email = student.User.Email,
+                    FullName = student.User.FullName,
                     SkillScore = sections,
                     TotalPercent = (int)totalPercent,
-                    UserId = student.Human.UserId,
+                    UserId = student.UserId,
                 });
 
                 if (learningProgressWarningModels.Any())

@@ -42,7 +42,6 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             var methodResult = new MethodResult<UserModel>();
 
             var user = await _userManager.Users
-                    .Include(u => u.Human)
                     .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
 
             var userRole = await _userRoleRepository.GetRoleIdsAndNamesByUserIdAsync(request.Id, cancellationToken);
@@ -59,20 +58,13 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             userModel.UserGroupName = userRole.RoleName;
             methodResult.Result = userModel;
 
-            // Nếu Human null thì không cần lấy thông tin của Người quản lý
-            if (userModel.Human == null)
-            {
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }
-
             // Lấy thông tin người quản lý
             var userManager = await _userManager.Users
-                .FirstOrDefaultAsync(u => u.Id == userModel.Human.ManageUserId, cancellationToken);
+                .FirstOrDefaultAsync(u => u.Id == userModel.ManageUserId, cancellationToken);
 
             if (userManager != null)
             {
-                userModel.Human.ManageUserName = userManager.FullName;
+                userModel.ManageUserName = userManager.FullName;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

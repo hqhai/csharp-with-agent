@@ -125,7 +125,7 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                                                                                                             (x.CompetitionEventId == competitionEvents.ParentEventId && !request.IsCityLeaderBoard))
 
                           on studentEvent.StudentId equals studentCompetitionEvent.StudentId
-                          join student in _studentRepository.Queryable.Include(x => x.Human) on studentCompetitionEvent.StudentId equals student.Id into resultGroup
+                          join student in _studentRepository.Queryable.Include(x => x.User) on studentCompetitionEvent.StudentId equals student.Id into resultGroup
                           from student in resultGroup.DefaultIfEmpty()
                           select new StudentRankingModel
                           {
@@ -134,10 +134,10 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                               Grade = student.SchoolGrade,
                               OverallScore = studentEvent.OverallScore,
                               Process = studentEvent != null ? studentEvent.Process : 0, // Thêm kiểm tra null và mặc định giá trị nếu null
-                              FullName = student.Human != null ? student.Human.FullName : string.Empty,
-                              Email = student.Human != null ? student.Human.Email : string.Empty,
-                              AvatarPath = student.Human != null ? student.Human.AvatarPath : string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
-                              UserId = student.Human != null ? student.Human.UserId : new Guid(),
+                              FullName = student.User != null ? student.User.FullName : string.Empty,
+                              Email = student.User != null ? student.User.Email : string.Empty,
+                              AvatarPath = student.User != null ? student.User.AvatarPath : string.Empty, // Thêm kiểm tra null và mặc định giá trị nếu null
+                              UserId = student.User != null ? student.UserId : new Guid(),
                               RankingScore = studentEvent.RankingScore,
                               CourseResultId = studentEvent.CourseResultId,
                               CourseType = studentEvent.CourseType,

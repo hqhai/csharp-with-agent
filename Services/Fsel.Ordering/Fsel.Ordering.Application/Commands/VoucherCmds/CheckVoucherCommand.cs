@@ -178,8 +178,8 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
                     EnumApplicableSubjectsVoucher.Other =>
                         voucher.ApplicableEmails != null &&
-                        !string.IsNullOrEmpty(student.Human?.Email) &&
-                        voucher.ApplicableEmails.Contains(student.Human.Email),
+                        !string.IsNullOrEmpty(student.User?.Email) &&
+                        voucher.ApplicableEmails.Contains(student.User.Email),
 
                     _ => false
                 };

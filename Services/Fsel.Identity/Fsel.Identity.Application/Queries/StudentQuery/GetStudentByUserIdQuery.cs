@@ -37,8 +37,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentModel>();
             var student = await _studentRepository.Queryable
-                                        .Include(i => i.Human).ThenInclude(p => p.User).ThenInclude(p => p.Receiver)
-                                        .FirstOrDefaultAsync(i => i.Human != null && i.Human.UserId == request.Id, cancellationToken);
+                                        .Include(p => p.User).ThenInclude(p => p.Receiver)
+                                        .FirstOrDefaultAsync(i => i.UserId == request.Id, cancellationToken);
             //if (student?.SchoolId != null)
             //{
             //    var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel

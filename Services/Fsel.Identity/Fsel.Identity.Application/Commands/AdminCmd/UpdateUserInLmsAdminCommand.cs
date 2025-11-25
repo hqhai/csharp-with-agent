@@ -25,15 +25,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class UpdateUserInLmsAdminCommandHandler : IRequestHandler<UpdateUserInLmsAdminCommand, MethodResult<UserModel>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly IUserRoleRepository _userRoleRepository;
 
-        public UpdateUserInLmsAdminCommandHandler(UserManager<User> userManager, IHumanRepository humanRepository, IMapper mapper, IMediator mediator, IUserRoleRepository userRoleRepository)
+        public UpdateUserInLmsAdminCommandHandler(UserManager<User> userManager, IMapper mapper, IMediator mediator, IUserRoleRepository userRoleRepository)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _mapper = mapper;
             _mediator = mediator;
             _userRoleRepository = userRoleRepository;
@@ -47,7 +45,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             #region Validate user
             // Kiểm tra user có tồn tại không
             var userEntity = await _userManager.Users
-                .Include(x => x.Human)
                 .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken: cancellationToken);
 
             var userRole = await _userRoleRepository.GetQuery()
@@ -96,76 +93,77 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             // Map dữ liệu
             _mapper.Map(request, userEntity);
-            _mapper.Map(request, userEntity.Human);
 
-            await _humanRepository.ExecuteTransactionAsync(async () =>
+            bool isSuccessChangePassword = true;
+            if (!string.IsNullOrWhiteSpace(request.Password))
             {
-                bool isSuccessChangePassword = true;
-                if (!string.IsNullOrWhiteSpace(request.Password))
+                // Xóa mật khẩu hiện tại
+                var result = await _userManager.RemovePasswordAsync(userEntity).ConfigureAwait(false);
+
+                // Nếu xóa thành công thì thêm mật khẩu mới
+                if (result.Succeeded)
                 {
-                    // Xóa mật khẩu hiện tại
-                    var result = await _userManager.RemovePasswordAsync(userEntity).ConfigureAwait(false);
-
-                    // Nếu xóa thành công thì thêm mật khẩu mới
-                    if (result.Succeeded)
-                    {
-                        // Thêm mật khẩu mới
-                        result = await _userManager.AddPasswordAsync(userEntity, request.Password).ConfigureAwait(false);
-                    }
-
-                    isSuccessChangePassword = result.Succeeded;
+                    // Thêm mật khẩu mới
+                    result = await _userManager.AddPasswordAsync(userEntity, request.Password).ConfigureAwait(false);
                 }
 
-                if (!isSuccessChangePassword)
+                isSuccessChangePassword = result.Succeeded;
+            }
+
+            if (!isSuccessChangePassword)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.ErrorResetPassword));
+                return methodResult;
+            }
+
+            await _userManager.UpdateAsync(userEntity).ConfigureAwait(false);
+
+            // Cập nhật UserRole nếu có thay đổi RoleId
+            // Vì RoleId là part of composite key, không thể update trực tiếp
+            // Cần xóa UserRole cũ và tạo UserRole mới
+            if (request.UserGroupId.HasValue && userRole.RoleId != request.UserGroupId.Value)
+            {
+                // Xóa UserRole cũ
+                await _userRoleRepository.DeleteAsync(userRole);
+
+                // Tạo UserRole mới với RoleId mới
+                var newUserRole = new UserRole
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.ErrorResetPassword));
+                    UserId = userEntity.Id,
+                    RoleId = request.UserGroupId.Value,
+                    IsActive = userRole.IsActive // Giữ nguyên trạng thái IsActive
+                };
+                await _userRoleRepository.AddAsync(newUserRole);
+
+                // Cập nhật reference cho logic tiếp theo
+                userRole = newUserRole;
+            }
+
+            var groupId = userRole.RoleId;  // Lấy RoleId hiện tại từ UserRole 
+
+            // Cập nhật dữ liệu nhóm người dùng
+            // Nếu có Id nhóm người dùng mới, thêm vào nhóm
+            if (request.UserGroupId.HasValue)
+            {
+                var userGroupResult = await _mediator.Send(new AddUserToGroupCommand()
+                {
+                    GroupId = request.UserGroupId.Value,
+                    UserIds = new List<Guid> { userEntity.Id }
+                }, cancellationToken);
+
+                if (!userGroupResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(userGroupResult.ErrorMessages);
                     return methodResult;
                 }
-
-                await _userManager.UpdateAsync(userEntity).ConfigureAwait(false);
-
-                // Nếu chưa có Human thì thêm mới
-                if (userEntity.Human == null)
+            }
+            else // Nếu không có Id nhóm người dùng mới, xóa khỏi nhóm hiện tại (nếu có)
+            {
+                if (groupId != Guid.Empty)
                 {
-                    var human = _mapper.Map<Human>(request);
-                    human.UserId = userEntity.Id;
-                    human = _humanRepository.Add(human);
-                }
-                else // Nếu có thì cập nhật Human
-                {
-                    _humanRepository.Update(userEntity.Human);
-                }
-
-                // Cập nhật UserRole nếu có thay đổi RoleId
-                // Vì RoleId là part of composite key, không thể update trực tiếp
-                // Cần xóa UserRole cũ và tạo UserRole mới
-                if (request.UserGroupId.HasValue && userRole.RoleId != request.UserGroupId.Value)
-                {
-                    // Xóa UserRole cũ
-                    await _userRoleRepository.DeleteAsync(userRole);
-
-                    // Tạo UserRole mới với RoleId mới
-                    var newUserRole = new UserRole
+                    var userGroupResult = await _mediator.Send(new RemoveUserFromGroupCommand()
                     {
-                        UserId = userEntity.Id,
-                        RoleId = request.UserGroupId.Value,
-                        IsActive = userRole.IsActive // Giữ nguyên trạng thái IsActive
-                    };
-                    await _userRoleRepository.AddAsync(newUserRole);
-
-                    // Cập nhật reference cho logic tiếp theo
-                    userRole = newUserRole;
-                }
-
-                var groupId = userRole.RoleId;  // Lấy RoleId hiện tại từ UserRole 
-
-                // Cập nhật dữ liệu nhóm người dùng
-                // Nếu có Id nhóm người dùng mới, thêm vào nhóm
-                if (request.UserGroupId.HasValue)
-                {
-                    var userGroupResult = await _mediator.Send(new AddUserToGroupCommand()
-                    {
-                        GroupId = request.UserGroupId.Value,
+                        GroupId = groupId,
                         UserIds = new List<Guid> { userEntity.Id }
                     }, cancellationToken);
 
@@ -175,31 +173,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                         return methodResult;
                     }
                 }
-                else // Nếu không có Id nhóm người dùng mới, xóa khỏi nhóm hiện tại (nếu có)
-                {
-                    if (groupId != Guid.Empty)
-                    {
-                        var userGroupResult = await _mediator.Send(new RemoveUserFromGroupCommand()
-                        {
-                            GroupId = groupId,
-                            UserIds = new List<Guid> { userEntity.Id }
-                        }, cancellationToken);
+            }
 
-                        if (!userGroupResult.IsOK)
-                        {
-                            methodResult.AddErrorBadRequest(userGroupResult.ErrorMessages);
-                            return methodResult;
-                        }
-                    }
-                }
-
-                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.Result = _mapper.Map<UserModel>(userEntity);
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                return methodResult;
-            }).ConfigureAwait(false);
-
+            methodResult.Result = _mapper.Map<UserModel>(userEntity);
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

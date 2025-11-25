@@ -6,14 +6,18 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Core.Base.Managers;
+    using Fsel.Core.Entities;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Infrastructure;
     using Fsel.Shared.Enums.ErrorCodes;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
 
     public class CreateUserReferralCommand : CreateUserReferralCommandModel, IRequest<MethodResult<VoidMethodResult>>
     {
@@ -21,27 +25,32 @@ namespace Fsel.Identity.Application.Commands.UserReferrals
 
     public class CreateUserReferralCommandHandler : IRequestHandler<CreateUserReferralCommand, MethodResult<VoidMethodResult>>
     {
-        private readonly IUserReferralRepository _userReferralRepository;
-        private readonly UserManager<User> _userManager;
+        private IUserReferralRepository _userReferralRepository;
+        private UserManager<User> _userManager;
         private readonly AuthContext _authContext;
+        private readonly IServiceProvider _serviceProvider;
         private const int MaxUserCoinRewarded = 10;
 
-        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager, AuthContext authContext)
+        public CreateUserReferralCommandHandler(IUserReferralRepository userReferralRepository, UserManager<User> userManager, AuthContext authContext, IServiceProvider serviceProvider)
         {
             _userReferralRepository = userReferralRepository;
             _userManager = userManager;
             _authContext = authContext;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<VoidMethodResult>> Handle(CreateUserReferralCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _userManager = tenantProvider != null ? await tenantProvider.CreateUserManagerAsync<User>(userId: request.ReceiverId) ?? _userManager : _userManager;
+            _userReferralRepository = tenantProvider != null ? await tenantProvider.CreateRepositoryAsync<IUserReferralRepository>(userId: request.ReceiverId) ?? _userReferralRepository : _userReferralRepository;
+
             var methodResult = new MethodResult<VoidMethodResult>();
 
             var receiverId = request.ReceiverId ?? _authContext.CurrentUserId;
-
             request.ReferralCode = request.ReferralCode?.Trim() ?? string.Empty;
-            var sender = await _userManager.Users.FirstOrDefaultAsync(p => p.Human != null && p.Human.Code != null && p.Human.Code == request.ReferralCode, cancellationToken);
+            var sender = await _userManager.Users.FirstOrDefaultAsync(p => p.Code != null && p.Code == request.ReferralCode, cancellationToken);
             if (sender == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUserReferralErrorCode.FriendCodeDoesNotExist));

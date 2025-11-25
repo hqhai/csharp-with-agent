@@ -59,17 +59,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             var studentsAbsent = await _studentDailyStreakRepository.Queryable
                                 .Include(x => x.Student)
-                                .ThenInclude(x => x.Human)
+                                .ThenInclude(x => x.User)
                                 .GroupBy(x => new
                                 {
                                     x.CreatedUserId,
-                                    FullName = x.Student != null && x.Student.Human != null ? x.Student.Human.FullName : string.Empty
+                                    FullName = x.Student != null && x.Student.User != null ? x.Student.User.FullName : string.Empty
                                 })
                                 .Where(g => g.All(x => x.CreatedUserId != Guid.Empty)
                                     && g.Any(x => x.DailyDate.Date >= startOfWeek
                                     && x.DailyDate.Date <= endOfWeek
                                     && x.Student != null
-                                    && x.Student.Human != null))
+                                    && x.Student.User != null))
                                 .Select(g => new
                                 {
                                     Id = g.Key.CreatedUserId,

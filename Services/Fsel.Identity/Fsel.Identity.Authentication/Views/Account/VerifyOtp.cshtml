@@ -1,0 +1,246 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer Localizer
+@model Fsel.Identity.Domain.Models.CommandModels.OpenId.VerifyOtpModel
+@using Fsel.Common.Helpers
+@using Fsel.Identity.Authentication.OpenId.Account;
+@using Fsel.Shared.Constants
+@using Fsel.Shared.Helpers
+
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    var isError = ViewContext.ModelState.IsValid;
+
+    var provider = ViewData["Provider"] as string;
+    var isBlocked = ViewData["IsOtpBlocked"] as bool?;
+    var isLockedResendOtp = ViewData["IsLockedResendOtp"] as bool?;
+    var isOtpExpired = ViewData["OtpExpired"] as bool?;
+    
+    var sentMessage = string.Empty;
+    if (!string.IsNullOrEmpty(provider))
+    {
+        sentMessage = Localizer["i18n_otp_sent_to"].ToString().InjectParam($"{provider} {Model.Identity}");
+    }
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/assets/css/pages/verify-otp.css" />
+}
+
+<div class="all-content">
+    <div class="content">
+        <div class="langs">
+            @await Component.InvokeAsync("Languages")
+        </div>
+
+        @await Component.InvokeAsync("Logos")
+        @if (Model.Identity.IsValidEmail())
+        {
+            <h1 class="title">@Localizer["i18n_verify_account"].Value?.ToUpper()</h1>
+        }
+        else
+        {
+            <h1 class="title">@Localizer["i18n_verify_phone_number"].Value?.ToUpper()</h1>
+        }
+
+        <form id="form-VerifyOtp" asp-route="VerifyOtp">  
+            @Html.Raw($"<p class='sub-title sub-verify-otp''>{sentMessage}</p>")
+
+            <input type="hidden" asp-for="ReturnUrl" />
+            <input type="hidden" asp-for="Type" />
+            <input type="hidden" asp-for="OtpProvider" id="OtpProvider" />
+            <div class="hidden" id="RemainSecond" data-value="@Model.RemainSecond"></div>
+            @Html.AntiForgeryToken()
+
+            <div class="otps">
+                <div class="number-list @(ViewContext.ModelState.IsValid ? "" : "number-list-error")">
+                    <input 
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           maxlength="1"
+                           id="otp-1"
+                           autocomplete="off"
+                           value="@Model.Otp?.ElementAt(0)"
+                           name="otp-1" />
+                    <input 
+                           id="otp-2"
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           maxlength="1"
+                           value="@Model.Otp?.ElementAt(1)"
+                           name="otp-2" />
+                    <input 
+                           id="otp-3"
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           maxlength="1"
+                           autocomplete="off"
+                           value="@Model.Otp?.ElementAt(2)"
+                           name="otp-3" />
+                    <input 
+                           id="otp-4"
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           maxlength="1"
+                           autocomplete="off"
+                           value="@Model.Otp?.ElementAt(3)"
+                           name="otp-4" />
+                    <input 
+                           id="otp-5"
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           maxlength="1"
+                           autocomplete="off"
+                           value="@Model.Otp?.ElementAt(4)"
+                           name="otp-5" />
+                    <input 
+                           id="otp-6"
+                           class="number-item"
+                           type="password"
+                           onkeypress="return event.charCode >= 48 && event.charCode <= 57"
+                           maxlength="1"
+                           autocomplete="off"
+                           value="@Model.Otp?.ElementAt(5)"
+                           name="otp-6" />
+                </div>
+                <div class="mt-2">
+                    <input type="hidden"
+                           name="Otp"
+                           id="otp"
+                           placeholder=" "
+                           autocomplete="off"
+                           asp-for="Otp" />
+                </div>
+                
+            </div>
+            @{
+                <div class="hidden" id="countTimeInSecond" data-value="@Localizer["i18n_otp_wait_in_second"]"></div>
+                <div class="hidden" id="isOtpExpired" data-value="@isOtpExpired"></div>
+                <div class="hidden" id="isLockedResendOtp" data-value="@isLockedResendOtp"></div>
+                <div class="hidden" id="maxNumberOfVerify" data-value="@OtpSetting.MaxCountVerifyFail.ToString()"></div>
+                if (isBlocked.HasValue && isBlocked.Value)
+                {
+                    <div class="hidden" id="countTimeInMinutesSecond" data-value="@Localizer["i18n_otp_locked"]"></div>
+                    <div class="hidden" id="isBlocked" data-value="true"></div> 
+                    <div class="resend-otp">
+                        <div class="resend-otp-1 @(Model.RemainSecond.HasValue ? "" : "hidden")" data-value="@Localizer["i18n_send_otp_after"]">
+                            @{
+                                if (Model.RemainSecond.HasValue)
+                                {
+                                    var waitTime = Model.RemainSecond.Value > 60 ? Math.Floor((double)Model.RemainSecond.Value / 60).ToString() : "1";
+                                    Html.Raw($"<p>{Localizer["i18n_otp_locked"].ToString().InjectParam(OtpSetting.MaxCountVerifyFail.ToString(), waitTime)}</p>");
+                                }
+                                else
+                                {
+                                    Html.Raw($"<p>{Localizer["i18n_otp_locked"].ToString().InjectParam(OtpSetting.MaxCountVerifyFail.ToString(), OtpSetting.OtpBlockDuration.ToString())}</p>");
+                                }
+                            }
+                        </div>
+                        <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
+                            @if (Model.Identity.IsValidEmail())
+                            {
+                                <button class="resend-btn" id="email" type="submit" name="button" value="resend">
+                                    <img class="icon" src="~/assets/icons/refresh.png" /><span> @Localizer["i18n_resend"]</span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="resend-btn" id="zalo" type="submit" name="button" value="resend">
+                                    <img class="icon" src="~/assets/icons/refresh.png" /><span> @Localizer["i18n_resend_zalo"]</span>
+                                </button>
+                            }
+                        </div>
+                        @if (!Model.Identity.IsValidEmail())
+                        {
+                            <div class="resend-otp-3">
+                                <p>@Localizer["i18n_or_resend"] <button id="sms" type="submit" name="button" value="resend">@Localizer["i18n_resend_sms"]</button></p>
+                            </div>
+                        }
+                        
+                    </div>
+                    @Html.Raw($"<button id='submit-otp' type='submit' class='btn' disabled>{Localizer["i18n_verify"]}</button>")
+                }
+                else
+                {
+
+                    <div class="hidden" id="countTimeInMinutesSecond" data-value="@Localizer["i18n_otp_wait_in_minute_and_second"]"></div>
+                    <div class="hidden" id="isBlocked" data-value="false"></div>
+                    <div class="resend-otp">
+                        <div class="resend-otp-1 @(Model.RemainSecond.HasValue ? "" : "hidden")" data-value="@Localizer["i18n_send_otp_after"]">
+                            @{
+                                if (Model.RemainSecond.HasValue)
+                                {
+                                    if (Model.RemainSecond.Value > 60)
+                                    {
+                                        Html.Raw($"<p>{Localizer["i18n_otp_wait_in_minute_and_second"].ToString()}</p>"
+                                        .InjectParam(Math.Floor((double)Model.RemainSecond.Value / 60).ToString(), (Model.RemainSecond.Value % 60).ToString()));
+                                    }
+                                    else
+                                    {
+                                        Html.Raw($"<p>{Localizer["i18n_otp_wait_in_second"].ToString()}</p>".InjectParam(Model.RemainSecond.Value.ToString()).ToString());
+                                    }
+                                }
+                            }
+                        </div>
+                        <div class="resend-otp-2 @(Model.RemainSecond.HasValue ? "hidden" : "")">
+                            @if (Model.Identity.IsValidEmail())
+                            {
+                                <button class="resend-btn" id="email" type="submit" name="button" value="resend">
+                                    <img class="icon" src="~/assets/icons/refresh.png" /><span> @Localizer["i18n_resend"]</span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="resend-btn" id="zalo" type="submit" name="button" value="resend">
+                                    <img class="icon" src="~/assets/icons/refresh.png" /><span> @Localizer["i18n_resend_zalo"]</span>
+                                </button>
+                            }
+                        </div>
+                        @if (!Model.Identity.IsValidEmail())
+                        {
+                            <div class="resend-otp-3">
+                                <p>@Localizer["i18n_or_resend"] <button id="sms" type="submit" name="button" value="resend">@Localizer["i18n_resend_sms"]</button></p>
+                            </div>
+                        }
+                    </div>
+                    if (isOtpExpired.HasValue && isOtpExpired.Value)
+                    {
+                        @Html.Raw($"<button id='submit-otp' type='submit' class='btn' disabled>{Localizer["i18n_verify"]}</button>")
+                    }
+                    else
+                    {
+                        @Html.Raw($"<button id='submit-otp' type='submit' class='btn'>{Localizer["i18n_verify"]}</button>")
+                    }
+                    
+                }
+            }
+        </form>
+        
+         @if (Model.Type == "Forgot")
+         {
+            <div class="text-footer">
+                <a href="@Url.Action("Forgot", "Account", new { Model.ReturnUrl })">@Localizer["i18n_change_email_or_phone_number"]</a>
+            </div>
+         }
+
+        <div class="text-footer">
+            <a href="https://zalo.me/fivestarelearning" target="_blank">@Localizer["i18n_did_not_a_code"]</a>
+        </div>
+        
+    </div>
+
+    @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })
+    <partial class="mt-3" name="_ValidationSummary" />
+</div>
+
+@section scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
+        <script src="~/assets/js/pages/verify-otp.js"></script>
+    }
+}
+

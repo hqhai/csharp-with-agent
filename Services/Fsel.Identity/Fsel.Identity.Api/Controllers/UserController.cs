@@ -18,6 +18,8 @@ using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Fsel.Identity.Application.Queries.AuthQuery;
+using Fsel.Core.Applications.Attributes;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -63,6 +65,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update Code Student
         /// </summary>
+        [TenantAware]
         [HttpPut("update-code-student")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -102,11 +105,11 @@ namespace Fsel.Identity.Api.Controllers
         /// Get users by ids
         /// </summary>
         [HttpPost("get-users-by-ids")]
-        [ProducesResponseType(typeof(MethodResult<IList<HumanModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUsersByIds([FromBody] GetUsersByIdsQuery query)
         {
-            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -114,11 +117,11 @@ namespace Fsel.Identity.Api.Controllers
         /// Get users by ids
         /// </summary>
         [HttpGet("get-user-by-id")]
-        [ProducesResponseType(typeof(MethodResult<HumanModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUsersByIds([FromQuery] GetUserByIdQuery query)
         {
-            MethodResult<HumanModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<UserModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -233,6 +236,36 @@ namespace Fsel.Identity.Api.Controllers
         {
             MethodResult<UserOtpCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Disconnect external connect
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPost("disconnect-external-provider")]
+        [Common.Attributes.Permission]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DisconnectExternalProvider([FromBody] DisconnectExternalAccountCommand command)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(command?.Provider);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get external provider connects
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("get-external-provider-connects")]
+        [Common.Attributes.Permission]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetExternalProviderConnects([FromQuery] GetExternalConnectsQuery query)
+        {
+            var result = await _mediator.Send(query).ConfigureAwait(false);
+            return result.GetActionResult();
         }
 
         /// <summary>

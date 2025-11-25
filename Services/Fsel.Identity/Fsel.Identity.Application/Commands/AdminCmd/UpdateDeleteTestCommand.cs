@@ -32,13 +32,13 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var student = await _studentRepository.Queryable.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == request.StudentId, cancellationToken);
-            if (student == null || student.Human == null)
+            var student = await _studentRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(x => x.Id == request.StudentId, cancellationToken);
+            if (student == null || student.User == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), request.StudentId);
                 return methodResult;
             }
-            int age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+            int age = DateTimeHelper.GetYearOld(student.User.Birthday);
             student.BaseCourseLevel = null;
             student.CourseId = null;
             student.ClassId = null;

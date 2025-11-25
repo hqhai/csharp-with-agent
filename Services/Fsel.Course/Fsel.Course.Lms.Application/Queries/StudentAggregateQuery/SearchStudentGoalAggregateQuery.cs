@@ -146,9 +146,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             foreach (var item in lists)
             {
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                item.FullName = student?.Human?.FullName;
-                item.Email = student?.Human?.Email;
-                item.UserId = student?.Human?.UserId;
+                item.FullName = student?.User?.FullName;
+                item.Email = student?.User?.Email;
+                item.UserId = student?.UserId;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
                     item.IsActive = totalScore <= item.TotalTargetLessons; // hoặc logic khác tùy ngưỡng bạn muốn

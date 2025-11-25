@@ -131,7 +131,10 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                         foreach (var teacherId in item.TeacherIds)
                         {
                             var teacher = teachers.FirstOrDefault(x => x.Id == teacherId);
-                            item.TeacherNames.Add(teacher?.Human?.FullName!);
+                            if (teacher?.User?.FullName != null)
+                            {
+                                item.TeacherNames.Add(teacher?.User?.FullName);
+                            }
                         }
                     }
                 }

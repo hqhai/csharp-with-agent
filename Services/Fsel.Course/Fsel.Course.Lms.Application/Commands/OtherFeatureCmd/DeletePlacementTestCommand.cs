@@ -56,12 +56,12 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 return methodResult;
             }
             var student = studentResult.Content?.Result;
-            if (student == null || student.Human == null)
+            if (student == null || student.User == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), request.StudentId);
                 return methodResult;
             }
-            var userId = student.Human.UserId;
+            var userId = student.UserId;
 
             var placementTestGroupResult = await _placementTestGroupResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == request.StudentId, cancellationToken);
             var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == request.StudentId).ToListAsync(cancellationToken);
@@ -89,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
 
-            await _mediator.Send(new DeleteListDataUserCommand { UserId = userId ?? default }, cancellationToken).ConfigureAwait(false);
+            await _mediator.Send(new DeleteListDataUserCommand { UserId = userId }, cancellationToken).ConfigureAwait(false);
             methodResult.Result = true;
             return methodResult;
         }

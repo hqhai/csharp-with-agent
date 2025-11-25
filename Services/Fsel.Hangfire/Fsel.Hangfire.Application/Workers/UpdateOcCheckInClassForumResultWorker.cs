@@ -3,19 +3,20 @@
 namespace Fsel.Hangfire.Application.Workers
 {
     using System.Threading.Tasks;
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
+    using Microsoft.AspNetCore.Http;
 
-    public class UpdateOcCheckInClassForumResultWorker : IWorker
+    public class UpdateOcCheckInClassForumResultWorker : BaseWorker
     {
         private readonly UpdateTeacherGradingInClassForumAndMockTestPublisher _updateOcCheckTimePublisher;
 
-        public UpdateOcCheckInClassForumResultWorker(UpdateTeacherGradingInClassForumAndMockTestPublisher updateOcCheckTimePublisher)
+        public UpdateOcCheckInClassForumResultWorker(UpdateTeacherGradingInClassForumAndMockTestPublisher updateOcCheckTimePublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _updateOcCheckTimePublisher = updateOcCheckTimePublisher;
         }
 
-        public async Task RunAsync()
+        public override async Task RunAsync()
         {
             await _updateOcCheckTimePublisher.Publish(CancellationToken.None);
         }
