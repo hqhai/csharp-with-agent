@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
+    using Core.Base;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
@@ -20,7 +21,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/student-goal")]
     [ApiController]
-    public class StudentGoalController : ControllerBase
+    public class StudentGoalController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -118,6 +119,27 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         {
             var commandResult = await _mediator.Send(new GetStudentGoalStatusHistoryQuery {StudentId = studentId}).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Export Student Goal
+        /// </summary>
+        [HttpGet("export-student-goal")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ReportManagementByAdminSchool.ViewLearningResultsReport)]
+        public async Task<IActionResult> Get([FromQuery] ExportFileExcelStudentGoalCommand command)
+        {
+            SetQuery(command);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+
+            var exportDate = DateTime.UtcNow.AddHours(7);
+            string fileName = $"Tien_Do_Tuan_{exportDate:dd_MM_yyyy}.xlsx";
+            return File(commandResult.Result, Settings.Excels.ContentType, fileName);
         }
     }
 }

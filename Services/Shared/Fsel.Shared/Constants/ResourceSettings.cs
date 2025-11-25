@@ -103,6 +103,7 @@ namespace Fsel.Shared.Constants
         public const string ReportLearningSchoolEvent = "Resources//ExportExcelTemplates//ReportLearningSchoolEvent.xlsx";
         public const string BaoCaoReportStudentEvent = "Resources//ExportExcelTemplates//BaoCaoReportStudentEvent.xlsx";
         public const string ReportSaleStudentProgress = "Resources//ExportExcelTemplates//ReportSaleStudentProgress.xlsx";
+        public const string StudentGoal =  "Resources//ExportExcelTemplates//TienDoTuan.xlsx";
 
         public const string ConfigPlacementTest = "Resources//PlacementTestConfigAgeLevel.json";
         public const string ConfigViewReportLevel = "Resources//PlacementTestReportViewConfig.json";
