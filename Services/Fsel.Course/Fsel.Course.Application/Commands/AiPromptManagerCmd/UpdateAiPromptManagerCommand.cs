@@ -39,7 +39,15 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
                 return methodResult;
             }
 
-            Validation(request, methodResult);
+            #region  Validation
+
+            if (request.AiModelName == null || request.InputModelJson == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                return methodResult;
+            }
+
+            #endregion
 
             await _aiModelManagerRepository.ExecuteTransactionAsync(async () =>
             {
@@ -59,23 +67,6 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
 
                 return methodResult;
             });
-
-            return methodResult;
-        }
-
-        private static MethodResult<AiPromptManagerModel> Validation(UpdateAiPromptManagerCommand request, MethodResult<AiPromptManagerModel> methodResult)
-        {
-            if (request.AiModelName == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
-            }
-
-            if (request.InputModel == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
-            }
 
             return methodResult;
         }
