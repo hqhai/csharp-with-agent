@@ -1,11 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
+namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
 {
     using Common.ActionResults;
     using Core.Base;
-    using Core.Base.BaseModels;
-    using Core.Extensions;
     using Domain.IRepositories;
     using Domain.Models.EntityModels;
     using Domain.Models.QueryModels.StudentProgress;
@@ -17,18 +15,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
     using Shared.Enums;
     using Shared.Helpers;
 
-    public class SearchStudentGoalAggregateQuery : SearchStudentGoalAggregateQueryModel, IRequest<MethodResult<PagingItemsModel<StudentGoalAggregateModel>>>
+    public class GetStudentGoalQuery : SearchStudentGoalAggregateQueryModel, IRequest<MethodResult<IList<StudentGoalAggregateModel>>>
     {
     }
 
-    public class SearchStudentGoalAggregateQueryHandler : IRequestHandler<SearchStudentGoalAggregateQuery, MethodResult<PagingItemsModel<StudentGoalAggregateModel>>>
+    public class GetStudentGoalQueryHandler : IRequestHandler<GetStudentGoalQuery, MethodResult<IList<StudentGoalAggregateModel>>>
     {
         private readonly IStudentGoalAggregateRepository _studentGoalAggregateRepository;
         private readonly IStudentGoalSummaryRepository _studentGoalSummaryRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
 
-        public SearchStudentGoalAggregateQueryHandler(IStudentGoalAggregateRepository studentGoalAggregateRepository,
+        public GetStudentGoalQueryHandler(IStudentGoalAggregateRepository studentGoalAggregateRepository,
             IStudentGoalSummaryRepository studentGoalSummaryRepository,
             IUserService userService,
             AuthContext authContext)
@@ -39,12 +37,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<PagingItemsModel<StudentGoalAggregateModel>>> Handle(SearchStudentGoalAggregateQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<StudentGoalAggregateModel>>> Handle(GetStudentGoalQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<StudentGoalAggregateModel>>();
+            var methodResult = new MethodResult<IList<StudentGoalAggregateModel>>();
 
-            if (request.PageSize > 100)
+            if (request.PageSize > 200)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
@@ -127,8 +125,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     LessonsPerWeek = sum.LessonsPerWeek,
                     StatusStudentGoal = baseQ.StatusStudentGoal
                 };
-            var totalItem = await queryData.CountAsync(cancellationToken);
-            var lists = await queryData.OrderByDescending(x => x.TotalCompletedLessons).ApplyPaging(request)
+
+            var lists = await queryData
                 .AsNoTracking()
                 .ToListAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -144,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 .ToListAsync(cancellationToken);
 
             var summarySumMap = summarys.GroupBy(s => s.StudentGoalAggregateId)
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.LessonsPerWeek)); // hoặc x.TotalPercent
+                .ToDictionary(g => g.Key, g => g.Sum(x => x.LessonsPerWeek));
 
             foreach (var item in lists)
             {
@@ -157,7 +155,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 item.PhoneNumber = student?.User?.PhoneNumber;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
-                    item.IsActive = totalScore <= item.TotalTargetLessons; // hoặc logic khác tùy ngưỡng bạn muốn
+                    item.IsActive = totalScore <= item.TotalTargetLessons;
                 }
             }
 
@@ -166,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
             }
 
-            methodResult.Result = new PagingItemsModel<StudentGoalAggregateModel>(lists, request, totalItem);
+            methodResult.Result = lists;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
