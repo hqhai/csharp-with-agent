@@ -160,8 +160,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lcms-web-beta.fsel.edu.vn",
                         "http://lcms-web-beta-ufm.fsel.edu.vn",
                         "https://lcms-web-beta-ufm.fsel.edu.vn",
-                        "http://lcms-web-pre-prod.fsel.edu.vn",
-                        "https://lcms-web-pre-prod.fsel.edu.vn",
+                        "http://lcms-pre-prod.fsel.edu.vn",
+                        "https://lcms-pre-prod.fsel.edu.vn",
                         "http://lcms.fsel.edu.vn",
                         "https://lcms.fsel.edu.vn"
                     },
@@ -181,8 +181,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lcms-web-beta.fsel.edu.vn",
                         "http://lcms-web-beta-ufm.fsel.edu.vn",
                         "https://lcms-web-beta-ufm.fsel.edu.vn",
-                        "http://lcms-web-pre-prod.fsel.edu.vn",
-                        "https://lcms-web-pre-prod.fsel.edu.vn",
+                        "http://lcms-pre-prod.fsel.edu.vn",
+                        "https://lcms-pre-prod.fsel.edu.vn",
                         "http://lcms.fsel.edu.vn",
                         "https://lcms.fsel.edu.vn"
                     },
@@ -234,8 +234,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lms-admin-beta.fsel.edu.vn",
                         "http://lms-admin-beta-ufm.fsel.edu.vn",
                         "https://lms-admin-beta-ufm.fsel.edu.vn",
-                        "http://lms-admin-pre-prod.fsel.edu.vn",
-                        "https://lms-admin-pre-prod.fsel.edu.vn",
+                        "http://lmsadmin-pre-prod.fsel.edu.vn",
+                        "https://lmsadmin-pre-prod.fsel.edu.vn",
                         "http://lmsadmin.fsel.edu.vn",
                         "https://lmsadmin.fsel.edu.vn"
                     },
@@ -255,8 +255,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lms-admin-beta.fsel.edu.vn",
                         "http://lms-admin-beta-ufm.fsel.edu.vn",
                         "https://lms-admin-beta-ufm.fsel.edu.vn",
-                        "http://lms-admin-pre-prod.fsel.edu.vn",
-                        "https://lms-admin-pre-prod.fsel.edu.vn",
+                        "http://lmsadmin-pre-prod.fsel.edu.vn",
+                        "https://lmsadmin-pre-prod.fsel.edu.vn",
                         "http://lmsadmin.fsel.edu.vn",
                         "https://lmsadmin.fsel.edu.vn"
                     },
@@ -358,8 +358,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
 
                     RequireClientSecret = false,
                     RequirePkce = false,
-                    RedirectUris = { "https://lms-pre-prod.fsel.edu.vn/auth/login", "http://lms-pre-prod.fsel.edu.vn/auth/login", "fsel-preproduction://lms-preproduction.fsel.edu.vn" },
-                    PostLogoutRedirectUris = { "https://lms-pre-prod.fsel.edu.vn/auth/login", "http://lms-pre-prod.fsel.edu.vn/auth/login", "fsel-preproduction://lms-preproduction.fsel.edu.vn" },
+                    RedirectUris = { "https://lms-pre-prod.fsel.edu.vn/auth/login", "http://lms-pre-prod.fsel.edu.vn/auth/login", "fsel-preproduction://lms-pre-prod.fsel.edu.vn" },
+                    PostLogoutRedirectUris = { "https://lms-pre-prod.fsel.edu.vn/auth/login", "http://lms-pre-prod.fsel.edu.vn/auth/login", "fsel-preproduction://lms-pre-prod.fsel.edu.vn" },
 
                     AllowOfflineAccess = true,
                     AccessTokenLifetime = 86400,
