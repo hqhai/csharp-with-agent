@@ -160,6 +160,21 @@ namespace Fsel.Course.Lms.Api.Controllers
         {
             var queryResult = await _mediator.Send(new GetPlacementTestResultByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
             return queryResult.GetActionResult();
+
+
+        }
+
+        /// <summary>
+        /// Get Placement Test Menu - Assessment Tree
+        /// </summary>
+        [HttpGet("process-tree")]
+        [ProducesResponseType(typeof(MethodResult<AssessmentTreeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetPlacementTestMenu([FromQuery] Guid? studentId)
+        {
+            var queryResult = await _mediator.Send(new GetPlacementTestMenuQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
+
 }

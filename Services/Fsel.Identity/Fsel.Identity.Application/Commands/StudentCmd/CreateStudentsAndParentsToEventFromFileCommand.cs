@@ -64,7 +64,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string SchoolDoesNotExistInEvent = "Trường học chưa được gắn vào sự kiện";
         private const string ExpiredDate = "Đã hết thời gian tạo tài khoản";
 
+        private const string Parent = "Phụ Huynh";
+
         private const string DefaultPassword = "Fsel@";
+        private const string DefaultDomainEmail = "@fsel.edu.vn";
         private const int MinYear = 1900;
         private static readonly Random s_random = new Random();
 
@@ -460,10 +463,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
 
                                 int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
+
+                                var userName = GenerateUsername(student.FullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()));
+
+                                var email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : Shared.Helpers.StringHelper.GenerateEmail(userName ?? string.Empty, DefaultDomainEmail);
+
                                 var user = new User()
                                 {
-                                    UserName = GenerateUsername(student.FullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim())),
-                                    Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
+                                    UserName = userName,
+                                    Email = email,
                                     FirstName = student.FullName.ParseFullName().FirstName,
                                     LastName = student.FullName.ParseFullName().LastName,
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
@@ -517,7 +525,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 }
                                 else
                                 {
-                                    user.UserName = GenerateUsername(student.FullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()));
+                                    userName = GenerateUsername(student.FullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()));
+
+                                    email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : Shared.Helpers.StringHelper.GenerateEmail(userName ?? string.Empty, DefaultDomainEmail);
+
+                                    user.UserName = userName;
+                                    user.Email = email;
+
                                     identityStudentResult = await studentManager.CreateAsync(user, password);
 
                                     if (identityStudentResult.Succeeded)
@@ -544,11 +558,15 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     var parentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                                     Microsoft.AspNetCore.Identity.IdentityResult identityParentResult;
 
+                                    var parentUserName = GenerateUsername(student.ParentFullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()));
+
+                                    var parentEmail = !string.IsNullOrEmpty(student.ParentEmail) ? student.ParentEmail.ToLower(cultureInfo).Trim() : Shared.Helpers.StringHelper.GenerateEmail(parentUserName ?? string.Empty, DefaultDomainEmail);
+
                                     age = Shared.Helpers.DateTimeHelper.GetYearOld(student.ParentDateOfBirth);
                                     var parent = new User()
                                     {
-                                        UserName = GenerateUsername(student.ParentFullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim())),
-                                        Email = !string.IsNullOrEmpty(student.ParentEmail) ? student.ParentEmail.ToLower(cultureInfo).Trim() : null,
+                                        UserName = parentUserName,
+                                        Email = parentEmail,
                                         FirstName = student.FullName.ParseFullName().FirstName,
                                         LastName = student.FullName.ParseFullName().LastName,
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()),
@@ -564,7 +582,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                             Occupation = nameof(Student),
                                             School = school.Name,
                                             SchoolClass = student.SchoolClass,
-                                            SchoolGrade = student.SchoolGrade,
+                                            SchoolGrade = Parent,
                                             SchoolId = schoolId,
                                             CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
                                         },
@@ -600,6 +618,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     }
                                     else
                                     {
+                                        parentUserName = GenerateUsername(student.ParentFullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()));
+
+                                        parentEmail = !string.IsNullOrEmpty(student.ParentEmail) ? student.ParentEmail.ToLower(cultureInfo).Trim() : Shared.Helpers.StringHelper.GenerateEmail(parentUserName ?? string.Empty, DefaultDomainEmail);
+
+                                        parent.UserName = parentUserName;
+                                        parent.Email = parentEmail;
+
                                         parent.UserName = GenerateUsername(student.ParentFullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()));
 
                                         identityParentResult = await parentManager.CreateAsync(parent, password);

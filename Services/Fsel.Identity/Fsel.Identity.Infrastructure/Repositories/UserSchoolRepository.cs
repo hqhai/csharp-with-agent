@@ -25,7 +25,9 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
         public async Task<Guid> GetSchoolIdAsync()
         {
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 var userSchool = await Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId);
                 return userSchool?.SchoolId ?? default;
@@ -35,7 +37,9 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
         public async Task<IList<StudentModel>> GetStudentsByRoleAdminSchoolAsync()
         {
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 var userSchool = await Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId);
                 if (userSchool == null)
@@ -50,7 +54,9 @@ namespace Fsel.Identity.Infrastructure.Repositories
 
         public async Task<bool> CheckStudentToAdminSchoolAsync(Guid studentId)
         {
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 var userSchool = await Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId);
                 if (userSchool == null)

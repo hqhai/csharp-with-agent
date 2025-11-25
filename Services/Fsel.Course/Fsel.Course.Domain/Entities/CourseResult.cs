@@ -15,6 +15,7 @@ namespace Fsel.Course.Domain.Entities
         public Course? Course { get; set; }
         public Guid CourseId { get; set; }
         public EnumWorkingStatus WorkingStatus { get; set; }
+        public DateTime? NewDate { get; set; }
         public DateTime? ProcessDate { get; set; }
         public DateTime? CompletionDate { get; set; }
     }

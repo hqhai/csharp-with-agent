@@ -34,18 +34,21 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
         private readonly UserManager<User> _userManager;
+        private readonly ISchoolClassRepository _schoolClassRepository;
 
         public GetStudentsQueryHandler(IStudentRepository studentRepository,
             IUserSchoolRepository userSchoolRepository,
             AuthContext authContext,
             ISystemService systemService,
-            UserManager<User> userManager)
+            UserManager<User> userManager,
+            ISchoolClassRepository schoolClassRepository)
         {
             _studentRepository = studentRepository;
             _userSchoolRepository = userSchoolRepository;
             _authContext = authContext;
             _systemService = systemService;
             _userManager = userManager;
+            _schoolClassRepository = schoolClassRepository;
         }
 
         public async Task<MethodResult<IList<StudentDtoModel>>> Handle(GetStudentsQuery request, CancellationToken cancellationToken)
@@ -63,11 +66,20 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 queryStudent = queryStudent.WhereBulkContains(request.SchoolClasses, x => x.SchoolClass);
             }
 
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
                 queryStudent = queryStudent.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
             }
+
+            if (_authContext.Roles != null && (_authContext.Roles.Contains(EnumRole.TeacherCampus.ToString())))
+            {
+                var schoolClassIds = await _schoolClassRepository.Queryable.Where(p => p.TeacherId == _authContext.CurrentUserId).Select(p => p.Id).ToListAsync(cancellationToken);
+                queryStudent = queryStudent.Where(x => x.SchoolClassId.HasValue && schoolClassIds.Contains(x.SchoolClassId.Value));
+            }
+
             if (request.LearningStatuses?.Any() == true)
             {
                 var hasInProgress = request.LearningStatuses.Contains(EnumLearningStatus.InProgress);

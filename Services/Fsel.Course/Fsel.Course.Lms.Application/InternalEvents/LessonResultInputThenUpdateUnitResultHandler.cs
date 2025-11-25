@@ -81,6 +81,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var lessonResultNext = await _lessonResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.LessonId == lesson.Id, cancellationToken);
                 if (lessonResultNext != null && lessonResultNext.Status == EnumResultStatus.Unfinished)
                 {
+                    lessonResultNext.NewDate = DateTime.UtcNow;
                     lessonResultNext.Status = EnumResultStatus.New;
                     await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResultNext }, bulk =>
                     {
@@ -93,6 +94,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 var mockTestResult = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == lessonResult.CourseId && x.UnitId == lessonResult.UnitId && x.StudentId == lessonResult.StudentId && x.MockTestId == mockTestId.Value, cancellationToken);
                 if (mockTestResult != null && mockTestResult.Status == EnumResultStatus.Unfinished)
                 {
+                    mockTestResult.NewDate = DateTime.UtcNow;
                     mockTestResult.Status = EnumResultStatus.New;
                     await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
                     {

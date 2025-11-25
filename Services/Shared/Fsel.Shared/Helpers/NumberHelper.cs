@@ -98,6 +98,27 @@ namespace Fsel.Shared.Helpers
             return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal, digits) : default;
         }
 
+        public static double GetPercentChart(this int correctCount, int correctTotal, int digits = 0)
+        {
+            if (correctTotal == 0)
+            {
+                if (correctCount == 0)
+                {
+                    return default;
+                }
+                else if (correctCount > 0)
+                {
+                    return MaxPercent;
+                }
+                else
+                {
+                    return -MaxPercent;
+                }
+            }
+
+            return correctTotal > 0 ? ConvertPercentDouble((double)correctCount / correctTotal, digits) : MaxPercent;
+        }
+
         public static double GetScore(this int correctCount, int correctTotal)
         {
             return correctTotal > 0 ? ((double)correctCount / correctTotal) * 10 : default;

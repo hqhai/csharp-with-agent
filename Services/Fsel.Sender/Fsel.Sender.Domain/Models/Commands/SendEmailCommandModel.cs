@@ -3,6 +3,7 @@
 namespace Fsel.Sender.Domain.Models.Commands
 {
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.SenderTemplates;
     using Microsoft.AspNetCore.Http;
 
     public class SendEmailCommandModel
@@ -16,5 +17,6 @@ namespace Fsel.Sender.Domain.Models.Commands
         public bool? IsCCEmail { get; set; }
         public bool? IsCCEmailDefault { get; set; }
         public EnumSenderTemplate? Template { get; set; }
+        public IList<SendReceiverCommandModel> Receivers { get; set; } = new List<SendReceiverCommandModel>();
     }
 }

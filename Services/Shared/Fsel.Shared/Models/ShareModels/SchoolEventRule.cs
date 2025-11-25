@@ -69,6 +69,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? NoticeDescription { get; set; }
         public bool? IsDisplayGift { get; set; }
         public bool? IsParentEvent { get; set; }
+        public string? DefaultOtp { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
@@ -84,7 +85,8 @@ namespace Fsel.Shared.Models.ShareModels
         WarningScreen,
         DailyQuiz,
         EventRegistrationSuccess,
-        EventGiftDisplay
+        EventGiftDisplay,
+        DisableChangePasswordToEvent,
     }
 
     public enum EnumByPassPaymentType
