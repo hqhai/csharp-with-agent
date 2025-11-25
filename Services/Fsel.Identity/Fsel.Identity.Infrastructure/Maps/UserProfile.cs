@@ -81,6 +81,7 @@ namespace Fsel.Identity.Infrastructure.Maps
             CreateMap<GetAccountDashboardQueryModel, ExportAccountDashboardCommandModel>().IgnoreAllNonExisting();
             CreateMap<CreateUserToLmsAdminPlatCommandModel, User>().AfterMap<ParseFullNameMappingAction<CreateUserToLmsAdminPlatCommandModel>>().IgnoreAllNonExisting();
             CreateMap<UpdateUserInLmsAdminPlatCommandModel, User>().AfterMap<ParseFullNameMappingAction<UpdateUserInLmsAdminPlatCommandModel>>().IgnoreAllNonExisting();
+            CreateMap<SignUpSMSCommandModel, User>().AfterMap<ParseFullNameMappingAction<SignUpSMSCommandModel>>().IgnoreAllNonExisting();
             CreateMap<ParentProfileModel, User>()
                 .AfterMap<ParseFullNameMappingAction<ParentProfileModel>>()
                 .IgnoreAllNonExisting();

@@ -1,10 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Shared.Enums;
-
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths
 {
-    public class SignUpCommandModel
+    public class SignUpSMSCommandModel
     {
         public string? FullName { get; set; }
 
@@ -13,11 +11,5 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Auths
         public string? Email { get; set; }
 
         public string? Password { get; set; }
-
-        public EnumRoleRegister Role { get; set; }
-
-        public string? ReferralCode { get; set; }
-
-        public EnumPlatformCode? PlatformCode { get; set; }
     }
 }
