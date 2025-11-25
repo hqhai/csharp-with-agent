@@ -44,6 +44,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
+        /// Get Ai Model Manager By Project
+        /// </summary>
+        [HttpGet("by/{projectId}")]
+        [ProducesResponseType(typeof(MethodResult<IList<AiPromptManagerModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByProject([FromRoute] Guid projectId)
+        {
+            var queryResult = await _mediator.Send(new GetAiPromptManagerByProjectQuery { ProjectId = projectId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Get Ai Model Manager
         /// </summary>
         [HttpGet("{id}")]
