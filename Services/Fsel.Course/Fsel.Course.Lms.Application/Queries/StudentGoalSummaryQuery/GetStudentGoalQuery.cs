@@ -42,12 +42,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<StudentGoalAggregateModel>>();
 
-            if (request.PageSize > 200)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
-
             var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow();
 
             Guid? schoolId = null;
