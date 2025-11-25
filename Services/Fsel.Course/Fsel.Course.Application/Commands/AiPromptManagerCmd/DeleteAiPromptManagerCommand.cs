@@ -32,14 +32,7 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
 
-            if (request.Id == Guid.Empty)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.Id));
-                return methodResult;
-            }
-
             var entity = await _aiPromptManagerRepository.GetIncludeByIdAsync(request.Id);
-
 
             if (entity == null)
             {
@@ -47,10 +40,9 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
                 return methodResult;
             }
 
-            await Validation(entity, methodResult, request);
-
             if (!methodResult.IsOK)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.ServerError));
                 return methodResult;
             }
 
@@ -66,19 +58,6 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
             });
 
             return methodResult;
-        }
-
-        private Task<MethodResult<bool>> Validation(AiPromptManager entity,
-            MethodResult<bool> methodResult,
-            DeleteAiPromptManagerCommand request)
-        {
-            if (!entity.IsValid())
-            {
-                methodResult.AddErrorBadRequest(entity.ErrorMessages);
-                return Task.FromResult(methodResult);
-            }
-
-            return Task.FromResult(methodResult);
         }
     }
 }
