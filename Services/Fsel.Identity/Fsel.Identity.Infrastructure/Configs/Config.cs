@@ -77,7 +77,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lms-beta.fsel.edu.vn",
                         "http://lms-beta.fsel.edu.vn",
                         "https://lms-beta-ufm.fsel.edu.vn",
-                        "http://lms-beta-ufm.fsel.edu.vn"
+                        "http://lms-beta-ufm.fsel.edu.vn",
+                        "https://lms-pre-prod.fsel.edu.vn",
+                        "http://lms-pre-prod.fsel.edu.vn",
+                        "https://lms.fsel.edu.vn",
+                        "http://lms.fsel.edu.vn",
                     },
                     PostLogoutRedirectUris =
                     {
@@ -102,16 +106,20 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "https://lms-beta.fsel.edu.vn/auth/login",
                         "http://lms-beta.fsel.edu.vn/auth/login",
                         "https://lms-beta-ufm.fsel.edu.vn/auth/login",
-                        "http://lms-beta-ufm.fsel.edu.vn/auth/login"
+                        "http://lms-beta-ufm.fsel.edu.vn/auth/login",
+                        "https://lms-pre-prod.fsel.edu.vn/auth/login",
+                        "http://lms-pre-prod.fsel.edu.vn/auth/login",
+                        "https://lms.fsel.edu.vn/auth/login",
+                        "http://lms.fsel.edu.vn/auth/login",
                     },
 
                     AllowOfflineAccess = true,
-                    AccessTokenLifetime = 3600,
+                    AccessTokenLifetime = 86400,
                     AllowAccessTokensViaBrowser = true,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
                     RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
-                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
+                    SlidingRefreshTokenLifetime = 864009600, // Cấu hình thời gian sống cho refresh token
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
@@ -157,7 +165,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-web-beta.fsel.edu.vn",
                         "https://lcms-web-beta.fsel.edu.vn",
                         "http://lcms-web-beta-ufm.fsel.edu.vn",
-                        "https://lcms-web-beta-ufm.fsel.edu.vn"
+                        "https://lcms-web-beta-ufm.fsel.edu.vn",
+                        "http://lcms-web-pre-prod.fsel.edu.vn",
+                        "https://lcms-web-pre-prod.fsel.edu.vn",
+                        "http://lcms.fsel.edu.vn",
+                        "https://lcms.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
@@ -176,7 +188,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-web-beta.fsel.edu.vn",
                         "https://lcms-web-beta.fsel.edu.vn",
                         "http://lcms-web-beta-ufm.fsel.edu.vn",
-                        "https://lcms-web-beta-ufm.fsel.edu.vn"
+                        "https://lcms-web-beta-ufm.fsel.edu.vn",
+                        "http://lcms-web-pre-prod.fsel.edu.vn",
+                        "https://lcms-web-pre-prod.fsel.edu.vn",
+                        "http://lcms.fsel.edu.vn",
+                        "https://lcms.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
@@ -227,7 +243,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-admin-beta.fsel.edu.vn",
                         "https://lms-admin-beta.fsel.edu.vn",
                         "http://lms-admin-beta-ufm.fsel.edu.vn",
-                        "https://lms-admin-beta-ufm.fsel.edu.vn"
+                        "https://lms-admin-beta-ufm.fsel.edu.vn",
+                        "http://lms-admin-pre-prod.fsel.edu.vn",
+                        "https://lms-admin-pre-prod.fsel.edu.vn",
+                        "http://lmsadmin.fsel.edu.vn",
+                        "https://lmsadmin.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
@@ -246,7 +266,11 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-admin-beta.fsel.edu.vn",
                         "https://lms-admin-beta.fsel.edu.vn",
                         "http://lms-admin-beta-ufm.fsel.edu.vn",
-                        "https://lms-admin-beta-ufm.fsel.edu.vn"
+                        "https://lms-admin-beta-ufm.fsel.edu.vn",
+                        "http://lms-admin-pre-prod.fsel.edu.vn",
+                        "https://lms-admin-pre-prod.fsel.edu.vn",
+                        "http://lmsadmin.fsel.edu.vn",
+                        "https://lmsadmin.fsel.edu.vn"
                     },
 
                     AllowOfflineAccess = true,
@@ -288,6 +312,78 @@ namespace Fsel.Authentication.Infrastructure.Configs
                 },
                 new Client
                 {
+                    ClientId = "com.fsel.lmsapp",
+                    AllowedGrantTypes = GrantTypes.Code,
+
+                    ClientSecrets =
+                    {
+                        new Secret("com.fsel.lmsapp_secret".Sha256())
+                    },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
+                    },
+
+                    RequireClientSecret = false,
+                    RequirePkce = false,
+                    RedirectUris = { "https://lms.fsel.edu.vn/auth/login", "http://lms.fsel.edu.vn/auth/login", "fsel://lms.fsel.edu.vn" },
+                    PostLogoutRedirectUris = { "https://lms.fsel.edu.vn/auth/login", "http://lms.fsel.edu.vn/auth/login", "fsel://lms.fsel.edu.vn" },
+
+                    AllowOfflineAccess = true,
+                    AccessTokenLifetime = 86400,
+                    AllowAccessTokensViaBrowser = true,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
+                    RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
+                    SlidingRefreshTokenLifetime = 864009600, // Cấu hình thời gian sống cho refresh token
+                    AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
+                },
+                new Client
+                {
+                    ClientId = "com.fsel.lmsapp.preproduction",
+                    AllowedGrantTypes = GrantTypes.Code,
+
+                    ClientSecrets =
+                    {
+                        new Secret("com.fsel.lmsapp.preproduction_secret".Sha256())
+                    },
+
+                    AllowedScopes =
+                    {
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
+                        IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.Profile,
+                        IdentityServerConstants.StandardScopes.Email,
+                        IdentityServerConstants.StandardScopes.Phone,
+                        IdentityServerConstants.StandardScopes.Address,
+                        IdentityServerSettings.AllowedScopes.Roles,
+                        IdentityServerSettings.AllowedScopes.Api
+                    },
+
+                    RequireClientSecret = false,
+                    RequirePkce = false,
+                    RedirectUris = { "https://lms-pre-prod.fsel.edu.vn/auth/login", "http://lms-pre-prod.fsel.edu.vn/auth/login", "fsel-preproduction://lms-preproduction.fsel.edu.vn" },
+                    PostLogoutRedirectUris = { "https://lms-pre-prod.fsel.edu.vn/auth/login", "http://lms-pre-prod.fsel.edu.vn/auth/login", "fsel-preproduction://lms-preproduction.fsel.edu.vn" },
+
+                    AllowOfflineAccess = true,
+                    AccessTokenLifetime = 86400,
+                    AllowAccessTokensViaBrowser = true,
+                    UpdateAccessTokenClaimsOnRefresh = true,
+                    RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
+                    RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
+                    SlidingRefreshTokenLifetime = 864009600, // Cấu hình thời gian sống cho refresh token
+                    AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
+                },
+                new Client
+                {
                     ClientId = "com.fsel.lmsapp.staging",
                     AllowedGrantTypes = GrantTypes.Code,
 
@@ -314,12 +410,12 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     PostLogoutRedirectUris = { "https://lms-beta.fsel.edu.vn/auth/login", "http://lms-beta.fsel.edu.vn/auth/login", "fsel-staging://lms-beta.fsel.edu.vn" },
 
                     AllowOfflineAccess = true,
-                    AccessTokenLifetime = 120,
+                    AccessTokenLifetime = 86400,
                     AllowAccessTokensViaBrowser = true,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
                     RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
-                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
+                    SlidingRefreshTokenLifetime = 864009600, // Cấu hình thời gian sống cho refresh token
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
@@ -350,12 +446,12 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     PostLogoutRedirectUris = { "https://lms-testing.fsel.edu.vn/auth/login", "http://lms-testing.fsel.edu.vn/auth/login", "fsel-uat://lms-testing.fsel.edu.vn" },
 
                     AllowOfflineAccess = true,
-                    AccessTokenLifetime = 3600,
+                    AccessTokenLifetime = 86400,
                     AllowAccessTokensViaBrowser = true,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
                     RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
-                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
+                    SlidingRefreshTokenLifetime = 864009600, // Cấu hình thời gian sống cho refresh token
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
@@ -391,7 +487,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly,
                     RefreshTokenExpiration = TokenExpiration.Sliding,
-                    SlidingRefreshTokenLifetime = 1209600,
+                    SlidingRefreshTokenLifetime = 864009600,
                     AlwaysIncludeUserClaimsInIdToken = true,
                 },
                 new Client
@@ -424,7 +520,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
                     RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
-                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
+                    SlidingRefreshTokenLifetime = 864009600, // Cấu hình thời gian sống cho refresh token
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
@@ -457,7 +553,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
                     RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
-                    SlidingRefreshTokenLifetime = 1209600, // Cấu hình thời gian sống cho refresh token
+                    SlidingRefreshTokenLifetime = 864009600, // Cấu hình thời gian sống cho refresh token
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
                 },
                 new Client
