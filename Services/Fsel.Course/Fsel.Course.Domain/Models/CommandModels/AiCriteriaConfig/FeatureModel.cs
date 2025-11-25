@@ -11,8 +11,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
         public static readonly List<FeatureTypeMap> FeatureTypes = new()
         {
             new(EnumFeatureMultiple.Unit,   new() { EnumSubFeatureType.AiPracticeGym }),
-            new(EnumFeatureMultiple.Lesson, new() { EnumSubFeatureType.ClassForumSpeaking, EnumSubFeatureType.ClassForumWriting }),
-            new(EnumFeatureMultiple.Test,   new() { EnumSubFeatureType.TestConfigSpeakingLayout, EnumSubFeatureType.TestConfigWritingLayout }),
+            new(EnumFeatureMultiple.Lesson, new() { EnumSubFeatureType.ClassForumSpeaking, EnumSubFeatureType.ClassForumWriting, EnumSubFeatureType.VideoLesson, EnumSubFeatureType.HomeWork }),
+            new(EnumFeatureMultiple.Test,   new() { EnumSubFeatureType.TestConfigSpeakingLayout, EnumSubFeatureType.TestConfigWritingLayout, EnumSubFeatureType.ShortAnswerBase}),
         };
 
         public static readonly List<FeatureCriteriaMap> FeatureCriteria = new()

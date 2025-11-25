@@ -20,5 +20,9 @@ namespace Fsel.Course.Domain.Enums
         TestConfigSpeakingLayout,
         [Description("Test Config Writing Layout")]
         TestConfigWritingLayout,
+        [Description("Short Answer (Answer base)")]
+        ShortAnswerBase,
+        [Description("Short Answer (Word count)")]
+        ShortAnswerWordCount,
     }
 }
