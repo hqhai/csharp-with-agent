@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ModuleModels
 
     public class BaseModuleModel
     {
+        public Guid Id { get; set; }
         public int DisplayOrder { get; set; }
         public int DisplayNumber { get; set; }
         public int OpenOrder { get; set; }
