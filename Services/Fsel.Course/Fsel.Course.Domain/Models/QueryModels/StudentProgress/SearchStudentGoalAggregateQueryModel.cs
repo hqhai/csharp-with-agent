@@ -11,5 +11,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.StudentProgress
         public Guid? SchoolId { get; set; }
         public string? ClassIdStr { get; set; }
         public EnumCombinedProgress? CombinedProgress { get; set; }
+        public EnumStatusStudentGoal? StatusStudentGoal { get; set; }
+        public string? ClassCampusCode { get; set; }
     }
 }
