@@ -11,12 +11,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetStudentGoalStatusHistoryQuery : IRequest<MethodResult<StausStudentGoalHistoryModel>>
+    public class GetStudentGoalStatusHistoryQuery : IRequest<MethodResult<IList<StausStudentGoalHistoryModel>>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class GetStudentGoalStatusHistoryQueryHandler : IRequestHandler<GetStudentGoalStatusHistoryQuery, MethodResult<StausStudentGoalHistoryModel>>
+    public class GetStudentGoalStatusHistoryQueryHandler : IRequestHandler<GetStudentGoalStatusHistoryQuery, MethodResult<IList<StausStudentGoalHistoryModel>>>
     {
         private readonly IStatusStudentGoalRepository _statusStudentGoalRepository;
         private readonly IMapper  _mapper;
@@ -27,21 +27,22 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<StausStudentGoalHistoryModel>> Handle(GetStudentGoalStatusHistoryQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<StausStudentGoalHistoryModel>>> Handle(GetStudentGoalStatusHistoryQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<StausStudentGoalHistoryModel>();
+            var methodResult = new MethodResult<IList<StausStudentGoalHistoryModel>>();
 
             var studentGoalHistory = await _statusStudentGoalRepository.ReadQueryable
-                .FirstOrDefaultAsync(x => x.StudentId == request.StudentId, cancellationToken);
+                .Where(x => x.StudentId == request.StudentId)
+                .ToListAsync(cancellationToken);
 
-            if (studentGoalHistory == null)
+            if (studentGoalHistory.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
-            methodResult.Result = _mapper.Map<StausStudentGoalHistoryModel>(studentGoalHistory);
+            methodResult.Result = _mapper.Map<IList<StausStudentGoalHistoryModel>>(studentGoalHistory);
             methodResult.StatusCode = StatusCodes.Status200OK;
 
             return methodResult;
