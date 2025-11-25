@@ -3,41 +3,25 @@
 namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 {
     using Common.ActionResults;
-    using Core.Base;
-    using Domain.Enums;
-    using Domain.IRepositories;
     using Domain.Models.EntityModels;
     using Domain.Models.QueryModels.StudentProgress;
     using MediatR;
     using OfficeOpenXml;
     using Queries.StudentGoalSummaryQuery;
-    using Services.UserServices;
     using Shared.Constants;
 
     public class ExportFileExcelStudentGoalCommand : SearchStudentGoalAggregateQueryModel, IRequest<MethodResult<Stream>>
     {
-        public EnumExportScope Scope { get; set; }
+        public bool IsSelected { get; set; } = false;
         public IList<Guid>? SelectedIds { get; set; }
     }
 
     public class ExportFileExcelStudentGoalCommandHandler : IRequestHandler<ExportFileExcelStudentGoalCommand, MethodResult<Stream>>
     {
-        private readonly IStudentGoalAggregateRepository _studentGoalAggregateRepository;
-        private readonly IStudentGoalSummaryRepository _studentGoalSummaryRepository;
-        private readonly IUserService _userService;
-        private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
 
-        public ExportFileExcelStudentGoalCommandHandler(IStudentGoalAggregateRepository studentGoalAggregateRepository,
-            IStudentGoalSummaryRepository studentGoalSummaryRepository,
-            IUserService userService,
-            AuthContext authContext,
-            IMediator mediator)
+        public ExportFileExcelStudentGoalCommandHandler(IMediator mediator)
         {
-            _studentGoalAggregateRepository = studentGoalAggregateRepository;
-            _studentGoalSummaryRepository = studentGoalSummaryRepository;
-            _userService = userService;
-            _authContext = authContext;
             _mediator = mediator;
         }
 
@@ -56,11 +40,9 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 ClassCampusCode = request.ClassCampusCode,
             }, cancellationToken);
 
-            IEnumerable<StudentGoalAggregateModel> items = dataResult.Result;
+            IEnumerable<StudentGoalAggregateModel>? items = dataResult.Result;
 
-            if (request.Scope == EnumExportScope.Selected
-                && request.SelectedIds != null
-                && request.SelectedIds.Any())
+            if (request.IsSelected && request.SelectedIds != null && request.SelectedIds.Any())
             {
                 items = items.Where(x => request.SelectedIds.Contains(x.Id));
             }
@@ -70,7 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             return methodResult;
         }
 
-        private Stream? ExportExcelTemplate(ExportFileExcelStudentGoalCommand request, IList<StudentGoalAggregateModel> dataResultResult)
+        private Stream ExportExcelTemplate(ExportFileExcelStudentGoalCommand request, IList<StudentGoalAggregateModel> dataResultResult)
         {
             ArgumentNullException.ThrowIfNull(request);
             var memoryStream = new MemoryStream();
