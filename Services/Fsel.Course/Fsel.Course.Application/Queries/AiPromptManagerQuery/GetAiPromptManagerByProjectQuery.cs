@@ -33,7 +33,6 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
             var methodResult = new MethodResult<IList<AiPromptManagerModel>>();
 
             var aiPromptManager = await _aiPromptManagerRepository.ReadQueryable
-                .AsNoTracking()
                 .Where(x => x.ProjectId == request.ProjectId)
                 .ToListAsync(cancellationToken);
 
