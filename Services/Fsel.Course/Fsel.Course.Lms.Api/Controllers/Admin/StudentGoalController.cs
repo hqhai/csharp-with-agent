@@ -127,7 +127,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [HttpGet("export-student-goal")]
         [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(ReportManagementByAdminSchool.ViewLearningResultsReport)]
+        [Permission(StudentProgressWeeklyManagement.View)]
         public async Task<IActionResult> Get([FromQuery] ExportFileExcelStudentGoalCommand command)
         {
             SetQuery(command);
@@ -140,6 +140,18 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
             var exportDate = DateTime.UtcNow.AddHours(7);
             string fileName = $"Tien_Do_Tuan_{exportDate:dd_MM_yyyy}.xlsx";
             return File(commandResult.Result, Settings.Excels.ContentType, fileName);
+        }
+
+        /// <summary>
+        /// get status history of student
+        /// </summary>
+        [HttpGet("campus-code")]
+        [ProducesResponseType(typeof(MethodResult<IList<string>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Get()
+        {
+            var commandResult = await _mediator.Send(new GetClassCampusQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }
