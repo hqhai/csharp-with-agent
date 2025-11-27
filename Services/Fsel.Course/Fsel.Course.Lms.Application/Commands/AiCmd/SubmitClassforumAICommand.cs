@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         private readonly ISenderService _senderService;
         private const int Max_Time_Retry = 4;
         private const int _intervalRetryTime = 30;
+        private const string NameSchema = "criteria_schema";
         private readonly IUserService _userService;
         private readonly ILogger<SubmitAIResponseCommandHandler> _logger;
 
@@ -145,7 +146,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         SettingTopP = request.SettingTopP,
                         SystemRoleAlConfig = request.SystemRoleAlConfig,
                         UserAIConfig = userAiConfig,
-                        Text = successCriteriaSchema
+                        Text = successCriteriaSchema,
+                        NameSchema = NameSchema
                     }, cancellationToken).ConfigureAwait(false);
 
                     aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
