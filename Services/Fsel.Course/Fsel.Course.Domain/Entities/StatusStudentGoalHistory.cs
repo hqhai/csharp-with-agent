@@ -8,6 +8,6 @@ namespace Fsel.Course.Domain.Entities
     public class StatusStudentGoalHistory : Entity
     {
         public Guid StudentId { get; set; }
-        public EnumStatusStudentGoal StatusStudentGoal  { get; set; }
+        public EnumStatusStudentCampus StatusStudentGoal  { get; set; }
     }
 }

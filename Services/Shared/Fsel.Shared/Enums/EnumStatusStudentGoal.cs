@@ -4,7 +4,7 @@ namespace Fsel.Shared.Enums
 {
     using System.ComponentModel;
 
-    public enum EnumStatusStudentGoal
+    public enum EnumStatusStudentCampus
     {
         [Description("Bình thường")]
         Normal,

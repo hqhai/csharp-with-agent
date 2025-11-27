@@ -41,5 +41,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public UserModel? User { get; set; }
         public string? StudentCampusCode { get; set; }
         public string? ClassCampusCode { get; set; }
+        public EnumStatusStudentCampus StatusStudentCampus { get; set; }
     }
 }

@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class StausStudentGoalHistoryModel : BaseModel
     {
-        public EnumStatusStudentGoal StatusStudentGoal { get; set; }
+        public EnumStatusStudentCampus StatusStudentGoal { get; set; }
         public Guid StudentId { get; set; }
     }
 }

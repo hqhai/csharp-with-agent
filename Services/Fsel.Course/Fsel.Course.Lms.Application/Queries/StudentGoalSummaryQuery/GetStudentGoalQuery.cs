@@ -75,10 +75,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                 query = query.Where(x => x.CombinedProgress == request.CombinedProgress);
             }
 
-            if (request.StatusStudentGoal.HasValue)
-            {
-                query = query.Where(x => x.StatusStudentGoal == request.StatusStudentGoal);
-            }
+            // if (request.StatusStudentGoal.HasValue)
+            // {
+            //     query = query.Where(x => x.StatusStudentGoal == request.StatusStudentGoal);
+            // }
 
             if (!string.IsNullOrEmpty(request.ClassIdStr))
             {
@@ -117,7 +117,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                     UpdatedUserId = baseQ.UpdatedUserId,
                     TotalTargetLessons = sum.TotalTargetLessons,
                     LessonsPerWeek = sum.LessonsPerWeek,
-                    StatusStudentGoal = baseQ.StatusStudentGoal
                 };
 
             var lists = await queryData
@@ -147,6 +146,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                 item.ClassCampusCode = student?.ClassCampusCode;
                 item.StudentCampusCode = student?.StudentCampusCode;
                 item.PhoneNumber = student?.User?.PhoneNumber;
+                item.StatusStudentCampus =  student?.StatusStudentCampus;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
                     item.IsActive = totalScore <= item.TotalTargetLessons;
@@ -158,7 +158,39 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                 lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
             }
 
-            methodResult.Result = lists;
+            IEnumerable<StudentGoalAggregateModel> ordered = lists;
+
+            if (!string.IsNullOrEmpty(request.SortCompletedLessons))
+            {
+                if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
+                {
+                    ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
+                }
+                else
+                {
+                    ordered = ordered.OrderBy(l => l.TotalCompletedLessons);
+                }
+            }
+            else if (!string.IsNullOrEmpty(request.SortDir))
+            {
+                if (request.SortDir.Equals("za", StringComparison.OrdinalIgnoreCase))
+                {
+                    ordered = ordered.OrderByDescending(l => l.FullName ?? string.Empty);
+                }
+                else
+                {
+                    ordered = ordered.OrderBy(l => l.FullName ?? string.Empty);
+                }
+            }
+            else
+            {
+                ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
+            }
+            var pagedLists = ordered
+                .AsQueryable()
+                .ToList();
+
+            methodResult.Result = pagedLists;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
