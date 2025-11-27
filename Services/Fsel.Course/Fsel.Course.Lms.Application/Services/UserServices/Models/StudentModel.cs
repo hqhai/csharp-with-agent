@@ -36,6 +36,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public string? ClassCampusCode { get; set; }
 
         public HumanModel? Human { get; set; }
+        public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
+
         public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
     }
 }

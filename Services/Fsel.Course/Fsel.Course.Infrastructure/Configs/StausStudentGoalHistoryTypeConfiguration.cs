@@ -19,7 +19,7 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
-                    v => v.EnumParse<EnumStatusStudentGoal>());
+                    v => v.EnumParse<EnumStatusStudentCampus>());
         }
     }
 }

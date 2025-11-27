@@ -38,12 +38,6 @@ namespace Fsel.Course.Infrastructure.Configs
                  .HasConversion(
                      v => v.ToString(),
                      v => v.EnumParse<EnumCombinedProgress>());
-
-            builder.Property(e => e.StatusStudentGoal)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => v.EnumParse<EnumStatusStudentGoal>());
         }
     }
 }

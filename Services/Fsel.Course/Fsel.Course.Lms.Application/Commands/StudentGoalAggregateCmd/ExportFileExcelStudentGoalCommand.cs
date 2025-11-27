@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 SchoolId = request.SchoolId,
                 ClassIdStr = request.ClassIdStr,
                 CombinedProgress = request.CombinedProgress,
-                StatusStudentGoal = request.StatusStudentGoal,
+                //StatusStudentGoal = request.StatusStudentGoal,
                 ClassCampusCode = request.ClassCampusCode,
             }, cancellationToken);
 
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 worksheet.Cells[startRow, 6].Value = item.TotalCompletedLessons + "/" + item.TotalTargetLessons;
                 worksheet.Cells[startRow, 7].Value = item.CompletedLessons + "/" + item.LessonsPerWeek;
                 worksheet.Cells[startRow, 8].Value = item.ConsecutiveBehindWeeks;
-                worksheet.Cells[startRow, 9].Value = item.StatusStudentGoal;
+                worksheet.Cells[startRow, 9].Value = item.StatusStudentCampus;
                 worksheet.Cells[startRow, 10].Value = item.CourseType;
                 worksheet.Cells[startRow, 11].Value = item.CourseLevel;
 

@@ -83,10 +83,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 query = query.Where(x => x.CombinedProgress == request.CombinedProgress);
             }
 
-            if (request.StatusStudentGoal.HasValue)
-            {
-                query = query.Where(x => x.StatusStudentGoal == request.StatusStudentGoal);
-            }
+            // if (request.StatusStudentGoal.HasValue)
+            // {
+            //     query = query.Where(x => x.StatusStudentGoal == request.StatusStudentGoal);
+            // }
 
             if (!string.IsNullOrEmpty(request.ClassIdStr))
             {
@@ -125,10 +125,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     UpdatedUserId = baseQ.UpdatedUserId,
                     TotalTargetLessons = sum.TotalTargetLessons,
                     LessonsPerWeek = sum.LessonsPerWeek,
-                    StatusStudentGoal = baseQ.StatusStudentGoal
                 };
             var totalItem = await queryData.CountAsync(cancellationToken);
-            var lists = await queryData.OrderByDescending(x => x.TotalCompletedLessons).ApplyPaging(request)
+
+            var lists = await queryData
                 .AsNoTracking()
                 .ToListAsync(cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
@@ -156,6 +156,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 item.ClassCampusCode = student!.ClassCampusCode;
                 item.StudentCampusCode = student.StudentCampusCode;
                 item.PhoneNumber = student?.User?.PhoneNumber;
+                item.StatusStudentCampus = student?.StatusStudentCampus;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
                     item.IsActive = totalScore <= item.TotalTargetLessons; // hoặc logic khác tùy ngưỡng bạn muốn
@@ -167,7 +168,40 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
             }
 
-            methodResult.Result = new PagingItemsModel<StudentGoalAggregateModel>(lists, request, totalItem);
+            IEnumerable<StudentGoalAggregateModel> ordered = lists;
+
+            if (!string.IsNullOrEmpty(request.SortCompletedLessons))
+            {
+                if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
+                {
+                    ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
+                }
+                else
+                {
+                    ordered = ordered.OrderBy(l => l.TotalCompletedLessons);
+                }
+            }
+            else if (!string.IsNullOrEmpty(request.SortDir))
+            {
+                if (request.SortDir.Equals("za", StringComparison.OrdinalIgnoreCase))
+                {
+                    ordered = ordered.OrderByDescending(l => l.FullName ?? string.Empty);
+                }
+                else
+                {
+                    ordered = ordered.OrderBy(l => l.FullName ?? string.Empty);
+                }
+            }
+            else
+            {
+                ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
+            }
+            var pagedLists = ordered
+                .AsQueryable()
+                .ApplyPaging(request)
+                .ToList();
+
+            methodResult.Result = new PagingItemsModel<StudentGoalAggregateModel>(pagedLists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

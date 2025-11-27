@@ -66,6 +66,11 @@ namespace Fsel.Identity.Domain.Entities
         public DateTime? ExpiredDate { get; set; }
         public Guid? SchoolClassId { get; set; }
         public SchoolClass? SchoolClassCampus { get; set; }
+
+
+
+        public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
+
         public EventRegistration? EventRegistration { get; set; }
         public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
         public ICollection<StudentDailyStreak> StudentDailyStreaks { get; set; } = new List<StudentDailyStreak>();

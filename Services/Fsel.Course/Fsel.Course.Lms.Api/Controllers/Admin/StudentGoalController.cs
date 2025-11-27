@@ -103,7 +103,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         public async Task<IActionResult> Get([FromRoute] Guid id, [FromBody] UpdateStudentGoalStatusCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
-            command.StudentGoalId = id;
+            command.StudentId = id;
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }

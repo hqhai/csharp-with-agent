@@ -36,6 +36,12 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .HasForeignKey(p => p.SchoolClassId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.Property(e => e.StatusStudentCampus)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumStatusStudentCampus>());
+
             builder.ToTable(tb =>
             {
                 tb.HasCheckConstraint("CK_Student_NumberOfToken_NonNegative", "[NumberOfToken] >= 0");
