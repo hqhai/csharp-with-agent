@@ -31,6 +31,7 @@ namespace Fsel.Shared.Enums
         LearningProgress,
         HomeWorkType,
         ProcessedStatus,
-        ProgressStatus
+        ProgressStatus,
+        SubtitleLanguage
     }
 }
