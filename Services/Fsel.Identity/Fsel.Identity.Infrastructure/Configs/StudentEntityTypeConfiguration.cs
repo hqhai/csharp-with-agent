@@ -26,9 +26,9 @@ namespace Fsel.Identity.Infrastructure.Configs
                      v => v.ToString(),
                      v => v.EnumParse<EnumCourseLevel>());
 
-            builder.HasOne(a => a.Human)
+            builder.HasOne(a => a.User)
                     .WithOne(b => b.Student)
-                    .HasForeignKey<Student>(b => b.HumanId)
+                    .HasForeignKey<Student>(b => b.UserId)
                     .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.SchoolClassCampus)
@@ -41,10 +41,10 @@ namespace Fsel.Identity.Infrastructure.Configs
                 tb.HasCheckConstraint("CK_Student_NumberOfToken_NonNegative", "[NumberOfToken] >= 0");
             });
 
-            builder.HasIndex(x => x.HumanId).IsUnique(false);
+            builder.HasIndex(x => x.UserId).IsUnique(false);
 
             builder.HasIndex(x => new { x.IsDeleted, x.SchoolId });
-            builder.HasIndex(x => new { x.IsDeleted }).IncludeValueProperties(x => new { x.CreatedDate, x.School, x.CourseLevel, x.HumanId, x.SchoolId });
+            builder.HasIndex(x => new { x.IsDeleted }).IncludeValueProperties(x => new { x.CreatedDate, x.School, x.CourseLevel, x.SchoolId });
             builder.HasIndexIncludeAllProperties(c => new { c.IsDeleted, c.SchoolId, c.SchoolClass });
         }
     }

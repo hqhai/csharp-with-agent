@@ -104,6 +104,12 @@
     <None Update="Resources\MailTemplates\Skill.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\MailTemplates\Section.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\MailTemplates\SkillPercent.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\MailTemplates\TeachersInfo.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

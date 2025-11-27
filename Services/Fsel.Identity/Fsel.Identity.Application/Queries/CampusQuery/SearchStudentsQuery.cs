@@ -32,17 +32,15 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
     public class SearchStudentsQueryHandler : IRequestHandler<SearchStudentsQuery, MethodResult<PagingItemsModel<StudentCampusModel>>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISchoolClassRepository _schoolClassRepository;
         private readonly IUserSchoolRepository _userSchoolRepository;
         private readonly AuthContext _authContext;
 
-        public SearchStudentsQueryHandler(UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, ISchoolClassRepository schoolClassRepository, AuthContext authContext, IUserSchoolRepository userSchoolRepository)
+        public SearchStudentsQueryHandler(UserManager<User> userManager, IStudentRepository studentRepository, ILmsCourseService lmsCourseService, ISchoolClassRepository schoolClassRepository, AuthContext authContext, IUserSchoolRepository userSchoolRepository)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _lmsCourseService = lmsCourseService;
             _schoolClassRepository = schoolClassRepository;
@@ -64,8 +62,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             }
 
             var query = from u in _userManager.Users
-                        join h in _humanRepository.Queryable on u.Id equals h.UserId
-                        join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                        join s in _studentRepository.Queryable on u.Id equals s.UserId
                         where s.SchoolId == schoolId
                         select new StudentCampusModel()
                         {
@@ -79,10 +76,11 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                             StudentId = s.Id,
                             SchoolClassId = s.SchoolClassId,
                             SchoolId = s.SchoolId,
-                            Gender = h.Gender,
+                            Gender = u.Gender,
                             School = s.School,
-                            Birthday = h.Birthday,
-                            DefaultPassword = u.DefaultPassword
+                            Birthday = u.Birthday,
+                            DefaultPassword = u.DefaultPassword,
+                            StudentCode = u.Code
                         };
 
             if (!string.IsNullOrEmpty(request.Keyword))

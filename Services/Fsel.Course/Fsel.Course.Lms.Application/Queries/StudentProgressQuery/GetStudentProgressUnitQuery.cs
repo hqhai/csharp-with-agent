@@ -55,7 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var userId = student.Human?.UserId ?? default;
+            var userId = student?.UserId ?? default;
             var course = await _courseRepository.GetByIdAsync(request.CourseId);
             if (course == null)
             {

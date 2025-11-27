@@ -256,5 +256,14 @@
     "status": true,
     "menuId": "49dece94-b2de-4271-88ef-72f3e2461a2f",
     "createdDate": "2025-08-05"
+  },
+  {
+    "id": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "claimType": "StudentProgressWeeklyManagement",
+    "name": "Quản lý tiến độ học sinh tuần",
+    "description": null,
+    "status": true,
+    "menuId": "b40fbc8d-355c-47f2-ad01-cc5655fcd66a",
+    "createdDate": "2025-09-24"
   }
 ]

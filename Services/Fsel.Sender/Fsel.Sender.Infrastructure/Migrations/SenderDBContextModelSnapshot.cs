@@ -72,6 +72,9 @@ namespace Fsel.Sender.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasColumnOrder(110);
 
+                    b.Property<Guid?>("ReceiverId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("RequestBody")
                         .HasColumnType("nvarchar(max)");
 

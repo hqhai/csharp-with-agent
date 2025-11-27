@@ -8,6 +8,7 @@ using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Commands.UserSetttingCmd;
 using Fsel.Identity.Application.Services;
+using Fsel.Identity.Application.Services.SenderService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -80,11 +81,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (!string.IsNullOrEmpty(request.Email))
             {
-                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Student).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
             }
             else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
-                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Human).FirstOrDefaultAsync(x => x.UserName == request.PhoneNumber.Trim(), cancellationToken);
+                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Student).FirstOrDefaultAsync(x => x.UserName == request.PhoneNumber.Trim(), cancellationToken);
             }
 
             if (user == null)
@@ -99,8 +100,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.AttemptsExhausted), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
-
-            if (!user.EmailConfirmed)
+            if (!user.EmailConfirmed && user.Student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;

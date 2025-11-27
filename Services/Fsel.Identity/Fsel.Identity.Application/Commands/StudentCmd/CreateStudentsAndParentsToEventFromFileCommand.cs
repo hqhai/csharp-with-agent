@@ -24,6 +24,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     using Fsel.Identity.Domain.Models.CommandModels.Students;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using Kros.Extensions;
     using MediatR;
@@ -50,7 +51,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly ILogger<CreateStudentsToEventFromFileCommand> _logger;
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
 
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột, bạn cần download template ở nút Tải Template mẫu";
@@ -64,11 +64,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private const string SchoolDoesNotExistInEvent = "Trường học chưa được gắn vào sự kiện";
         private const string ExpiredDate = "Đã hết thời gian tạo tài khoản";
 
+        private const string Parent = "Phụ Huynh";
+
         private const string DefaultPassword = "Fsel@";
+        private const string DefaultDomainEmail = "@fsel.edu.vn";
         private const int MinYear = 1900;
         private static readonly Random s_random = new Random();
 
-        public CreateStudentsAndParentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ILogger<CreateStudentsToEventFromFileCommand> logger, AuthContext authContext, ISystemService systemService, IHumanRepository humanRepository, IStudentRepository studentRepository)
+        public CreateStudentsAndParentsToEventFromFileCommandHandler(UserManager<User> userManager, IOrderService orderService, IPlatformRepository platformRepository, ICompetitionEventsRepository competitionEventsRepository, IStudentCompetitionEventsRepository studentCompetitionEventsRepository, IServiceProvider serviceProvider, SendStudentsFromFilePublisher sendStudentsFromFilePublisher, ILogger<CreateStudentsToEventFromFileCommand> logger, AuthContext authContext, ISystemService systemService, IStudentRepository studentRepository)
         {
             _userManager = userManager;
             _orderService = orderService;
@@ -80,7 +83,6 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             _logger = logger;
             _authContext = authContext;
             _systemService = systemService;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
         }
 
@@ -360,13 +362,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                      async (Dictionary<int, CreateStudentAndParentToEventFromFileModel> datas, IList<ValidateExcelModel> errors) =>
                      {
                          var query = await (from u in _userManager.Users
-                                            join h in _humanRepository.Queryable on u.Id equals h.UserId
-                                            join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                                            join s in _studentRepository.Queryable on u.Id equals s.UserId
                                             where s.SchoolId == schoolId
                                             select new
                                             {
                                                 User = u,
-                                                Human = h,
                                                 Student = s
                                             }).ToListAsync(cancellationToken);
 
@@ -374,7 +374,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                          {
                              var phoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(p.Value.PhoneNumber?.Trim());
 
-                             var data = query.FirstOrDefault(x => x.User.PhoneNumber == phoneNumber && x.Human.Birthday.HasValue && p.Value.DateOfBirth.HasValue && x.Human.Birthday.Value.Date == p.Value.DateOfBirth.Value.Date && !string.IsNullOrEmpty(x.User.FullName) && !string.IsNullOrEmpty(p.Value.FullName) && x.User.FullName.ToLower() == p.Value.FullName.ToLower());
+                             var data = query.FirstOrDefault(x => x.User.PhoneNumber == phoneNumber && x.User.Birthday.HasValue && p.Value.DateOfBirth.HasValue && x.User.Birthday.Value.Date == p.Value.DateOfBirth.Value.Date && !string.IsNullOrEmpty(x.User.FullName) && !string.IsNullOrEmpty(p.Value.FullName) && x.User.FullName.ToLower() == p.Value.FullName.ToLower());
 
                              if (data != null)
                              {
@@ -387,7 +387,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                              {
                                  var parentPhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(p.Value.PhoneNumber?.Trim());
 
-                                 var parentData = query.FirstOrDefault(x => x.User.PhoneNumber == parentPhoneNumber && x.Human.Birthday.HasValue && p.Value.DateOfBirth.HasValue && x.Human.Birthday.Value.Date == p.Value.DateOfBirth.Value.Date && !string.IsNullOrEmpty(x.User.FullName) && !string.IsNullOrEmpty(p.Value.FullName) && x.User.FullName.ToLower() == p.Value.FullName.ToLower());
+                                 var parentData = query.FirstOrDefault(x => x.User.PhoneNumber == parentPhoneNumber && x.User.Birthday.HasValue && p.Value.DateOfBirth.HasValue && x.User.Birthday.Value.Date == p.Value.DateOfBirth.Value.Date && !string.IsNullOrEmpty(x.User.FullName) && !string.IsNullOrEmpty(p.Value.FullName) && x.User.FullName.ToLower() == p.Value.FullName.ToLower());
 
                                  if (parentData != null)
                                  {
@@ -463,35 +463,35 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
 
                                 int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.DateOfBirth);
+
+                                var userName = GenerateUsername(student.FullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()));
+
+                                var email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : Shared.Helpers.StringHelper.GenerateEmail(userName ?? string.Empty, DefaultDomainEmail);
+
                                 var user = new User()
                                 {
-                                    UserName = GenerateUsername(student.FullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim())),
-                                    Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
-                                    FullName = student.FullName?.Trim() ?? string.Empty,
+                                    UserName = userName,
+                                    Email = email,
+                                    FirstName = student.FullName.ParseFullName().FirstName,
+                                    LastName = student.FullName.ParseFullName().LastName,
                                     PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
+                                    Birthday = student.DateOfBirth,
+                                    Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
                                     EmailConfirmed = false,
                                     PhoneNumberConfirmed = false,
                                     Status = EnumUserStatus.Active,
                                     DefaultPassword = password,
-                                    Human = new Human()
+                                    Student = new Student()
                                     {
-                                        FullName = student.FullName?.Trim(),
-                                        PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()),
-                                        Birthday = student.DateOfBirth,
-                                        Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
-                                        Code = GeneratorCodeAsync(studentRepository, student.DateOfBirth ?? DateTime.MinValue, null),
-                                        Student = new Student()
-                                        {
-                                            CreatedByParent = false,
-                                            Occupation = nameof(Student),
-                                            School = school.Name,
-                                            SchoolClass = student.SchoolClass,
-                                            SchoolGrade = student.SchoolGrade,
-                                            SchoolId = schoolId,
-                                            CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
-                                            ParentPhoneNumber = !string.IsNullOrEmpty(student.ParentPhoneNumber) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()) : null,
-                                            ParentEmail = !string.IsNullOrEmpty(student.ParentEmail) ? student.ParentEmail.Trim() : null,
-                                        }
+                                        CreatedByParent = false,
+                                        Occupation = nameof(Student),
+                                        School = school.Name,
+                                        SchoolClass = student.SchoolClass,
+                                        SchoolGrade = student.SchoolGrade,
+                                        SchoolId = schoolId,
+                                        CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
+                                        ParentPhoneNumber = !string.IsNullOrEmpty(student.ParentPhoneNumber) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()) : null,
+                                        ParentEmail = !string.IsNullOrEmpty(student.ParentEmail) ? student.ParentEmail.Trim() : null,
                                     },
                                     UserPlatforms = new List<UserPlatform>()
                                     {
@@ -511,37 +511,43 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                 {
                                     await studentManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-                                    studentIds.Add(user.Human.Student.Id);
+                                    studentIds.Add(user.Student.Id);
 
                                     studentModels.Add(new CreateOrderForStudentsEventCommandModel()
                                     {
                                         UserId = user.Id,
-                                        StudentId = user.Human.Student.Id,
+                                        StudentId = user.Student.Id,
                                         Email = user.Email,
                                         PhoneNumber = user.PhoneNumber,
                                         FullName = user.FullName,
-                                        StudentCode = user.Human.Code
+                                        StudentCode = user.Code
                                     });
                                 }
                                 else
                                 {
-                                    user.UserName = GenerateUsername(student.FullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()));
+                                    userName = GenerateUsername(student.FullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()));
+
+                                    email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : Shared.Helpers.StringHelper.GenerateEmail(userName ?? string.Empty, DefaultDomainEmail);
+
+                                    user.UserName = userName;
+                                    user.Email = email;
+
                                     identityStudentResult = await studentManager.CreateAsync(user, password);
 
                                     if (identityStudentResult.Succeeded)
                                     {
                                         await studentManager.AddToRoleAsync(user, EnumRole.Student.ToString());
 
-                                        studentIds.Add(user.Human.Student.Id);
+                                        studentIds.Add(user.Student.Id);
 
                                         studentModels.Add(new CreateOrderForStudentsEventCommandModel()
                                         {
                                             UserId = user.Id,
-                                            StudentId = user.Human.Student.Id,
+                                            StudentId = user.Student.Id,
                                             Email = user.Email,
                                             PhoneNumber = user.PhoneNumber,
                                             FullName = user.FullName,
-                                            StudentCode = user.Human.Code
+                                            StudentCode = user.Code
                                         });
                                     }
                                 }
@@ -552,34 +558,33 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     var parentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                                     Microsoft.AspNetCore.Identity.IdentityResult identityParentResult;
 
+                                    var parentUserName = GenerateUsername(student.ParentFullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()));
+
+                                    var parentEmail = !string.IsNullOrEmpty(student.ParentEmail) ? student.ParentEmail.ToLower(cultureInfo).Trim() : Shared.Helpers.StringHelper.GenerateEmail(parentUserName ?? string.Empty, DefaultDomainEmail);
+
                                     age = Shared.Helpers.DateTimeHelper.GetYearOld(student.ParentDateOfBirth);
                                     var parent = new User()
                                     {
-                                        UserName = GenerateUsername(student.ParentFullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim())),
-                                        Email = !string.IsNullOrEmpty(student.ParentEmail) ? student.ParentEmail.ToLower(cultureInfo).Trim() : null,
-                                        FullName = student.ParentFullName?.Trim() ?? string.Empty,
+                                        UserName = parentUserName,
+                                        Email = parentEmail,
+                                        FirstName = student.FullName.ParseFullName().FirstName,
+                                        LastName = student.FullName.ParseFullName().LastName,
                                         PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()),
+                                        Birthday = student.ParentDateOfBirth,
+                                        Code = GeneratorCodeAsync(parentRepository, student.ParentDateOfBirth ?? DateTime.MinValue, null),
                                         EmailConfirmed = false,
                                         PhoneNumberConfirmed = false,
                                         Status = EnumUserStatus.Active,
                                         DefaultPassword = password,
-                                        Human = new Human()
+                                        Student = new Student()
                                         {
-                                            FullName = student.ParentFullName?.Trim(),
-                                            PhoneNumber = Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()),
-                                            Birthday = student.ParentDateOfBirth,
-                                            Email = !string.IsNullOrEmpty(student.ParentEmail) ? student.ParentEmail.ToLower(cultureInfo).Trim() : null,
-                                            Code = GeneratorCodeAsync(parentRepository, student.ParentDateOfBirth ?? DateTime.MinValue, null),
-                                            Student = new Student()
-                                            {
-                                                CreatedByParent = false,
-                                                Occupation = nameof(Student),
-                                                School = school.Name,
-                                                SchoolClass = student.SchoolClass,
-                                                SchoolGrade = student.SchoolGrade,
-                                                SchoolId = schoolId,
-                                                CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
-                                            }
+                                            CreatedByParent = false,
+                                            Occupation = nameof(Student),
+                                            School = school.Name,
+                                            SchoolClass = student.SchoolClass,
+                                            SchoolGrade = Parent,
+                                            SchoolId = schoolId,
+                                            CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
                                         },
                                         UserPlatforms = new List<UserPlatform>()
                                         {
@@ -599,20 +604,27 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                     {
                                         await parentManager.AddToRoleAsync(parent, EnumRole.Student.ToString());
 
-                                        studentIds.Add(parent.Human.Student.Id);
+                                        studentIds.Add(parent.Student.Id);
 
                                         studentModels.Add(new CreateOrderForStudentsEventCommandModel()
                                         {
                                             UserId = parent.Id,
-                                            StudentId = parent.Human.Student.Id,
+                                            StudentId = parent.Student.Id,
                                             Email = parent.Email,
                                             PhoneNumber = parent.PhoneNumber,
                                             FullName = parent.FullName,
-                                            StudentCode = parent.Human.Code
+                                            StudentCode = parent.Code
                                         });
                                     }
                                     else
                                     {
+                                        parentUserName = GenerateUsername(student.ParentFullName?.Trim() ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()));
+
+                                        parentEmail = !string.IsNullOrEmpty(student.ParentEmail) ? student.ParentEmail.ToLower(cultureInfo).Trim() : Shared.Helpers.StringHelper.GenerateEmail(parentUserName ?? string.Empty, DefaultDomainEmail);
+
+                                        parent.UserName = parentUserName;
+                                        parent.Email = parentEmail;
+
                                         parent.UserName = GenerateUsername(student.ParentFullName ?? string.Empty, Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.ParentPhoneNumber.Trim()));
 
                                         identityParentResult = await parentManager.CreateAsync(parent, password);
@@ -621,16 +633,16 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                                         {
                                             await parentManager.AddToRoleAsync(parent, EnumRole.Student.ToString());
 
-                                            studentIds.Add(parent.Human.Student.Id);
+                                            studentIds.Add(parent.Student.Id);
 
                                             studentModels.Add(new CreateOrderForStudentsEventCommandModel()
                                             {
                                                 UserId = parent.Id,
-                                                StudentId = parent.Human.Student.Id,
+                                                StudentId = parent.Student.Id,
                                                 Email = parent.Email,
                                                 PhoneNumber = parent.PhoneNumber,
                                                 FullName = parent.FullName,
-                                                StudentCode = parent.Human.Code
+                                                StudentCode = parent.Code
                                             });
                                         }
                                     }

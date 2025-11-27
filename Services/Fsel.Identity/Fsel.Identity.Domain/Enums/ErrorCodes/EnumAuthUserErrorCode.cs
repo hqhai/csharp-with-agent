@@ -160,6 +160,26 @@ namespace Fsel.Identity.Domain.Enums.ErrorCodes
         AccountHasBeenCutOff,
 
         /// <summary>
+        /// OtpBlockInMinutes
+        /// </summary>
+        OtpBlockInMinutes,
+
+        /// <summary>
+        /// OtpTryResendAfterMinutes
+        /// </summary>
+        OtpTryResendAfterMinutes,
+
+        /// <summary>
+        /// OtpTryResendAfterSeconds
+        /// </summary>
+        OtpTryResendAfterSeconds,
+
+        /// <summary>
+        /// RegisterExpired
+        /// </summary>
+        RegisterExpired,
+
+        /// <summary>
         /// Role ko thuộc trang báo cáo
         /// </summary>
         RoleNotInDashboard

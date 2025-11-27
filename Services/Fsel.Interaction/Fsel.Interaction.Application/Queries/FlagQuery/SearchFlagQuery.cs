@@ -124,7 +124,7 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                     item.CreatedUserName = classForumResult?.CreatedFullName;
                     item.UserId = classForumResult?.CreatedUserId;
                     item.StudentId = classForumResult?.StudentId;
-                    item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
+                    item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.AvatarPath;
                     item.ClassForumResultId = classForumResult?.Id;
                 }
                 else if (item.Type == EnumInteractionType.ClassForum)
@@ -134,7 +134,7 @@ namespace Fsel.Interaction.Application.Queries.FlagQuery
                     item.CreatedUserName = classForumResult?.CreatedFullName;
                     item.UserId = classForumResult?.CreatedUserId;
                     item.StudentId = classForumResult?.StudentId;
-                    item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault()?.Human?.AvatarPath;
+                    item.AvatarPath = studentResults?.Where(x => x.Id == item.StudentId).FirstOrDefault().AvatarPath;
                     item.ClassForumResultId = classForumResult?.Id;
                 }
             }

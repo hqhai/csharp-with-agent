@@ -13,7 +13,6 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5201",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
@@ -23,7 +22,6 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5201",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Testing"
@@ -33,8 +31,16 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7201;http://localhost:5201",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "https-domain": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://fsel-auth-dev.fsel.edu.vn:443",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -43,7 +49,6 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "launchUrl": "swagger",
       "applicationUrl": "https://localhost:7201;http://localhost:5201",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Testing"
@@ -52,7 +57,6 @@
     "IIS Express": {
       "commandName": "IISExpress",
       "launchBrowser": true,
-      "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

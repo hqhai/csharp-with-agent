@@ -88,10 +88,10 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 {
                     placementTestResultExports.Add(new PlacementTestModuleExportModel
                     {
-                        Name = student.Human?.FullName,
+                        Name = student.User?.FullName,
                         Level = x.Level,
-                        Birthday = student.Human?.Birthday,
-                        Email = student.Human?.Email,
+                        Birthday = student.User?.Birthday,
+                        Email = student.User?.Email,
                         CorrectCount = x.CorrectCount,
                         CorrectTotal = x.CorrectTotal,
                         SkillScoresStr = x.SkillScoresStr

@@ -45,7 +45,7 @@ namespace Fsel.System.Application.Queries.BlindBoxes
                     return methodResult;
                 }
 
-                var fullName = user.Human?.FullName;
+                var fullName = user.User?.FullName;
 
                 if (user.DistrictId.HasValue)
                 {

@@ -14,8 +14,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
@@ -89,6 +89,8 @@ builder.Services.AddScoped<IHomeWorkExtraPracticeResultRepository, HomeWorkExtra
 builder.Services.AddScoped<IHomeWorkRetryRepository, HomeWorkRetryRepository>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IVideoSubFilePathRepository, VideoSubFilePathRepository>();
+builder.Services.AddScoped<IStudentGoalAggregateRepository, StudentGoalAggregateRepository>();
+builder.Services.AddScoped<IStudentGoalSummaryRepository, StudentGoalSummaryRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();

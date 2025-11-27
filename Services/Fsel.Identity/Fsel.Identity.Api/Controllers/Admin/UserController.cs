@@ -16,6 +16,7 @@ using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Identity.Api.Controllers.Admin
@@ -425,6 +426,40 @@ namespace Fsel.Identity.Api.Controllers.Admin
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Import Records
+        /// </summary>
+        [HttpPost("personal-training/import-records")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(UserManagement.Add)]
+        public async Task<IActionResult> Import([FromQuery] ImportPersonalTrainingRecordsFromFileCommand command)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Import_Personal_Record.xlsx");
+        }
+
+        /// <summary>
+        /// Export Template Records
+        /// </summary>
+        [HttpGet("personal-training/export-template")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(UserManagement.Add)]
+        public async Task<IActionResult> ExportTemplateRecord()
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(new ExportTemplatePersonalTrainingRecordCommand()).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Personal_Record.xlsx");
         }
     }
 }

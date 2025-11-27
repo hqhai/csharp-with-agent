@@ -75,6 +75,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             unitResult.CompletionDate = DateTime.UtcNow;
                         }
                         unitResult.Status = EnumResultStatus.Done;
+
                         // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
                         //send mail
@@ -805,11 +806,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return;
             }
             var student = studentResult.Content?.Result;
-            model.FullName = student?.Human?.FullName;
+            model.FullName = student?.User?.FullName;
 
             await _mediator.Send(new SenderCommand
             {
-                Email = student?.Human?.Email,
+                Email = student?.User?.Email,
                 Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.TitleUnit, model.UnitNumber),
                 Params = model,
                 Template = model.SenderTemplate,
@@ -826,11 +827,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return;
             }
             var student = studentResult.Content?.Result;
-            model.FullName = student?.Human?.FullName;
+            model.FullName = student?.User?.FullName;
 
             await _mediator.Send(new SenderCommand
             {
-                Email = student?.Human?.Email,
+                Email = student?.User?.Email,
                 Subject = SenderSettings.MidCourseTitle,
                 Params = model,
                 Template = model.CourseType == EnumCourseType.Academic || model.CourseType == EnumCourseType.EnglishFoundation ? EnumSenderTemplate.SendMailMidCourseAcademic : EnumSenderTemplate.SendMailMidCourseIELT,

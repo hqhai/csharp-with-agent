@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                 return methodResult;
             }
             var studentId = student.Id;
-            var userId = student.Human?.UserId ?? default;
+            var userId = student.UserId;
             //var packageResults = await _orderService.GetPackages();
             //if (!packageResults.IsSuccessStatusCode)
             //{

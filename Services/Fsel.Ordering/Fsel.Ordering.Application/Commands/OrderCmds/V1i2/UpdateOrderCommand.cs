@@ -8,14 +8,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Ordering.Application.Queries.OrderQuery;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Domain.Models.CommandModels.Orders.V1i2;
     using Fsel.Ordering.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
 
     public class UpdateOrderCommand : UpdateOrderCommandModel, IRequest<MethodResult<OrderModel>>
     {

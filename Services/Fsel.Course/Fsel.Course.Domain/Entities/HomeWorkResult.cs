@@ -21,6 +21,9 @@ namespace Fsel.Course.Domain.Entities
         public LessonResult? LessonResult { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
 
         public EnumSubmissionCount? SubmissionCount
         {

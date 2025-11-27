@@ -22,13 +22,11 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
     public class ToolGetOtpQueryHandler : IRequestHandler<ToolGetOtpQuery, MethodResult<UserOtpCodeModel>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
         private readonly IUserOtpCodeRepository _userOtpCodeRepository;
         private readonly IMapper _mapper;
-        public ToolGetOtpQueryHandler(UserManager<User> userManager, IHumanRepository humanRepository, IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, IUserRepository userRepository)
+        public ToolGetOtpQueryHandler(UserManager<User> userManager, IUserOtpCodeRepository userOtpCodeRepository, IMapper mapper, IUserRepository userRepository)
         {
-            _humanRepository = humanRepository;
             _userOtpCodeRepository = userOtpCodeRepository;
             _mapper = mapper;
             _userManager = userManager;

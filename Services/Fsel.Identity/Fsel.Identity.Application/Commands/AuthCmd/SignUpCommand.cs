@@ -85,14 +85,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
                     return methodResult;
                 }
-                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim(), cancellationToken: cancellationToken);
+                user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim(), cancellationToken: cancellationToken);
 
                 if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
                 {
                     methodResult.AddError(StatusCodes.Status400BadRequest, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
                     return methodResult;
                 }
-                if (user != null && (user.EmailConfirmed || user.Human != null))
+                if (user != null && (user.EmailConfirmed || user.Student != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
                     return methodResult;
@@ -105,14 +105,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                     return methodResult;
                 }
-                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken: cancellationToken);
+                user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken: cancellationToken);
 
                 if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
                 {
                     methodResult.AddError(StatusCodes.Status400BadRequest, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
                     return methodResult;
                 }
-                if (user != null && (user.EmailConfirmed || user.Human != null))
+                if (user != null && (user.EmailConfirmed || user.Student != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                     return methodResult;

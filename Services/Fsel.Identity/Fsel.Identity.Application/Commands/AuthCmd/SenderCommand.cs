@@ -5,7 +5,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Application.Services;
+    using Fsel.Identity.Application.Services.SenderService;
     using Fsel.Identity.Domain.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using MediatR;

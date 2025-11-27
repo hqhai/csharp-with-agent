@@ -54,7 +54,6 @@ namespace Fsel.Identity.Application.Commands.UserCmd
             }
 
             var user = await _userManager.Users
-                                         .Include(x => x.Human)
                                          .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (user == null)
             {
@@ -77,21 +76,11 @@ namespace Fsel.Identity.Application.Commands.UserCmd
                 return methodResult;
             }
 
-            if (user.Human == null)
-            {
-                user.Human = new Human();
-            }
-            _mapper.Map(request, user.Human);
             _mapper.Map(request, user);
 
             if (!user.IsValid())
             {
                 methodResult.AddErrorBadRequest(user.ErrorMessages);
-                return methodResult;
-            }
-            if (!user.Human.IsValid())
-            {
-                methodResult.AddErrorBadRequest(user.Human.ErrorMessages);
                 return methodResult;
             }
 

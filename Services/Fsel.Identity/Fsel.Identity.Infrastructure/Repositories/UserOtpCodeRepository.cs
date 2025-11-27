@@ -9,6 +9,7 @@ namespace Fsel.Identity.Infrastructure.Repositories
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
+    using MassTransit.Internals;
     using Microsoft.EntityFrameworkCore;
 
     public class UserOtpCodeRepository : BaseRepository<UserOtpCode>, IUserOtpCodeRepository
@@ -36,13 +37,22 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
             if (!string.IsNullOrEmpty(email))
             {
-                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email == email.Trim() && x.OTPCode == otpCode && x.Type == EnumUserOtpCodeType.Email);
+                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.Email == email.Trim() && x.OtpCode == otpCode && x.Type == EnumUserOtpCodeType.Email);
             }
             if (!string.IsNullOrEmpty(phoneNumber))
             {
-                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.UserName == phoneNumber.Trim() && x.OTPCode == otpCode && x.Type == EnumUserOtpCodeType.SMS);
+                return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.UserName == phoneNumber.Trim() && x.OtpCode == otpCode && x.Type == EnumUserOtpCodeType.SMS);
             }
             return null;
+        }
+
+        public async Task<UserOtpCode?> GetUserOtpCodeAsync(string? otpCode, string? phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                return null;
+            }
+            return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.PhoneNumber == phoneNumber.Trim() && x.OtpCode == otpCode && x.Type == EnumUserOtpCodeType.SMS);
         }
     }
 }

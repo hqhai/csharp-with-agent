@@ -102,7 +102,7 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
 
             var tasks = customerSurveyGroup.Select(async (item, index) =>
             {
-                var student = students.FirstOrDefault(x => x.Human != null && x.Human.UserId == item.UserId);
+                var student = students.FirstOrDefault(x => x.User != null && x.User.Id == item.UserId);
 
                 var answers = customerSurveys
                     .Where(p => p.CustomerSurvey.UserId == item.UserId && p.CustomerSurveyGroup.Id == item.Id)
@@ -114,10 +114,10 @@ namespace Fsel.Interaction.Application.Commands.SurveyConfigCmd
                             .ConvertTimeFromUtc(EnumCountryKey.Vietnam)
                             .ToString("yyyy-MM-dd HH:mm", cultureInfo) ?? string.Empty,
 
-                        student != null ? (student.Human?.FullName ?? string.Empty) : "Not Found",
-                        student != null ? (student.Human?.Email ?? string.Empty) : string.Empty,
-                        student != null ? (student.Human?.User?.PhoneNumber ?? string.Empty) : string.Empty,
-                        student != null ? (student.Human?.User?.UserName ?? string.Empty) : string.Empty,
+                        student != null ? (student.User?.FullName ?? string.Empty) : "Not Found",
+                        student != null ? (student.User?.Email ?? string.Empty) : string.Empty,
+                        student != null ? (student?.User?.PhoneNumber ?? string.Empty) : string.Empty,
+                        student != null ? (student?.User?.UserName ?? string.Empty) : string.Empty,
                     };
 
                 foreach (var question in surveyConfig.SurveyQuestions)

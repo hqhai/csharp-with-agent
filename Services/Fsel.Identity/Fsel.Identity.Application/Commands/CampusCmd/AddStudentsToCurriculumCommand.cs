@@ -35,7 +35,6 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
     public class AddStudentsToCurriculumCommandHandler : IRequestHandler<AddStudentsToCurriculumCommand, MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly UserManager<User> _userManager;
         private readonly ILmsCourseService _lmsCourseService;
@@ -50,9 +49,8 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
         private const string DataAlreadyExist = "Học sinh đã được thêm vào giáo trình này rồi";
         private const string CurriculumIsActive = "Giáo trình đang diễn ra";
 
-        public AddStudentsToCurriculumCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService)
+        public AddStudentsToCurriculumCommandHandler(IStudentRepository studentRepository, UserManager<User> userManager, ILmsCourseService lmsCourseService)
         {
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _userManager = userManager;
             _lmsCourseService = lmsCourseService;
@@ -191,12 +189,10 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
                 var emails = datas.Values.Where(p => p.Username != null && !string.IsNullOrEmpty(p.Username.Trim())).Select(n => n.Username?.Trim() ?? string.Empty);
 
                 var query = await (from u in _userManager.Users.WhereBulkContains(emails, p => p.UserName)
-                                   join h in _humanRepository.Queryable on u.Id equals h.UserId
-                                   join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                                   join s in _studentRepository.Queryable on u.Id equals s.UserId
                                    select new
                                    {
                                        User = u,
-                                       Human = h,
                                        Student = s
                                    }).ToListAsync(cancellationToken);
 
@@ -208,7 +204,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
                 usernamesDoesNotExist.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.ToLower(CultureInfo.CurrentCulture)));
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty())
+                                                  .FirstOrDefault
+                                                  (x =>
+                                                  !string.IsNullOrEmpty(user)
+                                                  && x.Username?.ToLower(CultureInfo.InvariantCulture).Trim() == user.ToLower(CultureInfo.InvariantCulture).Trim()
+                                                  );
                     if (dataByEmail != null)
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
@@ -218,8 +219,13 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
                 query.ForEach(user =>
                 {
-                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty()).FirstOrDefault(x => (!string.IsNullOrEmpty(user.User.UserName) && x.Username?.ToLower(CultureInfo.CurrentCulture) == user.User.UserName.ToLower(CultureInfo.CurrentCulture)));
-                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.CurrentCulture) != user.User.FullName?.ToLower(CultureInfo.CurrentCulture))
+                    var dataByEmail = datas.Values.Where(x => !x.Username.IsNullOrEmpty())
+                                                  .FirstOrDefault
+                                                  (x =>
+                                                  !string.IsNullOrEmpty(user.User.UserName)
+                                                  && x.Username?.ToLower(CultureInfo.InvariantCulture).Trim() == user.User.UserName.ToLower(CultureInfo.InvariantCulture).Trim());
+
+                    if (dataByEmail != null && dataByEmail.FullName?.ToLower(CultureInfo.InvariantCulture).Trim() != user.User.FullName?.ToLower(CultureInfo.InvariantCulture).Trim())
                     {
                         var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
                         errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Username), Message = MismatchedData });
@@ -259,8 +265,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
             var usernames = result.Datas.Where(p => p.Username != null && !string.IsNullOrEmpty(p.Username.Trim())).Select(n => n.Username!.Trim()).ToList();
 
             var query = await (from u in _userManager.Users.WhereBulkContains(usernames, p => p.UserName)
-                               join h in _humanRepository.Queryable on u.Id equals h.UserId
-                               join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                               join s in _studentRepository.Queryable on u.Id equals s.UserId
                                select s).ToListAsync(cancellationToken);
 
             var studentIds = query.Select(p => p.Id).ToList();

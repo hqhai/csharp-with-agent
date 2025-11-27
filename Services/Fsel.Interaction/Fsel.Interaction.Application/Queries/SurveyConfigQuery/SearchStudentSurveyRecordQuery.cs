@@ -96,12 +96,12 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
 
             lists.ForEach(p =>
             {
-                var student = students?.FirstOrDefault(x => x.Human?.UserId == p.UserId);
+                var student = students?.FirstOrDefault(x => x.User?.Id == p.UserId);
                 if (student != null)
                 {
-                    p.FullName = student.Human?.FullName;
-                    p.Email = student.Human?.Email;
-                    p.StudentCode = student.Human?.Code;
+                    p.FullName = student.User?.FullName;
+                    p.Email = student.User?.Email;
+                    p.StudentCode = student.User?.Code;
                 }
                 else
                 {

@@ -1,0 +1,23 @@
+@inject Microsoft.Extensions.Localization.IStringLocalizer Localizer
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    // ViewData["Title"] = "Register";
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/assets/css/pages/success-form.css" />
+}
+
+@await Component.InvokeAsync("Languages")
+
+<div class="content">
+    @await Component.InvokeAsync("Logos")
+    <img src="/assets/img/success-form.svg" alt="" class="logo" />
+
+    <h1 class="title">Success</h1>
+    <p class="sub-title success-sub-title">
+        @ViewBag.Message
+    </p>
+
+    <div class="text-footer"><a href="@Url.Action("Login", "Account", new { ViewBag.ReturnUrl })">@Localizer["i18n_login_now"]</a></div>
+</div>
