@@ -179,6 +179,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         CorrectCount = skill.CorrectCount,
                         TotalCount = skill.CorrectTotal,
                         Status = skill.Status,
+                        UpdatedDate = skill?.UpdatedDate ?? skill?.CreatedDate
                     };
 
                     return sectionStateModel;
