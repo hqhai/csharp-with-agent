@@ -33,10 +33,28 @@
     <Content Update="wwwroot\assets\js\pages\login.js">
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
+    <Content Update="wwwroot\zalo_verifierE-BWSCt3TsOzwCHOsyvoSW_4qLtZiWO4Cp8r.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\zalo_verifierFEUbTSIH7bD6xfjCp9ei6p2xd4NSpKiSCp8s.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\zalo_verifierGlgu8ulQQZyBh_4zpfb3EHAAb0F-_4DQCp8p.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\zalo_verifierHCNl1RJxIXflXTuTc99TAtAyztsUoYCYDZSn.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\zalo_verifierOiEtAgJ0Pn5zqS4mZQLmC5MIgYwvv7rtCp8t.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <None Update="Resources\Apple\ApplePrivateKey.Development.p8">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\Apple\ApplePrivateKey.PreProduction.p8">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Resources\Apple\ApplePrivateKey.Production.p8">
