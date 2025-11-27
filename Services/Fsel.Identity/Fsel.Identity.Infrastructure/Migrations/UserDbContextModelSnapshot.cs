@@ -5718,6 +5718,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.Menu", b =>
                 {
+                    b.HasOne("Fsel.Identity.Domain.Entities.PermissionGroup", "PermissionGroup")
+                        .WithOne("Menu")
+                        .HasForeignKey("Fsel.Identity.Domain.Entities.Menu", "Id")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("PermissionGroup");
                 });
 
