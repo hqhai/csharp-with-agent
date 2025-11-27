@@ -89,7 +89,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 PercentResult = TestResult.Percent,
                 Status = TestResult.Status,
                 Children = childStates,
-                StepFlowId = TestResult.StepFlowId
+                StepFlowId = TestResult.StepFlowId,
+                UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
             };
             return stateModel;
         }

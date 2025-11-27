@@ -24,7 +24,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 CorrectCount = TestSectionResult.CorrectCount,
                 TotalCount = TestSectionResult.SkillScores.Sum(x => x.TotalCount),
                 WorkingTime = TestSectionResult.WorkingTime,
-                Children = new List<BaseTestStateModel>()
+                Children = new List<BaseTestStateModel>(),
+                UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
             };
             if (Children.Count > 0)
             {

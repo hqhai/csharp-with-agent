@@ -29,6 +29,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     public class BaseTestStateModel
     {
         public EnumResultStatus Status { get; set; }
+
+        public DateTime? UpdatedDate { get; set; }
     }
 
     public class TestStateModel : BaseTestStateModel
