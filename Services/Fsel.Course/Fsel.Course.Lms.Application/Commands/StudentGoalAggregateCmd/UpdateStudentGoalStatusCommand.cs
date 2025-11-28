@@ -44,7 +44,6 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StausStudentGoalHistoryModel>();
 
-            // vết hàm update status cho student
             var student = await _userService.UpdateStatusStudentCampus(request.StudentId, new UpdateStatusStudentMode{ StatusStudentGoal =  request.StatusStudentGoal});
 
             var vnTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
