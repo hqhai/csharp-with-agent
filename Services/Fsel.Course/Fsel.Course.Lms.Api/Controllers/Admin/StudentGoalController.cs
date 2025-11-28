@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Api.Controllers.Admin
 {
     using System.Net;
+    using Core.Base;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
@@ -20,7 +21,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/admin/student-goal")]
     [ApiController]
-    public class StudentGoalController : ControllerBase
+    public class StudentGoalController : BaseController
     {
         private readonly IMediator _mediator;
 
@@ -90,6 +91,67 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// update status student goal
+        /// </summary>
+        [HttpPut("update-status/{id}")]
+        [ProducesResponseType(typeof(MethodResult<StausStudentGoalHistoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [Permission(StudentProgressWeeklyManagement.View)]
+        public async Task<IActionResult> Get([FromRoute] Guid id, [FromBody] UpdateStudentGoalStatusCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.StudentId = id;
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get status history of student
+        /// </summary>
+        [HttpGet("status-history/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<StausStudentGoalHistoryModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        [Permission(StudentProgressWeeklyManagement.View)]
+        public async Task<IActionResult> Get([FromRoute] Guid studentId)
+        {
+            var commandResult = await _mediator.Send(new GetStudentGoalStatusHistoryQuery {StudentId = studentId}).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Export Student Goal
+        /// </summary>
+        [HttpGet("export-student-goal")]
+        [ProducesResponseType(typeof(MethodResult<Stream>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(StudentProgressWeeklyManagement.View)]
+        public async Task<IActionResult> Get([FromQuery] ExportFileExcelStudentGoalCommand command)
+        {
+            SetQuery(command);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+
+            var exportDate = DateTime.UtcNow.AddHours(7);
+            string fileName = $"Tien_Do_Tuan_{exportDate:dd_MM_yyyy}.xlsx";
+            return File(commandResult.Result, Settings.Excels.ContentType, fileName);
+        }
+
+        /// <summary>
+        /// get status history of student
+        /// </summary>
+        [HttpGet("campus-code")]
+        [ProducesResponseType(typeof(MethodResult<IList<string>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> Get()
+        {
+            var commandResult = await _mediator.Send(new GetClassCampusQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Fsel.Identity.Infrastructure.Configs
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Metadata.Builders;
+    using RestSharp.Extensions;
 
     public class StudentEntityTypeConfiguration : IEntityTypeConfiguration<Student>
     {
@@ -35,6 +36,12 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .WithMany(b => b.Students)
                 .HasForeignKey(p => p.SchoolClassId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Property(e => e.StatusStudentCampus)
+                 .HasMaxLength(100)
+                 .HasConversion(
+                    v => v.HasValue ? v.ToString() : null,
+                    v => v.EnumParse<EnumStatusStudentCampus>());
 
             builder.ToTable(tb =>
             {
