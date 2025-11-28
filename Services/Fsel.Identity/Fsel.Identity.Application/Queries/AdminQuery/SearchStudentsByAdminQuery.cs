@@ -102,6 +102,10 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                         select new { User = u, Human = human, Student = student };
 
             query = query.Where(p => p.User.IsDeleted == request.IsDelete);
+            if (request.StudentId.HasValue)
+            {
+                query = query.Where(m => m.Student.Id == request.StudentId);
+            }
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
