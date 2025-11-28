@@ -45,7 +45,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [EncryptResponse]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, StudentProgressWeeklyManagement.View })]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsByAdminQuery query)
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
