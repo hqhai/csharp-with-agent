@@ -98,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
             var queryData = from baseQ in query
                 join sum in _studentGoalSummaryRepository.Queryable.AsNoTracking() on baseQ.Id equals sum.StudentGoalAggregateId
-                where sum.StartDate.Date <= weekStartUtc //&& sum.EndDate.Date >= weekEndUtc
+                where sum.StartDate.Date <= weekStartUtc && sum.EndDate.Date >= weekEndUtc
                 select new StudentGoalAggregateModel
                 {
                     Id = baseQ.Id,
