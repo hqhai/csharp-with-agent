@@ -37,9 +37,9 @@ namespace Fsel.Identity.Infrastructure.Configs
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(e => e.StatusStudentCampus)
-                .HasMaxLength(100)
-                .HasConversion(
-                    v => v.ToString(),
+                 .HasMaxLength(100)
+                 .HasConversion(
+                    v => v.HasValue ? v.ToString() : null,
                     v => v.EnumParse<EnumStatusStudentCampus>());
 
             builder.ToTable(tb =>

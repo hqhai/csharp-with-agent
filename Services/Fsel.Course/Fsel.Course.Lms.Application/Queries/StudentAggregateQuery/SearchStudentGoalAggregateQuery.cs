@@ -83,11 +83,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 query = query.Where(x => x.CombinedProgress == request.CombinedProgress);
             }
 
-            // if (request.StatusStudentGoal.HasValue)
-            // {
-            //     query = query.Where(x => x.StatusStudentGoal == request.StatusStudentGoal);
-            // }
-
             if (!string.IsNullOrEmpty(request.ClassIdStr))
             {
                 var classIds = request.ClassIdStr.ToList<Guid>();
@@ -103,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
             var queryData = from baseQ in query
                 join sum in _studentGoalSummaryRepository.Queryable.AsNoTracking() on baseQ.Id equals sum.StudentGoalAggregateId
-                where sum.StartDate.Date <= weekStartUtc && sum.EndDate.Date >= weekEndUtc
+                where sum.StartDate.Date <= weekStartUtc //&& sum.EndDate.Date >= weekEndUtc
                 select new StudentGoalAggregateModel
                 {
                     Id = baseQ.Id,
@@ -126,7 +121,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     TotalTargetLessons = sum.TotalTargetLessons,
                     LessonsPerWeek = sum.LessonsPerWeek,
                 };
-            var totalItem = await queryData.CountAsync(cancellationToken);
 
             var lists = await queryData
                 .AsNoTracking()
@@ -168,6 +162,16 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
             }
 
+            if (!string.IsNullOrEmpty(request.StudentCampusCode))
+            {
+                lists = lists.Where(l => l.StudentCampusCode == request.StudentCampusCode).ToList();
+            }
+
+            if (request.StatusStudentCampus != null)
+            {
+                lists = lists.Where(l => l.StatusStudentCampus == request.StatusStudentCampus).ToList();
+            }
+
             IEnumerable<StudentGoalAggregateModel> ordered = lists;
 
             if (!string.IsNullOrEmpty(request.SortCompletedLessons))
@@ -179,6 +183,28 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 else
                 {
                     ordered = ordered.OrderBy(l => l.TotalCompletedLessons);
+                }
+            }
+            else if (!string.IsNullOrEmpty(request.SortCompletedConfig))
+            {
+                if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
+                {
+                    ordered = ordered.OrderByDescending(l => l.TotalTargetLessons);
+                }
+                else
+                {
+                    ordered = ordered.OrderBy(l => l.TotalTargetLessons);
+                }
+            }
+            else if (!string.IsNullOrEmpty(request.SortSlowProgress))
+            {
+                if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
+                {
+                    ordered = ordered.OrderByDescending(l => l.ConsecutiveBehindWeeks);
+                }
+                else
+                {
+                    ordered = ordered.OrderBy(l => l.ConsecutiveBehindWeeks);
                 }
             }
             else if (!string.IsNullOrEmpty(request.SortDir))
@@ -196,6 +222,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             {
                 ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
             }
+
+            var totalItem = ordered.Count();
+
             var pagedLists = ordered
                 .AsQueryable()
                 .ApplyPaging(request)
