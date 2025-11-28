@@ -172,7 +172,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             }
 
             IEnumerable<StudentGoalAggregateModel> ordered = lists;
-
+            ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
             if (!string.IsNullOrEmpty(request.SortCompletedLessons))
             {
                 if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
@@ -184,9 +184,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     ordered = ordered.OrderBy(l => l.TotalCompletedLessons);
                 }
             }
-            else if (!string.IsNullOrEmpty(request.SortCompletedConfig))
+            if (!string.IsNullOrEmpty(request.SortCompletedConfig))
             {
-                if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
+                if (request.SortCompletedConfig.Equals("desc", StringComparison.OrdinalIgnoreCase))
                 {
                     ordered = ordered.OrderByDescending(l => l.TotalTargetLessons);
                 }
@@ -195,9 +195,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     ordered = ordered.OrderBy(l => l.TotalTargetLessons);
                 }
             }
-            else if (!string.IsNullOrEmpty(request.SortSlowProgress))
+            if (!string.IsNullOrEmpty(request.SortSlowProgress))
             {
-                if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
+                if (request.SortSlowProgress.Equals("desc", StringComparison.OrdinalIgnoreCase))
                 {
                     ordered = ordered.OrderByDescending(l => l.ConsecutiveBehindWeeks);
                 }
@@ -206,7 +206,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     ordered = ordered.OrderBy(l => l.ConsecutiveBehindWeeks);
                 }
             }
-            else if (!string.IsNullOrEmpty(request.SortDir))
+            if (!string.IsNullOrEmpty(request.SortDir))
             {
                 if (request.SortDir.Equals("za", StringComparison.OrdinalIgnoreCase))
                 {
@@ -216,10 +216,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 {
                     ordered = ordered.OrderBy(l => l.FullName ?? string.Empty);
                 }
-            }
-            else
-            {
-                ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
             }
 
             var totalItem = ordered.Count();
