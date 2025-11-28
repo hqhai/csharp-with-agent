@@ -50,7 +50,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "IX_HomeWorkResults_StudentId",
                 table: "HomeWorkResults",
                 column: "StudentId")
-                .Annotation("SqlServer:Include", new[] { "AIStatus", "CompletionDate", "CorrectCount", "CorrectTotal", "CreatedDate", "CreatedFullName", "CreatedUserId", "HomeWorkId", "IsDeleted", "LessonResultId", "NewDate", "Percent", "ProcessDate", "RetryTime", "SkillScoresStr", "Status", "SubmissionCount", "TokenFirstTime", "TokenLastTime", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+                .Annotation("SqlServer:Include", new[] { "CompletionDate", "CorrectCount", "CorrectTotal", "CreatedDate", "CreatedFullName", "CreatedUserId", "HomeWorkId", "IsDeleted", "LessonResultId", "NewDate", "Percent", "ProcessDate", "SkillScoresStr", "Status", "SubmissionCount", "TokenFirstTime", "TokenLastTime", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
         }
 
         /// <inheritdoc />
@@ -71,7 +71,7 @@ namespace Fsel.Course.Infrastructure.Migrations
                 name: "IX_HomeWorkResults_StudentId",
                 table: "HomeWorkResults",
                 column: "StudentId")
-                .Annotation("SqlServer:Include", new[] { "CompletionDate", "AIStatus", "CorrectCount", "CorrectTotal", "CreatedDate", "CreatedFullName", "CreatedUserId", "HomeWorkId", "IsDeleted", "LessonResultId", "NewDate", "Percent", "ProcessDate", "RetryTime", "SkillScoresStr", "Status", "SubmissionCount", "TokenFirstTime", "TokenLastTime", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+                .Annotation("SqlServer:Include", new[] { "CompletionDate", "CorrectCount", "CorrectTotal", "CreatedDate", "CreatedFullName", "CreatedUserId", "HomeWorkId", "IsDeleted", "LessonResultId", "NewDate", "Percent", "ProcessDate", "SkillScoresStr", "Status", "SubmissionCount", "TokenFirstTime", "TokenLastTime", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
         }
     }
 }
