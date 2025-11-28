@@ -100,5 +100,8 @@ namespace Fsel.Shared.Enums
 
         [Description("Color Matching Type")]
         ColorMatchingType,
+
+        [Description("Long Answer")]
+        LongAnswer,
     }
 }

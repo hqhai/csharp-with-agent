@@ -15,6 +15,7 @@ namespace Fsel.Shared.Constants
         public const int PercentMaxValue = 100;
 
         public const int ValueDefault = 0;
+        public const int ValueScoreDefault = 1;
         public const int ValueDefaultTracingScore = 1;
 
         public const int DelayOneMinute = 1;
