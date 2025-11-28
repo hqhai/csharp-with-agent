@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Services.UserServices;
+    using Services.UserServices.Models;
     using Shared.Enums;
 
     public class UpdateStudentGoalStatusCommand : IRequest<MethodResult<StausStudentGoalHistoryModel>>
@@ -43,37 +44,33 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StausStudentGoalHistoryModel>();
 
-            var exits = await _userService.GetStudentByUserIdAsync(request.StudentId);
-            if (exits == null)
+            // vết hàm update status cho student
+            var student = await _userService.UpdateStatusStudentCampus(request.StudentId, new UpdateStatusStudentMode{ StatusStudentGoal =  request.StatusStudentGoal});
+
+            var vnTimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            var vnNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vnTimeZone);
+
+            var statusHistoty = new StatusStudentGoalHistory();
+            statusHistoty.StatusStudentGoal = request.StatusStudentGoal;
+            statusHistoty.StudentId = student.Content!.Result!.Id;
+            statusHistoty.CreatedDate = vnNow;
+
+            await _statusStudentGoalRepository.ExecuteTransactionAsync(async () =>
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                statusHistoty = _statusStudentGoalRepository.Add(statusHistoty);
+
+                await _studentGoalAggregateRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _statusStudentGoalRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+
+                var result = new StausStudentGoalHistoryModel();
+                result.StatusStudentGoal = statusHistoty.StatusStudentGoal;
+                result.StudentId = statusHistoty.StudentId;
+
+                methodResult.StatusCode = StatusCodes.Status201Created;
+                methodResult.Result = result;
+
                 return methodResult;
-            }
-
-
-            // exits.Content?.Result?.StudentCampusCode = request.StatusStudentGoal;
-            //
-            // var statusHistoty = new StatusStudentGoalHistory();
-            // statusHistoty.StatusStudentGoal = request.StatusStudentGoal;
-            // statusHistoty.StudentId = exits.StudentId;
-            //
-            // var result = new StausStudentGoalHistoryModel();
-            // result.StatusStudentGoal = statusHistoty.StatusStudentGoal;
-            // result.StudentId = statusHistoty.StudentId;
-            //
-            // await _statusStudentGoalRepository.ExecuteTransactionAsync(async () =>
-            // {
-            //     exits = _studentGoalAggregateRepository.Update(exits);
-            //     statusHistoty = _statusStudentGoalRepository.Add(statusHistoty);
-            //
-            //     await _studentGoalAggregateRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            //     await _statusStudentGoalRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            //
-            //     methodResult.StatusCode = StatusCodes.Status201Created;
-            //     methodResult.Result = result;
-            //
-            //     return methodResult;
-            // });
+            });
 
             return methodResult;
         }

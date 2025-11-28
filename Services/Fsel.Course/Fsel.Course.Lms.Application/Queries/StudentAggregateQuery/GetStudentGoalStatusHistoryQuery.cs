@@ -34,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
             var studentGoalHistory = await _statusStudentGoalRepository.ReadQueryable
                 .Where(x => x.StudentId == request.StudentId)
+                .OrderBy(x => x.CreatedDate)
                 .ToListAsync(cancellationToken);
 
             if (studentGoalHistory.Count == 0)

@@ -152,11 +152,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                     item.IsActive = totalScore <= item.TotalTargetLessons;
                 }
             }
-
-            if (!string.IsNullOrEmpty(request.ClassCampusCode))
-            {
-                lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
-            }
+            //
+            // if (!string.IsNullOrEmpty(request.ClassCampusCode))
+            // {
+            //     lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
+            // }
 
             IEnumerable<StudentGoalAggregateModel> ordered = lists;
 

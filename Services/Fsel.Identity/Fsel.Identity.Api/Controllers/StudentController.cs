@@ -365,5 +365,32 @@ namespace Fsel.Identity.Api.Controllers
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// get students by codes
+        /// </summary>
+        [HttpPost("get-students-by-codes")]
+        [ProducesResponseType(typeof(MethodResult<IList<StudentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+        public async Task<IActionResult> GetStudentsByCodes([FromBody] GetStudentsByCodesQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update status student campus
+        /// </summary>
+        [HttpPut("update-status/{studentId}")]
+        [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> UpdateStatusStudentCampus([FromRoute] Guid studentId,[FromBody] UpdateStatusStudentCampusCommand command)
+        {
+            ArgumentNullException.ThrowIfNull(command);
+            command.StudentId = studentId;
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

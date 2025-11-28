@@ -14,6 +14,12 @@ namespace Fsel.Shared.Enums
         CallSecondTime,
         [Description("Gọi điện lần 3")]
         CallThirdTime,
+        [Description("Nhắc nhở lần 1")]
+        RemindFirstTime,
+        [Description("Nhắc nhở lần 2")]
+        RemindSecondTime,
+        [Description("Nhắc nhở lần 3")]
+        RemindThirdTime,
         [Description("Gặp mặt lần 1")]
         MeetFirstTime,
         [Description("Gặp mặt lần 2")]
