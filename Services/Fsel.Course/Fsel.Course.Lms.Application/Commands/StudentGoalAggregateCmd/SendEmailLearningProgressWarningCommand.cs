@@ -346,7 +346,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 }
                 else
                 {
-                    var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Score, image, p.Percent, color);
+                    var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, $"{p.Score} ", image, p.Percent, color);
                     skillScoreHtml += html;
                 }
             });
