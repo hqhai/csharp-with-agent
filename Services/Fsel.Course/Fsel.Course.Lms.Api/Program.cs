@@ -149,6 +149,9 @@ builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRule
 builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
 builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
 builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
+builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
+builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
+builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
