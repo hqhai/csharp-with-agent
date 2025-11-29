@@ -11,12 +11,11 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
     using Domain.Models.EntityModels.AiPromptManagerModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.EntityFrameworkCore;
 
-    public class CreateAiCriteriaConfigCommand : IRequest<MethodResult<AICriteriaConfigsModel>>
+    public class CreateAiCriteriaConfigCommand : CreateOrUpdateAiCriteriaCommand, IRequest<MethodResult<AICriteriaConfigsModel>>
     {
-        public Guid AiPromptManagerId { get; set; }
-        public CreateAiCriteriaConfigCommandModel? AiCriteriaConfig { get; set; }
-        public IList<CreateAiCriteriaConfigCommandModel>? AiCriteriaConfigs { get; set; }
+
     }
 
     public class CreateAiCriteriaConfigHasSubFeatureCommandHandler : IRequestHandler<CreateAiCriteriaConfigCommand, MethodResult<AICriteriaConfigsModel>>
@@ -55,7 +54,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 items.Add(request.AiCriteriaConfig);
             }
 
-            if (request.AiCriteriaConfigs != null && request.AiCriteriaConfigs.Count > 0 )
+            if (request.AiCriteriaConfigs != null && request.AiCriteriaConfigs.Count > 0)
             {
                 items.AddRange(request.AiCriteriaConfigs);
             }
@@ -76,17 +75,70 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 return methodResult;
             }
 
+            var updateIds = items
+               .Where(x => x.Id.HasValue && x.Id.Value != Guid.Empty)
+               .Select(x => x.Id!.Value)
+               .Distinct()
+               .ToList();
+
+            var existingEntities = new List<AICriteriaConfigs>();
+
+            if (updateIds.Count > 0)
+            {
+                existingEntities = await _aiCriteriaConfigRepository.Queryable
+                    .Where(x => updateIds.Contains(x.Id)
+                                && x.AiPromptManagerId == request.AiPromptManagerId)
+                    .ToListAsync(cancellationToken);
+            }
+
+            var toCreate = new List<AICriteriaConfigs>();
+            var toUpdate = new List<AICriteriaConfigs>();
+
+            foreach (var item in items)
+            {
+                var isCreate = !item.Id.HasValue || item.Id.Value == Guid.Empty;
+
+                if (isCreate)
+                {
+                    var entity = BuildCreateEntity(item, request);
+                    toCreate.Add(entity);
+                }
+                else
+                {
+                    var entity = existingEntities.FirstOrDefault(x => x.Id == item.Id!.Value);
+                    if (entity == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                        continue;
+                    }
+
+                    ApplyUpdateEntity(item, entity, request);
+
+                    toUpdate.Add(entity);
+                }
+            }
+            if (!methodResult.IsOK)
+            {
+                return methodResult;
+            }
             await _aiCriteriaConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                var entities = _mapper.Map<List<AICriteriaConfigs>>(items);
-                await _aiCriteriaConfigRepository.AddList(entities);
+                if (toCreate.Count > 0)
+                {
+                    await _aiCriteriaConfigRepository.AddList(toCreate);
+                }
+                if (toUpdate.Count > 0)
+                {
+                    _aiCriteriaConfigRepository.UpdateList(toUpdate);
+                }
                 await _aiCriteriaConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken)
                     .ConfigureAwait(false);
-                var result = new AICriteriaConfigsModel
-                {
-                    AiPromptManagerId    = request.AiPromptManagerId,
-                    AiCriteriaModel      = _mapper.Map<IList<AiCriteriaModel>>(entities)
-                };
+                var resultEntities = toCreate.Concat(toUpdate).ToList();
+                var result = _mapper.Map<AICriteriaConfigsModel>(resultEntities.FirstOrDefault());
+
+                result.AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(resultEntities);
+                result.AiPromptManagerId = request.AiPromptManagerId;
+
                 methodResult.Result = result;
                 methodResult.StatusCode = StatusCodes.Status200OK;
 
@@ -104,6 +156,24 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             }
 
             return methodResult;
+        }
+        private AICriteriaConfigs BuildCreateEntity(
+            CreateAiCriteriaConfigCommandModel item,
+            CreateAiCriteriaConfigCommand request)
+        {
+            var entity = _mapper.Map<AICriteriaConfigs>(item);
+            _mapper.Map(request, entity);
+
+            return entity;
+        }
+
+        private void ApplyUpdateEntity(
+            CreateAiCriteriaConfigCommandModel item,
+            AICriteriaConfigs entity,
+            CreateAiCriteriaConfigCommand request)
+        {
+            _mapper.Map(item, entity);
+            _mapper.Map(request, entity);
         }
     }
 }

@@ -13,12 +13,14 @@ namespace Fsel.Course.Infrastructure.Maps
         public AiCriteriaConfigProfile()
         {
             CreateMap<CreateAiCriteriaConfigCommandModel, AICriteriaConfigs>()
-                .ForMember(d => d.JsonConfig,      o => o.MapFrom(s => s.JsonConfig))
-                .ForMember(d => d.SettingAiJson,   o => o.Ignore())
+                .ForMember(d => d.Id, opt => opt.Ignore())
+                .ForMember(d => d.JsonConfig, o => o.MapFrom(s => s.JsonConfig))
+                .ForMember(d => d.SettingAiJson, o => o.Ignore())
                 .IgnoreAllNonExisting();
             CreateMap<UpdateAiCriteriaCommand, AICriteriaConfigs>()
-                .ForMember(d => d.JsonConfig,      o => o.MapFrom(s => s.JsonConfig))
-                .ForMember(d => d.SettingAiJson,   o => o.Ignore())
+                .ForMember(d => d.JsonConfig, o => o.MapFrom(s => s.JsonConfig))
+                .ForMember(d => d.SettingAiJson, o => o.Ignore())
+                .ForMember(d => d.AiPromptManager, o => o.Ignore())
                 .ForMember(d => d.AiPromptManager, o => o.Ignore())
                 .IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigsModel, AICriteriaConfigs>().IgnoreAllNonExisting();
@@ -28,6 +30,9 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<AICriteriaConfigs, AiCriteriaModel>().IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigs, CreateAiCriteriaConfigCommandModel>().IgnoreAllNonExisting();
             CreateMap<UpdateSettingAiFeatureCommandModel, AICriteriaConfigs>().IgnoreAllNonExisting();
+            CreateMap<CreateOrUpdateAiCriteriaCommand, AICriteriaConfigs>()
+                .IgnoreAllNonExisting();
+
         }
     }
 }

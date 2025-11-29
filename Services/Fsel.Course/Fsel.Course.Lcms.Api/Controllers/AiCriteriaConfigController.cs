@@ -19,7 +19,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/ai-criteria-config")]
-    [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
+    //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
     public class AiCriteriaConfigController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -35,7 +35,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("{projectId}")]
         [ProducesResponseType(typeof(MethodResult<AICriteriaConfigsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid projectId,[FromHeader] GetAiCriteriaConfigQuery query)
+        public async Task<IActionResult> Get([FromRoute] Guid projectId, [FromHeader] GetAiCriteriaConfigQuery query)
         {
             ArgumentNullException.ThrowIfNull(query);
             query.ProjectId = projectId;
@@ -44,9 +44,22 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
-        /// Create ai criteria
+        /// Get ai criteria by type
         /// </summary>
-        [HttpPost]
+        [HttpGet()]
+        [ProducesResponseType(typeof(MethodResult<AICriteriaConfigsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetByType([FromQuery] GetAiCriteriaByTypeQuery query)
+        {
+            ArgumentNullException.ThrowIfNull(query);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Create or update ai criteria
+        /// </summary>
+        [HttpPost("upsert")]
         [ProducesResponseType(typeof(MethodResult<AICriteriaConfigsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromBody] CreateAiCriteriaConfigCommand command)
