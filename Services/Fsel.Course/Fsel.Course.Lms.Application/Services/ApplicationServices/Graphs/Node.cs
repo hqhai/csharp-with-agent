@@ -63,6 +63,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Graphs
                 var nextStep = connection.GetNextNode();
                 if (nextStep != null)
                 {
+                    if (nextStep.TestResult != null)
+                    {
+                        return nextStep.GetNextNode();
+                    }
                     return nextStep;
                 }
             }
