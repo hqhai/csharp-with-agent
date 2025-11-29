@@ -24,5 +24,7 @@ namespace Fsel.Course.Domain.Enums
         ShortAnswerBase,
         [Description("Short Answer (Word count)")]
         ShortAnswerWordCount,
+        [Description("Long Answer")]
+        LongAnswer
     }
 }
