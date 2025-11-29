@@ -20,7 +20,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using Kros.Extensions;
     using MediatR;
@@ -149,14 +148,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                         };
                     }
 
-                    //var userAiConfig = request!.UserAIConfig?.Replace("{0}", request.WordContent, StringComparison.CurrentCulture);
-
-                    //add new logic
                     var classForum = await _classForumRepository.ReadQueryable.FirstOrDefaultAsync(x=> x.Id == classForumDetailResult.ClassForumResult.ClassForumId);
                     var aiConfig = await _aiCriteriaConfigRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == classForum.AiPromptCriteriaId, cancellationToken);
                     var aiModel = await _aiPromptManagerRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == aiConfig.AiPromptManagerId, cancellationToken);
-
-                    //var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.SuccessCriteriaSchema);
+    
                     var successCriteriaSchema = ConvertHelper.DeserializeFromFilePath<object>(aiConfig.SettingAiJson);
 
                     var aIResponse = await _mediator.Send(new V1i1.SubmitAICommand
