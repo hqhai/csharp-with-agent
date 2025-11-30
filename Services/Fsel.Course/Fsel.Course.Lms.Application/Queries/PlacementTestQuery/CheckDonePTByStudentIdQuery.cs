@@ -37,7 +37,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                                           && x.TestType == EnumTestType.PlacementTest,
                     cancellationToken);
 
-            var ptState = new PtStateModel { Level = testGroupResult?.Level?.Id.ToString(), Status = testGroupResult?.Status ?? EnumResultStatus.NotStarted };
+            var ptState = new PtStateModel { Level = testGroupResult?.Level?.Name, Status = testGroupResult?.Status ?? EnumResultStatus.NotStarted };
 
             return new MethodResult<PtStateModel> { StatusCode = StatusCodes.Status200OK, Result = ptState };
         }
