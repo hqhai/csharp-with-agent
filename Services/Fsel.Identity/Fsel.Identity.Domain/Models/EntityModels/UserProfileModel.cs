@@ -74,5 +74,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public IList<StudentProfileModel>? Students { get; set; }
         public ParentProfileModel? Parent { get; set; }
         public SenderModel? Sender { get; set; }
+
+        public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
     }
 }

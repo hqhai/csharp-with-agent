@@ -1,11 +1,9 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
+namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
 {
     using Common.ActionResults;
     using Core.Base;
-    using Core.Base.BaseModels;
-    using Core.Extensions;
     using Domain.IRepositories;
     using Domain.Models.EntityModels;
     using Domain.Models.QueryModels.StudentProgress;
@@ -17,18 +15,18 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
     using Shared.Enums;
     using Shared.Helpers;
 
-    public class SearchStudentGoalAggregateQuery : SearchStudentGoalAggregateQueryModel, IRequest<MethodResult<PagingItemsModel<StudentGoalAggregateModel>>>
+    public class GetStudentGoalQuery : SearchStudentGoalAggregateQueryModel, IRequest<MethodResult<IList<StudentGoalAggregateModel>>>
     {
     }
 
-    public class SearchStudentGoalAggregateQueryHandler : IRequestHandler<SearchStudentGoalAggregateQuery, MethodResult<PagingItemsModel<StudentGoalAggregateModel>>>
+    public class GetStudentGoalQueryHandler : IRequestHandler<GetStudentGoalQuery, MethodResult<IList<StudentGoalAggregateModel>>>
     {
         private readonly IStudentGoalAggregateRepository _studentGoalAggregateRepository;
         private readonly IStudentGoalSummaryRepository _studentGoalSummaryRepository;
         private readonly IUserService _userService;
         private readonly AuthContext _authContext;
 
-        public SearchStudentGoalAggregateQueryHandler(IStudentGoalAggregateRepository studentGoalAggregateRepository,
+        public GetStudentGoalQueryHandler(IStudentGoalAggregateRepository studentGoalAggregateRepository,
             IStudentGoalSummaryRepository studentGoalSummaryRepository,
             IUserService userService,
             AuthContext authContext)
@@ -39,16 +37,10 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             _authContext = authContext;
         }
 
-        public async Task<MethodResult<PagingItemsModel<StudentGoalAggregateModel>>> Handle(SearchStudentGoalAggregateQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<StudentGoalAggregateModel>>> Handle(GetStudentGoalQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<PagingItemsModel<StudentGoalAggregateModel>>();
-
-            if (request.PageSize > 100)
-            {
-                methodResult.StatusCode = StatusCodes.Status400BadRequest;
-                return methodResult;
-            }
+            var methodResult = new MethodResult<IList<StudentGoalAggregateModel>>();
 
             var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow();
 
@@ -82,6 +74,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             {
                 query = query.Where(x => x.CombinedProgress == request.CombinedProgress);
             }
+
+            // if (request.StatusStudentGoal.HasValue)
+            // {
+            //     query = query.Where(x => x.StatusStudentGoal == request.StatusStudentGoal);
+            // }
 
             if (!string.IsNullOrEmpty(request.ClassIdStr))
             {
@@ -138,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 .ToListAsync(cancellationToken);
 
             var summarySumMap = summarys.GroupBy(s => s.StudentGoalAggregateId)
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.LessonsPerWeek)); // hoặc x.TotalPercent
+                .ToDictionary(g => g.Key, g => g.Sum(x => x.LessonsPerWeek));
 
             foreach (var item in lists)
             {
@@ -149,27 +146,17 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 item.ClassCampusCode = student?.ClassCampusCode;
                 item.StudentCampusCode = student?.StudentCampusCode;
                 item.PhoneNumber = student?.User?.PhoneNumber;
-                item.StatusStudentCampus = student?.StatusStudentCampus;
+                item.StatusStudentCampus =  student?.StatusStudentCampus;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
-                    item.IsActive = totalScore <= item.TotalTargetLessons; // hoặc logic khác tùy ngưỡng bạn muốn
+                    item.IsActive = totalScore <= item.TotalTargetLessons;
                 }
             }
-
-            if (!string.IsNullOrEmpty(request.ClassCampusCode))
-            {
-                lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(request.StudentCampusCode))
-            {
-                lists = lists.Where(l => l.StudentCampusCode == request.StudentCampusCode).ToList();
-            }
-
-            if (request.StatusStudentCampus != null)
-            {
-                lists = lists.Where(l => l.StatusStudentCampus == request.StatusStudentCampus).ToList();
-            }
+            //
+            // if (!string.IsNullOrEmpty(request.ClassCampusCode))
+            // {
+            //     lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
+            // }
 
             IEnumerable<StudentGoalAggregateModel> ordered = lists;
 
@@ -182,28 +169,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 else
                 {
                     ordered = ordered.OrderBy(l => l.TotalCompletedLessons);
-                }
-            }
-            else if (!string.IsNullOrEmpty(request.SortCompletedConfig))
-            {
-                if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
-                {
-                    ordered = ordered.OrderByDescending(l => l.TotalTargetLessons);
-                }
-                else
-                {
-                    ordered = ordered.OrderBy(l => l.TotalTargetLessons);
-                }
-            }
-            else if (!string.IsNullOrEmpty(request.SortSlowProgress))
-            {
-                if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
-                {
-                    ordered = ordered.OrderByDescending(l => l.ConsecutiveBehindWeeks);
-                }
-                else
-                {
-                    ordered = ordered.OrderBy(l => l.ConsecutiveBehindWeeks);
                 }
             }
             else if (!string.IsNullOrEmpty(request.SortDir))
@@ -221,15 +186,11 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             {
                 ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
             }
-
-            var totalItem = ordered.Count();
-
             var pagedLists = ordered
                 .AsQueryable()
-                .ApplyPaging(request)
                 .ToList();
 
-            methodResult.Result = new PagingItemsModel<StudentGoalAggregateModel>(pagedLists, request, totalItem);
+            methodResult.Result = pagedLists;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

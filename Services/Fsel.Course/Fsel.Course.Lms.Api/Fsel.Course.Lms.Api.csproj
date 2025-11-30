@@ -158,6 +158,9 @@
     <None Update="Resources\SpeakingAiConfig\Role\LexicalResourceRole.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\ExportExcelTemplates\TienDoTuan.xlsx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
