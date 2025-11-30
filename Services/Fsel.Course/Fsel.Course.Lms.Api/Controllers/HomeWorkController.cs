@@ -48,6 +48,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get lesson homework score
         /// </summary>
         [HttpGet("get-list-homework")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<IList<LessonHomeWorkResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListHomeWork([FromQuery] GetListHomeworkQuery query)

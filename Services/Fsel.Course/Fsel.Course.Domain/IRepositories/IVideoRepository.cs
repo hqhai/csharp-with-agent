@@ -21,6 +21,6 @@ namespace Fsel.Course.Domain.IRepositories
 
         Task<IDictionary<Guid, Video>> GetVideoDicAsync(IList<Guid>? originalIds);
 
-        Task<(IDictionary<Guid, (Video, VideoResult)>, IDictionary<Guid, Video>)> BuildVideoLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules);
+        Task<(IDictionary<Guid, (Video, LessonModule, VideoResult)>, IDictionary<Guid, Video>)> BuildVideoLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules);
     }
 }
