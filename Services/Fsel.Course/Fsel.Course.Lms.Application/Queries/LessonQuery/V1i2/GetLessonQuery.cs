@@ -136,11 +136,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
 
         private void BuildVideoModuleLesson(
         LessonModule module,
-        IDictionary<Guid, (Video Video, VideoResult VideoResult)> videoResultsByOriginalId,
+        IDictionary<Guid, (Video Video, LessonModule lessonModule, VideoResult VideoResult)> videoResultsByOriginalId,
         IDictionary<Guid, Video> videoDics,
         IList<ModuleLessonModel> moduleResults)
         {
-            if (videoResultsByOriginalId.TryGetValue(module.OriginalId, out var videoResult))
+            if (videoResultsByOriginalId.TryGetValue(module.Id, out var videoResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
                 dto.Name = videoResult.Video.Name;
@@ -187,11 +187,11 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
 
         private void BuildHomeWorkModuleLesson(
         LessonModule module,
-        IDictionary<Guid, (HomeWork HomeWork, HomeWorkResult HomeWorkResult)> homeWorkResultsByOriginalId,
+        IDictionary<Guid, (HomeWork HomeWork, LessonModule lessonModule, HomeWorkResult HomeWorkResult)> homeWorkResultsByOriginalId,
         IDictionary<Guid, HomeWork> homeWorkDics,
         IList<ModuleLessonModel> moduleResults)
         {
-            if (homeWorkResultsByOriginalId.TryGetValue(module.OriginalId, out var hwResult))
+            if (homeWorkResultsByOriginalId.TryGetValue(module.Id, out var hwResult))
             {
                 var dto = _mapper.Map<ModuleLessonModel>(module);
                 dto.Name = hwResult.HomeWork.Name;

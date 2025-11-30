@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 {
     public class LessonHomeWorkResultModel : HomeWorkModel
     {
+        public Guid? LessonModuleId { get; set; }
         public long QuestionCompleted { get; set; }
         public long QuestionTotal { get; set; }
 

@@ -93,7 +93,6 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                     listQuestionShuffle.Add(questionShuffle);
                 }
 
-
                 listQuestion.Add(questionModel);
             }
 
