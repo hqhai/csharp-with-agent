@@ -440,7 +440,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-student-edit-histories")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentEditHistoryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, StudentProgressWeeklyManagement.View })]
         public async Task<IActionResult> GetStudentEditHistories([FromQuery] GetStudentEditHistoriesByStudentIdQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
