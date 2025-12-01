@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
             students.ForEach(p =>
             {
-                var historySendMail = historiesSendMail?.Where(x => x.ReceiverId.HasValue && p.Human != null && p.Human.UserId.HasValue && p.Human.UserId == x.ReceiverId).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
+                var historySendMail = historiesSendMail?.Where(x => x.ReceiverId.HasValue && p.Human != null && p.Human.UserId.HasValue && p.Human.UserId == x.ReceiverId && x.Template == EnumSenderTemplate.LearningProgressWarning).OrderByDescending(p => p.CreatedDate).FirstOrDefault();
                 if (historySendMail != null && historySendMail.CreatedDate.HasValue)
                 {
                     TimeSpan timeDifference = currentDate - historySendMail.CreatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
@@ -119,6 +119,11 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
             var studentIds = students.Select(p => p.Id).ToList();
             var courseIds = students.Select(p => p.CourseId ?? default).ToList();
+
+            if (studentIds == null || studentIds.Count == 0)
+            {
+                return methodResult;
+            }
 
             var courses = await _courseRepository.Queryable.WhereBulkContains(courseIds, p => p.Id).ToListAsync(cancellationToken);
 
@@ -336,7 +341,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
 
                 if (!isSkillMockTest)
                 {
-                    var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, p.Percent, image, p.Percent, color);
+                    var html = string.Format(CultureInfo.InvariantCulture, skillPercentTemplate, icon, skillName, $"{p.Percent}%", image, p.Percent, color);
                     skillScoreHtml += html;
                 }
                 else
