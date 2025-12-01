@@ -189,9 +189,9 @@ namespace Fsel.Course.Lms.Api.Controllers
         [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(roles: new string[] { nameof(EnumRole.Admin) })]
-        public async Task<IActionResult> UpdateAggregate()
+        public async Task<IActionResult> UpdateAggregate([FromBody] RebuildLearningGoalAggregateCommand command)
         {
-            var queryResult = await _mediator.Send(new RebuildLearningGoalAggregateCommand()).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
