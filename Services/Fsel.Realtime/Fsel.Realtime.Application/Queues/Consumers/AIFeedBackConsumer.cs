@@ -26,12 +26,6 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             {
                 var classForumResultId = message.ClassForumResultId.ToString();
                 await _classForumFeedBackHubContext.GetGroup(classForumResultId!).SendAsync(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, message);
-
-                //try
-                //{
-                //    _queueProvider.Publish(RealtimeSettings.ClassForumAIFeedBackHub.Methods.ClassForumResultFeedBack, classForumResultId, message);
-                //}
-                //catch { }
             }
         }
     }

@@ -18,12 +18,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
     public class DeleteStudentFromClassCommandHandler : IRequestHandler<DeleteStudentFromClassCommand, MethodResult<bool>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
 
-        public DeleteStudentFromClassCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository)
+        public DeleteStudentFromClassCommandHandler(IStudentRepository studentRepository)
         {
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
         }
 

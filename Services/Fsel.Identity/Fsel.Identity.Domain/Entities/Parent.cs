@@ -13,8 +13,8 @@ namespace Fsel.Identity.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Occupation { get; set; }
 
-        public Human? Human { get; set; }
-        public Guid HumanId { get; set; }
+        public virtual User? User { get; set; }
+        public Guid UserId { get; set; }
         public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();
     }
 }

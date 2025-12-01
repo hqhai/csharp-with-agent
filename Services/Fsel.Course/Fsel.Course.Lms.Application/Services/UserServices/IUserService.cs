@@ -194,5 +194,8 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Get("/v1/student/search-query")]
         Task<IApiResponse<MethodResult<PagingItemsModel<StudentDetailModel>>>> SearchAsync([Query] BaseQueryModel query);
+
+        [Put("/v1/student/update-status/{studentId}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateStatusStudentCampus([FromRoute] Guid studentId, [FromBody] UpdateStatusStudentMode command);
     }
 }

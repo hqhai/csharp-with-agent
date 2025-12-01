@@ -174,8 +174,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     ToEmails = new List<string> { _appSetting!.CustomerSupportConfig!.Email! },
                     CcEmails = _appSetting!.CustomerSupportConfig!.CCEmail!,
-                    Content = ValueSettings.CustomerSupport.Content.Format(student.Human?.Email ?? default, mockTestResult.MockTest.Name),
-                    Subject = ValueSettings.CustomerSupport.TitleMail.Format(student.Human?.Email ?? default),
+                    Content = ValueSettings.CustomerSupport.Content.Format(student.User?.Email ?? default, mockTestResult.MockTest.Name),
+                    Subject = ValueSettings.CustomerSupport.TitleMail.Format(student.User?.Email ?? default),
                 };
 
                 await _senderService.SendEmailAsync(model);

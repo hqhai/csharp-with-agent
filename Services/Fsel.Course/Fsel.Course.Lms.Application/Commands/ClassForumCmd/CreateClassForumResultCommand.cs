@@ -233,7 +233,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         CourseResultId = _courseResultRepository.Queryable.FirstOrDefault(x=>x.CourseId == course.Id && x.StudentId == studentId)?.Id,
                         Mission = GetTokenMission(classForum,classForumResult),
                         Type = EnumTokenHistoryType.Recevived,
-                        UserId = student.Human?.UserId ?? default,
+                        UserId = student.UserId,
                     }
                 };
                 await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken);

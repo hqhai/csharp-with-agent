@@ -18,6 +18,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.CommandModels.Admins;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -222,7 +223,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                         var user = new User();
                         user.UserName = item.UserName;
                         user.Email = item.Email;
-                        user.FullName = item.UserName;
+                        user.FirstName = item.UserName.ParseFullName().FirstName;
+                        user.LastName = item.UserName.ParseFullName().LastName;
                         user.EmailConfirmed = true;
                         user.DefaultPassword = item.Password ?? DefaultPasswork;
                         identityStudentResult = await userManager.CreateAsync(user, item.Password ?? DefaultPasswork);

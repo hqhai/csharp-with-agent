@@ -27,21 +27,18 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     public class SearchUsersQueryHandler : IRequestHandler<SearchUsersQuery, MethodResult<PagingItemsModel<UserManageModel>>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly IPlatformRepository _platformRepository;
         private readonly IUserPlatformRepository _userPlatformRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly RoleManager<Role> _roleManager;
 
         public SearchUsersQueryHandler(UserManager<User> userManager,
-                                       IHumanRepository humanRepository,
                                        IPlatformRepository platformRepository,
                                        IUserPlatformRepository userPlatformRepository,
                                        IUserRoleRepository userRoleRepository,
                                        RoleManager<Role> roleManager)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _platformRepository = platformRepository;
             _userPlatformRepository = userPlatformRepository;
             _userRoleRepository = userRoleRepository;
@@ -62,23 +59,21 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
 
             var userQuerys = from a in _userManager.Users
-                             join h in _humanRepository.Queryable on a.Id equals h.UserId into human
-                             from h in human.DefaultIfEmpty()
                              join ur in _userRoleRepository.Queryable on a.Id equals ur.UserId into userRole
                              from ur in userRole.DefaultIfEmpty()
                              join up in _userPlatformRepository.Queryable on a.Id equals up.UserId
                              where up.PlatformId == platform.Id
-                             group new { a, h, ur, up } by a.Id into groupedUsers
+                             group new { a, ur, up } by a.Id into groupedUsers
                              select new UserManageModel
                              {
                                  Id = groupedUsers.Key,
                                  FullName = groupedUsers.First().a.FullName,
                                  Email = groupedUsers.First().a.Email,
                                  PhoneNumber = groupedUsers.First().a.PhoneNumber,
-                                 Birthday = groupedUsers.First().h.Birthday,
-                                 Gender = groupedUsers.First().h.Gender,
-                                 Position = groupedUsers.First().h.Position,
-                                 ManageUserId = groupedUsers.First().h.ManageUserId,
+                                 Birthday = groupedUsers.First().a.Birthday,
+                                 Gender = groupedUsers.First().a.Gender,
+                                 Position = groupedUsers.First().a.Position,
+                                 ManageUserId = groupedUsers.First().a.ManageUserId,
                                  RoleId = groupedUsers.First().ur.RoleId,
                                  UserName = groupedUsers.First().a.UserName,
                                  Status = groupedUsers.First().a.Status,

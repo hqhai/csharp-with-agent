@@ -1,6 +1,5 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.ComponentModel.DataAnnotations;
 using Fsel.Shared.Enums;
 
 namespace Fsel.Identity.Domain.Models.CommandModels.Auths

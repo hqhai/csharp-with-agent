@@ -58,11 +58,11 @@ namespace Fsel.Cms.PlanetDefender.Application.Queries.StudentGameInfoQuery
             var accountModel = new AccountModel()
             {
                 Id = user.Id,
-                AvatarPath = user.Human?.AvatarPath,
-                Name = user.Human?.FullName,
-                Code = user.Human?.Code,
-                UserName = string.IsNullOrEmpty(user.Human?.Email) ? user.Human?.FullName : user.Human?.Email,
-                AccountType = user.Human?.Role,
+                AvatarPath = user.User?.AvatarPath,
+                Name = user.User?.FullName,
+                Code = user.User?.Code,
+                UserName = string.IsNullOrEmpty(user.User?.Email) ? user.User?.FullName : user.User?.Email,
+                AccountType = user.User?.Role,
                 GameLevel = studentGameInfo.CourseLevel,
                 Level = studentGameInfo.Level,
                 CurrentRank = 100,

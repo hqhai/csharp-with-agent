@@ -88,9 +88,9 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 foreach (var item in queryData)
                 {
                     var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                    item.FullName = student?.Human?.FullName;
-                    item.Email = student?.Human?.Email;
-                    item.UserId = student?.Human?.UserId;
+                    item.FullName = student?.User?.FullName;
+                    item.Email = student?.User?.Email;
+                    item.UserId = student?.UserId;
                 }
 
                 var tasks = queryData

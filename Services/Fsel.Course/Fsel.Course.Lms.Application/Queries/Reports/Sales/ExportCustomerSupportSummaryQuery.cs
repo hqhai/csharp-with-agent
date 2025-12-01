@@ -109,7 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
             var studentReports = new List<StudentLearningReportModel>();
             foreach (var item in students)
             {
-                var userId = item.Human?.UserId ?? default;
+                var userId = item?.UserId ?? default;
                 courseResultDict.TryGetValue(item.Id, out var courseResult);
 
                 courseCompleteDict.TryGetValue(item.Id, out var courseComplete);
@@ -122,8 +122,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports.Sales
 
                 var studentReport = new StudentLearningReportModel
                 {
-                    FullName = item.Human?.FullName,
-                    Email = item.Human?.Email,
+                    FullName = item.User?.FullName,
+                    Email = item.User?.Email,
                     SchoolClass = item.SchoolClass,
                     NotLoggedIn = featureAccessTime == null && placementTestGroupResult == null,
                     LoggedInButNoPT = featureAccessTime != null && (placementTestGroupResult == null || placementTestGroupResult.Status != EnumResultStatus.Done),

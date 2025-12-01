@@ -97,15 +97,15 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 Template = EnumSenderTemplate.MailPaymentForCustomer
             });
 
-            if (!string.IsNullOrEmpty(order.Email) && !string.IsNullOrEmpty(student.Human?.Email) && order.Email.ToLower(CultureInfo.InvariantCulture) != student.Human?.Email.ToLower(CultureInfo.InvariantCulture))
+            if (!string.IsNullOrEmpty(order.Email) && !string.IsNullOrEmpty(student.User?.Email) && order.Email.ToLower(CultureInfo.InvariantCulture) != student.User?.Email.ToLower(CultureInfo.InvariantCulture))
             {
                 await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
                 {
-                    ToEmails = new List<string> { student.Human?.Email ?? string.Empty },
+                    ToEmails = new List<string> { student.User?.Email ?? string.Empty },
                     Subject = "Chào mừng bạn đến với FSEL!",
                     Params = new
                     {
-                        FullName = student.Human?.FullName,
+                        FullName = student.User?.FullName,
                         OrderCode = order.Code,
                         ExpiredDate = expiredDate,
                         ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,

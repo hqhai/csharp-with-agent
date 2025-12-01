@@ -20,7 +20,6 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
 
     public class GetStudentInfoEventQueryHandler : IRequestHandler<GetStudentInfoEventQuery, MethodResult<StudentInfoEventModel>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly AuthContext _authContext;
         private readonly UserManager<User> _userManager;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
@@ -30,13 +29,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
         private const string Teacher = "Giáo Viên";
 
         public GetStudentInfoEventQueryHandler(
-            IHumanRepository humanRepository,
             AuthContext authContext,
             UserManager<User> userManager,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
             IStudentRepository studentRepository)
         {
-            _humanRepository = humanRepository;
             _authContext = authContext;
             _userManager = userManager;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
@@ -47,11 +44,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<StudentInfoEventModel>();
-            var human = await _humanRepository.Queryable.Include(x => x.Student).Include(x => x.User)
-                                                        .FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken);
-            var user = human?.User;
-            var student = human?.Student;
-            if (user == null || human == null || student == null)
+            var user = await _userManager.Users.Include(x => x.Student)
+                                                        .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
+            var student = user?.Student;
+            if (user == null || student == null)
             {
                 return methodResult;
             }
@@ -69,15 +65,15 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
 
             var studentInfoEvent = new StudentInfoEventModel
             {
-                Birthday = human.Birthday,
-                Email = human.Email,
-                FullName = human.FullName,
-                ParentEmail = human.Student?.ParentEmail,
-                ParentPhoneNumber = human.Student?.ParentPhoneNumber,
-                PhoneNumber = human.PhoneNumber,
-                School = human.Student?.School,
-                SchoolClass = human.Student?.SchoolClass,
-                SchoolGrade = human.Student?.SchoolGrade,
+                Birthday = user.Birthday,
+                Email = user.Email,
+                FullName = user.FullName,
+                ParentEmail = user.Student?.ParentEmail,
+                ParentPhoneNumber = user.Student?.ParentPhoneNumber,
+                PhoneNumber = user.PhoneNumber,
+                School = user.Student?.School,
+                SchoolClass = user.Student?.SchoolClass,
+                SchoolGrade = user.Student?.SchoolGrade,
                 EmailConfirmed = user.EmailConfirmed,
                 PhoneNumberConfirmed = user.PhoneNumberConfirmed,
                 IsChangePassword = !isChangePassword,
@@ -90,18 +86,16 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                 studentInfoEvent.AllowParentInfoUpdate = student.SchoolGrade != Parent && student.SchoolGrade != Teacher && studentInfoEvent.Age < 25;
             }
 
-            var schoolId = human.Student?.SchoolId ?? default;
+            var schoolId = user.Student?.SchoolId ?? default;
             var competitionEventId = competitionEvent?.Id ?? default;
 
             var query = await (from u in _userManager.Users
-                               join h in _humanRepository.Queryable on u.Id equals h.UserId
-                               join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                               join s in _studentRepository.Queryable on u.Id equals s.UserId
                                join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
                                where s.SchoolId == schoolId && u.Id != _authContext.CurrentUserId && sce.CompetitionEventId == competitionEventId
                                select new
                                {
                                    User = u,
-                                   Human = h,
                                    Student = s
                                }).ToListAsync(cancellationToken);
 
@@ -113,7 +107,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                 {
                     FullName = companion.User.FullName,
                     Email = companion.User.Email,
-                    Birthday = companion.Human.Birthday,
+                    Birthday = companion.User.Birthday,
                     School = companion.Student.School,
                     SchoolGrade = companion.Student.SchoolGrade,
                     SchoolClass = companion.Student.SchoolClass,
@@ -130,7 +124,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.StudentEventQuery
                     {
                         FullName = parent.User.FullName,
                         Email = parent.User.Email,
-                        Birthday = parent.Human.Birthday,
+                        Birthday = parent.User.Birthday,
                         School = parent.Student.School,
                         SchoolGrade = parent.Student.SchoolGrade,
                         SchoolClass = parent.Student.SchoolClass,

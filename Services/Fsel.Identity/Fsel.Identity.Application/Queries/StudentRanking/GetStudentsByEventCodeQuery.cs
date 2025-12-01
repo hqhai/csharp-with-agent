@@ -52,9 +52,9 @@ namespace Fsel.Identity.Application.Queries.StudentRanking
                 return methodResult;
             }
 
-            var studentIds = _studentCompetitionEventsRepository.Queryable.Where(p => p.CompetitionEventId == competitionEvent.Id).Select(p => p.StudentId).Distinct().ToList();
+            var studentIds = await _studentCompetitionEventsRepository.Queryable.Where(p => p.CompetitionEventId == competitionEvent.Id).Select(p => p.StudentId).Distinct().ToListAsync(cancellationToken);
 
-            var students = _studentRepository.Queryable.Include(p => p.Human).ThenInclude(x => x.User).WhereBulkContains(studentIds, p => p.Id).ToList();
+            var students = await _studentRepository.Queryable.Include(x => x.User).WhereBulkContains(studentIds, p => p.Id).ToListAsync(cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             return methodResult;

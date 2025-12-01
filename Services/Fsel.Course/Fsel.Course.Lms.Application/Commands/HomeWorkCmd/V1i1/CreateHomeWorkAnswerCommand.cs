@@ -316,7 +316,7 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                             Feature = EnumTokenFeature.Learn,
                             Mission = homeWorkResult.SubmissionCount == EnumSubmissionCount.FirstSubmit ? EnumTokenMission.HomeworkFirstSubmit : EnumTokenMission.HomeworkSecondSubmit,
                             Type = EnumTokenHistoryType.Recevived,
-                            UserId = student.Human?.UserId ?? default,
+                            UserId = student?.UserId ?? default,
                         }
                     };
                     await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);

@@ -107,8 +107,8 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 if (voucher.ApplicableSubjects!.Any(p => p == EnumApplicableSubjectsVoucher.Other))
                 {
                     if (voucher.ApplicableEmails != null &&
-                            !string.IsNullOrEmpty(student.Human?.Email) &&
-                            voucher.ApplicableEmails.Contains(student.Human.Email))
+                            !string.IsNullOrEmpty(student.User?.Email) &&
+                            voucher.ApplicableEmails.Contains(student.User.Email))
                     {
                         continue;
                     }

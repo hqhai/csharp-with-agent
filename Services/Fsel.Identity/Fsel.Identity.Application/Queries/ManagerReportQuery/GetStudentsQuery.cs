@@ -34,7 +34,6 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly ISchoolClassRepository _schoolClassRepository;
 
         public GetStudentsQueryHandler(IStudentRepository studentRepository,
@@ -42,7 +41,6 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             AuthContext authContext,
             ISystemService systemService,
             UserManager<User> userManager,
-            IHumanRepository humanRepository,
             ISchoolClassRepository schoolClassRepository)
         {
             _studentRepository = studentRepository;
@@ -50,7 +48,6 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             _authContext = authContext;
             _systemService = systemService;
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _schoolClassRepository = schoolClassRepository;
         }
 
@@ -126,20 +123,19 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             }
 
             var query = from u in _userManager.Users
-                        join h in _humanRepository.Queryable on u.Id equals h.UserId
-                        join s in queryStudent on h.Id equals s.HumanId
-                        select new { User = u, Human = h, Student = s };
+                        join s in queryStudent on u.Id equals s.UserId
+                        select new { User = u, Student = s };
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.Email == request.Keyword);
+                    query = query.Where(m => m.User != null && m.User.Email == request.Keyword);
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber == request.Keyword);
+                    query = query.Where(m => m.User != null && m.User.PhoneNumber == request.Keyword);
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
                 {
@@ -167,10 +163,10 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             var dataQuery = query.Select(i => new StudentDtoModel
             {
                 Id = i.Student.Id,
-                FullName = i.Human!.FullName,
-                BirthDay = i.Human.Birthday,
-                Email = i.Human.Email,
-                PhoneNumber = i.Human.PhoneNumber,
+                FullName = i.User!.FullName,
+                BirthDay = i.User.Birthday,
+                Email = i.User.Email,
+                PhoneNumber = i.User.PhoneNumber,
                 CourseLevel = i.Student.CourseLevel,
                 ExpiredDate = i.Student.ExpiredDate,
                 School = i.Student.School,
@@ -179,9 +175,9 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 BaseCourseLevel = i.Student.BaseCourseLevel,
                 SchoolId = i.Student.SchoolId,
                 CourseId = i.Student.CourseId,
-                UserId = i.Human.UserId,
+                UserId = i.Student.UserId,
                 CreatedDate = i.Student.CreatedDate,
-                UserName = i.User.UserName
+                UserName = i.User!.UserName
             });
 
             var list = await dataQuery.AsNoTracking().ToListAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

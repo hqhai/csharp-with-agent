@@ -44,13 +44,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 return methodResult;
             }
-
             var students = await _studentRepository.Queryable
-                    .Include(x => x.Human)
-                    .ThenInclude(u => u.User)
+                    .Include(u => u.User)
                     .Include(pr => pr.ParentStudents)
                         .ThenInclude(p => p.Parent)
-                        .ThenInclude(hm => hm.Human)
+                        .ThenInclude(hm => hm.User)
                     .WhereBulkContains(request.StudentIds, i => i.Id)
                     .ToListAsync(cancellationToken);
 

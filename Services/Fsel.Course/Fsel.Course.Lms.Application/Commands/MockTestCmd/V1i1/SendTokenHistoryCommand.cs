@@ -130,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
         {
             var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).ThenInclude(x => x!.Sections.OrderBy(x => x.DisplayOrder)).Where(x => x.MockTestResultId == mockTestResult.Id && x.CreatedDate >= mockTestResult.CreatedDate).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
             var tokenHistoryQueues = new List<TokenHistoryQueueModel>();
-            var userId = student.Human?.UserId ?? default;
+            var userId = student.UserId;
             if (sectionGroupResults != null && sectionGroupResults.Any())
             {
                 foreach (var item in sectionGroupResults)

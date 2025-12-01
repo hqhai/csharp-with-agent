@@ -248,7 +248,7 @@ namespace Fsel.Ordering.Application.Commands.UrBoxs
 
                     var result = await _userService.DeductCoinOfStudent(new DeductCoinOfStudentCommandModel()
                     {
-                        UserId = student?.Human?.UserId ?? default,
+                        UserId = student?.UserId,
                         NumberOfCoinsDeducted = totalPrice,
                         Feature = EnumTokenFeature.MarketPlace,
                         Mission = EnumTokenMission.UrBox,

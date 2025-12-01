@@ -149,8 +149,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
                     StudentProgressModel studentProgressModel = new StudentProgressModel
                     {
                         StudentId = courseResult.StudentId,
-                        FullName = student?.Human?.FullName,
-                        Email = student?.Human?.Email,
+                        FullName = student?.User?.FullName,
+                        Email = student?.User?.Email,
                         Level = courseResult.CourseLevel ?? default,
                         CourseType = courseResult.CourseLevel.GetEnumCourseType(),
                         CourseId = courseResult.CourseId,

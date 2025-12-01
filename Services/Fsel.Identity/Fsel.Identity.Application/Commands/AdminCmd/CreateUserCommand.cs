@@ -38,7 +38,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly ITeacherRepository _teacherRepository;
         private readonly ICSORepository _cSORepository;
         private readonly IPlatformRepository _platformRepository;
-        private readonly IHumanRepository _humanRepository;
 
         public CreateUserCommandHandler(UserManager<User> userManager,
             RoleManager<Role> roleManager,
@@ -48,8 +47,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             AppSetting appSetting,
             ITeacherRepository teacherRepository,
             ICSORepository cSORepository,
-            IPlatformRepository platformRepository,
-            IHumanRepository humanRepository)
+            IPlatformRepository platformRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -60,7 +58,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _teacherRepository = teacherRepository;
             _cSORepository = cSORepository;
             _platformRepository = platformRepository;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<UserModel>> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -70,6 +67,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             #region validate
 
+            if (string.IsNullOrEmpty(request.Email))
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Email), request.Email);
+                return methodResult;
+            }
             if (request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
                 if (request.PackageIds == null || request.PackageIds.Count == 0)
@@ -101,7 +103,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.CourseTypes), nameof(request.LiveCourseTypes));
                 return methodResult;
             }
-            var user = await _userManager.FindByEmailAsync(request.Email!);
+            var user = await _userManager.FindByEmailAsync(request.Email);
             if (user != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
@@ -122,6 +124,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             user = new();
             _mapper.Map(request, user);
             user.UserName = request.Email;
+            user = await GetUserByRoleAsync(request, user);
 
             #region Add Platform to User
 
@@ -151,14 +154,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(newPassword), newPassword);
                 return methodResult;
             }
-            var human = await CreateHuman(request, user);
-            if (!human.IsValid())
-            {
-                methodResult.AddErrorBadRequest(human.ErrorMessages);
-                return methodResult;
-            }
-            human = _humanRepository.Add(human);
-            await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
             await _userManager.AddToRoleAsync(user, request.Role.ToString());
 
             #region Send Code OTP
@@ -190,46 +186,44 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             return methodResult;
         }
 
-        private async Task<Human> CreateHuman(CreateUserCommand request, User user)
+        private async Task<User> GetUserByRoleAsync(CreateUserCommand request, User user)
         {
-            var human = _mapper.Map<Human>(request);
-            human.UserId = user.Id;
             if (request.Role == EnumRoleRegisterWithAdmin.Teacher)
             {
                 var stt = await _teacherRepository.Queryable.CountAsync();
-                human.Teacher = new Teacher
+                user.Teacher = new Teacher
                 {
-                    HumanId = human.Id,
+                    UserId = user.Id,
                     LiveCourseTypes = request.LiveCourseTypes,
                     CourseLevels = request.CourseLevels,
                     CourseTypes = request.CourseTypes
                 };
-                human.Teacher.TeacherBankAccounts?.Add(new TeacherBankAccount
+                user.Teacher.TeacherBankAccounts?.Add(new TeacherBankAccount
                 {
                     BankAccountName = request.BankAccountName,
                     BankAccountNumber = request.BankAccountNumber,
                     BankName = request.BankName,
                     Status = EnumBankStatus.Approve
                 });
-                human.Code = $"TC_{stt:0000}";
+                user.Code = $"TC_{stt:0000}";
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.CSO)
             {
                 var stt = await _cSORepository.Queryable.CountAsync();
-                human.CSO = new CSO
+                user.CSO = new CSO
                 {
-                    HumanId = human.Id,
+                    UserId = user.Id,
                     CourseTypes = request.CourseTypes,
                     CourseLevels = request.CourseLevels,
                     PackageIds = request.PackageIds,
                 };
-                human.Code = $"CSO_{stt:0000}";
+                user.Code = $"CSO_{stt:0000}";
             }
             else if (request.Role == EnumRoleRegisterWithAdmin.Moderator)
             {
-                human.Code = "Moderator";
+                user.Code = "Moderator";
             }
-            return human;
+            return user;
         }
 
         private async Task AddUserToPlatForm(User user, EnumPlatformCode platformCode, CancellationToken cancellationToken)

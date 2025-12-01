@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     var emailUserNeedSupportResult = classForumDetailResultOwner?.CreatedUserId != null ? await _userService.GetStudentByUserIdWithCacheAsync(classForumDetailResultOwner.CreatedUserId) : null;
 
-                    var emailStudent = emailUserNeedSupportResult != null ? emailUserNeedSupportResult!.Content?.Result?.Human?.Email : string.Empty;
+                    var emailStudent = emailUserNeedSupportResult != null ? emailUserNeedSupportResult!.Content?.Result?.User?.Email : string.Empty;
 
                     if (classForumDetailResult != null && classForumDetailResult.RetryTime == Max_Time_Retry)
                     {

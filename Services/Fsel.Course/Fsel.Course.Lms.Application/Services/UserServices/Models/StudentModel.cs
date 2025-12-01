@@ -31,7 +31,11 @@ namespace Fsel.Course.Lms.Application.Services.UserServices.Models
         public Guid? SchoolClassId { get; set; }
         public Guid? SenderId { get; set; }
         public DateTime? ExpiredDate { get; set; }
-        public HumanModel? Human { get; set; }
+        public Guid UserId { get; set; }
+        public string? StudentCampusCode { get; set; }
+        public string? ClassCampusCode { get; set; }
+        public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
+        public UserModel? User { get; set; }
         public StudentBeginnerGuideModel? BeginnerGuide { get; set; }
     }
 }

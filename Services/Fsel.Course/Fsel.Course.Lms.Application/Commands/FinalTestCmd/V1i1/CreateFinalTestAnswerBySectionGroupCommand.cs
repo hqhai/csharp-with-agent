@@ -200,9 +200,9 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
             var sectionGroupResultDto = _mapper.Map<SectionGroupResultModel>(sectionGroupResult);
             sectionGroupResultDto.IsTestDone = finalTestResult.Status == EnumResultStatus.Done;
 
-            if (student.Human != null && student.Human.UserId != null)
+            if (student != null)
             {
-                await PublishRankedStudent((Guid)student.Human.UserId, cancellationToken);
+                await PublishRankedStudent((Guid)student.UserId, cancellationToken);
             }
 
             methodResult.Result = sectionGroupResultDto;
@@ -233,7 +233,7 @@ namespace Fsel.Course.Lms.Application.Commands.FinalTestCmd.V1i1
                             Type = EnumTokenHistoryType.Recevived,
                             Feature = EnumTokenFeature.Test,
                             Mission = EnumTokenMission.FinalTest,
-                            UserId = student.Human?.UserId ?? default,
+                            UserId = student.UserId,
                         }
                     };
                     await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken).ConfigureAwait(false);

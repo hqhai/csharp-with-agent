@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             foreach (var student in students)
             {
-                int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
 
                 var placementTestResult = placementTestResults.FirstOrDefault(p => p.StudentId == student.Id);
 
@@ -140,12 +140,12 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 var studentInfo = new
                 {
-                    FullName = student.Human?.FullName,
-                    Email = student.Human?.Email,
+                    FullName = student.User?.FullName,
+                    Email = student.User?.Email,
                     School = student.School,
-                    Code = student.Human?.Code,
-                    PhoneNumber = student.Human?.PhoneNumber,
-                    UserName = student.Human?.User?.UserName
+                    Code = student.User?.Code,
+                    PhoneNumber = student.User?.PhoneNumber,
+                    UserName = student.User?.UserName
                 };
 
                 var @params = ObjectHelper.GetDictionary(studentInfo);
@@ -157,7 +157,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 await _mediator.Send(new SenderCommand
                 {
-                    Email = student.Human?.Email,
+                    Email = student.User?.Email,
                     Subject = request.Subject,
                     Content = html
                 }, cancellationToken).ConfigureAwait(false);

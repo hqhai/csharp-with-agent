@@ -76,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             if (request.StudentIds == null || request.StudentIds.Count == 0)
             {
-                var studentResults = await _userService.ExecuteListQueryAsync(new BaseQueryModel { IncludePaths = new List<string>() { "Human", "ParentStudents.Parent.Human" } });
+                var studentResults = await _userService.ExecuteListQueryAsync(new BaseQueryModel { IncludePaths = new List<string>() { "Human", "ParentStudents.Parent" } });
                 students = studentResults.Content?.Result?.ToList();
             }
             else
@@ -89,25 +89,25 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
             {
                 return methodResult;
             }
-            //students = students.Where(p => p.Human?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com").ToList();
+            //students = students.Where(p => p.User?.Email?.ToLower(CultureInfo.CurrentCulture) == "nguyenhuukhoa5462@gmail.com").ToList();
 
             UserSettingQuery query = new UserSettingQuery
             {
-                UserIds = students.Select(x => x.Human!.UserId).ToList(),
+                UserIds = students.Select(x => x.UserId).ToList(),
             };
 
             //Lấy những học sinh bật thông báo Gửi Email hàng tuần
-            //var studentFilter = await _userService.GetListUserSetting(query);
-            //var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
+            var studentFilter = await _userService.GetListUserSetting(query);
+            var studentFilterResult = studentFilter?.Content?.Result?.Where(x => x.NotifiEmail).Select(x => x.UserId).ToList();
 
-            //if (studentFilterResult == null || studentFilterResult.Count == 0)
-            //{
-            //    return methodResult;
-            //}
+            if (studentFilterResult == null || studentFilterResult.Count == 0)
+            {
+                return methodResult;
+            }
             //filter những học sinh bật thông báo email.
-            //students = students.Where(x => x.Human != null && studentFilterResult.Contains(x.Human.UserId)).OrderBy(x => x.Human!.Email).ToList();
+            students = students.Where(x => x.User != null && studentFilterResult.Contains(x.UserId)).OrderBy(x => x.User!.Email).ToList();
 
-            var userIds = students.Where(p => p.Human != null && p.Human.UserId.HasValue).Select(x => x.Human!.UserId!.Value).Distinct().ToList();
+            var userIds = students.Select(x => x.UserId).Distinct().ToList();
 
             DateTime currentDate = request.EndDate.HasValue ? request.EndDate.Value.AddDays(1).Date : DateTime.UtcNow.Date;
 
@@ -151,18 +151,18 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
             foreach (var item in students)
             {
-                _logger.LogInformation("Index {index} of {total}, Email: {email}", students.IndexOf(item) + 1, students.Count, item.Human!.Email);
+                _logger.LogInformation("Index {index} of {total}, Email: {email}", students.IndexOf(item) + 1, students.Count, item.User.Email);
 
                 if (weeklyReports.Any(p => p.StudentId == item.Id))
                 {
                     continue;
                 }
 
-                var studentDailyStreaks = featureAccessTimeResults.Where(p => p.CreatedUserId == item.Human?.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
+                var studentDailyStreaks = featureAccessTimeResults.Where(p => p.CreatedUserId == item.UserId).Where(x => x.CreatedDate.HasValue).Select(p => p.CreatedDate!.Value.Date).Distinct().ToList();
 
                 var weeklyReport = new WeeklyReportModel()
                 {
-                    FullName = item.Human?.FullName,
+                    FullName = item.User?.FullName,
                     StartDate = lastFridayAt13.ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
                     EndDate = currentDate.AddDays(-1).ToString("dd-MM-yyyy", CultureInfo.CurrentCulture),
                     TotalDay = studentDailyStreaks?.Count.ToString(CultureInfo.CurrentCulture),
@@ -188,8 +188,8 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 CheckAndAssignStatusDate(weeklyReport, studentDailyStreaks, dates.ToList());
 
-                var featureAccessTimes = featureAccessTimeResults.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
-                var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Where(p => p.CreatedUserId == item.Human?.UserId).ToList();
+                var featureAccessTimes = featureAccessTimeResults.Where(p => p.CreatedUserId == item.UserId).ToList();
+                var previousFeatureAccessTimes = previousFeatureAccessTimeResults.Where(p => p.CreatedUserId == item.UserId).ToList();
 
                 AddTimeIntoTemplate(weeklyReport, featureAccessTimes, previousFeatureAccessTimes);
 
@@ -363,19 +363,19 @@ namespace Fsel.Course.Lms.Application.Commands.WeeklyReportCommand
 
                 var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
                 {
-                    UserId = item.Human?.UserId ?? Guid.Empty,
+                    UserId = item?.UserId ?? Guid.Empty,
                     Template = weeklyReport.SenderTemplate
                 });
 
                 weeklyReport.AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
 
-                if (!string.IsNullOrEmpty(item.Human?.Email))
+                if (!string.IsNullOrEmpty(item.User?.Email))
                 {
-                    //await SendWeekly(item.Human?.Email, item.ParentEmail, weeklyReport, cancellationToken);
+                    //await SendWeekly(item.User?.Email, item.ParentEmail, weeklyReport, cancellationToken);
                     weeklyReportEntities.Add(new WeeklyReport()
                     {
                         StudentId = item.Id,
-                        Email = item.Human?.Email,
+                        Email = item.User?.Email,
                         ParentEmail = item.ParentEmail,
                         Param = weeklyReport
                     });

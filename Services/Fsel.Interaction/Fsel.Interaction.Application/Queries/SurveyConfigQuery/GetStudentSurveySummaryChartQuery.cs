@@ -144,7 +144,7 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                 {
                     foreach (var customerSurvey in customerSurveys)
                     {
-                        var student = students.FirstOrDefault(p => p.Human != null && p.Human.UserId == customerSurvey.UserId);
+                        var student = students.FirstOrDefault(p => p.User != null && p.User.Id == customerSurvey.UserId);
 
                         var answer = ConvertHelper.Deserialize<IList<AnswerSurveyModel>>(customerSurvey.Answer)?.FirstOrDefault();
                         if (answer != null && !string.IsNullOrEmpty(answer.Content))
@@ -152,9 +152,9 @@ namespace Fsel.Interaction.Application.Queries.SurveyConfigQuery
                             studentSurvey.StudentSurveyShortAnswers.Add(new StudentSurveyShortAnswerModel()
                             {
                                 Answer = answer.Content,
-                                FullName = student?.Human?.FullName ?? "Not Found",
-                                Email = student?.Human?.FullName ?? null,
-                                PhoneNumber = student?.Human?.User?.PhoneNumber ?? null
+                                FullName = student?.User?.FullName ?? "Not Found",
+                                Email = student?.User?.FullName ?? null,
+                                PhoneNumber = student?.User?.PhoneNumber ?? null
                             });
                         }
                     }

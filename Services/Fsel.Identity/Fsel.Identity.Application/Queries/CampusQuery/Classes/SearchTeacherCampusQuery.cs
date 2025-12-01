@@ -32,9 +32,8 @@ namespace Fsel.Identity.Application.Queries.CampusQuery.Classes
         private readonly IUserSchoolRepository _userSchoolRepository;
         private readonly AuthContext _authContext;
         private readonly ITeacherRepository _teacherRepository;
-        private readonly IHumanRepository _humanRepository;
 
-        public SearchTeacherCampusQueryHandler(UserManager<User> userManager, RoleManager<Role> roleManager, IUserRoleRepository userRoleRepository, IUserSchoolRepository userSchoolRepository, AuthContext authContext, ITeacherRepository teacherRepository, IHumanRepository humanRepository)
+        public SearchTeacherCampusQueryHandler(UserManager<User> userManager, RoleManager<Role> roleManager, IUserRoleRepository userRoleRepository, IUserSchoolRepository userSchoolRepository, AuthContext authContext, ITeacherRepository teacherRepository)
         {
             _userManager = userManager;
             _roleManager = roleManager;
@@ -42,7 +41,6 @@ namespace Fsel.Identity.Application.Queries.CampusQuery.Classes
             _userSchoolRepository = userSchoolRepository;
             _authContext = authContext;
             _teacherRepository = teacherRepository;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<TeacherModel>>> Handle(SearchTeacherCampusQuery request, CancellationToken cancellationToken)
@@ -59,8 +57,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery.Classes
             }
 
             var query = await (from u in _userManager.Users
-                               join h in _humanRepository.Queryable on u.Id equals h.UserId
-                               join t in _teacherRepository.Queryable on h.Id equals t.HumanId
+                               join t in _teacherRepository.Queryable on u.Id equals t.UserId
                                join ur in _userRoleRepository.Queryable on u.Id equals ur.UserId
                                join r in _roleManager.Roles on ur.RoleId equals r.Id
                                join us in _userSchoolRepository.Queryable on u.Id equals us.UserId
@@ -69,10 +66,10 @@ namespace Fsel.Identity.Application.Queries.CampusQuery.Classes
                                {
                                    Id = u.Id,
                                    CreatedDate = t.CreatedDate,
-                                   Human = new HumanModel()
+                                   User = new UserModel()
                                    {
                                        FullName = u.FullName,
-                                       AvatarPath = h.AvatarPath,
+                                       AvatarPath = u.AvatarPath,
                                    }
                                }).ToListAsync(cancellationToken);
 

@@ -15,4 +15,8 @@
     <Folder Include="Services\GoogleSheetServices\Models\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AspNet.Security.OAuth.Apple" Version="7.0.4" />
+  </ItemGroup>
+
 </Project>

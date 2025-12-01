@@ -30,6 +30,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Hosting;
     using Microsoft.Net.Http.Headers;
+    using PhoneNumbers;
+    using static IdentityServer4.Models.IdentityResources;
 
     public class CreateUserStudentToAdminCommand : CreateUserStudentToAdminCommandModel, IRequest<MethodResult<UserModel>>
     {
@@ -47,7 +49,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly AuthContext _authContext;
         private readonly Microsoft.AspNetCore.Identity.UserManager<User> _userManager;
         private readonly IOrderService _orderService;
-        private readonly IHumanRepository _humanRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IPlatformRepository _platformRepository;
         private readonly IHostEnvironment _environment;
@@ -65,7 +66,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             AuthContext authContext,
             Microsoft.AspNetCore.Identity.UserManager<User> userManager,
             IOrderService orderService,
-            IHumanRepository humanRepository,
             ILmsCourseService lmsCourseService,
             IPlatformRepository platformRepository,
             IHostEnvironment environment)
@@ -76,7 +76,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             _authContext = authContext;
             _userManager = userManager;
             _orderService = orderService;
-            _humanRepository = humanRepository;
             _lmsCourseService = lmsCourseService;
             _platformRepository = platformRepository;
             _environment = environment;
@@ -179,14 +178,31 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     user = new User();
                     user.UserName = request.Email;
                     user.Email = request.Email;
-                    user.FullName = request.FullName ?? request.Email;
+                    user.FirstName = request.FullName.ParseFullName().FirstName;
+                    user.LastName = request.FullName.ParseFullName().LastName;
                     user.EmailConfirmed = true;
+                    user.Gender = GetEnumGender(request.Gender);
                     user.PhoneNumber = request.PhoneNumber;
+                    user.Student = new Student
+                    {
+                        Occupation = RoleStudent,
+                        SchoolId = !string.IsNullOrEmpty(request.SchoolId) && Guid.TryParse(request.SchoolId, out Guid schoolIdData) ? schoolIdData : null,
+                        School = request.School,
+                        CourseId = !string.IsNullOrEmpty(request.CourseId) && Guid.TryParse(request.CourseId, out Guid courseId) ? courseId : null,
+                    };
+                    if (string.IsNullOrEmpty(request.DateOfBirth))
+                    {
+                        user.Birthday = GetBirthdayToCourseLevel(course.CourseLevel);
+                    }
+                    else if (DateTime.TryParse(request.DateOfBirth, out DateTime dateOfBirth))
+                    {
+                        user.Birthday = dateOfBirth;
+                    }
+
                     user.UserSettings = new List<UserSetting>()
                     {
                         new UserSetting(true)
                     };
-                    user = CreateHumanToUser(user, request, course.CourseLevel);
                     await UpdatePlatformToUserAsync(user, cancellationToken);
                     if (!user.IsValid())
                     {
@@ -223,7 +239,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             {
                 UserId = user.Id,
                 Gender = GetEnumGender(request.Gender),
-                Birthday = user.Human?.Birthday,
+                Birthday = user?.Birthday,
                 SchoolName = request.School,
                 SchoolId = !string.IsNullOrEmpty(request.SchoolId) && Guid.TryParse(request.SchoolId, out Guid schoolId) ? schoolId : null,
             }, cancellationToken);
@@ -232,7 +248,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 methodResult.AddErrorBadRequest(updateCode.ErrorMessages);
                 return methodResult;
             }
-            var student = user.Human?.Student;
+            var student = user?.Student;
 
             await _lmsCourseService.SavePlacementTestDoneAsync(new SavePlacementTestDoneCommandModel { CourseLevel = GetCourseLevel(course.CourseLevel), StudentId = student?.Id ?? default });
             var orderResult = await SaveOrderAsync(user, course, request);
@@ -344,35 +360,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private static User CreateHumanToUser(User user, CreateUserStudentToAdminCommand request, EnumCourseLevel level)
-        {
-            Human human = new Human
-            {
-                Email = user.Email,
-                FullName = user.FullName,
-                Gender = GetEnumGender(request.Gender),
-                UserId = user.Id,
-                PhoneNumber = request.PhoneNumber,
-                Student = new Student
-                {
-                    Occupation = RoleStudent,
-                    SchoolId = !string.IsNullOrEmpty(request.SchoolId) && Guid.TryParse(request.SchoolId, out Guid schoolId) ? schoolId : null,
-                    School = request.School,
-                    CourseId = !string.IsNullOrEmpty(request.CourseId) && Guid.TryParse(request.CourseId, out Guid courseId) ? courseId : null,
-                }
-            };
-            if (string.IsNullOrEmpty(request.DateOfBirth))
-            {
-                human.Birthday = GetBirthdayToCourseLevel(level);
-            }
-            else if (DateTime.TryParse(request.DateOfBirth, out DateTime dateOfBirth))
-            {
-                human.Birthday = dateOfBirth;
-            }
-            user.Human = human;
-            return user;
         }
 
         private static EnumGender GetEnumGender(string? gender)

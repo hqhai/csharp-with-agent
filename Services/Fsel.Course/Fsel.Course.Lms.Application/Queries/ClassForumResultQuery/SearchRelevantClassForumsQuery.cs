@@ -154,7 +154,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                {
                    if (students != null && students.TryGetValue(item.StudentId, out var studentDto))
                    {
-                       item.CreatedFullName = studentDto.Human?.FullName;
+                       item.CreatedFullName = studentDto.User?.FullName;
                    }
 
                    var action = actions.FirstOrDefault(x => x.ObjectId == item.Id);

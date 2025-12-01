@@ -125,7 +125,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
                 {
                     item.Stars = NumberHelper.ConvertRound(item.Stars);
                     var teacher = teachers.FirstOrDefault(x => x.Id == item.TeacherId);
-                    item.FullName = teacher?.Human?.FullName;
+                    item.FullName = teacher?.User?.FullName;
                 }
             }
 
