@@ -19,6 +19,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestModels
         public bool IsArchive { get; set; }
         public int Version { get; set; }
         public EnumVersionStatus VersionStatus { get; set; }
+        public EnumVersion VersionType { get; set; }
         public bool IsActive { get; set; }
         public IList<TestSectionModel> TestSections { get; set; } = new List<TestSectionModel>();
     }

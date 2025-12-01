@@ -32,6 +32,12 @@ namespace Fsel.Course.Infrastructure.Configs
                     v => v.ToString(),
                     v => v.EnumParse<EnumVersionStatus>());
 
+            builder.Property(e => e.VersionType)
+                  .HasMaxLength(20)
+                  .HasConversion(
+                      v => v.ToString(),
+                      v => v.EnumParse<EnumVersion>());
+
             builder.HasOne(a => a.Program)
                    .WithMany(b => b.Videos)
                    .HasForeignKey(p => p.ProgramId)

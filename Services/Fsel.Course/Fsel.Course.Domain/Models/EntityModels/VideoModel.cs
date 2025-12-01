@@ -39,6 +39,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCourseLevel CourseLevel { get; set; }
         public LevelModel? Level { get; set; }
         public ProgramModel? Program { get; set; }
+        public EnumVersion VersionType { get; set; }
         public IList<VideoTimeCodeModel>? VideoTimeCodes { get; set; }
         public VideoResultModel? VideoResult { get; set; }
     }
