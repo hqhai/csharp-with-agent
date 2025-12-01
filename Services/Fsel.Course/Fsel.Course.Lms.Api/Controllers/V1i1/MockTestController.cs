@@ -16,7 +16,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/mock-test")]
     [ApiController]
-    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class MockTestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -39,7 +38,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         }
 
         /// <summary>
-        /// Create MockTestAnswers
+        /// Create MockTestAnswers5
         /// </summary>
         [HttpPost("test-azure")]
         [ProducesResponseType(typeof(MethodResult<PronunciationAssessmentModel>), (int)HttpStatusCode.OK)]

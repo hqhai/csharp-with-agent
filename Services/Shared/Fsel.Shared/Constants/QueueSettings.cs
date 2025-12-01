@@ -143,6 +143,7 @@ namespace Fsel.Shared.Constants
                 public const string JobStudentAggregate = $"{KeyQueue}_JobStudentAggregate";
                 public const string NotifyWeeklyReportCourseTarget = $"{KeyQueue}_NotifyWeeklyReportCourseTarget";
                 public const string NotifyWeeklyCourseGoalTarget = $"{KeyQueue}_NotifyWeeklyCourseGoalTarget";
+                public const string ClassForumPronunciationAi = $"{KeyQueue}_ClassForumPronunciationAi";
             }
         }
 
@@ -150,6 +151,8 @@ namespace Fsel.Shared.Constants
         {
             public const string KeyQueue = nameof(ExamPracticeQueue);
 
+                public const string SubmitQuestionShortAnswerWordBase = $"{KeyQueue}_SubmitQuestionShortAnswerWordBase";
+                public const string ClassForumPronunciationAi = $"{KeyQueue}_ClassForumPronunciationAi";
             public static class NameQueue
             {
                 public const string GetTimeExamPractice = $"{KeyQueue}_GetTimeExamPractice";

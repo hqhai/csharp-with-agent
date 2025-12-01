@@ -115,6 +115,7 @@ builder.Services.AddScoped<IProsodyScoreRepository, ProsodyScoreRepository>();
 builder.Services.AddScoped<ISpeakingAIService, SpeakingAIService>();
 builder.Services.AddScoped<ISpeakingEvaluationAIService, SpeakingEvaluationAIService>();
 builder.Services.AddScoped<IPronuciationAssessmentService, PronuciationAssessmentService>();
+builder.Services.AddScoped<IContinuousPronunciationAssessmentService, PronuciationAssessmentService>();
 builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
 builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
 builder.Services.AddScoped<IPlacementTestGroupResultRepository, PlacementTestGroupResultRepository>();
@@ -193,6 +194,7 @@ builder.Services.AddScoped<SavePlacementTestAnswersPublisher>();
 builder.Services.AddScoped<ErrorExplainPublisher>();
 builder.Services.AddScoped<ExportFileExcelSchoolLearningProcessPublisher>();
 builder.Services.AddScoped<SpeechToTextPendingAiPublisher>();
+builder.Services.AddScoped<ClassForumPronunciationPublisher>();
 builder.Services.AddScoped<ExportFileUserInformationSupportSalePublisher>();
 
 // Refit
@@ -237,6 +239,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.ExportExcelSchoolLearningProcess, typeof(ExportExcelSchoolLearningProcessConsumer) },
     { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.ClassForumPronunciationAi, typeof(ClassForumPronunciationConsumer) },
     { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
     { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
     { QueueSettings.LmsQueue.NameQueue.ExportExcelUserInformationSupportSale, typeof(ExportFileUserInformationSupportSaleConsumer) },
