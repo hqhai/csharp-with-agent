@@ -843,6 +843,7 @@ namespace Fsel.Course.Infrastructure.Common
                 Name = keyboardText.Name,
                 Unicode = keyboardText.Unicode,
                 FilePath = keyboardText.FilePath,
+                VectorLibrary = keyboardText.VectorLibrary
             }).FirstOrDefault(x => x.Id == keyboardTextId);
         }
     }
