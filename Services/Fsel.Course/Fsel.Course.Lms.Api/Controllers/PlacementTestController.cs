@@ -162,6 +162,14 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
+        [HttpGet("get-test-result-detail/{id:guid}")]
+        public async Task<IActionResult> GetTestResultDetail(Guid id)
+        {
+            var getTestResultDetailQuery = new GetTestResultDetailQuery { TestResultId = id };
+            var queryResult = await _mediator.Send(getTestResultDetailQuery).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
         [HttpPost("select/{projectId:guid}")]
         public async Task<IActionResult> SelectPtFlowByProgramId(Guid projectId)
         {

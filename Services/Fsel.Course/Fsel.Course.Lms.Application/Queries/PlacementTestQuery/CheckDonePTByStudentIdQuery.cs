@@ -32,12 +32,19 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             ArgumentNullException.ThrowIfNull(request);
 
             var testGroupResult = await _testGroupResult.Queryable
-                .Include(x => x.Level)
+                .Include(x => x.CurrentLevel)
                 .FirstOrDefaultAsync(x => x.StudentId == request.StudentId
                                           && x.TestType == EnumTestType.PlacementTest,
                     cancellationToken);
 
-            var ptState = new PtStateModel { Level = testGroupResult?.Level?.Name, Status = testGroupResult?.Status ?? EnumResultStatus.NotStarted };
+            var ptState = new PtStateModel
+            {
+                FlowId = testGroupResult?.FlowId,
+                TestGroupResultId = testGroupResult?.Id,
+                StudentId = request.StudentId,
+                Level = testGroupResult?.CurrentLevel?.Name,
+                Status = testGroupResult?.Status ?? EnumResultStatus.NotStarted
+            };
 
             return new MethodResult<PtStateModel> { StatusCode = StatusCodes.Status200OK, Result = ptState };
         }
