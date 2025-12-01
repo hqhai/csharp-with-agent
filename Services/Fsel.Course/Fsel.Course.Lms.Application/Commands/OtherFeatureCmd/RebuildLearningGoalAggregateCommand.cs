@@ -147,7 +147,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return new();
             }
-            var (weekStart, weekEnd) = DateTimeHelper.GetCurrentWeekRangeUtc(dateNow);
+            var (weekStart, weekEnd) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeUtc(dateNow);
             var keyDtos = keys.Distinct().Select(k => new { k.StudentId, k.CourseId }).ToList();
 
             var rows = await _lessonResultRepository.Queryable.AsNoTracking()
@@ -183,7 +183,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 return new();
             }
             var keyDtos = keys.Distinct().Select(k => new { k.StudentId, k.CourseId }).ToList();
-            var (weekStart, weekEnd) = DateTimeHelper.GetCurrentWeekRangeUtc(dateNow);
+            var (weekStart, weekEnd) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeUtc(dateNow);
 
             var rows = await _lessonResultRepository.Queryable.AsNoTracking()
                 .Where(x => (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= weekEnd)
@@ -410,7 +410,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow(today);
+            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow(today);
             var toInsert = new List<StudentGoalSummary>();
             var courseGoalById = allCourseGoals.ToDictionary(g => g.Id);
 
@@ -461,7 +461,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
         public async Task<IDictionary<Guid, IReadOnlyList<EnumProgressStatus>>> GetOrderedProgressStatusesBeforeAsync(DateTime toDate, CancellationToken cancellationToken = default)
         {
-            var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow(toDate);
+            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow(toDate);
             // 1. Query: filter + sort theo AggregateId + mốc thời gian
             var items = await _studentLearningGoalSummaryRepository.Queryable
                 .AsNoTracking()
@@ -487,9 +487,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             return result;
         }
 
-        public async Task<IDictionary<Guid, IReadOnlyList<DateTime>>> GetStartDateAsync(DateTime toDate, CancellationToken cancellationToken = default)
+        public async Task<IDictionary<Guid, IReadOnlyList<DateTime>>> GetStartDateAsync(CancellationToken cancellationToken = default)
         {
-            var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow(toDate);
             // 1. Query: filter + sort theo AggregateId + mốc thời gian
             var items = await _studentLearningGoalSummaryRepository.Queryable
                 .AsNoTracking()
@@ -573,7 +572,10 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             {
                 return;
             }
-            var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow(toDate);
+
+            var nextWeekBaseDateUtc = toDate.AddDays(7);
+
+            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow(nextWeekBaseDateUtc);
             var toInsert = new List<StudentGoalSummary>();
             var updatedAggregates = new List<StudentGoalAggregate>();
             var courseGoalById = allCourseGoals.ToDictionary(g => g.Id);
@@ -583,7 +585,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 .AsNoTracking()
                 .WhereBulkContains(courseStudents, new[] { "CourseId", "StudentId" })
                 .ToListAsync(ct);
-            var summarieDates = await GetStartDateAsync(toDate, ct);
+            var summarieDates = await GetStartDateAsync(ct);
 
             foreach (var ag in aggregates)
             {
