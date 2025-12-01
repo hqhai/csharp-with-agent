@@ -2,7 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
-    using Fsel.Course.Lms.Application.Commands.AiCmd;
+    using Fsel.Course.Lms.Application.Commands.AiCmd.V1i2;
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Core.Base;

@@ -60,7 +60,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                                               ILogger<SubmitAIResponseCommandHandler> logger,
                                               IAiCriteriaConfigRepository aiCriteriaConfigRepository,
                                               IAiPromptManagerRepository aiPromptManagerRepository,
-                                              IClassForumRepository classForumRepository)
+                                              IClassForumRepository classForumRepository
+            )
         {
             _lessonResultRepository = lessonResultRepository;
             _submitAIResponsePublisher = submitAIResponsePublisher;
@@ -86,11 +87,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var checkForbidden = await _mediator.Send(new CheckForbiddenClassForumCommand { ClassForumDetailResultId = request.ClassForumDetailResultId }, cancellationToken);
-            if (checkForbidden != null && checkForbidden.Result)
-            {
-                return false;
-            }
+            //var checkForbidden = await _mediator.Send(new CheckForbiddenClassForumCommand { ClassForumDetailResultId = request.ClassForumDetailResultId }, cancellationToken);
+            //if (checkForbidden != null && checkForbidden.Result)
+            //{
+            //    return false;
+            //}
 
             try
             {
@@ -139,7 +140,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                             Subject = ValueSettings.CustomerSupport.TitleMail.Format(emailStudent ?? default),
                             CcEmails = _appSetting.CustomerSupportConfig.CCEmail
                         };
-                        await _senderService.SendEmailAsync(model);
+                        //await _senderService.SendEmailAsync(model);
 
                         return new UserAiModel
                         {
@@ -148,36 +149,54 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                         };
                     }
 
-                    var classForum = await _classForumRepository.ReadQueryable.FirstOrDefaultAsync(x=> x.Id == classForumDetailResult.ClassForumResult.ClassForumId);
+                    var classForum = await _classForumRepository.GetByIdAsync(classForumDetailResult.ClassForumResult.ClassForumId);
                     var aiConfig = await _aiCriteriaConfigRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == classForum.AiPromptCriteriaId, cancellationToken);
                     var aiModel = await _aiPromptManagerRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == aiConfig.AiPromptManagerId, cancellationToken);
-    
-                    var successCriteriaSchema = ConvertHelper.DeserializeFromFilePath<object>(aiConfig.SettingAiJson);
+
+                    var successCriteriaSchema = ConvertHelper.Deserialize<object>(aiConfig.SettingAiJson);
 
                     var aIResponse = await _mediator.Send(new V1i1.SubmitAICommand
                     {
                         SettingModel = aiModel.InputModel,
-                        SettingTemperature = (double)aiConfig.SettingTemperature,
-                        SettingFrequecy = (double)aiConfig.SettingFrequency,
-                        SettingWordMaxLength = (double)aiConfig.SettingWordMaxLength,
-                        SettingPresence = (double)aiConfig.SettingPresence,
-                        SettingTopP = (double)aiConfig.SettingTopP,
+                        SettingTemperature = aiConfig.SettingTemperature ?? 1d,
+                        SettingFrequecy = aiConfig.SettingFrequency ?? 1d,
+                        SettingWordMaxLength = aiConfig.SettingWordMaxLength ?? 1000d,
+                        SettingPresence = aiConfig.SettingPresence ?? 1d,
+                        SettingTopP = aiConfig.SettingTopP ?? 1d,
                         SystemRoleAlConfig = aiConfig.UserRole,
                         UserAIConfig = aiConfig.SettingAiConfig,
                         Text = successCriteriaSchema,
                         NameSchema = NameSchema
                     }, cancellationToken).ConfigureAwait(false);
+                    _logger.LogInformation(
+    "SubmitAIResponseCommand Id: {Id} raw AI response: {Response}",
+    request.ClassForumDetailResultId,
+    aIResponse
+);
+                    if (string.IsNullOrWhiteSpace(aIResponse))
+                    {
+                        _logger.LogWarning(
+                            "SubmitAIResponseCommand Id: {Id} AI response is empty",
+                            request.ClassForumDetailResultId
+                        );
 
+                        return new UserAiModel
+                        {
+                            ClassForumAIs = null,
+                            ConditionRetry = false
+                        };
+                    }
                     aIResponse = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
                     var doc = JsonDocument.Parse(aIResponse);
-                    var items = doc.RootElement.GetProperty("parameters");
+                    var parameters = doc.RootElement.GetProperty("parameters");
+                    var feedbackElement = parameters.GetProperty("feedback");
 
                     _logger.LogCritical($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} userAiConfig: {aiConfig.SettingAiConfig}");
 
                     _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} userAiConfig: {aiConfig.SettingAiConfig}");
                     _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} aIResponse: {aIResponse}");
 
-                    var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAiResponseModel>?>(items);
+                    var classForumAIs = ConvertHelper.Deserialize<List<ClassForumAiResponseModel>?>(feedbackElement);
 
                     _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumAIs: {classForumAIs.Serialize()}");
 

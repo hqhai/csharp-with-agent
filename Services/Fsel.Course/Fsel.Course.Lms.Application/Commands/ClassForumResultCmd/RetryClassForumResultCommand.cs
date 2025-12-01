@@ -87,18 +87,18 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             if (classForum != null && classForumResult != null && classForum.IsAlFeedBack)
             {
-                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModelV2
                 {
                     ClassForumResultId = classForumResult.Id,
                     WordContent = wordContent,
-                    UserAIConfig = classForum.UserAlConfig,
-                    SettingModel = classForum.SettingModel,
-                    SettingFrequecy = classForum.SettingFrequecy,
-                    SettingPresence = classForum.SettingPresence,
-                    SettingTemperature = classForum.SettingTemperature,
-                    SettingTopP = classForum.SettingTopP,
-                    SettingWordMaxLength = classForum.SettingWordMaxLength,
-                    SystemRoleAlConfig = classForum.SystemRoleAlConfig,
+                    //UserAIConfig = classForum.UserAlConfig,
+                    //SettingModel = classForum.SettingModel,
+                    //SettingFrequecy = classForum.SettingFrequecy,
+                    //SettingPresence = classForum.SettingPresence,
+                    //SettingTemperature = classForum.SettingTemperature,
+                    //SettingTopP = classForum.SettingTopP,
+                    //SettingWordMaxLength = classForum.SettingWordMaxLength,
+                    //SystemRoleAlConfig = classForum.SystemRoleAlConfig,
                     IsRetry = true,
                 }, cancellationToken);
             }
