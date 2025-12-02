@@ -218,11 +218,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                 }
             }
 
-            var totalItem = ordered.Count();
-
             var pagedLists = ordered
                 .AsQueryable()
-                .ApplyPaging(request)
                 .ToList();
 
             methodResult.Result = pagedLists;
