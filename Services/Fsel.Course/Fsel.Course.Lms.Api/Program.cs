@@ -133,6 +133,7 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IVideoSubFilePathRepository, VideoSubFilePathRepository>();
 builder.Services.AddScoped<IStudentGoalAggregateRepository, StudentGoalAggregateRepository>();
 builder.Services.AddScoped<IStudentGoalSummaryRepository, StudentGoalSummaryRepository>();
+builder.Services.AddScoped<IStatusStudentGoalRepository, StatusStudentGoalRepository>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
