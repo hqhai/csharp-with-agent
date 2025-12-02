@@ -149,7 +149,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
                 item.ClassCampusCode = student!.ClassCampusCode;
                 item.StudentCampusCode = student.StudentCampusCode;
-                item.PhoneNumber = student?.User?.PhoneNumber;
+                item.PhoneNumber = student?.Human?.PhoneNumber;
                 item.StatusStudentCampus = student?.StatusStudentCampus;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
