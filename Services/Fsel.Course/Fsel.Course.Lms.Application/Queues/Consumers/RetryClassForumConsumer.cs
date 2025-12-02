@@ -26,15 +26,6 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
                 WordContent = message?.WordContent ?? default,
                 IsRetry = message?.IsRetry ?? default,
                 SubmissionCount = message?.SubmissionCount ?? default,
-                //SettingModel = message?.SettingModel ?? default,
-                //SettingTemperature = message?.SettingTemperature ?? default,
-                //SettingWordMaxLength = message?.SettingWordMaxLength ?? default,
-                //SettingTopP = message?.SettingTopP ?? default,
-                //SettingFrequecy = message?.SettingFrequecy ?? default,
-                //SettingPresence = message?.SettingPresence ?? default,
-                //SystemRoleAlConfig = message?.SystemRoleAlConfig ?? default,
-                //UserAIConfig = message?.UserAIConfig ?? default
-
             }).ConfigureAwait(false);
         }
     }

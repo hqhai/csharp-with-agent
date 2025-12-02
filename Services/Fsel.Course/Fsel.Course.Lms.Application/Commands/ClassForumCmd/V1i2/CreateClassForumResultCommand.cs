@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             _environment = environment;
             _classForumResultFileRepository = classForumResultFileRepository;
             _aiCriteriaConfigRepository = aiCriteriaConfigRepository;
-            _aiPromptManagerRepository = aiPromptManagerRepository; 
+            _aiPromptManagerRepository = aiPromptManagerRepository;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -456,31 +456,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
         {
             if (classForum.IsAlFeedBack)
             {
-                var aiCriteria = new AICriteriaConfigs();
-                aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == classForum.AiPromptCriteriaId, cancellationToken);
-                if (aiCriteria == null && classForum.CourseSkill == EnumCourseSkill.Writing)
-                {
-                    aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable.FirstOrDefaultAsync(x => x.SubFeatureType == EnumSubFeatureType.ClassForumWriting, cancellationToken);
-                }
-
-                if(aiCriteria == null && classForum.CourseSkill == EnumCourseSkill.Writing)
-                {
-                    aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable.FirstOrDefaultAsync(x => x.SubFeatureType == EnumSubFeatureType.ClassForumSpeaking, cancellationToken);
-                }
-                var aiModel = await _aiPromptManagerRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == aiCriteria.AiPromptManagerId, cancellationToken);
                 await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModelV2
                 {
                     ClassForumResultId = classForumDetailResult.ClassForumResultId,
                     ClassForumDetailResultId = classForumDetailResult.Id,
                     WordContent = request.WordContent,
-                    //UserAIConfig = aiCriteria!.SettingAiConfig,
-                    //SettingModel = aiModel!.AiModelName,
-                    //SettingFrequecy = aiCriteria.SettingFrequency ?? 1d,
-                    //SettingPresence = aiCriteria.SettingPresence ?? 1d!,
-                    //SettingTemperature = aiCriteria.SettingTemperature ?? 1d,
-                    //SettingTopP = aiCriteria.SettingTopP ?? 1d,
-                    //SettingWordMaxLength = aiCriteria.SettingWordMaxLength ?? 1000d,
-                    //SystemRoleAlConfig = aiCriteria.UserRole,
                     SubmissionCount = classForumDetailResult.SubmissionCount ?? default
                 }, cancellationToken);
             }

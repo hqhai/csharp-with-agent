@@ -91,14 +91,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                 {
                     ClassForumResultId = classForumResult.Id,
                     WordContent = wordContent,
-                    //UserAIConfig = classForum.UserAlConfig,
-                    //SettingModel = classForum.SettingModel,
-                    //SettingFrequecy = classForum.SettingFrequecy,
-                    //SettingPresence = classForum.SettingPresence,
-                    //SettingTemperature = classForum.SettingTemperature,
-                    //SettingTopP = classForum.SettingTopP,
-                    //SettingWordMaxLength = classForum.SettingWordMaxLength,
-                    //SystemRoleAlConfig = classForum.SystemRoleAlConfig,
                     IsRetry = true,
                 }, cancellationToken);
             }

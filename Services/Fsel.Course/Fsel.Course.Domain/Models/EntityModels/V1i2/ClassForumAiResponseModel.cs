@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Models.EntityModels.V1i2
 {
     using System.Text.Json.Serialization;
+    using Shared.Enums;
 
     public class ClassForumAiResponseModel
     {
@@ -38,12 +39,5 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i2
 
         [JsonPropertyName("explanationAndGuidance")]
         public string? ExplanationAndGuidance { get; set; }
-    }
-
-    public enum SuccessCriteriaItemDetermination
-    {
-        Yes,
-        No,
-        Partial
     }
 }
