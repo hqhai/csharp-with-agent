@@ -4,6 +4,7 @@ using Fsel.Identity.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fsel.Identity.Infrastructure.Migrations
 {
     [DbContext(typeof(UserDbContext))]
-    partial class UserDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251119034557_Update_Table_Student")]
+    partial class Update_Table_Student
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -3695,10 +3698,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                     b.Property<Guid?>("SchoolId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("StatusStudentCampus")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("StudentCampusCode")
                         .HasColumnType("nvarchar(max)");
 
@@ -3729,7 +3728,7 @@ namespace Fsel.Identity.Infrastructure.Migrations
 
                     b.HasIndex("IsDeleted", "SchoolId", "SchoolClass");
 
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "SchoolId", "SchoolClass"), new[] { "BaseCourseLevel", "BeginnerGuideStr", "ClassCampusCode", "ClassId", "CourseId", "CourseLevel", "CreatedByParent", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DistrictId", "ExpiredDate", "HumanId", "NumberOfShield", "Occupation", "PackageId", "ParentEmail", "ParentPhoneNumber", "ProvinceId", "School", "SchoolClassId", "SchoolFaculty", "SchoolGrade", "StatusStudentCampus", "StudentCampusCode", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("IsDeleted", "SchoolId", "SchoolClass"), new[] { "BaseCourseLevel", "BeginnerGuideStr", "ClassCampusCode", "ClassId", "CourseId", "CourseLevel", "CreatedByParent", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DistrictId", "ExpiredDate", "HumanId", "NumberOfShield", "Occupation", "PackageId", "ParentEmail", "ParentPhoneNumber", "ProvinceId", "School", "SchoolClassId", "SchoolFaculty", "SchoolGrade", "StudentCampusCode", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
                     b.ToTable("Students", t =>
                         {
@@ -5842,7 +5841,6 @@ namespace Fsel.Identity.Infrastructure.Migrations
                         .HasForeignKey("SchoolClassId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-
                     b.Navigation("Human");
 
                     b.Navigation("SchoolClassCampus");
@@ -6130,6 +6128,11 @@ namespace Fsel.Identity.Infrastructure.Migrations
             modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserGroup", b =>
                 {
                     b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("Fsel.Identity.Domain.Entities.UserSetting", b =>
+                {
+                    b.Navigation("UserSenderSettings");
                 });
 #pragma warning restore 612, 618
         }

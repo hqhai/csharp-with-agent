@@ -34,5 +34,6 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public bool? EmailConfirm { get; set; }
         public bool IsLearnStudent { get; set; }
         public bool? IsDeleted { get; set; }
+        public string? StudentCampusCode { get; set; }
     }
 }
