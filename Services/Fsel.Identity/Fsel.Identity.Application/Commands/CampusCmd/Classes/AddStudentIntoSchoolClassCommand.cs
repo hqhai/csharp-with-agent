@@ -405,9 +405,10 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                                         SchoolId = schoolId,
                                         School = school.LocationName,
                                         CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
-                                   
-                                    StudentCampusCode = !string.IsNullOrEmpty(student.StudentCampusCode) ? student.StudentCampusCode.Trim() : null,
-                                    ClassCampusCode = !string.IsNullOrEmpty(student.ClassCampusCode) ? student.ClassCampusCode.Trim() : null,
+                                        StudentCampusCode = !string.IsNullOrEmpty(student.StudentCampusCode) ? student.StudentCampusCode.Trim() : null,
+                                        ClassCampusCode = !string.IsNullOrEmpty(student.ClassCampusCode) ? student.ClassCampusCode.Trim() : null,
+                                        StatusStudentCampus = EnumStatusStudentCampus.Normal
+                                    }
                                 },
                                 UserPlatforms = new List<UserPlatform>()
                                     {

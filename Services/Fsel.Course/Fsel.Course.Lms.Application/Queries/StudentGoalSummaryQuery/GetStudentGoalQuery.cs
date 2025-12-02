@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
     using Domain.IRepositories;
     using Domain.Models.EntityModels;
     using Domain.Models.QueryModels.StudentProgress;
+    using Fsel.Core.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -75,11 +76,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                 query = query.Where(x => x.CombinedProgress == request.CombinedProgress);
             }
 
-            // if (request.StatusStudentGoal.HasValue)
-            // {
-            //     query = query.Where(x => x.StatusStudentGoal == request.StatusStudentGoal);
-            // }
-
             if (!string.IsNullOrEmpty(request.ClassIdStr))
             {
                 var classIds = request.ClassIdStr.ToList<Guid>();
@@ -140,26 +136,43 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
             foreach (var item in lists)
             {
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
-                item.FullName = student?.User?.FullName;
-                item.Email = student?.User?.Email;
-                item.UserId = student?.User?.Id;
+                item.FullName = student?.Human?.FullName;
+                item.Email = student?.Human?.Email;
+                item.UserId = student?.Human?.UserId;
                 item.ClassCampusCode = student?.ClassCampusCode;
                 item.StudentCampusCode = student?.StudentCampusCode;
-                item.PhoneNumber = student?.User?.PhoneNumber;
+                item.PhoneNumber = student?.Human?.PhoneNumber;
                 item.StatusStudentCampus =  student?.StatusStudentCampus;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
                     item.IsActive = totalScore <= item.TotalTargetLessons;
                 }
             }
-            //
-            // if (!string.IsNullOrEmpty(request.ClassCampusCode))
-            // {
-            //     lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
-            // }
+
+            if (!string.IsNullOrEmpty(request.ClassCampusCode))
+            {
+                var classCampusCodes = request.ClassCampusCode.ToList<string>();
+
+                lists = lists
+                    .Where(l => !string.IsNullOrEmpty(l.ClassCampusCode) && classCampusCodes.Contains(l.ClassCampusCode!))
+                    .ToList();
+            }
+
+            if (!string.IsNullOrEmpty(request.StudentCampusCode))
+            {
+                lists = lists.Where(l => l.StudentCampusCode == request.StudentCampusCode).ToList();
+            }
+
+            if (request.StatusStudentCampus != null && request.StatusStudentCampus.Any())
+            {
+                var statusList = request.StatusStudentCampus;
+                ;
+                lists = lists.Where(l => l.StatusStudentCampus.HasValue && statusList.Contains(l.StatusStudentCampus.Value))
+                    .ToList();
+            }
 
             IEnumerable<StudentGoalAggregateModel> ordered = lists;
-
+            ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
             if (!string.IsNullOrEmpty(request.SortCompletedLessons))
             {
                 if (request.SortCompletedLessons.Equals("desc", StringComparison.OrdinalIgnoreCase))
@@ -171,7 +184,29 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                     ordered = ordered.OrderBy(l => l.TotalCompletedLessons);
                 }
             }
-            else if (!string.IsNullOrEmpty(request.SortDir))
+            if (!string.IsNullOrEmpty(request.SortCompletedConfig))
+            {
+                if (request.SortCompletedConfig.Equals("desc", StringComparison.OrdinalIgnoreCase))
+                {
+                    ordered = ordered.OrderByDescending(l => l.TotalTargetLessons);
+                }
+                else
+                {
+                    ordered = ordered.OrderBy(l => l.TotalTargetLessons);
+                }
+            }
+            if (!string.IsNullOrEmpty(request.SortSlowProgress))
+            {
+                if (request.SortSlowProgress.Equals("desc", StringComparison.OrdinalIgnoreCase))
+                {
+                    ordered = ordered.OrderByDescending(l => l.ConsecutiveBehindWeeks);
+                }
+                else
+                {
+                    ordered = ordered.OrderBy(l => l.ConsecutiveBehindWeeks);
+                }
+            }
+            if (!string.IsNullOrEmpty(request.SortDir))
             {
                 if (request.SortDir.Equals("za", StringComparison.OrdinalIgnoreCase))
                 {
@@ -182,12 +217,12 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                     ordered = ordered.OrderBy(l => l.FullName ?? string.Empty);
                 }
             }
-            else
-            {
-                ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
-            }
+
+            var totalItem = ordered.Count();
+
             var pagedLists = ordered
                 .AsQueryable()
+                .ApplyPaging(request)
                 .ToList();
 
             methodResult.Result = pagedLists;

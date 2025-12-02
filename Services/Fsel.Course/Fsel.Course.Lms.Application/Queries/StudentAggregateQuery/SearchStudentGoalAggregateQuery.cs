@@ -138,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 .ToListAsync(cancellationToken);
 
             var summarySumMap = summarys.GroupBy(s => s.StudentGoalAggregateId)
-                .ToDictionary(g => g.Key, g => g.Sum(x => x.LessonsPerWeek)); // hoặc x.TotalPercent
+                .ToDictionary(g => g.Key, g => g.Sum(x => x.LessonsPerWeek));
 
             foreach (var item in lists)
             {
@@ -146,20 +146,23 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 item.FullName = student?.Human?.FullName;
                 item.Email = student?.Human?.Email;
                 item.UserId = student?.Human?.UserId;
-
                 item.ClassCampusCode = student!.ClassCampusCode;
                 item.StudentCampusCode = student.StudentCampusCode;
                 item.PhoneNumber = student?.Human?.PhoneNumber;
                 item.StatusStudentCampus = student?.StatusStudentCampus;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
-                    item.IsActive = totalScore <= item.TotalTargetLessons; // hoặc logic khác tùy ngưỡng bạn muốn
+                    item.IsActive = totalScore <= item.TotalTargetLessons;
                 }
             }
 
             if (!string.IsNullOrEmpty(request.ClassCampusCode))
             {
-                lists = lists.Where(l => l.ClassCampusCode == request.ClassCampusCode).ToList();
+                var classCampusCodes = request.ClassCampusCode.ToList<string>();
+
+                lists = lists
+                    .Where(l => !string.IsNullOrEmpty(l.ClassCampusCode) && classCampusCodes.Contains(l.ClassCampusCode!))
+                    .ToList();
             }
 
             if (!string.IsNullOrEmpty(request.StudentCampusCode))
@@ -167,10 +170,14 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 lists = lists.Where(l => l.StudentCampusCode == request.StudentCampusCode).ToList();
             }
 
-            if (request.StatusStudentCampus != null)
+            if (request.StatusStudentCampus != null && request.StatusStudentCampus.Any())
             {
-                lists = lists.Where(l => l.StatusStudentCampus == request.StatusStudentCampus).ToList();
+                var statusList = request.StatusStudentCampus;
+                ;
+                lists = lists.Where(l => l.StatusStudentCampus.HasValue && statusList.Contains(l.StatusStudentCampus.Value))
+                    .ToList();
             }
+
 
             IEnumerable<StudentGoalAggregateModel> ordered = lists;
             ordered = ordered.OrderByDescending(l => l.TotalCompletedLessons);
