@@ -49,21 +49,18 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
 
         public GetStudentEventRegistrationsQueryHandler(ICompetitionEventsRepository competitionEventsRepository,
             IStudentRepository studentRepository,
             ISystemService systemService,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-            IHumanRepository humanRepository,
             UserManager<User> userManager)
         {
             _competitionEventsRepository = competitionEventsRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
-            _humanRepository = humanRepository;
             _userManager = userManager;
         }
 
@@ -102,25 +99,24 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                 eventRegistrations = await (from baseQ in _studentRepository.Queryable.Where(x => x.CourseId.HasValue)
                                             join sce in _studentCompetitionEventsRepository.Queryable.WhereBulkContains(competitionEventIds, x => x.CompetitionEventId) on baseQ.Id equals sce.StudentId
                                             join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id
-                                            join h in _humanRepository.Queryable on baseQ.HumanId equals h.Id
-                                            join u in _userManager.Users on h.UserId equals u.Id
+                                            join u in _userManager.Users on baseQ.UserId equals u.Id
                                             where (!request.StudentId.HasValue || baseQ.Id == request.StudentId.Value)
                                             && baseQ.CourseLevel.HasValue
                                             && courseLevels.Contains(baseQ.CourseLevel.Value)
                                             select new EventRegistrationModel
                                             {
                                                 StudentId = baseQ.Id,
-                                                BirthDay = h.Birthday,
+                                                BirthDay = u.Birthday,
                                                 District = ce.Name,
                                                 UserName = u.UserName,
                                                 DistrictId = ce.LocationId,
-                                                Email = h.Email,
+                                                Email = u.Email,
                                                 ExpiredDate = baseQ.ExpiredDate,
-                                                FullName = h.FullName,
+                                                FullName = u.FullName,
                                                 IsBussinessCheckBox = false,
                                                 ParentEmail = baseQ.ParentEmail,
                                                 ParentPhoneNumber = baseQ.ParentPhoneNumber,
-                                                PhoneNumber = h.PhoneNumber,
+                                                PhoneNumber = u.PhoneNumber,
                                                 Province = string.Empty,
                                                 ProvinceId = baseQ.ProvinceId ?? ce.LocationId,
                                                 School = baseQ.School,
@@ -153,24 +149,23 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
                                             join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id into ceGroup
                                             from ce in ceGroup.DefaultIfEmpty()
 
-                                            join h in _humanRepository.Queryable on baseQ.HumanId equals h.Id
-                                            join u in _userManager.Users.WhereBulkContains(request.UserNames, x => x.UserName) on h.UserId equals u.Id
+                                            join u in _userManager.Users.WhereBulkContains(request.UserNames, x => x.UserName) on baseQ.UserId equals u.Id
                                             where (!request.StudentId.HasValue || baseQ.Id == request.StudentId.Value)
                                             && baseQ.CourseLevel.HasValue
                                             && courseLevels.Contains(baseQ.CourseLevel.Value)
                                             select new EventRegistrationModel
                                             {
                                                 StudentId = baseQ.Id,
-                                                BirthDay = h.Birthday,
+                                                BirthDay = u.Birthday,
                                                 UserName = u.UserName,
                                                 DistrictId = baseQ.DistrictId ?? ce.LocationId,
-                                                Email = h.Email,
+                                                Email = u.Email,
                                                 ExpiredDate = baseQ.ExpiredDate,
-                                                FullName = h.FullName,
+                                                FullName = u.FullName,
                                                 IsBussinessCheckBox = false,
                                                 ParentEmail = baseQ.ParentEmail,
                                                 ParentPhoneNumber = baseQ.ParentPhoneNumber,
-                                                PhoneNumber = h.PhoneNumber,
+                                                PhoneNumber = u.PhoneNumber,
                                                 ProvinceId = baseQ.ProvinceId ?? ce.LocationId,
                                                 School = baseQ.School,
                                                 SchoolClass = baseQ.SchoolClass,

@@ -24,12 +24,6 @@ namespace Fsel.Realtime.Application.Queues.Consumers
             if (message != null)
             {
                 await _discussionBoardHubContext.Clients.All.SendAsync(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, message);
-
-                //try
-                //{
-                //    _queueProvider.Publish(RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, RealtimeSettings.DiscussionBoardHub.Methods.CommentLikeMessage, message);
-                //}
-                //catch { }
             }
         }
     }

@@ -33,17 +33,14 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly UserManager<User> _userManager;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly RoleManager<Role> _roleManager;
-        private readonly IHumanRepository _humanRepository;
 
         public GetUserManagesByRoleQueryHandler(UserManager<User> userManager,
                                                 IUserRoleRepository userRoleRepository,
-                                                RoleManager<Role> roleManager,
-                                                IHumanRepository humanRepository)
+                                                RoleManager<Role> roleManager)
         {
             _userManager = userManager;
             _userRoleRepository = userRoleRepository;
             _roleManager = roleManager;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<UserManageModel>>> Handle(GetUserManagesByRoleQuery request, CancellationToken cancellationToken)
@@ -52,8 +49,6 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             MethodResult<PagingItemsModel<UserManageModel>> methodResult = new MethodResult<PagingItemsModel<UserManageModel>>();
 
             var userQuerys = from a in _userManager.Users
-                             join h in _humanRepository.Queryable on a.Id equals h.UserId into human
-                             from h in human.DefaultIfEmpty()
                              join ur in _userRoleRepository.GetQuery() on a.Id equals ur.UserId
                              join r in _roleManager.Roles on ur.RoleId equals r.Id
                              where r.Name == request.Role.ToString()
@@ -63,10 +58,10 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                  FullName = a.FullName,
                                  Email = a.Email,
                                  PhoneNumber = a.PhoneNumber,
-                                 Birthday = h.Birthday,
-                                 Gender = h.Gender,
-                                 Position = h.Position,
-                                 ManageUserId = h.ManageUserId,
+                                 Birthday = a.Birthday,
+                                 Gender = a.Gender,
+                                 Position = a.Position,
+                                 ManageUserId = a.ManageUserId,
                                  RoleId = ur.RoleId,
                                  GroupName = r.Name,
                                  UserName = a.UserName,

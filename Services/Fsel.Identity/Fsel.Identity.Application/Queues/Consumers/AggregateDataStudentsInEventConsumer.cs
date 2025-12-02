@@ -14,14 +14,15 @@ namespace Fsel.Identity.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(BaseQueueModel? message)
+        public override Task ConsumeQueue(BaseQueueModel? message)
         {
             if (message == null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
-            await _mediator.Send(new AggregateDataStudentsInEventCommand()).ConfigureAwait(false);
+            _ = Task.Run(async () => await _mediator.Send(new AggregateDataStudentsInEventCommand()).ConfigureAwait(false));
+            return Task.CompletedTask;
         }
     }
 }

@@ -96,11 +96,6 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
             }
             else if (request.IsSurveyPT)
             {
-                if (!student.CourseLevel.HasValue)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.CourseLevel));
-                    return methodResult;
-                }
                 var eventResults = await _userService.GetEventByUserId(_authContext.CurrentUserId);
                 if (!eventResults.IsSuccessStatusCode)
                 {
@@ -112,9 +107,9 @@ namespace Fsel.Interaction.Application.Commands.CustomerSurveyCmd
                 var checkSurveyPTResult = await _mediator.Send(new CheckSurveyPTQuery()
                 {
                     CompetitionEventId = events?.FirstOrDefault()?.Id,
-                    CourseLevel = student.CourseLevel.Value,
+                    CourseLevel = student.CourseLevel,
                     SurveyFormType = events != null && events.Any() ? EnumSurveyFormType.Event : EnumSurveyFormType.Default,
-                    CourseType = EnumCourseLevelHelper.GetEnumCourseType(student.CourseLevel.Value)
+                    CourseType = EnumCourseLevelHelper.GetEnumCourseType(student.CourseLevel)
                 }, cancellationToken);
 
                 if (!checkSurveyPTResult.IsOK)

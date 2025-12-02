@@ -26,8 +26,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<InteractionDbContext>();
 
 builder.Services.AddScoped<ISurveyQuestionRepository, SurveyQuestionRepository>();

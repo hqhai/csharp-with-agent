@@ -62,9 +62,8 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
             var studentIds = studentGoalSummaries.Select(x => x.StudentId).ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             var students = studentResults?.Content?.Result ?? new List<StudentModel>();
-            var userIds = students.Where(x => x.Human != null).Select(x => x.Human!)
-                                   .Where(x => x.UserId.HasValue)
-                                   .Select(x => x.UserId!.Value).ToList();
+            var userIds = students.Where(x => x.UserId != Guid.Empty)
+                                   .Select(x => x.UserId).ToList();
 
             var featureAccessTimeResults = await _systemService.GetFeatureAccessTimeRangeByUserIds(new GetFeatureAccessTimesByUserIdsQueryModel
             {
@@ -87,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd
                     continue;
                 }
 
-                var userId = student.Human?.UserId ?? default;
+                var userId = student?.UserId ?? default;
                 var sgs = studentGoalSummary.StudentGoalSummary;
                 var featureAccessTime = featureAccessTimes?.FirstOrDefault(x => x.CreatedUserId == userId);
                 var (hours, minutes) = (featureAccessTime?.AccessTime ?? default).ConvertHoursAndMinutesBySeconds();

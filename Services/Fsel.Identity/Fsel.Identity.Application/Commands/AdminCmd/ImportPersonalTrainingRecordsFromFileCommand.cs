@@ -30,21 +30,18 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<User> _userManager;
         private readonly ILmsCourseService _lmsCourseService;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
 
         public ImportPersonalTrainingRecordsFromFileCommandHandler(IMediator mediator,
             IHttpContextAccessor httpContextAccessor,
             UserManager<User> userManager,
             ILmsCourseService lmsCourseService,
-            IHumanRepository humanRepository,
             IStudentRepository studentRepository)
         {
             _mediator = mediator;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
             _lmsCourseService = lmsCourseService;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
         }
 
@@ -92,12 +89,10 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
 
             var emails = result.Datas.Where(x => !string.IsNullOrEmpty(x.Email)).Select(p => p.Email!).Distinct().ToList() ?? new List<string>();
             var users = await (from baseQ in _studentRepository.Queryable
-                               join humanQ in _humanRepository.Queryable on baseQ.HumanId equals humanQ.Id
-                               join userQ in _userManager.Users.WhereBulkContains(emails, x => x.Email) on humanQ.UserId equals userQ.Id
+                               join userQ in _userManager.Users.WhereBulkContains(emails, x => x.Email) on baseQ.UserId equals userQ.Id
                                select new
                                {
                                    Student = baseQ,
-                                   Human = humanQ,
                                    User = userQ
                                }).ToListAsync(cancellationToken);
 
@@ -109,14 +104,11 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     continue;
                 }
                 var student = user.Student;
-                var human = user.Human;
                 var userDto = user.User;
 
                 if (!string.IsNullOrEmpty(item.PhoneNumber) && item.PhoneNumber.IsValidPhoneNumber() && userDto.PhoneNumber != item.PhoneNumber)
                 {
-                    human.PhoneNumber = item.PhoneNumber;
                     userDto.PhoneNumber = item.PhoneNumber;
-                    _humanRepository.Update(human);
                     await _userManager.UpdateAsync(userDto);
                 }
 
@@ -134,7 +126,6 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = tokenAdmin;
                 }
             }
-            await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

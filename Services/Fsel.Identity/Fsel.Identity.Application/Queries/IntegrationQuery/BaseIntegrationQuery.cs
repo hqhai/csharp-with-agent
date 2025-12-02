@@ -2,17 +2,15 @@
 
 namespace Fsel.Identity.Application.Queries.IntegrationQuery
 {
-    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
-    using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.Model;
     using Fsel.Identity.Domain.Entities;
-    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
@@ -20,15 +18,15 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     public class BaseIntegrationQuery
     {
         private readonly IOrderService _orderService;
-        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
         private readonly ILmsCourseService _lmsCourseService;
 
         public BaseIntegrationQuery(IOrderService orderService,
-                                    IHumanRepository humanRepository,
+                                    UserManager<User> userManager,
                                     ILmsCourseService lmsCourseService)
         {
             _orderService = orderService;
-            _humanRepository = humanRepository;
+            _userManager = userManager;
             _lmsCourseService = lmsCourseService;
         }
 
@@ -88,7 +86,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var userOrderIds = orderResultHasTimes.Select(x => x.UserId).Distinct().ToList();
 
             //lấy User đăng ký trong khoảng thời gian
-            var users = await _humanRepository.Queryable
+            var users = await _userManager.Users
                                               .Where(x => x.UpdatedDate == null ? (x.CreatedDate >= startDate && x.CreatedDate <= endDate) : (x.UpdatedDate.Value >= startDate && x.UpdatedDate.Value <= endDate))
                                               .ToListAsync(cancellationToken);
             if (users == null)
@@ -96,7 +94,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(users));
                 return methodResult;
             }
-            var userIdentityHasTimeIds = users.Select(x => x.UserId ?? Guid.Empty).ToList();
+            var userIdentityHasTimeIds = users.Select(x => x.Id).ToList();
 
             // hợp nhất UserId chưa có order
             var userIds = userIdentityHasTimeIds.Concat(userPtTestHasTimeIds).Concat(userUnitResultHasTimeIds).Concat(userOrderIds).ToList();
@@ -105,21 +103,21 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             return methodResult;
         }
 
-        public void SetUserData(IntegrationModel leadsIntegration, IList<Human> humans, out bool isCutOff)
+        public void SetUserData(IntegrationModel leadsIntegration, IList<User> users, out bool isCutOff)
         {
             ArgumentNullException.ThrowIfNull(leadsIntegration);
 
-            var human = humans.FirstOrDefault(x => x.UserId == leadsIntegration.UserId);
-            if (human != null && human.User != null && (human.User.EmailConfirmed || human.User.PhoneNumberConfirmed))
+            var user = users.FirstOrDefault(x => x.Id == leadsIntegration.UserId);
+            if (user != null && (user.EmailConfirmed || user.PhoneNumberConfirmed))
             {
                 leadsIntegration.Status = EnumIntegrationStatus.Confirm;
             }
 
-            leadsIntegration.SchoolGrade = human?.Student?.SchoolGrade;
-            leadsIntegration.SchoolClass = human?.Student?.SchoolClass;
-            leadsIntegration.HumanCode = human?.Code;
+            leadsIntegration.SchoolGrade = user?.Student?.SchoolGrade;
+            leadsIntegration.SchoolClass = user?.Student?.SchoolClass;
+            leadsIntegration.HumanCode = user?.Code;
 
-            isCutOff = human?.User?.Status == EnumUserStatus.Disable;
+            isCutOff = user?.Status == EnumUserStatus.Disable;
         }
 
         public void SetPalcementTestData(IntegrationModel leadsIntegration, IList<PlacementTestResultModel> placementTestResults)
@@ -178,12 +176,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             leadsIntegration.OTPPhoneNumber = userOtp?.OTPPhoneNumber;
         }
 
-        public void SetEventData(IntegrationModel leadsIntegration, IList<Human> humans, IList<EventUserIntegrationModel> eventUsers)
+        public void SetEventData(IntegrationModel leadsIntegration, IList<User> users, IList<EventUserIntegrationModel> eventUsers)
         {
             ArgumentNullException.ThrowIfNull(leadsIntegration);
 
-            var human = humans.FirstOrDefault(x => x.UserId == leadsIntegration.UserId);
-            var eventUser = eventUsers.FirstOrDefault(x => x.StudentId == human?.Student?.Id);
+            var user = users.FirstOrDefault(x => x.Id == leadsIntegration.UserId);
+            var eventUser = eventUsers.FirstOrDefault(x => x.StudentId == user?.Student?.Id);
             leadsIntegration.EventCode = eventUser?.EventCode;
         }
     }

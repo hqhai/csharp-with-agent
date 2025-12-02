@@ -4,6 +4,8 @@ namespace Fsel.Shared.Constants
 {
     public static class ResourceSettings
     {
+        public const string ApplePrivateKeyFilePath = "Resources//Apple//{0}";
+
         public const string NotificationType = "Resources//NotificationType.json";
         public const string QuestBoardFileName = "Resources//QuestBoard.json";
         public const string QuestBoardOverallFileName = "Resources//QuestBoardOverall.json";
@@ -18,12 +20,15 @@ namespace Fsel.Shared.Constants
         public const string IeltsStudentsName = "Resources//IeltsStudents.json";
         public const string IeltsStudentsNameTestName = "Resources//IeltsStudents.Testing.json";
         public const string IeltsStudentsStagingName = "Resources//IeltsStudents.Staging.json";
+
         public const string RoleFileName = "Resources//Role.json";
         public const string PermissionGroupName = "Resources//PermissionGroup.json";
         public const string PermissionName = "Resources//Permission.json";
         public const string RoleClaimName = "Resources//RoleClaim.json";
         public const string MenuName = "Resources//Menu.json";
         public const string SurveyQuestBoardFileName = "Resources//SurveyQuestBoards.json";
+        public const string UserFileName = "Resources//User.json";
+        public const string UserRoleFileName = "Resources//UserRole.json";
 
         public const string PackageFileName = "Resources//Packages.json";
         public const string TechieActionFileName = "Resources//TechieAction.json";
@@ -103,6 +108,7 @@ namespace Fsel.Shared.Constants
         public const string ReportLearningSchoolEvent = "Resources//ExportExcelTemplates//ReportLearningSchoolEvent.xlsx";
         public const string BaoCaoReportStudentEvent = "Resources//ExportExcelTemplates//BaoCaoReportStudentEvent.xlsx";
         public const string ReportSaleStudentProgress = "Resources//ExportExcelTemplates//ReportSaleStudentProgress.xlsx";
+        public const string StudentGoal =  "Resources//ExportExcelTemplates//TienDoTuan.xlsx";
 
         public const string ConfigPlacementTest = "Resources//PlacementTestConfigAgeLevel.json";
         public const string ConfigViewReportLevel = "Resources//PlacementTestReportViewConfig.json";

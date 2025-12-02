@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-dev
+spec:
+  selector:
+    matchLabels:
+      app: auth-dev
+  replicas: 1 
+  template:
+    metadata:
+      labels:
+        app: auth-dev
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: node_role
+                operator: In
+                values:
+                - appnodes-staging
+      containers:
+      - name: auth-dev
+        image: registry.fsel.edu.vn/fsel/api/fsel_src/auth:auth-openid-...............
+        ports:
+        - containerPort: 80
+        - containerPort: 443 
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: 30m
+            memory: 50Mi
+      tolerations:
+      - effect: NoSchedule
+        key: appnodes-staging
+        operator: Exists
+      imagePullSecrets:
+        - name: dev-image-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-dev
+  labels:
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  - port: 443
+    targetPort: 443
+    protocol: TCP
+    name: https
+  selector:
+    app: auth-dev
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: auth-dev
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    nginx.ingress.kubernetes.io/x-forwarded-proto: "https"
+    nginx.ingress.kubernetes.io/enable-cors: "true"
+    nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS"
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+#    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+    nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,Timeline,IdToken,X-Token,X-Time,Client-ID,Token,formdata"
+#    nginx.ingress.kubernetes.io/cors-expose-headers: "Content-Length,Content-Range"
+spec:
+  ingressClassName: nginx-public
+  rules:
+  - host: fsel-auth-dev.fsel.edu.vn
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: auth-dev
+            port:
+              number: 443
+  tls:
+  - hosts:
+    - fsel-auth-dev.fsel.edu.vn
+    secretName: fsel-auth-dev.fsel.edu.vn-wildcard
+
+status:
+  loadBalancer:
+    ingress:
+    - hostname: 103.22.218.217.nip.io
+
+

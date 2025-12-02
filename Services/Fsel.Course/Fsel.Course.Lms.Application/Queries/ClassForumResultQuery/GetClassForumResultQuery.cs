@@ -189,7 +189,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             var action = actions?.FirstOrDefault(x => x.ObjectId == classForumResultModel.Id);
             if (action != null)
             {
-                classForumResultModel.CreatedFullName = student.Human?.FullName;
+                classForumResultModel.CreatedFullName = student.User?.FullName;
                 classForumResultModel.LikeNumber = action.LikeNumber;
                 classForumResultModel.CommentNumber = action.CommentNumber;
                 classForumResultModel.IsLiked = action.IsLiked;

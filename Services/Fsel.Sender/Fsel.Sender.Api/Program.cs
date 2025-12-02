@@ -19,9 +19,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
+
 builder.AddDbContexts<SenderDBContext>();
-builder.AddAuthenticationJwtBearers(appSetting);
+
 builder.Services.AddScoped<IAmazonSimpleEmailService, AmazonSimpleEmailServiceClient>();
 builder.Services.AddScoped<IMessageHistoryRepository, MessageHistoryRepository>();
 builder.Services.AddScoped<IZaloService, ZaloService>();

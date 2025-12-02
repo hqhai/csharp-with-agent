@@ -41,16 +41,19 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
     {
         private readonly ILogger<AzurePronTestCmdHandler> _logger;
         private readonly IPronuciationAssessmentService _pronuciationService;
+        private readonly IContinuousPronunciationAssessmentService _continuousPronunciationAssessmentService;
 
         /// <summary>
         /// Khởi tạo handler
         /// </summary>
         public AzurePronTestCmdHandler(
             ILogger<AzurePronTestCmdHandler> logger,
-            IPronuciationAssessmentService pronuciationService)
+            IPronuciationAssessmentService pronuciationService,
+            IContinuousPronunciationAssessmentService continuousPronunciationAssessmentService)
         {
             _logger = logger;
             _pronuciationService = pronuciationService;
+            _continuousPronunciationAssessmentService = continuousPronunciationAssessmentService;
         }
 
         /// <summary>
@@ -77,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestCmd.V1i1
                 try
                 {
                     _logger.LogInformation("Đang đánh giá phát âm cho file: {FilePath}", request.AudioPath);
-                    var response = await _pronuciationService.AssessPronunciationFromFileAsync(request.AudioPath, request.TranscriptionText);
+                    var response = await _continuousPronunciationAssessmentService.AssessPronunciationFromFileContinuousAsync(request.AudioPath, request.TranscriptionText);
 
                     if (!string.IsNullOrEmpty(response.ErrorMessage))
                     {

@@ -52,5 +52,18 @@ namespace Fsel.Ordering.Api.Controllers
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Packages For Event
+        /// </summary>
+        [HttpGet("for-event")]
+        [ServerCache(CacheSettings.TimeCache.OneMinutes)]
+        [ProducesResponseType(typeof(MethodResult<List<PackageModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets([FromQuery] GetPackagesForEventQuery query)
+        {
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

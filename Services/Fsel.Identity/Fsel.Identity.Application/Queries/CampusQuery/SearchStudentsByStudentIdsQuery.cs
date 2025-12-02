@@ -22,14 +22,12 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
     public class SearchStudentsByStudentIdsQueryHandler : IRequestHandler<SearchStudentsByStudentIdsQuery, MethodResult<PagingItemsModel<StudentCampusModel>>>
     {
         private readonly Core.Base.Managers.UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ISchoolClassRepository _schoolClassRepository;
 
-        public SearchStudentsByStudentIdsQueryHandler(Core.Base.Managers.UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, ISchoolClassRepository schoolClassRepository)
+        public SearchStudentsByStudentIdsQueryHandler(Core.Base.Managers.UserManager<User> userManager, IStudentRepository studentRepository, ISchoolClassRepository schoolClassRepository)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _schoolClassRepository = schoolClassRepository;
         }
@@ -40,8 +38,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
             var methodResult = new MethodResult<PagingItemsModel<StudentCampusModel>>();
 
             var query = from u in _userManager.Users
-                        join h in _humanRepository.Queryable on u.Id equals h.UserId
-                        join s in _studentRepository.Queryable.WhereBulkContains(request.StudentIds, p => p.Id) on h.Id equals s.HumanId
+                        join s in _studentRepository.Queryable.WhereBulkContains(request.StudentIds, p => p.Id) on u.Id equals s.UserId
                         select new StudentCampusModel()
                         {
                             Id = u.Id,

@@ -22,5 +22,6 @@ namespace Fsel.Identity.Application.Services.OrderService.Model
         public PackageModel? Package { get; set; }
         public Guid UserId { get; set; }
         public EnumPaymentRevenueType? RevenueType { get; set; }
+        public bool IsDefault { get; set; }
     }
 }

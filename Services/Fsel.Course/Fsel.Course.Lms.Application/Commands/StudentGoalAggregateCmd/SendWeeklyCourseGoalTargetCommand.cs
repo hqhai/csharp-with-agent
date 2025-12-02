@@ -51,9 +51,8 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             var studentIds = studentGoalSummaries.Select(x => x.StudentId).ToList();
             var studentResults = await _userService.GetStudentsByStudentIdsAsync(studentIds);
             var students = studentResults?.Content?.Result ?? new List<StudentModel>();
-            var userIds = students.Where(x => x.Human != null).Select(x => x.Human!)
-                                   .Where(x => x.UserId.HasValue)
-                                   .Select(x => x.UserId!.Value).ToList();
+            var userIds = students.Where(x => x.User != null)
+                                   .Select(x => x.UserId).ToList();
 
             foreach (var student in students)
             {
@@ -62,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 {
                     continue;
                 }
-                var userId = student.Human?.UserId ?? default;
+                var userId = student?.UserId ?? default;
                 var sgs = studentGoalSummary.StudentGoalSummary;
                 var paramsMessage = new List<object> { sgs.LessonsPerWeek };
                 await SendNotificationAsync(new List<Guid> { userId }, paramsMessage, EnumNotificationType.LinkPage, EnumNotificationContent.CourseGoalStudent);

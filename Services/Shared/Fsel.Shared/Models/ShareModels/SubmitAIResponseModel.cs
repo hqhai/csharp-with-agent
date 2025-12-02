@@ -9,7 +9,9 @@ namespace Fsel.Shared.Models.ShareModels
         public string? GradingAlFeedback { get; set; }
         public Guid? ClassForumResultId { get; set; }
         public EnumSubmissionCount EnumSubmissionCount { get; set; }
+
         public string? PronunciationAlFeedback { get; set; }
+
         public double? PronunciationScore { get; set; }
     }
 

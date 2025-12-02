@@ -90,7 +90,7 @@ namespace Fsel.Training.Application.Queries.ClassLiveWorkFlowQuery
                     item.EndTime = liveTimeFrame.EndTime;
                 }
                 var teacher = teachers?.FirstOrDefault(x => x.Id == item.TeacherId);
-                item.TeacherName = teacher?.Human?.FullName;
+                item.TeacherName = teacher?.User?.FullName;
             }
             methodResult.Result = new PagingItemsModel<SearchClassLiveWorkFlowModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

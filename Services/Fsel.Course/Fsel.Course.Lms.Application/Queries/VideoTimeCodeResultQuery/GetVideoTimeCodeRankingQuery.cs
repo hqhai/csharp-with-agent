@@ -119,8 +119,8 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
             {
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 item.IsCurrentStudent = item.Id == videoTimeCodeResult.StudentId;
-                item.FullName = student?.Human?.FullName;
-                item.AvatarPath = student?.Human?.AvatarPath;
+                item.FullName = student?.User?.FullName;
+                item.AvatarPath = student?.User?.AvatarPath;
             }
             methodResult.Result = new PagingItemsModel<TestResultRankingModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -185,9 +185,9 @@ namespace Fsel.Course.Lms.Application.Queries.VideoTimeCodeResultQuery
                 var videoResultStudent = videoResults.FirstOrDefault(x => x.Id == item.Id);
                 item.Status = videoResultStudent?.Status ?? default;
                 item.IsCurrentStudent = student?.Id == videoResult.StudentId;
-                item.FullName = student?.Human?.FullName;
+                item.FullName = student?.User?.FullName;
                 item.Percent = NumberHelper.ConvertRound(item.Percent);
-                item.AvatarPath = student?.Human?.AvatarPath;
+                item.AvatarPath = student?.User?.AvatarPath;
             }
             methodResult.Result = new PagingItemsModel<TestResultRankingModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;

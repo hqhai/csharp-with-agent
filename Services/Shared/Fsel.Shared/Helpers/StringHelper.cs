@@ -9,7 +9,9 @@ namespace Fsel.Shared.Helpers
     using System.Text.Json;
     using System.Text.RegularExpressions;
     using Fsel.Common.Helpers;
+    using System.Web;
     using Fsel.Shared.Constants;
+    using Nest;
 
     public static class StringHelper
     {
@@ -456,8 +458,8 @@ namespace Fsel.Shared.Helpers
 
             private static readonly Regex ContentFieldsRx = new(
             "\"BeforeClick\"\\s*:\\s*\"(?<before>(?:\\\\.|[^\"])*)\"\\s*,\\s*"
-          + "\"Transcript\"\\s*:\\s*\"(?<trans>(?:\\\\.|[^\"])*)\"\\s*,\\s*"
-          + "\"AfterQuestions\"\\s*:\\s*\"(?<after>(?:\\\\.|[^\"])*)\"",
+            + "\"Transcript\"\\s*:\\s*\"(?<trans>(?:\\\\.|[^\"])*)\"\\s*,\\s*"
+            + "\"AfterQuestions\"\\s*:\\s*\"(?<after>(?:\\\\.|[^\"])*)\"",
             RegexOptions.Singleline | RegexOptions.Compiled);
 
             /// <summary>
@@ -501,38 +503,121 @@ namespace Fsel.Shared.Helpers
 
                 return StripTrailingEscapesAndEmojis(merged);
             }
+        }
 
-            private static string StripTrailingEscapesAndEmojis(string s)
+        public static (string? FirstName, string? LastName) ParseFullName(this string? fullName)
+        {
+            if (string.IsNullOrWhiteSpace(fullName))
             {
-                if (string.IsNullOrEmpty(s))
-                {
-                    return s;
-                }
-                // Xóa emoji thật ở cuối: 🌲 (U+1F332) và 😊 (U+1F60A), kèm khoảng trắng
-                s = Regex.Replace(
-                    s,
-                    @"(?:\s*(?:\uD83C\uDF32|\uD83D\uDE0A))+\s*$",
-                    "",
-                    RegexOptions.Singleline
-                );
+                return (string.Empty, null);
+            }
 
-                // Xóa emoji ở dạng JSON-escaped ở cuối: \uD83C\uDF32 hoặc \uD83D\uDE0A
-                s = Regex.Replace(
-                    s,
-                    @"(?:\s*(?:\\uD83C\\uDF32|\\uD83D\\uDE0A))+\s*$",
-                    "",
-                    RegexOptions.Singleline
-                );
+            int firstSpaceIndex = fullName.IndexOf(' ', StringComparison.InvariantCulture);
 
-                // Xóa mọi chuỗi escape JSON khác ở cuối (\\uXXXX, \\xXX, \\n, \\t, \\", \/, \\...)
-                s = Regex.Replace(
-                    s,
-                    @"(?:\s*(?:\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[0-7]{1,3}|\\[abefnrtv""\\/]|\\))+\s*$",
-                    "",
-                    RegexOptions.Singleline
-                );
+            if (firstSpaceIndex == -1)
+            {
+                return (fullName.Trim(), null);
+            }
+
+            string lastName = fullName[..firstSpaceIndex].Trim();
+            string firstName = fullName[(firstSpaceIndex + 1)..].Trim();
+
+            return (firstName, lastName);
+        }
+
+        public static string InjectParam(this string input, params string[] parameters)
+        {
+            if (string.IsNullOrEmpty(input) || parameters == null || parameters.Length == 0)
+            {
+                return input ?? string.Empty;
+            }
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                string placeholder = $"{{{{{i}}}}}";
+                input = input.Replace(placeholder, parameters[i] ?? string.Empty, StringComparison.InvariantCultureIgnoreCase);
+            }
+            return input;
+        }
+
+        public static T DecodeUrlBase64ToObject<T>(this string urlBase64)
+        {
+            if (string.IsNullOrWhiteSpace(urlBase64))
+            {
+                return default;
+            }
+
+            try
+            {
+                string decodedBase64 = HttpUtility.UrlDecode(urlBase64);
+                byte[] data = Convert.FromBase64String(decodedBase64);
+                string jsonString = Encoding.UTF8.GetString(data);
+
+                // Deserialize thành object
+                return JsonSerializer.Deserialize<T>(jsonString);
+            }
+            catch
+            {
+                return default;
+            }
+        }
+
+        public static string EncodeObjectToUrlBase64(this object obj)
+        {
+            if (obj == null)
+            {
+                return string.Empty;
+            }
+
+            // Serialize object thành JSON
+            string jsonString = JsonSerializer.Serialize(obj);
+
+            // Chuyển sang base64
+            byte[] bytes = Encoding.UTF8.GetBytes(jsonString);
+            string base64String = Convert.ToBase64String(bytes);
+
+            // Encode URL để đảm bảo an toàn
+            return HttpUtility.UrlEncode(base64String);
+        }
+
+        public static string ToSafeString(this string? input, string replace = "")
+        {
+            if (string.IsNullOrEmpty(input))
+            {
+                return replace;
+            }
+            return input.Trim();
+        }
+
+        private static string StripTrailingEscapesAndEmojis(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
                 return s;
             }
+            // Xóa emoji thật ở cuối: 🌲 (U+1F332) và 😊 (U+1F60A), kèm khoảng trắng
+            s = Regex.Replace(
+                s,
+                @"(?:\s*(?:\uD83C\uDF32|\uD83D\uDE0A))+\s*$",
+                "",
+                RegexOptions.Singleline
+            );
+
+            // Xóa emoji ở dạng JSON-escaped ở cuối: \uD83C\uDF32 hoặc \uD83D\uDE0A
+            s = Regex.Replace(
+                s,
+                @"(?:\s*(?:\\uD83C\\uDF32|\\uD83D\\uDE0A))+\s*$",
+                "",
+                RegexOptions.Singleline
+            );
+
+            // Xóa mọi chuỗi escape JSON khác ở cuối (\\uXXXX, \\xXX, \\n, \\t, \\", \/, \\...)
+            s = Regex.Replace(
+                s,
+                @"(?:\s*(?:\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[0-7]{1,3}|\\[abefnrtv""\\/]|\\))+\s*$",
+                "",
+                RegexOptions.Singleline
+            );
+            return s;
         }
 
         public static string GenerateEmail(string localPath, string domainPath)

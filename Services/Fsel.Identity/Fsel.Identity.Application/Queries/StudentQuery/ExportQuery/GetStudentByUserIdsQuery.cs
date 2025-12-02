@@ -8,8 +8,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.ExportQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -24,19 +26,19 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.ExportQuery
     public class GetStudentByUserIdsQueryHandler : IRequestHandler<GetStudentByUserIdsQuery, MethodResult<IList<StudentModel>>>
     {
         private readonly IMapper _mapper;
-        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
         private readonly IParentRepository _parentRepository;
         private readonly IParentStudentRepository _parentStudentRepository;
         private readonly ISystemService _systemService;
 
         public GetStudentByUserIdsQueryHandler(IMapper mapper,
-            IHumanRepository humanRepository,
+            UserManager<User> userManager,
             IParentRepository parentRepository,
             IParentStudentRepository parentStudentRepository,
             ISystemService systemService)
         {
             _mapper = mapper;
-            _humanRepository = humanRepository;
+            _userManager = userManager;
             _parentRepository = parentRepository;
             _parentStudentRepository = parentStudentRepository;
             _systemService = systemService;
@@ -52,11 +54,9 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.ExportQuery
                 return methodResult;
             }
 
-            var students = await _humanRepository.Queryable
-                .Include(x => x.User)
-                .Where(i => i.UserId != null)
+            var students = await _userManager.Users
                 .Where(i => i.Student != null)
-                .WhereBulkContains(request.UserIds, i => i.UserId)
+                .WhereBulkContains(request.UserIds, i => i.Id)
                 .Select(x => new StudentModel
                 {
                     Id = x.Student!.Id,
@@ -75,7 +75,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.ExportQuery
                     ExpiredDate = x.Student.ExpiredDate,
                     ParentEmail = x.Student.ParentEmail,
                     ParentPhoneNumber = x.Student.ParentPhoneNumber,
-                    Human = _mapper.Map<HumanProfileModel>(x)
+                    User = _mapper.Map<UserModel>(x)
                 })
                 .ToListAsync(cancellationToken);
 
@@ -89,12 +89,12 @@ namespace Fsel.Identity.Application.Queries.StudentQuery.ExportQuery
             if (studentIds.Any())
             {
                 var studentParents = (await (from baseQ in _parentRepository.Queryable
-                                             join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
+                                             join user in _userManager.Users on baseQ.UserId equals user.Id
                                              join parentStudent in _parentStudentRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId) on baseQ.Id equals parentStudent.ParentId
                                              select new
                                              {
                                                  StudentId = parentStudent.StudentId,
-                                                 ParentFullName = human.FullName,
+                                                 ParentFullName = user.FullName,
                                              }).ToListAsync(cancellationToken))
                                              .GroupBy(x => x.StudentId)
                                             .ToDictionary(x => x.Key, x => x.Select(x => x.ParentFullName).Where(x => !string.IsNullOrEmpty(x)).OrderBy(x => x).FirstOrDefault());

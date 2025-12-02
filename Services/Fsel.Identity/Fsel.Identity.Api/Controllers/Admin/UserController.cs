@@ -16,6 +16,7 @@ using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Identity.Api.Controllers.Admin

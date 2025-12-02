@@ -45,7 +45,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<StudentSearchAdminModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [EncryptResponse]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, StudentProgressWeeklyManagement.View })]
         public async Task<IActionResult> SearchStudent([FromQuery] SearchStudentsByAdminQuery query)
         {
             MethodResult<PagingItemsModel<StudentSearchAdminModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -87,7 +87,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [EncryptResponse]
-        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View, StudentProgressWeeklyManagement.View })]
         public async Task<IActionResult> GetProfileStudent([FromRoute] Guid studentId)
         {
             MethodResult<StudentModel> queryResult = await _mediator.Send(new GetStudentProfileQuery { StudentId = studentId }).ConfigureAwait(false);
@@ -166,7 +166,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-by-user-id/{id}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View, StudentProgressWeeklyManagement.View })]
         public async Task<IActionResult> GetByUserId([FromRoute] Guid id)
         {
             MethodResult<StudentModel> commandResult = await _mediator.Send(new GetStudentByUserIdQuery { Id = id }).ConfigureAwait(false);
@@ -296,7 +296,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-parent-by-student-id/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<ParentProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View, StudentProgressWeeklyManagement.View })]
         public async Task<IActionResult> GetParentByStudentId([FromRoute] Guid studentId)
         {
             var queryResult = await _mediator.Send(new GetParentByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
@@ -309,7 +309,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-otp-for-student")]
         [ProducesResponseType(typeof(MethodResult<OTPModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View })]
+        [Permission(permissionCodes: new[] { StudentManagement.View, SchoolStudentManagement.View, StudentProgressWeeklyManagement.View })]
         public async Task<IActionResult> GetOTPForStudent([FromQuery] GetOTPForStudentQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -440,7 +440,7 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-student-edit-histories")]
         [ProducesResponseType(typeof(MethodResult<IList<StudentEditHistoryModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(StudentManagement.View)]
+        [Permission(permissionCodes: new[] { StudentManagement.View, StudentProgressWeeklyManagement.View })]
         public async Task<IActionResult> GetStudentEditHistories([FromQuery] GetStudentEditHistoriesByStudentIdQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);

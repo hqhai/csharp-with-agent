@@ -60,10 +60,10 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             var query = _studentRepository.Queryable.Where(x => x.CourseId.HasValue).Select(i => new StudentDtoModel
             {
                 Id = i.Id,
-                FullName = i.Human!.FullName,
-                BirthDay = i.Human.Birthday,
-                Email = i.Human.Email,
-                PhoneNumber = i.Human.PhoneNumber,
+                FullName = i.User!.FullName,
+                BirthDay = i.User.Birthday,
+                Email = i.User.Email,
+                PhoneNumber = i.User.PhoneNumber,
                 CourseLevel = i.CourseLevel,
                 ExpiredDate = i.ExpiredDate,
                 School = i.School,
@@ -72,7 +72,7 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
                 BaseCourseLevel = i.BaseCourseLevel,
                 SchoolId = i.SchoolId,
                 CourseId = i.CourseId,
-                UserId = i.Human.UserId,
+                UserId = i.UserId,
                 CreatedDate = i.CreatedDate,
             });
             var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };

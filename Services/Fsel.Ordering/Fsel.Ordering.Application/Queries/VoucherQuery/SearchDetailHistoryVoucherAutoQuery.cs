@@ -70,7 +70,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 {
                     var studentResult = await _userService.GetStudentByEmail(request.Keyword);
                     var student = studentResult.Content?.Result;
-                    var userId = student?.Human?.UserId;
+                    var userId = student?.UserId;
                     if (userId.HasValue)
                     {
                         vouchers = vouchers.Where(p => p.UserId == userId);
@@ -109,10 +109,10 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             lists.ForEach(p =>
             {
-                p.StudentCode = students?.FirstOrDefault(x => x.Human?.UserId == p.UserId)?.Human?.Code;
-                p.Email = students?.FirstOrDefault(x => x.Human?.UserId == p.UserId)?.Human?.Email;
-                p.FullName = students?.FirstOrDefault(x => x.Human?.UserId == p.UserId)?.Human?.FullName;
-                p.PhoneNumber = students?.FirstOrDefault(x => x.Human?.UserId == p.UserId)?.Human?.PhoneNumber;
+                p.StudentCode = students?.FirstOrDefault(x => x.UserId == p.UserId)?.User?.Code;
+                p.Email = students?.FirstOrDefault(x => x.UserId == p.UserId)?.User?.Email;
+                p.FullName = students?.FirstOrDefault(x => x.UserId == p.UserId)?.User?.FullName;
+                p.PhoneNumber = students?.FirstOrDefault(x => x.UserId == p.UserId)?.User?.PhoneNumber;
             });
 
             methodResult.Result = new PagingItemsModel<HistoryVoucherModel>(lists, request, totalItem);

@@ -24,13 +24,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
     public class GetStudentsByIdsQueryHandler : IRequestHandler<GetStudentsByIdsQuery, MethodResult<List<StudentModel>>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly ISystemService _systemService;
 
-        public GetStudentsByIdsQueryHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, ISystemService systemService)
+        public GetStudentsByIdsQueryHandler(IStudentRepository studentRepository, ISystemService systemService)
         {
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _systemService = systemService;
         }
@@ -45,9 +43,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Ids));
                 return methodResult;
             }
-
-            var humans = await _humanRepository.Queryable.Where(p => p.UserId.HasValue && request.Ids.Contains(p.UserId.Value)).Select(p => p.Id).ToListAsync(cancellationToken);
-            var students = await _studentRepository.Queryable.Include(h => h.Human).Select(p => new StudentModel
+            var students = await _studentRepository.Queryable.Where(i => request.Ids.Contains(i.UserId)).Select(p => new StudentModel
             {
                 Id = p.Id,
                 PackageId = p.PackageId,
@@ -55,8 +51,10 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 School = p.School,
                 SchoolId = p.SchoolId,
                 CourseLevel = p.CourseLevel,
+                BaseCourseLevel = p.BaseCourseLevel,
                 ClassId = p.ClassId,
-            }).Where(i => i.Human != null && humans.Contains(i.Human.Id)).ToListAsync(cancellationToken);
+                UserId = p.UserId,
+            }).ToListAsync(cancellationToken);
 
             //var schoolResults = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
             //{

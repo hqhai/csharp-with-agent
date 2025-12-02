@@ -362,7 +362,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Where(s => s.PlacementTestResultId == placementTestResult.Id && s.CreatedDate >= placementTestResult.CreatedDate).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
                 if (sectionGroupResults != null && sectionGroupResults.Count == numberOfDone && sectionGroupResults.All(x => x.Status == EnumResultStatus.Done))
                 {
-                    int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                    int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
                     placementTestResult = GetPlacementTestResult(sectionGroupResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!).ToList(), placementTestResult);
                     var placementTestResultInitial = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == placementTestResult.StudentId)
                                                                           .OrderBy(x => x.CreatedDate)
@@ -373,7 +373,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                     {
                         await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
                         {
-                            Id = student.Human?.UserId ?? _authContext.CurrentUserId,
+                            Id = student.UserId == Guid.Empty ? _authContext.CurrentUserId : student.UserId,
                             CourseLevel = currentLevel.Value,
                             BaseCourseLevel = currentLevel.Value
                         }).ConfigureAwait(false);
@@ -389,7 +389,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                         await UpdatePlacementGroupResultDoneAsync(placementTestResult, currentLevel);
                         await DoQuestBoard(student.Id, cancellationToken).ConfigureAwait(false);
                         await SendStudentPlacementTest(currentLevel ?? default, student, age, cancellationToken).ConfigureAwait(false);
-                        await DoUserReferral(student.Human?.UserId ?? _authContext.CurrentUserId, cancellationToken).ConfigureAwait(false);
+                        await DoUserReferral(student.UserId != Guid.Empty ? student.UserId : _authContext.CurrentUserId, cancellationToken).ConfigureAwait(false);
                     }
                     return isLockPT;
                 }
@@ -508,7 +508,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             var param = new SendStudentPTTemplateModel
             {
-                FullName = student.Human?.FullName,
+                FullName = student.User?.FullName,
                 CurrentCourse = currentCourseHtml,
                 CourseInfos = coursesInfo,
                 ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
@@ -517,9 +517,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
 
             var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
             var sendResult = new MethodResult<bool>();
-            if (!string.IsNullOrEmpty(student.Human?.Email))
+            if (!string.IsNullOrEmpty(student.User?.Email))
             {
-                sendResult = await _mediator.Send(new SenderCommand { Email = student.Human.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT, IsCCEmail = true }, cancellationToken).ConfigureAwait(false);
+                sendResult = await _mediator.Send(new SenderCommand { Email = student.User.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.StudentCompletePT, IsCCEmail = true }, cancellationToken).ConfigureAwait(false);
             }
         }
 

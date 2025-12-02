@@ -40,7 +40,7 @@ namespace Fsel.Identity.Application.Commands.StudentRankingEvents
             MethodResult<IList<StudentCompetitionEventsModel>> methodResult = new MethodResult<IList<StudentCompetitionEventsModel>>();
             request.Emails = request.Emails ?? new List<string>();
 
-            var studentResultIds = await _studentRepository.Queryable.Where(x => x.Human != null && x.Human!.Email != null && request.Emails!.Contains(x.Human.Email)).Select(x => x.Id).ToListAsync(cancellationToken);
+            var studentResultIds = await _studentRepository.Queryable.Where(x => x.User!.Email != null && request.Emails!.Contains(x.User.Email)).Select(x => x.Id).ToListAsync(cancellationToken);
             var competitionEvent = await _competitionEventsRepository.Queryable.FirstOrDefaultAsync(x => x.EventCode == request.EventCode, cancellationToken);
 
             if (competitionEvent == null)

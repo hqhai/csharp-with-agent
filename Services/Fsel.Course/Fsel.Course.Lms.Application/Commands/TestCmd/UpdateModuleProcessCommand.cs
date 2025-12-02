@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var userId = student.Human?.UserId ?? default;
+            var userId = student?.UserId ?? default;
 
             var tokenResult = await _userService.GetJWTAsync(userId);
             var authToken = tokenResult.Content?.Result;
@@ -169,7 +169,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             await UpdateUnitResultAsync(request, student);
             if (request.UnitId.HasValue)
             {
-                await _mediator.Send(new GetLessonsQuery { CourseId = request.CourseId, UnitId = request.UnitId.Value, UserId = student.Human?.UserId ?? default }, cancellationToken);
+                await _mediator.Send(new GetLessonsQuery { CourseId = request.CourseId, UnitId = request.UnitId.Value, UserId = student?.UserId ?? default }, cancellationToken);
             }
         }
 
@@ -220,7 +220,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                         UnitId = request.UnitId.Value,
                         LessonId = lessonResult.LessonId,
                         LessonResultId = lessonResult.Id,
-                        UserId = student.Human?.UserId ?? default
+                        UserId = student?.UserId ?? default
                     }, cancellationToken);
                 }
             }
