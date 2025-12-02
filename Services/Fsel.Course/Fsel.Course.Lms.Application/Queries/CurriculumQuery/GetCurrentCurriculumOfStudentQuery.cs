@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
     using Fsel.Course.Lms.Application.Services.UserServices;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Shared.Enums;
 
     public class GetCurrentCurriculumOfStudentQuery : IRequest<MethodResult<CurriculumModel?>>
     {
@@ -49,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             var studentResult = await _userService.GetStudentByUserIdAsync(userId);
             var student = studentResult.Content?.Result;
-            if (student == null || student.StatusStudentCampus == EnumStatusStudentCampus.Unpaid)
+            if (student == null)
             {
                 methodResult.Result = null;
                 return methodResult;
