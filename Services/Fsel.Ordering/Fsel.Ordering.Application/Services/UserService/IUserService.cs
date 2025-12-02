@@ -34,7 +34,7 @@ namespace Fsel.Ordering.Application.Services.UserService
         Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByUserId([Query] Guid? userId);
 
         [Get("/v1/student/get-student-by-email")]
-        Task<IApiResponse<MethodResult<StudentModel?>>> GetStudentByEmail([Query] string email);
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByEmail([Query] string email);
 
         [Put("/v1/admin-school/student/update-expired-date-for-students")]
         Task<IApiResponse<MethodResult<bool>>> UpdateExpiredDateForStudentsEvent([Body] UpdateExpiredDateForStudentsEventCommandModel model);
