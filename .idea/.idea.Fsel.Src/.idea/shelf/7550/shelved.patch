@@ -1,0 +1,156 @@
+Index: Services/Fsel.Course/Fsel.Course.Lms.Api/appsettings.Development.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n  \"Logging\": {\r\n    \"LogLevel\": {\r\n      \"Default\": \"Information\",\r\n      \"Microsoft.AspNetCore\": \"Warning\"\r\n    }\r\n  },\r\n  \"AllowedHosts\": \"*\",\r\n  \"ConnectionStrings\": {\r\n    \"DefaultConnection\": \"Data Source=10.0.0.28;Initial Catalog=env-multi-subject.course-service;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;\"\r\n  },\r\n  \"ProjectKey\": \"Fsel\",\r\n  \"ServiceName\": \"Lms Course\",\r\n  \"ApiVersions\": [ \"v1\", \"v1.1\", \"v1.2\" ],\r\n  \"Services\": {\r\n    \"UserApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/user-gateway\",\r\n    \"ClassApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/training-gateway\",\r\n    \"InteractionApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/interaction-gateway\",\r\n    \"SystemApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/system-gateway\",\r\n    \"OrderApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/ordering-gateway\",\r\n    \"SenderApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/sender-gateway\",\r\n    \"NotificationApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/notification-gateway\",\r\n    \"StorageApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/storage-gateway\",\r\n    \"FFmpegApiUrl\": \"https://ffmpeg-api-services.fsel.edu.vn\"\r\n  },\r\n  \"StorageConfig\": {\r\n    \"AwsS3BaseUrl\": \"s3-sgn10.fptcloud.com\"\r\n  },\r\n  \"SentryConfig\": {\r\n    \"Dsn\": \"http://9723bd4aa046ae03065e2d11c6c30b74@10.10.0.202:9000/2\"\r\n  },\r\n  \"Jwt\": {\r\n    \"SecretKey\": \"JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore\",\r\n    \"Issuer\": \"baseWebApiIssuer\",\r\n    \"Audience\": \"baseWebApiAudience\",\r\n    \"Subject\": \"baseWebApiSubject\",\r\n    \"TokenValidityInMinutes\": 1440,\r\n    \"RefreshTokenValidityInDays\": 7\r\n  },\r\n  \"QueueConfig\": {\r\n    \"RootUri\": \"rabbitmq://localhost\",\r\n    \"Username\": \"guest\",\r\n    \"Password\": \"guest\"\r\n  },\r\n  \"OpenAiConfig\": {\r\n    \"Uri\": \"https://api.openai.com\",\r\n    \"ApiKeys\": [ \"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\" ],\r\n    \"ApprovalAIModel\": \"gpt-4o-mini\",\r\n    \"CheckForbiddenAIModel\": \"gpt-4.1-mini\"\r\n  },\r\n  \"ResourceContent\": {\r\n    \"LmsWebsiteUrl\": \"https://lms-testing.fsel.edu.vn\",\r\n    \"HotLine\": \"0933.353.538\"\r\n  },\r\n  \"AzureAiConfig\": {\r\n    \"SecondApiKey\": \"9f65a197359f4636a09e562c58bbd9b8\",\r\n    \"Location\": \"eastus\"\r\n  },\r\n  \"ConstantUrl\": {\r\n    \"LinkFullMockTestReport\": \"https://lms-testing.fsel.edu.vn/learn/full-mock-test/{0}/{1}?userId={2}\",\r\n    \"LinkMockTestReport\": \"https://lms-testing.fsel.edu.vn/learn/mock-test-report/{0}/{1}/{2}/{3}?userId={4}\"\r\n  },\r\n  \"EncryptionConfig\": {\r\n    \"Aes\": {\r\n      \"SecretKey\": \"OYrlVSXO0nzzVz2/VkJ0QDixhFdze5mDpTsGsPAZ1CE=\"\r\n    }\r\n  },\r\n  \"CustomerSupportConfig\": {\r\n    \"Email\": \"thuhien@atlantic.edu.vn\",\r\n    \"CCEmail\": [ \"thuhien@atlantic.edu.vn\", \"cskh_fsel@atlantic.edu.vn\", \"vanhong@atlantic.edu.vn\" ]\r\n  },\r\n  \"GoogleSheetConfig\": {\r\n    \"StudentGetErrorClassForumSheetId\": \"1-fjpmjwMbXvBtlml1YlkTyNOFyNOgnz8Vcobpog7fK8\"\r\n  },\r\n  \"TouchpointConfig\": {\r\n    \"TurnOnTouchpoint\": true\r\n  },\r\n  \"CacheConfig\": {\r\n    \"Type\": \"Redis\",\r\n    \"RedisCache\": {\r\n      \"RootUri\": \"localhost:6379\",\r\n      \"DefaultDatabase\": 0\r\n    }\r\n  }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Services/Fsel.Course/Fsel.Course.Lms.Api/appsettings.Development.json b/Services/Fsel.Course/Fsel.Course.Lms.Api/appsettings.Development.json
+--- a/Services/Fsel.Course/Fsel.Course.Lms.Api/appsettings.Development.json	(revision b51eb12a7b193c79754cd01c9152bc5a37a47ec5)
++++ b/Services/Fsel.Course/Fsel.Course.Lms.Api/appsettings.Development.json	(date 1764659808370)
+@@ -7,7 +7,7 @@
+   },
+   "AllowedHosts": "*",
+   "ConnectionStrings": {
+-    "DefaultConnection": "Data Source=10.0.0.28;Initial Catalog=env-multi-subject.course-service;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;"
++    "DefaultConnection": "Data Source=10.0.0.28;Initial Catalog=env-multi-subject.dev.course-service;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;"
+   },
+   "ProjectKey": "Fsel",
+   "ServiceName": "Lms Course",
+Index: Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetClassForumDetailResultsQuery.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Copyright (c) Atlantic. All rights reserved.\r\n\r\nnamespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery\r\n{\r\n    using System;\r\n    using System.Collections.Generic;\r\n    using System.Threading;\r\n    using System.Threading.Tasks;\r\n    using AutoMapper;\r\n    using Fsel.Common.ActionResults;\r\n    using Fsel.Common.Enums.ErrorCodes;\r\n    using Fsel.Course.Domain.Entities;\r\n    using Fsel.Course.Domain.IRepositories;\r\n    using Fsel.Course.Domain.Models.EntityModels;\r\n    using Fsel.Shared.Enums;\r\n    using MediatR;\r\n    using Microsoft.AspNetCore.Http;\r\n    using Microsoft.EntityFrameworkCore;\r\n\r\n    public class GetClassForumDetailResultsQuery : IRequest<MethodResult<IList<ClassForumDetailResultModel>>>\r\n    {\r\n        public Guid LessonResultId { get; set; }\r\n    }\r\n\r\n    public class GetClassForumDetailResultsQueryHandler : IRequestHandler<GetClassForumDetailResultsQuery, MethodResult<IList<ClassForumDetailResultModel>>>\r\n    {\r\n        private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;\r\n        private readonly IMapper _mapper;\r\n\r\n        public GetClassForumDetailResultsQueryHandler(IClassForumDetailResultRepository classForumDetailResultRepository,\r\n                                                      IMapper mapper)\r\n        {\r\n            _classForumDetailResultRepository = classForumDetailResultRepository;\r\n            _mapper = mapper;\r\n        }\r\n\r\n        public async Task<MethodResult<IList<ClassForumDetailResultModel>>> Handle(GetClassForumDetailResultsQuery request, CancellationToken cancellationToken)\r\n        {\r\n            ArgumentNullException.ThrowIfNull(request);\r\n            MethodResult<IList<ClassForumDetailResultModel>> methodResult = new MethodResult<IList<ClassForumDetailResultModel>>();\r\n\r\n            var classForumDetailResults = await _classForumDetailResultRepository.Queryable\r\n                                                                                 .Include(x => x.ClassForumResult)\r\n                                                                                 .ThenInclude(x => x.ClassForum)\r\n                                                                                 .Include(x => x.ClassForumResultFiles)\r\n                                                                                 .Include(x => x.ClassForumDetailResultHistories)\r\n                                                                                 .ThenInclude(x => x.ClassForumResultFiles)\r\n                                                                                 .Where(x => x.ClassForumResult!.LessonResultId == request.LessonResultId)\r\n                                                                                 .ToListAsync(cancellationToken);\r\n\r\n            if (classForumDetailResults == null || !classForumDetailResults.Any())\r\n            {\r\n                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumDetailResults));\r\n                return methodResult;\r\n            }\r\n\r\n            foreach (var item in classForumDetailResults)\r\n            {\r\n                item.Score = GetTargetCount(item);\r\n            }\r\n\r\n            methodResult.Result = _mapper.Map<IList<ClassForumDetailResultModel>>(classForumDetailResults);\r\n            methodResult.StatusCode = StatusCodes.Status200OK;\r\n            return methodResult;\r\n        }\r\n\r\n        private static int GetTargetCount(ClassForumDetailResult classForumDetailResult)\r\n        {\r\n            int targetScore = default;\r\n            var classForum = classForumDetailResult.ClassForumResult?.ClassForum;\r\n            if (classForum?.CourseSkill == EnumCourseSkill.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)\r\n            {\r\n                ++targetScore;\r\n            }\r\n            if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)\r\n            {\r\n                ++targetScore;\r\n            }\r\n            return targetScore;\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetClassForumDetailResultsQuery.cs b/Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetClassForumDetailResultsQuery.cs
+--- a/Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetClassForumDetailResultsQuery.cs	(revision b51eb12a7b193c79754cd01c9152bc5a37a47ec5)
++++ b/Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetClassForumDetailResultsQuery.cs	(date 1764661099375)
+@@ -19,7 +19,7 @@
+ 
+     public class GetClassForumDetailResultsQuery : IRequest<MethodResult<IList<ClassForumDetailResultModel>>>
+     {
+-        public Guid LessonResultId { get; set; }
++        public Guid ClassForumResultId { get; set; }
+     }
+ 
+     public class GetClassForumDetailResultsQueryHandler : IRequestHandler<GetClassForumDetailResultsQuery, MethodResult<IList<ClassForumDetailResultModel>>>
+@@ -28,7 +28,7 @@
+         private readonly IMapper _mapper;
+ 
+         public GetClassForumDetailResultsQueryHandler(IClassForumDetailResultRepository classForumDetailResultRepository,
+-                                                      IMapper mapper)
++            IMapper mapper)
+         {
+             _classForumDetailResultRepository = classForumDetailResultRepository;
+             _mapper = mapper;
+@@ -40,13 +40,13 @@
+             MethodResult<IList<ClassForumDetailResultModel>> methodResult = new MethodResult<IList<ClassForumDetailResultModel>>();
+ 
+             var classForumDetailResults = await _classForumDetailResultRepository.Queryable
+-                                                                                 .Include(x => x.ClassForumResult)
+-                                                                                 .ThenInclude(x => x.ClassForum)
+-                                                                                 .Include(x => x.ClassForumResultFiles)
+-                                                                                 .Include(x => x.ClassForumDetailResultHistories)
+-                                                                                 .ThenInclude(x => x.ClassForumResultFiles)
+-                                                                                 .Where(x => x.ClassForumResult!.LessonResultId == request.LessonResultId)
+-                                                                                 .ToListAsync(cancellationToken);
++                .Include(x => x.ClassForumResult)
++                .ThenInclude(x => x.ClassForum)
++                .Include(x => x.ClassForumResultFiles)
++                .Include(x => x.ClassForumDetailResultHistories)
++                .ThenInclude(x => x.ClassForumResultFiles)
++                .Where(x => x.Id == request.ClassForumResultId)
++                .ToListAsync(cancellationToken);
+ 
+             if (classForumDetailResults == null || !classForumDetailResults.Any())
+             {
+@@ -72,10 +72,12 @@
+             {
+                 ++targetScore;
+             }
++
+             if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
+             {
+                 ++targetScore;
+             }
++
+             return targetScore;
+         }
+     }
+Index: Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetCurrentClassForumQuery.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Copyright (c) Atlantic. All rights reserved.\r\n\r\nnamespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery\r\n{\r\n    using System;\r\n    using System.Linq;\r\n    using System.Threading;\r\n    using System.Threading.Tasks;\r\n    using AutoMapper;\r\n    using Fsel.Common.ActionResults;\r\n    using Fsel.Common.Enums.ErrorCodes;\r\n    using Fsel.Core.Base;\r\n    using Fsel.Course.Domain.Entities;\r\n    using Fsel.Course.Domain.Enums;\r\n    using Fsel.Course.Domain.IRepositories;\r\n    using Fsel.Course.Domain.Models.EntityModels;\r\n    using Fsel.Course.Lms.Application.Queues.Publishers;\r\n    using Fsel.Course.Lms.Application.Services.InteractionService;\r\n    using Fsel.Course.Lms.Application.Services.InteractionService.Models;\r\n    using Fsel.Course.Lms.Application.Services.NotificationServices;\r\n    using Fsel.Course.Lms.Application.Services.NotificationServices.Models;\r\n    using Fsel.Course.Lms.Application.Services.UserServices;\r\n    using Fsel.Shared.Enums;\r\n    using Fsel.Shared.Enums.ErrorCodes;\r\n    using Fsel.Shared.Models.ShareModels;\r\n    using MediatR;\r\n    using Microsoft.AspNetCore.Http;\r\n    using Microsoft.EntityFrameworkCore;\r\n\r\n    public class GetCurrentClassForumQuery : IRequest<MethodResult<ClassForumByStudentModel>>\r\n    {\r\n        public Guid LessonResultId { get; set; }\r\n    }\r\n\r\n    public class GetCurrentClassForumQueryHandler : IRequestHandler<GetCurrentClassForumQuery, MethodResult<ClassForumByStudentModel>>\r\n    {\r\n        private readonly IMapper _mapper;\r\n        private readonly IClassForumResultRepository _classForumResultRepository;\r\n        private readonly IClassForumRepository _classForumRepository;\r\n        private readonly ILessonResultRepository _lessonResultRepository;\r\n        private readonly IUserService _userService;\r\n        private readonly INotificationService _notificationService;\r\n        private readonly IInteractionService _interactionService;\r\n        private readonly AuthContext _authContext;\r\n        private readonly IStudentFeedbackRepository _studentFeedbackRepository;\r\n        private readonly QuestBoardPublisher _questBoardPublisher;\r\n\r\n        public GetCurrentClassForumQueryHandler(IMapper mapper,\r\n            IClassForumResultRepository classForumResultRepository,\r\n            IClassForumRepository classForumRepository,\r\n            ILessonResultRepository lessonResultRepository,\r\n            IUserService userService,\r\n            INotificationService notificationService,\r\n            IInteractionService interactionService,\r\n            AuthContext authContext,\r\n            IStudentFeedbackRepository studentFeedbackRepository,\r\n            QuestBoardPublisher questBoardPublisher)\r\n        {\r\n            _mapper = mapper;\r\n            _classForumResultRepository = classForumResultRepository;\r\n            _classForumRepository = classForumRepository;\r\n            _lessonResultRepository = lessonResultRepository;\r\n            _userService = userService;\r\n            _notificationService = notificationService;\r\n            _interactionService = interactionService;\r\n            _authContext = authContext;\r\n            _studentFeedbackRepository = studentFeedbackRepository;\r\n            _questBoardPublisher = questBoardPublisher;\r\n        }\r\n\r\n        public async Task<MethodResult<ClassForumByStudentModel>> Handle(GetCurrentClassForumQuery request, CancellationToken cancellationToken)\r\n        {\r\n            ArgumentNullException.ThrowIfNull(request);\r\n            MethodResult<ClassForumByStudentModel> methodResult = new MethodResult<ClassForumByStudentModel>();\r\n\r\n            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);\r\n            var student = studentResult.Content?.Result;\r\n            if (!studentResult.IsSuccessStatusCode)\r\n            {\r\n                methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));\r\n                return methodResult;\r\n            }\r\n            if (student == null)\r\n            {\r\n                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));\r\n                return methodResult;\r\n            }\r\n\r\n            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);\r\n            if (lessonResult == null)\r\n            {\r\n                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));\r\n                return methodResult;\r\n            }\r\n\r\n            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).Where(x => x.LessonId == lessonResult.LessonId).FirstOrDefaultAsync(cancellationToken);\r\n            if (classForum == null)\r\n            {\r\n                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));\r\n                return methodResult;\r\n            }\r\n            var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);\r\n\r\n            var classForumResult = await _classForumResultRepository.Queryable\r\n                .Include(x => x.ClassForumDetailResults)\r\n                .ThenInclude(x => x.ClassForumResultFiles)\r\n                .Include(x => x.ClassForumResultFiles)\r\n                .Include(x => x.ClassForumScores)\r\n                .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum.Id)\r\n                .FirstOrDefaultAsync(cancellationToken: cancellationToken);\r\n\r\n            classForumByStudentModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);\r\n            var classForumResultModel = classForumByStudentModel.ClassForumResultCurrentStudent;\r\n\r\n            if (classForumResultModel != null && classForumResult != null)\r\n            {\r\n                classForumResultModel.ClassForumDetailResults = classForumResult.ClassForumDetailResults.Select(x =>\r\n                {\r\n                    x.Score = GetTargetCount(x, classForumResult);\r\n                    return _mapper.Map<ClassForumDetailResultModel>(x);\r\n                }).ToList();\r\n\r\n                classForumResultModel.IsTeacherFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.Teacher, cancellationToken);\r\n                classForumResultModel.IsAIFeedBack = await _studentFeedbackRepository.Queryable.AnyAsync(x => x.ObjectId == classForumResultModel.Id && x.Type == EnumStudentFeedBackType.AI, cancellationToken);\r\n\r\n                IList<Guid> classForumResultIds = new List<Guid>()\r\n                {\r\n                    classForumResult.Id\r\n                };\r\n                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResultIds.ToList(), UserId = _authContext.CurrentUserId });\r\n                var actions = actionsResult.Content?.Result;\r\n\r\n                if (actions != null)\r\n                {\r\n                    GetListNotificationRemindQuery query = new GetListNotificationRemindQuery\r\n                    {\r\n                        ObjectIds = classForumResultIds.ToList(),\r\n                        Status = EnumNotificationRemindStatus.Off\r\n                    };\r\n\r\n                    var notificationRemind = await _notificationService.GetListNotificationRemind(query);\r\n                    var notificationTurnOff = notificationRemind.Content?.Result;\r\n\r\n                    var action = actions.FirstOrDefault(x => x.ObjectId == classForumResultModel.Id);\r\n                    classForumResultModel.CommentNumber = action?.CommentNumber;\r\n                    classForumResultModel.LikeNumber = action?.LikeNumber;\r\n                    classForumResultModel.IsLiked = action?.IsLiked;\r\n                    classForumResultModel.IsTurnedOffNotification = notificationTurnOff!.Any(x => x.ObjectId == classForumResultModel.Id);\r\n                    classForumResultModel.CourseLevel = student.CourseLevel;\r\n                }\r\n            }\r\n\r\n            methodResult.Result = classForumByStudentModel;\r\n            methodResult.StatusCode = StatusCodes.Status200OK;\r\n\r\n            #region Do QuestBoard\r\n\r\n            if (classForumByStudentModel != null && classForumResult != null && classForumResult.ClassForumDetailResults.Any(x => !string.IsNullOrEmpty(x.GradingAlFeedback)))\r\n            {\r\n                await DoQuestBoard(student.Id, EnumQuestBoardCategory.MessagesFromAI, cancellationToken);\r\n            }\r\n\r\n            #endregion Do QuestBoard\r\n\r\n            return methodResult;\r\n        }\r\n\r\n        private static int GetTargetCount(ClassForumDetailResult classForumDetailResult, ClassForumResult classForumResult)\r\n        {\r\n            int targetScore = default;\r\n            var classForum = classForumResult.ClassForum;\r\n            if (classForum?.CourseSkill == EnumCourseSkill.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)\r\n            {\r\n                ++targetScore;\r\n            }\r\n            if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)\r\n            {\r\n                ++targetScore;\r\n            }\r\n            return targetScore;\r\n        }\r\n\r\n        private async Task DoQuestBoard(Guid studentId, EnumQuestBoardCategory category, CancellationToken cancellationToken)\r\n        {\r\n            await _questBoardPublisher.Publish(new QuestBoardQueueModel()\r\n            {\r\n                StudentID = studentId,\r\n                Type = EnumQuestBoardType.LearningQuests,\r\n                Category = category,\r\n                Value = 1\r\n            }, cancellationToken);\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetCurrentClassForumQuery.cs b/Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetCurrentClassForumQuery.cs
+--- a/Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetCurrentClassForumQuery.cs	(revision b51eb12a7b193c79754cd01c9152bc5a37a47ec5)
++++ b/Services/Fsel.Course/Fsel.Course.Lms.Application/Queries/ClassForumResultQuery/GetCurrentClassForumQuery.cs	(date 1764660922200)
+@@ -29,7 +29,7 @@
+ 
+     public class GetCurrentClassForumQuery : IRequest<MethodResult<ClassForumByStudentModel>>
+     {
+-        public Guid LessonResultId { get; set; }
++        public Guid ClassForumResultId { get; set; }
+     }
+ 
+     public class GetCurrentClassForumQueryHandler : IRequestHandler<GetCurrentClassForumQuery, MethodResult<ClassForumByStudentModel>>
+@@ -75,40 +75,39 @@
+ 
+             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+             var student = studentResult.Content?.Result;
++
+             if (!studentResult.IsSuccessStatusCode)
+             {
+                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
+                 return methodResult;
+             }
++
+             if (student == null)
+             {
+                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                 return methodResult;
+             }
+ 
+-            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
+-            if (lessonResult == null)
+-            {
+-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
+-                return methodResult;
+-            }
+-
+-            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).Where(x => x.LessonId == lessonResult.LessonId).FirstOrDefaultAsync(cancellationToken);
+-            if (classForum == null)
+-            {
+-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
+-                return methodResult;
+-            }
+-            var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
+-
+             var classForumResult = await _classForumResultRepository.Queryable
+                 .Include(x => x.ClassForumDetailResults)
+                 .ThenInclude(x => x.ClassForumResultFiles)
+                 .Include(x => x.ClassForumResultFiles)
+                 .Include(x => x.ClassForumScores)
+-                .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum.Id)
++                .Where(x => x.Id == request.ClassForumResultId)
+                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+ 
++            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles)
++                .Where(x => x.Id == classForumResult.ClassForumId)
++                .FirstOrDefaultAsync(cancellationToken);
++
++            if (classForum == null)
++            {
++                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
++                return methodResult;
++            }
++
++            var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
++
+             classForumByStudentModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);
+             var classForumResultModel = classForumByStudentModel.ClassForumResultCurrentStudent;
+ 

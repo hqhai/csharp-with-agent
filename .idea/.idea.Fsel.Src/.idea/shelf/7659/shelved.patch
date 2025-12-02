@@ -1,0 +1,87 @@
+Index: Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n  \"Logging\": {\r\n    \"LogLevel\": {\r\n      \"Default\": \"Information\",\r\n      \"Microsoft.AspNetCore\": \"Warning\"\r\n    }\r\n  },\r\n  \"AllowedHosts\": \"*\",\r\n  \"ConnectionStrings\": {\r\n    \"DefaultConnection\": \"Data Source=10.0.0.28;Initial Catalog=env-local.course-service;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;\",\r\n    \"TenantMasterConnection\": \"Data Source=10.0.0.28;Initial Catalog=env-local.tenant-master;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;\"\r\n  },\r\n  \"ProjectKey\": \"Fsel\",\r\n  \"ServiceName\": \"Lcms Course\",\r\n  \"ApiVersions\": [ \"v1\", \"v1.1\", \"v1.2\" ],\r\n  \"Services\": {\r\n    \"UserApiUrl\": \"https://fsel-gateway-dev.fsel.edu.vn/user-gateway\",\r\n    \"SystemApiUrl\": \"https://fsel-gateway-dev.fsel.edu.vn/system-gateway\"\r\n  },\r\n  \"StorageConfig\": {\r\n    \"AwsS3BaseUrl\": \"s3-sgn10.fptcloud.com\"\r\n  },\r\n  \"SentryConfig\": {\r\n    \"Dsn\": \"https://5e94b84938f9a003ed95d995cfa31e98@sentry.fsel.edu.vn/7\"\r\n  },\r\n  \"Authentication\": {\r\n    \"OpenId\": {\r\n      \"AuthorityUrl\": \"https://fsel-auth-dev.fsel.edu.vn\",\r\n      \"ClientId\": \"test.fsel.swagger\",\r\n      \"ClientSecret\": \"test.fsel.swagger_secret\",\r\n      \"Scopes\": [ \"offline_access\", \"openid\", \"profile\", \"email\", \"address\", \"phone\", \"roles\", \"api\" ]\r\n    }\r\n  },\r\n  \"Jwt\": {\r\n    \"SecretKey\": \"JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore\",\r\n    \"Issuer\": \"baseWebApiIssuer\",\r\n    \"Audience\": \"baseWebApiAudience\",\r\n    \"Subject\": \"baseWebApiSubject\",\r\n    \"TokenValidityInMinutes\": 1440,\r\n    \"RefreshTokenValidityInDays\": 7\r\n  },\r\n  \"CacheConfig\": {\r\n    \"TurnOnCaching\": true,\r\n    \"CachingDuration\": 10800,\r\n    \"Type\": \"Redis\",\r\n    \"RedisCache\": {\r\n      \"RootUri\": \"redis-cluster.redis-testing.svc.cluster.local:6379\",\r\n      \"Password\": \"JwcJGcdNIl4TXy9\",\r\n      \"DefaultDatabase\": 0,\r\n      \"InstanceName\": \"Fsel:Development\"\r\n    }\r\n  }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json b/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json
+--- a/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json	(revision e595b6c3533b948f00c66e07fd0b62c2717297a9)
++++ b/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json	(date 1764665482436)
+@@ -7,8 +7,8 @@
+   },
+   "AllowedHosts": "*",
+   "ConnectionStrings": {
+-    "DefaultConnection": "Data Source=10.0.0.28;Initial Catalog=env-local.course-service;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;",
+-    "TenantMasterConnection": "Data Source=10.0.0.28;Initial Catalog=env-local.tenant-master;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;"
++    "DefaultConnection": "Data Source=10.0.0.28;Initial Catalog=env-dev.course-service;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;"
++    //"TenantMasterConnection": "Data Source=10.0.0.28;Initial Catalog=env-local.tenant-master;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;"
+   },
+   "ProjectKey": "Fsel",
+   "ServiceName": "Lcms Course",
+Index: Services/Fsel.Course/Fsel.Course.Domain/Models/EntityModels/HomeWorkExtraModel.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Copyright (c) Atlantic. All rights reserved.\r\n\r\nnamespace Fsel.Course.Domain.Models.EntityModels\r\n{\r\n    using Fsel.Shared.Enums;\r\n\r\n    public class HomeWorkExtraModel\r\n    {\r\n        public Guid Id { get; set; }\r\n        public DateTime? CreatedDate { get; set; }\r\n        public DateTime? UpdatedDate { get; set; }\r\n        public string? Name { get; set; }\r\n        public EnumCourseLevel CourseLevel { get; set; }\r\n        public EnumCourseSkill CourseSkill { get; set; }\r\n        public DateTime? StartDate { get; set; }\r\n        public DateTime? EndDate { get; set; }\r\n        public int CorrectCount { get; set; }\r\n        public int CorrectTotal { get; set; }\r\n        public int TotalQuestion { get; set; }\r\n        public int CountQuestion { get; set; }\r\n        public double ProgressPercent { get; set; }\r\n        public string? TopicName { get; set; }\r\n        public int NumberRetry { get; set; }\r\n        public EnumExpiryState ExpiryState { get; set; }\r\n        public Guid? HomeWorkConfigId { get; set; }\r\n        public bool IsActive { get; set; }\r\n        public HomeWorkExtraPracticeResultModel? HomeWorkExtraPracticeResult { get; set; }\r\n    }\r\n\r\n    public enum EnumExpiryState\r\n    {\r\n        NotExpired = 0,          // chưa hết hạn\r\n        ExpiredMetTarget = 1,    // hết hạn nhưng ĐÃ đạt chỉ tiêu\r\n        ExpiredUnmetTarget = 2   // hết hạn và CHƯA đạt chỉ tiêu\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Services/Fsel.Course/Fsel.Course.Domain/Models/EntityModels/HomeWorkExtraModel.cs b/Services/Fsel.Course/Fsel.Course.Domain/Models/EntityModels/HomeWorkExtraModel.cs
+--- a/Services/Fsel.Course/Fsel.Course.Domain/Models/EntityModels/HomeWorkExtraModel.cs	(revision e595b6c3533b948f00c66e07fd0b62c2717297a9)
++++ b/Services/Fsel.Course/Fsel.Course.Domain/Models/EntityModels/HomeWorkExtraModel.cs	(date 1764665956772)
+@@ -2,6 +2,7 @@
+ 
+ namespace Fsel.Course.Domain.Models.EntityModels
+ {
++    using Enums;
+     using Fsel.Shared.Enums;
+ 
+     public class HomeWorkExtraModel
+@@ -25,6 +26,7 @@
+         public Guid? HomeWorkConfigId { get; set; }
+         public bool IsActive { get; set; }
+         public HomeWorkExtraPracticeResultModel? HomeWorkExtraPracticeResult { get; set; }
++        public EnumHomeWorkType Type { get; set; }
+     }
+ 
+     public enum EnumExpiryState
+Index: Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n  \"Logging\": {\r\n    \"LogLevel\": {\r\n      \"Default\": \"Information\",\r\n      \"Microsoft.AspNetCore\": \"Warning\"\r\n    }\r\n  },\r\n  \"AllowedHosts\": \"*\",\r\n  \"ConnectionStrings\": {\r\n    \"DefaultConnection\": \"Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;\",\r\n    \"TenantMasterConnection\": \"Data Source=10.0.0.28;Initial Catalog=env-local.tenant-master;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;\"\r\n  },\r\n  \"ProjectKey\": \"Fsel\",\r\n  \"ServiceName\": \"Lcms Course\",\r\n  \"ApiVersions\": [ \"v1\", \"v1.1\", \"v1.2\" ],\r\n  \"Services\": {\r\n    \"UserApiUrl\": \"https://fsel-gateway-dev.fsel.edu.vn/user-gateway\",\r\n    \"SystemApiUrl\": \"https://fsel-gateway-dev.fsel.edu.vn/system-gateway\"\r\n  },\r\n  \"StorageConfig\": {\r\n    \"AwsS3BaseUrl\": \"s3-sgn10.fptcloud.com\"\r\n  },\r\n  \"SentryConfig\": {\r\n    \"Dsn\": \"http://9723bd4aa046ae03065e2d11c6c30b74@10.10.0.202:9000/2\"\r\n  },\r\n  \"Authentication\": {\r\n    \"OpenId\": {\r\n      \"AuthorityUrl\": \"https://fsel-auth-dev.fsel.edu.vn\",\r\n      \"ClientId\": \"test.fsel.swagger\",\r\n      \"ClientSecret\": \"test.fsel.swagger_secret\",\r\n      \"Scopes\": [ \"offline_access\", \"openid\", \"profile\", \"email\", \"address\", \"phone\", \"roles\", \"api\" ]\r\n    }\r\n  },\r\n  \"Jwt\": {\r\n    \"SecretKey\": \"JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore\",\r\n    \"Issuer\": \"baseWebApiIssuer\",\r\n    \"Audience\": \"baseWebApiAudience\",\r\n    \"Subject\": \"baseWebApiSubject\",\r\n    \"TokenValidityInMinutes\": 1440,\r\n    \"RefreshTokenValidityInDays\": 7\r\n  },\r\n  \"CacheConfig\": {\r\n    \"TurnOnCaching\": true,\r\n    \"CachingDuration\": 10800,\r\n    \"Type\": \"Redis\",\r\n    \"RedisCache\": {\r\n      \"RootUri\": \"redis-cluster.redis-testing.svc.cluster.local:6379\",\r\n      \"Password\": \"JwcJGcdNIl4TXy9\",\r\n      \"DefaultDatabase\": 0,\r\n      \"InstanceName\": \"Fsel:Development\"\r\n    }\r\n  }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json b/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json
+--- a/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json	(revision e595b6c3533b948f00c66e07fd0b62c2717297a9)
++++ b/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json	(date 1764665482443)
+@@ -7,8 +7,8 @@
+   },
+   "AllowedHosts": "*",
+   "ConnectionStrings": {
+-    "DefaultConnection": "Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;",
+-    "TenantMasterConnection": "Data Source=10.0.0.28;Initial Catalog=env-local.tenant-master;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;"
++    "DefaultConnection": "Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;"
++    //"TenantMasterConnection": "Data Source=10.0.0.28;Initial Catalog=env-local.tenant-master;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;"
+   },
+   "ProjectKey": "Fsel",
+   "ServiceName": "Lcms Course",
+Index: Services/Fsel.Course/Fsel.Course.Lcms.Api/Controllers/HomeWorkController.cs
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Copyright (c) Atlantic. All rights reserved.\r\n\r\nnamespace Fsel.Course.Lcms.Api.Controllers\r\n{\r\n    using System.Net;\r\n    using Application.Commands.HomeWorkExtraCmd;\r\n    using Fsel.Common.ActionResults;\r\n    using Fsel.Common.Constants;\r\n    using Fsel.Core.Base.BaseModels;\r\n    using Fsel.Course.Application.Commands.HomeWorkCmd;\r\n    using Fsel.Course.Application.Queries.HomeWorkQuery;\r\n    using Fsel.Course.Domain.Models.EntityModels;\r\n    using Fsel.Shared.Enums;\r\n    using MediatR;\r\n    using Microsoft.AspNetCore.Mvc;\r\n    using Asp.Versioning;\r\n    using Fsel.Shared.Constants;\r\n\r\n    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]\r\n    [Route(Settings.APIDefaultRoute + \"/home-work\")]\r\n    [ApiController]\r\n    //[Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]\r\n    public class HomeWorkController : ControllerBase\r\n    {\r\n        private readonly IMediator _mediator;\r\n\r\n        public HomeWorkController(IMediator mediator)\r\n        {\r\n            _mediator = mediator;\r\n        }\r\n\r\n        /// <summary>\r\n        /// Search Home Work\r\n        /// </summary>\r\n        [HttpGet]\r\n        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<HomeWorkSearchModel>>), (int)HttpStatusCode.OK)]\r\n        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]\r\n        public async Task<IActionResult> Search([FromQuery] SearchHomeWorkQuery query)\r\n        {\r\n            MethodResult<PagingItemsModel<HomeWorkSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);\r\n            return queryResult.GetActionResult();\r\n        }\r\n\r\n        /// <summary>\r\n        /// Get Home Work\r\n        /// </summary>\r\n        [HttpGet(\"{id}\")]\r\n        [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]\r\n        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]\r\n        public async Task<IActionResult> Get([FromRoute] Guid id)\r\n        {\r\n            MethodResult<HomeWorkModel> queryResult = await _mediator.Send(new GetHomeWorkQuery { Id = id }).ConfigureAwait(false);\r\n            return queryResult.GetActionResult();\r\n        }\r\n\r\n        /// <summary>\r\n        /// Create a Home Work\r\n        /// </summary>\r\n        [HttpPost]\r\n        [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]\r\n        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]\r\n        public async Task<IActionResult> Create([FromBody] CreateHomeWorkCommand command)\r\n        {\r\n            MethodResult<HomeWorkModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);\r\n            return commandResult.GetActionResult();\r\n        }\r\n\r\n        /// <summary>\r\n        /// Delete a Home Work\r\n        /// </summary>\r\n        [HttpDelete(\"{id}\")]\r\n        [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]\r\n        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]\r\n        public async Task<IActionResult> Delete([FromRoute] Guid id)\r\n        {\r\n            MethodResult<bool> commandResult = await _mediator.Send(new DeleteHomeWorkCommand { Id = id }).ConfigureAwait(false);\r\n            return commandResult.GetActionResult();\r\n        }\r\n\r\n        /// <summary>\r\n        /// Update a Home Work\r\n        /// </summary>\r\n        [HttpPut(\"{id}\")]\r\n        [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]\r\n        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]\r\n        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateHomeWorkCommand command)\r\n        {\r\n            ArgumentNullException.ThrowIfNull(command);\r\n            command.Id = id;\r\n            MethodResult<HomeWorkModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);\r\n            return commandResult.GetActionResult();\r\n        }\r\n\r\n        /// <summary>\r\n        /// Update Status HomeWorkExtra\r\n        /// </summary>\r\n        [HttpPut(\"update-status/{id}\")]\r\n        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]\r\n        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]\r\n        public async Task<IActionResult> ActiveExtraPractice([FromRoute] Guid id, [FromBody] UpdateStatusHomeWorkExtraCommand command)\r\n        {\r\n            ArgumentNullException.ThrowIfNull(command);\r\n            command.Id = id;\r\n            var queryResult = await _mediator.Send(command).ConfigureAwait(false);\r\n            return queryResult.GetActionResult();\r\n        }\r\n    }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Services/Fsel.Course/Fsel.Course.Lcms.Api/Controllers/HomeWorkController.cs b/Services/Fsel.Course/Fsel.Course.Lcms.Api/Controllers/HomeWorkController.cs
+--- a/Services/Fsel.Course/Fsel.Course.Lcms.Api/Controllers/HomeWorkController.cs	(revision e595b6c3533b948f00c66e07fd0b62c2717297a9)
++++ b/Services/Fsel.Course/Fsel.Course.Lcms.Api/Controllers/HomeWorkController.cs	(date 1764665956718)
+@@ -95,7 +95,7 @@
+         /// Update Status HomeWorkExtra
+         /// </summary>
+         [HttpPut("update-status/{id}")]
+-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
++        [ProducesResponseType(typeof(MethodResult<HomeWorkExtraModel>), (int)HttpStatusCode.OK)]
+         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+         public async Task<IActionResult> ActiveExtraPractice([FromRoute] Guid id, [FromBody] UpdateStatusHomeWorkExtraCommand command)
+         {

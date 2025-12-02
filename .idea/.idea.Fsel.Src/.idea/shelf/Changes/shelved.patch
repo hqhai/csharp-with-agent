@@ -1,0 +1,38 @@
+Index: Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n  \"Logging\": {\r\n    \"LogLevel\": {\r\n      \"Default\": \"Information\",\r\n      \"Microsoft.AspNetCore\": \"Warning\"\r\n    }\r\n  },\r\n  \"AllowedHosts\": \"*\",\r\n  \"ConnectionStrings\": {\r\n    \"DefaultConnection\": \"Data Source=10.0.0.28;Initial Catalog=env-multi-subject.course-service;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;\"\r\n  },\r\n  \"ProjectKey\": \"Fsel\",\r\n  \"ServiceName\": \"Lcms Course\",\r\n  \"ApiVersions\": [ \"v1\", \"v1.1\", \"v1.2\" ],\r\n  \"Services\": {\r\n    \"UserApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/user-gateway\",\r\n    \"SystemApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/system-gateway\",\r\n    \"StorageApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/storage-gateway\"\r\n  },\r\n  \"StorageConfig\": {\r\n    \"AwsS3BaseUrl\": \"s3-sgn10.fptcloud.com\"\r\n  },\r\n  \"SentryConfig\": {\r\n    \"Dsn\": \"http://9723bd4aa046ae03065e2d11c6c30b74@10.10.0.202:9000/2\"\r\n  },\r\n  \"Jwt\": {\r\n    \"SecretKey\": \"JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore\",\r\n    \"Issuer\": \"baseWebApiIssuer\",\r\n    \"Audience\": \"baseWebApiAudience\",\r\n    \"Subject\": \"baseWebApiSubject\",\r\n    \"TokenValidityInMinutes\": 1440,\r\n    \"RefreshTokenValidityInDays\": 7\r\n  },\r\n  \"CacheConfig\": {\r\n    \"TurnOnCaching\": true,\r\n    \"CachingDuration\": 10800\r\n  }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json b/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json
+--- a/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json	(revision f874c80c2725747625c0393448567ff03a1b855d)
++++ b/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.Development.json	(date 1764640687066)
+@@ -7,7 +7,7 @@
+   },
+   "AllowedHosts": "*",
+   "ConnectionStrings": {
+-    "DefaultConnection": "Data Source=10.0.0.28;Initial Catalog=env-multi-subject.course-service;User Id=sa;Password=Fsela@2023!@#$;TrustServerCertificate=true;"
++    "DefaultConnection": "Data Source=DESKTOP-RFO7LQE;Initial Catalog=env-multi-subject.dev.course-service;Integrated Security=True;Trust Server Certificate=True"
+   },
+   "ProjectKey": "Fsel",
+   "ServiceName": "Lcms Course",
+Index: Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n  \"Logging\": {\r\n    \"LogLevel\": {\r\n      \"Default\": \"Information\",\r\n      \"Microsoft.AspNetCore\": \"Warning\"\r\n    }\r\n  },\r\n  \"AllowedHosts\": \"*\",\r\n  \"ConnectionStrings\": {\r\n    \"DefaultConnection\": \"Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;\"\r\n  },\r\n  \"ProjectKey\": \"Fsel\",\r\n  \"ServiceName\": \"Lcms Course\",\r\n  \"ApiVersions\": [ \"v1\", \"v1.1\", \"v1.2\" ],\r\n  \"Services\": {\r\n    \"UserApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/user-gateway\",\r\n    \"SystemApiUrl\": \"https://fsel-gateway-testing-api.fsel.edu.vn/system-gateway\"\r\n  },\r\n  \"StorageConfig\": {\r\n    \"AwsS3BaseUrl\": \"s3-sgn10.fptcloud.com\"\r\n  },\r\n  \"SentryConfig\": {\r\n    \"Dsn\": \"http://9723bd4aa046ae03065e2d11c6c30b74@10.10.0.202:9000/2\"\r\n  },\r\n  \"Jwt\": {\r\n    \"SecretKey\": \"JsonWebApiTokenWithSwaggerAuthorizationAuthenticationAspNetCore\",\r\n    \"Issuer\": \"baseWebApiIssuer\",\r\n    \"Audience\": \"baseWebApiAudience\",\r\n    \"Subject\": \"baseWebApiSubject\",\r\n    \"TokenValidityInMinutes\": 1440,\r\n    \"RefreshTokenValidityInDays\": 7\r\n  },\r\n  \"CacheConfig\": {\r\n    \"TurnOnCaching\": true,\r\n    \"CachingDuration\": 10800\r\n  }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json b/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json
+--- a/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json	(revision f874c80c2725747625c0393448567ff03a1b855d)
++++ b/Services/Fsel.Course/Fsel.Course.Lcms.Api/appsettings.json	(date 1764640621900)
+@@ -7,7 +7,7 @@
+   },
+   "AllowedHosts": "*",
+   "ConnectionStrings": {
+-    "DefaultConnection": "Data Source=183.91.11.235;Initial Catalog=env-dev.course-service;User Id=sa;Password=FselTech@2023;TrustServerCertificate=true;"
++    "DefaultConnection": "Data Source=DESKTOP-RFO7LQE;Initial Catalog=env-multi-subject.dev.course-service;Integrated Security=True;Trust Server Certificate=True"
+   },
+   "ProjectKey": "Fsel",
+   "ServiceName": "Lcms Course",
