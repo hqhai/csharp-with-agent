@@ -13,18 +13,9 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CreateAiCriteriaConfigCommand : IRequest<MethodResult<AICriteriaConfigsModel>>
+    public class CreateAiCriteriaConfigCommand : CreateOrUpdateAiCriteriaCommand, IRequest<MethodResult<AICriteriaConfigsModel>>
     {
-        public Guid AiPromptManagerId { get; set; }
-        public CreateAiCriteriaConfigCommandModel? AiCriteriaConfig { get; set; }
-        public IList<CreateAiCriteriaConfigCommandModel>? AiCriteriaConfigs { get; set; }
-        public double? SettingTemperature { get; set; }
-        public double? SettingWordMaxLength { get; set; }
-        public double? SettingTopP { get; set; }
-        public double? SettingFrequency { get; set; }
-        public double? SettingPresence { get; set; }
-        public int? MaximumNumber { get; set; }
-        public int? MaximumToken { get; set; }
+
     }
 
     public class CreateAiCriteriaConfigHasSubFeatureCommandHandler : IRequestHandler<CreateAiCriteriaConfigCommand, MethodResult<AICriteriaConfigsModel>>
@@ -109,15 +100,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
 
                 if (isCreate)
                 {
-                    var entity = _mapper.Map<AICriteriaConfigs>(item);
-                    entity.AiPromptManagerId = request.AiPromptManagerId;
-                    entity.SettingTemperature = request.SettingTemperature;
-                    entity.SettingWordMaxLength = request.SettingWordMaxLength;
-                    entity.SettingPresence = request.SettingPresence;
-                    entity.SettingFrequency = request.SettingFrequency;
-                    entity.SettingTopP = request.SettingTopP;
-                    entity.MaximumNumber = request.MaximumNumber ?? null;
-                    entity.MaximumToken = request.MaximumToken ?? null;
+                    var entity = BuildCreateEntity(item, request);
                     toCreate.Add(entity);
                 }
                 else
@@ -128,8 +111,9 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                         methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                         continue;
                     }
-                    _mapper.Map(item, entity);
-                    entity.AiPromptManagerId = request.AiPromptManagerId;
+
+                    ApplyUpdateEntity(item, entity, request);
+
                     toUpdate.Add(entity);
                 }
             }
@@ -172,6 +156,24 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             }
 
             return methodResult;
+        }
+        private AICriteriaConfigs BuildCreateEntity(
+            CreateAiCriteriaConfigCommandModel item,
+            CreateAiCriteriaConfigCommand request)
+        {
+            var entity = _mapper.Map<AICriteriaConfigs>(item);
+            _mapper.Map(request, entity);
+
+            return entity;
+        }
+
+        private void ApplyUpdateEntity(
+            CreateAiCriteriaConfigCommandModel item,
+            AICriteriaConfigs entity,
+            CreateAiCriteriaConfigCommand request)
+        {
+            _mapper.Map(item, entity);
+            _mapper.Map(request, entity);
         }
     }
 }

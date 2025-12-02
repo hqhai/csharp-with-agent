@@ -1,6 +1,7 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.Net;
+using Asp.Versioning;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
@@ -20,10 +21,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
+    using Application.Commands.CourseCmd;
+
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Student))]
     public class CourseController : BaseController
     {
         private readonly IMediator _mediator;
@@ -66,6 +68,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get units by course Id
         /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Student))]
@@ -105,6 +109,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Start Course Result
         /// </summary>
         [HttpPost("start/{courseResultId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [Permission(role: nameof(EnumRole.Student))]
@@ -124,6 +130,14 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> GetCourseForChooseLevel([FromQuery] GetCourseForChooseLevelQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpPost("select-course-by-choose-level")]
+        [Permission(role: nameof(EnumRole.Student))]
+        public async Task<IActionResult> GetLevelsBySelectedProgram([FromBody] ChooseCourseByLevelCommand request)
+        {
+            var queryResult = await _mediator.Send(request).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

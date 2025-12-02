@@ -2,6 +2,7 @@
 
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Models.EntityModels;
 
 namespace Fsel.Course.Domain.IRepositories
@@ -17,5 +18,11 @@ namespace Fsel.Course.Domain.IRepositories
         Task<HomeWork?> GetAsync(HomeWorkResult homeWorkResult);
 
         Task<bool> IsUsingByClient(Guid id);
+
+        Task<IDictionary<Guid, HomeWork>> GetHomeWorkDicAsync(IList<Guid>? originalIds);
+
+        Task<(IList<HomeWork>, IList<HomeWorkResult>)> GetModulesListAsync(LessonResult lessonResult, Guid? homeWorkId);
+
+        Task<(IDictionary<Guid, (HomeWork, LessonModule, HomeWorkResult)>, IDictionary<Guid, HomeWork>)> BuildHomeWorkLookupsAsync(LessonResult? lessonResult, IList<LessonModule> lessonModules);
     }
 }

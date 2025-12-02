@@ -32,5 +32,11 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i1
         public HomeWorkModel? HomeWork { get; set; }
 
         public DocumentModel? Document { get; set; }
+
+        public bool IsClassForumLock { get; set; } = true;
+
+        public bool IsHomeWorkLock { get; set; } = true;
+
+        public bool IsDocumentLock { get; set; } = true;
     }
 }

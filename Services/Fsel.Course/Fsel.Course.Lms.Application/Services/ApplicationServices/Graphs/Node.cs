@@ -12,17 +12,21 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Graphs
 
         public ICollection<Connection> Connections { get; set; }
 
+        public bool IsLeft => Connections.Count == 0;
+
         public Node(StepFlow stepFlow)
         {
             StepFlow = stepFlow;
             Connections = new List<Connection>();
 
-            if (stepFlow.ChildActionFlows != null && stepFlow.ChildActionFlows.Any())
+            if (!stepFlow.ChildActionFlows.Any())
             {
-                foreach (var stepFlowChild in stepFlow.ChildActionFlows)
-                {
-                    Connections.Add(new Connection(this, new Node(stepFlowChild.ToStepFlow), stepFlowChild.StartPercent, stepFlowChild.EndPercent));
-                }
+                return;
+            }
+
+            foreach (var stepFlowChild in stepFlow.ChildActionFlows)
+            {
+                Connections.Add(new Connection(this, new Node(stepFlowChild.ToStepFlow), stepFlowChild.StartPercent, stepFlowChild.EndPercent));
             }
         }
 
@@ -59,9 +63,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Graphs
                 var nextStep = connection.GetNextNode();
                 if (nextStep != null)
                 {
+                    if (nextStep.TestResult != null)
+                    {
+                        return nextStep.GetNextNode();
+                    }
                     return nextStep;
                 }
             }
+
             return null;
         }
 

@@ -12,12 +12,12 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class ContinuePTCommand : IRequest<MethodResult<PTStateModel>>
+    public class ContinuePTCommand : IRequest<MethodResult<PtStateModel>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class ContinuePTCommandHandler : IRequestHandler<ContinuePTCommand, MethodResult<PTStateModel>>
+    public class ContinuePTCommandHandler : IRequestHandler<ContinuePTCommand, MethodResult<PtStateModel>>
     {
         private IRepository<TestGroupResult> _testGroupResult;
         private readonly IServiceProvider _serviceProvider;
@@ -28,7 +28,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<MethodResult<PTStateModel>> Handle(ContinuePTCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PtStateModel>> Handle(ContinuePTCommand request, CancellationToken cancellationToken)
         {
             var flowTestResult = await _testGroupResult.Queryable.Where(x => x.StudentId == request.StudentId && x.TestType == Domain.Enums.EnumTestType.PlacementTest)
                 .Include(x => x.TestResults)
@@ -36,7 +36,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
 
             if (flowTestResult == null)
             {
-                var result = new MethodResult<PTStateModel>
+                var result = new MethodResult<PtStateModel>
                 {
                     StatusCode = 400,
                 };
@@ -47,25 +47,17 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 return result;
             }
 
-            if (flowTestResult.Status == Domain.Enums.EnumResultStatus.Done)
+            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
+            await  aggregate.InitAggregate();
+
+            if (flowTestResult.Status != Domain.Enums.EnumResultStatus.Done && flowTestResult.Status != Domain.Enums.EnumResultStatus.ByPass)
             {
-                return new MethodResult<PTStateModel>
-                {
-                    Result = new PTStateModel
-                    {
-                        FlowId = flowTestResult.FlowId,
-                        Status = flowTestResult.Status,
-                    }
-                };
+                await aggregate.Start();
             }
 
-            var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
-
-            await aggregate.Start();
-
-            return new MethodResult<PTStateModel>
+            return new MethodResult<PtStateModel>
             {
-                Result = aggregate.ExpotStateData()
+                Result = await aggregate.ExpotStateData()
             };
         }
     }

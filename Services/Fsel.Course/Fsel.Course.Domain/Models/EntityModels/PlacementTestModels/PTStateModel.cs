@@ -3,17 +3,20 @@
 namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 {
     using System.Text.Json.Serialization;
+    using Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Newtonsoft.Json;
     using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 
-    public class PTStateModel
+    public class PtStateModel
     {
         public Guid? FlowId { get; set; }
 
         public Guid? StudentId { get; set; }
 
         public Guid? TestGroupResultId { get; set; }
+
+        public string? Level { get; set; }
 
         public EnumResultStatus? Status { get; set; }
 
@@ -26,10 +29,14 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     public class BaseTestStateModel
     {
         public EnumResultStatus Status { get; set; }
+
+        public DateTime? UpdatedDate { get; set; }
     }
 
     public class TestStateModel : BaseTestStateModel
     {
+        public string? Name { get; set; }
+
         [JsonProperty("ModuleId")]
         public Guid? StepFlowId { get; set; }
 
@@ -41,29 +48,82 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
 
-        [JsonIgnore]
-        public int StartPercent { get; set; }
+        public void UpdateDetailInfo(Test? test)
+        {
+            if (test == null)
+            {
+                return;
+            }
 
-        [JsonIgnore]
-        public int ToPercent { get; set; }
+            Name = test.Name;
+
+            foreach (var sectionResult in Children)
+            {
+                if (sectionResult is not SectionStateModel sectionStateModel)
+                {
+                    continue;
+                }
+
+                var section = test.TestSections.FirstOrDefault(s => s.Id == sectionStateModel.SectionId);
+                if (section == null)
+                {
+                    continue;
+                }
+                sectionStateModel.UpdateDetailInfo(section);
+            }
+
+        }
     }
 
     public class SectionStateModel : BaseTestStateModel
     {
+        public string? Name { get; set; }
         public Guid? SectionId { get; set; }
+
+        public TestSectionConfig? Config { get; set; }
 
         public Guid? SectionResultId { get; set; }
 
+        public int CorrectCount { get; set; }
+
+        public double TotalCount { get; set; }
+
         public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
+
+        public double? WorkingTime { get; set; }
+
+        public double? PercentResult { get; set; }
+
+        public void UpdateDetailInfo(TestSection? section)
+        {
+            if (section == null)
+            {
+                return;
+            }
+            Name = section.Name ?? section.Skill?.Name;
+            Config = section.Config;
+            foreach (var sectionResult in Children)
+            {
+                if (sectionResult is not SectionStateModel sectionStateModel)
+                {
+                    continue;
+                }
+
+                var sectionMatch = section.TestSections.FirstOrDefault(s => s.Id == sectionStateModel.SectionId);
+                if (sectionMatch == null)
+                {
+                    continue;
+                }
+                sectionStateModel.UpdateDetailInfo(sectionMatch);
+            }
+        }
     }
 
     public class QuestionStateModel : BaseTestStateModel
     {
         public Guid? QuestionId { get; set; }
 
-        public Guid? QuestionResultId { get; set; }
-
-        public QuestionModel Question { get; set; }
+        public Guid? TestAnswerId { get; set; }
 
         public AnswerModel Answer { get; set; }
     }

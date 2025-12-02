@@ -22,6 +22,7 @@ using Fsel.Course.Lms.Application.Services.ApplicationServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
 using Fsel.Course.Lms.Application.Services.FFmpegServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
+using Fsel.Course.Lms.Application.Services.LessonItemServices;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SenderService;
@@ -31,7 +32,6 @@ using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
 using Refit;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,10 +42,17 @@ builder.AddSwaggerGens(appSetting);
 builder.AddAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
+builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IFlowService, FlowService>();
 builder.Services.AddScoped<ITestService, TestService>();
 builder.Services.AddScoped<ITestCachingService, TestCachingService>();
 builder.Services.AddScoped<IFlowCachingService, FlowCachingService>();
+builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
+builder.Services.AddScoped<IDocumentCachingService, DocumentCachingService>();
+builder.Services.AddScoped<ICourseCachingService, CourseCachingService>();
+builder.Services.AddScoped<IUnitModuleCachingService, UnitModuleCachingService>();
+builder.Services.AddScoped<ICourseModuleCachingService, CourseModuleCachingService>();
+builder.Services.AddScoped<ILessonModuleCachingService, LessonModuleCachingService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -153,6 +160,18 @@ builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository
 builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
 builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
 
+builder.Services.AddScoped<IDocumentResultRepository, DocumentResultRepository>();
+builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
+builder.Services.AddScoped<ITestGroupResultRepository, TestGroupResultRepository>();
+builder.Services.AddScoped<IUnitModuleRepository, UnitModuleRepository>();
+builder.Services.AddScoped<ICourseModuleRepository, CourseModuleRepository>();
+
+builder.Services.AddScoped<VideoLessonItemInitializer>();
+builder.Services.AddScoped<ClassForumLessonItemInitializer>();
+builder.Services.AddScoped<HomeWorkLessonItemInitializer>();
+builder.Services.AddScoped<DocumentLessonItemInitializer>();
+builder.Services.AddScoped<ILessonItemInitializerFactory, LessonItemInitializerFactory>();
+
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
@@ -235,36 +254,37 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
 });
 
 builder.AddMassTransit(appSetting,
-queues: new Dictionary<string, Type>
-{
-    { QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, typeof(UpdateOcCheckInClassForumResultConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.CompleteTestWhenTimeOut, typeof(CompleteTestWhenTimeOutConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.UpdateTeacherGradingInClassForumAndMockTest, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.DeleteClassForumByFlag, typeof(DeleteClassForumByFlagConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.ClassForumAIResponse, typeof(RealTimeAIResponseConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.MockTestAnwserResponse, typeof(AiFeedBackResponseConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.UpdateClassForumResultToExpiredTime, typeof(UpdateClassForumResultToExpiredTimeConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.SendWeeklyReport, typeof(SendWeeklyReportConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.AggregateDataWeeklyReport, typeof(AggregateDataWeeklyReportConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.SetTimeModule, typeof(SetTimeModuleConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.RetryMockTestAction, typeof(RetryMockTestWhenScoreZeroConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.RankedStudent, typeof(RankedStudentConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.ExportExcelStudentLearningProcess, typeof(ExportFileExcelStudentLearningProcessConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.ExportExcelSchoolLearningProcess, typeof(ExportExcelSchoolLearningProcessConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
-    { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
-    { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.QuestionType, typeof(QuestionTypeConsumer) },
-});
+    queues: new Dictionary<string, Type>
+    {
+        { QueueSettings.LmsQueue.NameQueue.UpdateOcCheckInClassForumResult, typeof(UpdateOcCheckInClassForumResultConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.CompleteTestWhenTimeOut, typeof(CompleteTestWhenTimeOutConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.UpdateTeacherGradingInClassForumAndMockTest, typeof(UpdateTeacherGradingInClassForumAndMockTestConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.DeleteClassForumByFlag, typeof(DeleteClassForumByFlagConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.ClassForumAIResponse, typeof(RealTimeAIResponseConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.MockTestAnwserResponse, typeof(AiFeedBackResponseConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.UpdateClassForumResultToExpiredTime, typeof(UpdateClassForumResultToExpiredTimeConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.SendWeeklyReport, typeof(SendWeeklyReportConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.AggregateDataWeeklyReport, typeof(AggregateDataWeeklyReportConsumer) },
+        { QueueSettings.RealtimeQueue.NameQueue.SetTimeModule, typeof(SetTimeModuleConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.RetryMockTestAction, typeof(RetryMockTestWhenScoreZeroConsumer) },
+        { QueueSettings.RealtimeQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.RetryClassForumAction, typeof(RetryClassForumConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.SpeakingAI, typeof(SpeakingAIEvaluationConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.RankedStudent, typeof(RankedStudentConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.ExportExcelStudentLearningProcess, typeof(ExportFileExcelStudentLearningProcessConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.ExportExcelSchoolLearningProcess, typeof(ExportExcelSchoolLearningProcessConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.SavePlacementTestAnswers, typeof(SavePlacementTestAnswersConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.ErrorExplainGgSheet, typeof(ErrorExplainConsumer) },
+        { QueueSettings.StorageQueue.NameQueue.ResponseSpeechToTextPendingAi, typeof(ResponseSpeechToTextPendingAiConsumer) },
+        { QueueSettings.LmsQueue.NameQueue.PushNotice, typeof(PushNoticeConsumer) },
+        { QueueSettings.RealtimeQueue.NameQueue.QuestionType, typeof(QuestionTypeConsumer) },
+    });
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging() || app.Environment.IsEnvironment(Settings.Environments.Testing))
 {
     app.UseMiddleware<CacheManagerMiddleware>("/cache");
 }
+
 app.UseServices();
 app.Run();

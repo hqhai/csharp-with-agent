@@ -34,17 +34,15 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             var subjects = await _categoryCachingService.GetOrSetAsync("all", async (ctx, _) =>
             {
                 var categories = await _categoryRepository.ReadQueryable
-                .Where(x => x.Type == EnumTypeCategory.Subject && !x.ParentId.HasValue && x.Status != EnumStatus.Archive)
-                .ToListAsync(cancellationToken);
+                    .Where(x => x.Type == EnumTypeCategory.Subject
+                                && x.Status == EnumStatus.Active
+                                && x.ParentId == null)
+                    .ToListAsync(cancellationToken);
 
                 return categories;
             }, token: cancellationToken);
 
-            return new MethodResult<IList<SubjectModel>>()
-            {
-                Result = GetSubjectModels(subjects).ToList(),
-                StatusCode = 200
-            };
+            return new MethodResult<IList<SubjectModel>>() { Result = GetSubjectModels(subjects).ToList(), StatusCode = 200 };
         }
 
         private async Task LoadChildCategory(Category category)
@@ -60,11 +58,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
         {
             foreach (var category in categories)
             {
-                var subjectModel = new SubjectModel
-                {
-                    Id = category.Id,
-                    Name = category.Name,
-                };
+                var subjectModel = new SubjectModel { Id = category.Id, Name = category.Name, };
 
                 if (category.Categorys != null && category.Categorys.Count > 0)
                 {

@@ -3,14 +3,10 @@
 namespace Fsel.Training.Application.Commands.ClassStudentCmd
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Common.Models;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Training.Application.Services.CourseServices;
     using Fsel.Training.Application.Services.CourseServices.CommandModels;

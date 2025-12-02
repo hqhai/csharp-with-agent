@@ -21,37 +21,37 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 SectionId = TestSectionResult.TestSectionId,
                 SectionResultId = TestSectionResult.Id,
                 Status = TestSectionResult.Status,
-                Children = new List<BaseTestStateModel>()
+                CorrectCount = TestSectionResult.CorrectCount,
+                TotalCount = TestSectionResult.SkillScores.Sum(x => x.TotalCount),
+                WorkingTime = TestSectionResult.WorkingTime,
+                Children = new List<BaseTestStateModel>(),
+                UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
             };
-            if (Children != null && Children.Count > 0)
+            if (Children.Count > 0)
             {
                 foreach (var child in Children)
                 {
                     sectionState.Children.Add(child.ExportState());
                 }
             }
+
             return sectionState;
         }
 
         public override void GenerateChildren()
         {
-            if (TestSectionResult.TestAnswers != null && TestSectionResult.TestAnswers.Any())
+            if (TestSectionResult.TestAnswers.Any())
             {
                 foreach (var testAnswer in TestSectionResult.TestAnswers)
                 {
                     Children.Add(new TestAnswerLeaf { Result = testAnswer, Parent = this, ServiceProvider = ServiceProvider });
                 }
             }
-            else if (TestSectionResult.SectionResults != null && TestSectionResult.SectionResults.Any())
+            else if (TestSectionResult.SectionResults.Any())
             {
                 foreach (var sectionResult in TestSectionResult.SectionResults)
                 {
-                    var sectionComposite = new TestSectionResultComposite
-                    {
-                        Result = sectionResult,
-                        Parent = this,
-                        ServiceProvider = ServiceProvider
-                    };
+                    var sectionComposite = new TestSectionResultComposite { Result = sectionResult, Parent = this, ServiceProvider = ServiceProvider };
                     Children.Add(sectionComposite);
                     sectionComposite.GenerateChildren();
                 }
@@ -62,21 +62,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         {
             if (TestSectionResult.SectionResults.Count == 0)
             {
-                var testSectionQuestionRepository = ServiceProvider.GetService<IRepository<TestSectionQuestion>>();
+                var testSectionQuestionRepository = ServiceProvider.GetRequiredService<IRepository<TestSectionQuestion>>();
                 var questions = await testSectionQuestionRepository.ReadQueryable.Where(x => x.TestSectionId == TestSectionResult.TestSectionId)
                     .Include(x => x.Question)
                     .Select(x => x.Question)
                     .ToListAsync();
 
                 TestSectionResult.CorrectTotal = questions.Sum(x => x.CorrectTotal);
-                TestSectionResult.SkillScores = new List<SkillScores>
-                {
-                    new SkillScores
-                    {
-                        TotalCount = questions.Sum(x => x.CorrectTotal),
-                        TotalQuestion = questions.Count
-                    }
-                };
+                TestSectionResult.SkillScores = new List<SkillScores> { new SkillScores { TotalCount = questions.Sum(x => x.CorrectTotal), TotalQuestion = questions.Count } };
             }
             else
             {
@@ -90,8 +83,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 {
                     new SkillScores
                     {
-                        TotalCount =  TestSectionResult.SectionResults.Sum(x => x.CorrectTotal),
-                        TotalQuestion =  TestSectionResult.SectionResults.SelectMany(x => x.SkillScores).Sum(x => x.TotalQuestion)
+                        TotalCount = TestSectionResult.SectionResults.Sum(x => x.CorrectTotal),
+                        TotalQuestion = TestSectionResult.SectionResults.SelectMany(x => x.SkillScores).Sum(x => x.TotalQuestion)
                     }
                 };
             }
@@ -121,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         {
             await base.Submit();
 
-            if (Children != null && Children.Count > 0)
+            if (Children.Count > 0)
             {
                 if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == Shared.Enums.EnumAnswerStatus.Done))
                 {
@@ -132,6 +125,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         firstSkillScore.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
+
                     TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
                 }
                 else if (Children.All(c => c is TestSectionResultComposite))
@@ -143,6 +137,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         firstSkillScore.CorrectCount = TestSectionResult.SectionResults.SelectMany(x => x.SkillScores).Sum(x => x.CorrectCount);
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
+
                     TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
                 }
                 else

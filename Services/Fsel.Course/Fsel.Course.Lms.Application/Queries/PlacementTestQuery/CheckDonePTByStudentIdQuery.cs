@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 {
     using System;
     using System.Threading.Tasks;
+    using Domain.Models.EntityModels.PlacementTestModels;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.TestConfigs;
@@ -12,34 +13,40 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class CheckDonePTByStudentIdQuery : IRequest<MethodResult<bool>>
+    public class CheckDonePtByStudentIdQuery : IRequest<MethodResult<PtStateModel>>
     {
         public Guid StudentId { get; set; }
     }
 
-    public class CheckDonePTByStudentIdHandler : IRequestHandler<CheckDonePTByStudentIdQuery, MethodResult<bool>>
+    public class CheckDonePtByStudentIdHandler : IRequestHandler<CheckDonePtByStudentIdQuery, MethodResult<PtStateModel>>
     {
         private readonly IRepository<TestGroupResult> _testGroupResult;
 
-        public CheckDonePTByStudentIdHandler(IRepository<TestGroupResult> testGroupResult)
+        public CheckDonePtByStudentIdHandler(IRepository<TestGroupResult> testGroupResult)
         {
             _testGroupResult = testGroupResult;
         }
 
-        public async Task<MethodResult<bool>> Handle(CheckDonePTByStudentIdQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<PtStateModel>> Handle(CheckDonePtByStudentIdQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            var isDone = await _testGroupResult.Queryable.AnyAsync(x => x.Status == EnumResultStatus.Done
-            && x.StudentId == request.StudentId
-            && x.TestType == EnumTestType.PlacementTest,
-                cancellationToken);
+            var testGroupResult = await _testGroupResult.Queryable
+                .Include(x => x.CurrentLevel)
+                .FirstOrDefaultAsync(x => x.StudentId == request.StudentId
+                                          && x.TestType == EnumTestType.PlacementTest,
+                    cancellationToken);
 
-            return new MethodResult<bool>
+            var ptState = new PtStateModel
             {
-                StatusCode = StatusCodes.Status200OK,
-                Result = isDone
+                FlowId = testGroupResult?.FlowId,
+                TestGroupResultId = testGroupResult?.Id,
+                StudentId = request.StudentId,
+                Level = testGroupResult?.CurrentLevel?.Name,
+                Status = testGroupResult?.Status ?? EnumResultStatus.NotStarted
             };
+
+            return new MethodResult<PtStateModel> { StatusCode = StatusCodes.Status200OK, Result = ptState };
         }
     }
 }

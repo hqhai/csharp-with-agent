@@ -2,8 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.V1i1
 {
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Enums;
+    using Core.Base.BaseModels;
+    using Enums;
 
     public class DocumentModel : BaseModel
     {

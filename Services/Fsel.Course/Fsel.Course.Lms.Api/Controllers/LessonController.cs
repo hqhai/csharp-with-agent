@@ -33,6 +33,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get List lesson by unit
         /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<LessonsMockTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [ApiVersion(ApiSettings.APIVersion1)]

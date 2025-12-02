@@ -18,9 +18,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     {
         Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate);
 
+        Task<Test> GetHierachicalTestById(Guid id);
+
         Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false);
 
-        Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid programId, Guid studentId, EnumTestType enumTestType);
+        Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass =false);
 
         Task<TestResult> MakeNewTestResultTree(Guid studentId, Guid stepFlowId, Guid testGroupResultId, Guid programId, Guid? actionFlowId = default);
 
@@ -41,13 +43,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         public TestService(ITestCachingService testCachingService,
             ITestRepository testRepository,
-             ICategoryTestBankRepository categoryTestBankRepository,
-             IStepFlowRepository stepFlowRepository,
-             Core.Base.Interfaces.IRepository<TestResult> testResultRepository,
-             Core.Base.Interfaces.IRepository<TestGroupResult> testGroupResultRepository,
-             IQuestionRepository questionRepository,
-             Core.Base.Interfaces.IRepository<TestAnswer> testAnswerRepository,
-             QuestionConverter questionConverter)
+            ICategoryTestBankRepository categoryTestBankRepository,
+            IStepFlowRepository stepFlowRepository,
+            Core.Base.Interfaces.IRepository<TestResult> testResultRepository,
+            Core.Base.Interfaces.IRepository<TestGroupResult> testGroupResultRepository,
+            IQuestionRepository questionRepository,
+            Core.Base.Interfaces.IRepository<TestAnswer> testAnswerRepository,
+            QuestionConverter questionConverter)
         {
             _testCachingService = testCachingService;
             _testRepository = testRepository;
@@ -63,9 +65,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         public async Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate)
         {
             var test = await _testRepository.ReadQueryable
-                                 .Where(predicate)
-                                 .OrderBy(x => x.CreatedDate)
-                                 .FirstOrDefaultAsync();
+                .Where(predicate)
+                .OrderBy(x => x.CreatedDate)
+                .FirstOrDefaultAsync();
 
             if (test != null)
             {
@@ -75,15 +77,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return test;
         }
 
-        private async Task<Test> GetHierachicalTestById(Guid id)
+        public async Task<Test> GetHierachicalTestById(Guid id)
         {
             return await _testCachingService.GetOrSetAsync(id.ToString(), async (ctx, _) =>
             {
                 var test = await _testRepository.ReadQueryable
-                                 .Where(x => x.Id == id)
-                                 .Include(x => x.TestSections)
-                                 .OrderBy(x => x.CreatedDate)
-                                 .FirstOrDefaultAsync(cancellationToken: _);
+                    .Where(x => x.Id == id)
+                    .Include(x => x.TestSections)
+                    .ThenInclude(x => x.Skill)
+                    .OrderBy(x => x.CreatedDate)
+                    .FirstOrDefaultAsync(cancellationToken: _);
 
                 var childSections = test.TestSections.Where(x => x.ParentId != null).ToList();
                 test.TestSections = test.TestSections.Where(x => x.ParentId == null).ToList();
@@ -115,17 +118,17 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             Guid? actionFlowId = default)
         {
             var stepFlow = await _stepFlowRepository.ReadQueryable
-                                .Where(x => x.Id == stepFlowId)
-                                .FirstOrDefaultAsync();
+                .Where(x => x.Id == stepFlowId)
+                .FirstOrDefaultAsync();
             var testIds = await _categoryTestBankRepository.ReadQueryable
-                                        .Where(x => x.ProgramId == programId && x.TestType == EnumTestType.PlacementTest)
-                                        .OrderBy(x => x.CreatedDate)
-                                        .Select(x => x.TestOriginalId)
-                                        .ToListAsync();
+                .Where(x => x.ProgramId == programId && x.TestType == EnumTestType.PlacementTest)
+                .OrderBy(x => x.CreatedDate)
+                .Select(x => x.TestOriginalId)
+                .ToListAsync();
 
             var test = await GetHierachicalTestFirstOrDefault(x => x.LevelId == stepFlow.LevelId
-                                    && testIds.Contains(x.OriginalId)
-                                    && x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
+                                                                   && testIds.Contains(x.OriginalId)
+                                                                   && x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
             if (test != null)
             {
                 var testResult = new TestResult
@@ -140,12 +143,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
                 foreach (var section in test.TestSections)
                 {
-                    var testSectionResult = new TestSectionResult
-                    {
-                        TestSectionId = section.Id,
-                        StudentId = studentId,
-                        Status = EnumResultStatus.New,
-                    };
+                    var testSectionResult = new TestSectionResult { TestSectionId = section.Id, StudentId = studentId, Status = EnumResultStatus.New, };
                     testResult.SectionResults.Add(testSectionResult);
 
                     CreateTestSectionResultTree(section, testSectionResult, testResult);
@@ -157,7 +155,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return null;
         }
 
-        public async Task<TestGroupResult> InitTestGroupResultForFlow(Guid flowId, Guid programId, Guid studentId, EnumTestType enumTestType)
+        public async Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass = false)
         {
             var testGroupResult = new TestGroupResult
             {
@@ -165,7 +163,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 FlowId = flowId,
                 StudentId = studentId,
                 TestType = enumTestType,
-                Status = EnumResultStatus.New
+                Status = isByPass ? EnumResultStatus.ByPass : EnumResultStatus.New
             };
             _testGroupResultRepository.Add(testGroupResult);
             await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
@@ -176,12 +174,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         {
             foreach (var child in parentTestSection.TestSections)
             {
-                var testSectionResult = new TestSectionResult
-                {
-                    TestSectionId = child.Id,
-                    StudentId = parentSectionResult.StudentId,
-                    Status = EnumResultStatus.New,
-                };
+                var testSectionResult = new TestSectionResult { TestSectionId = child.Id, StudentId = parentSectionResult.StudentId, Status = EnumResultStatus.New, };
+                testSectionResult.ParentTestSectionResult = parentSectionResult;
                 parentSectionResult.SectionResults.Add(testSectionResult);
                 testResult.SectionResults.Add(testSectionResult);
                 CreateTestSectionResultTree(child, testSectionResult, testResult);
@@ -192,32 +186,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         {
             var queryable = isReadOnly ? _testResultRepository.ReadQueryable : _testResultRepository.Queryable;
 
-            var testResult = await queryable
-                                .Where(predicate)
-                                .Include(x => x.SectionResults)
-                                .ThenInclude(x => x.TestAnswers)
-                                .FirstOrDefaultAsync();
-            if (testResult == null)
-            {
-                return null;
-            }
-            var inventory = testResult.SectionResults.Where(x => x.ParentTestSectionResultId != null).ToList();
-            testResult.SectionResults = testResult.SectionResults.Where(x => x.ParentTestSectionResultId == null).ToList();
-            foreach (var sectionResult in testResult.SectionResults)
-            {
-                LoadTestSectionResultTreeRecursive(sectionResult, inventory);
-            }
-            return testResult;
-        }
-
-        private static void LoadTestSectionResultTreeRecursive(TestSectionResult testSectionResult, List<TestSectionResult> inventory)
-        {
-            testSectionResult.SectionResults = inventory.Where(x => x.ParentTestSectionResultId == testSectionResult.Id).ToList();
-            inventory = inventory.Except(testSectionResult.SectionResults).ToList();
-            foreach (var child in testSectionResult.SectionResults)
-            {
-                LoadTestSectionResultTreeRecursive(child, inventory);
-            }
+            return await queryable
+                .Where(predicate)
+                .Include(x => x.SectionResults)
+                .ThenInclude(x => x.TestAnswers)
+                .FirstOrDefaultAsync();
         }
 
         public async Task CreateAnswers(SubmitAnswerCommandModel request)
@@ -240,18 +213,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     {
                         return;
                     }
+
                     var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
 
-                    var questionId = questionItem.TestSectionQuestions.FirstOrDefault()?.QuestionId ?? default;
-                    var testAnswer = testAnswers.FirstOrDefault(x => x.QuestionId == questionId);
+                    var testAnswer = testAnswers.FirstOrDefault(x => x.QuestionId == question.Id);
                     if (testAnswer == null)
                     {
-                        testAnswer = new TestAnswer
-                        {
-                            TestSectionResultId = request.SectionResultId,
-                            QuestionId = questionId,
-                            StudentId = request.StudentId
-                        };
+                        testAnswer = new TestAnswer { TestSectionResultId = request.SectionResultId, QuestionId = question.Id, StudentId = request.StudentId };
 
                         _testAnswerRepository.Add(testAnswer);
                     }
