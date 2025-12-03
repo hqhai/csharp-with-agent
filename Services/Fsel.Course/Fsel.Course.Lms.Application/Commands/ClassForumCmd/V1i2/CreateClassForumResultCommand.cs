@@ -161,11 +161,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                                                 classForumDetailResultAttemp1.ProcessDate.Value.AddHours(2) :
                                                 classForumDetailResultAttemp1?.ProcessDate;
 
-            //if (classForumDetailResultAttemp1 != null && processDateResultAttemp1.HasValue && processDateResultAttemp1.Value <= DateTime.UtcNow)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.TimeUpPostClassForum), nameof(classForum));
-            //    return methodResult;
-            //}
+            if (classForumDetailResultAttemp1 != null && processDateResultAttemp1.HasValue && processDateResultAttemp1.Value <= DateTime.UtcNow)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.TimeUpPostClassForum), nameof(classForum));
+                return methodResult;
+            }
             if (classForumResult != null && classForumResult.ClassForumDetailResults.Where(x => x.Status == EnumClassForumResultStatus.Pending).Count() >= 2)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumDetailHaveMoreThan2));
