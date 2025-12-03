@@ -2,7 +2,7 @@
 
 namespace Fsel.Shared.Enums
 {
-    public enum SuccessCriteriaItemDetermination
+    public enum EnumSuccessCriteriaItemDetermination
     {
         Yes,
         No,

@@ -26,6 +26,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Polly;
+    using Shared.Helpers;
 
     public class SubmitClassForumAICommand : ClassForumAIResponseModelV2, IRequest<bool>
     {
@@ -76,13 +77,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
             _aiPromptManagerRepository = aiPromptManagerRepository;
             _classForumRepository = classForumRepository;
         }
-
-        private class UserAiModel
-        {
-            public IList<ClassForumAiResponseModel>? ClassForumAIs { get; set; }
-            public bool ConditionRetry { get; set; }
-        }
-
         public async Task<bool> Handle(SubmitClassForumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -95,13 +89,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
 
             try
             {
-                var options = new JsonSerializerOptions
-                {
-                    Converters = { new JsonStringEnumConverter() },
-                    PropertyNameCaseInsensitive = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    ReferenceHandler = ReferenceHandler.IgnoreCycles,
-                };
+                var options = CovertJsonHelper.CreateDefault();
 
                 var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
                 if (classForumDetailResult == null)
@@ -274,7 +262,10 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
 
             return feedback.Clone();
         }
+        private class UserAiModel
+        {
+            public IList<ClassForumAiResponseModel>? ClassForumAIs { get; set; }
+            public bool ConditionRetry { get; set; }
+        }
     }
-
-
 }

@@ -11,7 +11,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.V1i2
         public string? SuccessCriteriaItem { get; set; }
 
         [JsonPropertyName("successCriteriaItemDetermination")]
-        public SuccessCriteriaItemDetermination SuccessCriteriaItemDetermination { get; set; }
+        public EnumSuccessCriteriaItemDetermination SuccessCriteriaItemDetermination { get; set; }
 
         [JsonPropertyName("details")]
         public SuccessCriteriaDetails? Details { get; set; }
