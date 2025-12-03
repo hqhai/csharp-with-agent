@@ -9,6 +9,7 @@ namespace Fsel.Identity.Api.Controllers.Campus
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Identity.Application.Commands.AdminCmd;
+    using Fsel.Identity.Application.Commands.CampusCmd;
     using Fsel.Identity.Application.Commands.CampusCmd.Classes;
     using Fsel.Identity.Application.Queries.CampusQuery.Classes;
     using Fsel.Identity.Domain.Models;
@@ -198,6 +199,23 @@ namespace Fsel.Identity.Api.Controllers.Campus
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update info students campus
+        /// </summary>
+        [HttpPost("update-info-students-campus")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(StudentCampusManagement.Update)]
+        public async Task<IActionResult> UpdateInfoStudentCampus([FromForm] UpdateInfoStudentCampusCommand command)
+        {
+            MethodResult<Stream> commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            if (!commandResult.IsOK || commandResult.Result == null)
+            {
+                return commandResult.GetActionResult();
+            }
+            return File(commandResult.Result, Settings.Excels.ContentType, "File_Lỗi.xlsx");
         }
     }
 }
