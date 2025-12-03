@@ -24,10 +24,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
         private readonly IMapper _mapper;
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUnitLessonRepository _unitLessonRepository;
-        private const string VIDEOTYPE =  "Video bài giảng";
-        private const string CLASSFORUMTYPE =  "Diễn dàn";
-        private const string HOMEWORKTYPE =  "Bài tập về nhà";
-        private const string DOCUMENTTYPE =  "Tài liệu";
+        private const string VIDEOTYPE = "Video bài giảng";
+        private const string CLASSFORUMTYPE = "Diễn dàn";
+        private const string HOMEWORKTYPE = "Bài tập về nhà";
+        private const string DOCUMENTTYPE = "Tài liệu";
 
         public GetListLessonByUnitIdQueryHandler(
             IMapper mapper,
@@ -82,9 +82,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 var lesson = ul.Lesson!;
 
                 var orderModules = lesson.LessonModules
-                    .OrderBy(m => m.DisplayNumber)
-                    .ToList();
-
+                                         .OrderBy(m => m.DisplayNumber)
+                                         .ToList();
                 var lessonModulesModel = _mapper.Map<List<LessonModuleModel>>(orderModules);
                 lessonResultByLessonId.TryGetValue(lesson.Id, out var lessonResult);
 
@@ -99,7 +98,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 lessonModel.IsLocked = !previousLessonCompleted;
                 lessonModel.Status = lessonResult.Status;
                 lessonModel.LessonModules = lessonModulesModel;
-                lessonModel.CourseId =  request.CourseId;
+                lessonModel.CourseId = request.CourseId;
                 lessonModel.LessonResult = lessonResult.Id;
 
                 response.Add(lessonModel);

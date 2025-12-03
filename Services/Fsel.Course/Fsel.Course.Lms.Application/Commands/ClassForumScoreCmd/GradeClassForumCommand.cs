@@ -116,20 +116,20 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumScoreCmd
                 methodResult.AddErrorBadRequest(nameof(EnumClassForumResultErrorCode.ClassForumResultStatusNotPendingForGrading));
                 return methodResult;
             }
-            await _classForumResultRepository.ExecuteTransactionAsync(async () =>
+            await _classForumResultRepository.ExecuteTransactionAsync((Func<Task<VoidMethodResult>>)(async () =>
             {
                 classForumResult.Status = EnumClassForumResultStatus.Graded;
                 classForumResult.ClassForumScores = classForumScores;
                 await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
                 {
-                    bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                    bulk.IgnoreOnUpdateExpression = c => (new { c.StudentId, c.LessonResultId, c.ClassForumId });
                 });
                 await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;
                 methodResult.Result = _mapper.Map<List<ClassForumScoreModel>>(classForumScores);
                 return methodResult;
-            });
+            }));
 
             return methodResult;
         }

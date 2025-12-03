@@ -102,6 +102,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 FlowId = FlowTestResult.FlowId,
                 Status = FlowTestResult.Status,
                 StudentId = FlowTestResult.StudentId,
+                Level = FlowTestResult.LevelId?.ToString(),
                 TestStates = TestResultComposites.Select(c => c.ExportState()).ToList()
             };
 

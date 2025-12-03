@@ -7,6 +7,7 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Models.CommandModels.VideoResults;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.V1i2;
 
     public class VideoResultProfile : Profile
     {
@@ -14,6 +15,8 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<VideoResult, VideoResultModel>().IgnoreAllNonExisting();
             CreateMap<ReviewLessonVideoCommandModel, VideoResult>().IgnoreAllNonExisting();
+
+            CreateMap<VideoResult, ResultModel>().IgnoreAllNonExisting();
         }
     }
 }

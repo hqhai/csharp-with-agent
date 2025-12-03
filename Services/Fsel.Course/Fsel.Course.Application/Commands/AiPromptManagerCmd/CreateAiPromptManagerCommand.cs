@@ -2,15 +2,13 @@
 
 namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using AutoMapper;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.AiPromptManager;
-    using Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels;
+    using Common.ActionResults;
+    using Common.Enums.ErrorCodes;
+    using Domain.Entities;
+    using Domain.IRepositories;
+    using Domain.Models.CommandModels.AiPromptManager;
+    using Domain.Models.EntityModels.AiPromptManagerModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -34,9 +32,10 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
         public async Task<MethodResult<AiPromptManagerModel>> Handle(CreateAiPromptManagerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AiPromptManagerModel> methodResult = new MethodResult<AiPromptManagerModel>();
+            var methodResult = new MethodResult<AiPromptManagerModel>();
 
-            var exits = await _aiModelManagerRepository.Queryable.FirstOrDefaultAsync(x => x.AiModelName == request.AiModelName, cancellationToken);
+            var exits = await _aiModelManagerRepository.Queryable
+                .FirstOrDefaultAsync(x => x.AiModelName == request.AiModelName, cancellationToken);
 
             if (exits != null)
             {
@@ -44,7 +43,16 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
                 return methodResult;
             }
 
-            Validation(request, methodResult);
+            #region  Validation
+
+            if (request.AiModelName == null || request.InputModelJson == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                return methodResult;
+            }
+
+            #endregion
+
 
             await _aiModelManagerRepository.ExecuteTransactionAsync(async () =>
             {
@@ -57,23 +65,6 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
 
                 return methodResult;
             });
-
-            return methodResult;
-        }
-
-        private static MethodResult<AiPromptManagerModel> Validation(CreateAiPromptManagerCommand request, MethodResult<AiPromptManagerModel> methodResult)
-        {
-            if (request.AiModelName == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
-            }
-
-            if (request.InputModel == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
-            }
 
             return methodResult;
         }

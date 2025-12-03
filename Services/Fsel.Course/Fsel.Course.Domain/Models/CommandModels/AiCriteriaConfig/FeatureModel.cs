@@ -2,20 +2,28 @@
 
 namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
 {
-    using Fsel.Course.Domain.Enums;
-    using Fsel.Shared.Enums;
+    using Enums;
 
+    public record FeatureTypeMap(EnumFeatureMultiple Feature, List<EnumSubFeatureType> SubFeatures);
+    public record FeatureCriteriaMap(EnumSubFeatureType SubFeature, List<EnumCriteriaAi> Criterias);
     public static class FeatureModel
     {
-        public static readonly Dictionary<EnumFeature, EnumCriteriaAi[]> FeatureTypes = new()
+        public static readonly List<FeatureTypeMap> FeatureTypes = new()
         {
-            {EnumFeature.ClassForum, Array.Empty<EnumCriteriaAi>()},
-            {EnumFeature.HomeWork, Array.Empty<EnumCriteriaAi>()},
-            {EnumFeature.MockTest,  Array.Empty<EnumCriteriaAi>()},
-            {EnumFeature.ChatBot, Array.Empty<EnumCriteriaAi>()},
-            {EnumFeature.VideoLesson, Array.Empty < EnumCriteriaAi >()},
-            {EnumFeature.FinalTest, Array.Empty < EnumCriteriaAi >()},
-            {EnumFeature.DiscussionBoard, Array.Empty < EnumCriteriaAi >()}
+            new(EnumFeatureMultiple.Unit,   new() { EnumSubFeatureType.AiPracticeGym }),
+            new(EnumFeatureMultiple.Lesson, new() { EnumSubFeatureType.ClassForumSpeaking, EnumSubFeatureType.ClassForumWriting, EnumSubFeatureType.VideoLesson, EnumSubFeatureType.HomeWork }),
+            new(EnumFeatureMultiple.Test,   new() { EnumSubFeatureType.TestConfigSpeakingLayout, EnumSubFeatureType.TestConfigWritingLayout, EnumSubFeatureType.ShortAnswerBase}),
+        };
+
+        public static readonly List<FeatureCriteriaMap> FeatureCriteria = new()
+        {
+            new(EnumSubFeatureType.AiPracticeGym,           new()),
+            new(EnumSubFeatureType.ClassForumSpeaking,      new()),
+            new(EnumSubFeatureType.ClassForumWriting,       new()),
+            new(EnumSubFeatureType.VideoLesson,             new()),
+            new(EnumSubFeatureType.HomeWork,                new()),
+            new(EnumSubFeatureType.TestConfigSpeakingLayout,new() { EnumCriteriaAi.Fc, EnumCriteriaAi.Lr, EnumCriteriaAi.Gra }),
+            new(EnumSubFeatureType.TestConfigWritingLayout, new() { EnumCriteriaAi.Lr, EnumCriteriaAi.Ta, EnumCriteriaAi.Gra, EnumCriteriaAi.Cc }),
         };
     }
 }

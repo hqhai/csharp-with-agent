@@ -5,14 +5,23 @@ namespace Fsel.Course.Domain.Entities
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using Common.Enums.ErrorCodes;
+    using Common.Helpers;
     using Core.Entities;
     using Enums;
-    using Fsel.Common.Helpers;
 
     public class AICriteriaConfigs : Entity
     {
         public Guid AiPromptManagerId { get; set; }
-        public EnumCriteriaAi TypeCriteriaAi { get; set; }
+
+        public EnumFeatureMultiple? FeatureMultiple { get; set; }
+
+        public EnumSubFeatureType? SubFeatureType { get; set; }
+
+        public EnumCriteriaAi? TypeCriteriaAi { get; set; }
+
+        public Guid ProjectId { get; set; }
+
+        public Guid? ObjectId { get; set; }
 
         [MaxLength(100000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? UserRole { get; set; }
@@ -43,6 +52,7 @@ namespace Fsel.Course.Domain.Entities
 
         [Range(1, 10000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int? MaximumToken { get; set; } = 4000;
+
         public AiPromptManager? AiPromptManager { get; set; }
 
         [NotMapped]

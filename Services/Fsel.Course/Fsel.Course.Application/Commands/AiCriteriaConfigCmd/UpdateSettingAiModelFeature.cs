@@ -1,15 +1,13 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Commands.AiFeatureConfigCmd
+namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
 {
-    using System.Threading;
-    using System.Threading.Tasks;
     using AutoMapper;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig;
-    using Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels;
+    using Common.ActionResults;
+    using Common.Enums.ErrorCodes;
+    using Domain.IRepositories;
+    using Domain.Models.CommandModels.AiCriteriaConfig;
+    using Domain.Models.EntityModels.AiPromptManagerModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -20,55 +18,47 @@ namespace Fsel.Course.Application.Commands.AiFeatureConfigCmd
 
     public class UpdateSettingAiModelFeatureHandler : IRequestHandler<UpdateSettingAiModelFeature, MethodResult<AICriteriaConfigsModel>>
     {
-        private readonly IAiCriteriaConfigRepository _aiModelFeatureRepository;
+        private readonly IAiCriteriaConfigRepository _aiCriteriaConfigRepository;
         private readonly IMapper _mapper;
 
-        public UpdateSettingAiModelFeatureHandler(IAiCriteriaConfigRepository aiModelFeatureRepository, IMapper mapper)
+        public UpdateSettingAiModelFeatureHandler(IAiCriteriaConfigRepository aiCriteriaConfigRepository, IMapper mapper)
         {
-            _aiModelFeatureRepository = aiModelFeatureRepository;
+            _aiCriteriaConfigRepository = aiCriteriaConfigRepository;
             _mapper = mapper;
         }
 
         public async Task<MethodResult<AICriteriaConfigsModel>> Handle(UpdateSettingAiModelFeature request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AICriteriaConfigsModel> methodResult = new MethodResult<AICriteriaConfigsModel>();
+            var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
-            var exits = await _aiModelFeatureRepository.Queryable.AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == request.Id && !x.IsDeleted, cancellationToken);
+            var existing = await _aiCriteriaConfigRepository.ReadQueryable
+                .Where(x => x.ProjectId == request.ProjectId && x.SubFeatureType == request.SubFeatureType && !x.IsDeleted)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
 
-            if (exits == null)
+            if (existing.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
 
-            await _aiModelFeatureRepository.ExecuteTransactionAsync(async () =>
+            await _aiCriteriaConfigRepository.ExecuteTransactionAsync(async () =>
             {
-                if (!exits.IsValid())
+                foreach (var item in existing)
                 {
-                    methodResult.AddErrorBadRequest(exits.ErrorMessages);
-                    return methodResult;
+                    _mapper.Map(request, item);
+                    _aiCriteriaConfigRepository.Update(item);
                 }
 
-                exits.SettingTemperature = request.SettingTemperature;
-                exits.SettingWordMaxLength = request.SettingWordMaxLength;
-                exits.SettingTopP = request.SettingTopP;
-                exits.SettingFrequency = request.SettingFrequency;
-                exits.SettingPresence = request.SettingPresence;
+                await _aiCriteriaConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
-                if (request.MaximumNumber != null && request.MaximumToken != null)
-                {
-                    exits.MaximumNumber = request.MaximumNumber;
-                    exits.MaximumToken = request.MaximumToken;
-                }
-
-                exits = _aiModelFeatureRepository.Update(exits);
-
-                await _aiModelFeatureRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                var result = _mapper.Map<AICriteriaConfigsModel>(existing.First());
+                result.AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(existing);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<AICriteriaConfigsModel>(exits);
+                methodResult.Result = result;
+
                 return methodResult;
             });
 

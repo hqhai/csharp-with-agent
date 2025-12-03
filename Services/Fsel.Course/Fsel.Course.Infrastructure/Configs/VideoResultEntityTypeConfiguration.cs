@@ -18,11 +18,6 @@ namespace Fsel.Course.Infrastructure.Configs
               .HasForeignKey(b => b.VideoId)
               .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasOne(a => a.LessonResult)
-                .WithOne(b => b.VideoResult)
-                .HasForeignKey<VideoResult>(p => p.LessonResultId)
-                .OnDelete(DeleteBehavior.Cascade);
-
             builder.HasIndex(x => x.LessonResultId).IsUnique(false);
 
             builder.Property(e => e.Status)
@@ -36,6 +31,11 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumPlaybackSpeed>());
+
+            builder.HasOne(a => a.LessonModule)
+                .WithMany(b => b.VideoResults)
+                .HasForeignKey(p => p.LessonModuleId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasIndex(c => new { c.LessonResultId, c.VideoId, c.StudentId }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.Status, c.StudentId });

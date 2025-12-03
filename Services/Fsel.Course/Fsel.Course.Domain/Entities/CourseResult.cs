@@ -18,7 +18,8 @@ namespace Fsel.Course.Domain.Entities
         public EnumWorkingStatus WorkingStatus { get; set; }
         public DateTime? ProcessDate { get; set; }
         public DateTime? CompletionDate { get; set; }
-
         public ICollection<TestGroupResult> TestGroupResults { get; set; } = new List<TestGroupResult>();
+        public ICollection<UnitResult> UnitResults { get; set; } = new List<UnitResult>();
+        public ICollection<LessonResult> LessonResults { get; set; } = new List<LessonResult>();
     }
 }

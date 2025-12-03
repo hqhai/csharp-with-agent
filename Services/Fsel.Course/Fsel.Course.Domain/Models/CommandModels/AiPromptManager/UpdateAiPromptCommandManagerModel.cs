@@ -6,8 +6,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiPromptManager
     {
         public Guid Id { get; set; }
         public string? AiModelName { get; set; }
-        public string? InputModel { get; set; }
+        public string? InputModelJson { get; set; }
         public Guid? FeatureObjectId { get; set; }
-        public Guid? ParentId { get; set; }
     }
 }

@@ -30,16 +30,9 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
         public async Task<MethodResult<bool>> Handle(DeleteAiPromptManagerCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<bool> methodResult = new MethodResult<bool>();
-
-            if (request.Id == Guid.Empty)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.Id));
-                return methodResult;
-            }
+            var methodResult = new MethodResult<bool>();
 
             var entity = await _aiPromptManagerRepository.GetIncludeByIdAsync(request.Id);
-
 
             if (entity == null)
             {
@@ -47,10 +40,9 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
                 return methodResult;
             }
 
-            await Validation(entity, methodResult, request);
-
             if (!methodResult.IsOK)
             {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.ServerError));
                 return methodResult;
             }
 
@@ -64,31 +56,6 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
 
                 return methodResult;
             });
-
-            return methodResult;
-        }
-
-        private async Task<MethodResult<bool>> Validation(AiPromptManager entity,
-            MethodResult<bool> methodResult,
-            DeleteAiPromptManagerCommand request)
-        {
-            if (!entity.IsValid())
-            {
-                methodResult.AddErrorBadRequest(entity.ErrorMessages);
-                return methodResult;
-            }
-
-            var isCriteria = await _aiPromptManagerRepository.Queryable
-                .Include(x => x.AiPromptParent)
-                .Include(x => x.AICriteriaConfigs)
-                .AsNoTracking()
-                .AllAsync(x => x.Id == entity.Id && x.AICriteriaConfigs.Count > 0 && x.AiPromptManagers.Count > 0);
-
-            if (isCriteria)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumAiPromptManagerErrorCode.IsFeature), nameof(request.Id), request.Id);
-                return methodResult;
-            }
 
             return methodResult;
         }

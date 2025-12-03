@@ -89,6 +89,9 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? MediaPost { get; set; }
 
+        public double? TotalScore { get; set; }
+        public string? AudioPath { get; set; }
+
         /// <summary>
         /// Media Post Ruby
         /// </summary>

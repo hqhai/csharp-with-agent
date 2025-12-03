@@ -22,6 +22,7 @@ using Fsel.Course.Lms.Application.Services.ApplicationServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
 using Fsel.Course.Lms.Application.Services.FFmpegServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
+using Fsel.Course.Lms.Application.Services.LessonItemServices;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SenderService;
@@ -48,6 +49,10 @@ builder.Services.AddScoped<ITestCachingService, TestCachingService>();
 builder.Services.AddScoped<IFlowCachingService, FlowCachingService>();
 builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
 builder.Services.AddScoped<IDocumentCachingService, DocumentCachingService>();
+builder.Services.AddScoped<ICourseCachingService, CourseCachingService>();
+builder.Services.AddScoped<IUnitModuleCachingService, UnitModuleCachingService>();
+builder.Services.AddScoped<ICourseModuleCachingService, CourseModuleCachingService>();
+builder.Services.AddScoped<ILessonModuleCachingService, LessonModuleCachingService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -152,6 +157,18 @@ builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
 builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
 builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
 
+builder.Services.AddScoped<IDocumentResultRepository, DocumentResultRepository>();
+builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
+builder.Services.AddScoped<ITestGroupResultRepository, TestGroupResultRepository>();
+builder.Services.AddScoped<IUnitModuleRepository, UnitModuleRepository>();
+builder.Services.AddScoped<ICourseModuleRepository, CourseModuleRepository>();
+
+builder.Services.AddScoped<VideoLessonItemInitializer>();
+builder.Services.AddScoped<ClassForumLessonItemInitializer>();
+builder.Services.AddScoped<HomeWorkLessonItemInitializer>();
+builder.Services.AddScoped<DocumentLessonItemInitializer>();
+builder.Services.AddScoped<ILessonItemInitializerFactory, LessonItemInitializerFactory>();
+
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
@@ -223,7 +240,7 @@ builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiU
 builder.AddRefitClients(typeof(INotificationService), appSetting?.Services?.NotificationApiUrl);
 builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
 builder.AddRefitClients(typeof(IFFmpegServices), appSetting?.Services?.FFmpegApiUrl);
-builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate(IServiceProvider serviceProvider, HttpClient httpClient)
+builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
     if (appSetting?.OpenAiConfig?.ApiKeys != null && appSetting.OpenAiConfig.ApiKeys!.Any())

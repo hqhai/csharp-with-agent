@@ -3,11 +3,14 @@
 namespace Fsel.Course.Lms.Api.Controllers.V1i2
 {
     using System.Net;
+    using Application.Commands.DocumentCmd;
     using Application.Queries.DocumentQuery;
     using Common.ActionResults;
     using Common.Attributes;
     using Common.Constants;
+    using Domain.Models.CommandModels.Documents;
     using Domain.Models.EntityModels.V1i1;
+    using Domain.Models.EntityModels.V1i2;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Shared.Attributes;
@@ -16,7 +19,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/document")]
-    [Permission(role: nameof(EnumRole.Student))]
+    //[Permission(role: nameof(EnumRole.Student))]
     [ApiController]
     public class DocumentController : ControllerBase
     {
@@ -30,14 +33,28 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         /// <summary>
         /// Get List Document for lesson
         /// </summary>
-        [HttpGet("{originalId}")]
+        [HttpGet("{documentId}")]
         [ProducesResponseType(typeof(MethodResult<DocumentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetDocument([FromRoute] Guid originalId)
+        public async Task<IActionResult> GetDocument([FromRoute] Guid documentId)
         {
-            var getDocument = new SearchDocumentQuery { OriginalId = originalId };
+            var getDocument = new GetDocumentQuery { DocumentId = documentId };
             var queryResult = await _mediator.Send(getDocument).ConfigureAwait(false);
             return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Update document result
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPut("{id}")]
+        [ProducesResponseType(typeof(MethodResult<DocumentResultModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Create([FromRoute] Guid id)
+        {
+            var commandResult = await _mediator.Send(new UpdateDocumentResultCommand { Id = id}).ConfigureAwait(false);
+            return commandResult.GetActionResult();
         }
     }
 }

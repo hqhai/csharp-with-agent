@@ -1,10 +1,11 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Queries.AiPromptConfigQuery
+namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
+    using Domain.Enums;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
@@ -15,36 +16,53 @@ namespace Fsel.Course.Application.Queries.AiPromptConfigQuery
 
     public class GetAiCriteriaConfigQuery : IRequest<MethodResult<AICriteriaConfigsModel>>
     {
-        public Guid Id { get; set; }
+        public EnumSubFeatureType Type { get; set; }
+        public Guid ProjectId { get; set; }
+
     }
 
     public class GetAiModelFeatureQueryHandler : IRequestHandler<GetAiCriteriaConfigQuery, MethodResult<AICriteriaConfigsModel>>
     {
-        private readonly IAiCriteriaConfigRepository _aiModelFeatureRepository;
+        private readonly IAiCriteriaConfigRepository _aiCriteriaSettingRepository;
         private readonly IMapper _mapper;
 
-        public GetAiModelFeatureQueryHandler(IAiCriteriaConfigRepository aiModelFeatureRepository, IMapper mapper)
+        public GetAiModelFeatureQueryHandler(IAiCriteriaConfigRepository aiModelFeatureRepository,
+            IMapper mapper,
+            IAiCriteriaConfigRepository aiCriteriaSettingRepository)
         {
-            _aiModelFeatureRepository = aiModelFeatureRepository;
             _mapper = mapper;
+            _aiCriteriaSettingRepository = aiCriteriaSettingRepository;
         }
         public async Task<MethodResult<AICriteriaConfigsModel>> Handle(GetAiCriteriaConfigQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<AICriteriaConfigsModel> methodResult = new MethodResult<AICriteriaConfigsModel>();
+            var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
-            var ctriteria = await _aiModelFeatureRepository.Queryable
+            var setting = await _aiCriteriaSettingRepository.ReadQueryable
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == request.Id && !x.IsDeleted, cancellationToken);
-            if (ctriteria == null)
+                .FirstOrDefaultAsync(x => x.SubFeatureType == request.Type && x.ProjectId == request.ProjectId, cancellationToken);
+
+            if (setting == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(ctriteria));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(setting));
                 return methodResult;
             }
 
-            var resultMap = _mapper.Map<AICriteriaConfigsModel>(ctriteria);
+            var criteria = await _aiCriteriaSettingRepository.ReadQueryable
+                .AsNoTracking()
+                .Where(x => x.SubFeatureType == request.Type &&  x.ProjectId == request.ProjectId)
+                .ToListAsync(cancellationToken);
 
-            methodResult.Result = resultMap;
+            if (criteria.Count == 0)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(criteria));
+                return methodResult;
+            }
+
+            var result = _mapper.Map<AICriteriaConfigsModel>(setting);
+            result.AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(criteria);;
+
+            methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
 
             return methodResult;

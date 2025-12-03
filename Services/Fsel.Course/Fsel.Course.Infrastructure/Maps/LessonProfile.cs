@@ -27,6 +27,8 @@ namespace Fsel.Course.Infrastructure.Maps
                     .ForMember(p => p.LessonModules, x => x.Ignore())
                     .ForMember(p => p.LessonInstructions, x => x.Ignore());
 
+            CreateMap<Lesson, Domain.Models.EntityModels.V1i2.LessonDtoModel>().IgnoreAllNonExisting();
+
             CreateMap<Lesson, Fsel.Course.Domain.Models.EntityModels.V1i2.LessonModel>()
                 .ForMember(d => d.CourseLevel,
                     o => o.MapFrom(s => s.CourseLevel.ToString()))
@@ -41,7 +43,8 @@ namespace Fsel.Course.Infrastructure.Maps
                 .ForMember(d => d.IsLocked,
                     o => o.Ignore())
                 .ForMember(d => d.LessonModules,
-                    o => o.Ignore()); ;
+                    o => o.Ignore());
+            ;
         }
     }
 }

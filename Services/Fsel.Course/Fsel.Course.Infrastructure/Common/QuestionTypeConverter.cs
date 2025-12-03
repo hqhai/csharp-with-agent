@@ -280,6 +280,15 @@ namespace Fsel.Course.Infrastructure.Common
                     }
                     break;
 
+                case EnumQuestionType.LongAnswer:
+                    var longAnswerQuestion = config.Deserialize<LongAnswerQuestion>();
+                    if (longAnswerQuestion != null)
+                    {
+                        result = longAnswerQuestion;
+                        totalCorrect = GetTotalCorrect(longAnswerQuestion);
+                    }
+                    break;
+
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -834,6 +843,7 @@ namespace Fsel.Course.Infrastructure.Common
                 Name = keyboardText.Name,
                 Unicode = keyboardText.Unicode,
                 FilePath = keyboardText.FilePath,
+                VectorLibrary = keyboardText.VectorLibrary
             }).FirstOrDefault(x => x.Id == keyboardTextId);
         }
     }

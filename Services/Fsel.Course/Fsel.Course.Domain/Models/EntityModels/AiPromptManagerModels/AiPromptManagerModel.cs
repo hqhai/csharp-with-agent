@@ -8,9 +8,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels
     public class AiPromptManagerModel : BaseModel
     {
         public string? AiModelName { get; set; }
-        public string? InputModel { get; set; }
-        public Guid? ParentId { get; set; }
-        public EnumFeature FeatureAi { get; set; }
+        public object? InputModelJson { get; set; }
         public Guid? FeatureObjectId { get; set; }
+        public Guid? ProjectId { get; set; }
     }
 }

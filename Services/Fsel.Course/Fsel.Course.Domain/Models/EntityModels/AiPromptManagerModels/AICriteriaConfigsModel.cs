@@ -2,16 +2,13 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels
 {
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Enums;
+    using Core.Base.BaseModels;
+    using Enums;
 
-    public class AICriteriaConfigsModel : BaseModel
+    public class AICriteriaConfigsModel
     {
         public Guid AiPromptManagerId { get; set; }
-        public EnumCriteriaAi TypeCriteriaAi { get; set; }
-        public string? UserRole { get; set; }
-        public string? SettingAiConfig { get; set; }
-        public string? SettingAiJson { get; set; }
+        public IList<AiCriteriaModel> AiCriteriaModel { get; set; }
         public double? SettingTemperature { get; set; }
         public double? SettingWordMaxLength { get; set; }
         public double? SettingTopP { get; set; }
@@ -19,5 +16,15 @@ namespace Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels
         public double? SettingPresence { get; set; }
         public int? MaximumNumber { get; set; }
         public int? MaximumToken { get; set; }
+    }
+
+    public class AiCriteriaModel : BaseModel
+    {
+        public EnumFeatureMultiple? FeatureMultiple { get; set; }
+        public EnumSubFeatureType? SubFeatureType { get; set; }
+        public EnumCriteriaAi? TypeCriteriaAi { get; set; }
+        public string? UserRole { get; set; }
+        public string? SettingAiConfig { get; set; }
+        public string? SettingAiJson { get; set; }
     }
 }
