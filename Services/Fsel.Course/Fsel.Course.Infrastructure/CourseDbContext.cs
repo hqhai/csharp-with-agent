@@ -13,6 +13,8 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Course.Infrastructure
 {
+    using Domain.Entities.LongAnswerConfig;
+
     /// <summary>
     /// Represents the read database context for the course service.
     /// </summary>
@@ -165,6 +167,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<AiPromptManager> AiPromptManagers { get; set; }
         public DbSet<AICriteriaConfigs> AICriteriaConfigs { get; set; }
         public DbSet<DocumentResult> DocumentResults { get; set; }
+        public DbSet<LongAnswerSetting> LongAnswerSettings { get; set; }
 
         //#region Report
 
@@ -305,6 +308,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new TestAnswerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AiPromptManagerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AICriteriaConfigsEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LongAnswerSettingTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
