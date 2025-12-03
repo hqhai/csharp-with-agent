@@ -18,7 +18,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
 
     public class GetVideoTimeCodeQuery : IRequest<MethodResult<VideoModel>>
     {
-        public Guid VideoId { get; set; }
         public Guid VideoResultId { get; set; }
     }
 
@@ -57,7 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
             }
 
             var video = await _videoRepository.ReadQueryable
-                .Where(x => x.Id == request.VideoId)
+                .Where(x => x.Id == videoResult.VideoId)
                 .Include(v => v.VideoTimeCodes)
                 .FirstOrDefaultAsync(cancellationToken);
 
