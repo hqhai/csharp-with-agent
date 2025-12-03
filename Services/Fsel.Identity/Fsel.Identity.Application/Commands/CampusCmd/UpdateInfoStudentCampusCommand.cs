@@ -30,7 +30,6 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
     public class UpdateInfoStudentCampusCommandHandler : IRequestHandler<UpdateInfoStudentCampusCommand, MethodResult<Stream>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly RoleManager<Role> _roleManager;
         private readonly IUserRoleRepository _userRoleRepository;
@@ -38,10 +37,9 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
         private const string ErrorMessage = "Thông báo lỗi";
         private const string ErrorTemplate = "Template bị sai, kiểm tra lại tên cột";
 
-        public UpdateInfoStudentCampusCommandHandler(UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, RoleManager<Role> roleManager, IUserRoleRepository userRoleRepository)
+        public UpdateInfoStudentCampusCommandHandler(UserManager<User> userManager, IStudentRepository studentRepository, RoleManager<Role> roleManager, IUserRoleRepository userRoleRepository)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _roleManager = roleManager;
             _userRoleRepository = userRoleRepository;
@@ -180,13 +178,11 @@ namespace Fsel.Identity.Application.Commands.CampusCmd
 
                                join r in _roleManager.Roles on ur.RoleId equals r.Id
 
-                               join h in _humanRepository.Queryable on u.Id equals h.UserId
-
-                               join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                               join s in _studentRepository.Queryable on u.Id equals s.UserId
 
                                where r.Name == EnumRole.StudentCampus.ToString()
 
-                               select new { User = u, Human = h, Student = s }).ToListAsync(cancellationToken);
+                               select new { User = u, Student = s }).ToListAsync(cancellationToken);
 
             var studentUpdates = new List<Student>();
 
