@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
 
             try
             {
-                var options = CovertJsonHelper.CreateDefault();
+                var options = ConvertJson();
 
                 var classForumDetailResult = await _classForumDetailResultRepository.GetByIdAsync(request.ClassForumDetailResultId);
                 if (classForumDetailResult == null)
@@ -271,6 +271,20 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
         {
             public IList<ClassForumAiResponseModel>? ClassForumAIs { get; set; }
             public bool ConditionRetry { get; set; }
+        }
+
+        private static JsonSerializerOptions ConvertJson()
+        {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                ReferenceHandler = ReferenceHandler.IgnoreCycles,
+            };
+
+            options.Converters.Add(new JsonStringEnumConverter());
+
+            return options;
         }
     }
 }
