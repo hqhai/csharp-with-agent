@@ -49,6 +49,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
         private readonly IAiCriteriaConfigRepository _aiCriteriaConfigRepository;
         private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
         private readonly IClassForumRepository _classForumRepository;
+        private const double SettingTemperatureDefual = 1d;
+        private const double SettingFrequencyDefual = 0d;
+        private const double SettingWordMaxLengthDefual = 1500d;
+        private const double SettingPresenceDefual = 0d;
+        private const double SettingTopPDefual = 1d;
 
         public SubmitAIResponseCommandHandler(ILessonResultRepository lessonResultRepository,
             SubmitAIResponsePublisher submitAIResponsePublisher,
@@ -81,11 +86,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
         {
             ArgumentNullException.ThrowIfNull(request);
 
-            //var checkForbidden = await _mediator.Send(new CheckForbiddenClassForumCommand { ClassForumDetailResultId = request.ClassForumDetailResultId }, cancellationToken);
-            //if (checkForbidden != null && checkForbidden.Result)
-            //{
-            //    return false;
-            //}
+            var checkForbidden = await _mediator.Send(new CheckForbiddenClassForumCommand { ClassForumDetailResultId = request.ClassForumDetailResultId }, cancellationToken);
+            if (checkForbidden != null && checkForbidden.Result)
+            {
+                return false;
+            }
 
             try
             {
@@ -147,11 +152,11 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                             new V1i1.SubmitAICommand
                             {
                                 SettingModel = aiModel.InputModel,
-                                SettingTemperature = aiConfig.SettingTemperature ?? 1d,
-                                SettingFrequecy = aiConfig.SettingFrequency ?? 1d,
-                                SettingWordMaxLength = aiConfig.SettingWordMaxLength ?? 1000d,
-                                SettingPresence = aiConfig.SettingPresence ?? 1d,
-                                SettingTopP = aiConfig.SettingTopP ?? 1d,
+                                SettingTemperature = aiConfig.SettingTemperature ?? SettingTemperatureDefual,
+                                SettingFrequecy = aiConfig.SettingFrequency ?? SettingFrequencyDefual,
+                                SettingWordMaxLength = aiConfig.SettingWordMaxLength ?? SettingWordMaxLengthDefual,
+                                SettingPresence = aiConfig.SettingPresence ?? SettingPresenceDefual,
+                                SettingTopP = aiConfig.SettingTopP ?? SettingTopPDefual,
                                 SystemRoleAlConfig = aiConfig.UserRole,
                                 UserAIConfig = aiConfig.SettingAiConfig,
                                 Text = successCriteriaSchema,
