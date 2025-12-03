@@ -34,15 +34,12 @@ namespace Fsel.Course.Application.Commands.SkillCmd
             MethodResult<SkillModel> methodResult = new MethodResult<SkillModel>();
 
             var isDuplicateCode = await _skillRepository.IsDuplicateFieldValueAsync(nameof(request.Code), request.Code);
-            var isDuplicateName = await _skillRepository.IsDuplicateFieldValueAsync(nameof(request.Name), request.Name);
+
             if (isDuplicateCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Code), request.Code);
             }
-            if (isDuplicateName)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Name), request.Name);
-            }
+
             if (!methodResult.IsOK)
             {
                 return methodResult;
