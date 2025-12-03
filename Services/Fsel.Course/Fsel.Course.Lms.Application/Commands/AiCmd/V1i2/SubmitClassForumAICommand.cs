@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
     using System.Text.Json.Serialization;
     using System.Threading;
     using System.Threading.Tasks;
+    using Domain.Models.CommandModels.Ais;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
@@ -266,11 +267,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
             var feedback = parameters.GetProperty("feedback");
 
             return feedback.Clone();
-        }
-        private class UserAiModel
-        {
-            public IList<ClassForumAiResponseModel>? ClassForumAIs { get; set; }
-            public bool ConditionRetry { get; set; }
         }
 
         private static JsonSerializerOptions ConvertJson()
