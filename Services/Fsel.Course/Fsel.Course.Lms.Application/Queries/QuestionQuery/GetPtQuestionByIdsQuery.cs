@@ -4,6 +4,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 {
     using System.Linq;
     using AutoMapper;
+    using Core.Base.Interfaces;
+    using Domain.Entities.TestConfigs;
+    using Domain.Enums;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
@@ -12,11 +15,18 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using Shared.Enums;
 
     public class GetPtQuestionByIdsQuery : IRequest<MethodResult<IList<QuestionModel>>>
     {
         public Guid StudentId { get; set; }
-        public IList<Guid> QuestionIds { get; set; } = new List<Guid>();
+        public IList<QuestionAnswer> QuestionAnswerIds { get; set; } = new List<QuestionAnswer>();
+    }
+
+    public class QuestionAnswer
+    {
+        public Guid QuestionId { get; set; }
+        public Guid AnswerId { get; set; }
     }
 
     public class GetPtQuestionByIdsQueryHandler : IRequestHandler<GetPtQuestionByIdsQuery, MethodResult<IList<QuestionModel>>>
@@ -25,24 +35,29 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         private readonly QuestionTypeConverter _questionTypeConverter;
         private readonly IMapper _mapper;
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
+        private readonly IRepository<TestAnswer> _testAnswerRepository;
+        private readonly AnswerTypeConverter _answerTypeConverter;
 
         public GetPtQuestionByIdsQueryHandler(IQuestionRepository questionRepository,
             AnswerTypeConverter answerTypeConverter,
             QuestionTypeConverter questionTypeConverter,
             IMapper mapper,
-            IQuestionShuffleRepository questionShuffleRepository)
+            IQuestionShuffleRepository questionShuffleRepository,
+            IRepository<TestAnswer> testAnswerRepository)
         {
+            _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
             _questionTypeConverter = questionTypeConverter;
             _mapper = mapper;
             _questionShuffleRepository = questionShuffleRepository;
+            _testAnswerRepository = testAnswerRepository;
         }
 
         public async Task<MethodResult<IList<QuestionModel>>> Handle(GetPtQuestionByIdsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<QuestionModel>>();
-            if (!request.QuestionIds.Any())
+            if (!request.QuestionAnswerIds.Any())
             {
                 return methodResult;
             }
@@ -54,14 +69,16 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
         private async Task<IList<QuestionModel>?> GetQuestionAsync(GetPtQuestionByIdsQuery request)
         {
-            ArgumentNullException.ThrowIfNull(request.QuestionIds);
+            ArgumentNullException.ThrowIfNull(request.QuestionAnswerIds);
 
-            var questions = await _questionRepository.ReadQueryable.WhereBulkContains(request.QuestionIds, x => x.Id).ToListAsync();
+            var questions = await _questionRepository.ReadQueryable.WhereBulkContains(request.QuestionAnswerIds.Select(x => x.QuestionId), x => x.Id).ToListAsync();
 
             if (!questions.Any())
             {
                 return null;
             }
+
+            var testAnswers = await _testAnswerRepository.ReadQueryable.WhereBulkContains(request.QuestionAnswerIds.Select(x => x.AnswerId), x => x.Id).ToListAsync();
 
             var listQuestion = new List<QuestionModel>();
 
@@ -93,12 +110,35 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                     listQuestionShuffle.Add(questionShuffle);
                 }
 
+                var answer = testAnswers.FirstOrDefault(x => x.QuestionId == question.Id);
+                if (answer != null)
+                {
+                    questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer));
+                    var answerDto = _mapper.Map<AnswerModel>(answer);
+                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, EnumResultStatus.Done);
+                    questionModel.ResultAnswer = answerDto;
+                }
 
                 listQuestion.Add(questionModel);
             }
 
             await _questionShuffleRepository.SaveQuestionShufflesAsync(listQuestionShuffle);
             return listQuestion;
+        }
+
+        private static EnumCorrectStatus? GetCorrectStatus(BaseAnswer? answer)
+        {
+            EnumCorrectStatus? status = null;
+            if (answer != null)
+            {
+                status = EnumCorrectStatus.Process;
+                if (answer.Status == EnumAnswerStatus.Done)
+                {
+                    status = answer.IsCorrect.HasValue && answer.IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
+                }
+            }
+
+            return status;
         }
     }
 }
