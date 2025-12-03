@@ -615,6 +615,15 @@
           "parentId": 25,
           "code": "",
           "permission": "AdminSchool"
+        },
+        {
+          "id": 254,
+          "code_title": "Báo cáo mục tiêu tuần",
+          "link": "/dashboard/week-progress",
+          "icon": "",
+          "parentId": 25,
+          "code": "",
+          "permission": "Admin,CSO,AdminSchool"
         }
       ]
     },

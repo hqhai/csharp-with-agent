@@ -183,7 +183,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 return new();
             }
             var keyDtos = keys.Distinct().Select(k => new { k.StudentId, k.CourseId }).ToList();
-            var (weekStart, weekEnd) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeUtc(dateNow);
+            var (weekStart, weekEnd) = DateTimeHelper.GetCurrentWeekRangeUtc(dateNow);
 
             var rows = await _lessonResultRepository.Queryable.AsNoTracking()
                 .Where(x => (x.CompletionDate ?? x.UpdatedDate ?? x.CreatedDate).Date <= weekEnd)
@@ -573,9 +573,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 return;
             }
 
-            var nextWeekBaseDateUtc = toDate.AddDays(7);
-
-            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow(nextWeekBaseDateUtc);
+            var (weekStartUtc, weekEndUtc) = Shared.Helpers.DateTimeHelper.GetCurrentWeekRangeNow(toDate);
             var toInsert = new List<StudentGoalSummary>();
             var updatedAggregates = new List<StudentGoalAggregate>();
             var courseGoalById = allCourseGoals.ToDictionary(g => g.Id);
@@ -660,8 +658,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
             var pairs = aggregates.Select(a => (a.StudentId, a.CourseId)).Distinct().ToList();
 
-            var doneCourse = await LoadDoneLessonStatsCourseAsync(pairs, toDate, ct);
-            var doneStats = await LoadDoneLessonStatsAsync(pairs, toDate, ct);
+            var doneCourse = await LoadDoneLessonStatsCourseAsync(pairs, toDate.Date, ct);
+            var doneStats = await LoadDoneLessonStatsAsync(pairs, toDate.Date, ct);
 
             var allStatuses = await GetOrderedProgressStatusesBeforeAsync(toDate, ct);
 
