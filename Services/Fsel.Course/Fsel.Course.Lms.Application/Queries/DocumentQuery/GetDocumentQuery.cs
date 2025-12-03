@@ -13,18 +13,18 @@ namespace Fsel.Course.Lms.Application.Queries.DocumentQuery
     using Microsoft.EntityFrameworkCore;
     using Services.ApplicationServices.CacheServices;
 
-    public class SearchDocumentQuery : IRequest<MethodResult<DocumentModel>>
+    public class GetDocumentQuery : IRequest<MethodResult<DocumentModel>>
     {
-        public Guid OriginalId { get; set; }
+        public Guid DocumentId { get; set; }
     }
 
-    public class SearchDocumentQueryHandler : IRequestHandler<SearchDocumentQuery, MethodResult<DocumentModel>>
+    public class GetDocumentQueryHandler : IRequestHandler<GetDocumentQuery, MethodResult<DocumentModel>>
     {
         private readonly IDocumentRepository _documentRepository;
         private readonly IDocumentCachingService _documentCachingService;
         private readonly IMapper _mapper;
 
-        public SearchDocumentQueryHandler(
+        public GetDocumentQueryHandler(
             IDocumentRepository documentRepository,
             IDocumentCachingService documentCachingService,
             IMapper mapper)
@@ -34,26 +34,18 @@ namespace Fsel.Course.Lms.Application.Queries.DocumentQuery
             _mapper = mapper;
         }
 
-        public async Task<MethodResult<DocumentModel>> Handle(SearchDocumentQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<DocumentModel>> Handle(GetDocumentQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<DocumentModel>();
 
-            if (request.OriginalId == Guid.Empty && request.OriginalId == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
-                return methodResult;
-            }
-
-            string cacheKey = $"DocumentQuery_{request.OriginalId}";
+            string cacheKey = $"DocumentQuery_{request.DocumentId}";
 
             var documentResult =  await _documentCachingService.GetOrSetAsync(cacheKey, async (ctx, _) =>
             {
                 var document = await _documentRepository.ReadQueryable
-                    .Where(x => x.OriginalId == request.OriginalId && x.VersionStatus == EnumVersionStatus.LastVersion)
-                    .AsNoTracking()
+                    .Where(x => x.Id == request.DocumentId && x.VersionStatus == EnumVersionStatus.LastVersion)
                     .SingleOrDefaultAsync(cancellationToken);
-
                 return document ?? null!;
             }, token: cancellationToken);
 
