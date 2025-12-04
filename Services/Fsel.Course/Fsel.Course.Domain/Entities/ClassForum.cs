@@ -93,6 +93,8 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumClassForumLayout Layout { get; set; }
 
+        public Guid? AiPromptCriteriaId { get; set; }
+
         public ICollection<ClassForumResult> ClassForumResults { get; set; } = new List<ClassForumResult>();
 
         public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();
