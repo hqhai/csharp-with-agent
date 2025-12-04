@@ -49,6 +49,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+
             var (weekStartUtc, weekEndUtc) = DateTimeHelper.GetCurrentWeekRangeNow();
 
             Guid? schoolId = null;
@@ -96,30 +97,30 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
             }
 
             var queryData = from baseQ in query
-                            join sum in _studentGoalSummaryRepository.Queryable.AsNoTracking() on baseQ.Id equals sum.StudentGoalAggregateId
-                            where sum.StartDate.Date <= weekStartUtc && sum.EndDate.Date >= weekEndUtc
-                            select new StudentGoalAggregateModel
-                            {
-                                Id = baseQ.Id,
-                                ClassName = baseQ.ClassName,
-                                CombinedProgress = baseQ.CombinedProgress,
-                                TotalCompletedLessons = baseQ.TotalCompletedLessons,
-                                CreatedFullName = baseQ.CreatedFullName,
-                                CreatedDate = baseQ.CreatedDate,
-                                CourseType = baseQ.CourseType,
-                                CourseLevel = baseQ.CourseLevel,
-                                CourseId = baseQ.CourseId,
-                                ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
-                                CompletedLessons = sum.CompletedLessons,
-                                CreatedUserId = baseQ.CreatedUserId,
-                                StudentId = baseQ.StudentId,
-                                ProgressStatus = sum.ProgressStatus,
-                                UpdatedDate = baseQ.UpdatedDate,
-                                UpdatedFullName = baseQ.UpdatedFullName,
-                                UpdatedUserId = baseQ.UpdatedUserId,
-                                TotalTargetLessons = sum.TotalTargetLessons,
-                                LessonsPerWeek = sum.LessonsPerWeek,
-                            };
+                join sum in _studentGoalSummaryRepository.Queryable.AsNoTracking() on baseQ.Id equals sum.StudentGoalAggregateId
+                where sum.StartDate.Date <= weekStartUtc && sum.EndDate.Date >= weekEndUtc
+                select new StudentGoalAggregateModel
+                {
+                    Id = baseQ.Id,
+                    ClassName = baseQ.ClassName,
+                    CombinedProgress = baseQ.CombinedProgress,
+                    TotalCompletedLessons = baseQ.TotalCompletedLessons,
+                    CreatedFullName = baseQ.CreatedFullName,
+                    CreatedDate = baseQ.CreatedDate,
+                    CourseType = baseQ.CourseType,
+                    CourseLevel = baseQ.CourseLevel,
+                    CourseId = baseQ.CourseId,
+                    ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
+                    CompletedLessons = sum.CompletedLessons,
+                    CreatedUserId = baseQ.CreatedUserId,
+                    StudentId = baseQ.StudentId,
+                    ProgressStatus = sum.ProgressStatus,
+                    UpdatedDate = baseQ.UpdatedDate,
+                    UpdatedFullName = baseQ.UpdatedFullName,
+                    UpdatedUserId = baseQ.UpdatedUserId,
+                    TotalTargetLessons = sum.TotalTargetLessons,
+                    LessonsPerWeek = sum.LessonsPerWeek,
+                };
 
             var lists = await queryData
                 .AsNoTracking()
@@ -144,7 +145,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 item.FullName = student?.User?.FullName;
                 item.Email = student?.User?.Email;
-                item.UserId = student?.User?.Id;
+                item.UserId = student?.UserId;
                 item.ClassCampusCode = student?.ClassCampusCode;
                 item.StudentCampusCode = student?.StudentCampusCode;
                 item.PhoneNumber = student?.User?.PhoneNumber;
