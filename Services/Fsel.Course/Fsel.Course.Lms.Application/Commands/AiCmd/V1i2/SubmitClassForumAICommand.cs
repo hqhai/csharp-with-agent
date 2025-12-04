@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Polly;
+    using Services.AiService.Models;
     using Shared.Helpers;
 
     public class SubmitClassForumAICommand : ClassForumAIResponseModelV2, IRequest<bool>
@@ -152,7 +153,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                         .Send(
                             new V1i1.SubmitAICommand
                             {
-                                SettingModel = aiModel.InputModel,
+                                SettingModel = aiModel.AiModelName,
                                 SettingTemperature = aiConfig.SettingTemperature ?? SettingTemperatureDefual,
                                 SettingFrequecy = aiConfig.SettingFrequency ?? SettingFrequencyDefual,
                                 SettingWordMaxLength = aiConfig.SettingWordMaxLength ?? SettingWordMaxLengthDefual,
@@ -261,12 +262,18 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                 throw new ArgumentException("AI response is null or empty", nameof(aiResponse));
             }
             var cleaned = Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aiResponse);
-            using var doc = JsonDocument.Parse(cleaned);
 
-            var parameters = doc.RootElement.GetProperty("parameters");
-            var feedback = parameters.GetProperty("feedback");
+            var model = JsonSerializer.Deserialize<AiJsonResponseModel>(
+                cleaned,
+                JsonSerializerOptions.Default
+            );
 
-            return feedback.Clone();
+            if (model?.Parameters.Feedback.ValueKind == JsonValueKind.Undefined)
+            {
+                throw new InvalidOperationException("Feedback property not found in AI response.");
+            }
+
+            return model.Parameters.Feedback.Clone();
         }
 
         private static JsonSerializerOptions ConvertJson()
@@ -277,9 +284,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 ReferenceHandler = ReferenceHandler.IgnoreCycles,
             };
-
             options.Converters.Add(new JsonStringEnumConverter());
-
             return options;
         }
     }
