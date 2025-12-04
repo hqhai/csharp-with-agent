@@ -70,10 +70,10 @@ namespace Fsel.Identity.Domain.Entities
 
         public SchoolClass? SchoolClassCampus { get; set; }
 
+        public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
+
         public virtual User? User { get; set; }
         public Guid UserId { get; set; }
-
-        public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
 
         public EventRegistration? EventRegistration { get; set; }
         public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();

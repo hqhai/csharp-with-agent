@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
     using Domain.IRepositories;
     using Domain.Models.EntityModels;
     using Domain.Models.QueryModels.StudentProgress;
+    using Fsel.Core.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -137,7 +138,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 item.FullName = student?.User?.FullName;
                 item.Email = student?.User?.Email;
-                item.UserId = student?.User?.Id;
+                item.UserId = student?.UserId;
                 item.ClassCampusCode = student?.ClassCampusCode;
                 item.StudentCampusCode = student?.StudentCampusCode;
                 item.PhoneNumber = student?.User?.PhoneNumber;
@@ -156,6 +157,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                     .Where(l => !string.IsNullOrEmpty(l.ClassCampusCode) && classCampusCodes.Contains(l.ClassCampusCode!))
                     .ToList();
             }
+
             if (!string.IsNullOrEmpty(request.StudentCampusCode))
             {
                 lists = lists.Where(l => l.StudentCampusCode == request.StudentCampusCode).ToList();
@@ -164,7 +166,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
             if (request.StatusStudentCampus != null && request.StatusStudentCampus.Any())
             {
                 var statusList = request.StatusStudentCampus;;
-                lists = lists .Where(l => l.StatusStudentCampus.HasValue && statusList.Contains(l.StatusStudentCampus.Value))
+                lists = lists.Where(l => l.StatusStudentCampus.HasValue && statusList.Contains(l.StatusStudentCampus.Value))
                     .ToList();
             }
 
