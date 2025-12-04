@@ -6,12 +6,14 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
     using Fsel.Identity.Domain.Models.QueryModels.Integration;
@@ -28,7 +30,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     public class LeadsIntegrationByEventQueryHandler : IRequestHandler<LeadsIntegrationByEventQuery, MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
     {
         private readonly IOrderService _orderService;
-        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
@@ -39,7 +41,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         private readonly IStudentRepository _studentRepository;
 
         public LeadsIntegrationByEventQueryHandler(IOrderService orderService,
-                                            IHumanRepository humanRepository,
+                                             UserManager<User> userManager,
                                             ILmsCourseService lmsCourseService,
                                             ISystemService systemService,
                                             IMapper mapper,
@@ -50,7 +52,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                             IStudentRepository studentRepository)
         {
             _orderService = orderService;
-            _humanRepository = humanRepository;
+            _userManager = userManager;
             _lmsCourseService = lmsCourseService;
             _systemService = systemService;
             _mapper = mapper;
@@ -78,9 +80,8 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             distinctUserIds = await (from a in studentCompetitionEvents
                                      join b in _studentRepository.Queryable on a.StudentId equals b.Id
-                                     join c in _humanRepository.Queryable on b.HumanId equals c.Id
-                                     where c.UserId.HasValue
-                                     select c.UserId!.Value).Distinct().ToListAsync(cancellationToken);
+                                     join c in _userManager.Users on b.UserId equals c.Id
+                                     select c.Id).Distinct().ToListAsync(cancellationToken);
 
             // bỏ những lead đã thành client
             var orderClients = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
@@ -115,13 +116,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var infoCourses = infoCourseResults.Content?.Result;
 
             // lấy all user từ list hợp nhất
-            var userCombines = await _humanRepository.Queryable
-                                                     .Include(x => x.User)
+            var userCombines = await _userManager.Users
                                                      .Include(x => x.Student)
                                                      .ThenInclude(x => x!.ParentStudents)
                                                      .ThenInclude(x => x.Parent)
-                                                     .ThenInclude(x => x!.Human)
-                                                     .WhereBulkContains(paging, x => x.UserId)
+                                                     .ThenInclude(x => x!.User)
+                                                     .WhereBulkContains(paging, x => x.Id)
                                                      .ToListAsync(cancellationToken);
 
             // lấy thông tin trường học
@@ -138,7 +138,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             {
                 GetCourseSuggestByUserIds = userCombines.Select(x => new GetCourseSuggestByUserIdsDetailModel
                 {
-                    UserId = x.UserId ?? Guid.Empty,
+                    UserId = x.Id,
                     Age = Shared.Helpers.DateTimeHelper.GetYearOld(x.Birthday),
                     BaseCourseLevel = x.Student?.BaseCourseLevel
                 }).ToList()
@@ -153,9 +153,9 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                        {
                                                            UserId = x.Key ?? Guid.Empty,
                                                            OTPPhoneNumber = x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.SMS) != null ?
-                                                                            x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.SMS)!.OTPCode : default,
+                                                                            x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.SMS)!.OtpCode : default,
                                                            OTPEmail = x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.Email) != null ?
-                                                                      x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.Email)!.OTPCode : default
+                                                                      x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.Email)!.OtpCode : default
                                                        }).ToListAsync(cancellationToken);
 
             // lấy sự kiện

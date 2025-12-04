@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "http://gateway-testing.fsel-testing-n.svc"
+    "BaseUrl": "http://gateway-dev.fsel-dev.svc"
   },
   "RateLimitOptions": {
     "DisableRateLimitHeaders": true,
@@ -11,20 +11,6 @@
     "Limit": 100
   },
   "Routes": [
-    // Auth Service
-    {
-      "SwaggerKey": "auth",
-      "UpstreamPathTemplate": "/auth-gateway/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
-      "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "auth-testing.fsel-testing-n.svc",
-          "Port": 80
-        }
-      ]
-    },
     // User Service
     {
       "SwaggerKey": "user",
@@ -34,7 +20,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "user-testing.fsel-testing-n.svc",
+          "Host": "user-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -48,7 +34,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "lcmsapi-testing.fsel-testing-n.svc",
+          "Host": "lcmsapi-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -62,7 +48,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "lmsapi-testing.fsel-testing-n.svc",
+          "Host": "lmsapi-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -76,7 +62,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "storage-testing.fsel-testing-n.svc",
+          "Host": "storage-dev.fsel-dev.svc",
           "Port": 80
         }
       ],
@@ -95,7 +81,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "sender-testing.fsel-testing-n.svc",
+          "Host": "sender-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -109,7 +95,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "training-testing.fsel-testing-n.svc",
+          "Host": "training-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -123,7 +109,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "interaction-testing.fsel-testing-n.svc",
+          "Host": "interaction-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -137,7 +123,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "ordering-testing.fsel-testing-n.svc",
+          "Host": "ordering-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -151,7 +137,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "system-testing.fsel-testing-n.svc",
+          "Host": "system-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -165,7 +151,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "cms-planet-defender-testing.fsel-testing-n.svc",
+          "Host": "cms-planet-defender-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -179,7 +165,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "realtime-testing.fsel-testing-n.svc",
+          "Host": "realtime-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -193,7 +179,7 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "notification-testing.fsel-testing-n.svc",
+          "Host": "notification-dev.fsel-dev.svc",
           "Port": 80
         }
       ]
@@ -229,42 +215,22 @@
   ],
   "SwaggerEndPoints": [
     {
-      "Key": "auth",
-      "Config": [
-        {
-          "Name": "Auths API",
-          "Version": "v1",
-          "Url": "http://auth-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
-        },
-        {
-          "Name": "Auths API",
-          "Version": "v1.1",
-          "Url": "http://auth-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
-        },
-        {
-          "Name": "Auths API",
-          "Version": "v1.2",
-          "Url": "http://auth-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
-        }
-      ]
-    },
-    {
       "Key": "user",
       "Config": [
         {
           "Name": "Users API",
           "Version": "v1",
-          "Url": "http://user-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://user-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Users API",
           "Version": "v1.1",
-          "Url": "http://user-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://user-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Users API",
           "Version": "v1.2",
-          "Url": "http://user-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://user-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -274,17 +240,17 @@
         {
           "Name": "Lcms Courses API",
           "Version": "v1",
-          "Url": "http://lcmsapi-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://lcmsapi-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Lcms Courses API",
           "Version": "v1.1",
-          "Url": "http://lcmsapi-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://lcmsapi-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Lcms Courses API",
           "Version": "v1.2",
-          "Url": "http://lcmsapi-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://lcmsapi-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -294,17 +260,17 @@
         {
           "Name": "Lms Courses API",
           "Version": "v1",
-          "Url": "http://lmsapi-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://lmsapi-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Lms Courses API",
           "Version": "v1.1",
-          "Url": "http://lmsapi-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://lmsapi-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Lms Courses API",
           "Version": "v1.2",
-          "Url": "http://lmsapi-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://lmsapi-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -314,17 +280,17 @@
         {
           "Name": "Storage API",
           "Version": "v1",
-          "Url": "http://storage-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://storage-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Storage API",
           "Version": "v1.1",
-          "Url": "http://storage-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://storage-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Storage API",
           "Version": "v1.2",
-          "Url": "http://storage-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://storage-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -334,17 +300,17 @@
         {
           "Name": "Senders API",
           "Version": "v1",
-          "Url": "http://sender-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://sender-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Senders API",
           "Version": "v1.1",
-          "Url": "http://sender-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://sender-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Senders API",
           "Version": "v1.2",
-          "Url": "http://sender-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://sender-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -354,17 +320,17 @@
         {
           "Name": "Training API",
           "Version": "v1",
-          "Url": "http://training-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://training-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Training API",
           "Version": "v1.1",
-          "Url": "http://training-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://training-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Training API",
           "Version": "v1.2",
-          "Url": "http://training-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://training-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -374,17 +340,17 @@
         {
           "Name": "Interaction API",
           "Version": "v1",
-          "Url": "http://interaction-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://interaction-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Interaction API",
           "Version": "v1.1",
-          "Url": "http://interaction-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://interaction-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Interaction API",
           "Version": "v1.2",
-          "Url": "http://interaction-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://interaction-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -394,17 +360,17 @@
         {
           "Name": "Ordering API",
           "Version": "v1",
-          "Url": "http://ordering-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://ordering-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Ordering API",
           "Version": "v1.1",
-          "Url": "http://ordering-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://ordering-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Ordering API",
           "Version": "v1.2",
-          "Url": "http://ordering-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://ordering-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -414,17 +380,17 @@
         {
           "Name": "System API",
           "Version": "v1",
-          "Url": "http://system-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://system-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "System API",
           "Version": "v1.1",
-          "Url": "http://system-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://system-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "System API",
           "Version": "v1.2",
-          "Url": "http://system-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://system-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -434,17 +400,17 @@
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1",
-          "Url": "http://cms-planet-defender-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://cms-planet-defender-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1.1",
-          "Url": "http://cms-planet-defender-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://cms-planet-defender-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1.2",
-          "Url": "http://cms-planet-defender-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://cms-planet-defender-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -454,17 +420,17 @@
         {
           "Name": "Realtime API",
           "Version": "v1",
-          "Url": "http://realtime-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://realtime-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Realtime API",
           "Version": "v1.1",
-          "Url": "http://realtime-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://realtime-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Realtime API",
           "Version": "v1.2",
-          "Url": "http://realtime-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://realtime-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -474,17 +440,17 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "http://notification-testing.fsel-testing-n.svc/swagger/v1/swagger.json"
+          "Url": "http://notification-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Notification API",
           "Version": "v1.1",
-          "Url": "http://notification-testing.fsel-testing-n.svc/swagger/v1.1/swagger.json"
+          "Url": "http://notification-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Notification API",
           "Version": "v1.2",
-          "Url": "http://notification-testing.fsel-testing-n.svc/swagger/v1.2/swagger.json"
+          "Url": "http://notification-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },

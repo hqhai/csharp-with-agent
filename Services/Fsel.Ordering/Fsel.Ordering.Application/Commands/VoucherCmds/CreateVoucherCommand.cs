@@ -46,51 +46,61 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VoucherModel> methodResult = new MethodResult<VoucherModel>();
+
             if (request.Source != EnumVoucherSource.Admin && request.Source != EnumVoucherSource.Auto)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.Source), request.Source);
                 return methodResult;
             }
+
             if (request.Source == EnumVoucherSource.Auto && string.IsNullOrEmpty(request.CodePrefix))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.CodePrefix));
                 return methodResult;
             }
-            if (request.Source == EnumVoucherSource.Auto && await _voucherRepository.Queryable.AnyAsync(p => p.CodePrefix.ToLower() == request.CodePrefix.ToLower(), cancellationToken))
+
+            if (request.Source == EnumVoucherSource.Auto && await _voucherRepository.Queryable.AnyAsync(p => p.CodePrefix == request.CodePrefix, cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodePrefixAlreadyExists), nameof(request.CodePrefix));
                 return methodResult;
             }
+
             if (request.Source == EnumVoucherSource.Auto && !string.IsNullOrEmpty(request.CodePrefix) && (request.CodePrefix.Length > 5 || !StringHelper.ContainsWhitespaceOrSpecialChars(request.CodePrefix)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeInValidFormat), nameof(request.CodePrefix));
                 return methodResult;
             }
+
             if (string.IsNullOrEmpty(request.Banner))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.Banner), request.Banner);
                 return methodResult;
             }
+
             if (request.Translations == null || request.Translations.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.Translations), request.Translations);
                 return methodResult;
             }
+
             if (request.Category == EnumVoucherCategory.Percent && request.Value > 100)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.ValueGreaterThan100), nameof(request.Category), request.Category);
                 return methodResult;
             }
+
             if (request.ApplicableSubjects == null || request.ApplicableSubjects.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.ApplicableSubjects), request.ApplicableSubjects);
                 return methodResult;
             }
+
             if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other) && (request.File == null || request.File.Length == 0 || string.IsNullOrEmpty(request.ExcelFilePath)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.File), request.File);
                 return methodResult;
             }
+
             var emails = new List<string>();
             if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other))
             {
@@ -109,36 +119,43 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                     return methodResult;
                 }
             }
+
             if (request.Source == EnumVoucherSource.Auto && !request.NumberOfChanges.HasValue)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.NumberOfChanges), request.NumberOfChanges);
                 return methodResult;
             }
+
             if (request.StartDate > request.EndDate)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.VoucherStartTimeMustSoonerThanEndTime), nameof(request.EndDate), request.EndDate);
                 return methodResult;
             }
+
             if (request.PackageIds == null || request.PackageIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), nameof(request.PackageIds));
                 return methodResult;
             }
+
             if (_packageRepository.IsIdsInValid(request.PackageIds))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.PackageIds));
                 return methodResult;
             }
+
             if (request.EventIds != null && request.EventIds.Count > 0 && _eventRepository.IsIdsInValid(request.EventIds))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.EventIds));
                 return methodResult;
             }
+
             if (request.Source == EnumVoucherSource.Admin && (string.IsNullOrEmpty(request.Code) || !StringHelper.ContainsWhitespaceOrSpecialChars(request.Code)))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeInValidFormat), nameof(request.Code));
                 return methodResult;
             }
+
             if (request.Source == EnumVoucherSource.Admin && await _voucherRepository.Queryable.AnyAsync(p => p.Code.ToLower() == request.Code.ToLower(), cancellationToken))
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVoucherErrorCode.CodeAlreadyExists), nameof(request.Code));
@@ -147,14 +164,17 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
 
             Voucher voucher = _mapper.Map<Voucher>(request);
             voucher.Source = request.Source;
+
             if (request.ApplicableSubjects.Any(p => p == EnumApplicableSubjectsVoucher.Other))
             {
                 voucher.ApplicableEmails = emails;
             }
+
             request.PackageIds.ForEach(p => voucher.VoucherPackages.Add(new VoucherPackage()
             {
                 PackageId = p
             }));
+
             if (request.EventIds == null || request.EventIds.Count == 0)
             {
                 var eventDefault = await _eventRepository.Queryable.FirstOrDefaultAsync(p => p.IsDefault, cancellationToken);
@@ -179,40 +199,33 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                 {
                     var vouchers = new List<Voucher>();
                     var codes = new List<string>();
-                    while (true)
+
+                    var existingCodes = await _voucherRepository.Queryable.Where(p => !string.IsNullOrEmpty(p.Code))
+                        .Select(v => v.Code)
+                        .ToListAsync(cancellationToken);
+
+                    while (codes.Count < request.Quantity)
                     {
-                        string code;
-                        do
-                        {
-                            if (string.IsNullOrEmpty(request.CodePrefix))
-                            {
-                                code = NumberHelper.GenerateCode(10);
-                            }
-                            else
-                            {
-                                code = request.CodePrefix + NumberHelper.GenerateCode(5);
-                            }
-                        } while (await _voucherRepository.Queryable.AnyAsync(p => p.Code.ToLower() == code.ToLower(), cancellationToken));
+                        var code = request.CodePrefix + NumberHelper.GenerateCode(5);
 
-                        if (!codes.Contains(code))
+                        if (existingCodes.Contains(code) || codes.Contains(code))
                         {
-                            codes.Add(code);
-                            var newVoucher = voucher.Clone();
-                            newVoucher.Id = Guid.NewGuid();
-                            newVoucher.Code = code;
-                            newVoucher.Quantity = 1;
-                            newVoucher.VoucherPackages = new List<VoucherPackage>();
-                            request.PackageIds.ForEach(p => newVoucher.VoucherPackages.Add(new VoucherPackage()
-                            {
-                                PackageId = p
-                            }));
-                            vouchers.Add(newVoucher);
+                            continue;
                         }
 
-                        if (codes.Count == request.Quantity)
+                        codes.Add(code);
+
+                        var newVoucher = voucher.Clone();
+                        newVoucher.Id = Guid.NewGuid();
+                        newVoucher.Code = code;
+                        newVoucher.Quantity = 1;
+                        newVoucher.VoucherPackages = new List<VoucherPackage>();
+                        request.PackageIds.ForEach(p => newVoucher.VoucherPackages.Add(new VoucherPackage()
                         {
-                            break;
-                        }
+                            PackageId = p
+                        }));
+
+                        vouchers.Add(newVoucher);
                     }
 
                     var voucherEntity = vouchers.First();
@@ -221,6 +234,7 @@ namespace Fsel.Ordering.Application.Commands.VoucherCmds
                         methodResult.AddErrorBadRequest(voucher.ErrorMessages);
                         return methodResult;
                     }
+
                     await _voucherRepository.AddList(vouchers);
                 }
 

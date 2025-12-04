@@ -31,17 +31,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
     {
         private readonly IStudentRepository _studentRepository;
         private readonly AuthContext _authContext;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
 
         public UpdateStudentInfoEventCommandHandler(IStudentRepository studentRepository,
             AuthContext authContext,
-            IHumanRepository humanRepository,
             UserManager<User> userManager)
         {
             _studentRepository = studentRepository;
             _authContext = authContext;
-            _humanRepository = humanRepository;
             _userManager = userManager;
         }
 
@@ -86,22 +83,11 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 return methodResult;
             }
 
-            var humanMethod = await UpdateHumanAsync(request, cancellationToken);
-            if (!humanMethod.IsOK)
+            var studentMethod = await UpdateStudentAsync(request, _authContext.CurrentUserId, cancellationToken);
+            if (!studentMethod.IsOK)
             {
-                methodResult.AddErrorBadRequest(humanMethod.ErrorMessages);
+                methodResult.AddErrorBadRequest(studentMethod.ErrorMessages);
                 return methodResult;
-            }
-            var human = humanMethod.Result;
-
-            if (human != null)
-            {
-                var studentMethod = await UpdateStudentAsync(request, human.Id, cancellationToken);
-                if (!studentMethod.IsOK)
-                {
-                    methodResult.AddErrorBadRequest(studentMethod.ErrorMessages);
-                    return methodResult;
-                }
             }
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;
@@ -118,6 +104,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 return methodResult;
             }
             user.Email = request.Email;
+            user.Birthday = request.Birthday;
             user.EmailConfirmed = true;
             user.NormalizedEmail = request.Email?.ToUpper(System.Globalization.CultureInfo.CurrentCulture);
             if (!user.IsValid())
@@ -130,36 +117,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             return methodResult;
         }
 
-        private async Task<MethodResult<Human>> UpdateHumanAsync(UpdateStudentInfoEventCommand request, CancellationToken cancellationToken)
-        {
-            var methodResult = new MethodResult<Human>();
-            var human = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken);
-            if (human == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(human), _authContext.CurrentUserId);
-                return methodResult;
-            }
-            human.Email = request.Email;
-            human.Birthday = request.Birthday;
-            if (!human.IsValid())
-            {
-                methodResult.AddErrorBadRequest(human.ErrorMessages);
-                return methodResult;
-            }
-            _humanRepository.Update(human);
-            await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-
-            methodResult.Result = human;
-            return methodResult;
-        }
-
-        private async Task<VoidMethodResult> UpdateStudentAsync(UpdateStudentInfoEventCommand request, Guid humanId, CancellationToken cancellationToken)
+        private async Task<VoidMethodResult> UpdateStudentAsync(UpdateStudentInfoEventCommand request, Guid userId, CancellationToken cancellationToken)
         {
             var methodResult = new VoidMethodResult();
-            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.HumanId == humanId, cancellationToken);
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == userId, cancellationToken);
             if (student == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), humanId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student), userId);
                 return methodResult;
             }
             int age = Shared.Helpers.DateTimeHelper.GetYearOld(request.Birthday);
@@ -200,9 +164,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
 
         private async Task AddParentAsync(UpdateStudentInfoEventCommand request, Guid studentId, CancellationToken cancellationToken)
         {
-            var human = new Human()
+            var user = new User()
             {
-                FullName = "N/A",
+                FirstName = "N/A",
+                LastName = "N/A",
                 PhoneNumber = request.ParentPhoneNumber,
                 Email = request.ParentEmail,
                 Parent = new Parent()
@@ -216,10 +181,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                     }
                 }
             };
-            if (human.IsValid())
+            if (user.IsValid())
             {
-                _humanRepository.Add(human);
-                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _userManager.CreateAsync(user);
             }
         }
     }

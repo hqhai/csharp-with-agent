@@ -6,6 +6,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Ordering.Application.Services.UserService;
@@ -25,11 +26,13 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     {
         private readonly IVoucherRepository _voucherRepository;
         private readonly IUserService _userService;
+        private readonly IOrderRepository _orderRepository;
 
-        public SearchDetailHistoryVoucherAutoQueryHandler(IVoucherRepository voucherRepository, IUserService userService)
+        public SearchDetailHistoryVoucherAutoQueryHandler(IVoucherRepository voucherRepository, IUserService userService, IOrderRepository orderRepository)
         {
             _voucherRepository = voucherRepository;
             _userService = userService;
+            _orderRepository = orderRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<HistoryVoucherModel>>> Handle(SearchDetailHistoryVoucherAutoQuery request, CancellationToken cancellationToken)
@@ -43,28 +46,43 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                 return methodResult;
             }
 
-            var vouchers = _voucherRepository.Queryable.Where(p => p.CodePrefix.ToLower() == request.CodePrefix.ToLower()).Include(p => p.Orders).Select(p => new HistoryVoucherModel()
-            {
-                VoucherCode = p.Code,
-                Status = p.Orders.Where(x => x.Status == EnumOrderStatus.New || x.Status == EnumOrderStatus.Payment).Any(),
-                UsageStatus = p.Orders.Where(x => x.Status == EnumOrderStatus.New || x.Status == EnumOrderStatus.Payment).Any() ? "Đã đổi" : "Chưa đổi",
-                OrderCode = !p.Orders.Any() ? null : p.Orders.First().Code,
-                DayUsed = !p.Orders.Any() ? null : p.Orders.First().CreatedDate,
-                UserId = !p.Orders.Any() ? null : p.Orders.First().UserId,
-            });
+            var vouchers = from v in _voucherRepository.Queryable
+                           join o in _orderRepository.Queryable.Where(p => p.Status == EnumOrderStatus.Payment || p.Status == EnumOrderStatus.New)
+                               on v.Id equals o.VoucherId into orderGroup
+                           from o in orderGroup.DefaultIfEmpty()
+                           where v.CodePrefix == request.CodePrefix
+
+                           select new HistoryVoucherModel
+                           {
+                               VoucherCode = v.Code,
+                               VoucherId = v.Id,
+                               Status = o != null,
+                               UsageStatus = o != null ? "Đã đổi" : "Chưa đổi",
+                               OrderCode = o.Code,
+                               DayUsed = o.CreatedDate,
+                               UserId = o.UserId,
+                               Email = o.Email,
+                           };
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                var studentResult = await _userService.GetStudentByEmail(request.Keyword);
-                var student = studentResult.Content?.Result;
-                var userId = student?.Human?.UserId;
-                if (userId.HasValue)
+                if (request.Keyword.IsValidEmail())
                 {
-                    vouchers = vouchers.Where(p => p.UserId == userId);
+                    var studentResult = await _userService.GetStudentByEmail(request.Keyword);
+                    var student = studentResult.Content?.Result;
+                    var userId = student?.UserId;
+                    if (userId.HasValue)
+                    {
+                        vouchers = vouchers.Where(p => p.UserId == userId);
+                    }
+                    else
+                    {
+                        vouchers = vouchers.Where(p => p.Email == request.Keyword);
+                    }
                 }
                 else
                 {
-                    vouchers = vouchers.Where(m => (m.OrderCode ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.VoucherCode ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()));
+                    vouchers = vouchers.Where(m => (!string.IsNullOrEmpty(m.OrderCode) && m.OrderCode.Contains(request.Keyword)) || (!string.IsNullOrEmpty(m.VoucherCode) && m.VoucherCode.Contains(request.Keyword)));
                 }
             }
 
@@ -85,19 +103,18 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
                     .ToListAsync(cancellationToken: cancellationToken)
                     .ConfigureAwait(false);
 
-            var nullableGuids = lists.Where(p => p.UserId.HasValue).Select(p => p.UserId).Distinct().ToList();
-            var userIds = new List<Guid>();
-            nullableGuids.ForEach(p =>
-            {
-                userIds.Add(p!.Value);
-            });
+            var userIds = lists.Where(p => p.UserId.HasValue).Select(p => p.UserId ?? default).Distinct().ToList();
             var studentResults = await _userService.GetStudentsByIdsAsync(userIds);
             var students = studentResults.Content?.Result;
+
             lists.ForEach(p =>
             {
-                p.StudentCode = students?.FirstOrDefault(x => x.Human?.UserId == p.UserId)?.Human?.Code;
-                p.Email = students?.FirstOrDefault(x => x.Human?.UserId == p.UserId)?.Human?.Email;
+                p.StudentCode = students?.FirstOrDefault(x => x.UserId == p.UserId)?.User?.Code;
+                p.Email = students?.FirstOrDefault(x => x.UserId == p.UserId)?.User?.Email;
+                p.FullName = students?.FirstOrDefault(x => x.UserId == p.UserId)?.User?.FullName;
+                p.PhoneNumber = students?.FirstOrDefault(x => x.UserId == p.UserId)?.User?.PhoneNumber;
             });
+
             methodResult.Result = new PagingItemsModel<HistoryVoucherModel>(lists, request, totalItem);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

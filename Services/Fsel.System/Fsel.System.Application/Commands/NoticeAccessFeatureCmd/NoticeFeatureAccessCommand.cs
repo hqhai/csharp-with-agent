@@ -105,7 +105,7 @@ namespace Fsel.System.Application.Commands.NoticeAccessFeatureCmd
                         SenderId = Guid.Empty,
                         Type = EnumNotificationType.LinkPage,
                         Content = content,
-                        ParamsMessage = new List<object> { item?.Human?.FullName ?? string.Empty }
+                        ParamsMessage = new List<object> { item?.FullName ?? string.Empty }
                     };
 
                     await _notificationMessagePublisher.Publish(model, cancellationToken).ConfigureAwait(false);

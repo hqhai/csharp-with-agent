@@ -200,6 +200,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<DateTime?>("ProcessDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("PronunciationAlFeedback")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("RetryTime")
                         .HasColumnType("int");
 

@@ -60,9 +60,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             }
 
             var student = await _studentRepository.Queryable
-                                                  .Include(x => x.Human)
+                                                  .Include(x => x.User)
                                                   .FirstOrDefaultAsync(x => x.Id == request.StudentId, cancellationToken);
-            if (student == null || student.Human == null)
+            if (student == null || student.User == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
@@ -80,12 +80,12 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 ExpiredDate = paymentDate.Value,
                 Student = new CreateOrderForStudentsEventCommandModel
                 {
-                    Email = student.Human.Email,
-                    FullName = student.Human.FullName,
-                    PhoneNumber = student.Human.PhoneNumber,
-                    StudentCode = student.Human.Code,
+                    Email = student.User.Email,
+                    FullName = student.User.FullName,
+                    PhoneNumber = student.User.PhoneNumber,
+                    StudentCode = student.User.Code,
                     StudentId = student.Id,
-                    UserId = student.Human.UserId!.Value
+                    UserId = student.UserId
                 }
             });
             if (!addOrder.IsSuccessStatusCode)

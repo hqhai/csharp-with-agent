@@ -39,11 +39,9 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
             var (currentWeekStartUtc, previousWeekStartUtc) = GetWeekBoundariesUtc();
 
             var query = BuildBaseQuery(request);
-            var data = await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken)
-                     ?? await GetDataForWeekAsync(query, request.SchoolId, currentWeekStartUtc, cancellationToken)
-                     ?? new List<ProgressRow>();
+            var data = await GetDataForWeekAsync(query, request.SchoolId, currentWeekStartUtc, cancellationToken) ?? new List<ProgressRow>();
             var dataPre = await GetDataForWeekAsync(query, request.SchoolId, previousWeekStartUtc, cancellationToken) ?? new List<ProgressRow>();
-            var stackBar = BuildStackBarChart(data);
+            var stackBar = BuildStackBarChart(dataPre);
             var pie = BuildPieChart(data, dataPre);
 
             methodResult.Result = new List<StackBarChartsModel> { stackBar, pie };
@@ -91,6 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
 
             var totalOnTrackPre = dataPre.Count(s => s.ProgressStatus == EnumProgressStatus.OnTrack || s.ProgressStatus == EnumProgressStatus.Ahead);
             var totalBehindPre = dataPre.Count(s => s.ProgressStatus == EnumProgressStatus.Behind);
+            var grandTotalPre = totalOnTrackPre + totalBehindPre;
 
             var onTrackDelta = totalOnTrack - totalOnTrackPre;
             var behindDelta = totalBehind - totalBehindPre;
@@ -103,8 +102,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                     new StackBarChartModel
                     {
                         Label = EnumProgressStatus.OnTrack.GetDescription(),
-                        Value = totalOnTrack.ToString(),
-                        NumericValue = totalOnTrack,
+                        Value = $"{totalOnTrackPre}",
+                        NumericValue = totalOnTrackPre,
                         DataColumns = new List<DataChartModel>
                         {
                             new DataChartModel
@@ -113,13 +112,13 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                 Value = (int)NumberHelper.GetPercentChart(onTrackDelta, totalOnTrackPre)
                             }
                         },
-                        Percent = (int)NumberHelper.GetPercent(totalOnTrack, grandTotal)
+                        Percent = (int)NumberHelper.GetPercent(totalOnTrackPre, grandTotalPre)
                     },
                     new StackBarChartModel
                     {
                         Label = EnumProgressStatus.Behind.GetDescription(),
-                        Value = totalBehind.ToString(),
-                        NumericValue = totalBehind,
+                        Value =  $"{totalBehindPre}",
+                        NumericValue = totalBehindPre,
                         DataColumns = new List<DataChartModel>
                         {
                             new DataChartModel
@@ -128,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Queries.ReportDashboardQuery
                                 Value = (int)NumberHelper.GetPercentChart(behindDelta, totalBehindPre)
                             }
                         },
-                        Percent = (int)NumberHelper.GetPercent(totalBehind, grandTotal)
+                        Percent = (int)NumberHelper.GetPercent(totalBehindPre, grandTotalPre)
                     }
                 },
             };

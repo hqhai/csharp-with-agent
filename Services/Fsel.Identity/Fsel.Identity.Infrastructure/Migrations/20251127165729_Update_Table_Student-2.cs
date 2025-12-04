@@ -21,6 +21,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 type: "nvarchar(100)",
                 maxLength: 100,
                 nullable: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Students_IsDeleted_SchoolId_SchoolClass",
+                table: "Students",
+                columns: new[] { "IsDeleted", "SchoolId", "SchoolClass" })
+                .Annotation("SqlServer:Include", new[] { "BaseCourseLevel", "BeginnerGuideStr", "ClassCampusCode", "ClassId", "CourseId", "CourseLevel", "CreatedByParent", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DistrictId", "ExpiredDate", "NumberOfShield", "Occupation", "PackageId", "ParentEmail", "ParentPhoneNumber", "ProvinceId", "School", "SchoolClassId", "SchoolFaculty", "SchoolGrade", "StatusStudentCampus", "StudentCampusCode", "UpdatedDate", "UpdatedFullName", "UpdatedUserId", "UserId" });
         }
 
         /// <inheritdoc />
@@ -33,6 +39,12 @@ namespace Fsel.Identity.Infrastructure.Migrations
             migrationBuilder.DropColumn(
                 name: "StatusStudentCampus",
                 table: "Students");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Students_IsDeleted_SchoolId_SchoolClass",
+                table: "Students",
+                columns: new[] { "IsDeleted", "SchoolId", "SchoolClass" })
+                .Annotation("SqlServer:Include", new[] { "BaseCourseLevel", "BeginnerGuideStr", "ClassId", "CourseId", "CourseLevel", "CreatedByParent", "CreatedDate", "CreatedFullName", "CreatedUserId", "DeletedDate", "DeletedFullName", "DeletedUserId", "DistrictId", "ExpiredDate", "NumberOfShield", "Occupation", "PackageId", "ParentEmail", "ParentPhoneNumber", "ProvinceId", "School", "SchoolClassId", "SchoolFaculty", "SchoolGrade", "UpdatedDate", "UpdatedFullName", "UpdatedUserId", "UserId" });
         }
     }
 }

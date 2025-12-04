@@ -82,9 +82,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
                 Level = student.CourseLevel,
                 BaseCourseLevel = student.BaseCourseLevel,
                 ClassId = student.ClassId,
-                EmailConfirmed = student.Human?.User?.EmailConfirmed ?? default,
+                EmailConfirmed = student.User?.EmailConfirmed ?? default,
                 TurnOnTouchpoint = _appSetting.TouchpointConfig?.TurnOnTouchpoint ?? false,
-                UserStatus = student.Human?.User?.Status
+                UserStatus = student?.User?.Status
             };
             var role = _authContext.Roles?.FirstOrDefault();
 
@@ -151,7 +151,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
         private async Task GetPlacementTestAsync(StudentSettingModel settingStudentModel, StudentModel student, CancellationToken cancellationToken)
         {
-            int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+            int age = DateTimeHelper.GetYearOld(student.User?.Birthday);
             var placementTestResults = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
                                                                             .OrderByDescending(x => x.CreatedDate)
                                                                             .ToListAsync(cancellationToken);

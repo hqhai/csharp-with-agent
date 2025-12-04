@@ -279,7 +279,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 }
 
                 var student = studentResult.Content.Result;
-                if (student.Human?.Birthday == null)
+                if (student.User?.Birthday == null)
                 {
                     return false;
                 }
@@ -307,7 +307,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                 }
 
                 // Calculate age
-                int age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+                int age = DateTimeHelper.GetYearOld(student.User.Birthday);
 
                 // Get initial placement test result for level calculation
                 var placementTestResultInitial = await _placementTestResultRepository.Queryable

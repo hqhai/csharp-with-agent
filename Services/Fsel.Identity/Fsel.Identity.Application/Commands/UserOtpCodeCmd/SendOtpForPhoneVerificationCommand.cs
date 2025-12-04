@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Identity.Application.Services;
+    using Fsel.Identity.Application.Services.SenderService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Enums;
     using Fsel.Identity.Domain.IRepositories;
@@ -32,7 +33,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         private readonly UserManager<User> _userManager;
         private readonly ISenderService _senderService;
         private readonly AuthContext _authContext;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
         private readonly ICompetitionEventsRepository _competitionEventsRepository;
@@ -41,7 +41,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             UserManager<User> userManager,
             ISenderService senderService,
             AuthContext authContext,
-            IHumanRepository humanRepository,
             IStudentRepository studentRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
             ICompetitionEventsRepository competitionEventsRepository)
@@ -50,7 +49,6 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             _userManager = userManager;
             _senderService = senderService;
             _authContext = authContext;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
             _competitionEventsRepository = competitionEventsRepository;
@@ -62,13 +60,11 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
             var methodResult = new MethodResult<SaveOTPForUserEventHaNoiCommandModel>();
 
             var query = await (from u in _userManager.Users
-                               join h in _humanRepository.Queryable on u.Id equals h.UserId
-                               join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                               join s in _studentRepository.Queryable on u.Id equals s.UserId
                                where u.Id == _authContext.CurrentUserId
                                select new
                                {
                                    User = u,
-                                   Human = h,
                                    Student = s
                                }).FirstOrDefaultAsync(cancellationToken);
 
@@ -115,7 +111,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     userOtpCode = new UserOtpCode
                     {
                         UserId = query.User.Id,
-                        OTPCode = otp,
+                        OtpCode = otp,
                         Status = EnumOtpCodeStatus.New,
                         Type = EnumUserOtpCodeType.SMS,
                         RetryCount = 1,
@@ -139,7 +135,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                         Template = EnumSendSMSTemplate.SendOTP,
                         Params = new
                         {
-                            OTP = userOtpCode.OTPCode,
+                            OTP = userOtpCode.OtpCode,
                             CountOTP = userOtpCode.RetryCount
                         },
                         IsCheckDuplicate = false,
@@ -154,7 +150,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                         Template = EnumZaloTemplate.OTP,
                         Params = new
                         {
-                            otp = userOtpCode.OTPCode
+                            otp = userOtpCode.OtpCode
                         },
                         UseUnicode = 0
                     });

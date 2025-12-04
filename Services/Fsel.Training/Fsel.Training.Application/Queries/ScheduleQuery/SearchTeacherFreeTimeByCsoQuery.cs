@@ -80,8 +80,8 @@ namespace Fsel.Training.Application.Queries.ScheduleQuery
             foreach (var item in lists)
             {
                 var teacher = teachers?.FirstOrDefault(x => x.Id == item.TeacherId);
-                item.TeacherName = teacher?.Human?.FullName;
-                item.TeacherCode = teacher?.Human?.Code;
+                item.TeacherName = teacher?.User?.FullName;
+                item.TeacherCode = teacher?.User?.Code;
             }
 
             return lists;

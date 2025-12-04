@@ -2,8 +2,6 @@
 
 namespace Fsel.Ordering.Domain.Models.EntityModels
 {
-    using Fsel.Common.Enums.ErrorCodes;
-    using System.ComponentModel.DataAnnotations;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
 
@@ -35,5 +33,6 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
         public Guid? EventId { get; set; }
         public VoucherModel? Voucher { get; set; }
         public EnumPaymentRevenueType? RevenueType { get; set; }
+        public bool IsDefault { get; set; }
     }
 }

@@ -26,6 +26,7 @@ namespace Fsel.System.Application.Commands.Chatbots
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
+    using Fsel.Shared.Helpers;
 
     public class SaveChatBotMessageCommand : SaveChatBotMessageModel, IRequest<MethodResult<ChatBotModel>>
     {

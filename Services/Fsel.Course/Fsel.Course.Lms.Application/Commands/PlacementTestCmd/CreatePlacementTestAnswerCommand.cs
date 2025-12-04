@@ -101,7 +101,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                                                                       .OrderBy(x => x.CreatedDate)
                                                                       .FirstOrDefaultAsync(cancellationToken);
 
-            int age = DateTimeHelper.GetYearOld(student.Human?.Birthday);
+            int age = DateTimeHelper.GetYearOld(student?.User?.Birthday);
             if (placementTestResultDone != null)
             {
                 var (levelNext, isLock) = placementTestResultDone.Level.GetLevelInScore(placementTestResultDone.Percent, IeltsScoreHelper.GetInitialAge(placementTestResultInitial?.Level, age));
@@ -243,15 +243,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 #region
                 //var param = new SendStudentPTTemplateModel
                 //{
-                //    StudentName = student!.Human?.FullName,
+                //    StudentName = student?.User?.FullName,
                 //    CourseLevel = placementTestResult.Level,
                 //    Percents = string.Join(Environment.NewLine, placementTestResults.Select((x, index) => $"- Module {index + 1}: {Math.Round(x.Percent, MidpointRounding.AwayFromZero)} %")),
                 //};
                 //var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendPTResultSubject);
                 //var sendResult = new MethodResult<bool>();
-                //if (!string.IsNullOrEmpty(student.Human?.Email))
+                //if (!string.IsNullOrEmpty(student?.User?.Email))
                 //{
-                //    sendResult = await _mediator.Send(new SenderCommand { Email = student.Human?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
+                //    sendResult = await _mediator.Send(new SenderCommand { Email = student?.User?.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendStudentPTOnline }, cancellationToken).ConfigureAwait(false);
                 //}
                 #endregion
             }

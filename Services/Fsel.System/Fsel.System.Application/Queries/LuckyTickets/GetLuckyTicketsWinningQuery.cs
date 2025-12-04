@@ -105,9 +105,9 @@ namespace Fsel.System.Application.Queries.LuckyTickets
                 }
                 studentLuckyTickets.Add(new StudentLuckyTicketModel()
                 {
-                    AvatarPath = student.Human?.AvatarPath,
+                    AvatarPath = student.User?.AvatarPath,
                     StudentId = student.Id,
-                    StudentName = student.Human?.FullName,
+                    StudentName = student.User?.FullName,
                     SchoolName = student.School,
                     Ticket = item.Ticket,
                 });

@@ -71,8 +71,8 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumQuery
                             item.IsLiked = action.IsLiked;
                         }
                         var user = users?.FirstOrDefault(x => x.Id == item.CreatedUserId);
-                        item.CreatedFullName = user?.Human?.FullName ?? item.CreatedFullName;
-                        item.AvatarPath = user?.Human?.AvatarPath;
+                        item.CreatedFullName = user?.FullName ?? item.CreatedFullName;
+                        item.AvatarPath = user?.AvatarPath;
                     }
                 }
             }

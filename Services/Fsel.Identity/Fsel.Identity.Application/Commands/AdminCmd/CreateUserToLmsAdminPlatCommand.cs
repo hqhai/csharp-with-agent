@@ -27,17 +27,15 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     {
         private readonly UserManager<User> _userManager;
         private readonly IPlatformRepository _platformRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
         private readonly AppSetting _appSetting;
         private const string DEFAULT_PASSWORD = "Fsel@2025";
 
-        public CreateUserToLmsAdminPlatCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IHumanRepository humanRepository, IMapper mapper, IMediator mediator, AppSetting appSetting)
+        public CreateUserToLmsAdminPlatCommandHandler(UserManager<User> userManager, IPlatformRepository platformRepository, IMapper mapper, IMediator mediator, AppSetting appSetting)
         {
             _userManager = userManager;
             _platformRepository = platformRepository;
-            _humanRepository = humanRepository;
             _mapper = mapper;
             _mediator = mediator;
             _appSetting = appSetting;
@@ -91,73 +89,61 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 });
             }
 
-            await _humanRepository.ExecuteTransactionAsync(async () =>
+            Microsoft.AspNetCore.Identity.IdentityResult result;
+            request.Password = request.Password ?? DEFAULT_PASSWORD;
+
+            // Thêm user
+            result = await _userManager.CreateAsync(user, request.Password);
+
+            if (!result.Succeeded)
             {
-                Microsoft.AspNetCore.Identity.IdentityResult result;
-                request.Password = request.Password ?? DEFAULT_PASSWORD;
+                methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(request.Password), request.Password);
+                return methodResult;
+            }
 
-                // Thêm user
-                result = await _userManager.CreateAsync(user, request.Password);
-
-                if (!result.Succeeded)
+            if (request.UserGroupId.HasValue)
+            {
+                var userGroupResult = await _mediator.Send(new AddUserToGroupCommand()
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserFailToCreate), nameof(request.Password), request.Password);
+                    GroupId = request.UserGroupId.Value,
+                    UserIds = new List<Guid> { user.Id }
+                }, cancellationToken);
+
+                if (!userGroupResult.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(userGroupResult.ErrorMessages);
                     return methodResult;
                 }
+            }
 
-                // Tạo Human
-                var human = _mapper.Map<Human>(request);
-                human.UserId = user.Id;
-                human = _humanRepository.Add(human);
+            // Có lẽ không cần thiết phải gửi mã OTP cho người dùng mới tạo
 
-                if (request.UserGroupId.HasValue)
-                {
-                    var userGroupResult = await _mediator.Send(new AddUserToGroupCommand()
-                    {
-                        GroupId = request.UserGroupId.Value,
-                        UserIds = new List<Guid> { user.Id }
-                    }, cancellationToken);
+            //#region Send Code OTP
 
-                    if (!userGroupResult.IsOK)
-                    {
-                        methodResult.AddErrorBadRequest(userGroupResult.ErrorMessages);
-                        return methodResult;
-                    }
-                }
+            //var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
+            //var param = new SendOtpTemplateModel
+            //{
+            //    OtpCode = userOtpCode.Result,
+            //    AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, userOtpCode.Result, user.Id),
+            //    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
+            //};
+            //var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+            //var sendResult = new MethodResult<bool>();
+            //if (!string.IsNullOrEmpty(request.Email))
+            //{
+            //    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
+            //}
 
-                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            //if (!sendResult.IsOK)
+            //{
+            //    methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
+            //    return methodResult;
+            //}
 
-                // Có lẽ không cần thiết phải gửi mã OTP cho người dùng mới tạo
+            //#endregion Send Code OTP
 
-                //#region Send Code OTP
-
-                //var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
-                //var param = new SendOtpTemplateModel
-                //{
-                //    OtpCode = userOtpCode.Result,
-                //    AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.ConfirmOtpUrl!, userOtpCode.Result, user.Id),
-                //    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidDay, _appSetting!.Otp!.StepDayWithAdmin)
-                //};
-                //var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
-                //var sendResult = new MethodResult<bool>();
-                //if (!string.IsNullOrEmpty(request.Email))
-                //{
-                //    sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtpAndLink }, cancellationToken).ConfigureAwait(false);
-                //}
-
-                //if (!sendResult.IsOK)
-                //{
-                //    methodResult.AddErrorBadRequest(sendResult?.ErrorMessages);
-                //    return methodResult;
-                //}
-
-                //#endregion Send Code OTP
-
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<UserModel>(user);
-                return methodResult;
-            });
-
+            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = _mapper.Map<UserModel>(user);
             return methodResult;
         }
     }

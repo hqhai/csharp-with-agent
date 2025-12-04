@@ -41,8 +41,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             }
 
             var students = await _studentRepository.Queryable
-                                    .Include(x => x.Human)
-                                    .Where(x => x.Human != null && x.Human.Email != null && request.Emails.Contains(x.Human.Email))
+                                    .Include(x => x.User)
+                                    .Where(x => x.User != null && x.User!.Email != null && request.Emails.Contains(x.User!.Email))
                                     .ToListAsync(cancellationToken: cancellationToken);
 
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);

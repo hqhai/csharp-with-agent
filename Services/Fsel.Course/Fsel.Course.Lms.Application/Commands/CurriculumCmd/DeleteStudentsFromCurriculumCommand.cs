@@ -205,7 +205,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
                     return methodResult;
                 }
 
-                var userIds = students.Select(p => p.Human).Where(p => p.UserId.HasValue).Select(p => p.UserId ?? default).ToList();
+                var userIds = students.Select(p => p.UserId).ToList();
 
                 var result = await _mediator.Send(new DeleteDataLearningOfStudentsCommand()
                 {

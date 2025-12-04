@@ -229,26 +229,6 @@
   ],
   "SwaggerEndPoints": [
     {
-      "Key": "auth",
-      "Config": [
-        {
-          "Name": "Auths API",
-          "Version": "v1",
-          "Url": "http://auth-production.fsel-prod.svc/swagger/v1/swagger.json"
-        },
-        {
-          "Name": "Auths API",
-          "Version": "v1.1",
-          "Url": "http://auth-production.fsel-prod.svc/swagger/v1.1/swagger.json"
-        },
-        {
-          "Name": "Auths API",
-          "Version": "v1.2",
-          "Url": "http://auth-production.fsel-prod.svc/swagger/v1.2/swagger.json"
-        }
-      ]
-    },
-    {
       "Key": "user",
       "Config": [
         {
