@@ -28,11 +28,12 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
     using Kros.Extensions;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using OfficeOpenXml;
     using OfficeOpenXml.Style;
+    using DateTimeHelper = Shared.Helpers.DateTimeHelper;
+    using StringHelper = Shared.Helpers.StringHelper;
 
     public class AddStudentIntoSchoolClassCommand : BaseImportCommandModel, IRequest<MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
@@ -42,7 +43,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
     public class AddStudentIntoSchoolClassCommandHandler : IRequestHandler<AddStudentIntoSchoolClassCommand, MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
         private readonly IStudentRepository _studentRepository;
-        private readonly UserManager<User> _userManager;
+        private readonly Core.Base.Managers.UserManager<User> _userManager;
         private readonly IOrderService _orderService;
         private readonly IServiceProvider _serviceProvider;
         private readonly IPlatformRepository _platformRepository;
@@ -102,17 +103,17 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
             Action<ExcelWorksheet, Dictionary<string, int?>?, IList<ValidateExcelModel>> errorHandlerAction = (worksheet, columnIndexes, errors) =>
             {
-                worksheet.Cells[1, 5].Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 5].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 5].Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 5].Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                worksheet.Cells[1, 5].Value = ErrorMassageSetting.ErrorMessage;
-                worksheet.Cells[1, 5].Style.Font.Bold = true;
+                worksheet.Cells[1, 7].Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 7].Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 7].Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 7].Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                worksheet.Cells[1, 7].Value = ErrorMassageSetting.ErrorMessage;
+                worksheet.Cells[1, 7].Style.Font.Bold = true;
                 foreach (var error in errors.GroupBy(x => x.RowIndex).Select(x => x).OrderBy(x => x.Key))
                 {
                     var row = error.Key;
 
-                    int lastColumn = 5;
+                    int lastColumn = 7;
 
                     // Tạo biến lưu trữ dữ liệu dòng hiện tại
                     List<object?> rowData = new List<object?>();
@@ -155,7 +156,8 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                             }
                         }
                     }
-                    var messages = Shared.Helpers.StringHelper.JoinWithComma(errorMessages.Distinct().ToList());
+
+                    var messages = StringHelper.JoinWithComma(errorMessages.Distinct().ToList());
                     worksheet.Cells[targetRow, lastColumn].Value = messages;
                 }
             };
@@ -180,109 +182,153 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
             int currentYear = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Year;
 
-            var result = request.FormFile.ImportAndValidateExcel(async (AddStudentsToSchoolClassModel x, IList<AddStudentsToSchoolClassModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
-            {
-                if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || !string.IsNullOrEmpty(x.Email?.Trim()) || !x.DateOfBirth.HasValue)
+            var result = request.FormFile.ImportAndValidateExcel(
+                async (AddStudentsToSchoolClassModel x, IList<AddStudentsToSchoolClassModel> models, int rowIndex, IList<ValidateExcelModel> errors) =>
                 {
-                    if (string.IsNullOrEmpty(x.FullName?.Trim()))
+                    if (!string.IsNullOrEmpty(x.FullName?.Trim()) || !string.IsNullOrEmpty(x.PhoneNumber?.Trim()) || !string.IsNullOrEmpty(x.Email?.Trim()) ||
+                        !x.DateOfBirth.HasValue)
                     {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
-                    }
-                    if (string.IsNullOrEmpty(x.Email?.Trim()))
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmptyEmailVN });
-                    }
-                    else if (!x.Email.IsValidEmail())
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
-                    }
-                    else if (x.Email.Length > 70)
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
-                    }
-                    if (!string.IsNullOrEmpty(x.PhoneNumber?.Trim()) && !Shared.Helpers.StringHelper.IsValidPhoneNumber(x.PhoneNumber?.Trim()))
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
+                        if (string.IsNullOrEmpty(x.FullName?.Trim()))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.FullName), Message = ErrorMassageSetting.EmptyFullNameVN });
+                        }
+
+                        if (string.IsNullOrEmpty(x.Email?.Trim()))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmptyEmailVN });
+                        }
+                        else if (!x.Email.IsValidEmail())
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
+                        }
+                        else if (x.Email.Length > 70)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.InvalidEmailVN });
+                        }
+
+                        if (!string.IsNullOrEmpty(x.PhoneNumber?.Trim()) && !StringHelper.IsValidPhoneNumber(x.PhoneNumber?.Trim()))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.InvalidPhoneNumberVN });
+                        }
+
+                        if (!x.DateOfBirth.HasValue)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyBirthDayVN });
+                        }
+                        else if (x.DateOfBirth <= MinYear || x.DateOfBirth >= currentYear)
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
+                        }
+
+                        if (!string.IsNullOrEmpty(x.PhoneNumber) && students.Where(p => !string.IsNullOrEmpty(p.PhoneNumber)).Select(p => p.PhoneNumber).Contains(x.PhoneNumber))
+                        {
+                            errors.Add(new ValidateExcelModel
+                            {
+                                RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistInListVN
+                            });
+                        }
+
+                        if (students.Select(p => p.Email).Contains(x.Email))
+                        {
+                            errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmailAlreadyExistInListVN });
+                        }
+
+                        if (!string.IsNullOrEmpty(x.StudentCampusCode) && students
+                                .Where(p => !string.IsNullOrEmpty(p.StudentCampusCode))
+                                .Select(p => p.StudentCampusCode).Contains(x.StudentCampusCode))
+                        {
+                            errors.Add(new ValidateExcelModel
+                            {
+                                RowIndex = rowIndex, ColumnName = nameof(x.StudentCampusCode), Message = ErrorMassageSetting.StudentCodeAlreadyExistInListVN
+                            });
+                        }
+
+                        students.Add(new AddStudentsToSchoolClassModel()
+                        {
+                            FullName = x.FullName,
+                            Email = x.Email,
+                            PhoneNumber = x.PhoneNumber,
+                            DateOfBirth = x.DateOfBirth,
+                            StudentCampusCode = x.StudentCampusCode,
+                            ClassCampusCode = x.ClassCampusCode
+                        });
                     }
 
-                    if (!x.DateOfBirth.HasValue)
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.EmptyBirthDayVN });
-                    }
-                    else if (x.DateOfBirth <= MinYear || x.DateOfBirth >= currentYear)
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.DateOfBirth), Message = ErrorMassageSetting.InvalidBirthDayVN });
-                    }
+                    return await Task.FromResult(errors.Count == 0);
+                },
+                async (Dictionary<int, AddStudentsToSchoolClassModel> datas, IList<ValidateExcelModel> errors) =>
+                {
+                    var emails = datas.Values.Where(p => p.Email != null && !string.IsNullOrEmpty(p.Email.Trim())).Select(n => n.Email?.Trim() ?? string.Empty);
 
-                    if (!string.IsNullOrEmpty(x.PhoneNumber) && students.Where(p => !string.IsNullOrEmpty(p.PhoneNumber)).Select(p => p.PhoneNumber).Contains(x.PhoneNumber))
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistInListVN });
-                    }
+                    var phoneNumbers = datas.Values.Where(p => p.PhoneNumber != null && !string.IsNullOrEmpty(p.PhoneNumber.Trim()))
+                        .Select(n => StringHelper.NormalizeToDomesticFormat(n.PhoneNumber?.Trim()));
 
-                    if (students.Select(p => p.Email).Contains(x.Email))
-                    {
-                        errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = ErrorMassageSetting.EmailAlreadyExistInListVN });
-                    }
+                    var studentCode = datas.Values
+                        .Where(p => p.StudentCampusCode != null && !string.IsNullOrEmpty(p.StudentCampusCode.Trim()))
+                        .Select(n => n.StudentCampusCode?.Trim() ?? string.Empty);
 
-                    students.Add(new AddStudentsToSchoolClassModel()
+                    var emailsAlreadyExist = _userManager.Users.Where(x => emails.Contains(x.UserName)).Select(p => p.UserName);
+
+                    var phoneNumbersAlreadyExist = _userManager.Users.Where(x => phoneNumbers.Contains(x.PhoneNumber)).Select(p => p.PhoneNumber);
+
+                    var studentCodeAlreadyExist = _studentRepository.ReadQueryable.Where(x => studentCode.Contains(x.StudentCampusCode)).Select(p => p.StudentCampusCode);
+
+                    emailsAlreadyExist.ForEach(user =>
                     {
-                        FullName = x.FullName,
-                        Email = x.Email,
-                        PhoneNumber = x.PhoneNumber,
-                        DateOfBirth = x.DateOfBirth,
+                        var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty())
+                            .FirstOrDefault
+                            (x =>
+                                !string.IsNullOrEmpty(user)
+                                &&
+                                x.Email?.ToLower(CultureInfo.InvariantCulture).Trim() == user.ToLower(CultureInfo.InvariantCulture).Trim()
+                            );
+
+                        if (dataByEmail != null)
+                        {
+                            var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
+                            errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Email), Message = ErrorMassageSetting.DataAlreadyExistVN });
+                        }
                     });
-                }
 
-                return await Task.FromResult(errors.Count == 0);
-            },
-            async (Dictionary<int, AddStudentsToSchoolClassModel> datas, IList<ValidateExcelModel> errors) =>
-            {
-                var emails = datas.Values.Where(p => p.Email != null && !string.IsNullOrEmpty(p.Email.Trim())).Select(n => n.Email?.Trim() ?? string.Empty);
-
-                var phoneNumbers = datas.Values.Where(p => p.PhoneNumber != null && !string.IsNullOrEmpty(p.PhoneNumber.Trim())).Select(n => Shared.Helpers.StringHelper.NormalizeToDomesticFormat(n.PhoneNumber?.Trim()));
-
-                var emailsAlreadyExist = _userManager.Users.Where(x => emails.Contains(x.UserName)).Select(p => p.UserName);
-
-                var phoneNumbersAlreadyExist = _userManager.Users.Where(x => phoneNumbers.Contains(x.PhoneNumber)).Select(p => p.PhoneNumber);
-
-                emailsAlreadyExist.ForEach(user =>
-                {
-                    var dataByEmail = datas.Values.Where(x => !x.Email.IsNullOrEmpty())
-                                                  .FirstOrDefault
-                                                  (x =>
-                                                  !string.IsNullOrEmpty(user)
-                                                  &&
-                                                  x.Email?.ToLower(CultureInfo.InvariantCulture).Trim() == user.ToLower(CultureInfo.InvariantCulture).Trim()
-                                                  );
-
-                    if (dataByEmail != null)
+                    phoneNumbersAlreadyExist.ForEach(user =>
                     {
-                        var index = datas.FirstOrDefault(x => x.Value == dataByEmail).Key;
-                        errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByEmail.Email), Message = ErrorMassageSetting.DataAlreadyExistVN });
-                    }
-                });
+                        var dataByPhoneNumber = datas.Values.Where(x => !x.PhoneNumber.IsNullOrEmpty())
+                            .FirstOrDefault
+                            (x =>
+                                !string.IsNullOrEmpty(user)
+                                && x.PhoneNumber?.Trim() == user.Trim()
+                            );
 
-                phoneNumbersAlreadyExist.ForEach(user =>
-                {
-                    var dataByPhoneNumber = datas.Values.Where(x => !x.PhoneNumber.IsNullOrEmpty())
-                                                        .FirstOrDefault
-                                                        (x =>
-                                                        !string.IsNullOrEmpty(user)
-                                                        && x.PhoneNumber?.Trim() == user.Trim()
-                                                        );
+                        if (dataByPhoneNumber != null)
+                        {
+                            var index = datas.FirstOrDefault(x => x.Value == dataByPhoneNumber).Key;
+                            errors.Add(new ValidateExcelModel
+                            {
+                                RowIndex = index, ColumnName = nameof(dataByPhoneNumber.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistVN
+                            });
+                        }
+                    });
 
-                    if (dataByPhoneNumber != null)
+                    studentCodeAlreadyExist.AsEnumerable().ForEach(user =>
                     {
-                        var index = datas.FirstOrDefault(x => x.Value == dataByPhoneNumber).Key;
-                        errors.Add(new ValidateExcelModel { RowIndex = index, ColumnName = nameof(dataByPhoneNumber.PhoneNumber), Message = ErrorMassageSetting.PhoneNumberAlreadyExistVN });
-                    }
-                });
+                        var dataByStudentCode = datas.Values.Where(x => !x.StudentCampusCode.IsNullOrEmpty())
+                            .FirstOrDefault(x => !string.IsNullOrEmpty(user) && x.StudentCampusCode?.Trim() == user.Trim());
 
-                return await Task.FromResult(errors.Count == 0);
-            },
-             defaultStudentHandlerAction,
-             errorHandlerAction,
-             true);
+                        if (dataByStudentCode != null)
+                        {
+                            int index = datas.FirstOrDefault(x => x.Value == dataByStudentCode).Key;
+                            errors.Add(new ValidateExcelModel
+                            {
+                                RowIndex = index, ColumnName = nameof(dataByStudentCode.StudentCampusCode), Message = ErrorMassageSetting.StudentCodeAlreadyExistVN
+                            });
+                        }
+                    });
+
+                    return await Task.FromResult(errors.Count == 0);
+                },
+                defaultStudentHandlerAction,
+                errorHandlerAction,
+                isValidateHeader: true);
 
             if (!result.IsValidHeader)
             {
@@ -310,10 +356,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                 return methodResult;
             }
 
-            var parallelOptions = new ParallelOptions
-            {
-                MaxDegreeOfParallelism = 50
-            };
+            var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 50 };
 
             var createOrdersForStudentCampusModel = new ConcurrentBag<CreateOrdersForStudentCampusCommandModel>();
 
@@ -325,15 +368,15 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                     {
                         using (var scope = _serviceProvider.CreateScope())
                         {
-                            var password = DefaultPassword + Shared.Helpers.StringHelper.GenerateLaterPartPassword(4);
+                            var password = DefaultPassword + StringHelper.GenerateLaterPartPassword(4);
 
-                            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                            var userManager = scope.ServiceProvider.GetRequiredService<Core.Base.Managers.UserManager<User>>();
                             var studentRepository = scope.ServiceProvider.GetRequiredService<IStudentRepository>();
                             Microsoft.AspNetCore.Identity.IdentityResult identityStudentResult;
 
                             DateTime dateOfBirth = new DateTime(student.DateOfBirth ?? (currentYear - 1), 01, 01);
 
-                            int age = Shared.Helpers.DateTimeHelper.GetYearOld(dateOfBirth);
+                            int age = DateTimeHelper.GetYearOld(dateOfBirth);
 
                             var user = new User()
                             {
@@ -357,6 +400,9 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                                     SchoolId = schoolId,
                                     School = school.LocationName,
                                     CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
+                                    StudentCampusCode = !string.IsNullOrEmpty(student.StudentCampusCode) ? student.StudentCampusCode.Trim() : null,
+                                    ClassCampusCode = !string.IsNullOrEmpty(student.ClassCampusCode) ? student.ClassCampusCode.Trim() : null,
+                                    StatusStudentCampus = EnumStatusStudentCampus.Normal
                                 },
                                 UserPlatforms = new List<UserPlatform>()
                                     {

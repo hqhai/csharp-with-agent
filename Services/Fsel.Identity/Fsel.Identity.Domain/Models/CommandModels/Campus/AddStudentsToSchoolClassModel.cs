@@ -17,5 +17,11 @@ namespace Fsel.Identity.Domain.Models.CommandModels.Campus
 
         [EpplusTableColumn(Header = "Year Of Birth\n(Năm sinh)")]
         public int? DateOfBirth { get; set; }
+
+        [EpplusTableColumn(Header = "Student ID\n(Mã sinh viên)")]
+        public string? StudentCampusCode { get; set; }
+
+        [EpplusTableColumn(Header = "Class ID\n(Mã lớp của học viên)")]
+        public string? ClassCampusCode { get; set; }
     }
 }
