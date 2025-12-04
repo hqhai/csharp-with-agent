@@ -56,27 +56,25 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 methodResult.AddErrorBadRequest(nameof(EnumUserSchoolErrorCode.StudentNotInSchool), nameof(isStudentToSchool));
                 return methodResult;
             }
-            var userView = await _userManager.Users.Include(x => x.Human)
-                                                   .ThenInclude(x => x!.Student)
+            var userView = await _userManager.Users.Include(x => x.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
-                                                   .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
+                                                   .FirstOrDefaultAsync(x => x.Student != null && x.Student.Id == request.StudentId, cancellationToken);
             if (userView == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(userView));
                 return methodResult;
             }
-            var student = userView.Human?.Student;
+            var student = userView.Student;
 
             var parentStudent = student?.ParentStudents.FirstOrDefault();
             if (student != null && parentStudent != null)
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                              .ThenInclude(x => x!.Student)
+                userView = await _userManager.Users.Include(x => x!.Student)
                                               .ThenInclude(x => x!.ParentStudents)
                                               .ThenInclude(x => x.Parent)
-                                              .ThenInclude(x => x!.Human)
-                                              .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
-                student = userView?.Human?.Student;
+                                              .ThenInclude(x => x!.User)
+                                              .FirstOrDefaultAsync(x => x.Student != null && x.Student.Id == request.StudentId, cancellationToken);
+                student = userView?.Student;
                 //if (student?.SchoolId != null)
                 //{
                 //    var schoolResult = await _systemService.ExecuteListSchoolQueryAsync(new BaseQueryModel
@@ -94,11 +92,11 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 parentStudent = student?.ParentStudents.FirstOrDefault();
             }
             var userModel = _mapper.Map<StudentModel>(userView);
-            _mapper.Map(userView?.Human, userModel);
+            _mapper.Map(userView, userModel);
             _mapper.Map(student, userModel);
             if (parentStudent != null && parentStudent.Parent != null)
             {
-                userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent.Human);
+                userModel.Parent = _mapper.Map<ParentProfileModel>(parentStudent.Parent.User);
                 userModel.Parent.Occupation = parentStudent.Parent.Occupation;
             }
             var classStudent = await _trainingService.GetClassToStudentId(student?.Id ?? default);

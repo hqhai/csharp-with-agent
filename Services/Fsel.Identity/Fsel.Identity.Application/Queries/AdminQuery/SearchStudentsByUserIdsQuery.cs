@@ -7,6 +7,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
+    using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Models.ShareModels.QueryModels;
@@ -21,12 +23,12 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
     public class SearchStudentsByUserIdsQueryHandler : IRequestHandler<SearchStudentsByUserIdsQuery, MethodResult<IList<StudentModel>>>
     {
         private readonly IMapper _mapper;
-        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
 
-        public SearchStudentsByUserIdsQueryHandler(IMapper mapper, IHumanRepository humanRepository)
+        public SearchStudentsByUserIdsQueryHandler(IMapper mapper, UserManager<User> userManager)
         {
             _mapper = mapper;
-            _humanRepository = humanRepository;
+            _userManager = userManager;
         }
 
         public async Task<MethodResult<IList<StudentModel>>> Handle(SearchStudentsByUserIdsQuery request, CancellationToken cancellationToken)
@@ -40,10 +42,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 return methodResult;
             }
 
-            var students = await _humanRepository.Queryable
-                .Include(x => x.User)
-                .Where(i => i.UserId != null)
-                .WhereBulkContains(request.UserIds, i => i.UserId)
+            var students = await _userManager.Users
+                .WhereBulkContains(request.UserIds, i => i.Id)
                 .Select(x => new StudentModel
                 {
                     Id = x.Student!.Id,
@@ -54,7 +54,7 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                     School = x.Student.School,
                     SchoolId = x.Student.SchoolId,
                     ExpiredDate = x.Student.ExpiredDate,
-                    Human = _mapper.Map<HumanProfileModel>(x)
+                    User = _mapper.Map<UserModel>(x)
                 })
                 .ToListAsync(cancellationToken);
 
@@ -62,15 +62,15 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             {
                 if (request.Keyword.IsValidEmail())
                 {
-                    students = students.Where(p => p.Human != null && p.Human.Email == request.Keyword).ToList();
+                    students = students.Where(p => p.User != null && p.User.Email == request.Keyword).ToList();
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
-                    students = students.Where(p => p.Human != null && p.Human.PhoneNumber == request.Keyword).ToList();
+                    students = students.Where(p => p.User != null && p.User.PhoneNumber == request.Keyword).ToList();
                 }
                 else
                 {
-                    students = students.Where(p => p.Human != null && !string.IsNullOrEmpty(p.Human.FullName) && p.Human.FullName.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                    students = students.Where(p => p.User != null && !string.IsNullOrEmpty(p.User.FullName) && p.User.FullName.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)).ToList();
                 }
             }
 

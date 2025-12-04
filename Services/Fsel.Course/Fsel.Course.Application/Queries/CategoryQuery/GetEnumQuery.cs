@@ -137,6 +137,10 @@ namespace Fsel.Course.Application.Queries.CategoryQuery
                 case EnumCourseSourceData.ProgressStatus:
                     methodResult.Result = ConvertHelper.EnumToListModel<EnumProgressStatus>();
                     break;
+
+                case EnumCourseSourceData.SubtitleLanguage:
+                    methodResult.Result = ConvertHelper.EnumToListModel<EnumSubtitleLanguage>();
+                    break;
             }
 
             methodResult.StatusCode = StatusCodes.Status200OK;

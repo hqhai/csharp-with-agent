@@ -93,8 +93,8 @@ namespace Fsel.Course.Lms.Application.Queries.ReviewFselQuery
             return new ReviewLessonDetailModel
             {
                 Id = x.Id,
-                Code = student?.Human?.Code,
-                FullName = student?.Human?.FullName,
+                Code = student?.User?.Code,
+                FullName = student?.User?.FullName,
                 ClassCode = classStudent?.Code,
                 StudentId = x.StudentId,
                 CreatedDate = x.CreatedDate,

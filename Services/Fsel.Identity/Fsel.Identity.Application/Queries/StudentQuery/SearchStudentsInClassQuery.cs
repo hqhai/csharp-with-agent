@@ -8,9 +8,11 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Core.Extensions;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.TrainingService;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using MediatR;
@@ -27,16 +29,16 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
         private readonly IStudentRepository _studentRepository;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ITrainingService _trainingService;
-        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
 
         public SearchStudentsInClassQueryHandler(IStudentRepository studentRepository, ILmsCourseService lmsCourseService,
             ITrainingService trainingService,
-            IHumanRepository humanRepository)
+            UserManager<User> userManager)
         {
             _studentRepository = studentRepository;
             _lmsCourseService = lmsCourseService;
             _trainingService = trainingService;
-            _humanRepository = humanRepository;
+            _userManager = userManager;
         }
 
         public async Task<MethodResult<PagingItemsModel<SearchStudentsInClassModel>>> Handle(SearchStudentsInClassQuery request, CancellationToken cancellationToken)
@@ -49,19 +51,19 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
-            var humanQuery = _humanRepository.Queryable;
+            var userQuery = _userManager.Users;
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(CultureInfo.InvariantCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    humanQuery = humanQuery.Where(m => m.Email != null && m.Email.Contains(request.Keyword));
+                    userQuery = userQuery.Where(m => m.Email!.Contains(request.Keyword));
                 }
                 else
                 {
-                    var queryFullName = humanQuery.Where(m => m.FullName != null && m.FullName.Contains(request.Keyword));
-                    var queryCode = humanQuery.Where(m => m.Code != null && m.Code.Contains(request.Keyword));
-                    humanQuery = queryFullName.Union(queryCode);
+                    var queryFullName = userQuery.Where(m => m.FullName!.Contains(request.Keyword));
+                    var queryCode = userQuery.Where(m => m.Code!.Contains(request.Keyword));
+                    userQuery = queryFullName.Union(queryCode);
                 }
             }
             var studentQuery = _studentRepository.Queryable.Where(p => p.ClassId.HasValue);
@@ -81,16 +83,16 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             }
 
             var query = from baseQ in studentQuery
-                        join h in humanQuery on baseQ.HumanId equals h.Id
+                        join u in userQuery on baseQ.UserId equals u.Id
                         select new SearchStudentsInClassModel
                         {
                             Id = baseQ.Id,
-                            FullName = h.FullName,
-                            BirthDay = h.Birthday,
-                            Code = h.Code,
+                            FullName = u.FullName,
+                            BirthDay = u.Birthday,
+                            Code = u.Code,
                             CreatedDate = baseQ.CreatedDate,
                             UpdatedDate = baseQ.UpdatedDate,
-                            Email = h.Email,
+                            Email = u.Email,
                             ClassId = baseQ.ClassId,
                         };
 

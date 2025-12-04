@@ -451,7 +451,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     CourseResultId =  courseResultId,
                     Mission = mission,
                     Type = EnumTokenHistoryType.Recevived,
-                    UserId = student.Human?.UserId ?? default,
+                    UserId = student?.UserId ?? default,
                 }
             };
 

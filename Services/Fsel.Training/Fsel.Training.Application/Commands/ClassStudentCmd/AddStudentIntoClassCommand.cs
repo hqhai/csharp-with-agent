@@ -77,7 +77,7 @@ namespace Fsel.Training.Application.Commands.ClassStudentCmd
             {
                 BaseCourseLevel = student.BaseCourseLevel ?? default,
                 ChooseCourseLevel = course.CourseLevel,
-                Age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday)
+                Age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday)
             });
 
             if (!checkCourseSuggest.IsSuccessStatusCode)

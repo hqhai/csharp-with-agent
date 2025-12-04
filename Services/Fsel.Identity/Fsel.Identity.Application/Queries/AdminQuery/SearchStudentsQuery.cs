@@ -28,19 +28,16 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
         private readonly IUserSchoolRepository _userSchoolRepository;
         private readonly AuthContext _authContext;
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
 
         public SearchStudentsQueryHandler(IStudentRepository studentRepository,
             IUserSchoolRepository userSchoolRepository,
             AuthContext authContext,
-            UserManager<User> userManager,
-            IHumanRepository humanRepository)
+            UserManager<User> userManager)
         {
             _studentRepository = studentRepository;
             _userSchoolRepository = userSchoolRepository;
             _authContext = authContext;
             _userManager = userManager;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<StudentSearchAdminModel>>> Handle(SearchStudentsQuery request, CancellationToken cancellationToken)
@@ -89,20 +86,19 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             }
 
             var query = from u in _userManager.Users
-                        join h in _humanRepository.Queryable on u.Id equals h.UserId
-                        join s in queryStudent on h.Id equals s.HumanId
-                        select new { User = u, Human = h, Student = s };
+                        join s in queryStudent on u.Id equals s.UserId
+                        select new { User = u, Student = s };
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 request.Keyword = request.Keyword.Trim().ToLower(System.Globalization.CultureInfo.CurrentCulture);
                 if (request.Keyword.IsValidEmail())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.Email == request.Keyword);
+                    query = query.Where(m => m.User.Email == request.Keyword);
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
-                    query = query.Where(m => m.Human != null && m.Human.PhoneNumber == request.Keyword);
+                    query = query.Where(m => m.User.PhoneNumber == request.Keyword);
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
                 {
@@ -121,11 +117,11 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             {
                 Id = x.Student.Id,
                 CreatedDate = x.Student.CreatedDate,
-                Birthday = x.Human!.Birthday,
+                Birthday = x.User!.Birthday,
                 CourseLevel = x.Student.CourseLevel,
-                PhoneNumber = x.Human.PhoneNumber,
-                Email = x.Human.Email,
-                FullName = x.Human.FullName,
+                PhoneNumber = x.User.PhoneNumber,
+                Email = x.User.Email,
+                FullName = x.User.FullName,
                 Type = x.Student.CourseLevel.GetEnumCourseType(),
                 CourseId = x.Student.CourseId,
                 SchoolId = x.Student.SchoolId,

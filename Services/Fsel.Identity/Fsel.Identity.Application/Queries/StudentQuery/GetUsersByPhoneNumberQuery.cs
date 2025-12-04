@@ -33,9 +33,9 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<StudentModel>>();
 
-            var users = await _userManager.Users.Include(p => p.Human).ThenInclude(p => p.Student).Where(p => p.PhoneNumber == request.PhoneNumber).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
+            var users = await _userManager.Users.Include(p => p.Student).Where(p => p.PhoneNumber == request.PhoneNumber).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
 
-            var students = users.Where(p => p.Human != null).Select(p => p.Human).Where(p => p.Student != null).Select(p => p.Student).ToList();
+            var students = users.Where(p => p.Student != null).Select(p => p.Student).ToList();
 
             methodResult.Result = _mapper.Map<IList<StudentModel>>(students);
             return methodResult;

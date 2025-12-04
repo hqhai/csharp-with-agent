@@ -23,17 +23,15 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
         private readonly IPlatformRepository _platformRepository;
         private readonly IUserPlatformRepository _userPlatformRepository;
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly RoleManager<Role> _roleManager;
         private readonly IUserRoleRepository _userRoleRepository;
 
-        public GetStudentsInPlatformQueryHandler(IPlatformRepository platformRepository, IUserPlatformRepository userPlatformRepository, UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, RoleManager<Role> roleManager, IUserRoleRepository userRoleRepository)
+        public GetStudentsInPlatformQueryHandler(IPlatformRepository platformRepository, IUserPlatformRepository userPlatformRepository, UserManager<User> userManager, IStudentRepository studentRepository, RoleManager<Role> roleManager, IUserRoleRepository userRoleRepository)
         {
             _platformRepository = platformRepository;
             _userPlatformRepository = userPlatformRepository;
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _roleManager = roleManager;
             _userRoleRepository = userRoleRepository;
@@ -53,16 +51,15 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var userRoleQuery = _userRoleRepository.GetQuery();
             var query = from a in _userPlatformRepository.Queryable.Where(n => !platformId.HasValue || n.PlatformId == platformId)
                         join b in _userManager.Users on a.UserId equals b.Id
-                        join c in _humanRepository.Queryable on b.Id equals c.UserId
-                        join d in _studentRepository.Queryable on c.Id equals d.HumanId
+                        join d in _studentRepository.Queryable on b.Id equals d.UserId
                         join ur in userRoleQuery on b.Id equals ur.UserId
                         join r in _roleManager.Roles on ur.RoleId equals r.Id
-                        select new { b, c, r, d, a };
+                        select new { b, r, d, a };
             query = query.Where(p => p.a.Status == request.Status);
             if (!string.IsNullOrEmpty(request.Keyword))
             {
                 var userNameQuery = query.Where(p => p.b.UserName!.Contains(request.Keyword));
-                var codeQuery = query.Where(p => p.c.Code!.Contains(request.Keyword));
+                var codeQuery = query.Where(p => p.b.Code!.Contains(request.Keyword));
                 query = userNameQuery.Union(codeQuery);
             }
             if (request.Role.HasValue)
@@ -73,7 +70,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             var dataQuery = query.Select(i => new StudentInPlatformModel
             {
                 Id = i.b.Id,
-                Code = i.c.Code,
+                Code = i.b.Code,
                 UserName = i.b.UserName,
                 Role = i.r.Name,
                 StudentId = i.d.Id,

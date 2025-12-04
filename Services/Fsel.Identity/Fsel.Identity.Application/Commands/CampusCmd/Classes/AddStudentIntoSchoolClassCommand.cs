@@ -23,6 +23,7 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
     using Fsel.Identity.Domain.Models.CommandModels.Campus;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels.CampusModel;
     using Kros.Extensions;
     using MediatR;
@@ -41,7 +42,6 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
 
     public class AddStudentIntoSchoolClassCommandHandler : IRequestHandler<AddStudentIntoSchoolClassCommand, MethodResult<AddStudentIntoSchoolClassCommandModel>>
     {
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly Core.Base.Managers.UserManager<User> _userManager;
         private readonly IOrderService _orderService;
@@ -54,9 +54,8 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
         private const string DefaultPassword = "Fsel@";
         private const int MinYear = 1900;
 
-        public AddStudentIntoSchoolClassCommandHandler(IHumanRepository humanRepository, IStudentRepository studentRepository, UserManager<User> userManager, IOrderService orderService, IServiceProvider serviceProvider, IPlatformRepository platformRepository, ILogger<AddStudentIntoSchoolClassCommand> logger, AuthContext authContext, ISchoolClassRepository schoolClassRepository, ISystemService systemService)
+        public AddStudentIntoSchoolClassCommandHandler(IStudentRepository studentRepository, UserManager<User> userManager, IOrderService orderService, IServiceProvider serviceProvider, IPlatformRepository platformRepository, ILogger<AddStudentIntoSchoolClassCommand> logger, AuthContext authContext, ISchoolClassRepository schoolClassRepository, ISystemService systemService)
         {
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _userManager = userManager;
             _orderService = orderService;
@@ -383,32 +382,27 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                             {
                                 UserName = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
                                 Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
-                                FullName = student.FullName?.Trim() ?? string.Empty,
+                                FirstName = student.FullName.ParseFullName().FirstName,
+                                LastName = student.FullName.ParseFullName().LastName,
                                 EmailConfirmed = true,
                                 PhoneNumber = !string.IsNullOrEmpty(student.PhoneNumber) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()) : null,
+                                Birthday = dateOfBirth,
+                                Code = GeneratorCodeAsync(studentRepository, dateOfBirth, null),
                                 PhoneNumberConfirmed = false,
                                 Status = EnumUserStatus.Active,
                                 DefaultPassword = password,
-                                Human = new Human()
+                                Student = new Student()
                                 {
-                                    FullName = student.FullName?.Trim(),
-                                    PhoneNumber = !string.IsNullOrEmpty(student.PhoneNumber) ? Shared.Helpers.StringHelper.NormalizeToDomesticFormat(student.PhoneNumber.Trim()) : null,
-                                    Birthday = dateOfBirth,
-                                    Email = !string.IsNullOrEmpty(student.Email) ? student.Email.ToLower(cultureInfo).Trim() : null,
-                                    Code = GeneratorCodeAsync(studentRepository, dateOfBirth, null),
-                                    Student = new Student()
-                                    {
-                                        CreatedByParent = false,
-                                        Occupation = nameof(Student),
-                                        SchoolClass = schoolClass.Name,
-                                        SchoolClassId = request.SchoolClassId,
-                                        SchoolId = schoolId,
-                                        School = school.LocationName,
-                                        CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
-                                        StudentCampusCode = !string.IsNullOrEmpty(student.StudentCampusCode) ? student.StudentCampusCode.Trim() : null,
-                                        ClassCampusCode = !string.IsNullOrEmpty(student.ClassCampusCode) ? student.ClassCampusCode.Trim() : null,
-                                        StatusStudentCampus = EnumStatusStudentCampus.Normal
-                                    }
+                                    CreatedByParent = false,
+                                    Occupation = nameof(Student),
+                                    SchoolClass = schoolClass.Name,
+                                    SchoolClassId = request.SchoolClassId,
+                                    SchoolId = schoolId,
+                                    School = school.LocationName,
+                                    CourseLevel = age <= 13 ? EnumCourseLevel.A2 : EnumCourseLevel.B1,
+                                    StudentCampusCode = !string.IsNullOrEmpty(student.StudentCampusCode) ? student.StudentCampusCode.Trim() : null,
+                                    ClassCampusCode = !string.IsNullOrEmpty(student.ClassCampusCode) ? student.ClassCampusCode.Trim() : null,
+                                    StatusStudentCampus = EnumStatusStudentCampus.Normal
                                 },
                                 UserPlatforms = new List<UserPlatform>()
                                     {
@@ -431,11 +425,11 @@ namespace Fsel.Identity.Application.Commands.CampusCmd.Classes
                                 createOrdersForStudentCampusModel.Add(new CreateOrdersForStudentCampusCommandModel()
                                 {
                                     UserId = user.Id,
-                                    StudentId = user.Human.Student.Id,
+                                    StudentId = user.Student.Id,
                                     Email = user.Email,
                                     PhoneNumber = user.PhoneNumber,
                                     FullName = user.FullName,
-                                    StudentCode = user.Human.Code
+                                    StudentCode = user.Code
                                 });
                             }
                         }

@@ -1,12 +1,17 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using Fsel.Core.Base.Interfaces;
+using Fsel.Core.Base;
+using Microsoft.AspNetCore.Http;
 
 namespace Fsel.Hangfire.Application.Workers
 {
-    public class TestWorker : IWorker
+    public class TestWorker : BaseWorker
     {
-        public Task RunAsync()
+        public TestWorker(AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        {
+        }
+
+        public override Task RunAsync()
         {
             return Task.CompletedTask;
         }

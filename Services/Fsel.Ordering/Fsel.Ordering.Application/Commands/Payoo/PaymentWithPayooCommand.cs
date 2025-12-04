@@ -6,7 +6,6 @@ namespace Fsel.Ordering.Application.Commands.Payoo
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base;
@@ -87,11 +86,11 @@ namespace Fsel.Ordering.Application.Commands.Payoo
                     NotifyUrl = _appSetting.PayooConfig?.NotifyUrl,
                     ValidityTime = validityTime,
                     OrderCode = order.Code,
-                    CustomerName = student?.Human?.FullName,
-                    CustomerPhone = student?.Human?.PhoneNumber,
-                    CustomerAddress = student?.Human?.Address,
-                    CustomerEmail = student?.Human?.Email,
-                    StudentCode = student?.Human?.Code,
+                    CustomerName = student?.User?.FullName,
+                    CustomerPhone = student?.User?.PhoneNumber,
+                    CustomerAddress = student?.User?.Address,
+                    CustomerEmail = student?.User?.Email,
+                    StudentCode = student?.User?.Code,
                     Email = _appSetting.ResourceContent?.Email,
                     Hotline = _appSetting.ResourceContent?.HotLine,
                 };

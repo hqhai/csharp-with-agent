@@ -61,8 +61,6 @@ namespace Fsel.Identity.Domain.Entities
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
-        public Human? Human { get; set; }
-        public Guid HumanId { get; set; }
         public DateTime? ExpiredDate { get; set; }
         public Guid? SchoolClassId { get; set; }
 
@@ -72,9 +70,10 @@ namespace Fsel.Identity.Domain.Entities
 
         public SchoolClass? SchoolClassCampus { get; set; }
 
-
-
         public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
+
+        public virtual User? User { get; set; }
+        public Guid UserId { get; set; }
 
         public EventRegistration? EventRegistration { get; set; }
         public ICollection<ParentStudent> ParentStudents { get; set; } = new List<ParentStudent>();

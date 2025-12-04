@@ -2,19 +2,20 @@
 
 namespace Fsel.Hangfire.Application.Workers
 {
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
+    using Microsoft.AspNetCore.Http;
 
-    public class LeaderBoardWorker : IWorker
+    public class LeaderBoardWorker : BaseWorker
     {
         private readonly LeaderBoardPublisher _leaderBoardPublisher;
 
-        public LeaderBoardWorker(LeaderBoardPublisher leaderBoardPublisher)
+        public LeaderBoardWorker(LeaderBoardPublisher leaderBoardPublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _leaderBoardPublisher = leaderBoardPublisher;
         }
 
-        public async Task RunAsync()
+        public override async Task RunAsync()
         {
             await _leaderBoardPublisher.Publish(CancellationToken.None);
         }

@@ -121,12 +121,12 @@ ITeacherFreeTimeLiveRepository teacherFreeTimeLiveRepository)
 
             var teacherResult = await _userService.GetTeacherByIdsAsync(new GetTeacherByIdsQueryModel { Ids = teacherFreeDateModel.Select(x => x.TeacherId).ToList() });
 
-            var teacher = teacherResult.Content?.Result;
+            var teachers = teacherResult.Content?.Result;
             foreach (var item in teacherFreeDateModel)
             {
-                var human = teacher?.FirstOrDefault(x => x.Id == item.TeacherId)?.Human;
-                item.TeacherName = human?.FullName;
-                item.TeacherCode = human?.Code;
+                var teacher = teachers?.FirstOrDefault(x => x.Id == item.TeacherId);
+                item.TeacherName = teacher?.User?.FullName;
+                item.TeacherCode = teacher?.User?.Code;
             }
 
             methodResult.Result = teacherFreeDateModel;

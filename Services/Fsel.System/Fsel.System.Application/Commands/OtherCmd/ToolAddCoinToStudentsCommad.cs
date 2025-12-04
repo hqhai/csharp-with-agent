@@ -130,7 +130,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email is null or malformed" });
                 }
 
-                var student = students.FirstOrDefault(y => y.Human != null && y.Human.Email == x.Email);
+                var student = students.FirstOrDefault(y => y.User != null && y.User.Email == x.Email);
                 if (student == null)
                 {
                     errors.Add(new ValidateExcelModel { RowIndex = rowIndex, ColumnName = nameof(x.Email), Message = "Email Is Not Exist" });
@@ -143,7 +143,7 @@ namespace Fsel.System.Application.Commands.OtherCmd
                     }
                     else
                     {
-                        var userId = student.Human?.UserId ?? Guid.Empty;
+                        var userId = student?.UserId ?? Guid.Empty;
                         var tokenHistoryStudents = await _tokenHistoryRepository.Queryable.Where(x => x.UserId == userId && x.Feature == EnumTokenFeature.FselEvent).ToListAsync(cancellationToken);
                         var tokenHistoryEvent = tokenHistoryStudents.FirstOrDefault(y => !string.IsNullOrEmpty(y.ConfigData?.EventCode) && y.ConfigData.EventCode == x.EventCode);
                         if (tokenHistoryEvent != null)
@@ -166,8 +166,8 @@ namespace Fsel.System.Application.Commands.OtherCmd
 
             foreach (var student in students)
             {
-                var email = student.Human?.Email;
-                var userId = student.Human?.UserId ?? default;
+                var email = student.User?.Email;
+                var userId = student.UserId;
                 var dataToken = result.Datas.FirstOrDefault(x => x.Email == email);
 
                 var tokenHistoryTranslations = GetTokenHistoryTranslations(dataToken?.ConfigEventCode);

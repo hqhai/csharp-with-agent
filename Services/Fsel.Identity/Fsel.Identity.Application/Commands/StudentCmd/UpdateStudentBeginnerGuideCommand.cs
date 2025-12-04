@@ -43,8 +43,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
 
             //Kiểm tra xem student có tồn tại không
             var student = await _studentRepository.Queryable
-                                    .Include(x => x.Human)
-                                    .FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId, cancellationToken: cancellationToken);
+                                    .Include(x => x.User)
+                                    .FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken: cancellationToken);
 
             if (student == null)
             {

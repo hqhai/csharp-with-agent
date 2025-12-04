@@ -7,39 +7,40 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Core.Base.Managers;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Identity.Domain.Models.QueryModels.Users;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
-    public class GetUsersByIdsQuery : GetUsersByIdsQueryModel, IRequest<MethodResult<IList<HumanModel>>>
+    public class GetUsersByIdsQuery : GetUsersByIdsQueryModel, IRequest<MethodResult<IList<UserModel>>>
     {
     }
 
-    public class GetUsersByIdsQueryHandler : IRequestHandler<GetUsersByIdsQuery, MethodResult<IList<HumanModel>>>
+    public class GetUsersByIdsQueryHandler : IRequestHandler<GetUsersByIdsQuery, MethodResult<IList<UserModel>>>
     {
         private readonly IMapper _mapper;
-        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
 
-        public GetUsersByIdsQueryHandler(IMapper mapper, IHumanRepository humanRepository)
+        public GetUsersByIdsQueryHandler(IMapper mapper, UserManager<User> userManager)
         {
             _mapper = mapper;
-            _humanRepository = humanRepository;
+            _userManager = userManager;
         }
 
-        public async Task<MethodResult<IList<HumanModel>>> Handle(GetUsersByIdsQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<IList<UserModel>>> Handle(GetUsersByIdsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<HumanModel>> methodResult = new MethodResult<IList<HumanModel>>();
+            MethodResult<IList<UserModel>> methodResult = new MethodResult<IList<UserModel>>();
 
             if (request.UserIds == null || !request.UserIds.Any())
             {
-                methodResult.Result = new List<HumanModel>();
+                methodResult.Result = new List<UserModel>();
                 return methodResult;
             }
-            var humans = await _humanRepository.Queryable.Where(p => p.UserId.HasValue && request.UserIds.Contains(p.UserId.Value)).ToListAsync(cancellationToken);
-            methodResult.Result = _mapper.Map<IList<HumanModel>>(humans);
+            var users = await _userManager.Users.Where(p => request.UserIds.Contains(p.Id)).ToListAsync(cancellationToken);
+            methodResult.Result = _mapper.Map<IList<UserModel>>(users);
             return methodResult;
         }
     }

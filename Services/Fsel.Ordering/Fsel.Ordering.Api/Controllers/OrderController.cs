@@ -154,5 +154,17 @@ namespace Fsel.Ordering.Api.Controllers
             MethodResult<IList<OrderModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Current Order By UserId
+        /// </summary>
+        [HttpGet("current-by-userid")]
+        [ProducesResponseType(typeof(MethodResult<OrderModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Get([FromQuery] GetCurrentOrderByUserIdQuery query)
+        {
+            MethodResult<OrderModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
     }
 }

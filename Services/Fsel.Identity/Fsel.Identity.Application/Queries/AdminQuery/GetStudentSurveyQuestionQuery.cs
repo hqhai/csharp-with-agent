@@ -43,9 +43,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 methodResult.AddErrorBadRequest(nameof(EnumUserSchoolErrorCode.StudentNotInSchool), nameof(isStudentToSchool));
                 return methodResult;
             }
-            var user = await _userManager.Users.Include(x => x.Human)
-                                        .ThenInclude(x => x!.Student)
-                                        .FirstOrDefaultAsync(x => x.Human != null && x.Human.Student != null && x.Human.Student.Id == request.StudentId, cancellationToken);
+            var user = await _userManager.Users.Include(x => x.Student)
+                                        .FirstOrDefaultAsync(x => x.Student != null && x.Student.Id == request.StudentId, cancellationToken);
             if (user == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));

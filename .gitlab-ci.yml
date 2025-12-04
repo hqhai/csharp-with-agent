@@ -128,7 +128,7 @@ build-demo-auth:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -306,7 +306,7 @@ build-demo-gateway:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -483,7 +483,7 @@ build-demo-hangfire:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -661,7 +661,7 @@ build-demo-interaction:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -839,7 +839,7 @@ build-demo-lcmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1017,7 +1017,7 @@ build-demo-lmsapi:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1195,7 +1195,7 @@ build-demo-notification:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1373,7 +1373,7 @@ build-demo-ordering:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1551,7 +1551,7 @@ build-demo-realtime:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1729,7 +1729,7 @@ build-demo-sender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -1907,7 +1907,7 @@ build-demo-storage:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -2085,7 +2085,7 @@ build-demo-system:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -2263,7 +2263,7 @@ build-demo-training:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -2440,7 +2440,7 @@ build-demo-identity:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:
@@ -2618,7 +2618,7 @@ build-demo-cms-planetdefender:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u tunglinh -p glpat-BosS33r3VPAwzJUK4sYR
+    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
     - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
     - docker push $IMAGE_NAME:$TAG
   variables:

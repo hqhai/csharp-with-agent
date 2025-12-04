@@ -1,6 +1,6 @@
 {
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5200"
+    "BaseUrl": "http://gateway-dev.fsel-dev.svc"
   },
   "RateLimitOptions": {
     "DisableRateLimitHeaders": true,
@@ -11,20 +11,6 @@
     "Limit": 100
   },
   "Routes": [
-    // Auth Service
-    {
-      "SwaggerKey": "auth",
-      "UpstreamPathTemplate": "/auth-gateway/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
-      "DownstreamPathTemplate": "/api/{everything}",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5201
-        }
-      ]
-    },
     // User Service
     {
       "SwaggerKey": "user",
@@ -34,8 +20,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5202
+          "Host": "user-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -48,8 +34,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5203
+          "Host": "lcmsapi-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -62,8 +48,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5204
+          "Host": "lmsapi-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -76,8 +62,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5205
+          "Host": "storage-dev.fsel-dev.svc",
+          "Port": 80
         }
       ],
       "QoSOptions": {
@@ -95,8 +81,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5206
+          "Host": "sender-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -109,8 +95,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5207
+          "Host": "training-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -123,8 +109,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5208
+          "Host": "interaction-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -137,8 +123,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5209
+          "Host": "ordering-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -151,8 +137,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 52010
+          "Host": "system-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -165,8 +151,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 52011
+          "Host": "cms-planet-defender-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -179,8 +165,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5501
+          "Host": "realtime-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -193,8 +179,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "localhost",
-          "Port": 5502
+          "Host": "notification-dev.fsel-dev.svc",
+          "Port": 80
         }
       ]
     },
@@ -229,42 +215,22 @@
   ],
   "SwaggerEndPoints": [
     {
-      "Key": "auth",
-      "Config": [
-        {
-          "Name": "Auths API",
-          "Version": "v1",
-          "Url": "http://localhost:5201/swagger/v1/swagger.json"
-        },
-        {
-          "Name": "Auths API",
-          "Version": "v1.1",
-          "Url": "http://localhost:5201/swagger/v1.1/swagger.json"
-        },
-        {
-          "Name": "Auths API",
-          "Version": "v1.2",
-          "Url": "http://localhost:5201/swagger/v1.2/swagger.json"
-        }
-      ]
-    },
-    {
       "Key": "user",
       "Config": [
         {
           "Name": "Users API",
           "Version": "v1",
-          "Url": "http://localhost:5202/swagger/v1/swagger.json"
+          "Url": "http://user-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Users API",
           "Version": "v1.1",
-          "Url": "http://localhost:5202/swagger/v1.1/swagger.json"
+          "Url": "http://user-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Users API",
           "Version": "v1.2",
-          "Url": "http://localhost:5202/swagger/v1.2/swagger.json"
+          "Url": "http://user-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -274,17 +240,17 @@
         {
           "Name": "Lcms Courses API",
           "Version": "v1",
-          "Url": "http://localhost:5203/swagger/v1/swagger.json"
+          "Url": "http://lcmsapi-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Lcms Courses API",
           "Version": "v1.1",
-          "Url": "http://localhost:5203/swagger/v1.1/swagger.json"
+          "Url": "http://lcmsapi-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Lcms Courses API",
           "Version": "v1.2",
-          "Url": "http://localhost:5203/swagger/v1.2/swagger.json"
+          "Url": "http://lcmsapi-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -294,17 +260,17 @@
         {
           "Name": "Lms Courses API",
           "Version": "v1",
-          "Url": "http://localhost:5204/swagger/v1/swagger.json"
+          "Url": "http://lmsapi-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Lms Courses API",
           "Version": "v1.1",
-          "Url": "http://localhost:5204/swagger/v1.1/swagger.json"
+          "Url": "http://lmsapi-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Lms Courses API",
           "Version": "v1.2",
-          "Url": "http://localhost:5204/swagger/v1.2/swagger.json"
+          "Url": "http://lmsapi-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -314,17 +280,17 @@
         {
           "Name": "Storage API",
           "Version": "v1",
-          "Url": "http://localhost:5205/swagger/v1/swagger.json"
+          "Url": "http://storage-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Storage API",
           "Version": "v1.1",
-          "Url": "http://localhost:5205/swagger/v1.1/swagger.json"
+          "Url": "http://storage-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Storage API",
           "Version": "v1.2",
-          "Url": "http://localhost:5205/swagger/v1.2/swagger.json"
+          "Url": "http://storage-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -334,17 +300,17 @@
         {
           "Name": "Senders API",
           "Version": "v1",
-          "Url": "http://localhost:5206/swagger/v1/swagger.json"
+          "Url": "http://sender-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Senders API",
           "Version": "v1.1",
-          "Url": "http://localhost:5206/swagger/v1.1/swagger.json"
+          "Url": "http://sender-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Senders API",
           "Version": "v1.2",
-          "Url": "http://localhost:5206/swagger/v1.2/swagger.json"
+          "Url": "http://sender-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -354,17 +320,17 @@
         {
           "Name": "Training API",
           "Version": "v1",
-          "Url": "http://localhost:5207/swagger/v1/swagger.json"
+          "Url": "http://training-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Training API",
           "Version": "v1.1",
-          "Url": "http://localhost:5207/swagger/v1.1/swagger.json"
+          "Url": "http://training-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Training API",
           "Version": "v1.2",
-          "Url": "http://localhost:5207/swagger/v1.2/swagger.json"
+          "Url": "http://training-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -374,17 +340,17 @@
         {
           "Name": "Interaction API",
           "Version": "v1",
-          "Url": "http://localhost:5208/swagger/v1/swagger.json"
+          "Url": "http://interaction-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Interaction API",
           "Version": "v1.1",
-          "Url": "http://localhost:5208/swagger/v1.1/swagger.json"
+          "Url": "http://interaction-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Interaction API",
           "Version": "v1.2",
-          "Url": "http://localhost:5208/swagger/v1.2/swagger.json"
+          "Url": "http://interaction-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -394,17 +360,17 @@
         {
           "Name": "Ordering API",
           "Version": "v1",
-          "Url": "http://localhost:5209/swagger/v1/swagger.json"
+          "Url": "http://ordering-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Ordering API",
           "Version": "v1.1",
-          "Url": "http://localhost:5209/swagger/v1.1/swagger.json"
+          "Url": "http://ordering-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Ordering API",
           "Version": "v1.2",
-          "Url": "http://localhost:5209/swagger/v1.2/swagger.json"
+          "Url": "http://ordering-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -414,17 +380,17 @@
         {
           "Name": "System API",
           "Version": "v1",
-          "Url": "http://localhost:52010/swagger/v1/swagger.json"
+          "Url": "http://system-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "System API",
           "Version": "v1.1",
-          "Url": "http://localhost:52010/swagger/v1.1/swagger.json"
+          "Url": "http://system-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "System API",
           "Version": "v1.2",
-          "Url": "http://localhost:52010/swagger/v1.2/swagger.json"
+          "Url": "http://system-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -434,17 +400,17 @@
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1",
-          "Url": "http://localhost:52011/swagger/v1/swagger.json"
+          "Url": "http://cms-planet-defender-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1.1",
-          "Url": "http://localhost:52011/swagger/v1.1/swagger.json"
+          "Url": "http://cms-planet-defender-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Cms Planet Defender API",
           "Version": "v1.2",
-          "Url": "http://localhost:52011/swagger/v1.2/swagger.json"
+          "Url": "http://cms-planet-defender-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -454,17 +420,17 @@
         {
           "Name": "Realtime API",
           "Version": "v1",
-          "Url": "http://localhost:5501/swagger/v1/swagger.json"
+          "Url": "http://realtime-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Realtime API",
           "Version": "v1.1",
-          "Url": "http://localhost:5501/swagger/v1.1/swagger.json"
+          "Url": "http://realtime-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Realtime API",
           "Version": "v1.2",
-          "Url": "http://localhost:5501/swagger/v1.2/swagger.json"
+          "Url": "http://realtime-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },
@@ -474,17 +440,17 @@
         {
           "Name": "Notification API",
           "Version": "v1",
-          "Url": "http://localhost:5502/swagger/v1/swagger.json"
+          "Url": "http://notification-dev.fsel-dev.svc/swagger/v1/swagger.json"
         },
         {
           "Name": "Notification API",
           "Version": "v1.1",
-          "Url": "http://localhost:5502/swagger/v1.1/swagger.json"
+          "Url": "http://notification-dev.fsel-dev.svc/swagger/v1.1/swagger.json"
         },
         {
           "Name": "Notification API",
           "Version": "v1.2",
-          "Url": "http://localhost:5502/swagger/v1.2/swagger.json"
+          "Url": "http://notification-dev.fsel-dev.svc/swagger/v1.2/swagger.json"
         }
       ]
     },

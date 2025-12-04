@@ -8,12 +8,16 @@ namespace Fsel.Interaction.Application.Services.UserServices.Models
 
     public class StudentModel : BaseModel
     {
-        public EnumCourseLevel? CourseLevel { get; set; }
+        public string? Code { get; set; }
+        public EnumCourseLevel CourseLevel { get; set; }
         public EnumCourseLevel? BaseCourseLevel { get; set; }
+        public string? FullName { get; set; }
+        public string? AvatarPath { get; set; }
         public Guid? ClassId { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
-        public HumanProfileModel? Human { get; set; }
+        public Guid? UserId { get; set; }
+        public UserModel? User { get; set; }
     }
 }
