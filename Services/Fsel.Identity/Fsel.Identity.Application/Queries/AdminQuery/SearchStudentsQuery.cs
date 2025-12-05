@@ -98,7 +98,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
-                    query = query.Where(m => m.User.PhoneNumber == request.Keyword);
+                    var queryPhone = query.Where(m => m.User.PhoneNumber == request.Keyword);
+                    var queryStudentCampus = query.Where(m => m.Student.StudentCampusCode  != null && m.Student.StudentCampusCode == request.Keyword);
+                    query = queryPhone.Union(queryStudentCampus);
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
                 {
