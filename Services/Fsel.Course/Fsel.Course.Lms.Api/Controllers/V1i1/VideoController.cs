@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Api.Controllers.V1i1
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -30,6 +31,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// Create video time code answer
         /// </summary>
         [HttpPost("create-video-time-code-answer")]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreateVideoTimeCodeAnswerByTimeCodeCommand query)

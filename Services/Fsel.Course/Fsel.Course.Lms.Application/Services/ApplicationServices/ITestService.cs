@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false);
 
-        Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass =false);
+        Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass = false);
 
         Task<TestResult> MakeNewTestResultTree(Guid studentId, Guid stepFlowId, Guid testGroupResultId, Guid programId, Guid? actionFlowId = default);
 
@@ -201,7 +201,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
 
             var questionIds = request.Answers.Select(x => x.QuestionId).ToList();
-            var questions = await _questionRepository.GetIncludeSectionByIdAsync(questionIds);
+            var questions = await _questionRepository.GetByIdsAsync(questionIds);
             if (questions != null && questions.Any())
             {
                 var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();

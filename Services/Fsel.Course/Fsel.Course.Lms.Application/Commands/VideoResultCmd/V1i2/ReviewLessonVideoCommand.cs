@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
+namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd.V1i2
 {
     using System.Linq.Dynamic.Core;
     using System.Threading;
@@ -11,18 +11,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.CommandModels.VideoResults;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
-    public class ReviewLessonVideoCommand : ReviewLessonVideoCommandModel, IRequest<MethodResult<VideoResultModel>>
+    public class ReviewLessonVideoCommand : IRequest<MethodResult<VideoResultModel>>
     {
+        public Guid VideoResultId { get; set; }
+        public double NumberOfStars { get; set; }
+        public string? Feedback { get; set; }
     }
 
     public class ReviewLessonVideoCommandHandler : IRequestHandler<ReviewLessonVideoCommand, MethodResult<VideoResultModel>>
@@ -33,13 +36,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
         private readonly VideoConverter _videoConverter;
         private readonly IVideoRepository _videoRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly IVideoCachingService _videoCachingService;
 
         public ReviewLessonVideoCommandHandler(IVideoResultRepository videoResultRepository,
             IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             IMapper mapper,
             VideoConverter videoConverter,
             IVideoRepository videoRepository,
-            QuestBoardPublisher questBoardPublisher)
+            QuestBoardPublisher questBoardPublisher,
+            IVideoCachingService videoCachingService)
         {
             _videoResultRepository = videoResultRepository;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
@@ -47,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             _videoConverter = videoConverter;
             _videoRepository = videoRepository;
             _questBoardPublisher = questBoardPublisher;
+            _videoCachingService = videoCachingService;
         }
 
         public async Task<MethodResult<VideoResultModel>> Handle(ReviewLessonVideoCommand request, CancellationToken cancellationToken)
@@ -54,13 +60,15 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoResultModel> methodResult = new MethodResult<VideoResultModel>();
 
-            var videoResult = await _videoResultRepository.Queryable.Include(x => x.LessonResult).FirstOrDefaultAsync(x => x.LessonResultId == request.LessonResultId, cancellationToken: cancellationToken);
+            var videoResult = await _videoResultRepository.Queryable.Include(x => x.LessonResult)
+                                                          .FirstOrDefaultAsync(x => x.Id == request.VideoResultId, cancellationToken);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-            _mapper.Map(request, videoResult);
+            videoResult.NumberOfStars = request.NumberOfStars;
+            videoResult.Feedback = request.Feedback;
             if (!videoResult.IsValid())
             {
                 methodResult.AddErrorBadRequest(videoResult.ErrorMessages);
@@ -74,13 +82,13 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 return methodResult;
             }
 
-            var video = await _videoRepository.ReadQueryable.Include(x => x.VideoTimeCodes)
-                                              .FirstOrDefaultAsync(x => x.Id == videoResult.VideoId, cancellationToken: cancellationToken);
+            var video = await GetVideoAsync(videoResult.VideoId);
             if (video == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
+
             if (videoTimeCodeResults.Count != video.VideoTimeCodes.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNotCompleted), nameof(videoTimeCodeResults));
@@ -100,6 +108,19 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
             return methodResult;
+        }
+
+        private async Task<Video?> GetVideoAsync(Guid id)
+        {
+            return await _videoCachingService.GetOrSetAsync(id.ToString(), async (ctx, _) =>
+            {
+                var video = await _videoRepository.ReadQueryable
+                                                  .Where(x => x.Id == id)
+                                                  .Include(v => v.VideoTimeCodes)
+                                                  .FirstOrDefaultAsync(_);
+
+                return video;
+            });
         }
 
         private async Task<VideoResult> GetVideoResult(VideoResult videoResult, CancellationToken cancellationToken)

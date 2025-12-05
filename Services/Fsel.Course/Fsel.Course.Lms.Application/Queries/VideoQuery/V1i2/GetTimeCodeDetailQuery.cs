@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Queries.VideoQuery
+namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
 {
     using System;
     using System.Linq;
@@ -9,53 +9,43 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
-    using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
 
     public class GetTimeCodeDetailQuery : IRequest<MethodResult<VideoTimeCodeModel>>
     {
-        public Guid VideoId { get; set; }
+        public Guid VideoResultId { get; set; }
         public Guid VideoTimeCodeId { get; set; }
         public bool IsShowSubStatus { get; set; }
         public bool IsCreateAnswer { get; set; }
-        public Guid? LessonResultId { get; set; }
     }
 
     public class GetTimeCodeDetailQueryHandler : IRequestHandler<GetTimeCodeDetailQuery, MethodResult<VideoTimeCodeModel>>
     {
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly AuthContext _authContext;
         private readonly IMediator _mediator;
-        private readonly VideoConverter _videoConverter;
-        private readonly IUserService _userService;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
+        private readonly IVideoTimeCodeService _videoTimeCodeService;
 
         public GetTimeCodeDetailQueryHandler(IVideoTimeCodeRepository videoTimeCodeRepository,
             IVideoResultRepository videoResultRepository,
-            AuthContext authContext,
             IMediator mediator,
-            VideoConverter videoConverter,
-            IUserService userService,
-            IVideoTimeCodeResultRepository videoTimeCodeResultRepository)
+            IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
+            IVideoTimeCodeService videoTimeCodeService)
         {
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoResultRepository = videoResultRepository;
-            _authContext = authContext;
             _mediator = mediator;
-            _videoConverter = videoConverter;
-            _userService = userService;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
+            _videoTimeCodeService = videoTimeCodeService;
         }
 
         public async Task<MethodResult<VideoTimeCodeModel>> Handle(GetTimeCodeDetailQuery request, CancellationToken cancellationToken)
@@ -63,17 +53,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoTimeCodeModel> methodResult = new MethodResult<VideoTimeCodeModel>();
 
-            var studentsResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
-            if (studentsResult == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(studentsResult));
-                return methodResult;
-            }
-            var studentId = studentsResult.Content?.Result?.Id ?? default;
-
-            var videoResult = await _videoResultRepository.Queryable
-                        .Where(x => !request.LessonResultId.HasValue || x.LessonResultId == request.LessonResultId)
-                        .FirstOrDefaultAsync(x => x.VideoId == request.VideoId && x.StudentId == studentId, cancellationToken);
+            var videoResult = await _videoResultRepository.ReadQueryable.Where(x => x.Id == request.VideoResultId).FirstOrDefaultAsync(cancellationToken);
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
@@ -100,8 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
                 return methodResult;
             }
 
-            methodResult.Result = await _videoConverter.GetVideoTimeCodeDetailAsync(videoTimeCode, method.Result ?? new VideoTimeCodeResultModel(), request.IsShowSubStatus);
-            methodResult.StatusCode = StatusCodes.Status200OK;
+            methodResult.Result = await _videoTimeCodeService.GetVideoTimeCodeDetailAsync(videoTimeCode, method.Result ?? new VideoTimeCodeResultModel(), request.IsShowSubStatus);
             return methodResult;
         }
 
@@ -109,7 +88,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
         {
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Where(x => x.VideoId == videoResult.VideoId).OrderBy(x => x.DisplayTime).ToListAsync(cancellationToken);
+            var videoTimeCodes = await _videoTimeCodeRepository.ReadQueryable.Where(x => x.VideoId == videoResult.VideoId).OrderBy(x => x.DisplayTime).ToListAsync(cancellationToken);
             var videoTimeCodeRequest = videoTimeCodes.FirstOrDefault(x => x.Id == request.VideoTimeCodeId);
             if (videoTimeCodeRequest == null)
             {
@@ -151,7 +130,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery
             if (videoTimeCodes != null)
             {
                 var videoTimeCodePrevios = videoTimeCodes.Where(x => videoTimeCodes.IndexOf(x) < videoTimeCodes.IndexOf(videoTimeCodeRequest)).ToList();
-                var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id).ToListAsync();
+                var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable.Where(x => x.VideoResultId == videoResult.Id).ToListAsync();
                 if (videoTimeCodePrevios != null && videoTimeCodePrevios.Any())
                 {
                     foreach (var videoTimeCode in videoTimeCodePrevios)

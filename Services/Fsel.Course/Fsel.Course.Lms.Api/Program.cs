@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.Constants;
-using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Core.Middlewares;
 using Fsel.Course.Domain.IRepositories;
@@ -168,6 +167,12 @@ builder.Services.AddScoped<ClassForumLessonItemInitializer>();
 builder.Services.AddScoped<HomeWorkLessonItemInitializer>();
 builder.Services.AddScoped<DocumentLessonItemInitializer>();
 builder.Services.AddScoped<ILessonItemInitializerFactory, LessonItemInitializerFactory>();
+
+builder.Services.AddScoped<IVideoService, VideoService>();
+builder.Services.AddScoped<IVideoCachingService, VideoCachingService>();
+builder.Services.AddScoped<IVideoTimeCodeModelCachingService, VideoTimeCodeModelCachingService>();
+builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
+builder.Services.AddScoped<ITimeCodeQuestionCachingService, TimeCodeQuestionCachingService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
