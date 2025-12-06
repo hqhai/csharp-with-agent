@@ -59,7 +59,7 @@
                            maxlength="1"
                            id="otp-1"
                            autocomplete="off"
-                           value="@Model.Otp?.ElementAt(0)"
+                           value="@(Model.Otp != null && Model.Otp.Length > 0 ? Model.Otp[0].ToString() : "")"
                            name="otp-1" />
                     <input 
                            id="otp-2"
@@ -67,7 +67,7 @@
                            type="password"
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
-                           value="@Model.Otp?.ElementAt(1)"
+                           value="@(Model.Otp != null && Model.Otp.Length > 1 ? Model.Otp[1].ToString() : "")"
                            name="otp-2" />
                     <input 
                            id="otp-3"
@@ -76,7 +76,7 @@
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
                            autocomplete="off"
-                           value="@Model.Otp?.ElementAt(2)"
+                           value="@(Model.Otp != null && Model.Otp.Length > 2 ? Model.Otp[2].ToString() : "")"
                            name="otp-3" />
                     <input 
                            id="otp-4"
@@ -85,7 +85,7 @@
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
                            autocomplete="off"
-                           value="@Model.Otp?.ElementAt(3)"
+                           value="@(Model.Otp != null && Model.Otp.Length > 3 ? Model.Otp[3].ToString() : "")"
                            name="otp-4" />
                     <input 
                            id="otp-5"
@@ -94,7 +94,7 @@
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
                            autocomplete="off"
-                           value="@Model.Otp?.ElementAt(4)"
+                           value="@(Model.Otp != null && Model.Otp.Length > 4 ? Model.Otp[4].ToString() : "")"
                            name="otp-5" />
                     <input 
                            id="otp-6"
@@ -103,7 +103,7 @@
                            onkeypress="return event.charCode >= 48 && event.charCode <= 57"
                            maxlength="1"
                            autocomplete="off"
-                           value="@Model.Otp?.ElementAt(5)"
+                           value="@(Model.Otp != null && Model.Otp.Length > 5 ? Model.Otp[5].ToString() : "")"
                            name="otp-6" />
                 </div>
                 <div class="mt-2">
