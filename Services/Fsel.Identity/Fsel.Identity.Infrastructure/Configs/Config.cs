@@ -196,6 +196,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     },
 
                     AllowOfflineAccess = true,
+                    AccessTokenLifetime = 2592000,
                     AllowAccessTokensViaBrowser = true,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     AlwaysIncludeUserClaimsInIdToken = true,
@@ -274,6 +275,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     },
 
                     AllowOfflineAccess = true,
+                    AccessTokenLifetime = 2592000,
                     AllowAccessTokensViaBrowser = true,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     AlwaysIncludeUserClaimsInIdToken = true,
@@ -306,6 +308,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     PostLogoutRedirectUris = { "https://lms.fsel.edu.vn/login", "http://lms.fsel.edu.vn/login" },
 
                     AllowOfflineAccess = true,
+                    AccessTokenLifetime = 2592000,
                     RequireConsent = false,
                     AllowAccessTokensViaBrowser = true,
                     AlwaysIncludeUserClaimsInIdToken = true, //hiển thị claims trong token
