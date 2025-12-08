@@ -25,6 +25,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass =false);
 
         Task<TestResult> MakeNewTestResultTree(Guid studentId, Guid stepFlowId, Guid testGroupResultId, Guid programId, Guid? actionFlowId = default);
+        Task<TestResult> MakeNewTestResult(Guid studentId, Guid testId);
 
         Task CreateAnswers(SubmitAnswerCommandModel request);
     }
@@ -139,6 +140,32 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     StepFlowId = stepFlowId,
                     ActionFlowId = actionFlowId,
                     TestGroupResultId = testGroupResultId,
+                };
+
+                foreach (var section in test.TestSections)
+                {
+                    var testSectionResult = new TestSectionResult { TestSectionId = section.Id, StudentId = studentId, Status = EnumResultStatus.New, };
+                    testResult.SectionResults.Add(testSectionResult);
+
+                    CreateTestSectionResultTree(section, testSectionResult, testResult);
+                }
+
+                return testResult;
+            }
+
+            return null;
+        }
+
+        public async Task<TestResult> MakeNewTestResult(Guid studentId, Guid testId)
+        {
+            var test = await GetHierachicalTestFirstOrDefault(x =>  x.Id == testId && x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
+            if (test != null)
+            {
+                var testResult = new TestResult
+                {
+                    TestId = test.Id,
+                    StudentId = studentId,
+                    Status = EnumResultStatus.New
                 };
 
                 foreach (var section in test.TestSections)
