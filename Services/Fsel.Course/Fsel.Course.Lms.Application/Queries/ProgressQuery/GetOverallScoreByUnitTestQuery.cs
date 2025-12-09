@@ -138,7 +138,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         {
             var listScore = await _videoTimeCodeAnswerRepository.Queryable
                                                .Where(x => x.VideoResultId.HasValue)
-                                               .WhereBulkContains(questionIds, x => x.QuestionId).WhereBulkContains(videoResultIds, x => x.VideoResultId)
+                                               .WhereBulkContains(questionIds, x => x.QuestionId)
+                                               .WhereBulkContains(videoResultIds, x => x.VideoResultId)
                                                .Select(x => x.CorrectCount)
                                                .ToListAsync(cancellationToken);
             return new SkillScores
