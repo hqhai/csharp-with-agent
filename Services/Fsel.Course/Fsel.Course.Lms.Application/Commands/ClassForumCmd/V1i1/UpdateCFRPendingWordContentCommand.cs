@@ -236,19 +236,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         {
             if (classForum.IsAlFeedBack)
             {
-                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModelV2
                 {
                     ClassForumResultId = classForumDetailResult.ClassForumResultId,
                     ClassForumDetailResultId = classForumDetailResult.Id,
                     WordContent = wordContent,
-                    UserAIConfig = classForum.UserAlConfig,
-                    SettingModel = classForum.SettingModel,
-                    SettingFrequecy = classForum.SettingFrequecy,
-                    SettingPresence = classForum.SettingPresence,
-                    SettingTemperature = classForum.SettingTemperature,
-                    SettingTopP = classForum.SettingTopP,
-                    SettingWordMaxLength = classForum.SettingWordMaxLength,
-                    SystemRoleAlConfig = classForum.SystemRoleAlConfig,
                     SubmissionCount = classForumDetailResult.SubmissionCount ?? default
                 }, cancellationToken);
             }

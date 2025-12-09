@@ -110,9 +110,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             }
         }
 
-        public override async Task Submit()
+        public override async Task Submit(Guid id)
         {
-            await base.Submit();
+            await base.Submit(id);
 
             if (Children.Count > 0)
             {

@@ -71,10 +71,10 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Question
         /// </summary>
         [EncryptResponse]
-        [HttpGet("get-pt-question-by-ids")]
+        [HttpPost("get-pt-question-by-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<QuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] GetPtQuestionByIdsQuery query)
+        public async Task<IActionResult> GetQuestions([FromBody] GetPtQuestionByIdsQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();

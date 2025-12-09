@@ -2,12 +2,12 @@
 
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
-    using Fsel.Course.Lms.Application.Commands.AiCmd;
+    using Fsel.Course.Lms.Application.Commands.AiCmd.V1i2;
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Core.Base;
 
-    public class RealTimeAIResponseConsumer : BaseConsumer<ClassForumAIResponseModel>
+    public class RealTimeAIResponseConsumer : BaseConsumer<ClassForumAIResponseModelV2>
     {
         private readonly IMediator _mediator;
 
@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ClassForumAIResponseModel? message)
+        public override async Task ConsumeQueue(ClassForumAIResponseModelV2? message)
         {
             if (message == null)
             {
@@ -25,16 +25,8 @@ namespace Fsel.Course.Lms.Application.Queues.Consumers
 
             await _mediator.Send(new SubmitClassForumAICommand
             {
-                UserAIConfig = message.UserAIConfig,
                 ClassForumResultId = message.ClassForumResultId,
                 ClassForumDetailResultId = message.ClassForumDetailResultId,
-                SystemRoleAlConfig = message.SystemRoleAlConfig,
-                SettingWordMaxLength = message.SettingWordMaxLength,
-                SettingTopP = message.SettingTopP,
-                SettingTemperature = message.SettingTemperature,
-                SettingPresence = message.SettingPresence,
-                SettingFrequecy = message.SettingFrequecy,
-                SettingModel = message.SettingModel,
                 WordContent = message.WordContent,
                 IsRetry = message.IsRetry,
                 SubmissionCount = message.SubmissionCount,

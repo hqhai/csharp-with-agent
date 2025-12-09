@@ -57,6 +57,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         }
 
         /// <summary>
+        /// Get ai criteria by id
+        /// </summary>
+        [HttpGet("ai-criteria-by/{id}")]
+        [ProducesResponseType(typeof(MethodResult<AICriteriaConfigsModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
+        {
+            var queryResult = await _mediator.Send(new GetAiCriteriaByIdQuery { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
         /// Create or update ai criteria
         /// </summary>
         [HttpPost("upsert")]

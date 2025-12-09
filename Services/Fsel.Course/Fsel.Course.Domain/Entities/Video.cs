@@ -64,6 +64,9 @@ namespace Fsel.Course.Domain.Entities
         public Category? Program { get; set; }
 
         public ExtraPractice? ExtraPractice { get; set; }
+
+        public EnumVersion VersionType { get; set; } = EnumVersion.V2;
+
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
         public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
