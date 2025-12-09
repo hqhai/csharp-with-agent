@@ -35,7 +35,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public Category? Program { get; set; }
         public Guid LevelId { get; set; }
         public Level? Level { get; set; }
-
+        public EnumVersion VersionType { get; set; } = EnumVersion.V2;
         public ICollection<TestSection> TestSections { get; set; } = new List<TestSection>();
         public ICollection<CategoryTestBank> CategoryTestBanks { get; set; } = new List<CategoryTestBank>();
         public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();

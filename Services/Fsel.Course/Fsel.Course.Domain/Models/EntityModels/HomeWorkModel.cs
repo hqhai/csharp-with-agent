@@ -34,6 +34,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public string? SkillName { get; set; }
         public string? ProgramName { get; set; }
         public string? LevelName { get; set; }
+        public EnumVersion VersionType { get; set; }
         public HomeWorkResultModel? HomeWorkResult { get; set; }
     }
 }
