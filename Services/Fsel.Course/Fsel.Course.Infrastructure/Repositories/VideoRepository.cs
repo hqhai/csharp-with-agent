@@ -193,6 +193,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                 Program = _mapper.Map<ProgramModel>(i.Program),
                                 Level = _mapper.Map<LevelModel>(i.Level),
                                 IsUseStudent = i.VideoResults.Any(),
+                                VideoPercentConfigs = i.VideoPercentConfigs,
                                 VideoTimeCodes = i.VideoTimeCodes.Where(x => !x.IsDeleted).OrderBy(x => x!.DisplayTime).Select(x => new VideoTimeCodeModel
                                 {
                                     Id = x.Id,
