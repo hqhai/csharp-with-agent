@@ -1,13 +1,16 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Fsel.Common.Attributes;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
+using Fsel.Common.Helpers;
 using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Shared.Enums;
+using Nest;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -64,11 +67,31 @@ namespace Fsel.Course.Domain.Entities
         public Category? Program { get; set; }
 
         public ExtraPractice? ExtraPractice { get; set; }
-
         public EnumVersion VersionType { get; set; } = EnumVersion.V2;
+
+        public string? VideoPercentConfigStr { get; set; }
+
+        [NotMapped]
+        public IList<VideoPercentConfig>? VideoPercentConfigs
+        {
+            get { return ConvertHelper.Deserialize<IList<VideoPercentConfig>>(VideoPercentConfigStr); }
+            set
+            {
+                if (value != null)
+                {
+                    VideoPercentConfigStr = ConvertHelper.Serialize(value);
+                }
+            }
+        }
 
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
         public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
+    }
+
+    public class VideoPercentConfig
+    {
+        public EnumTimeCodeType Type { get; set; }
+        public double Percent { get; set; }
     }
 }

@@ -3,6 +3,7 @@
 using Fsel.Common.Enums;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.BaseModels;
+using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Shared.Enums;
 
@@ -40,6 +41,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public LevelModel? Level { get; set; }
         public ProgramModel? Program { get; set; }
         public EnumVersion VersionType { get; set; }
+        public IList<VideoPercentConfig>? VideoPercentConfigs { get; set; }
         public IList<VideoTimeCodeModel>? VideoTimeCodes { get; set; }
         public VideoResultModel? VideoResult { get; set; }
     }
