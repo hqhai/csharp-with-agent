@@ -54,6 +54,8 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public bool IsArchive { get; set; }
 
+        public EnumVersion VersionType { get; set; } = EnumVersion.V2;
+
         public Skill? Skill { get; set; }
         public Guid? SkillId { get; set; }
 
