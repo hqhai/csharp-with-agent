@@ -77,6 +77,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var (videoIds, courseResult) = method.Result;
+            if (courseResult == null)
+            {
+                methodResult.Result = overallScoreReport;
+                return methodResult;
+            }
+
             var lessonResultIds = await GetLessonResultIdsAsync(request, courseResult.StudentId);
             var videoDuplicateIds = videoIds.GroupBy(x => x)
                 .Select(x => new
@@ -170,9 +176,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }, listScore.Select(x => x.Id).ToList());
         }
 
-        private async Task<MethodResult<(List<Guid>, CourseResult)>> Validate(GetOverallScoreByUnitTestQuery request, CancellationToken cancellationToken)
+        private async Task<MethodResult<(List<Guid>, CourseResult?)>> Validate(GetOverallScoreByUnitTestQuery request, CancellationToken cancellationToken)
         {
-            var methodResult = new MethodResult<(List<Guid>, CourseResult)>();
+            var methodResult = new MethodResult<(List<Guid>, CourseResult?)>();
             var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -194,9 +200,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == student.Id, cancellationToken);
             if (courseResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
                 return methodResult;
             }
+
             var videoIds = await GetVideoIdsAsync(request);
             methodResult.Result = (videoIds, courseResult);
             return methodResult;

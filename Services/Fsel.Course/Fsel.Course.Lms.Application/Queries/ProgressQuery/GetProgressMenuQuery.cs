@@ -113,7 +113,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
 
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.CourseId == course.Id);
-
             methodResult.Result = (course, courseResult);
             return methodResult;
         }

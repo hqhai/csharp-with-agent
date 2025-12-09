@@ -109,6 +109,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     var placementTestScore = await _placementTestResultRepository.Queryable.OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(x => x.StudentId == studentId && x.Status == EnumResultStatus.Done, cancellationToken);
                     if (placementTestScore == null)
                     {
+                        methodResult.Result = overallScoreModel;
                         return methodResult;
                     }
                     overallScoreModel.SkillScores = placementTestScore.SkillScores;
@@ -116,6 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                     overallScoreModel.Percent = placementTestScore.Percent;
                 }
             }
+
             overallScoreModel.CourseLevel = course.CourseLevel;
             overallScoreModel.CourseType = course.CourseType;
             if (course.CourseType == Shared.Enums.EnumCourseType.Ielts)
