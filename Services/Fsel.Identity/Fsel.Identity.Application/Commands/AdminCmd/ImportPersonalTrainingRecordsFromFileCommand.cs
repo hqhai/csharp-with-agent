@@ -119,7 +119,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 }
                 if (!string.IsNullOrEmpty(item.CourseLevel) && Enum.TryParse(item.CourseLevel, out EnumCourseLevel courseLevel))
                 {
-                    await _lmsCourseService.SavePlacementTestDoneAsync(new SavePlacementTestDoneCommandModel { CourseLevel = courseLevel, StudentId = student?.Id ?? default });
+                    await _lmsCourseService.SavePlacementTestDoneAsync(new SavePlacementTestDoneCommandModel { CourseLevel = courseLevel, StudentId = student?.Id ?? default, IsSendLevel = false });
                 }
                 if (_httpContextAccessor.HttpContext != null)
                 {

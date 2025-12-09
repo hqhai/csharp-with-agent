@@ -136,9 +136,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<SkillScores> GetSkillScoreVideoTimeCodeAnswerAsync(IList<Guid> questionIds, IList<Guid> videoResultIds, CancellationToken cancellationToken)
         {
+            if (!videoResultIds.Any())
+            {
+                return new SkillScores
+                {
+                    CorrectCount = default,
+                    CountQuestion = default,
+                };
+            }
+
             var listScore = await _videoTimeCodeAnswerRepository.Queryable
                                                .Where(x => x.VideoResultId.HasValue)
-                                               .WhereBulkContains(questionIds, x => x.QuestionId).WhereBulkContains(videoResultIds, x => x.VideoResultId)
+                                               .WhereBulkContains(questionIds, x => x.QuestionId)
+                                               .WhereBulkContains(videoResultIds, x => x.VideoResultId)
                                                .Select(x => x.CorrectCount)
                                                .ToListAsync(cancellationToken);
             return new SkillScores
