@@ -60,6 +60,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var (course, courseResult) = method.Result;
+            if (courseResult == null)
+            {
+                methodResult.Result = progressMenu;
+                return methodResult;
+            }
             var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == course.Id).Select(x => x.Id).ToListAsync(cancellationToken);
             progressMenu.NumberOfUnitDone = await _unitResultRepository.Queryable.Where(x => x.CourseId == course.Id && x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done).CountAsync(cancellationToken);
             progressMenu.NumberOfPostsCreated = await _classForumResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId))
@@ -84,9 +89,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return methodResult;
         }
 
-        private async Task<MethodResult<(Course, CourseResult)>> ValidateAsync(GetProgressMenuQuery request)
+        private async Task<MethodResult<(Course, CourseResult?)>> ValidateAsync(GetProgressMenuQuery request)
         {
-            var methodResult = new MethodResult<(Course, CourseResult)>();
+            var methodResult = new MethodResult<(Course, CourseResult?)>();
             var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -108,11 +113,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
 
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.CourseId == course.Id);
-            if (courseResult == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
-                return methodResult;
-            }
+
             methodResult.Result = (course, courseResult);
             return methodResult;
         }
