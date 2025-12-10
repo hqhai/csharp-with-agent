@@ -70,9 +70,9 @@ namespace Fsel.Shared.Helpers
             return orderCode;
         }
 
-        public static double ConvertDoublePercent(double value)
+        public static double ConvertDoublePercent(double value, int digits = 0)
         {
-            double convertedValue = Math.Round(value / 100, 0, MidpointRounding.AwayFromZero);
+            double convertedValue = Math.Round(value / 100, digits, MidpointRounding.AwayFromZero);
             return convertedValue;
         }
 

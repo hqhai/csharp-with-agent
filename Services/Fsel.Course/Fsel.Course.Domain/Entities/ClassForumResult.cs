@@ -72,7 +72,7 @@ namespace Fsel.Course.Domain.Entities
         public DateTime? CheckStartDate { get; set; }
 
         public DateTime? GradingStartDate { get; set; }
-
+        public double PercentModule { get; set; }
         public bool IsViewed { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }

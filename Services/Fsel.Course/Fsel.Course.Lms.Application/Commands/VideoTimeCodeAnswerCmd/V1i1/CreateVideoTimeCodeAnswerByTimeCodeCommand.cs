@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 {
-    using System.Globalization;
     using System.Linq;
     using System.Linq.Dynamic.Core;
     using System.Threading;
@@ -24,13 +23,11 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
 
@@ -55,12 +52,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private readonly IQuestionRepository _questionRepository;
         private readonly QuestionConverter _questionConverter;
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
-        private readonly ILogger<CreateVideoTimeCodeAnswerByTimeCodeCommand> _logger;
         private readonly QuestBoardPublisher _questBoardPublisher;
-        private readonly TechieActionPublisher _techieActionPublisher;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly RankedStudentPublisher _rankedStudentPublisher;
-        private readonly IMapper _mapper;
 
         public CreateVideoTimeCodeAnswerByTimeCodeCommandHandler(QuestBoardPublisher questBoardPublisher,
             IMapper mapper,
@@ -80,9 +74,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             IQuestionRepository questionRepository,
             QuestionConverter questionConverter,
             CreateTokenHistoryPublisher createTokenHistoryPublisher,
-            TechieActionPublisher techieActionPublisher,
-            RankedStudentPublisher rankedStudentPublisher,
-            ILogger<CreateVideoTimeCodeAnswerByTimeCodeCommand> logger)
+            RankedStudentPublisher rankedStudentPublisher)
         {
             _videoTimeCodeAnswerRepository = videoTimeCodeAnswerRepository;
             _disconnectSocketCalculateTimePublisher = disconnectSocketCalculateTimePublisher;
@@ -99,11 +91,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             _questionRepository = questionRepository;
             _questionConverter = questionConverter;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
-            _logger = logger;
             _questBoardPublisher = questBoardPublisher;
-            _techieActionPublisher = techieActionPublisher;
             _courseResultRepository = courseResultRepository;
-            _mapper = mapper;
             _rankedStudentPublisher = rankedStudentPublisher;
         }
 
@@ -111,8 +100,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<VideoTimeCodeModel>();
-
-            _logger.LoggerRequest(request);
 
             StudentModel? student;
             if (request.StudentId.HasValue)
@@ -205,10 +192,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 IsCreateAnswer = true
             }, cancellationToken);
 
-            await StreakTimeCodeCheer(request, cancellationToken);
             methodResult.Result = videoTimeCodeMethod.Result;
-            methodResult.StatusCode = StatusCodes.Status200OK;
-
             return methodResult;
         }
 
@@ -334,9 +318,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     });
                 }
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogWarning($"Log Duplicate PlacementTestAnswer : {ex.Message}");
             }
 
             return methodResult;
@@ -449,79 +432,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             };
 
             await _createTokenHistoryPublisher.Publish(listToken, cancellationToken).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Show Techies khi học sinh học bài xong
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="cancellation"></param>
-        /// <returns></returns>
-        private async Task StreakTimeCodeCheer(CreateVideoTimeCodeAnswerByTimeCodeCommand request, CancellationToken cancellation)
-        {
-            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.OrderBy(x => x.CreatedDate).Where(x => x.VideoResultId == request.VideoResultId).ToListAsync(cancellation);
-
-            var currentVideoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoTimeCodeId == request.VideoTimeCodeId && x.VideoResultId == request.VideoResultId).FirstOrDefaultAsync(cancellation);
-
-            if (currentVideoTimeCodeResults != null && currentVideoTimeCodeResults.CorrectCount == currentVideoTimeCodeResults.CorrectTotal && currentVideoTimeCodeResults.Status == EnumResultStatus.Done)
-            {
-                int indexOfCurrent = videoTimeCodeResults.IndexOf(currentVideoTimeCodeResults);
-                int count = 0;
-                for (int i = indexOfCurrent; i >= 0; i--)
-                {
-                    var result = videoTimeCodeResults[i];
-                    if (result.CorrectCount == result.CorrectTotal && result.Status == EnumResultStatus.Done)
-                    {
-                        count++;
-                    }
-                    else
-                    {
-                        break; // Ngắt bộ đếm nếu gặp một record không thỏa mãn điều kiện
-                    }
-                }
-
-                if (count >= 5)
-                {
-                    (EnumTechieAction action, int countStreak) = NumberOfCorrectTimeCode(count);
-                    StudentTechieActionModel model = new StudentTechieActionModel()
-                    {
-                        Config = new TechieConfig
-                        {
-                            Value = countStreak.ToString(CultureInfo.InvariantCulture)
-                        },
-                        Feature = EnumTechieFeature.Cheer,
-                        Action = action
-                    };
-
-                    if (count == countStreak)
-                    {
-                        await _techieActionPublisher.Publish(model, cancellation);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// custom dữ liệu của từng loại Techie
-        /// </summary>
-        /// <param name="correctCount"></param>
-        /// <returns></returns>
-        private static (EnumTechieAction action, int count) NumberOfCorrectTimeCode(int correctCount)
-        {
-            return correctCount switch
-            {
-                ValueSettings.TimeCodeStreak.StreakFiveTimeCode => (EnumTechieAction.StreakFiveTimeCode, ValueSettings.TimeCodeStreak.StreakFiveTimeCode),
-                ValueSettings.TimeCodeStreak.StreakTenTimeCode => (EnumTechieAction.StreakTenTimeCode, ValueSettings.TimeCodeStreak.StreakTenTimeCode),
-                ValueSettings.TimeCodeStreak.StreakFifTeenTimeCode => (EnumTechieAction.StreakFifTeenTimeCode, ValueSettings.TimeCodeStreak.StreakFifTeenTimeCode),
-                ValueSettings.TimeCodeStreak.StreakTwentyTimeCode => (EnumTechieAction.StreakTwentyTimeCode, ValueSettings.TimeCodeStreak.StreakTwentyTimeCode),
-                ValueSettings.TimeCodeStreak.StreakTwentyFiveTimeCode => (EnumTechieAction.StreakTwentyFiveTimeCode, ValueSettings.TimeCodeStreak.StreakTwentyFiveTimeCode),
-                ValueSettings.TimeCodeStreak.StreakThirtyTimeCode => (EnumTechieAction.StreakThirtyTimeCode, ValueSettings.TimeCodeStreak.StreakThirtyTimeCode),
-                ValueSettings.TimeCodeStreak.StreakThirtyFiveTimeCode => (EnumTechieAction.StreakThirtyFiveTimeCode, ValueSettings.TimeCodeStreak.StreakThirtyFiveTimeCode),
-                ValueSettings.TimeCodeStreak.StreakFourtyTimeCode => (EnumTechieAction.StreakFourtyTimeCode, ValueSettings.TimeCodeStreak.StreakFourtyTimeCode),
-                ValueSettings.TimeCodeStreak.StreakFourtyFiveTimeCode => (EnumTechieAction.StreakFourtyFiveTimeCode, ValueSettings.TimeCodeStreak.StreakFourtyFiveTimeCode),
-                ValueSettings.TimeCodeStreak.StreakFiftyTimeCode => (EnumTechieAction.StreakFiftyTimeCode, ValueSettings.TimeCodeStreak.StreakFiftyTimeCode),
-                _ => (EnumTechieAction.StreakFiveTimeCode, ValueSettings.TimeCodeStreak.StreakFiveTimeCode)
-            };
         }
 
         private async Task<VideoTimeCodeResult> GetTokenVideoTimeCodeResult(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, EnumCourseType courseType, long correctCount)

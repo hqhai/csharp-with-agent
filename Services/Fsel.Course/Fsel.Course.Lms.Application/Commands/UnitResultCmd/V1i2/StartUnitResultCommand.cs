@@ -10,7 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Lms.Application.Services.LessonItemServices;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

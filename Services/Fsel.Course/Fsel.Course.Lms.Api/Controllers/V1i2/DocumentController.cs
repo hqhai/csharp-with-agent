@@ -6,20 +6,19 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     using Application.Commands.DocumentCmd;
     using Application.Queries.DocumentQuery;
     using Common.ActionResults;
-    using Common.Attributes;
     using Common.Constants;
-    using Domain.Models.CommandModels.Documents;
     using Domain.Models.EntityModels.V1i1;
     using Domain.Models.EntityModels.V1i2;
+    using Fsel.Common.Attributes;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
     using Shared.Attributes;
     using Shared.Constants;
-    using Shared.Enums;
 
     [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/document")]
-    //[Permission(role: nameof(EnumRole.Student))]
+    [Permission(role: nameof(EnumRole.Student))]
     [ApiController]
     public class DocumentController : ControllerBase
     {
@@ -53,7 +52,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Create([FromRoute] Guid id)
         {
-            var commandResult = await _mediator.Send(new UpdateDocumentResultCommand { Id = id}).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(new UpdateDocumentResultCommand { Id = id }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

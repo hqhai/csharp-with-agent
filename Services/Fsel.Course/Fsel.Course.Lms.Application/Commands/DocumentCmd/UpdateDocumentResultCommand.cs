@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Commands.DocumentCmd
     using Common.Enums.ErrorCodes;
     using Domain.Enums;
     using Domain.IRepositories;
-    using Domain.Models.CommandModels.Documents;
     using Domain.Models.EntityModels.V1i2;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -34,15 +33,12 @@ namespace Fsel.Course.Lms.Application.Commands.DocumentCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<DocumentResultModel>();
 
-            var documentResult = await _documentResultRepository.ReadQueryable
-                .FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
-
+            var documentResult = await _documentResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (documentResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                 return methodResult;
             }
-
             documentResult.Status = EnumResultStatus.Done;
 
             await _documentResultRepository.ExecuteTransactionAsync(async () =>

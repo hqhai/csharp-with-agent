@@ -4,8 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.DocumentQuery
 {
     using AutoMapper;
     using Common.ActionResults;
-    using Common.Enums;
-    using Common.Enums.ErrorCodes;
     using Domain.IRepositories;
     using Domain.Models.EntityModels.V1i1;
     using MediatR;
@@ -41,11 +39,11 @@ namespace Fsel.Course.Lms.Application.Queries.DocumentQuery
 
             string cacheKey = $"DocumentQuery_{request.DocumentId}";
 
-            var documentResult =  await _documentCachingService.GetOrSetAsync(cacheKey, async (ctx, _) =>
+            var documentResult = await _documentCachingService.GetOrSetAsync(cacheKey, async (ctx, _) =>
             {
                 var document = await _documentRepository.ReadQueryable
-                    .Where(x => x.Id == request.DocumentId && x.VersionStatus == EnumVersionStatus.LastVersion)
-                    .SingleOrDefaultAsync(cancellationToken);
+                                                        .Where(x => x.Id == request.DocumentId)
+                                                        .SingleOrDefaultAsync(cancellationToken);
                 return document ?? null!;
             }, token: cancellationToken);
 

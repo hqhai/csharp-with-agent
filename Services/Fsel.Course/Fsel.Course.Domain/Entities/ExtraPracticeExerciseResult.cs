@@ -3,11 +3,15 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
 
     public class ExtraPracticeExerciseResult : BaseResult
     {
+        [NotMapped]
+        public override double PercentModule { get; set; }
+
         /// <summary>
         /// Số luot lam bai của Student
         /// </summary>
