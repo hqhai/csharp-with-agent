@@ -74,7 +74,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(method.ErrorMessages);
                 return methodResult;
             }
-            var courseResult = method.Result!;
+            var courseResult = method.Result;
+            if (courseResult == null)
+            {
+                methodResult.Result = overallScoreReport;
+                return methodResult;
+            }
+
             //Check Duplicate HomeWorkId
 
             #region Check Duplicate HomeWorkId
@@ -126,9 +132,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             return methodResult;
         }
 
-        private async Task<MethodResult<CourseResult>> Validate(GetOverallScoreByHomeWorkQuery request, CancellationToken cancellationToken)
+        private async Task<MethodResult<CourseResult?>> Validate(GetOverallScoreByHomeWorkQuery request, CancellationToken cancellationToken)
         {
-            var methodResult = new MethodResult<CourseResult>();
+            var methodResult = new MethodResult<CourseResult?>();
             var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -150,7 +156,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == student.Id, cancellationToken);
             if (courseResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
                 return methodResult;
             }
             methodResult.Result = courseResult;
