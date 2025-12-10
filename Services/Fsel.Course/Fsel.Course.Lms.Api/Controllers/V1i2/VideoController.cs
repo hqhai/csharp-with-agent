@@ -7,7 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     using Common.Attributes;
     using Common.Constants;
     using Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd;
+    using Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2;
     using Fsel.Course.Lms.Application.Commands.VideoTimeCodeResultCmd;
     using Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2;
     using MediatR;
@@ -58,11 +58,11 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         /// Create video time code answer
         /// </summary>
         [HttpPost("create-video-time-code-answer")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<VideoTimeCodeModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CreateVideoTimeCodeAnswer([FromBody] CreateVideoTimeCodeAnswerCommand query)
+        public async Task<IActionResult> CreateVideoTimeCodeAnswer([FromBody] CreateVideoTimeCodeAnswerByTimeCodeCommand query)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<VideoTimeCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
