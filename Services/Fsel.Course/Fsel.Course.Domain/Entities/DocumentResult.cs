@@ -20,6 +20,8 @@ namespace Fsel.Course.Domain.Entities
         [NotMapped]
         public override DateTime? DeletedDate { get; set; }
 
+        public virtual double PercentModule { get; set; }
+
         /// <summary>
         /// Trạng thái
         /// </summary>

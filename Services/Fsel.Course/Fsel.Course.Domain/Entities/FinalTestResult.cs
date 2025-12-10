@@ -2,10 +2,14 @@
 
 namespace Fsel.Course.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Course.Domain.IEntities;
 
     public class FinalTestResult : BaseLearnResult, ITokenResult
     {
+        [NotMapped]
+        public override double PercentModule { get; set; }
+
         public FinalTest? FinalTest { get; set; }
         public Guid FinalTestId { get; set; }
         public Course? Course { get; set; }

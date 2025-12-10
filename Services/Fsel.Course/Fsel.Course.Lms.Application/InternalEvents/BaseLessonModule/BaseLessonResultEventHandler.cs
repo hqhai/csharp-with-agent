@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
 {
     using System.Threading;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -44,45 +45,93 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
         public async Task UpdateLessonResultAsync(LessonResult lessonResult, IList<LessonModule> lessonModules, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
-            // Tính toán lại tiến độ hoàn thành bài học
-            if (!lessonModules.Any())
-            {
-                lessonResult.Percent = 100;
-            }
-            else
-            {
-                // Kiểm tra các loại kết quả liên quan đến bài học
-                var videoResults = await _videoResultRepository.ReadQueryable
-                                                               .Where(x => x.LessonResultId == lessonResult.Id && x.Status == EnumResultStatus.Done)
-                                                               .ToListAsync(cancellationToken);
 
-                var documentResults = await _documentResultRepository.ReadQueryable
-                                                                     .Where(x => x.LessonResultId == lessonResult.Id && x.Status == EnumResultStatus.Done)
+            // Kiểm tra các loại kết quả liên quan đến bài học
+            var videoResults = await _videoResultRepository.ReadQueryable
+                                                           .Where(x => x.LessonResultId == lessonResult.Id && x.Status == EnumResultStatus.Done)
+                                                           .ToListAsync(cancellationToken);
+
+            var documentResults = await _documentResultRepository.ReadQueryable
+                                                                 .Where(x => x.LessonResultId == lessonResult.Id && x.Status == EnumResultStatus.Done)
+                                                                 .ToListAsync(cancellationToken);
+
+            var classForumResults = await _classForumResultRepository.ReadQueryable
+                                                                     .Where(x => x.LessonResultId == lessonResult.Id && x.ResultStatus == EnumResultStatus.Done)
                                                                      .ToListAsync(cancellationToken);
 
-                var classForumResults = await _classForumResultRepository.ReadQueryable
-                                                                         .Where(x => x.LessonResultId == lessonResult.Id && x.ResultStatus == EnumResultStatus.Done)
-                                                                         .ToListAsync(cancellationToken);
+            var homeWorkResults = await _homeWorkResultRepository.ReadQueryable
+                                                                 .Where(x => x.LessonResultId == lessonResult.Id && x.Status == EnumResultStatus.Done)
+                                                                 .ToListAsync(cancellationToken);
+            var totalPercentModule = videoResults.Sum(x => x.PercentModule)
+                                     + classForumResults.Sum(x => x.PercentModule)
+                                     + documentResults.Sum(x => x.PercentModule)
+                                     + homeWorkResults.Sum(x => x.PercentModule);
 
-                var homeWorkResults = await _homeWorkResultRepository.ReadQueryable
-                                                                     .Where(x => x.LessonResultId == lessonResult.Id && x.Status == EnumResultStatus.Done)
-                                                                     .ToListAsync(cancellationToken);
+            var totalCorrectCount = videoResults.Sum(x => x.CorrectCount) +
+                                        classForumResults.Sum(x => x.CorrectCount) +
+                                        homeWorkResults.Sum(x => x.CorrectCount);
 
-                var skillScores = videoResults.SelectMany(x => x.VideoSkillScores)
-                                              .Where(x => x.Type == EnumTimeCodeType.Standalone)
-                                              .Select(x => x.SkillScores)
-                                              .ToList();
+            var totalCorrectTotal =
+                videoResults.Sum(x => x.CorrectTotal) +
+                videoResults.Sum(x => x.CorrectTotal) +
+                classForumResults.Sum(x => x.CorrectTotal) +
+                homeWorkResults.Sum(x => x.CorrectTotal);
 
-                var skillScoreHomeWork = homeWorkResults.SelectMany(x => x.SkillScores)
-                                                        .ToList();
+            var allSkillScores = Enumerable.Empty<SkillScores>()
+             .Concat(videoResults.Where(x => x.VideoSkillScores != null).SelectMany(x => x.VideoSkillScores!)
+                                 .SelectMany(x => x.SkillScores ?? Enumerable.Empty<SkillScores>()))
+             .Concat(classForumResults.SelectMany(x => x.SkillScores ?? Enumerable.Empty<SkillScores>()))
+             .Concat(homeWorkResults.SelectMany(x => x.SkillScores ?? Enumerable.Empty<SkillScores>()));
 
-                var skillScoreClassForum = classForumResults.SelectMany(x => x.SkillScores).ToList();
+            var aggregatedSkillScores = allSkillScores
+              .GroupBy(s => new { s.SkillId, s.Skill })
+              .Select(g =>
+              {
+                  // Lấy 1 mẫu để reuse name, v.v.
+                  var first = g.First();
 
-                // Giả sử mỗi loại kết quả tương ứng với một module hoàn thành
+                  return new SkillScores
+                  {
+                      Skill = first.Skill,
+                      SkillId = first.SkillId,
+                      SkillName = first.SkillName,
+
+                      // Tổng hợp các giá trị
+                      Scores = g.Sum(x => x.Scores),
+                      TotalCount = g.Sum(x => x.TotalCount),
+                      CorrectCount = g.Sum(x => x.CorrectCount),
+                      TotalQuestion = g.Sum(x => x.TotalQuestion),
+                      CountQuestion = g.Sum(x => x.CountQuestion),
+                      TokenReceived = g.Sum(x => x.TokenReceived),
+                      // Tuỳ nghiệp vụ: tổng hoặc trung bình CorrectQuestion
+                      CorrectQuestion = g.Any(x => x.CorrectQuestion.HasValue)
+                          ? g.Where(x => x.CorrectQuestion.HasValue).Sum(x => x.CorrectQuestion!.Value)
+                          : (double?)null
+                      // Percent KHÔNG cần set, getter sẽ tự tính từ CorrectCount / TotalCount
+                  };
+              })
+              .ToList();
+
+            // Clamp về 0–100 cho chắc
+            if (totalPercentModule < 0)
+            {
+                totalPercentModule = 0;
             }
-            // Lưu thay đổi
-            _lessonResultRepository.Update(lessonResult);
-            await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            else if (totalPercentModule > 100)
+            {
+                totalPercentModule = 100;
+            }
+            lessonResult.SkillScores = aggregatedSkillScores;
+            lessonResult.CorrectCount = totalCorrectCount;
+            lessonResult.CorrectTotal = totalCorrectTotal;
+            lessonResult.Percent = totalPercentModule;
+
+            lessonResult.Status = EnumResultStatus.Done;
+            await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResult }, bulk =>
+            {
+                bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.CorrectTotal, entity.Percent, entity.SkillScoresStr, entity.Status };
+            });
+            await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task UpdateLessonResultAsync(LessonResult lessonResult, Guid lessonModuleId, CancellationToken cancellationToken)

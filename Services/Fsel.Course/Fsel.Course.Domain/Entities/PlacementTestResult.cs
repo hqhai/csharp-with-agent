@@ -2,11 +2,15 @@
 
 namespace Fsel.Course.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Course.Domain.Entities.FlowConfigs;
     using Fsel.Shared.Enums;
 
     public class PlacementTestResult : BaseScoreResult
     {
+        [NotMapped]
+        public override double PercentModule { get; set; }
+
         public double TotalQuestion { get; set; }
         public double CountQuestion { get; set; }
         public EnumPlacementTestLevel Level { get; set; }

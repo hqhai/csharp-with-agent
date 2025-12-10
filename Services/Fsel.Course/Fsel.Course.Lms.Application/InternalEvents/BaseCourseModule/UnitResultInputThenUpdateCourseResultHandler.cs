@@ -10,18 +10,26 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
+    using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.EntityFrameworkCore;
 
     public class UnitResultInputThenUpdateCourseResultHandler : BaseCourseResultEventHandler, INotificationHandler<EntityChangedEvent<UnitResult>>
     {
+        private readonly ICourseModuleRepository _courseModuleRepository;
         private readonly ICourseResultRepository _courseResultRepository;
+        private readonly IUnitResultRepository _unitResultRepository;
 
         public UnitResultInputThenUpdateCourseResultHandler(ICourseModuleCachingService courseModuleCachingService,
             ICourseModuleRepository courseModuleRepository,
             ICourseResultRepository courseResultRepository,
-            ICourseItemInitializerFactory courseItemInitializerFactory) : base(courseModuleCachingService, courseModuleRepository, courseResultRepository, courseItemInitializerFactory)
+            ICourseItemInitializerFactory courseItemInitializerFactory,
+            ITestGroupResultRepository testGroupResultRepository,
+            IUnitResultRepository unitResultRepository) : base(courseModuleCachingService, courseModuleRepository, courseResultRepository, courseItemInitializerFactory, testGroupResultRepository, unitResultRepository)
         {
+            _courseModuleRepository = courseModuleRepository;
             _courseResultRepository = courseResultRepository;
+            _unitResultRepository = unitResultRepository;
         }
 
         public async Task Handle(EntityChangedEvent<UnitResult> notification, CancellationToken cancellationToken)
@@ -41,11 +49,36 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
                 {
                     return;
                 }
+
+                var percentModule = await _courseModuleRepository.ReadQueryable
+                                        .Where(x => x.Id == unitResult.CourseModuleId)
+                                        .Select(x => x.Percent)
+                                        .FirstOrDefaultAsync(cancellationToken);
+
+                await UpdateUnitResultAsync(unitResult, percentModule);
                 await UpdateCourseResultAsync(courseResult, unitResult.CourseModuleId.Value, cancellationToken);
             }
             catch
             {
             }
+        }
+
+        private async Task UpdateUnitResultAsync(UnitResult unitResult, double percentModule)
+        {
+            if (unitResult == null)
+            {
+                return;
+            }
+
+            unitResult.PercentModule = NumberHelper.ConvertDoublePercent(unitResult.Percent * percentModule, 2);
+            await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult },
+            bulk =>
+            {
+                bulk.ColumnInputExpression = entity => new
+                {
+                    entity.PercentModule
+                };
+            }).ConfigureAwait(false);
         }
     }
 }
