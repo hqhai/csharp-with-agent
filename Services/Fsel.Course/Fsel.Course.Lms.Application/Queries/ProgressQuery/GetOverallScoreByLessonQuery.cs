@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<SkillScores> GetSkillScoreVideoTimeCodeAnswerAsync(IList<Guid> questionIds, IList<Guid> videoResultIds, CancellationToken cancellationToken)
         {
-            if (!videoResultIds.Any())
+            if (!videoResultIds.Any() || !questionIds.Any())
             {
                 return new SkillScores
                 {
@@ -171,7 +171,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                                     .Select(x => new { x.CorrectTotal, x.Id }).ToListAsync(cancellationToken);
             return (new SkillScores
             {
-                TotalCount = listScore.Sum(x => x.CorrectTotal),
+                TotalCount = listScore.Any() ? listScore.Sum(x => x.CorrectTotal) : default,
                 TotalQuestion = listScore.Count,
             }, listScore.Select(x => x.Id).ToList());
         }

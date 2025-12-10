@@ -142,7 +142,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<SkillScores> GetSkillScoreVideoTimeCodeAnswerAsync(IList<Guid> questionIds, IList<Guid> videoResultIds, CancellationToken cancellationToken)
         {
-            if (!videoResultIds.Any())
+            if (!videoResultIds.Any() || !questionIds.Any())
             {
                 return new SkillScores
                 {
