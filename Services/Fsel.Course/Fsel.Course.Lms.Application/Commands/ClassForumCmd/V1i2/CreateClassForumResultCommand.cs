@@ -124,8 +124,14 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             }
             var studentId = student.Id;
 
-            var lessonResult = await _lessonResultRepository.ReadQueryable.
-                FirstOrDefaultAsync(x => x.CourseResultId == request.ClassForumResultId, cancellationToken);
+            var classForumResult = await _classForumResultRepository.Queryable
+                    .Include(x => x.ClassForumDetailResults.OrderBy(x => x.CreatedDate))
+                    .ThenInclude(x => x.ClassForumResultFiles)
+                    .Include(x => x.ClassForumResultFiles)
+                    .Include(x => x.ClassForumScores)
+                    .FirstOrDefaultAsync(x => x.Id == request.ClassForumResultId && x.StudentId == studentId, cancellationToken);
+
+            var lessonResult = await _lessonResultRepository.GetByIdAsync(classForumResult.LessonResultId);
 
             if (lessonResult == null)
             {
@@ -140,20 +146,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 return methodResult;
             }
 
-            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.LessonId == lessonResult.LessonId, cancellationToken);
+            var classForum = await _classForumRepository.Queryable.FirstOrDefaultAsync(x => x.Id == classForumResult.ClassForumId, cancellationToken);
             if (classForum == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
                 return methodResult;
             }
-
-            var classForumResult = await _classForumResultRepository.Queryable
-                    .Include(x => x.ClassForumDetailResults.OrderBy(x => x.CreatedDate))
-                    .ThenInclude(x => x.ClassForumResultFiles)
-                    .Include(x => x.ClassForumResultFiles)
-                    .Include(x => x.ClassForumScores)
-                    .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id, cancellationToken);
-
             var query = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResultFiles);
 
             var classForumDetailResultAttemp1 = await query.Where(x => x.SubmissionCount == EnumSubmissionCount.FirstSubmit && classForumResult != null && x.ClassForumResultId == classForumResult.Id).FirstOrDefaultAsync(cancellationToken);
@@ -180,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             {
                 if (classForumResult == null)
                 {
-                    classForumResult = await CreateClassForumResultAsync(lessonResult.Id,request, classForum, course, studentId, cancellationToken);
+                    classForumResult = await CreateClassForumResultAsync(lessonResult.Id, request, classForum, course, studentId, cancellationToken);
                     var method = await CreateClassForumDetailResultAsync(request, classForum, classForumResult, EnumSubmissionCount.FirstSubmit, cancellationToken);
                     if (!method.IsOK)
                     {
