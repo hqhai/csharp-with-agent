@@ -9,7 +9,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Microsoft.Extensions.DependencyInjection;
 
-    public class TestResultComposite : ResultComposite
+    public class  TestResultComposite : ResultComposite
     {
         public TestResult TestResult => Result as TestResult;
 

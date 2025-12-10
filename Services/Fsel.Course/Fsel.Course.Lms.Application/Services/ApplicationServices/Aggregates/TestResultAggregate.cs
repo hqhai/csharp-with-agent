@@ -6,22 +6,26 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Domain.Entities.TestConfigs;
     using Domain.Enums;
     using Domain.Models.CommandModels.Tests;
-    using Domain.Models.EntityModels.PlacementTestModels;
+    using Domain.Models.EntityModels.TestModels;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
+    using BaseTestStateModel = Domain.Models.EntityModels.PlacementTestModels.BaseTestStateModel;
+    using SectionStateModel = Domain.Models.EntityModels.PlacementTestModels.SectionStateModel;
+    using TestStateModel = Domain.Models.EntityModels.PlacementTestModels.TestStateModel;
 
     public class TestResultAggregate
     {
-        public TestResult TestResult { get; set; }
-
+        public TestGroupResult SingleTestResult { get; set; }
         public IServiceProvider ServiceProvider { get; set; }
+        public TestResult TestResult { get; set; }
 
         public ICollection<TestResultComposite> TestResultComposites { get; set; } = new List<TestResultComposite>();
 
-        public TestResultAggregate(TestResult testResult, IServiceProvider serviceProvider)
+        public TestResultAggregate(TestGroupResult singleTestResult, IServiceProvider serviceProvider,  TestResult testResult)
         {
-            TestResult = testResult;
+            SingleTestResult = singleTestResult;
             ServiceProvider = serviceProvider;
+            TestResult = testResult;
         }
 
         public async Task Submit(Guid id)
@@ -39,22 +43,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public async Task Start()
         {
-            if (TestResult.Status == EnumResultStatus.Done)
+            if (SingleTestResult.Status == EnumResultStatus.Done)
             {
                 return;
             }
 
-            if (TestResult.Status == EnumResultStatus.New)
+            if (SingleTestResult.Status == EnumResultStatus.New)
             {
-                TestResult.Status = EnumResultStatus.Process;
+                SingleTestResult.Status = EnumResultStatus.Process;
             }
 
-            if (!TestResult.SectionResults.Any() || TestResult.SectionResults.All(x => x.Status == EnumResultStatus.Done))
+            if (!SingleTestResult.TestResults.Any() || SingleTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done))
             {
                 var testService = ServiceProvider.GetRequiredService<ITestService>();
 
                 var newTestResult =
-                    await testService.MakeNewTestResult(TestResult.StudentId, (Guid)TestResult.TestId!);
+                    await testService.MakeNewTestResult(SingleTestResult.StudentId.Value, SingleTestResult.Id, SingleTestResult.ProgramId.Value, TestResult.TestId.Value);
 
                 await AddNewTest(newTestResult);
             }
@@ -72,33 +76,34 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         private async Task AddNewTest(TestResult testResult)
         {
-            //TestResult.TestResults.Add(testResult);
-            var testResultComposite = new TestResultComposite() { Result = testResult, ServiceProvider = ServiceProvider };
+            SingleTestResult.TestResults.Add(testResult);
+            var testResultComposite = new TestResultComposite { Result = testResult, ServiceProvider = ServiceProvider };
             TestResultComposites.Add(testResultComposite);
             testResultComposite.GenerateChildren();
             await testResultComposite.LoadTotalScoreData();
             testResult.Status = EnumResultStatus.Process;
         }
 
-        public async Task<TestStateModel> ExpotStateData()
+        public async Task<SingleTestStateModel> ExpotStateData()
         {
-            var testResult = new TestStateModel
+            var singleTestStateModel = new SingleTestStateModel
             {
-                TestResultId = TestResult.Id,
-                TestId = TestResult.TestId,
-                Status = TestResult.Status,
-                Children = TestResultComposites.Select(c => c.ExportState()).ToList()
+                TestGroupResultId = SingleTestResult.Id,
+                StudentId = SingleTestResult.StudentId,
+                Status = SingleTestResult.Status,
+                Level = SingleTestResult.LevelId?.ToString(),
+                TestStates = TestResultComposites.Select(c => c.ExportState()).ToList()
             };
 
-            foreach (var test in testResult.Children)
+            foreach (var testResult in singleTestStateModel.TestStates)
             {
-                if (test is TestStateModel testStateModel)
+                if (testResult is TestStateModel testStateModel)
                 {
                     await UpdateTestResultDetailInfo(testStateModel);
                 }
             }
 
-            return testResult;
+            return singleTestStateModel;
         }
 
         public async Task MakeAnswers(SubmitAnswerCommandModel request)
@@ -119,16 +124,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 return;
             }
 
-            foreach (var sectionResult in TestResult.SectionResults)
+            foreach (var testResult in SingleTestResult.TestResults)
             {
-                var testResultComposite = new TestResultComposite { Result = sectionResult, ServiceProvider = ServiceProvider };
+                var testResultComposite = new TestResultComposite { Result = testResult, ServiceProvider = ServiceProvider };
                 TestResultComposites.Add(testResultComposite);
-                if (sectionResult.Status == EnumResultStatus.Process)
+                if (testResult.Status == EnumResultStatus.Process)
                 {
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
-                    var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == sectionResult.Id);
-                    sectionResult.SectionResults = hierarchicalTestResult.SectionResults;
-                    sectionResult.TestAnswers =  hierarchicalTestResult.TestAnswers;
+                    var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == testResult.Id);
+                    testResult.SectionResults = hierarchicalTestResult.SectionResults;
+                    testResult.TestAnswers =  hierarchicalTestResult.TestAnswers;
                 }
 
                 testResultComposite.GenerateChildren();
@@ -158,7 +163,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                 testStateModel.Children = testSectionResults.Select(BaseTestStateModel (skill) =>
                 {
-                    var sectionStateModel = new SectionStateModel
+                    var sectionStateModel = new SectionStateModel()
                     {
                         Name = skill.TestSection?.Skill?.Name,
                         SectionResultId = skill.Id,

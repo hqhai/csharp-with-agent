@@ -11,6 +11,11 @@ namespace Fsel.Course.Infrastructure.Maps
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.TestModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i2;
+    using TestModel = Domain.Models.EntityModels.V1i2.TestModel;
+    using TestSectionModel = Domain.Models.EntityModels.V1i2.TestSectionModel;
+
+    //using TestModel = Domain.Models.EntityModels.TestModels.TestModel;
+    //using TestSectionModel = Domain.Models.EntityModels.TestModels.TestSectionModel;
 
     public class TestProfile : Profile
     {

@@ -1,28 +1,26 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Application.Queries.TestQuery
+namespace Fsel.Course.Lms.Application.Queries.TestQuery
 {
-    using System;
-    using System.Threading;
-    using System.Threading.Tasks;
     using AutoMapper;
-    using Domain.Models.EntityModels;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Entities.TestConfigs;
-    using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels.TestModels;
+    using Common.ActionResults;
+    using Common.Enums.ErrorCodes;
+    using Domain.Entities;
+    using Domain.Entities.TestConfigs;
+    using Domain.IRepositories;
+    using Domain.Models.EntityModels.TestModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
+    using TestModel = Domain.Models.EntityModels.V1i2.TestModel;
+    using TestSectionModel = Domain.Models.EntityModels.V1i2.TestSectionModel;
 
-    public class GetTestQuery : IRequest<MethodResult<TestModel>>
+    public class GetTestQueryById : IRequest<MethodResult<TestModel>>
     {
         public Guid Id { get; set; }
     }
 
-    public class GetTestQueryHandler : IRequestHandler<GetTestQuery, MethodResult<TestModel>>
+    public class GetTestQueryByIdHandler : IRequestHandler<GetTestQueryById, MethodResult<TestModel>>
     {
         private readonly ITestRepository _testRepository;
         private readonly ITestSectionRepository _testSectionRepository;
@@ -30,7 +28,7 @@ namespace Fsel.Course.Application.Queries.TestQuery
         private readonly ITestSectionQuestionRepository _testSectionQuestionRepository;
         private readonly ITestAISettingRepository _testAISettingRepository;
 
-        public GetTestQueryHandler(
+        public GetTestQueryByIdHandler(
             ITestRepository testRepository,
             ITestSectionRepository testSectionRepository,
             IMapper mapper,
@@ -44,12 +42,13 @@ namespace Fsel.Course.Application.Queries.TestQuery
             _testAISettingRepository = testAISettingRepository;
         }
 
-        public async Task<MethodResult<TestModel>> Handle(GetTestQuery request, CancellationToken cancellationToken)
+        public async Task<MethodResult<TestModel>> Handle(GetTestQueryById request, CancellationToken cancellationToken)
         {
-            MethodResult<TestModel> methodResult = new MethodResult<TestModel>();
+            var methodResult = new MethodResult<TestModel>();
             ArgumentNullException.ThrowIfNull(request);
 
-            var test = await _testRepository.Queryable.Include(x => x.Level).Include(x => x.Program).Where(tc => tc.Id == request.Id).AsNoTracking().FirstOrDefaultAsync(cancellationToken);
+            var test = await _testRepository.Queryable.Include(x => x.Level).Include(x => x.Program).Where(tc => tc.Id == request.Id).AsNoTracking()
+                .FirstOrDefaultAsync(cancellationToken);
             if (test == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -57,38 +56,33 @@ namespace Fsel.Course.Application.Queries.TestQuery
             }
 
             var allSections = await _testSectionRepository.Queryable
-                                     .Include(x => x.Skill)
-                                     .Where(x => x.TestId == request.Id)
-                                     .AsNoTracking()
-                                     .ToListAsync(cancellationToken);
+                .Include(x => x.Skill)
+                .Where(x => x.TestId == request.Id)
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
 
             var allTestAISettings = await _testAISettingRepository.Queryable.Include(x => x.TestAICriteriaSettings)
-                                    .WhereBulkContains(allSections.Select(x => x.Id), x => x.TestSectionId)
-                                    .ToListAsync(cancellationToken);
+                .WhereBulkContains(allSections.Select(x => x.Id), x => x.TestSectionId)
+                .ToListAsync(cancellationToken);
 
             var allQuestions = await _testSectionQuestionRepository.Queryable
-                                .WhereBulkContains(allSections.Select(x => x.Id), x => x.TestSectionId)
-                                .Select(x => new
-                                {
-                                    TestSectionId = x.TestSectionId,
-                                    Question = x.Question,
-                                })
-                                .AsNoTracking()
-                                .ToListAsync(cancellationToken);
+                .WhereBulkContains(allSections.Select(x => x.Id), x => x.TestSectionId)
+                .Select(x => new { TestSectionId = x.TestSectionId, Question = x.Question, })
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
 
             var testAISettingDict = allTestAISettings.GroupBy(x => x.TestSectionId)
-                              .ToDictionary(
-                                  g => g.Key,
-                                  g => g.Select(x => x).OrderBy(x => x.CreatedDate).ToList()
-                              );
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x).OrderBy(x => x.CreatedDate).ToList()
+                );
 
             var questionDict = allQuestions.GroupBy(x => x.TestSectionId)
-                                    .ToDictionary(
-                                        g => g.Key,
-                                        g => g.Select(x => x.Question).OrderBy(x => x.CreatedDate).ToList()
-                                    );
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.Question).OrderBy(x => x.CreatedDate).ToList()
+                );
 
-            // Mapping Test
             var testModel = _mapper.Map<TestModel>(test);
             testModel.IsActive = await _testRepository.IsUsingByClient(test.OriginalId);
             testModel.TestSections = BuildSectionTree(allSections, questionDict, testAISettingDict);
@@ -98,7 +92,8 @@ namespace Fsel.Course.Application.Queries.TestQuery
             return methodResult;
         }
 
-        private List<TestSectionModel> BuildSectionTree(List<TestSection> allSections, Dictionary<Guid, List<Question>> questionDict, Dictionary<Guid, List<TestAISetting>> testAISettingDict, Guid? parentId = null)
+        private List<TestSectionModel> BuildSectionTree(List<TestSection> allSections, Dictionary<Guid, List<Question>> questionDict,
+            Dictionary<Guid, List<TestAISetting>> testAISettingDict, Guid? parentId = null)
         {
             var currentSections = allSections
                 .Where(s => s.ParentId == parentId)
@@ -111,15 +106,18 @@ namespace Fsel.Course.Application.Queries.TestQuery
                 var model = _mapper.Map<TestSectionModel>(entity);
                 if (questionDict.TryGetValue(entity.Id, out var questions))
                 {
-                    model.Questions = _mapper.Map<IList<QuestionModel>>(questions);
+                    model.Questions = _mapper.Map<IList<Guid>>(questions.Select(x => x.Id));
                 }
+
                 if (testAISettingDict.TryGetValue(entity.Id, out var testAISettings))
                 {
                     model.TestAISettings = _mapper.Map<IList<TestAISettingModel>>(testAISettings);
                 }
+
                 model.Childrens = BuildSectionTree(allSections, questionDict, testAISettingDict, entity.Id);
                 result.Add(model);
             }
+
             return result;
         }
     }

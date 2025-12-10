@@ -7,26 +7,29 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using Core.Base;
     using Domain.Entities.TestConfigs;
     using Domain.Enums;
-    using Domain.Models.EntityModels.PlacementTestModels;
+    using Domain.Models.EntityModels.TestModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Services.ApplicationServices;
     using Services.ApplicationServices.Aggregates;
     using Services.UserServices;
     using Shared.Enums.ErrorCodes;
+    using TestStateModel = Domain.Models.EntityModels.PlacementTestModels.TestStateModel;
 
 
-    public class ChoseTestCommand : IRequest<MethodResult<TestStateModel>>
+    public class ChoseTestCommand : IRequest<MethodResult<SingleTestStateModel>>
     {
-        public ChoseTestCommand(Guid testResultId)
-        {
-            TestResultId = testResultId;
-        }
+        // public ChoseTestCommand(Guid testResultId, Guid projectId)
+        // {
+        //     TestResultId = testResultId;
+        //     ProjectId = projectId;
+        // }
 
         public Guid TestResultId { get; set; }
+        public Guid ProjectId { get; set; }
     }
 
-    public class ChoseTestCommandHandler : IRequestHandler<ChoseTestCommand, MethodResult<TestStateModel>>
+    public class ChoseTestCommandHandler : IRequestHandler<ChoseTestCommand, MethodResult<SingleTestStateModel>>
     {
         private readonly IUserService _userService;
         private readonly IServiceProvider _serviceProvider;
@@ -50,10 +53,10 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             _testGroupResult = testGroupResult;
         }
 
-        public async Task<MethodResult<TestStateModel>> Handle(ChoseTestCommand request, CancellationToken cancellationToken)
+        public async Task<MethodResult<SingleTestStateModel>> Handle(ChoseTestCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            var methodResult = new MethodResult<TestStateModel>();
+            var methodResult = new MethodResult<SingleTestStateModel>();
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -74,18 +77,29 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             }
 
             var testResult = await _testService.LoadHierachicalTestResult(x => x.Id == request.TestResultId);
-            var testId = testResult.TestId;
-            var test = await _testService.GetHierachicalTestById((Guid)testId!);
-            // var programContainPtFound = await _categoryService.GetProgramContainPtBySelectedProject(test.ProgramId, cancellationToken);
-            // if (programContainPtFound == null)
-            // {
-            //     return methodResult;
-            // }
+            var groupTestResult = await _testGroupResult.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
+            if (groupTestResult != null)
+            {
+                methodResult.AddErrorBadRequest("Test is started or completed");
+                return methodResult;
+            }
+            var programContainPtFound = await _categoryService.GetProgramContainPtBySelectedProject(request.ProjectId, cancellationToken);
+            if (programContainPtFound != null)
+            {
+                var testGroupResult = await _testService.InitTestGroupResult(programContainPtFound.Id, student.Id, EnumTestType.SkillMockTest);
 
-            var aggregate = new TestResultAggregate(testResult, _serviceProvider);
-            await aggregate.Start();
-            methodResult.Result = await aggregate.ExpotStateData();
-            return methodResult;
+                var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
+                await aggregate.Start();
+                methodResult.Result = await aggregate.ExpotStateData();
+
+                return methodResult;
+            }
+            else
+            {
+                var testGroupResult = await _testService.InitTestGroupResult(request.ProjectId, student.Id, EnumTestType.SkillMockTest);
+                methodResult.Result = new SingleTestStateModel{ StudentId = student.Id, Status = EnumResultStatus.ByPass,  TestGroupResultId = testGroupResult.Id };
+                return methodResult;
+            }
         }
     }
 }
