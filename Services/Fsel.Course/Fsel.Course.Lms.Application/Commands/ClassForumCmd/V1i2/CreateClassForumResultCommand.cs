@@ -124,7 +124,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             }
             var studentId = student.Id;
 
-            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
+            var lessonResult = await _lessonResultRepository.ReadQueryable.
+                FirstOrDefaultAsync(x => x.CourseResultId == request.ClassForumResultId, cancellationToken);
+
             if (lessonResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
@@ -150,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                     .ThenInclude(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumResultFiles)
                     .Include(x => x.ClassForumScores)
-                    .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == request.LessonResultId, cancellationToken);
+                    .FirstOrDefaultAsync(x => x.StudentId == studentId && x.LessonResultId == lessonResult.Id, cancellationToken);
 
             var query = _classForumDetailResultRepository.Queryable.Include(x => x.ClassForumResultFiles);
 
@@ -178,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             {
                 if (classForumResult == null)
                 {
-                    classForumResult = await CreateClassForumResultAsync(request, classForum, course, studentId, cancellationToken);
+                    classForumResult = await CreateClassForumResultAsync(lessonResult.Id,request, classForum, course, studentId, cancellationToken);
                     var method = await CreateClassForumDetailResultAsync(request, classForum, classForumResult, EnumSubmissionCount.FirstSubmit, cancellationToken);
                     if (!method.IsOK)
                     {
@@ -379,12 +381,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             return methodResult;
         }
 
-        private async Task<ClassForumResult> CreateClassForumResultAsync(CreateClassForumResultCommand request, ClassForum classForum, Course course, Guid studentId, CancellationToken cancellationToken)
+        private async Task<ClassForumResult> CreateClassForumResultAsync(Guid LessonId, CreateClassForumResultCommand request, ClassForum classForum, Course course, Guid studentId, CancellationToken cancellationToken)
         {
             var classForumResult = new ClassForumResult
             {
                 StudentId = studentId,
-                LessonResultId = request.LessonResultId,
+                LessonResultId = LessonId,
                 ClassForumId = classForum.Id,
                 SubmissionCount = EnumSubmissionCount.FirstSubmit,
             };
