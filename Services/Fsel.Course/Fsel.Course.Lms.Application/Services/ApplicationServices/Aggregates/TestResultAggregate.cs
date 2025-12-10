@@ -21,7 +21,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public ICollection<TestResultComposite> TestResultComposites { get; set; } = new List<TestResultComposite>();
 
-        public TestResultAggregate(TestGroupResult singleTestResult, IServiceProvider serviceProvider,  TestResult testResult)
+        public TestResultAggregate(TestGroupResult singleTestResult, IServiceProvider serviceProvider, TestResult testResult)
         {
             SingleTestResult = singleTestResult;
             ServiceProvider = serviceProvider;
@@ -55,12 +55,26 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             if (!SingleTestResult.TestResults.Any() || SingleTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                var testService = ServiceProvider.GetRequiredService<ITestService>();
+                //var testService = ServiceProvider.GetRequiredService<ITestService>();
+                if (!TestResult.SectionResults.Any())
+                {
+                    var testService = ServiceProvider.GetRequiredService<ITestService>();
+                    await testService.MakeSectionTestResult(
+                        SingleTestResult.StudentId!.Value,
+                        TestResult,
+                        SingleTestResult.ProgramId!.Value,
+                        TestResult.TestId!.Value);
 
-                var newTestResult =
-                    await testService.MakeNewTestResult(SingleTestResult.StudentId.Value, SingleTestResult.Id, SingleTestResult.ProgramId.Value, TestResult.TestId.Value);
+                    if (!SingleTestResult.TestResults.Contains(TestResult))
+                    {
+                        SingleTestResult.TestResults.Add(TestResult);
+                    }
 
-                await AddNewTest(newTestResult);
+                    await AddNewTest(TestResult);
+                }
+                // var newTestResult = await testService.MakeSectionTestResult(SingleTestResult.StudentId!.Value, TestResult, SingleTestResult.ProgramId!.Value, TestResult.TestId!.Value);
+                //
+                // await AddNewTest(newTestResult);
             }
 
             if (!TestResultComposites.Any())
@@ -76,7 +90,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         private async Task AddNewTest(TestResult testResult)
         {
-            SingleTestResult.TestResults.Add(testResult);
+            //SingleTestResult.TestResults.Add(testResult);
+            if (!SingleTestResult.TestResults.Contains(testResult))
+            {
+                SingleTestResult.TestResults.Add(testResult);
+            }
+
             var testResultComposite = new TestResultComposite { Result = testResult, ServiceProvider = ServiceProvider };
             TestResultComposites.Add(testResultComposite);
             testResultComposite.GenerateChildren();
@@ -124,20 +143,17 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 return;
             }
 
-            foreach (var testResult in SingleTestResult.TestResults)
+            var testResultComposite = new TestResultComposite { Result = TestResult, ServiceProvider = ServiceProvider };
+            TestResultComposites.Add(testResultComposite);
+            if (TestResult.Status == EnumResultStatus.Process)
             {
-                var testResultComposite = new TestResultComposite { Result = testResult, ServiceProvider = ServiceProvider };
-                TestResultComposites.Add(testResultComposite);
-                if (testResult.Status == EnumResultStatus.Process)
-                {
-                    var testService = ServiceProvider.GetRequiredService<ITestService>();
-                    var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == testResult.Id);
-                    testResult.SectionResults = hierarchicalTestResult.SectionResults;
-                    testResult.TestAnswers =  hierarchicalTestResult.TestAnswers;
-                }
-
-                testResultComposite.GenerateChildren();
+                var testService = ServiceProvider.GetRequiredService<ITestService>();
+                var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == TestResult.Id);
+                TestResult.SectionResults = hierarchicalTestResult.SectionResults;
+                TestResult.TestAnswers = hierarchicalTestResult.TestAnswers;
             }
+
+            testResultComposite.GenerateChildren();
         }
 
         public async Task UpdateTestResultDetailInfo(TestStateModel? testStateModel)
@@ -180,7 +196,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         private async Task Commit()
         {
-            var repository = ServiceProvider.GetRequiredService<IRepository<TestGroupResult>>();
+            var repository = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
             if (repository.DbContext.ChangeTracker.HasChanges())
             {
                 await repository.UnitOfWork.SaveChangesAsync();

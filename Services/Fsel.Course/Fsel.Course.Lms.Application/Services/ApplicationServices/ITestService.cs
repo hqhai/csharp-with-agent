@@ -24,12 +24,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass =false);
         Task<TestGroupResult> InitTestGroupResult(Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass =false);
-
         Task<TestResult> MakeNewTestResultTree(Guid studentId, Guid stepFlowId, Guid testGroupResultId, Guid programId, Guid? actionFlowId = default);
-        Task<TestResult> MakeNewTestResult(Guid studentId, Guid testGroupResultId, Guid programId, Guid testId);
+        Task<TestResult> MakeSectionTestResult(Guid studentId, TestResult testResult, Guid programId, Guid testId);
 
         Task CreateAnswers(SubmitAnswerCommandModel request);
-        Task<TestGroupResult> InitTestGroupResultForSingleTest(Guid programId, Guid studentId, EnumTestType testType, bool isByPass = false);
     }
 
     public class TestService : ITestService
@@ -172,22 +170,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return null;
         }
 
-        public async Task<TestResult> MakeNewTestResult(Guid studentId, Guid testGroupResultId, Guid programId, Guid testId)
+        public async Task<TestResult> MakeSectionTestResult(Guid studentId, TestResult testResult, Guid programId, Guid testId)
         {
             var test = await GetHierachicalTestFirstOrDefault(x =>  x.Id == testId && x.ProgramId == programId && x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
             if (test != null)
             {
-                var testResult = new TestResult
-                {
-                    TestId = test.Id,
-                    StudentId = studentId,
-                    Status = EnumResultStatus.New,
-                    TestGroupResultId = testGroupResultId,
-                };
 
                 foreach (var section in test.TestSections)
                 {
-                    var testSectionResult = new TestSectionResult { TestSectionId = section.Id, StudentId = studentId, Status = EnumResultStatus.New };
+                    var testSectionResult = new TestSectionResult { TestSectionId = section.Id, StudentId = studentId, Status = EnumResultStatus.New, TestResultId = testResult.Id};
                     testResult.SectionResults.Add(testSectionResult);
 
                     CreateTestSectionResultTree(section, testSectionResult, testResult);
@@ -218,7 +209,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         {
             foreach (var child in parentTestSection.TestSections)
             {
-                var testSectionResult = new TestSectionResult { TestSectionId = child.Id, StudentId = parentSectionResult.StudentId, Status = EnumResultStatus.New, };
+                var testSectionResult = new TestSectionResult { TestSectionId = child.Id, StudentId = parentSectionResult.StudentId, Status = EnumResultStatus.New, TestResultId = testResult.Id};
                 testSectionResult.ParentTestSectionResult = parentSectionResult;
                 parentSectionResult.SectionResults.Add(testSectionResult);
                 testResult.SectionResults.Add(testSectionResult);
@@ -281,22 +272,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
                 await _testAnswerRepository.DbContext.SaveChangesAsync();
             }
-        }
-
-        public async Task<TestGroupResult> InitTestGroupResultForSingleTest(Guid programId, Guid studentId, EnumTestType testType, bool isByPass = false)
-        {
-            var testGroupResult = new TestGroupResult
-            {
-                ProgramId = programId,
-                FlowId = null,
-                StudentId = studentId,
-                TestType = testType,
-                Status = isByPass ? EnumResultStatus.ByPass : EnumResultStatus.New
-            };
-
-            _testGroupResultRepository.Add(testGroupResult);
-            await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
-            return testGroupResult;
         }
     }
 }
