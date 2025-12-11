@@ -136,7 +136,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 var resultEntities = toCreate.Concat(toUpdate).ToList();
                 var result = _mapper.Map<AICriteriaConfigsModel>(resultEntities.FirstOrDefault());
 
-                result.AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(resultEntities);
+                result.AiCriteriaModels = _mapper.Map<IList<AiCriteriaModel>>(resultEntities);
                 result.AiPromptManagerId = request.AiPromptManagerId;
 
                 methodResult.Result = result;
