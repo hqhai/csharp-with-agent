@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 StudentId = SingleTestResult.StudentId,
                 Status = SingleTestResult.Status,
                 Level = SingleTestResult.LevelId?.ToString(),
-                TestStates = TestResultComposites.Select(c => c.ExportState()).ToList()
+                TestStates = TestResultComposites.Select(c => c.ExportForTestState()).ToList()
             };
 
             foreach (var testResult in singleTestStateModel.TestStates)

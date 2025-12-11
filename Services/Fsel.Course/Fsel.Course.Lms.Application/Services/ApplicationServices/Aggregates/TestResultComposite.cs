@@ -13,6 +13,23 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     {
         public TestResult TestResult => Result as TestResult;
 
+        public override BaseTestStateModel ExportForTestState()
+        {
+            var childStates = Children?.Select(c => c.ExportState()).ToList() ?? new List<BaseTestStateModel>();
+
+            var stateModel = new TestStateModel
+            {
+                TestId = TestResult.TestId,
+                TestResultId = TestResult.Id,
+                PercentResult = TestResult.Percent,
+                Status = TestResult.Status,
+                Children = childStates,
+                StepFlowId = TestResult.StepFlowId,
+                UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
+            };
+            return stateModel;
+        }
+
         public override async Task Submit()
         {
             await base.Submit();

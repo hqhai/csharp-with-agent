@@ -27,6 +27,18 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             };
         }
 
+        public override BaseTestStateModel ExportForTestState()
+        {
+            return new QuestionStateModel
+            {
+                QuestionId = TestAnswer.QuestionId,
+                TestAnswerId = TestAnswer.Id,
+                Answer = new AnswerModel { Answer = TestAnswer.Answer, CorrectCount = TestAnswer.CorrectCount, IsCorrect = TestAnswer.IsCorrect, },
+                Status = TestAnswer.Status == EnumAnswerStatus.Done ? EnumResultStatus.Done : EnumResultStatus.Process,
+                UpdatedDate = TestAnswer?.UpdatedDate ?? TestAnswer?.CreatedDate
+            };
+        }
+
         public override bool IsBelongTo(Guid id)
         {
             return Result != null && Result.Id == id;
