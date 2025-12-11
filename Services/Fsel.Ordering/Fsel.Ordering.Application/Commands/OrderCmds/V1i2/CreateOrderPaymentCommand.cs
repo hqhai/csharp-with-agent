@@ -245,7 +245,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             });
 
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
 
             if (request.IsSendMail)
             {
