@@ -87,7 +87,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             if (request.ExpireDate.HasValue)
             {
                 @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).ThenInclude(p => p.Package).Where(p => p.IsDefault).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                packageEvent = @event?.PackageEvents.Where(p => p.Status == EnumEventPackageStatus.Active).OrderBy(p => p.Package?.MonthNumber).FirstOrDefault();
+                packageEvent = @event?.PackageEvents.OrderBy(p => p.Package?.MonthNumber).FirstOrDefault();
                 package = packageEvent?.Package;
             }
             else
