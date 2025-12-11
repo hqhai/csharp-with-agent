@@ -40,5 +40,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public Guid OriginalId { get; set; }
 
+        public V1i1.LessonSearchModel? Lesson { get; set; }
+
     }
 }
