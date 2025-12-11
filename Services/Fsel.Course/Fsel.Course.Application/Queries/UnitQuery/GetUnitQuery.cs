@@ -49,9 +49,11 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 return methodResult;
             }
 
+            var unitModel = _mapper.Map<UnitModel>(unit);
             var originals = unit.UnitModules.Select(x => x.OriginalId).ToList();
-
-            var lessons = await _lessonRepository.ReadQueryable
+            if (originals.Any())
+            {
+                var lessons = await _lessonRepository.ReadQueryable
                 .Where(x => originals.Contains(x.OriginalId) && x.VersionStatus == EnumVersionStatus.LastVersion && !x.IsArchive)
                 .Include(x => x.LessonInstructions)
                 .ThenInclude(li => li.Skill)
@@ -71,12 +73,12 @@ namespace Fsel.Course.Application.Queries.UnitQuery
                 })
                 .ToListAsync(cancellationToken: cancellationToken);
 
-            var unitModel = _mapper.Map<UnitModel>(unit);
+                unitModel.UnitModules?.ForEach(x =>
+                {
+                    x.Lesson = lessons.FirstOrDefault(l => l.OriginalId == x.OriginalId);
+                });
+            }
 
-            unitModel.UnitModules?.ForEach(x =>
-            {
-                x.Lesson = lessons.FirstOrDefault(l => l.OriginalId == x.OriginalId);
-            });
             methodResult.Result = unitModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
