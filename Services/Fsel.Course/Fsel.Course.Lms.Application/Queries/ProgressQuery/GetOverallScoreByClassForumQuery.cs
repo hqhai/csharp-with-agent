@@ -135,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseNotTypeAcademic), nameof(course));
                 return methodResult;
             }
-            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == student.Id, cancellationToken);
+            var courseResult = await _courseResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == student.Id, cancellationToken);
             if (courseResult == null)
             {
                 return methodResult;
@@ -146,14 +146,17 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<Guid>> GetLessonResultIdsAsync(GetOverallScoreByClassForumQuery request, Guid studentId)
         {
-            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId).Select(x => x.Id).ToListAsync();
+            return await _lessonResultRepository.ReadQueryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId)
+                                                .Select(x => x.Id)
+                                                .ToListAsync();
         }
 
         private async Task<SkillScores> GetClassForumResultsAsync(GetOverallScoreByClassForumQuery request, IList<Guid> classForumIds, Guid studentId)
         {
             var lessonResultIds = await GetLessonResultIdsAsync(request, studentId);
-            var classForumResults = await _classForumResultRepository.Queryable.Include(x => x.ClassForumScores).Where(x => lessonResultIds.Contains(x.LessonResultId) && classForumIds.Contains(x.ClassForumId)).ToListAsync();
-
+            var classForumResults = await _classForumResultRepository.ReadQueryable.Include(x => x.ClassForumScores)
+                                                                     .Where(x => lessonResultIds.Contains(x.LessonResultId) && classForumIds.Contains(x.ClassForumId))
+                                                                     .ToListAsync();
             return new SkillScores
             {
                 CountQuestion = classForumResults.Count,
@@ -164,7 +167,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<Guid>> GetLessonIdsAsync(GetOverallScoreByClassForumQuery request)
         {
-            return await _unitRepository.Queryable.Include(x => x.UnitLessons)
+            return await _unitRepository.ReadQueryable.Include(x => x.UnitLessons)
                                                   .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
                                                   .SelectMany(x => x.UnitLessons)
                                                   .Select(x => x.LessonId)
@@ -174,7 +177,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<IList<Guid>> GetClassForumIdsAsync(GetOverallScoreByClassForumQuery request)
         {
             var lessonIds = await GetLessonIdsAsync(request);
-            return await _classForumRepository.Queryable.WhereBulkContains(lessonIds, x => x.LessonId).Select(x => x.Id).ToListAsync();
+            if (!lessonIds.Any())
+            {
+                return new List<Guid>();
+            }
+            return await _classForumRepository.ReadQueryable.WhereBulkContains(lessonIds, x => x.LessonId).Select(x => x.Id).ToListAsync();
         }
     }
 }

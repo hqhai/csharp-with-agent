@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var studentId = student.Id;
-            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
+            var course = await _courseRepository.ReadQueryable.Include(x => x.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
                                                             .Where(x => x.Id == request.CourseId)
                                                             .AsNoTracking()
                                                             .FirstOrDefaultAsync(cancellationToken);
@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
             var mockTestIds = course.CourseUnitMockTests.Where(x => x.MockTestId.HasValue).Select(x => x.MockTestId!.Value).ToList();
 
-            var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestResults.Where(x => x.CourseId == course.Id && x.StudentId == studentId))
+            var mockTests = await _mockTestRepository.ReadQueryable.Include(x => x.MockTestResults.Where(x => x.CourseId == course.Id && x.StudentId == studentId))
                                                                     .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
                                                                .Include(x => x.MockTestResults.Where(x => x.CourseId == course.Id && x.StudentId == studentId))
                                                                     .ThenInclude(x => x.MockTestScores)
@@ -139,7 +139,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         {
             ArgumentNullException.ThrowIfNull(courseUnitMockTests);
             var unitIds = courseUnitMockTests.Where(x => x.UnitId.HasValue).Select(x => x.UnitId!.Value).ToList();
-            return await _unitRepository.Queryable.Include(x => x.UnitSkillMockTests).Where(x => unitIds.Contains(x.Id)).ToListAsync();
+            return await _unitRepository.ReadQueryable.Include(x => x.UnitSkillMockTests).Where(x => unitIds.Contains(x.Id)).ToListAsync();
         }
 
         private static (IList<Guid>, IList<CourseUnitMockTest>) GetMockTestIds(CourseUnitMockTest? courseUnitMockTest, IList<CourseUnitMockTest> courseUnitMockTests, IList<Domain.Entities.Unit> units)
@@ -168,11 +168,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var unitIds = courseUnits.Where(x => x.UnitId.HasValue).Select(x => x.UnitId!.Value).ToList();
             if (mockTestIds.Any())
             {
-                var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestSections)
-                                                                    .ThenInclude(x => x.SectionGroup)
-                                                                    .Include(x => x.MockTestResults.Where(x => x.StudentId == studentId && x.CourseId == courseUnitMockTest.CourseId && x.UnitId.HasValue && unitIds.Contains(x.UnitId.Value)))
-                                                                    .ThenInclude(x => x.MockTestScores)
-                                                                    .Where(x => mockTestIds.Contains(x.Id)).ToListAsync();
+                var mockTests = await _mockTestRepository.ReadQueryable.Include(x => x.MockTestSections)
+                                                        .ThenInclude(x => x.SectionGroup)
+                                                        .Include(x => x.MockTestResults.Where(x => x.StudentId == studentId && x.CourseId == courseUnitMockTest.CourseId && x.UnitId.HasValue && unitIds.Contains(x.UnitId.Value)))
+                                                        .ThenInclude(x => x.MockTestScores)
+                                                        .Where(x => mockTestIds.Contains(x.Id)).ToListAsync();
                 mockTests = mockTests.OrderBy(x => mockTestIds.IndexOf(x.Id)).ToList();
                 var overallScoreReportSkills = mockTests.Select(x => GetOverallScoreReportSkill(x, unitIds, studentId)).ToList();
                 overallScoreReportByMockTest.Percent = NumberHelper.GetPercent(overallScoreReportSkills.Count(x => x.Status == EnumResultStatus.Done), overallScoreReportSkills.Count);

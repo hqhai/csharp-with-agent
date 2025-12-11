@@ -65,9 +65,15 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.Result = progressMenu;
                 return methodResult;
             }
-            var lessonResultIds = await _lessonResultRepository.Queryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == course.Id).Select(x => x.Id).ToListAsync(cancellationToken);
-            progressMenu.NumberOfUnitDone = await _unitResultRepository.Queryable.Where(x => x.CourseId == course.Id && x.StudentId == courseResult.StudentId && x.Status == EnumResultStatus.Done).CountAsync(cancellationToken);
-            progressMenu.NumberOfPostsCreated = await _classForumResultRepository.Queryable.Where(x => lessonResultIds.Contains(x.LessonResultId))
+            var lessonResultIds = await _lessonResultRepository.ReadQueryable.Where(x => x.StudentId == courseResult.StudentId && x.CourseId == course.Id)
+                                                               .Select(x => x.Id)
+                                                               .ToListAsync(cancellationToken);
+
+            progressMenu.NumberOfUnitDone = await _unitResultRepository.ReadQueryable.Where(x => x.CourseId == course.Id && x.StudentId == courseResult.StudentId)
+                                                                       .Where(x => x.Status == EnumResultStatus.Done)
+                                                                       .CountAsync(cancellationToken);
+
+            progressMenu.NumberOfPostsCreated = await _classForumResultRepository.ReadQueryable.Where(x => lessonResultIds.Contains(x.LessonResultId))
                                                                                            .Where(x => x.Status.HasValue)
                                                                                            .CountAsync(cancellationToken);
             var dailyStreakResult = await _userService.GetDailyStreak(courseResult.StudentId);
@@ -112,7 +118,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
 
-            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.CourseId == course.Id);
+            var courseResult = await _courseResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.StudentId == student.Id && x.CourseId == course.Id);
             methodResult.Result = (course, courseResult);
             return methodResult;
         }

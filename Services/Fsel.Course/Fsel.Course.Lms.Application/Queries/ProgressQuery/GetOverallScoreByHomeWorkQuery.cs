@@ -86,27 +86,26 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             #region Check Duplicate HomeWorkId
 
             var homeWorkDuplicates = await GetHomeWorksDupliateAsync(request, cancellationToken);
-            if (homeWorkDuplicates == null || !homeWorkDuplicates.Any())
+            var homeWorkIds = homeWorkDuplicates.Select(x => x.ObjectId).ToList() ?? new List<Guid>();
+
+            if (homeWorkDuplicates == null || !homeWorkDuplicates.Any() || !homeWorkIds.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkDuplicates));
                 return methodResult;
             }
 
             #endregion Check Duplicate HomeWorkId
 
-            var homeWorkIds = homeWorkDuplicates.Select(x => x.ObjectId).ToList() ?? new List<Guid>();
-
-            var groupHomeWorkResult = await _homeWorkRepository.Queryable.WhereBulkContains(homeWorkIds, x => x.Id).ToListAsync(cancellationToken);
+            var groupHomeWorkResult = await _homeWorkRepository.ReadQueryable.WhereBulkContains(homeWorkIds, x => x.Id).ToListAsync(cancellationToken);
 
             var groupHomeWork = groupHomeWorkResult.GroupBy(x => x.CourseSkill)
                                                    .Select(x => new { x.Key, HomeWorkIds = x.Select(x => x.Id).ToList() })
                                                    .ToList();
-
             if (groupHomeWork == null || groupHomeWork.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(groupHomeWork));
                 return methodResult;
             }
+
             var skillScores = new List<SkillScores>();
             foreach (var item in groupHomeWork)
             {
@@ -153,7 +152,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == student.Id, cancellationToken);
+            var courseResult = await _courseResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == student.Id, cancellationToken);
             if (courseResult == null)
             {
                 return methodResult;
@@ -165,17 +164,30 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<IList<Guid>> GetHomeWorkResultIdsAsync(GetOverallScoreByHomeWorkQuery request, IList<Guid> homeWorkIds, Guid studentId)
         {
             var lessonResultIds = await GetLessonResultIdsAsync(request, studentId);
-            return await _homeWorkResultRepository.Queryable.WhereBulkContains(homeWorkIds, x => x.HomeWorkId).WhereBulkContains(lessonResultIds, x => x.LessonResultId).Select(x => x.Id).ToListAsync();
+            if ((lessonResultIds == null || lessonResultIds.Count == 0) || homeWorkIds.Count == 0)
+            {
+                return new List<Guid>();
+            }
+
+            return await _homeWorkResultRepository.ReadQueryable.WhereBulkContains(homeWorkIds, x => x.HomeWorkId)
+                                                  .WhereBulkContains(lessonResultIds, x => x.LessonResultId)
+                                                  .Select(x => x.Id)
+                                                  .ToListAsync();
         }
 
         private async Task<SkillScores> GetSkillScoreHomeWorkAnswerAsync(IList<Guid> homeWorkResultIds, CancellationToken cancellationToken)
         {
-            var listScore = await _homeWorkAnswerRepository.Queryable.WhereBulkContains(homeWorkResultIds, x => x.HomeWorkResultId)
+            if (!homeWorkResultIds.Any())
+            {
+                return new SkillScores();
+            }
+
+            var listScore = await _homeWorkAnswerRepository.ReadQueryable.WhereBulkContains(homeWorkResultIds, x => x.HomeWorkResultId)
                                     .Select(x => x.CorrectCount)
                                     .ToListAsync(cancellationToken);
             return new SkillScores
             {
-                CorrectCount = listScore.Sum(x => x),
+                CorrectCount = listScore.Any() ? listScore.Sum(x => x) : default,
                 CountQuestion = listScore.Count,
             };
         }
@@ -183,13 +195,18 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<IList<ModuleDuplicateModel>> GetHomeWorksDupliateAsync(GetOverallScoreByHomeWorkQuery request, CancellationToken cancellationToken)
         {
             var lessonIds = await GetLessonIdsAsync(request) ?? new List<Guid>();
+            if (!lessonIds.Any())
+            {
+                return new List<ModuleDuplicateModel>();
+            }
+
             var lessonDuplicateIds = lessonIds.GroupBy(x => x).Select(x => new ModuleDuplicateModel
             {
                 ObjectId = x.Key,
                 NumberOfDuplicate = x.Count(),
             }).ToList();
 
-            var homeWorkDuplicates = await _lessonHomeWorkRepository.Queryable
+            var homeWorkDuplicates = await _lessonHomeWorkRepository.ReadQueryable
                                                                     .WhereBulkContains(lessonIds, x => x.LessonId)
                                                                     .Select(x => new { x.HomeWorkId, x.LessonId })
                                                                     .ToListAsync(cancellationToken);
@@ -206,6 +223,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var listScore = await _questionRepository.Queryable.Where(x => x.HomeWorkQuestions.Any(x => homeWorkIds.Contains(x.HomeWorkId)))
                                     .Select(x => new { x.CorrectTotal, HomeWorkId = x.HomeWorkQuestions.Select(x => x.HomeWorkId).FirstOrDefault() })
                                     .ToListAsync(cancellationToken);
+
             var skillScores = listScore.GroupBy(x => x.HomeWorkId).Select(x =>
             {
                 var skillScore = new SkillScores();
@@ -223,14 +241,14 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<Guid>> GetLessonResultIdsAsync(GetOverallScoreByHomeWorkQuery request, Guid studentId)
         {
-            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId)
+            return await _lessonResultRepository.ReadQueryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId)
                                                           .Select(x => x.Id)
                                                           .ToListAsync();
         }
 
         private async Task<IList<Guid>> GetLessonIdsAsync(GetOverallScoreByHomeWorkQuery request)
         {
-            return await _unitRepository.Queryable.Include(x => x.UnitLessons)
+            return await _unitRepository.ReadQueryable.Include(x => x.UnitLessons)
                                                   .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
                                                   .SelectMany(x => x.UnitLessons)
                                                   .Select(x => x.LessonId)
