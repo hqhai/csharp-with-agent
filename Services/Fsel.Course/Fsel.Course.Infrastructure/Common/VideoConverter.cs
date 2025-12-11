@@ -362,10 +362,11 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<(IList<VideoSkillScores>, bool)> GetVideoSkillScores(VideoResult videoResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
-            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode)
-                .Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
-                .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
-                .ToListAsync(cancellationToken);
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable
+                    .Include(x => x.VideoTimeCode)
+                    .Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
+                    .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
+                    .ToListAsync(cancellationToken);
 
             var answers = videoTimeCodeResults.Where(x => x.CorrectTotal > 0 && x.SkillScores != null && x.SkillScores.Any())
                             .GroupBy(x => new { x.VideoTimeCode!.TimeCodeType })
@@ -377,7 +378,7 @@ namespace Fsel.Course.Infrastructure.Common
                                 TotalAnswer = x.Sum(y => y.CountQuestion),
                                 TokenReceived = x.Sum(x => x.TokenReceived)
                             })).ToList();
-            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Include(x => x.TimeCodeExercises)
+            var videoTimeCodes = await _videoTimeCodeRepository.ReadQueryable.Include(x => x.TimeCodeExercises)
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions)
                                     .ThenInclude(x => x.Question)
