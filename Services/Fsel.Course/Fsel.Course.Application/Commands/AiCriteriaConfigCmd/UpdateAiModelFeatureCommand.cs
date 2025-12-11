@@ -103,7 +103,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 var result = new AICriteriaConfigsModel
                 {
                     AiPromptManagerId = request.AiPromptManagerId,
-                    AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(updated)
+                    AiCriteriaModels = _mapper.Map<IList<AiCriteriaModel>>(updated)
                 };
                 methodResult.Result = result;
                 methodResult.StatusCode = StatusCodes.Status200OK;

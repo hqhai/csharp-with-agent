@@ -54,7 +54,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 await _aiCriteriaConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 var result = _mapper.Map<AICriteriaConfigsModel>(existing.First());
-                result.AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(existing);
+                result.AiCriteriaModels = _mapper.Map<IList<AiCriteriaModel>>(existing);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = result;

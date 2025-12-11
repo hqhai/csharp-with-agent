@@ -60,7 +60,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             }
 
             var result = _mapper.Map<AICriteriaConfigsModel>(setting);
-            result.AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(criteria);;
+            result.AiCriteriaModels = _mapper.Map<IList<AiCriteriaModel>>(criteria);;
 
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
