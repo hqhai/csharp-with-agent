@@ -79,7 +79,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             else if (!string.IsNullOrEmpty(request.UserName))
             {
-                var user = await _userManager.FindByEmailAsync(request.UserName.Trim());
+                var user = await _userManager.FindByNameAsync(request.UserName.Trim());
                 if (user == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
