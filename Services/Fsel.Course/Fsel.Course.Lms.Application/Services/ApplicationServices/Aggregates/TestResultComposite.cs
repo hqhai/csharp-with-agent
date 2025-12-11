@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public override BaseTestStateModel ExportForTestState()
         {
-            var childStates = Children?.Select(c => c.ExportState()).ToList() ?? new List<BaseTestStateModel>();
+            var childStates = Children?.Select(c => c.ExportForTestState()).ToList() ?? new List<BaseTestStateModel>();
 
             var stateModel = new TestStateModel
             {
