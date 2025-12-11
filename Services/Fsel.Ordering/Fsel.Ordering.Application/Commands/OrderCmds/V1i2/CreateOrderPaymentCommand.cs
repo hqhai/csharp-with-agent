@@ -268,7 +268,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 }
             }
 
-            var updateNextUnitResult = await _lmsCourseService.UpdateNextUnit(newOrder.UserId);
+            await _lmsCourseService.UpdateNextUnit(newOrder.UserId);
 
             return methodResult;
         }
