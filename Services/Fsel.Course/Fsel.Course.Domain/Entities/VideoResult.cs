@@ -37,6 +37,7 @@ namespace Fsel.Course.Domain.Entities
             set { VideoSkillScoresStr = ConvertHelper.Serialize(value); }
         }
 
+        public override double Percent { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
         public bool IsShowToken { get; set; }
