@@ -35,7 +35,7 @@ namespace Fsel.Course.Lcms.Api.Controllers
         [HttpGet("{projectId}")]
         [ProducesResponseType(typeof(MethodResult<AICriteriaConfigsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] Guid projectId, [FromHeader] GetAiCriteriaConfigQuery query)
+        public async Task<IActionResult> Get([FromRoute] Guid projectId, [FromQuery] GetAiCriteriaConfigQuery query)
         {
             ArgumentNullException.ThrowIfNull(query);
             query.ProjectId = projectId;

@@ -28,7 +28,11 @@ namespace Fsel.Course.Infrastructure.Configs
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumCriteriaAi>());
-
+            builder.Property(e => e.DefaultType)
+                .HasMaxLength(100)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => v.EnumParse<EnumDefaultType>());
             builder.HasOne(e => e.AiPromptManager)
                 .WithMany(m => m.AICriteriaConfigs)
                 .HasForeignKey(e => e.AiPromptManagerId)

@@ -19,6 +19,8 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumCriteriaAi? TypeCriteriaAi { get; set; }
 
+        public EnumDefaultType? DefaultType { get; set; }
+
         public Guid ProjectId { get; set; }
 
         public Guid? ObjectId { get; set; }

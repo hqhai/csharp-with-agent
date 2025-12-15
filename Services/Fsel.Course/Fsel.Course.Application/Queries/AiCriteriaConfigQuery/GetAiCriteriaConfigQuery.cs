@@ -18,7 +18,6 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
     {
         public EnumSubFeatureType Type { get; set; }
         public Guid ProjectId { get; set; }
-
     }
 
     public class GetAiModelFeatureQueryHandler : IRequestHandler<GetAiCriteriaConfigQuery, MethodResult<AICriteriaConfigsModel>>
@@ -33,14 +32,14 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             _mapper = mapper;
             _aiCriteriaSettingRepository = aiCriteriaSettingRepository;
         }
+
         public async Task<MethodResult<AICriteriaConfigsModel>> Handle(GetAiCriteriaConfigQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
             var setting = await _aiCriteriaSettingRepository.ReadQueryable
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.SubFeatureType == request.Type && x.ProjectId == request.ProjectId, cancellationToken);
+                .FirstOrDefaultAsync(x => x.SubFeatureType == request.Type && x.ProjectId == request.ProjectId && x.DefaultType == EnumDefaultType.Default, cancellationToken);
 
             if (setting == null)
             {
@@ -49,8 +48,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             }
 
             var criteria = await _aiCriteriaSettingRepository.ReadQueryable
-                .AsNoTracking()
-                .Where(x => x.SubFeatureType == request.Type &&  x.ProjectId == request.ProjectId)
+                .Where(x => x.SubFeatureType == request.Type && x.ProjectId == request.ProjectId && x.DefaultType == EnumDefaultType.Default)
                 .ToListAsync(cancellationToken);
 
             if (criteria.Count == 0)
@@ -60,7 +58,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             }
 
             var result = _mapper.Map<AICriteriaConfigsModel>(setting);
-            result.AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(criteria);;
+            result.AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(criteria);
 
             methodResult.Result = result;
             methodResult.StatusCode = StatusCodes.Status200OK;
