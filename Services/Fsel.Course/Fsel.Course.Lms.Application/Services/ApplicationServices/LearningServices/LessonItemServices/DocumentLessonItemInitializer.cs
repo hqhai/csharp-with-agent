@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Services.LessonItemServices
+namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -12,57 +12,57 @@ namespace Fsel.Course.Lms.Application.Services.LessonItemServices
     using Fsel.Course.Domain.IRepositories;
     using Microsoft.EntityFrameworkCore;
 
-    public class VideoLessonItemInitializer : ILessonItemInitializer
+    public class DocumentLessonItemInitializer : ILessonItemInitializer
     {
-        private readonly IVideoRepository _videoRepository;
-        private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IDocumentRepository _documentRepository;
+        private readonly IDocumentResultRepository _documentResultRepository;
 
-        public VideoLessonItemInitializer(IVideoRepository videoRepository, IVideoResultRepository videoResultRepository)
+        public DocumentLessonItemInitializer(IDocumentRepository documentRepository, IDocumentResultRepository documentResultRepository)
         {
-            _videoRepository = videoRepository;
-            _videoResultRepository = videoResultRepository;
+            _documentRepository = documentRepository;
+            _documentResultRepository = documentResultRepository;
         }
 
         public async Task<VoidMethodResult> InitializeAsync(LessonModule lessonModule, LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonModule);
             ArgumentNullException.ThrowIfNull(lessonResult);
-            VoidMethodResult methodResult = new VoidMethodResult();
-            if (lessonModule.LessonConfigType != EnumLessonConfigType.Video)
+            var methodResult = new VoidMethodResult();
+            if (lessonModule.LessonConfigType != EnumLessonConfigType.Document)
             {
                 return methodResult;
             }
 
-            var video = await _videoRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
-                                              .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                              .FirstOrDefaultAsync(cancellationToken);
+            var document = await _documentRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
+                                                .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                .FirstOrDefaultAsync(cancellationToken);
 
-            if (video == null)
+            if (document == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video), lessonModule.OriginalId);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(document), lessonModule.OriginalId);
                 return methodResult;
             }
 
-            var videoResult = await _videoResultRepository.ReadQueryable.Where(x => x.LessonResultId == lessonResult.Id)
+            var documentResult = await _documentResultRepository.ReadQueryable.Where(x => x.LessonResultId == lessonResult.Id)
                                                           .Where(x => x.LessonModuleId == lessonModule.Id)
                                                           .FirstOrDefaultAsync(cancellationToken);
-            if (videoResult != null)
+            if (documentResult != null)
             {
                 return methodResult;
             }
 
-            videoResult = new VideoResult
+            documentResult = new DocumentResult
             {
                 LessonModuleId = lessonModule.Id,
                 LessonResultId = lessonResult.Id,
                 StudentId = lessonResult.StudentId,
                 Status = EnumResultStatus.New,
-                VideoId = video.Id,
+                DocumentId = document.Id,
             };
 
             try
             {
-                await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
+                await _documentResultRepository.BulkMergeAsync(new List<DocumentResult> { documentResult }, bulk =>
                 {
                     bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
                 });

@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Services.LessonItemServices
+namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -27,7 +27,7 @@ namespace Fsel.Course.Lms.Application.Services.LessonItemServices
         {
             ArgumentNullException.ThrowIfNull(lessonModule);
             ArgumentNullException.ThrowIfNull(lessonResult);
-            VoidMethodResult methodResult = new VoidMethodResult();
+            var methodResult = new VoidMethodResult();
             if (lessonModule.LessonConfigType != EnumLessonConfigType.HomeWork)
             {
                 return methodResult;
@@ -44,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Services.LessonItemServices
             }
 
             var homeWorkResult = await _homeWorkResultRepository.ReadQueryable.Where(x => x.LessonResultId == lessonResult.Id)
+                                                                .Where(x => x.LessonModuleId == lessonModule.Id)
                                                                 .FirstOrDefaultAsync(cancellationToken);
             if (homeWorkResult != null)
             {

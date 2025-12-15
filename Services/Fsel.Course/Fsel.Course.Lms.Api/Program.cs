@@ -1,7 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Common.Constants;
-using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Core.Middlewares;
 using Fsel.Course.Domain.IRepositories;
@@ -12,6 +11,8 @@ using Fsel.Course.Infrastructure.Common.QuestionHelper.QuestionTypes;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
 using Fsel.Course.Lms.Application.InternalEvents;
+using Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule;
+using Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule;
 using Fsel.Course.Lms.Application.Queues.Consumers;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Services.AiService;
@@ -20,9 +21,11 @@ using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
 using Fsel.Course.Lms.Application.Services.ApplicationServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
 using Fsel.Course.Lms.Application.Services.FFmpegServices;
 using Fsel.Course.Lms.Application.Services.InteractionService;
-using Fsel.Course.Lms.Application.Services.LessonItemServices;
 using Fsel.Course.Lms.Application.Services.NotificationServices;
 using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SenderService;
@@ -156,6 +159,9 @@ builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRule
 builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
 builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
 builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
+builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
+builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
+builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
 
 builder.Services.AddScoped<IDocumentResultRepository, DocumentResultRepository>();
 builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
@@ -168,6 +174,20 @@ builder.Services.AddScoped<ClassForumLessonItemInitializer>();
 builder.Services.AddScoped<HomeWorkLessonItemInitializer>();
 builder.Services.AddScoped<DocumentLessonItemInitializer>();
 builder.Services.AddScoped<ILessonItemInitializerFactory, LessonItemInitializerFactory>();
+builder.Services.AddScoped<TestUnitItemInitializer>();
+builder.Services.AddScoped<LessonUnitItemInitializer>();
+builder.Services.AddScoped<IUnitItemInitializerFactory, UnitItemInitializerFactory>();
+builder.Services.AddScoped<TestCourseItemInitializer>();
+builder.Services.AddScoped<UnitCourseItemInitializer>();
+builder.Services.AddScoped<ICourseItemInitializerFactory, CourseItemInitializerFactory>();
+builder.Services.AddScoped<ICourseResultUpdater, BaseCourseResultEventHandler>();
+builder.Services.AddScoped<IUnitResultUpdater, BaseUnitResultEventHandler>();
+
+builder.Services.AddScoped<IVideoService, VideoService>();
+builder.Services.AddScoped<IVideoCachingService, VideoCachingService>();
+builder.Services.AddScoped<IVideoTimeCodeModelCachingService, VideoTimeCodeModelCachingService>();
+builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
+builder.Services.AddScoped<ITimeCodeQuestionCachingService, TimeCodeQuestionCachingService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

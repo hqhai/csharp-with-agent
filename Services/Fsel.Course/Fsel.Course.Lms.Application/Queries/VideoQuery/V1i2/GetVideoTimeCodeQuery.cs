@@ -2,15 +2,16 @@
 
 namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
 {
+    using System.Threading;
     using AutoMapper;
     using Common.ActionResults;
     using Common.Enums.ErrorCodes;
     using Domain.Enums;
     using Domain.IRepositories;
     using Domain.Models.EntityModels;
-    using Infrastructure.Common;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices;
     using MediatR;
-    using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Queues.Publishers;
     using Shared.Enums;
@@ -23,23 +24,21 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
 
     public class GetVideoTimeCodeQueryHandler : IRequestHandler<GetVideoTimeCodeQuery, MethodResult<VideoModel>>
     {
-        private readonly IVideoRepository _videoRepository;
         private readonly IVideoResultRepository _videoResultRepository;
-        private readonly VideoConverter _videoConverter;
         private readonly IMapper _mapper;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly IVideoService _videoService;
 
-        public GetVideoTimeCodeQueryHandler(IVideoRepository videoRepository,
+        public GetVideoTimeCodeQueryHandler(
             IVideoResultRepository videoResultRepository,
-            VideoConverter videoConverter,
             IMapper mapper,
-            QuestBoardPublisher questBoardPublisher)
+            QuestBoardPublisher questBoardPublisher,
+            IVideoService videoService)
         {
-            _videoRepository = videoRepository;
             _videoResultRepository = videoResultRepository;
-            _videoConverter = videoConverter;
             _mapper = mapper;
             _questBoardPublisher = questBoardPublisher;
+            _videoService = videoService;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(GetVideoTimeCodeQuery request, CancellationToken cancellationToken)
@@ -48,30 +47,21 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
             var methodResult = new MethodResult<VideoModel>();
 
             var videoResult = await _videoResultRepository.ReadQueryable.Where(x => x.Id == request.VideoResultId).FirstOrDefaultAsync(cancellationToken);
-
             if (videoResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
 
-            var video = await _videoRepository.ReadQueryable
-                .Where(x => x.Id == videoResult.VideoId)
-                .Include(v => v.VideoTimeCodes)
-                .FirstOrDefaultAsync(cancellationToken);
-
-            if (video == null)
+            var videoModel = await _videoService.GetVideoModelAsync(videoResult, cancellationToken);
+            if (videoModel == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(Video));
                 return methodResult;
             }
 
-            var videoModel = _mapper.Map<VideoModel>(video);
-            videoModel.VideoTimeCodes = await _videoConverter.GetTimeCodes(video, videoResult);
             videoModel.VideoResult = _mapper.Map<VideoResultModel>(videoResult);
-
             methodResult.Result = videoModel;
-            methodResult.StatusCode = StatusCodes.Status200OK;
 
             #region Do QuestBoard
 
@@ -87,9 +77,13 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
 
         private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
         {
-            await _questBoardPublisher.Publish(
-                new QuestBoardQueueModel { StudentID = studentId, Type = EnumQuestBoardType.LearningQuests, Category = EnumQuestBoardCategory.HistoryOfDiscovery, Value = 1 },
-                cancellationToken);
+            await _questBoardPublisher.Publish(new QuestBoardQueueModel
+            {
+                StudentID = studentId,
+                Type = EnumQuestBoardType.LearningQuests,
+                Category = EnumQuestBoardCategory.HistoryOfDiscovery,
+                Value = 1
+            }, cancellationToken);
         }
     }
 }

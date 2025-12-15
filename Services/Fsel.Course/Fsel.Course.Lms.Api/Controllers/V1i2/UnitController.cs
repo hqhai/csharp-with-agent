@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     using Fsel.Common.Attributes;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels.V1i2;
-    using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
     using Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2;
     using Fsel.Course.Lms.Application.Queries.UnitQuery.V1i2;
     using Fsel.Shared.Attributes;

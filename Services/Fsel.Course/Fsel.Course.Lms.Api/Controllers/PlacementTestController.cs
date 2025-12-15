@@ -8,7 +8,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Fsel.Course.Lms.Application.Commands.PlacementTestCmd;
     using Fsel.Course.Lms.Application.Queries.CategoryQuery;
     using Fsel.Course.Lms.Application.Queries.PlacementTestQuery;
@@ -177,7 +176,6 @@ namespace Fsel.Course.Lms.Api.Controllers
             var queryResult = await _mediator.Send(chosePtFlowCommand).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
 
         [HttpPost("continue/{studentId:guid}")]
         public async Task<IActionResult> GetPtFlowForStudent(Guid studentId)

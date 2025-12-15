@@ -143,6 +143,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                         LevelName = x.Level != null ? x.Level.Name : null,
                         OriginalId = x.OriginalId,
                         MediaPostContentRuby = x.MediaPostContentRuby,
+                        VersionType = x.VersionType,
                         Questions = x.HomeWorkQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                         {
                             Id = m!.Id,

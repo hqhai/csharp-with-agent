@@ -41,17 +41,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode).Include(x => x.VideoResult).FirstOrDefaultAsync(x => x.Id == request.VideoTimeCodeResultId, cancellationToken);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.ReadQueryable.Include(x => x.VideoTimeCode)
+                                                                          .Include(x => x.VideoResult)
+                                                                          .FirstOrDefaultAsync(x => x.Id == request.VideoTimeCodeResultId, cancellationToken);
             if (videoTimeCodeResult == null || videoTimeCodeResult.VideoResult == null || videoTimeCodeResult.VideoTimeCode == null)
             {
                 return methodResult;
             }
-            var lessonResult = await _lessonResultRepository.Queryable.Include(x => x.Course).FirstOrDefaultAsync(x => x.Id == videoTimeCodeResult.VideoResult.LessonResultId, cancellationToken);
+            var lessonResult = await _lessonResultRepository.ReadQueryable.Include(x => x.Course)
+                                        .FirstOrDefaultAsync(x => x.Id == videoTimeCodeResult.VideoResult.LessonResultId, cancellationToken);
             if (lessonResult == null || lessonResult.Course == null)
             {
                 return methodResult;
             }
-            var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == request.VideoTimeCodeResultId).ToListAsync(cancellationToken);
+            var videoTimeCodeAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == request.VideoTimeCodeResultId)
+                                                                           .ToListAsync(cancellationToken);
 
             EnumCourseType courseType = lessonResult.Course.CourseType;
             var tokenConfigs = await GetTokenConfigsAsync(videoTimeCodeResult.VideoTimeCode, courseType);
@@ -64,10 +68,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             }
             await _videoTimeCodeAnswerRepository.ExecuteTransactionAsync(async () =>
             {
-                _videoTimeCodeAnswerRepository.UpdateList(videoTimeCodeAnswers);
-                await _videoTimeCodeAnswerRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _videoTimeCodeAnswerRepository.BulkUpdateList(videoTimeCodeAnswers, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new { entity.TokenReceived };
+                });
+                methodResult.Result = true;
                 return methodResult;
             });
+
             return methodResult;
         }
 

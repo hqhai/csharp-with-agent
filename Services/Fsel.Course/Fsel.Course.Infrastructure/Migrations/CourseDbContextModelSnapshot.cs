@@ -382,6 +382,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnOrder(0);
 
+                    b.Property<Guid?>("AiPromptCriteriaId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("CourseSkill")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -840,6 +843,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("Percent")
+                        .HasColumnType("float");
+
+                    b.Property<double>("PercentModule")
                         .HasColumnType("float");
 
                     b.Property<string>("ResultStatus")
@@ -1606,6 +1612,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<Guid>("LessonResultId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("PercentModule")
+                        .HasColumnType("float");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -2914,6 +2923,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("VersionType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LevelId");
@@ -3092,6 +3106,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
+                    b.Property<double>("PercentModule")
+                        .HasColumnType("float");
+
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
 
@@ -3134,7 +3151,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("StudentId");
 
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("StudentId"), new[] { "CorrectCount", "CorrectTotal", "CreatedDate", "CreatedFullName", "CreatedUserId", "HomeWorkId", "IsDeleted", "LessonModuleId", "LessonResultId", "Percent", "SkillScoresStr", "Status", "SubmissionCount", "TokenFirstTime", "TokenLastTime", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("StudentId"), new[] { "CorrectCount", "CorrectTotal", "CreatedDate", "CreatedFullName", "CreatedUserId", "HomeWorkId", "IsDeleted", "LessonModuleId", "LessonResultId", "Percent", "PercentModule", "SkillScoresStr", "Status", "SubmissionCount", "TokenFirstTime", "TokenLastTime", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
                     b.HasIndex("LessonResultId", "HomeWorkId", "StudentId")
                         .IsUnique()
@@ -3732,6 +3749,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
+                    b.Property<double>("PercentModule")
+                        .HasColumnType("float");
+
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
 
@@ -3778,7 +3798,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("CreatedUserId");
 
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "CorrectCount", "CorrectTotal", "CourseId", "CourseResultId", "CreatedDate", "CreatedFullName", "IsDeleted", "LessonId", "Percent", "SkillScoresStr", "Status", "StudentId", "SummaryNote", "UnitId", "UnitModuleId", "UnitResultId", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "CorrectCount", "CorrectTotal", "CourseId", "CourseResultId", "CreatedDate", "CreatedFullName", "IsDeleted", "LessonId", "Percent", "PercentModule", "SkillScoresStr", "Status", "StudentId", "SummaryNote", "UnitId", "UnitModuleId", "UnitResultId", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
                     b.HasIndex("LessonId");
 
@@ -6552,6 +6572,11 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("VersionType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("LevelId");
@@ -6983,6 +7008,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<double>("Percent")
+                        .HasColumnType("float");
+
+                    b.Property<double>("PercentModule")
                         .HasColumnType("float");
 
                     b.Property<string>("SkillScoresStr")
@@ -7578,6 +7606,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<double>("Percent")
                         .HasColumnType("float");
 
+                    b.Property<double>("PercentModule")
+                        .HasColumnType("float");
+
                     b.Property<DateTime?>("ProcessDate")
                         .HasColumnType("datetime2");
 
@@ -7619,7 +7650,7 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.HasIndex("CreatedUserId");
 
-                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "CompletionDate", "CorrectCount", "CorrectTotal", "CourseId", "CourseModuleId", "CourseResultId", "CreatedDate", "CreatedFullName", "IsDeleted", "Percent", "ProcessDate", "SkillScoresStr", "Status", "StudentId", "UnitId", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
+                    SqlServerIndexBuilderExtensions.IncludeProperties(b.HasIndex("CreatedUserId"), new[] { "CompletionDate", "CorrectCount", "CorrectTotal", "CourseId", "CourseModuleId", "CourseResultId", "CreatedDate", "CreatedFullName", "IsDeleted", "Percent", "PercentModule", "ProcessDate", "SkillScoresStr", "Status", "StudentId", "UnitId", "UpdatedDate", "UpdatedFullName", "UpdatedUserId" });
 
                     b.HasIndex("UnitId");
 
@@ -8050,9 +8081,17 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<string>("VersionType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("VideoFilePath")
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("VideoPercentConfigStr")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -8117,6 +8156,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .HasColumnType("float");
 
                     b.Property<double>("Percent")
+                        .HasColumnType("float");
+
+                    b.Property<double>("PercentModule")
                         .HasColumnType("float");
 
                     b.Property<string>("PlaybackSpeed")

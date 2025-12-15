@@ -2,8 +2,13 @@
 
 namespace Fsel.Course.Domain.Entities.TestConfigs
 {
+    using System.ComponentModel.DataAnnotations.Schema;
+
     public class TestSectionResult : BaseLearnResult
     {
+        [NotMapped]
+        public override double PercentModule { get; set; }
+
         public Guid? TestResultId { get; set; }
 
         public TestResult? TestResult { get; set; }

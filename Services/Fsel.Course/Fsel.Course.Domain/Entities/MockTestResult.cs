@@ -5,11 +5,15 @@ namespace Fsel.Course.Domain.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IEntities;
 
     public class MockTestResult : BaseLearnResult, ITokenResult
     {
+        [NotMapped]
+        public override double PercentModule { get; set; }
+
         public Guid? GradingTeacherId { get; set; }
 
         public Course? Course { get; set; }

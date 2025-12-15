@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Services.LessonItemServices
+namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
@@ -27,8 +27,16 @@ namespace Fsel.Course.Lms.Application.Services.LessonItemServices
         {
             ArgumentNullException.ThrowIfNull(lessonModule);
             ArgumentNullException.ThrowIfNull(lessonResult);
-            VoidMethodResult methodResult = new VoidMethodResult();
+            var methodResult = new VoidMethodResult();
             if (lessonModule.LessonConfigType != EnumLessonConfigType.ClassForum)
+            {
+                return methodResult;
+            }
+
+            var classForumResult = await _classForumResultRepository.ReadQueryable.Where(x => x.LessonResultId == lessonResult.Id)
+                                                .Where(x => x.LessonModuleId == lessonModule.Id)
+                                                .FirstOrDefaultAsync(cancellationToken);
+            if (classForumResult != null)
             {
                 return methodResult;
             }
@@ -40,13 +48,6 @@ namespace Fsel.Course.Lms.Application.Services.LessonItemServices
             if (classForum == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum), lessonModule.OriginalId);
-                return methodResult;
-            }
-
-            var classForumResult = await _classForumResultRepository.ReadQueryable.Where(x => x.LessonResultId == lessonResult.Id)
-                                                          .FirstOrDefaultAsync(cancellationToken);
-            if (classForumResult != null)
-            {
                 return methodResult;
             }
 

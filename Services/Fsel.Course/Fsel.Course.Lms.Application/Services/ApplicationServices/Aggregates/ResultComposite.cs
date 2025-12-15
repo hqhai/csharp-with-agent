@@ -27,11 +27,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return Children?.Any(c => c.IsBelongTo(id)) ?? false;
         }
 
-        public override async Task Submit()
+        public override async Task Submit(Guid id)
         {
             foreach (var child in Children)
             {
-                await child.Submit();
+                await child.Submit(id);
             }
         }
     }

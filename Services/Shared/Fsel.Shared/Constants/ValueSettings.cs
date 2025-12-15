@@ -261,5 +261,29 @@ namespace Fsel.Shared.Constants
             public const int MinValue = 0;
             public const int MaxValue = 100;
         }
+
+        public static class VideoPercentDefaults
+        {
+            // Tổng % chuẩn
+            public const double TotalPercent = 100d;
+
+            // Trường hợp 1 type
+            public const double SingleTypePercent = 100d;
+
+            // Trường hợp 2 type
+            public const double TwoTypesPercentEach = 50d;
+
+            // Trường hợp 3 type: rule riêng
+            public const double Standalone = 34d;
+
+            public const double UnitTest = 33d;
+            public const double SkillTest = 33d;
+
+            // Sai số cho so sánh double
+            public const double Epsilon = 0.0001d;
+
+            // Giá trị mặc định cho type không hỗ trợ
+            public const double DefaultUnknownTypePercent = 0d;
+        }
     }
 }

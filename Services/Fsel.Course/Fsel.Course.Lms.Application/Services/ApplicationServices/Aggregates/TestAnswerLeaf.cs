@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return Result != null && Result.Id == id;
         }
 
-        public override async Task Submit()
+        public override async Task Submit(Guid id)
         {
             TestAnswer.Status = EnumAnswerStatus.Done;
             await Task.CompletedTask;

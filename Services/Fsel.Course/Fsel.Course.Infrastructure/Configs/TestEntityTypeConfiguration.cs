@@ -38,6 +38,12 @@ namespace Fsel.Course.Infrastructure.Configs
                .HasConversion(
                    v => v.ToString(),
                    v => v.EnumParse<EnumScoringFormulaType>());
+
+            builder.Property(e => e.VersionType)
+                  .HasMaxLength(20)
+                  .HasConversion(
+                      v => v.ToString(),
+                      v => v.EnumParse<EnumVersion>());
         }
     }
 }

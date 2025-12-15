@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -30,6 +31,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Review lesson video
         /// </summary>
         [HttpPost]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<VideoResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReviewLessonVideo([FromBody] ReviewLessonVideoCommand command)
@@ -42,6 +45,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Review lesson video
         /// </summary>
         [HttpPut("{lessonResultId}")]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> UpdateShowCoinVideo([FromRoute] Guid lessonResultId)
@@ -56,6 +61,8 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPut("playback-speed")]
         [ProducesResponseType(typeof(MethodResult<VideoResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         public async Task<IActionResult> SetPlaybackSpeed([FromBody] UpdatePlaybackSpeedCommand command)
         {
             MethodResult<VideoResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);

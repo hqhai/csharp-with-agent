@@ -3,11 +3,15 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.IEntities;
 
     public class SectionGroupResult : BaseLearnResult, ITokenResult
     {
+        [NotMapped]
+        public override double PercentModule { get; set; }
+
         public SectionGroup? SectionGroup { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

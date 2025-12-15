@@ -32,10 +32,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public override async Task Submit()
         {
-            await base.Submit();
-            var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);
+            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(id));
+            skillMatch?.Submit(id);
             if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
             {
+                var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);
                 TestResult.Status = EnumResultStatus.Done;
                 TestResult.CorrectCount = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.CorrectCount);
                 TestResult.SkillScores = Children.Cast<TestSectionResultComposite>().SelectMany(x =>

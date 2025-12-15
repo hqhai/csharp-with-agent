@@ -49,14 +49,14 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
 
             var items = new List<CreateAiCriteriaConfigCommandModel>();
 
-            if (request.AiCriteriaConfig != null)
+            if (request.AiCriteriaModel != null)
             {
-                items.Add(request.AiCriteriaConfig);
+                items.Add(request.AiCriteriaModel);
             }
 
-            if (request.AiCriteriaConfigs != null && request.AiCriteriaConfigs.Count > 0)
+            if (request.AiCriteriaModels != null && request.AiCriteriaModels.Count > 0)
             {
-                items.AddRange(request.AiCriteriaConfigs);
+                items.AddRange(request.AiCriteriaModels);
             }
 
             if (items.Count == 0)
@@ -136,7 +136,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
                 var resultEntities = toCreate.Concat(toUpdate).ToList();
                 var result = _mapper.Map<AICriteriaConfigsModel>(resultEntities.FirstOrDefault());
 
-                result.AiCriteriaModel = _mapper.Map<IList<AiCriteriaModel>>(resultEntities);
+                result.AiCriteriaModels = _mapper.Map<IList<AiCriteriaModel>>(resultEntities);
                 result.AiPromptManagerId = request.AiPromptManagerId;
 
                 methodResult.Result = result;

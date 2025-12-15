@@ -1,6 +1,6 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Application.Services.LessonItemServices
+namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices
 {
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
