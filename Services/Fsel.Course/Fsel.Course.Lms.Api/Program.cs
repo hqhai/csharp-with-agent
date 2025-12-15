@@ -162,6 +162,7 @@ builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankReposito
 builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
 builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
 builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
+builder.Services.AddScoped<ITestSectionResultRepository, TestSectionResultRepository>();
 
 builder.Services.AddScoped<IDocumentResultRepository, DocumentResultRepository>();
 builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();

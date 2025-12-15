@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     using Common.ActionResults;
     using Common.Attributes;
     using Common.Constants;
+    using Domain.Enums;
     using Domain.Models.EntityModels.PlacementTestModels;
     using Domain.Models.EntityModels.TestModels;
     using MediatR;
@@ -52,9 +53,9 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         [ProducesResponseType(typeof(MethodResult<SingleTestStateModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [HttpPost("start-or-continue/{testResultId:guid}")]
-        public async Task<IActionResult> SelectTestProgramId(Guid testResultId, [FromQuery]Guid projectId)
+        public async Task<IActionResult> SelectTestProgramId(Guid testResultId, [FromQuery] EnumTestType testType)
         {
-            var command = new ChoseTestCommand { TestResultId = testResultId,  ProjectId = projectId};
+            var command = new ChoseTestCommand { TestResultId = testResultId, TestType = testType};
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
