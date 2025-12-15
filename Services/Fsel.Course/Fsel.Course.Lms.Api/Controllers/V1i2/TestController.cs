@@ -46,14 +46,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
             return queryResult.GetActionResult();
         }
 
-        [HttpPost("continue/{testResult:guid}")]
-        public async Task<IActionResult> GetTestForStudent(Guid testResult)
-        {
-            var continueCommand = new ContinueTestCommand() { TestResultId = testResult};
-            var queryResult = await _mediator.Send(continueCommand).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
-
         [HttpPost("submit-answer")]
         public async Task<IActionResult> GetTestState([FromBody] TestSubmitAnswerCommand submitCommand)
         {
