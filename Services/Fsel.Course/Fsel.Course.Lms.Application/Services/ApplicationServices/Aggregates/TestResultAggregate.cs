@@ -58,17 +58,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 if (!TestResult.SectionResults.Any())
                 {
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
-                    await testService.MakeSectionTestResult(
+                    var testResultWithSection = await testService.MakeSectionTestResult(
                         SingleTestResult.StudentId!.Value,
                         TestResult,
                         TestResult.TestId!.Value);
 
-                    if (!SingleTestResult.TestResults.Contains(TestResult))
-                    {
-                        SingleTestResult.TestResults.Add(TestResult);
-                    }
-
-                    await AddNewTest(TestResult);
+                    await AddNewTest(testResultWithSection);
                 }
             }
 
@@ -85,10 +80,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         private async Task AddNewTest(TestResult testResult)
         {
-            if (!SingleTestResult.TestResults.Contains(testResult))
-            {
-                SingleTestResult.TestResults.Add(testResult);
-            }
+            // if (!SingleTestResult.TestResults.Contains(testResult))
+            // {
+            //     SingleTestResult.TestResults.Add(testResult);
+            // }
 
             var testResultComposite = new TestResultComposite { Result = testResult, ServiceProvider = ServiceProvider };
             TestResultComposites.Add(testResultComposite);
@@ -191,10 +186,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         private async Task Commit()
         {
             var repositoryTestResult = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
-            var repositoryTestGroupResult = ServiceProvider.GetRequiredService<IRepository<TestGroupResult>>();
-            if (repositoryTestResult.DbContext.ChangeTracker.HasChanges() ||  repositoryTestGroupResult.DbContext.ChangeTracker.HasChanges())
+            if (repositoryTestResult.DbContext.ChangeTracker.HasChanges() )
             {
-                await repositoryTestGroupResult.DbContext.SaveChangesAsync();
                 await repositoryTestResult.UnitOfWork.SaveChangesAsync();
             }
         }

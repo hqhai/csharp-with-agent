@@ -79,10 +79,15 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testResult));
                 return methodResult;
             }
+            var testGroupResult = await _testGroupResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
+            if (testGroupResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testGroupResult));
+                return methodResult;
+            }
 
             if (testResult.Status == EnumResultStatus.New)
             {
-                var testGroupResult = await _testGroupResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
                 var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
                 await aggregate.Start();
                 methodResult.Result = await aggregate.ExpotStateData();
@@ -91,8 +96,6 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             }
             else
             {
-                var testGroupResult = await _testGroupResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
-
                 var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
                 await aggregate.InitAggregate();
 
