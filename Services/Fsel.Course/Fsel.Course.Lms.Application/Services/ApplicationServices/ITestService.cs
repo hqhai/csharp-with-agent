@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly IQuestionRepository _questionRepository;
         private readonly Core.Base.Interfaces.IRepository<TestAnswer> _testAnswerRepository;
         private readonly QuestionConverter _questionConverter;
+        private readonly ITestSectionResultRepository _testSectionResultRepository;
 
         public TestService(ITestCachingService testCachingService,
             ITestRepository testRepository,
@@ -50,7 +51,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             Core.Base.Interfaces.IRepository<TestGroupResult> testGroupResultRepository,
             IQuestionRepository questionRepository,
             Core.Base.Interfaces.IRepository<TestAnswer> testAnswerRepository,
-            QuestionConverter questionConverter)
+            QuestionConverter questionConverter,
+            ITestSectionResultRepository testSectionResultRepository)
         {
             _testCachingService = testCachingService;
             _testRepository = testRepository;
@@ -61,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             _questionRepository = questionRepository;
             _testAnswerRepository = testAnswerRepository;
             _questionConverter = questionConverter;
+            _testSectionResultRepository = testSectionResultRepository;
         }
 
         public async Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate)
@@ -169,7 +172,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         public async Task<TestResult> MakeSectionTestResult(Guid studentId, TestResult testResult, Guid testId)
         {
-            var test = await GetHierachicalTestFirstOrDefault(x => x.Id == testId && x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
+            var test = await GetHierachicalTestFirstOrDefault(x => x.Id == testId);
             if (test != null)
             {
                 foreach (var section in test.TestSections)
@@ -177,9 +180,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     var testSectionResult =
                         new TestSectionResult { TestSectionId = section.Id, StudentId = studentId, Status = EnumResultStatus.New, TestResultId = testResult.Id };
                     testResult.SectionResults.Add(testSectionResult);
-
+                    _testSectionResultRepository.Add(testSectionResult);
                     CreateTestSectionResultTree(section, testSectionResult, testResult);
                 }
+                await _testSectionResultRepository.UnitOfWork.SaveChangesAsync();
 
                 return testResult;
             }
