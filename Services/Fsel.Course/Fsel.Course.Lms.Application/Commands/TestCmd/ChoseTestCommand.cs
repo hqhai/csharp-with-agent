@@ -75,6 +75,12 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             var testResult = await _testResultRepository.ReadQueryable.Include(x => x.TestGroupResult)
                 .FirstOrDefaultAsync(x => x.Id == request.TestResultId, cancellationToken);
 
+            if (testResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testResult));
+                return methodResult;
+            }
+
             if (testResult.Status == EnumResultStatus.New)
             {
                 var testGroupResult = await _testService.InitTestGroupResult(student.Id, request.TestType);
