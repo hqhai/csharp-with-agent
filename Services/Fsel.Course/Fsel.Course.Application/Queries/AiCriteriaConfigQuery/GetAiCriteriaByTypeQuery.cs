@@ -34,7 +34,7 @@ namespace Fsel.Course.Application.Queries.AiCriteriaConfigQuery
             var methodResult = new MethodResult<AICriteriaConfigsModel>();
 
             var aiCriteria = await _aiCriteriaConfigRepository.ReadQueryable
-                .Where(x => x.SubFeatureType == request.SubFeatureType && x.ObjectId == null)
+                .Where(x => x.SubFeatureType == request.SubFeatureType && x.ObjectId == null && x.DefaultType == EnumDefaultType.Default)
                 .ToListAsync(cancellationToken);
 
             if (aiCriteria.Count == 0)
