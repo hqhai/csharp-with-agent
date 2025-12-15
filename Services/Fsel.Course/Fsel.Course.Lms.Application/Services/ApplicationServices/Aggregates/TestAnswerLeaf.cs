@@ -33,7 +33,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             {
                 QuestionId = TestAnswer.QuestionId,
                 TestAnswerId = TestAnswer.Id,
-                Answer = new AnswerModel { Answer = TestAnswer.Answer, CorrectCount = TestAnswer.CorrectCount, IsCorrect = TestAnswer.IsCorrect, },
+                Answer = new AnswerModel { Answer = TestAnswer.Answer, CorrectCount = TestAnswer.CorrectCount, IsCorrect = TestAnswer.IsCorrect },
                 Status = TestAnswer.Status == EnumAnswerStatus.Done ? EnumResultStatus.Done : EnumResultStatus.Process,
                 UpdatedDate = TestAnswer?.UpdatedDate ?? TestAnswer?.CreatedDate
             };
