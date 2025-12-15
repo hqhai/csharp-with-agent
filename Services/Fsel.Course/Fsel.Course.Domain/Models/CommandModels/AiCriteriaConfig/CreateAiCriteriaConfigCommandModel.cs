@@ -14,7 +14,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
         public EnumCriteriaAi? TypeCriteriaAi { get; set; }
         public EnumSubFeatureType? SubFeatureType { get; set; }
         public EnumFeatureMultiple? FeatureMultiple { get; set; }
-        public EnumDefaultType DefaultType { get; set; } = EnumDefaultType.Default;
+        public EnumDefaultType DefaultType { get; set; }
         public string? UserRole { get; set; }
         public string? SettingAiConfig { get; set; }
         public object? JsonConfig { get; set; }
