@@ -61,7 +61,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     await testService.MakeSectionTestResult(
                         SingleTestResult.StudentId!.Value,
                         TestResult,
-                        SingleTestResult.ProgramId!.Value,
                         TestResult.TestId!.Value);
 
                     if (!SingleTestResult.TestResults.Contains(TestResult))
@@ -191,10 +190,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         private async Task Commit()
         {
-            var repository = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
-            if (repository.DbContext.ChangeTracker.HasChanges())
+            var repositoryTestResult = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
+            var repositoryTestGroupResult = ServiceProvider.GetRequiredService<IRepository<TestGroupResult>>();
+            if (repositoryTestResult.DbContext.ChangeTracker.HasChanges() ||  repositoryTestGroupResult.DbContext.ChangeTracker.HasChanges())
             {
-                await repository.UnitOfWork.SaveChangesAsync();
+                await repositoryTestGroupResult.DbContext.SaveChangesAsync();
+                await repositoryTestResult.UnitOfWork.SaveChangesAsync();
             }
         }
     }

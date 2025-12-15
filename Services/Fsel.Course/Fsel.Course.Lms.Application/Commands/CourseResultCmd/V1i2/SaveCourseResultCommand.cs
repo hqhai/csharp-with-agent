@@ -168,6 +168,9 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
                         CourseId = courseResult.CourseId,
                         StudentId = courseResult.StudentId,
                         Status = EnumResultStatus.New,
+                        ProgramId = test.ProgramId,
+                        LevelId = test.LevelId,
+                        TestType = EnumTestType.FullTest
                     };
                     try
                     {
