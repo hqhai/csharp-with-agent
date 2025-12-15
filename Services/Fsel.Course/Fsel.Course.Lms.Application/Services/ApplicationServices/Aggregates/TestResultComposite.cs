@@ -9,9 +9,26 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Microsoft.Extensions.DependencyInjection;
 
-    public class TestResultComposite : ResultComposite
+    public class  TestResultComposite : ResultComposite
     {
         public TestResult TestResult => Result as TestResult;
+
+        public override BaseTestStateModel ExportForTestState()
+        {
+            var childStates = Children?.Select(c => c.ExportForTestState()).ToList() ?? new List<BaseTestStateModel>();
+
+            var stateModel = new TestStateModel
+            {
+                TestId = TestResult.TestId,
+                TestResultId = TestResult.Id,
+                PercentResult = TestResult.Percent,
+                Status = TestResult.Status,
+                Children = childStates,
+                StepFlowId = TestResult.StepFlowId,
+                UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
+            };
+            return stateModel;
+        }
 
         public override async Task Submit(Guid id)
         {

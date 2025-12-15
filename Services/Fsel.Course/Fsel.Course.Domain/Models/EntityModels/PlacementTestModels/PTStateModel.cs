@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     using Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Newtonsoft.Json;
+    using Shared.Enums;
     using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 
     public class PtStateModel
@@ -80,6 +81,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public string? Name { get; set; }
         public Guid? SectionId { get; set; }
 
+        public EnumTestLayoutType? TestLayoutType { get; set; }
         public TestSectionConfig? Config { get; set; }
 
         public Guid? SectionResultId { get; set; }
