@@ -164,7 +164,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
             dto.ObjectId = test.Test.Id;
             dto.Name = test.Test.Name;
             dto.Code = test.Test.Code;
-            dto.Result = _mapper.Map<ResultModel>(test.TestGroupResult);
+            dto.Result = _mapper.Map<ResultModel>(test.TestResult);
             dto.ProgressPrecent = test.TestGroupResult.Status == EnumResultStatus.Done ? ValueSettings.PercentMaxValue : ValueSettings.PercentMinValue;
             return dto;
         }
