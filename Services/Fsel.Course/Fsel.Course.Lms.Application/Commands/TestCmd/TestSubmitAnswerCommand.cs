@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using Core.Base.Interfaces;
     using Domain.Entities.TestConfigs;
     using Domain.Enums;
+    using Domain.IRepositories;
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.TestModels;
     using MediatR;
@@ -27,15 +28,15 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
 
     public class TestSubmitAnswerCommandHandler : IRequestHandler<TestSubmitAnswerCommand, MethodResult<SingleTestStateModel>>
     {
-        private IRepository<TestResult> _testResult;
-        private IRepository<TestGroupResult> _testGroupResult;
+        private readonly ITestResultRepository _testResultRepository;
+        private readonly ITestGroupResultRepository _testGroupResultRepository;
         private readonly IServiceProvider _serviceProvider;
 
-        public TestSubmitAnswerCommandHandler(IRepository<TestResult> testResult, IServiceProvider serviceProvider, IRepository<TestGroupResult> testGroupResult)
+        public TestSubmitAnswerCommandHandler(ITestResultRepository testResultRepository, IServiceProvider serviceProvider, ITestGroupResultRepository testGroupResultRepository)
         {
-            _testResult = testResult;
+            _testGroupResultRepository = testGroupResultRepository;
             _serviceProvider = serviceProvider;
-            _testGroupResult = testGroupResult;
+            _testResultRepository = testResultRepository;
         }
 
         public async Task<MethodResult<SingleTestStateModel>> Handle(TestSubmitAnswerCommand request, CancellationToken cancellationToken)
@@ -43,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SingleTestStateModel>();
 
-            var testResult = await _testResult.ReadQueryable.FirstOrDefaultAsync(x => x.Id == request.TestResultId, cancellationToken);
+            var testResult = await _testResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == request.TestResultId, cancellationToken);
 
             if (testResult == null)
             {
@@ -61,7 +62,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 };
             }
 
-            var testGroupResult = await _testGroupResult.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
+            var testGroupResult = await _testGroupResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
             var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
 
             await aggregate.MakeAnswers(new SubmitAnswerCommandModel

@@ -3,8 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.TestQuery
 {
     using Common.ActionResults;
-    using Core.Base.Interfaces;
-    using Domain.Entities.TestConfigs;
+    using Domain.IRepositories;
     using Domain.Models.EntityModels;
     using Domain.Models.EntityModels.PlacementTestModels;
     using MediatR;
@@ -17,9 +16,9 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
     public class GetTestSectionResultDetailQueryHandler : IRequestHandler<GetTestSectionResultDetailQuery, MethodResult<SectionStateModel>>
     {
-        private readonly IRepository<TestSectionResult> _testSectionResultRepository;
+        private readonly ITestSectionResultRepository  _testSectionResultRepository;
 
-        public GetTestSectionResultDetailQueryHandler(IRepository<TestSectionResult> testSectionResultRepository)
+        public GetTestSectionResultDetailQueryHandler(ITestSectionResultRepository testSectionResultRepository)
         {
             _testSectionResultRepository = testSectionResultRepository;
         }
@@ -48,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 sectionStateModel.Children = testSectionResult.TestSection.TestSectionQuestions.Select(BaseTestStateModel (x) =>
                 {
                     var questionModel = new QuestionStateModel { QuestionId = x.QuestionId };
-                    var testAnswer = testSectionResult?.TestAnswers.FirstOrDefault(t => t.QuestionId == x.QuestionId);
+                    var testAnswer = testSectionResult.TestAnswers.FirstOrDefault(t => t.QuestionId == x.QuestionId);
                     questionModel.TestAnswerId = testAnswer?.Id;
                     if (testAnswer != null)
                     {
