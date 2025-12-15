@@ -25,7 +25,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass = false);
         Task<TestGroupResult> InitTestGroupResult(Guid studentId, EnumTestType enumTestType, bool isByPass = false);
         Task<TestResult> MakeNewTestResultTree(Guid studentId, Guid stepFlowId, Guid testGroupResultId, Guid programId, Guid? actionFlowId = default);
-        Task<TestResult> MakeSectionTestResult(Guid studentId, TestResult testResult, Guid programId, Guid testId);
+        Task<TestResult> MakeSectionTestResult(Guid studentId, TestResult testResult, Guid testId);
 
         Task CreateAnswers(SubmitAnswerCommandModel request);
     }
@@ -167,9 +167,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return null;
         }
 
-        public async Task<TestResult> MakeSectionTestResult(Guid studentId, TestResult testResult, Guid programId, Guid testId)
+        public async Task<TestResult> MakeSectionTestResult(Guid studentId, TestResult testResult, Guid testId)
         {
-            var test = await GetHierachicalTestFirstOrDefault(x => x.Id == testId && x.ProgramId == programId && x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
+            var test = await GetHierachicalTestFirstOrDefault(x => x.Id == testId && x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion);
             if (test != null)
             {
                 foreach (var section in test.TestSections)
