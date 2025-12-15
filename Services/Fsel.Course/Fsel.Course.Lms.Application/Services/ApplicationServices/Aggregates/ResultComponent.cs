@@ -17,7 +17,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public abstract BaseTestStateModel ExportForTestState();
 
-        public abstract Task Submit();
+        public abstract Task Submit(Guid id);
 
         public IServiceProvider ServiceProvider { get; set; }
     }

@@ -5,9 +5,8 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using Common.ActionResults;
     using Common.Enums.ErrorCodes;
     using Core.Base;
-    using Core.Base.Interfaces;
-    using Domain.Entities.TestConfigs;
     using Domain.Enums;
+    using Domain.IRepositories;
     using Domain.Models.EntityModels.TestModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -15,8 +14,6 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using Services.ApplicationServices.Aggregates;
     using Services.UserServices;
     using Shared.Enums.ErrorCodes;
-    using TestStateModel = Domain.Models.EntityModels.PlacementTestModels.TestStateModel;
-
 
     public class ChoseTestCommand : IRequest<MethodResult<SingleTestStateModel>>
     {
@@ -30,25 +27,25 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
         private readonly IServiceProvider _serviceProvider;
         private readonly AuthContext _authContext;
         private readonly ITestService _testService;
-        private readonly IRepository<TestGroupResult> _testGroupResult;
+        private readonly ITestGroupResultRepository _testGroupResultRepository;
         private readonly ICategoryService _categoryService;
-        private IRepository<TestResult> _testResult;
+        private readonly ITestResultRepository _testResultRepository;
 
         public ChoseTestCommandHandler(AuthContext authContext,
             ITestService testService,
             IUserService userService,
-            IRepository<TestGroupResult> testGroupResult,
-            IRepository<TestResult> testResult,
+            ITestGroupResultRepository testGroupResultRepository,
+            ITestResultRepository testResultRepository,
             ICategoryService categoryService,
             IServiceProvider serviceProvider)
         {
             _authContext = authContext;
             _testService = testService;
             _userService = userService;
-            _testResult = testResult;
+            _testGroupResultRepository = testGroupResultRepository;
             _categoryService = categoryService;
             _serviceProvider = serviceProvider;
-            _testGroupResult = testGroupResult;
+            _testResultRepository = testResultRepository;
         }
 
         public async Task<MethodResult<SingleTestStateModel>> Handle(ChoseTestCommand request, CancellationToken cancellationToken)
@@ -74,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 return methodResult;
             }
 
-            var testResult = await _testResult.ReadQueryable.Include(x => x.TestGroupResult)
+            var testResult = await _testResultRepository.ReadQueryable.Include(x => x.TestGroupResult)
                 .FirstOrDefaultAsync(x => x.Id == request.TestResultId, cancellationToken);
 
             if (testResult.Status == EnumResultStatus.New)
@@ -82,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 var programContainPtFound = await _categoryService.GetProgramContainPtBySelectedProject(request.ProjectId, cancellationToken);
                 if (programContainPtFound != null)
                 {
-                    var testGroupResult = await _testService.InitTestGroupResult(programContainPtFound.Id, student.Id, EnumTestType.Test);
+                    var testGroupResult = await _testService.InitTestGroupResult(programContainPtFound.Id, student.Id, EnumTestType.SkillTest);
 
                     var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
                     await aggregate.Start();
@@ -92,14 +89,14 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 }
                 else
                 {
-                    var testGroupResult = await _testService.InitTestGroupResult(request.ProjectId, student.Id, EnumTestType.Test);
+                    var testGroupResult = await _testService.InitTestGroupResult(request.ProjectId, student.Id, EnumTestType.SkillTest);
                     methodResult.Result = new SingleTestStateModel{ StudentId = student.Id, Status = EnumResultStatus.ByPass,  TestGroupResultId = testGroupResult.Id };
                     return methodResult;
                 }
             }
             else
             {
-                var testGroupResult = await _testGroupResult.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
+                var testGroupResult = await _testGroupResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
 
                 var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
                 await aggregate.InitAggregate();

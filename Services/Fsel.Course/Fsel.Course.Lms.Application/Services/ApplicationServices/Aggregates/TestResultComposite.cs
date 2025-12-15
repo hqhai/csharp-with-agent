@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return stateModel;
         }
 
-        public override async Task Submit()
+        public override async Task Submit(Guid id)
         {
             var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(id));
             skillMatch?.Submit(id);
