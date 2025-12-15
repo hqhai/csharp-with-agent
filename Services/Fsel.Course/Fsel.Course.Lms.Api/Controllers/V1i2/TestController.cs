@@ -38,7 +38,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
             var queryResult = await _mediator.Send(getTestResultDetailQuery).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-        [HttpPost("start/{testResultId:guid}")]
+        [HttpPost("start-or-continue/{testResultId:guid}")]
         public async Task<IActionResult> SelectTestProgramId(Guid testResultId, [FromQuery]Guid projectId)
         {
             var command = new ChoseTestCommand { TestResultId = testResultId,  ProjectId = projectId};

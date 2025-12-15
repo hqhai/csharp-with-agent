@@ -55,7 +55,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             if (!SingleTestResult.TestResults.Any() || SingleTestResult.TestResults.All(x => x.Status == EnumResultStatus.Done))
             {
-                //var testService = ServiceProvider.GetRequiredService<ITestService>();
                 if (!TestResult.SectionResults.Any())
                 {
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
@@ -72,9 +71,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                     await AddNewTest(TestResult);
                 }
-                // var newTestResult = await testService.MakeSectionTestResult(SingleTestResult.StudentId!.Value, TestResult, SingleTestResult.ProgramId!.Value, TestResult.TestId!.Value);
-                //
-                // await AddNewTest(newTestResult);
             }
 
             if (!TestResultComposites.Any())
@@ -90,7 +86,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         private async Task AddNewTest(TestResult testResult)
         {
-            //SingleTestResult.TestResults.Add(testResult);
             if (!SingleTestResult.TestResults.Contains(testResult))
             {
                 SingleTestResult.TestResults.Add(testResult);
