@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     {
         public Guid TestResultId { get; set; }
         public Guid ProjectId { get; set; }
+        public EnumTestType TestType { get; set; }
     }
 
     public class ChoseTestCommandHandler : IRequestHandler<ChoseTestCommand, MethodResult<SingleTestStateModel>>
@@ -79,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 var programContainPtFound = await _categoryService.GetProgramContainPtBySelectedProject(request.ProjectId, cancellationToken);
                 if (programContainPtFound != null)
                 {
-                    var testGroupResult = await _testService.InitTestGroupResult(programContainPtFound.Id, student.Id, EnumTestType.SkillTest);
+                    var testGroupResult = await _testService.InitTestGroupResult(programContainPtFound.Id, student.Id, request.TestType);
 
                     var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
                     await aggregate.Start();
@@ -89,7 +90,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 }
                 else
                 {
-                    var testGroupResult = await _testService.InitTestGroupResult(request.ProjectId, student.Id, EnumTestType.SkillTest);
+                    var testGroupResult = await _testService.InitTestGroupResult(request.ProjectId, student.Id, request.TestType);
                     methodResult.Result = new SingleTestStateModel{ StudentId = student.Id, Status = EnumResultStatus.ByPass,  TestGroupResultId = testGroupResult.Id };
                     return methodResult;
                 }
