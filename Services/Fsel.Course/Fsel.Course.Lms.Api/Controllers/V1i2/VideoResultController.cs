@@ -1,9 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-namespace Fsel.Course.Lms.Api.Controllers
+namespace Fsel.Course.Lms.Api.Controllers.V1i2
 {
     using System.Net;
-    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -13,8 +12,10 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
+    using ReviewLessonVideoCommand = Application.Commands.VideoResultCmd.V1i2.ReviewLessonVideoCommand;
+    using UpdateShowTokenVideoResultCommand = Application.Commands.VideoResultCmd.V1i2.UpdateShowTokenVideoResultCommand;
 
-    [ApiVersions(ApiSettings.APIVersion1)]
+    [ApiVersions(ApiSettings.APIVersion1i2)]
     [Route(Settings.APIDefaultRoute + "/video-result")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
@@ -31,8 +32,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Review lesson video
         /// </summary>
         [HttpPost]
-        [MapToApiVersion(ApiSettings.APIVersion1)]
-        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         [ProducesResponseType(typeof(MethodResult<VideoResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ReviewLessonVideo([FromBody] ReviewLessonVideoCommand command)
@@ -44,14 +43,12 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Review lesson video
         /// </summary>
-        [HttpPut("{lessonResultId}")]
-        [MapToApiVersion(ApiSettings.APIVersion1)]
-        [MapToApiVersion(ApiSettings.APIVersion1i1)]
+        [HttpPut("{videoResultId}")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateShowCoinVideo([FromRoute] Guid lessonResultId)
+        public async Task<IActionResult> UpdateShowCoinVideo([FromRoute] Guid videoResultId)
         {
-            MethodResult<bool> commandResult = await _mediator.Send(new UpdateShowTokenVideoResultCommand { LessonResultId = lessonResultId }).ConfigureAwait(false);
+            MethodResult<bool> commandResult = await _mediator.Send(new UpdateShowTokenVideoResultCommand { VideoResultId = videoResultId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -61,8 +58,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPut("playback-speed")]
         [ProducesResponseType(typeof(MethodResult<VideoResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [MapToApiVersion(ApiSettings.APIVersion1)]
-        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         public async Task<IActionResult> SetPlaybackSpeed([FromBody] UpdatePlaybackSpeedCommand command)
         {
             MethodResult<VideoResultModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);

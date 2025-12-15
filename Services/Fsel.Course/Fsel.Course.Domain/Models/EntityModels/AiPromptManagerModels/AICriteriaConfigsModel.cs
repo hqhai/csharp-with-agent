@@ -8,7 +8,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels
     public class AICriteriaConfigsModel
     {
         public Guid AiPromptManagerId { get; set; }
-        public IList<AiCriteriaModel> AiCriteriaModel { get; set; }
+        public IList<AiCriteriaModel>? AiCriteriaModels { get; set; }
         public double? SettingTemperature { get; set; }
         public double? SettingWordMaxLength { get; set; }
         public double? SettingTopP { get; set; }

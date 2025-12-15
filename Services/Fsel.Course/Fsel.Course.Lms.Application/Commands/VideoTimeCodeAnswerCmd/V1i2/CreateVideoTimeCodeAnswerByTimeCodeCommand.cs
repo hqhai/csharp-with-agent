@@ -242,7 +242,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2
                     videoTimeCodeResult.CorrectTotalUngraded = (int)skillScoreUngradeds.Sum(x => x.TotalCount);
                 }
 
-                videoTimeCodeResult.Status = isDone ? EnumResultStatus.Process : EnumResultStatus.Done;
+                videoTimeCodeResult.Status = isDone ? EnumResultStatus.Done : EnumResultStatus.Process;
                 videoTimeCodeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
                 videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                 videoTimeCodeResult.SkillScores = skillScores;

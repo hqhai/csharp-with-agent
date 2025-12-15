@@ -25,7 +25,7 @@ namespace Fsel.Course.Infrastructure.Maps
                 .IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigsModel, AICriteriaConfigs>().IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigs, AICriteriaConfigsModel>()
-                .ForMember(d => d.AiCriteriaModel, o => o.Ignore())
+                .ForMember(d => d.AiCriteriaModels, o => o.Ignore())
                 .IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigs, AiCriteriaModel>().IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigs, CreateAiCriteriaConfigCommandModel>().IgnoreAllNonExisting();
