@@ -44,8 +44,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
         private readonly AddExpiredDateForStudentPublisher _addExpiredDateForStudentPublisher;
         private readonly AppSetting _appSetting;
         private readonly ILmsCourseService _lmsCourseService;
+        private readonly IPackageEventRepository _packageEventRepository;
 
-        public CreateOrderPaymentCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, IVoucherRepository voucherRepository, AppSetting appSetting, ILmsCourseService lmsCourseService)
+        public CreateOrderPaymentCommandHandler(IMapper mapper, IOrderRepository orderRepository, IMediator mediator, IPackageRepository packageRepository, IUserService userService, IEventRepository eventRepository, AddExpiredDateForStudentPublisher addExpiredDateForStudentPublisher, IVoucherRepository voucherRepository, AppSetting appSetting, ILmsCourseService lmsCourseService, IPackageEventRepository packageEventRepository)
         {
             _mapper = mapper;
             _orderRepository = orderRepository;
@@ -57,6 +58,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             _voucherRepository = voucherRepository;
             _appSetting = appSetting;
             _lmsCourseService = lmsCourseService;
+            _packageEventRepository = packageEventRepository;
         }
 
         public async Task<MethodResult<OrderModel>> Handle(CreateOrderPaymentCommand request, CancellationToken cancellationToken)
@@ -77,13 +79,62 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
 
             Package? package = null;
-            if (request.MonthNumber.HasValue)
+            Event? @event = null;
+            PackageEvent? packageEvent = null;
+
+            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            if (request.ExpireDate.HasValue)
             {
-                package = await _packageRepository.Queryable.FirstOrDefaultAsync(p => p.MonthNumber == request.MonthNumber, cancellationToken);
+                @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).ThenInclude(p => p.Package).Where(p => p.IsDefault).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                packageEvent = @event?.PackageEvents.OrderBy(p => p.Package?.MonthNumber).FirstOrDefault();
+                package = packageEvent?.Package;
             }
             else
             {
-                package = await _packageRepository.Queryable.OrderBy(p => p.MonthNumber).FirstOrDefaultAsync(cancellationToken);
+                if (!string.IsNullOrEmpty(request.EventCode))
+                {
+                    var query = await (from e in _eventRepository.Queryable
+                                       join pe in _packageEventRepository.Queryable on e.Id equals pe.EventId
+                                       join p in _packageRepository.Queryable on pe.PackageId equals p.Id
+                                       where e.Code == request.EventCode && p.MonthNumber == request.MonthNumber
+                                       select new
+                                       {
+                                           Event = e,
+                                           PackageEvent = pe,
+                                           Package = p
+                                       }).FirstOrDefaultAsync(cancellationToken);
+
+                    @event = query?.Event;
+                    packageEvent = query?.PackageEvent;
+                    package = query?.Package;
+                }
+                else
+                {
+                    var baseQuery =
+                    from e in _eventRepository.Queryable
+                    join pe in _packageEventRepository.Queryable on e.Id equals pe.EventId
+                    join p in _packageRepository.Queryable on pe.PackageId equals p.Id
+                    where p.MonthNumber == request.MonthNumber
+                    select new
+                    {
+                        Event = e,
+                        PackageEvent = pe,
+                        Package = p,
+                        IsActive = e.StartDate.HasValue && e.EndDate.HasValue &&
+                                   e.StartDate < currentDate && e.EndDate >= currentDate
+                    };
+
+                    var query = await baseQuery
+                        .OrderByDescending(x => x.IsActive)
+                        .ThenByDescending(x => x.Event.IsDefault)
+                        .ThenBy(x => x.Event.CreatedDate)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    @event = query?.Event;
+                    packageEvent = query?.PackageEvent;
+                    package = query?.Package;
+                }
             }
 
             if (package == null)
@@ -92,31 +143,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             }
 
-            var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
-
-            Event? @event = null;
-
-            if (!string.IsNullOrEmpty(request.EventCode))
-            {
-                @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.Code.Trim().ToLower() == request.EventCode.Trim().ToLower(), cancellationToken);
-            }
-            else
-            {
-                @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.StartDate.HasValue && p.EndDate.HasValue && p.StartDate < currentDate && p.EndDate >= currentDate, cancellationToken);
-            }
-
-            if (@event == null)
-            {
-                @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).FirstOrDefaultAsync(p => p.IsDefault, cancellationToken);
-            }
-
             if (@event == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(@event));
                 return methodResult;
             }
-
-            var packageEvent = @event.PackageEvents.FirstOrDefault(p => p.PackageId == package.Id);
 
             if (packageEvent == null)
             {
@@ -214,7 +245,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             });
 
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
 
             if (request.IsSendMail)
             {
@@ -237,12 +268,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 }
             }
 
-            var updateNextUnitResult = await _lmsCourseService.UpdateNextUnit(newOrder.UserId);
-            if (!updateNextUnitResult.IsSuccessStatusCode)
-            {
-                methodResult.AddError(updateNextUnitResult.Error);
-                return methodResult;
-            }
+            await _lmsCourseService.UpdateNextUnit(newOrder.UserId);
 
             return methodResult;
         }
