@@ -17,7 +17,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd
 
     public class ToolUpdateVideoTimeCodeCommand : IRequest<MethodResult<bool>>
     {
-
     }
 
     public class ToolUpdateVideoTimeCodeCommandHandler : IRequestHandler<ToolUpdateVideoTimeCodeCommand, MethodResult<bool>>

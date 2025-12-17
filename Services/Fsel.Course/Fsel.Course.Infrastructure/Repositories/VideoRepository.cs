@@ -149,7 +149,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<double> GetPercent(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResult).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResults).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
 
             var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
             var videoResultIds = lessonResults.Where(x => x.VideoResult != null).Select(x => x.VideoResult!.Id).ToList();

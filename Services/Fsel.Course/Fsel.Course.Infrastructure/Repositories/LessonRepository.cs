@@ -53,7 +53,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<double> GetPercentHomeWork(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResult).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResults).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
 
@@ -72,7 +72,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<double> GetPercentClassForum(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResult).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResults).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
 
