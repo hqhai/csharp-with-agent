@@ -53,9 +53,9 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         [ProducesResponseType(typeof(MethodResult<SingleTestStateModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [HttpPost("start-or-continue/{testResultId:guid}")]
-        public async Task<IActionResult> SelectTestProgramId(Guid testResultId, [FromQuery] EnumTestType testType)
+        public async Task<IActionResult> SelectTestProgramId(Guid testResultId)
         {
-            var command = new ChoseTestCommand { TestResultId = testResultId, TestType = testType};
+            var command = new ChoseTestCommand { TestResultId = testResultId };
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }

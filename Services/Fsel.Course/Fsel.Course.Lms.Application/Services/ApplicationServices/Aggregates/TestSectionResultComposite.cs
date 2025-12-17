@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 SectionId = TestSectionResult.TestSectionId,
                 SectionResultId = TestSectionResult.Id,
                 Status = TestSectionResult.Status,
-                TestLayoutType = TestSectionResult.TestSection.LayoutType,
+                TestLayoutType = TestSectionResult.TestSection?.LayoutType,
                 CorrectCount = TestSectionResult.CorrectCount,
                 TotalCount = TestSectionResult.SkillScores.Sum(x => x.TotalCount),
                 WorkingTime = TestSectionResult.WorkingTime,

@@ -15,7 +15,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public override BaseTestStateModel ExportForTestState()
         {
-            var childStates = Children?.Select(c => c.ExportForTestState()).ToList() ?? new List<BaseTestStateModel>();
+            var childStates = Children.Select(c => c.ExportForTestState()).ToList();
 
             var stateModel = new TestStateModel
             {
@@ -24,7 +24,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 PercentResult = TestResult.Percent,
                 Status = TestResult.Status,
                 Children = childStates,
-                StepFlowId = TestResult.StepFlowId,
                 UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
             };
             return stateModel;
