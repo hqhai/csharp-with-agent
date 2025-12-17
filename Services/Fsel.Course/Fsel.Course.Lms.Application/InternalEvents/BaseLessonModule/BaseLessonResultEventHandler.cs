@@ -48,20 +48,30 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
 
             // Kiểm tra các loại kết quả liên quan đến bài học
             var videoResults = await _videoResultRepository.ReadQueryable
-                                                           .Where(x => x.LessonResultId == lessonResult.Id && x.Status == EnumResultStatus.Done)
+                                                           .Where(x => x.LessonResultId == lessonResult.Id)
                                                            .ToListAsync(cancellationToken);
 
             var documentResults = await _documentResultRepository.ReadQueryable
-                                                                 .Where(x => x.LessonResultId == lessonResult.Id && x.Status == EnumResultStatus.Done)
+                                                                 .Where(x => x.LessonResultId == lessonResult.Id)
                                                                  .ToListAsync(cancellationToken);
 
             var classForumResults = await _classForumResultRepository.ReadQueryable
-                                                                     .Where(x => x.LessonResultId == lessonResult.Id && x.ResultStatus == EnumResultStatus.Done)
+                                                                     .Where(x => x.LessonResultId == lessonResult.Id)
                                                                      .ToListAsync(cancellationToken);
 
             var homeWorkResults = await _homeWorkResultRepository.ReadQueryable
-                                                                 .Where(x => x.LessonResultId == lessonResult.Id && x.Status == EnumResultStatus.Done)
+                                                                 .Where(x => x.LessonResultId == lessonResult.Id)
                                                                  .ToListAsync(cancellationToken);
+
+            bool hasUnfinished = videoResults.Any(x => x.Status != EnumResultStatus.Done)
+                              || documentResults.Any(x => x.Status != EnumResultStatus.Done)
+                              || classForumResults.Any(x => x.ResultStatus != EnumResultStatus.Done)
+                              || homeWorkResults.Any(x => x.Status != EnumResultStatus.Done);
+            if (hasUnfinished)
+            {
+                return;
+            }
+
             var totalPercentModule = videoResults.Sum(x => x.PercentModule)
                                      + classForumResults.Sum(x => x.PercentModule)
                                      + documentResults.Sum(x => x.PercentModule)
@@ -148,9 +158,45 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             if (nextModule != null)
             {
                 await UpdateNewResultLessonModule(nextModule, lessonResult, cancellationToken);
+
+                var nextDone = await IsLessonModuleCompletedAsync(nextModule, lessonResult, cancellationToken);
+                if (nextDone)
+                {
+                    await UpdateLessonResultAsync(lessonResult, lessonModules, cancellationToken);
+                }
                 return;
             }
             await UpdateLessonResultAsync(lessonResult, lessonModules, cancellationToken);
+        }
+
+        private async Task<bool> IsLessonModuleCompletedAsync(
+        LessonModule module,
+        LessonResult lessonResult,
+        CancellationToken cancellationToken)
+        {
+            var resultId = lessonResult.Id;
+
+            switch (module.LessonConfigType)
+            {
+                case EnumLessonConfigType.Video:
+                    return !await _videoResultRepository.ReadQueryable
+                        .AnyAsync(x => x.LessonResultId == resultId && x.Status != EnumResultStatus.Done, cancellationToken);
+
+                case EnumLessonConfigType.Document:
+                    return !await _documentResultRepository.ReadQueryable
+                        .AnyAsync(x => x.LessonResultId == resultId && x.Status != EnumResultStatus.Done, cancellationToken);
+
+                case EnumLessonConfigType.ClassForum:
+                    return !await _classForumResultRepository.ReadQueryable
+                        .AnyAsync(x => x.LessonResultId == resultId && x.ResultStatus != EnumResultStatus.Done, cancellationToken);
+
+                case EnumLessonConfigType.HomeWork:
+                    return !await _homeWorkResultRepository.ReadQueryable
+                        .AnyAsync(x => x.LessonResultId == resultId && x.Status != EnumResultStatus.Done, cancellationToken);
+
+                default:
+                    return true;
+            }
         }
 
         private static LessonModule? FindCurrentModule(IList<LessonModule> lessonModules, Guid? lessonModuleId)

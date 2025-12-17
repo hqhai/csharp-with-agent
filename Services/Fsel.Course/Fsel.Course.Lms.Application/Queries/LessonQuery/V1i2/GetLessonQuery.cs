@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.ModuleModels;
     using Fsel.Course.Domain.Models.EntityModels.V1i2;
+    using Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -33,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
         private readonly IDocumentRepository _documentRepository;
         private readonly ILessonRepository _lessonRepository;
         private readonly IMapper _mapper;
+        private readonly IMediator _mediator;
 
         public GetLessonQueryHandler(
             ILessonModuleRepository lessonModuleRepository,
@@ -43,7 +45,8 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             IClassForumRepository classForumRepository,
             IDocumentRepository documentRepository,
             ILessonRepository lessonRepository,
-            IMapper mapper)
+            IMapper mapper,
+            IMediator mediator)
         {
             _lessonModuleRepository = lessonModuleRepository;
             _lessonResultRepository = lessonResultRepository;
@@ -54,6 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             _documentRepository = documentRepository;
             _lessonRepository = lessonRepository;
             _mapper = mapper;
+            _mediator = mediator;
         }
 
         public async Task<MethodResult<LessonDtoModel>> Handle(GetLessonQuery request, CancellationToken cancellationToken)
@@ -68,6 +72,15 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 if (lessonResult == null || !methodResult.IsOK)
                 {
                     return methodResult;
+                }
+                if (lessonResult.Status == EnumResultStatus.New)
+                {
+                    var result = await _mediator.Send(new StartLessonCommand { LessonResultId = lessonResult.Id }, cancellationToken);
+                    if (!result.IsOK)
+                    {
+                        methodResult.AddErrorBadRequest(result.ErrorMessages);
+                        return methodResult;
+                    }
                 }
             }
             var lesson = await _lessonRepository.GetByIdAsync(request.LessonId);

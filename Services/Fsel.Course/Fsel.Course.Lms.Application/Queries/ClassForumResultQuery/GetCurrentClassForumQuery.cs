@@ -96,6 +96,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 .Where(x => x.Id == request.ClassForumResultId)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
 
+            if (classForumResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(classForumResult), request.ClassForumResultId);
+                return methodResult;
+            }
+
             var classForum = await _classForumRepository.Queryable
                 .Include(x => x.ClassForumFiles)
                 .Where(x => x.Id == classForumResult.ClassForumId)
