@@ -180,7 +180,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentProgressQuery
             {
                 return lessonProgress;
             }
-            var query = await _lessonResultRepository.Queryable.Include(x => x.VideoResult).Include(x => x.ClassForumResults).Include(x => x.HomeWorkResults)
+            var query = await _lessonResultRepository.Queryable.Include(x => x.VideoResults).Include(x => x.ClassForumResults).Include(x => x.HomeWorkResults)
                                  .Where(x => x.Id == lessonResult.Id)
                                  .Select(x => new
                                  {
