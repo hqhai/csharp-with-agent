@@ -62,15 +62,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
             ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
-            var staticModel = await _videoTimeCodeModelCachingService.GetOrSetAsync(videoTimeCode.Id.ToString(), async (ctx, _) =>
+            var timeCodeModel = await _videoTimeCodeModelCachingService.GetOrSetAsync(videoTimeCode.Id.ToString(), async (ctx, _) =>
             {
                 return await BuildVideoTimeCodeStaticModelInternalAsync(videoTimeCode, _);
             });
 
-            // 2) Clone ra bản mới để không làm bẩn cache
-            var timeCodeModel = _mapper.Map<VideoTimeCodeModel>(staticModel);
-
-            // 3) Bơm VideoTimeCodeResult (phần dynamic theo student/result) vào model vừa clone
             await MapVideoTimeCodeResultAsync(
                 timeCodeModel,
                 videoTimeCode,
