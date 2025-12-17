@@ -79,7 +79,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 .Where(x => x.StudentId == student.Id && x.TestType == EnumTestType.PlacementTest)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (ptTestResult == null)
+            if (!IsDonePt(ptTestResult))
             {
                 return new MethodResult<List<SelectionLevelModel>>();
             }
@@ -97,7 +97,14 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
             if (!ptTestResult.CurrentLevelId.HasValue)
             {
-                return new MethodResult<List<SelectionLevelModel>> { Result = _mapper.Map<List<SelectionLevelModel>>(program.Levels), StatusCode = 200 };
+                var levels = program.Levels.Select(x =>
+                {
+                    var selectionLevel = _mapper.Map<SelectionLevelModel>(x);
+                    selectionLevel.ProgramId = request.SelectedProgramId;
+                    selectionLevel.CanSelect = ptTestResult.Status == EnumResultStatus.ByPass;
+                    return selectionLevel;
+                }).ToList();
+                return new MethodResult<List<SelectionLevelModel>> { Result = _mapper.Map<List<SelectionLevelModel>>(levels), StatusCode = 200 };
             }
 
 
@@ -132,6 +139,10 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             return new MethodResult<List<SelectionLevelModel>> { Result = suggestLevels, StatusCode = 200 };
         }
 
+        public static bool IsDonePt(TestGroupResult? ptTestResult)
+        {
+            return ptTestResult?.Status == EnumResultStatus.Done || ptTestResult?.Status == EnumResultStatus.ByPass;
+        }
 
         public static bool IsMatchRule(SubjectConditionRule rule, int age, Guid levelId)
         {
