@@ -195,7 +195,7 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery
                                 LessonInstructions = _mapper.Map<IList<LessonInstructionModel>>(x.LessonInstructions.OrderBy(x => x.CreatedDate).ToList()),
                             }).OrderBy(x => x.DisplayOrder).ToListAsync(cancellationToken: cancellationToken);
             var lessonIds = lessons.Select(x => x.Id).ToList();
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.VideoResult)
+            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.VideoResults)
                                                         .Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                                         .WhereBulkContains(lessonIds, x => x.LessonId)
                                                         .Where(x => x.StudentId == studentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId)
