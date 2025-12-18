@@ -25,5 +25,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public bool CanSelect { get; set; }
 
         public Guid ProgramId { get; set; }
+
+        public string? CourseType { get; set; }
+
+        public bool IsCurrentLevel { get; set; }
     }
 }

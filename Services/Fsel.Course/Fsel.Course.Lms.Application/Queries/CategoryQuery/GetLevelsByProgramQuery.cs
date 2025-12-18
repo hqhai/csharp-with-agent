@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
     using Domain.IRepositories;
     using Common.ActionResults;
     using Domain.Entities;
+    using Domain.Entities.SubjectConditionRuleConfigs;
     using Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -123,20 +124,38 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 })
                 .FirstOrDefault();
 
-            var additionalLevelIds = matchestRule?.ConditionValues?
-                .SelectMany(x => x.LevelIds ?? new List<Guid>())
-                .Distinct().ToList() ?? new List<Guid>();
-
-            additionalLevelIds.Add(ptTestResult.CurrentLevelId.Value);
-
             var suggestLevels = program.Levels.Select(x =>
             {
                 var selectionLevel = _mapper.Map<SelectionLevelModel>(x);
                 selectionLevel.ProgramId = request.SelectedProgramId;
-                selectionLevel.CanSelect = additionalLevelIds.Contains(x.Id);
+
+                var matchCondition = GetMatchConditionValue(matchestRule?.ConditionValues, x.Id);
+                if (matchCondition != null)
+                {
+                    selectionLevel.CanSelect = true;
+                    selectionLevel.CourseType = matchCondition.Type.ToString();
+                }
+
+                if (!selectionLevel.CanSelect)
+                {
+                    selectionLevel.CanSelect = ptTestResult.CurrentLevelId.Value == x.Id;
+                }
+
+                selectionLevel.IsCurrentLevel = ptTestResult.CurrentLevelId.Value == x.Id;
+
                 return selectionLevel;
             }).ToList();
             return new MethodResult<List<SelectionLevelModel>> { Result = suggestLevels, StatusCode = 200 };
+        }
+
+        public static ConditionValue? GetMatchConditionValue(IList<ConditionValue>? conditionValues, Guid levelId)
+        {
+            if (conditionValues == null)
+            {
+                return null;
+            }
+
+            return conditionValues.FirstOrDefault(x => x.LevelIds != null && x.LevelIds.Contains(levelId));
         }
 
         public static bool IsDonePt(TestGroupResult? ptTestResult)
