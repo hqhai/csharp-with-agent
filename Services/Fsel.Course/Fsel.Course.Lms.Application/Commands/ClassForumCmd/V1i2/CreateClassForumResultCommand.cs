@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
     using Microsoft.Extensions.Logging;
     using CreateClassForumResultCommandModel = Domain.Models.CommandModels.ClassForumResults.V1i2.CreateClassForumResultCommandModel;
 
-    public class CreateClassForumResultCommand : CreateClassForumResultCommandModel,IRequest<MethodResult<ClassForumResultModel>>
+    public class CreateClassForumResultCommand : CreateClassForumResultCommandModel, IRequest<MethodResult<ClassForumResultModel>>
     {
     }
 
@@ -186,7 +186,28 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                         methodResult.AddErrorBadRequest(methodClass.ErrorMessages);
                         return methodResult;
                     }
+
                     (classForumResult, classForumDetailResult) = methodClass.Result;
+                    if (request.IsSubmit && classForumDetailResult != null)
+                    {
+                        if (classForumDetailResult.Status != EnumClassForumResultStatus.Draft && classForumResult.SubmissionCount == EnumSubmissionCount.FirstSubmit)
+                        {
+                            await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
+                            classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
+                            classForumResult.ResultStatus = EnumResultStatus.Done;
+                            if (!classForumResult.IsValid())
+                            {
+                                methodResult.AddErrorBadRequest(classForumResult.ErrorMessages);
+                                return methodResult;
+                            }
+
+                            await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+                            {
+                                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                            });
+                            await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                        }
+                    }
                 }
                 else if (classForumDetailResultAttemp1 != null && classForumDetailResultAttemp1.ProcessDate.HasValue && classForumResult.ClassForumDetailResults.All(x => x.SubmissionCount != EnumSubmissionCount.SecondSubmit))
                 {
@@ -207,7 +228,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                         methodResult.AddErrorBadRequest(method.ErrorMessages);
                         return methodResult;
                     }
-
                     (classForumResult, classForumDetailResult) = method.Result;
                 }
 
@@ -331,6 +351,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 {
                     await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
                     classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
+                    classForumResult.ResultStatus = EnumResultStatus.Done;
                     if (!classForumResult.IsValid())
                     {
                         methodResult.AddErrorBadRequest(classForumResult.ErrorMessages);
@@ -390,6 +411,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             methodResult.Result = (classForumResult, classForumDetailResult);
             return methodResult;
         }
+
         #endregion Save ClassForum Result
 
         private async Task DoQuestBoard(Guid studentId, EnumQuestBoardType type, EnumQuestBoardCategory category, CancellationToken cancellationToken)
@@ -408,7 +430,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
         {
             var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
             {
-                Feature = EnumTokenFeature.Learn, Mission = GetTokenMission(classForum, classForumResult), CourseType = courseType
+                Feature = EnumTokenFeature.Learn,
+                Mission = GetTokenMission(classForum, classForumResult),
+                CourseType = courseType
             });
             if (!tokenConfigs.IsSuccessStatusCode)
             {
