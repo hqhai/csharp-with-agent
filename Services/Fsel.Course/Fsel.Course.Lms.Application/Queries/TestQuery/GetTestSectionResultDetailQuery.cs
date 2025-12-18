@@ -11,7 +11,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
     public class GetTestSectionResultDetailQuery : IRequest<MethodResult<SectionStateModel>>
     {
-        public Guid SectionResultId { get; set; }
+        public Guid TestSectionResultId { get; set; }
     }
 
     public class GetTestSectionResultDetailQueryHandler : IRequestHandler<GetTestSectionResultDetailQuery, MethodResult<SectionStateModel>>
@@ -25,13 +25,13 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
         public async Task<MethodResult<SectionStateModel>> Handle(GetTestSectionResultDetailQuery request, CancellationToken cancellationToken)
         {
-            var testSectionResult = await _testSectionResultRepository.ReadQueryable.Where(x => x.Id == request.SectionResultId)
+            var testSectionResult = await _testSectionResultRepository.ReadQueryable.Where(x => x.Id == request.TestSectionResultId)
                 .Include(x => x.TestSection)
                 .ThenInclude(x => x.TestSectionQuestions)
                 .Include(x => x.TestAnswers)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            var sectionStateModel = new SectionStateModel { SectionResultId = request.SectionResultId };
+            var sectionStateModel = new SectionStateModel { SectionResultId = request.TestSectionResultId };
 
             if (testSectionResult == null)
             {
@@ -44,7 +44,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
             if (testSectionResult.TestSection?.TestSectionQuestions != null)
             {
-                sectionStateModel.Children = testSectionResult.TestSection.TestSectionQuestions.Select(BaseTestStateModel (x) =>
+                sectionStateModel.Children = testSectionResult.TestAnswers.Select(BaseTestStateModel (x) =>
                 {
                     var questionModel = new QuestionStateModel { QuestionId = x.QuestionId };
                     var testAnswer = testSectionResult.TestAnswers.FirstOrDefault(t => t.QuestionId == x.QuestionId);

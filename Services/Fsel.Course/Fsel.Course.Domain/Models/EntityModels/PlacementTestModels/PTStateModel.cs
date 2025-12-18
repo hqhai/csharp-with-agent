@@ -7,8 +7,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     using Fsel.Course.Domain.Enums;
     using Newtonsoft.Json;
     using Shared.Enums;
-    using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
-
     public class PtStateModel
     {
         public Guid? FlowId { get; set; }

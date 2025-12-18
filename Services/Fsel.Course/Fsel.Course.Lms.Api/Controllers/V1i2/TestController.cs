@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         [HttpGet("get-test-section-result-detail/{id:guid}")]
         public async Task<IActionResult> GetTestSectionResultDetail(Guid id)
         {
-            var getSectionResultDetailQuery = new GetTestSectionResultDetailQuery { SectionResultId = id };
+            var getSectionResultDetailQuery = new GetTestSectionResultDetailQuery { TestSectionResultId = id };
             var queryResult = await _mediator.Send(getSectionResultDetailQuery).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
