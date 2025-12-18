@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
     using Microsoft.EntityFrameworkCore;
 
     public class TestUnitItemInitializer : IUnitItemInitializer
@@ -44,6 +45,28 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             var testGroupResult = await GetTestGroupResultAsync(unitResult.Id, unitModule.Id, cancellationToken);
             if (testGroupResult != null)
             {
+                if (testGroupResult.Status == EnumResultStatus.Unfinished)
+                {
+                    foreach (var item in testGroupResult.TestResults)
+                    {
+                        if (item.Status != EnumResultStatus.Unfinished)
+                        {
+                            continue;
+                        }
+                        item.Status = EnumResultStatus.New;
+                    }
+                    await _testResultRepository.BulkUpdateList(testGroupResult.TestResults.ToList(), bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.Status };
+                    });
+
+                    testGroupResult.Status = EnumResultStatus.New;
+                    await _testGroupResultRepository.BulkUpdateList(new List<TestGroupResult> { testGroupResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.Status };
+                    });
+                }
+
                 return methodResult;
             }
 
@@ -110,7 +133,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
 
         private async Task<TestGroupResult?> GetTestGroupResultAsync(Guid unitResultId, Guid unitModuleId, CancellationToken cancellationToken)
         {
-            return await _testGroupResultRepository.ReadQueryable.Where(x => x.UnitResultId == unitResultId)
+            return await _testGroupResultRepository.Queryable.Where(x => x.UnitResultId == unitResultId)
                                                    .FirstOrDefaultAsync(x => x.UnitModuleId == unitModuleId, cancellationToken);
         }
     }

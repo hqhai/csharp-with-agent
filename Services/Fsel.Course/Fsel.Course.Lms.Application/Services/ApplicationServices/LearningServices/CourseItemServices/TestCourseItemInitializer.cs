@@ -43,6 +43,27 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             var testGroupResult = await GetTestGroupResultAsync(courseResult.Id, courseModule.Id, cancellationToken);
             if (testGroupResult != null)
             {
+                if (testGroupResult.Status == EnumResultStatus.Unfinished)
+                {
+                    foreach (var item in testGroupResult.TestResults)
+                    {
+                        if (item.Status != EnumResultStatus.Unfinished)
+                        {
+                            continue;
+                        }
+                        item.Status = EnumResultStatus.New;
+                    }
+                    await _testResultRepository.BulkUpdateList(testGroupResult.TestResults.ToList(), bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.Status };
+                    });
+
+                    testGroupResult.Status = EnumResultStatus.New;
+                    await _testGroupResultRepository.BulkUpdateList(new List<TestGroupResult> { testGroupResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.Status };
+                    });
+                }
                 return methodResult;
             }
 
@@ -106,7 +127,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
 
         private async Task<TestGroupResult?> GetTestGroupResultAsync(Guid courseResultId, Guid courseModuleId, CancellationToken cancellationToken)
         {
-            return await _testGroupResultRepository.ReadQueryable.Where(x => x.CourseResultId == courseResultId)
+            return await _testGroupResultRepository.Queryable.Include(x => x.TestResults)
+                                                   .Where(x => x.CourseResultId == courseResultId)
                                                    .FirstOrDefaultAsync(x => x.CourseModuleId == courseModuleId, cancellationToken);
         }
     }

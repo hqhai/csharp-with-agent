@@ -33,11 +33,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 return methodResult;
             }
 
-            var videoResult = await _videoResultRepository.ReadQueryable.Where(x => x.LessonResultId == lessonResult.Id)
+            var videoResult = await _videoResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id)
                                                           .Where(x => x.LessonModuleId == lessonModule.Id)
                                                           .FirstOrDefaultAsync(cancellationToken);
             if (videoResult != null)
             {
+                if (videoResult.Status == EnumResultStatus.Unfinished)
+                {
+                    videoResult.Status = EnumResultStatus.New;
+                    await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.Status };
+                    });
+                }
                 return methodResult;
             }
 
@@ -60,14 +68,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 VideoId = video.Id,
             };
 
-            try
+            await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
             {
-                await _videoResultRepository.BulkMergeAsync(new List<VideoResult> { videoResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
-                });
-            }
-            catch { }
+                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
+            });
             return methodResult;
         }
     }

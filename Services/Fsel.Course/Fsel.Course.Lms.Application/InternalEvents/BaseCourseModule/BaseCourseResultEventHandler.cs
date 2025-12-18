@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
+    using Fsel.Shared.Constants;
     using Microsoft.EntityFrameworkCore;
 
     public interface ICourseResultUpdater
@@ -45,14 +46,22 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
             ArgumentNullException.ThrowIfNull(courseResult);
             // Tính toán lại tiến độ hoàn thành bài học
             var testResults = await _testGroupResultRepository.ReadQueryable
-                                                                         .Where(x => x.CourseResultId == courseResult.Id && x.Status == EnumResultStatus.Done)
-                                                                         .Where(x => !x.UnitModuleId.HasValue)
-                                                                         .SelectMany(x => x.TestResults)
-                                                                         .ToListAsync(cancellationToken);
+                                                              .Where(x => x.CourseResultId == courseResult.Id)
+                                                              .Where(x => !x.UnitModuleId.HasValue)
+                                                              .SelectMany(x => x.TestResults)
+                                                              .ToListAsync(cancellationToken);
 
             var unitResults = await _unitResultRepository.ReadQueryable
-                                                                 .Where(x => x.CourseResultId == courseResult.Id && x.Status == EnumResultStatus.Done)
-                                                                 .ToListAsync(cancellationToken);
+                                                         .Where(x => x.CourseResultId == courseResult.Id)
+                                                         .ToListAsync(cancellationToken);
+
+            var hasUnfinishedLesson = unitResults.Any(x => x.Status != EnumResultStatus.Done);
+            var hasUnfinishedTestResult = testResults.Any(x => x.Status != EnumResultStatus.Done);
+            if (hasUnfinishedLesson || hasUnfinishedTestResult)
+            {
+                return;
+            }
+
             var totalPercentModule = unitResults.Sum(x => x.PercentModule) + testResults.Sum(x => x.PercentModule);
             var totalCorrectCount = unitResults.Sum(x => x.CorrectCount) + testResults.Sum(x => x.CorrectCount);
             var totalCorrectTotal = unitResults.Sum(x => x.CorrectTotal) + testResults.Sum(x => x.CorrectTotal);
@@ -87,13 +96,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
               .ToList();
 
             // Clamp về 0–100 cho chắc
-            if (totalPercentModule < 0)
+            if (totalPercentModule < ValueSettings.PercentMinValue)
             {
-                totalPercentModule = 0;
+                totalPercentModule = ValueSettings.PercentMinValue;
             }
-            else if (totalPercentModule > 100)
+            else if (totalPercentModule > ValueSettings.PercentMaxValue)
             {
-                totalPercentModule = 100;
+                totalPercentModule = ValueSettings.PercentMaxValue;
             }
             courseResult.SkillScores = aggregatedSkillScores;
             courseResult.CorrectCount = totalCorrectCount;
@@ -117,24 +126,41 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
                 return;
             }
 
-            var nextModule = GetNextModule(courseModules, currentModule);
-            if (nextModule != null)
+            var nextModules = GetNextModules(courseModules, currentModule);
+            if (nextModules != null)
             {
-                await UpdateNewResultCourseModule(nextModule, courseResult, cancellationToken);
-                return;
+                foreach (var module in nextModules)
+                {
+                    await UpdateNewResultCourseModule(module, courseResult, cancellationToken);
+                }
             }
-            await UpdateCourseResultAsync(courseResult, courseModules, cancellationToken);
+            var courseDone = await IsCourseModulesCompletedAsync(
+            courseResult,
+            courseModules,
+            cancellationToken);
+
+            if (courseDone)
+            {
+                await UpdateCourseResultAsync(courseResult, courseModules, cancellationToken);
+            }
         }
 
-        private async Task UpdateNewResultCourseModule(CourseModule nextModule, CourseResult courseResult, CancellationToken cancellationToken)
+        private async Task<bool> IsCourseModulesCompletedAsync(
+        CourseResult courseResult,
+        IList<CourseModule> courseModules,
+        CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(nextModule);
-            var initializer = _courseItemInitializerFactory.Get(nextModule.CourseConfigType);
-            if (initializer != null)
-            {
-                await initializer.InitializeAsync(nextModule, courseResult, cancellationToken);
-            }
-            return;
+            var resultId = courseResult.Id;
+
+            var queryLesson = _unitResultRepository.ReadQueryable
+                    .Where(x => x.CourseResultId == resultId && x.Status == EnumResultStatus.Done)
+                    .Select(x => x.Id);
+            var queryTest = _testGroupResultRepository.ReadQueryable
+                    .Where(x => x.CourseResultId == resultId && x.Status == EnumResultStatus.Done && !x.UnitModuleId.HasValue)
+                    .Select(x => x.Id);
+
+            var doneModuleIds = await queryLesson.Union(queryTest).ToListAsync(cancellationToken);
+            return doneModuleIds.Count == courseModules.Count;
         }
 
         private static CourseModule? FindCurrentModule(IList<CourseModule> courseModules, Guid? courseModuleId)
@@ -146,11 +172,22 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
             return courseModules.FirstOrDefault(m => m.Id == courseModuleId);
         }
 
-        private static CourseModule? GetNextModule(IList<CourseModule> courseModules, CourseModule currentModule)
+        private static IList<CourseModule> GetNextModules(IList<CourseModule> courseModules, CourseModule currentModule)
         {
-            return courseModules.Where(m => m.OpenOrder > currentModule.OpenOrder)
+            return courseModules.Where(m => m.OpenOrder == currentModule.OpenOrder + 1)
                                 .OrderBy(m => m.OpenOrder)
-                                .FirstOrDefault();
+                                .ToList();
+        }
+
+        private async Task UpdateNewResultCourseModule(CourseModule nextModule, CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(nextModule);
+            var initializer = _courseItemInitializerFactory.Get(nextModule.CourseConfigType);
+            if (initializer != null)
+            {
+                await initializer.InitializeAsync(nextModule, courseResult, cancellationToken);
+            }
+            return;
         }
 
         public async Task<IList<CourseModule>> GetCourseModulesAsync(Guid id)

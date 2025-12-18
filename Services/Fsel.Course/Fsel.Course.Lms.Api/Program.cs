@@ -189,6 +189,7 @@ builder.Services.AddScoped<IVideoCachingService, VideoCachingService>();
 builder.Services.AddScoped<IVideoTimeCodeModelCachingService, VideoTimeCodeModelCachingService>();
 builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
 builder.Services.AddScoped<ITimeCodeQuestionCachingService, TimeCodeQuestionCachingService>();
+builder.Services.AddScoped<ITestSectionCachingService, TestSectionCachingService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

@@ -34,11 +34,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 return methodResult;
             }
 
-            var lessonResult = await _lessonResultRepository.ReadQueryable.Where(x => x.UnitResultId == unitResult.Id)
+            var lessonResult = await _lessonResultRepository.Queryable.Where(x => x.UnitResultId == unitResult.Id)
                                                           .Where(x => x.UnitModuleId == unitModule.Id)
                                                           .FirstOrDefaultAsync(cancellationToken);
             if (lessonResult != null)
             {
+                if (lessonResult.Status == EnumResultStatus.Unfinished)
+                {
+                    lessonResult.Status = EnumResultStatus.New;
+                    await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.Status };
+                    });
+                }
                 return methodResult;
             }
 
