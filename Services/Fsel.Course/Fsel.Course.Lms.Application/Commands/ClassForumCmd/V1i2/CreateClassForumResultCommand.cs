@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
     using Microsoft.Extensions.Logging;
     using CreateClassForumResultCommandModel = Domain.Models.CommandModels.ClassForumResults.V1i2.CreateClassForumResultCommandModel;
 
-    public class CreateClassForumResultCommand : CreateClassForumResultCommandModel,IRequest<MethodResult<ClassForumResultModel>>
+    public class CreateClassForumResultCommand : CreateClassForumResultCommandModel, IRequest<MethodResult<ClassForumResultModel>>
     {
     }
 
@@ -331,6 +331,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 {
                     await _setTimeClassForumDonePublisher.Publish(new Core.Base.BaseModels.BaseQueueModel { QueueId = classForumResult.Id.ToString() }, cancellationToken);
                     classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
+                    classForumResult.ResultStatus = EnumResultStatus.Done;
                     if (!classForumResult.IsValid())
                     {
                         methodResult.AddErrorBadRequest(classForumResult.ErrorMessages);
@@ -390,6 +391,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             methodResult.Result = (classForumResult, classForumDetailResult);
             return methodResult;
         }
+
         #endregion Save ClassForum Result
 
         private async Task DoQuestBoard(Guid studentId, EnumQuestBoardType type, EnumQuestBoardCategory category, CancellationToken cancellationToken)
@@ -408,7 +410,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
         {
             var tokenConfigs = await _systemService.GetTokenConfigAsync(new GetTokenQueryModel
             {
-                Feature = EnumTokenFeature.Learn, Mission = GetTokenMission(classForum, classForumResult), CourseType = courseType
+                Feature = EnumTokenFeature.Learn,
+                Mission = GetTokenMission(classForum, classForumResult),
+                CourseType = courseType
             });
             if (!tokenConfigs.IsSuccessStatusCode)
             {

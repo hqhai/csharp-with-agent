@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
+    using Org.BouncyCastle.Ocsp;
     using Services.UserServices;
     using Shared.Enums.ErrorCodes;
 
@@ -21,7 +22,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
         public Guid LevelId { get; set; }
 
         public Guid ProgramId { get; set; }
-
     }
 
     public class ChooseCourseByLevelCommandHandler : IRequestHandler<ChooseCourseByLevelCommand, MethodResult<CourseModel>>
@@ -71,6 +71,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             if (courseResult != null)
             {
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
+                methodResult.AddErrorBadRequest($"StudentId: {student.Id} already has a course assigned.");
                 _logger.LogWarning("StudentId: {StudentId} already has a course assigned.", student.Id);
                 return methodResult;
             }
@@ -84,6 +85,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
             if (course == null)
             {
                 methodResult.StatusCode = StatusCodes.Status404NotFound;
+                methodResult.AddErrorBadRequest($"No course found for ProgramId: {request.ProgramId} and LevelId: {request.LevelId}");
                 _logger.LogWarning("No course found for ProgramId: {ProgramId} and LevelId: {LevelId}", request.ProgramId, request.LevelId);
                 return methodResult;
             }
