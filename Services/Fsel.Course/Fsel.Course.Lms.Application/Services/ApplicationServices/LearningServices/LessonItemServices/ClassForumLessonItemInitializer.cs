@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
 
     public class ClassForumLessonItemInitializer : ILessonItemInitializer
@@ -58,6 +59,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 ClassForumId = classForum.Id,
                 ResultStatus = EnumResultStatus.New,
                 LessonModuleId = lessonModule.Id,
+                SubmissionCount = EnumSubmissionCount.FirstSubmit
             };
 
             try
