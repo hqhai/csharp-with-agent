@@ -317,6 +317,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 return methodResult;
             }
 
+            classForumResult.Status = request.IsSubmit ? EnumClassForumResultStatus.Pending : EnumClassForumResultStatus.Draft;
             var classForumDetailResult = method.Result;
             if (classForumDetailResult == null)
             {
