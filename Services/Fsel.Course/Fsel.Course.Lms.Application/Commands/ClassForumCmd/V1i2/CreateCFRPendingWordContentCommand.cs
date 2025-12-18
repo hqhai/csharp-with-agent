@@ -188,11 +188,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                     request.Content ?? string.Empty,
                     request.FormFile);
 
+                classForumResult.ResultStatus = EnumResultStatus.Done;
                 classForumResult.IsPendingSpeechToText = true;
-                await _classForumResultRepository.BulkUpdateList(
-                    new List<ClassForumResult> { classForumResult },
-                    bulk => bulk.IgnoreOnUpdateExpression =
-                        e => new { e.ClassForumId, e.LessonResultId, e.StudentId });
+                await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult },
+                    bulk => bulk.IgnoreOnUpdateExpression = e => new { e.ClassForumId, e.LessonResultId, e.StudentId });
 
                 result.Result = true;
                 result.StatusCode = StatusCodes.Status200OK;
