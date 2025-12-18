@@ -3,18 +3,21 @@
 namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
 {
     using System.Linq.Dynamic.Core;
+    using System.Threading;
     using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
@@ -41,6 +44,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
         private readonly IRepository<TestGroupResult> _testGroupResultRepository;
         private readonly IRepository<TestResult> _testResultRepository;
         private readonly IMapper _mapper;
+        private readonly ICourseModuleCachingService _courseModuleCachingService;
+        private readonly ICourseItemInitializerFactory _courseItemInitializerFactory;
 
         public SaveCourseResultCommandHandler(ICourseResultRepository courseResultRepository
             , ICourseRepository courseRepository
@@ -53,7 +58,9 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
             , IUnitResultRepository unitResultRepository
             , IRepository<TestGroupResult> testGroupResultRepository
             , IRepository<TestResult> testResultRepository
-            , IMapper mapper)
+            , IMapper mapper
+            , ICourseModuleCachingService courseModuleCachingService
+            , ICourseItemInitializerFactory courseItemInitializerFactory)
         {
             _courseResultRepository = courseResultRepository;
             _courseRepository = courseRepository;
@@ -67,6 +74,8 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
             _testGroupResultRepository = testGroupResultRepository;
             _testResultRepository = testResultRepository;
             _mapper = mapper;
+            _courseModuleCachingService = courseModuleCachingService;
+            _courseItemInitializerFactory = courseItemInitializerFactory;
         }
 
         public async Task<MethodResult<CourseResultModel>> Handle(SaveCourseResultCommand request, CancellationToken cancellationToken)
@@ -103,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
                 catch
                 {
                 }
-                await SaveCourseModuleAsync(courseResult);
+                await SaveCourseModuleAsync(courseResult, cancellationToken);
                 await SaveCourseSettingAsync(course, cancellationToken);
             }
 
@@ -111,94 +120,21 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
             return methodResult;
         }
 
-        private async Task SaveCourseModuleAsync(CourseResult courseResult)
+        private async Task SaveCourseModuleAsync(CourseResult courseResult, CancellationToken cancellationToken)
         {
-            var courseModule = await _courseModuleRepository.ReadQueryable.Where(x => x.CourseId == courseResult.CourseId)
-                                                                      .OrderBy(x => x.OpenOrder)
-                                                                      .FirstOrDefaultAsync();
-            if (courseModule == null)
+            var minOpenOrder = await _courseModuleRepository.ReadQueryable
+                                                            .Where(x => x.CourseId == courseResult.CourseId)
+                                                            .MinAsync(x => x.OpenOrder, cancellationToken);
+
+            var courseModules = await GetCourseModulesAsync(courseResult.CourseId);
+            courseModules = courseModules.Where(x => x.OpenOrder == minOpenOrder).ToList();
+            if (courseModules == null || !courseModules.Any())
             {
                 return;
             }
-
-            if (courseModule.CourseConfigType == EnumCourseConfigType.Unit)
+            foreach (var module in courseModules)
             {
-                var unit = await _unitRepository.ReadQueryable.Where(x => x.OriginalId == courseModule.OriginalId)
-                                                .FirstOrDefaultAsync(x => x.VersionStatus == EnumVersionStatus.LastVersion);
-                var unitResult = await _unitResultRepository.ReadQueryable.Where(x => x.CourseModuleId == courseModule.Id)
-                                                            .Where(x => x.CourseResultId == courseResult.Id)
-                                                            .FirstOrDefaultAsync();
-                if (unitResult == null && unit != null)
-                {
-                    unitResult = new UnitResult
-                    {
-                        CourseModuleId = courseModule.Id,
-                        CourseResultId = courseResult.Id,
-                        CourseId = courseResult.CourseId,
-                        UnitId = unit.Id,
-                        StudentId = courseResult.StudentId,
-                        Status = EnumResultStatus.New,
-                    };
-                    try
-                    {
-                        await _unitResultRepository.BulkMergeAsync(new List<UnitResult> { unitResult }, bulk =>
-                        {
-                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseModuleId, c.CourseResultId, c.IsDeleted };
-                        });
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-            else
-            {
-                var test = await _testRepository.Queryable.Where(x => x.OriginalId == courseModule.OriginalId)
-                                                .FirstOrDefaultAsync(x => x.VersionStatus == EnumVersionStatus.LastVersion);
-
-                var testGroupResult = await _testGroupResultRepository.Queryable.Where(x => x.CourseModuleId == courseModule.Id)
-                                                                  .Where(x => x.CourseResultId == courseResult.Id)
-                                                                  .FirstOrDefaultAsync();
-                if (testGroupResult == null && test != null)
-                {
-                    testGroupResult = new TestGroupResult
-                    {
-                        CourseModuleId = courseModule.Id,
-                        CourseResultId = courseResult.Id,
-                        CourseId = courseResult.CourseId,
-                        StudentId = courseResult.StudentId,
-                        Status = EnumResultStatus.New,
-                        ProgramId = test.ProgramId,
-                        LevelId = test.LevelId,
-                        TestType = EnumTestType.FullTest
-                    };
-                    try
-                    {
-                        await _testGroupResultRepository.BulkMergeAsync(new List<TestGroupResult> { testGroupResult }, bulk =>
-                        {
-                            bulk.ColumnPrimaryKeyExpression = c => new { c.CourseModuleId, c.CourseResultId, c.IsDeleted };
-                        });
-                    }
-                    catch
-                    {
-                    }
-
-                    var testResult = new TestResult
-                    {
-                        TestGroupResultId = testGroupResult.Id,
-                        TestId = test.Id,
-                        StudentId = courseResult.StudentId,
-                        Status = EnumResultStatus.New,
-                    };
-                    try
-                    {
-                        await _testResultRepository.BulkMergeAsync(new List<TestResult> { testResult }, bulk =>
-                        {
-                            bulk.ColumnPrimaryKeyExpression = c => new { c.TestGroupResultId, c.TestId, c.StudentId, c.IsDeleted };
-                        });
-                    }
-                    catch { }
-                }
+                await UpdateNewResultCourseModule(module, courseResult, cancellationToken);
             }
         }
 
@@ -220,6 +156,29 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
                 Type = EnumUserCourseType.ResetAndLearnAgain,
                 UserId = _authContext.CurrentUserId
             }, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task UpdateNewResultCourseModule(CourseModule nextModule, CourseResult courseResult, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(nextModule);
+            var initializer = _courseItemInitializerFactory.Get(nextModule.CourseConfigType);
+            if (initializer != null)
+            {
+                await initializer.InitializeAsync(nextModule, courseResult, cancellationToken);
+            }
+            return;
+        }
+
+        public async Task<IList<CourseModule>> GetCourseModulesAsync(Guid id)
+        {
+            return await _courseModuleCachingService.GetOrSetAsync(id.ToString(), async (ctx, _) =>
+            {
+                var courseModules = await _courseModuleRepository.ReadQueryable
+                                                             .Where(x => x.CourseId == id)
+                                                             .ToListAsync(_);
+
+                return courseModules.OrderBy(x => x.DisplayOrder).ToList();
+            });
         }
     }
 }

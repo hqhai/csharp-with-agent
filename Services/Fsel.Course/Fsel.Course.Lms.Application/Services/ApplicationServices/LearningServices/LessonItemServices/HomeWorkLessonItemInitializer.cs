@@ -10,6 +10,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
     public class HomeWorkLessonItemInitializer : ILessonItemInitializer
@@ -33,21 +35,30 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 return methodResult;
             }
 
-            var homeWork = await _homeWorkRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
-                                                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                                    .FirstOrDefaultAsync(cancellationToken);
-
-            if (homeWork == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork), lessonModule.OriginalId);
-                return methodResult;
-            }
-
-            var homeWorkResult = await _homeWorkResultRepository.ReadQueryable.Where(x => x.LessonResultId == lessonResult.Id)
+            var homeWorkResult = await _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id)
                                                                 .Where(x => x.LessonModuleId == lessonModule.Id)
                                                                 .FirstOrDefaultAsync(cancellationToken);
             if (homeWorkResult != null)
             {
+                if (homeWorkResult.Status == EnumResultStatus.Unfinished)
+                {
+                    homeWorkResult.Status = EnumResultStatus.New;
+                    await _homeWorkResultRepository.BulkUpdateList(new List<HomeWorkResult> { homeWorkResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.Status };
+                    });
+                }
+
+                return methodResult;
+            }
+
+            var homeWork = await _homeWorkRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
+                                             .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                             .FirstOrDefaultAsync(cancellationToken);
+
+            if (homeWork == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWork), lessonModule.OriginalId);
                 return methodResult;
             }
 
@@ -59,15 +70,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 HomeWorkId = homeWork.Id,
                 LessonModuleId = lessonModule.Id,
             };
-
-            try
+            await _homeWorkResultRepository.BulkMergeAsync(new List<HomeWorkResult> { homeWorkResult }, bulk =>
             {
-                await _homeWorkResultRepository.BulkMergeAsync(new List<HomeWorkResult> { homeWorkResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.LessonModuleId, c.IsDeleted };
-                });
-            }
-            catch { }
+                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.LessonModuleId, c.IsDeleted };
+            });
             return methodResult;
         }
     }

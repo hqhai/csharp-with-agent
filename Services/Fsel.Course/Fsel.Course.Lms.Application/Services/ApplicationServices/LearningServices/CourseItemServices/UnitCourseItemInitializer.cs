@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
     using Microsoft.EntityFrameworkCore;
 
     public class UnitCourseItemInitializer : ICourseItemInitializer
@@ -39,6 +40,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             var unitResult = await GetUnitResultAsync(courseResult.Id, courseModule.Id, cancellationToken);
             if (unitResult != null)
             {
+                if (unitResult.Status == EnumResultStatus.Unfinished)
+                {
+                    unitResult.Status = EnumResultStatus.New;
+                    await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.Status };
+                    });
+                }
+
                 return methodResult;
             }
 
@@ -74,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
 
         private async Task<UnitResult?> GetUnitResultAsync(Guid courseResultId, Guid courseModuleId, CancellationToken cancellationToken)
         {
-            return await _unitResultRepository.ReadQueryable.Where(x => x.CourseResultId == courseResultId)
+            return await _unitResultRepository.Queryable.Where(x => x.CourseResultId == courseResultId)
                                               .FirstOrDefaultAsync(x => x.CourseModuleId == courseModuleId, cancellationToken);
         }
     }

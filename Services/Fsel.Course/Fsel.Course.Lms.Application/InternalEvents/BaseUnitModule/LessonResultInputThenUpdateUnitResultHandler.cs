@@ -22,9 +22,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             IUnitModuleRepository unitModuleRepository,
             IUnitResultRepository unitResultRepository,
             ILessonResultRepository lessonResultRepository,
-            ITestRepository testRepository,
             ITestGroupResultRepository testGroupResultRepository,
-            IUnitItemInitializerFactory unitItemInitializerFactory) : base(unitModuleCachingService, unitModuleRepository, unitResultRepository, lessonResultRepository, testRepository, testGroupResultRepository, unitItemInitializerFactory)
+            IUnitItemInitializerFactory unitItemInitializerFactory) : base(unitModuleCachingService, unitModuleRepository, unitResultRepository, lessonResultRepository, testGroupResultRepository, unitItemInitializerFactory)
         {
             _unitModuleRepository = unitModuleRepository;
             _unitResultRepository = unitResultRepository;

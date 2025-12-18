@@ -265,8 +265,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
 
             var homeWorkQuestionCount = await _homeWorkResultRepository.Queryable.Where(x => x.Id == homeWorkResult.Id).Select(x => new
             {
+                SkillId = x.HomeWork != null ? x.HomeWork.SkillId : null,
+                SkillName = x.HomeWork != null && x.HomeWork.Skill != null ? x.HomeWork.Skill.Name : string.Empty,
                 CourseSkill = x.HomeWork!.CourseSkill,
                 CourseLevel = x.HomeWork.CourseLevel,
+                CorrectQuestion = x.HomeWorkAnswers.Count(x => x.IsCorrect == true),
                 CorrectCount = x.HomeWorkAnswers.Sum(x => x.CorrectCount),
                 CorrectTotal = x.HomeWork.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
                 TotalQuestion = x.HomeWork.HomeWorkQuestions.Count,
@@ -369,6 +372,9 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkCmd.V1i1
                 TotalCount = homeWorkQuestionCount.CorrectTotal,
                 CountQuestion = homeWorkQuestionCount.TotalAnswer,
                 TotalQuestion = homeWorkQuestionCount.TotalQuestion,
+                SkillName = homeWorkQuestionCount.SkillName,
+                SkillId = homeWorkQuestionCount.SkillId,
+                CorrectQuestion = homeWorkQuestionCount.CorrectQuestion,
             };
             homeWorkResult.SkillScores = new List<SkillScores> { skillScores };
 

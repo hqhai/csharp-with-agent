@@ -33,21 +33,29 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 return methodResult;
             }
 
-            var document = await _documentRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
-                                                .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                                .FirstOrDefaultAsync(cancellationToken);
-
-            if (document == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(document), lessonModule.OriginalId);
-                return methodResult;
-            }
-
-            var documentResult = await _documentResultRepository.ReadQueryable.Where(x => x.LessonResultId == lessonResult.Id)
+            var documentResult = await _documentResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id)
                                                           .Where(x => x.LessonModuleId == lessonModule.Id)
                                                           .FirstOrDefaultAsync(cancellationToken);
             if (documentResult != null)
             {
+                if (documentResult.Status == EnumResultStatus.Unfinished)
+                {
+                    documentResult.Status = EnumResultStatus.New;
+                    await _documentResultRepository.BulkUpdateList(new List<DocumentResult> { documentResult }, bulk =>
+                    {
+                        bulk.ColumnInputExpression = c => new { c.Status };
+                    });
+                }
+
+                return methodResult;
+            }
+            var document = await _documentRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
+                                      .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                      .FirstOrDefaultAsync(cancellationToken);
+
+            if (document == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(document), lessonModule.OriginalId);
                 return methodResult;
             }
 
