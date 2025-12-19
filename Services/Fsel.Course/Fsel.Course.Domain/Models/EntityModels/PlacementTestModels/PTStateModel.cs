@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     using Fsel.Course.Domain.Enums;
     using Newtonsoft.Json;
     using Shared.Enums;
+
     public class PtStateModel
     {
         public Guid? FlowId { get; set; }
@@ -28,7 +29,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     public class BaseTestStateModel
     {
         public EnumResultStatus Status { get; set; }
-
         public DateTime? UpdatedDate { get; set; }
     }
 
@@ -70,7 +70,6 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
                 }
                 sectionStateModel.UpdateDetailInfo(section);
             }
-
         }
     }
 
@@ -122,9 +121,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     public class QuestionStateModel : BaseTestStateModel
     {
         public Guid? QuestionId { get; set; }
-
         public Guid? TestAnswerId { get; set; }
-
-        public AnswerModel Answer { get; set; }
+        public QuestionModel? Question { get; set; }
+        public AnswerModel? Answer { get; set; }
     }
 }

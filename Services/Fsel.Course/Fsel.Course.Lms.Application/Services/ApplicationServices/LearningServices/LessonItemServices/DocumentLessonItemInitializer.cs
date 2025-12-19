@@ -68,14 +68,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 DocumentId = document.Id,
             };
 
-            try
+            await _documentResultRepository.BulkMergeAsync(new List<DocumentResult> { documentResult }, bulk =>
             {
-                await _documentResultRepository.BulkMergeAsync(new List<DocumentResult> { documentResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
-                });
-            }
-            catch { }
+                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonModuleId, c.LessonResultId, c.IsDeleted };
+            });
             return methodResult;
         }
     }

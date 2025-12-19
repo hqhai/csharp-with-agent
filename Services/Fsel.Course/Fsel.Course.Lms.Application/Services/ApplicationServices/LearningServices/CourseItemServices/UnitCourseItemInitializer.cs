@@ -32,7 +32,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             ArgumentNullException.ThrowIfNull(courseResult);
             var methodResult = new VoidMethodResult();
 
-            if (courseModule.CourseConfigType != EnumCourseConfigType.Test)
+            if (courseModule.CourseConfigType != EnumCourseConfigType.Unit)
             {
                 return methodResult;
             }
@@ -68,16 +68,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 CourseId = courseResult.CourseId,
                 CourseModuleId = courseModule.Id,
                 CourseResultId = courseResult.Id,
+                UnitId = unit.Id,
             };
 
-            try
+            await _unitResultRepository.BulkMergeAsync(new List<UnitResult> { unitResult }, bulk =>
             {
-                await _unitResultRepository.BulkMergeAsync(new List<UnitResult> { unitResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseResultId, c.CourseModuleId, c.IsDeleted };
-                });
-            }
-            catch { }
+                bulk.ColumnPrimaryKeyExpression = c => new { c.CourseResultId, c.CourseModuleId, c.IsDeleted };
+            });
 
             return methodResult;
         }

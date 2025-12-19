@@ -69,17 +69,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 ClassForumId = classForum.Id,
                 ResultStatus = EnumResultStatus.New,
                 LessonModuleId = lessonModule.Id,
-                SubmissionCount = EnumSubmissionCount.FirstSubmit
+                SubmissionCount = EnumSubmissionCount.FirstSubmit,
             };
 
-            try
+            await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
             {
-                await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.LessonModuleId, c.IsDeleted };
-                });
-            }
-            catch { }
+                bulk.ColumnPrimaryKeyExpression = c => new { c.LessonResultId, c.LessonModuleId, c.IsDeleted };
+            });
             return methodResult;
         }
     }
