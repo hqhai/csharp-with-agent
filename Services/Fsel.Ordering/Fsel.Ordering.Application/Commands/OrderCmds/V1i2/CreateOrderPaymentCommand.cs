@@ -87,7 +87,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             if (request.ExpireDate.HasValue)
             {
                 @event = await _eventRepository.Queryable.Include(p => p.PackageEvents).ThenInclude(p => p.Package).Where(p => p.IsDefault).OrderBy(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                packageEvent = @event?.PackageEvents.Where(p => p.Status == EnumEventPackageStatus.Active).OrderBy(p => p.Package?.MonthNumber).FirstOrDefault();
+                packageEvent = @event?.PackageEvents.OrderBy(p => p.Package?.MonthNumber).FirstOrDefault();
                 package = packageEvent?.Package;
             }
             else
@@ -111,44 +111,25 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 }
                 else
                 {
-                    var query = await (from e in _eventRepository.Queryable
-                                       join pe in _packageEventRepository.Queryable on e.Id equals pe.EventId
-                                       join p in _packageRepository.Queryable on pe.PackageId equals p.Id
-                                       where p.MonthNumber == request.MonthNumber && e.StartDate.HasValue && e.EndDate.HasValue && e.StartDate < currentDate && e.EndDate >= currentDate
-                                       select new
-                                       {
-                                           Event = e,
-                                           PackageEvent = pe,
-                                           Package = p
-                                       }).OrderBy(p => p.Event.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-
-                    if (query == null)
+                    var baseQuery =
+                    from e in _eventRepository.Queryable
+                    join pe in _packageEventRepository.Queryable on e.Id equals pe.EventId
+                    join p in _packageRepository.Queryable on pe.PackageId equals p.Id
+                    where p.MonthNumber == request.MonthNumber
+                    select new
                     {
-                        query = await (from e in _eventRepository.Queryable
-                                       join pe in _packageEventRepository.Queryable on e.Id equals pe.EventId
-                                       join p in _packageRepository.Queryable on pe.PackageId equals p.Id
-                                       where p.MonthNumber == request.MonthNumber && e.IsDefault
-                                       select new
-                                       {
-                                           Event = e,
-                                           PackageEvent = pe,
-                                           Package = p
-                                       }).OrderBy(p => p.Event.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                    }
+                        Event = e,
+                        PackageEvent = pe,
+                        Package = p,
+                        IsActive = e.StartDate.HasValue && e.EndDate.HasValue &&
+                                   e.StartDate < currentDate && e.EndDate >= currentDate
+                    };
 
-                    if (query == null)
-                    {
-                        query = await (from e in _eventRepository.Queryable
-                                       join pe in _packageEventRepository.Queryable on e.Id equals pe.EventId
-                                       join p in _packageRepository.Queryable on pe.PackageId equals p.Id
-                                       where p.MonthNumber == request.MonthNumber
-                                       select new
-                                       {
-                                           Event = e,
-                                           PackageEvent = pe,
-                                           Package = p
-                                       }).OrderBy(p => p.Event.CreatedDate).FirstOrDefaultAsync(cancellationToken);
-                    }
+                    var query = await baseQuery
+                        .OrderByDescending(x => x.IsActive)
+                        .ThenByDescending(x => x.Event.IsDefault)
+                        .ThenBy(x => x.Event.CreatedDate)
+                        .FirstOrDefaultAsync(cancellationToken);
 
                     @event = query?.Event;
                     packageEvent = query?.PackageEvent;
@@ -264,7 +245,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 return methodResult;
             });
 
-            Thread.Sleep(3000);
+            Thread.Sleep(1000);
 
             if (request.IsSendMail)
             {
@@ -287,7 +268,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 }
             }
 
-            var updateNextUnitResult = await _lmsCourseService.UpdateNextUnit(newOrder.UserId);
+            await _lmsCourseService.UpdateNextUnit(newOrder.UserId);
 
             return methodResult;
         }
