@@ -186,6 +186,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             videoTimeCodeResult.Status,
                             videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone);
 
+                        questionModel.CorrectStatus = GetCorrectStatus(videoTimeCodeAnswer, isShowSubStatus);
                         questionModel.ResultAnswer = _mapper.Map<AnswerModel>(videoTimeCodeAnswer);
                     }
                 }
@@ -203,13 +204,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             timeCode.VideoTimeCodeResult = GetVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode);
         }
 
-        private static EnumCorrectStatus? GetCorrectStatus(VideoTimeCodeAnswer? videoTimeCodeAnswer)
+        private static EnumCorrectStatus? GetCorrectStatus(VideoTimeCodeAnswer? videoTimeCodeAnswer, bool isShowAnswer = false)
         {
             EnumCorrectStatus? status = null;
             if (videoTimeCodeAnswer != null && videoTimeCodeAnswer.IsCorrect.HasValue)
             {
                 status = EnumCorrectStatus.Process;
-                if (videoTimeCodeAnswer.Status == EnumAnswerStatus.Done)
+                if (isShowAnswer || videoTimeCodeAnswer.Status == EnumAnswerStatus.Done)
                 {
                     status = videoTimeCodeAnswer.IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
                 }

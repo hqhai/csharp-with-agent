@@ -41,6 +41,12 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public LevelModel? Level { get; set; }
         public ProgramModel? Program { get; set; }
         public EnumVersion VersionType { get; set; }
+
+        public bool IsShowToken { get; set; }
+        public EnumBadge? Badge { get; set; }
+        public string? BadgeDescription { get; set; }
+        public double AnswerTime { get; set; }
+
         public IList<VideoPercentConfig>? VideoPercentConfigs { get; set; }
         public IList<VideoTimeCodeModel>? VideoTimeCodes { get; set; }
         public VideoResultModel? VideoResult { get; set; }
