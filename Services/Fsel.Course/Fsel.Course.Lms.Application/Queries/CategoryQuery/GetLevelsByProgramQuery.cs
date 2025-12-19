@@ -95,20 +95,6 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 return new MethodResult<List<SelectionLevelModel>>();
             }
 
-
-            if (!ptTestResult.CurrentLevelId.HasValue)
-            {
-                var levels = program.Levels.Select(x =>
-                {
-                    var selectionLevel = _mapper.Map<SelectionLevelModel>(x);
-                    selectionLevel.ProgramId = request.SelectedProgramId;
-                    selectionLevel.CanSelect = ptTestResult.Status == EnumResultStatus.ByPass;
-                    return selectionLevel;
-                }).ToList();
-                return new MethodResult<List<SelectionLevelModel>> { Result = _mapper.Map<List<SelectionLevelModel>>(levels), StatusCode = 200 };
-            }
-
-
             var age = DateTimeHelper.GetYearOld(human.Birthday);
             var suggestCondition = await _subjectConditionRepository.ReadQueryable
                 .Where(x => x.CategoryId == program.ParentId && x.Status && x.Type == EnumConditionType.CourseSuggest)
@@ -116,13 +102,14 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 .FirstOrDefaultAsync(cancellationToken);
 
 
-            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, ptTestResult.CurrentLevelId.Value))
+            var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, ptTestResult.CurrentLevelId))
                 .OrderBy(x =>
                 {
                     var ageCondition = x?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.Age);
                     return ageCondition?.FromAge == null ? 999 : Math.Abs(age - ageCondition.FromAge.Value);
                 })
                 .FirstOrDefault();
+
 
             var suggestLevels = program.Levels.Select(x =>
             {
@@ -138,10 +125,10 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
                 if (!selectionLevel.CanSelect)
                 {
-                    selectionLevel.CanSelect = ptTestResult.CurrentLevelId.Value == x.Id;
+                    selectionLevel.CanSelect = !ptTestResult.CurrentLevelId.HasValue ? true : ptTestResult.CurrentLevelId.Value == x.Id;
                 }
 
-                selectionLevel.IsCurrentLevel = ptTestResult.CurrentLevelId.Value == x.Id;
+                selectionLevel.IsCurrentLevel = ptTestResult.CurrentLevelId == x.Id;
 
                 return selectionLevel;
             }).ToList();
@@ -163,7 +150,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             return ptTestResult?.Status == EnumResultStatus.Done || ptTestResult?.Status == EnumResultStatus.ByPass;
         }
 
-        public static bool IsMatchRule(SubjectConditionRule rule, int age, Guid levelId)
+        public static bool IsMatchRule(SubjectConditionRule rule, int age, Guid? levelId)
         {
             var ageCondition = rule?.ConditionRules?.FirstOrDefault(x => x.Type == EnumSubjectConditionRuleType.Age);
             if (ageCondition != null)
@@ -185,7 +172,6 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                     case EnumOperatorType.LessThanEqual when age > ageCondition.FromAge.Value:
                     case EnumOperatorType.Between when !ageCondition.ToAge.HasValue || age > ageCondition.ToAge.Value ||
                                                        age < ageCondition.FromAge.Value:
-                    default:
                         return false;
                 }
             }
@@ -196,10 +182,15 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 return true;
             }
 
+            if (!levelId.HasValue)
+            {
+                return false;
+            }
+
             return levelCondition.OperatorType switch
             {
-                EnumOperatorType.Include => levelCondition.LevelIds != null && levelCondition.LevelIds.Contains(levelId),
-                EnumOperatorType.Exclude => levelCondition.LevelIds == null || !levelCondition.LevelIds.Contains(levelId),
+                EnumOperatorType.Include => levelCondition.LevelIds != null && levelCondition.LevelIds.Contains(levelId.Value),
+                EnumOperatorType.Exclude => levelCondition.LevelIds == null || !levelCondition.LevelIds.Contains(levelId.Value),
                 _ => true
             };
         }
