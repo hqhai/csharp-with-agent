@@ -96,9 +96,9 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(student.Human?.FullName) || string.IsNullOrEmpty(student.Human?.Email))
+            if (string.IsNullOrEmpty(student.User?.FullName) || string.IsNullOrEmpty(student.User?.Email))
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human.FullName), nameof(student.Human.Email));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.User.FullName), nameof(student.User.Email));
                 return methodResult;
             }
 
@@ -124,7 +124,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
             string code = string.Empty;
             do
             {
-                var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.Human?.Code }, cancellationToken).ConfigureAwait(false);
+                var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student.User?.Code }, cancellationToken).ConfigureAwait(false);
                 code = codeSend.Result ?? string.Empty;
             } while (await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken) && (newOrder == null || newOrder.Code != code));
             if (newOrder != null)
@@ -203,11 +203,11 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
         private static void AddDataIntoOrder(Order order, string? code, decimal price, Guid courseId, StudentModel student)
         {
-            order.FullName = student.Human?.FullName;
-            order.PhoneNumber = student.Human?.PhoneNumber;
-            order.Email = student.Human?.Email;
+            order.FullName = student.User?.FullName;
+            order.PhoneNumber = student.User?.PhoneNumber;
+            order.Email = student.User?.Email;
             order.Status = EnumOrderStatus.New;
-            order.UserId = student.Human?.UserId ?? default;
+            order.UserId = student?.UserId ?? default;
             order.Code = code;
             order.Price = price;
             order.DiscountPrice = (decimal)NumberHelper.ConvertDoublePercent(Convert.ToDouble(order.Price * order.DiscountPercent));

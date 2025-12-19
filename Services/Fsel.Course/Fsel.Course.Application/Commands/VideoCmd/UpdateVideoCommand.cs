@@ -30,6 +30,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         private readonly ICategoryRepository _categoryRepository;
         private readonly ILevelRepository _levelRepository;
         private readonly IVideoResultRepository _videoResultRepository;
+        private readonly IVideoSubFilePathRepository _videoSubFilePathRepository;
         private readonly IMediator _mediator;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
@@ -38,6 +39,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             , ICategoryRepository categoryRepository
             , ILevelRepository levelRepository
             , IVideoResultRepository videoResultRepository
+            , IVideoSubFilePathRepository videoSubFilePathRepository
             , IMediator mediator)
         {
             _videoRepository = videoRepository;
@@ -46,6 +48,7 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             _categoryRepository = categoryRepository;
             _levelRepository = levelRepository;
             _videoResultRepository = videoResultRepository;
+            _videoSubFilePathRepository = videoSubFilePathRepository;
             _mediator = mediator;
         }
 
@@ -124,6 +127,13 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     methodResult.AddErrorBadRequest(video.ErrorMessages);
                     return methodResult;
                 }
+
+                var videoSubFilePaths = await _videoSubFilePathRepository.Queryable.Where(p => p.VideoId == video.Id).ToListAsync(cancellationToken);
+                if (videoSubFilePaths.Any())
+                {
+                    await _videoSubFilePathRepository.DeleteListAsync(videoSubFilePaths);
+                }
+
                 var method = await _videoConverter.UpdateTimeCodeToVideo(video, request);
                 if (!method.IsOK)
                 {

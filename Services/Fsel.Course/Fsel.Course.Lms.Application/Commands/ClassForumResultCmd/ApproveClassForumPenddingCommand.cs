@@ -129,7 +129,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
             if (lessonResult != null)
             {
                 var user = await _userService.GetUserByStudentId(lessonResult.StudentId);
-                var userId = user?.Content?.Result?.Human?.UserId;
+                var userId = user?.Content?.Result?.UserId;
 
                 GetFeatureModuleQuery query = new GetFeatureModuleQuery
                 {

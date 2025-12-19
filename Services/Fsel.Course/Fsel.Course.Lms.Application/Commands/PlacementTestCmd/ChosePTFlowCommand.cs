@@ -73,10 +73,9 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-
-            if (student.Human == null)
+            if (student.User == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.User));
                 return methodResult;
             }
 
@@ -90,7 +89,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             var programContainPtFound = await _categoryService.GetProgramContainPtBySelectedProject(request.ProjectId, cancellationToken);
             if (programContainPtFound != null)
             {
-                var age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+                var age = DateTimeHelper.GetYearOld(student.User.Birthday);
                 var flowMatch = await _flowService.GetHierarchicalFlowByCondition(x => x.ProgramId == programContainPtFound.Id
                                                                                        && x.Status == EnumStatus.Active
                                                                                        && x.FromAge <= age && x.ToAge >= age);

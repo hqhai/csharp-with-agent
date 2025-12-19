@@ -21,6 +21,7 @@ namespace Fsel.Ordering.Application.Services.UserService.Models
         public Guid? CourseId { get; set; }
         public Guid? SenderId { get; set; }
         public DateTime? ExpiredDate { get; set; }
-        public HumanModel? Human { get; set; }
+        public Guid UserId { get; set; }
+        public UserModel? User { get; set; }
     }
 }

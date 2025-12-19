@@ -3,6 +3,7 @@
 namespace Fsel.Sender.Domain.Models.Commands
 {
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.SenderTemplates;
 
     public class SaveMessageHistoryByTypeEmailCommandModel
     {
@@ -19,5 +20,7 @@ namespace Fsel.Sender.Domain.Models.Commands
         public EnumSenderTemplate? Template { get; set; }
 
         public EnumMessageHistoryStatus Status { get; set; }
+
+        public IList<SendReceiverCommandModel> Receivers { get; set; } = new List<SendReceiverCommandModel>();
     }
 }

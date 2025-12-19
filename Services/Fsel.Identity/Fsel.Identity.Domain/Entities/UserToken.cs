@@ -8,6 +8,9 @@ namespace Fsel.Identity.Domain.Entities
 {
     public class UserToken : UserTokenEntity
     {
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? IpAddress { get; set; }
+
         [MaxLength(50, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public override string? RefreshToken { get; set; }
     }

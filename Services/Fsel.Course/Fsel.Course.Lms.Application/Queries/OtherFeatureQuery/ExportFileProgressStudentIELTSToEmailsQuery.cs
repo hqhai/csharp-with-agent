@@ -189,30 +189,30 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     {
                         new GetFeatureAccessTimeExportQueryModel
                         {
-                            UserId = student.Human?.UserId ?? default,
+                            UserId = student.UserId,
                             EnumFeature = EnumFeature.VideoLesson,
                             CourseId = student.CourseId,
                         },
                         new GetFeatureAccessTimeExportQueryModel
                         {
-                            UserId = student.Human?.UserId ?? default,
+                            UserId = student.UserId,
                             EnumFeature = EnumFeature.ClassForum,
                             CourseId =student.CourseId,
                         },
                         new GetFeatureAccessTimeExportQueryModel
                         {
-                            UserId = student.Human?.UserId ?? default,
+                            UserId = student.UserId,
                             EnumFeature = EnumFeature.HomeWork,
                             CourseId = student.CourseId,
                         },
                         new GetFeatureAccessTimeExportQueryModel
                         {
-                            UserId = student.Human?.UserId ?? default,
+                            UserId = student.UserId,
                             CourseId = student.CourseId,
                         },
                         new GetFeatureAccessTimeExportQueryModel
                         {
-                            UserId = student.Human?.UserId ?? default,
+                            UserId = student.UserId,
                         }
                     };
                 }).ToList()
@@ -234,14 +234,14 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 var mockTestResultGroup = mockTestResultGroups.FirstOrDefault(x => x.StudentId == student.Id);
                 var skillMockTestResultGroup = skillMockTestResultGroups.FirstOrDefault(x => x.StudentId == student.Id);
                 var lessonResult = lessonResults.FirstOrDefault(x => x.StudentId == student.Id);
-                var featureAccessTimeStudent = featureAccessTimes?.Where(x => x.CreatedUserId == student.Human?.UserId).ToList();
+                var featureAccessTimeStudent = featureAccessTimes?.Where(x => x.CreatedUserId == student.UserId).ToList();
 
                 var featureAccessTime = featureAccessTimeStudent?.FirstOrDefault(x => !x.EnumFeature.HasValue && !x.CourseId.HasValue);
 
                 var studentProgressReport = new StudentProgressReportIELTSModel
                 {
-                    FullName = student.Human?.FullName,
-                    Email = student.Human?.Email,
+                    FullName = student.User?.FullName,
+                    Email = student.User?.Email,
                     School = student.School ?? schools?.FirstOrDefault(x => x.Id == student.SchoolId)?.Name,
                     ProcessDate = courseResult?.ProcessDate,
                     ExpiredDate = student.ExpiredDate,
@@ -251,7 +251,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 
                 if (placementTestStudent != null && placementTestStudent.PlacementTestEnd != null)
                 {
-                    int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.Human?.Birthday);
+                    int age = Shared.Helpers.DateTimeHelper.GetYearOld(student.User?.Birthday);
                     var (levelCompleted, isLock) = placementTestStudent.PlacementTestEnd.Level.GetLevelInScore(placementTestStudent.PlacementTestEnd.Percent, IeltsScoreHelper.GetInitialAge(placementTestStudent.PlacementTestCurrent?.Level, age));
                     studentProgressReport.StatusUser = isLock ? ValueStatusUser.CompletedPlacementTest : ValueStatusUser.NotCompletedPlacementTest;
                 }

@@ -24,6 +24,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Kros.Extensions;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using SharedStringHelper = Shared.Helpers.StringHelper;
 
     public class SubmitMockTestAnswerAICommand : MockTestAnswerResponseModel, IRequest<bool>
     {
@@ -99,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     }
 
                     var aIResponse = await SendChatGPT(aiConfig, item.SystemRoleAlConfig!, userAiConfig, cancellationToken);
-
+                    aIResponse = SharedStringHelper.RemoveMarkdownFromJson(aIResponse);
                     resultDictionary[item.Prompts![0].Type] = aIResponse!;
 
                     await SendWebSocket(aIResponse, item.Prompts![0].Type.ToString(), section.DisplayOrder, request.MockTestResultId, cancellationToken);
@@ -121,6 +122,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                     }
 
                     var aIResponse = await SendChatGPT(aiConfig, aiConfig.SystemRoleAlConfig, userAiConfig, cancellationToken);
+                    aIResponse = SharedStringHelper.RemoveMarkdownFromJson(aIResponse);
 
                     resultDictionary[item.Type] = aIResponse!;
 
@@ -146,7 +148,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
             {
                 return true;
             }
-            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId);
+            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefault(x => x.SectionGroupId == request.SectionGroupId && x.MockTestResultId == request.MockTestResultId && x.CreatedDate >= mockTestResult.CreatedDate);
             if (sectionGroupResult == null)
             {
                 return true;
@@ -172,8 +174,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 {
                     ToEmails = new List<string> { _appSetting!.CustomerSupportConfig!.Email! },
                     CcEmails = _appSetting!.CustomerSupportConfig!.CCEmail!,
-                    Content = ValueSettings.CustomerSupport.Content.Format(student.Human?.Email ?? default, mockTestResult.MockTest.Name),
-                    Subject = ValueSettings.CustomerSupport.TitleMail.Format(student.Human?.Email ?? default),
+                    Content = ValueSettings.CustomerSupport.Content.Format(student.User?.Email ?? default, mockTestResult.MockTest.Name),
+                    Subject = ValueSettings.CustomerSupport.TitleMail.Format(student.User?.Email ?? default),
                 };
 
                 await _senderService.SendEmailAsync(model);

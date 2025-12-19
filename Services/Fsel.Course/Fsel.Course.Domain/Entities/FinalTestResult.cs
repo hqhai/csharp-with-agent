@@ -16,6 +16,11 @@ namespace Fsel.Course.Domain.Entities
         public Guid CourseId { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
+
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
+
         public ICollection<FinalTestAnswer> FinalTestAnswers { get; set; } = new List<FinalTestAnswer>();
         public ICollection<SectionGroupResult> SectionGroupResults { get; set; } = new List<SectionGroupResult>();
     }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -34,15 +34,15 @@ namespace Fsel.Identity.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_UserReferrals", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserReferrals_AspNetUsers_ReceiverId",
+                        name: "FK_UserReferrals_Users_ReceiverId",
                         column: x => x.ReceiverId,
-                        principalTable: "AspNetUsers",
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_UserReferrals_AspNetUsers_SenderId",
+                        name: "FK_UserReferrals_Users_SenderId",
                         column: x => x.SenderId,
-                        principalTable: "AspNetUsers",
+                        principalTable: "Users",
                         principalColumn: "Id");
                 });
 

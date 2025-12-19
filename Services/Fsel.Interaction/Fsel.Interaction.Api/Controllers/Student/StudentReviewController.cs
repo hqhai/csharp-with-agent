@@ -18,7 +18,7 @@ namespace Fsel.Interaction.Api.Controllers.Student
     [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/student/review")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class StudentReviewController : ControllerBase
     {
         private readonly IMediator _mediator;

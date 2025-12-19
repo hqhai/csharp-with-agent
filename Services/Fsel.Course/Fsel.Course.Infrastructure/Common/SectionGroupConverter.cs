@@ -68,9 +68,10 @@ namespace Fsel.Course.Infrastructure.Common
 
             if (sectionGroupResult.MockTestResultId.HasValue && sectionGroup.CourseSkill != EnumCourseSkill.Writing && sectionGroup.CourseSkill != EnumCourseSkill.Speaking)
             {
-                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
-                                              .OrderBy(x => x.CreatedDate)
-                                              .ToListAsync();
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                     .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                     .OrderBy(x => x.CreatedDate)
+                                                                     .ToListAsync();
                 if (version == (int)EnumVersion.V1)
                 {
                     isHighestStreaks = mockTestAnswers.Select(x => x.IsCorrect == true).ToList();
@@ -86,8 +87,9 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (sectionGroupResult.FinalTestResultId.HasValue)
             {
-                isHighestStreaks = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
-                                            .Select(x => x.IsCorrect == true).ToListAsync();
+                isHighestStreaks = await _finalTestAnswerRepository.Queryable.Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                   .Where(x => x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                   .Select(x => x.IsCorrect == true).ToListAsync();
             }
             return isHighestStreaks.GetHighestStreak();
         }
@@ -135,12 +137,16 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (sectionGroupResult.FinalTestResultId.HasValue)
             {
-                var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync();
+                var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Include(x => x.SectionQuestion)
+                                                                       .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                       .Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync();
                 return await GetSkillScore(GetSkillScore(sectionGroup, new List<BaseAnswer>(finalTestAnswers)), finalTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList());
             }
             else
             {
-                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion).Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync();
+                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Include(x => x.SectionQuestion)
+                                                                               .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                               .Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync();
                 return await GetSkillScore(GetSkillScore(sectionGroup, new List<BaseAnswer>(placementTestAnswers)), placementTestAnswers.Select(x => x.SectionQuestion).Select(x => x!.QuestionId).ToList());
             }
         }
@@ -149,7 +155,7 @@ namespace Fsel.Course.Infrastructure.Common
         {
             if (ids != null && ids.Any())
             {
-                skillScore.TotalCount = await _questionRepository.Queryable.Where(x => ids.Contains(x.Id)).SumAsync(x => x.CorrectTotal);
+                skillScore.TotalCount = await _questionRepository.Queryable.WhereBulkContains(ids, x => x.Id).SumAsync(x => x.CorrectTotal);
                 skillScore.TotalQuestion = ids.Count;
             }
             return skillScore;
@@ -163,6 +169,7 @@ namespace Fsel.Course.Infrastructure.Common
 
             var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Include(x => x.SectionQuestion)
                 .ThenInclude(x => x.Question)
+                .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
                 .Where(x => x.SectionGroupResultId == sectionGroupResult.Id).ToListAsync();
             var skillScore = GetSkillScore(sectionGroup, new List<BaseAnswer>(mockTestAnswers), version);
             if (version != (int)EnumVersion.V1)
@@ -451,7 +458,9 @@ namespace Fsel.Course.Infrastructure.Common
             ArgumentNullException.ThrowIfNull(sectionGroupResult);
             if (sectionGroupResult.FinalTestResultId.HasValue)
             {
-                var finalTestAnswers = await _finalTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
+                var finalTestAnswers = await _finalTestAnswerRepository.Queryable
+                                        .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                        .Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
                 await _finalTestAnswerRepository.BulkUpdateList(finalTestAnswers.Select(x =>
                 {
                     x.Status = EnumAnswerStatus.Done;
@@ -463,7 +472,9 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else if (sectionGroupResult.PlacementTestResultId.HasValue)
             {
-                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
+                var placementTestAnswers = await _placementTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process)
+                                                                               .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                               .ToListAsync();
                 await _placementTestAnswerRepository.BulkUpdateList(placementTestAnswers.Select(x =>
                 {
                     x.Status = EnumAnswerStatus.Done;
@@ -475,7 +486,9 @@ namespace Fsel.Course.Infrastructure.Common
             }
             else
             {
-                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process).ToListAsync();
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.SectionGroupResultId == sectionGroupResult.Id && x.Status == EnumAnswerStatus.Process)
+                                                                               .Where(x => x.CreatedDate >= sectionGroupResult.CreatedDate)
+                                                                               .ToListAsync();
                 await _mockTestAnswerRepository.BulkUpdateList(mockTestAnswers.Select(x =>
                 {
                     x.Status = EnumAnswerStatus.Done;
@@ -748,7 +761,10 @@ namespace Fsel.Course.Infrastructure.Common
             }
             if (isAIGraded.HasValue && isAIGraded.Value)
             {
-                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id).ToListAsync();
+                var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Where(x => x.MockTestResultId == mockTestResult.Id)
+                                                                               .Where(x => x.CreatedDate >= mockTestResult.CreatedDate)
+                                                                               .Where(x => !(mockTestResult.Status == EnumResultStatus.Done && mockTestResult.UpdatedDate.HasValue) || x.CreatedDate <= mockTestResult.UpdatedDate)
+                                                                               .ToListAsync();
                 return mockTestAnswers.All(x => !string.IsNullOrEmpty(x.GradingAlFeedback));
             }
             return true;

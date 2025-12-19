@@ -46,6 +46,10 @@ namespace Fsel.Course.Domain.Entities
         public UnitModule? UnitModule { get; set; }
         public Guid? UnitModuleId { get; set; }
 
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
+
         public ICollection<LessonNote> LessonNotes { get; set; } = new List<LessonNote>();
         public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
         public ICollection<HomeWorkResult> HomeWorkResults { get; set; } = new List<HomeWorkResult>();

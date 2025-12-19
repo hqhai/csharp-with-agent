@@ -22,15 +22,13 @@ namespace Fsel.Identity.Application.Queries.StudentEditHistoryQuery
         private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly IStudentRepository _studentRepository;
-        private readonly IHumanRepository _humanRepository;
 
-        public GetStudentEditHistoriesByStudentIdQueryHandler(IStudentEditHistoryRepository studentEditHistoryRepository, UserManager<User> userManager, IMapper mapper, IStudentRepository studentRepository, IHumanRepository humanRepository)
+        public GetStudentEditHistoriesByStudentIdQueryHandler(IStudentEditHistoryRepository studentEditHistoryRepository, UserManager<User> userManager, IMapper mapper, IStudentRepository studentRepository)
         {
             _studentEditHistoryRepository = studentEditHistoryRepository;
             _userManager = userManager;
             _mapper = mapper;
             _studentRepository = studentRepository;
-            _humanRepository = humanRepository;
         }
 
         public async Task<MethodResult<IList<StudentEditHistoryModel>>> Handle(GetStudentEditHistoriesByStudentIdQuery request, CancellationToken cancellationToken)
@@ -63,11 +61,11 @@ namespace Fsel.Identity.Application.Queries.StudentEditHistoryQuery
             var studentIds = result.Select(p => p.StudentId).Distinct().ToList();
 
             var students = await (from s in _studentRepository.Queryable.WhereBulkContains(studentIds, p => p.Id).IgnoreQueryFilters()
-                                  join h in _humanRepository.Queryable.IgnoreQueryFilters() on s.HumanId equals h.Id
+                                  join u in _userManager.Users.IgnoreQueryFilters() on s.UserId equals u.Id
                                   select new
                                   {
                                       Student = s,
-                                      Human = h
+                                      User = u
                                   }).ToListAsync(cancellationToken);
 
             result.ForEach(p =>
@@ -75,8 +73,8 @@ namespace Fsel.Identity.Application.Queries.StudentEditHistoryQuery
                 if (p.CreatedUserId == default)
                 {
                     var student = students.First();
-                    p.CreatedUserId = student.Human.UserId ?? default;
-                    p.CreatedFullName = student.Human.FullName;
+                    p.CreatedUserId = student.User.Id;
+                    p.CreatedFullName = student.User.FullName;
                 }
             });
 

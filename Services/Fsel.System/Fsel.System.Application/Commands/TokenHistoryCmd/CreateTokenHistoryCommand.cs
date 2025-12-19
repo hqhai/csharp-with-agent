@@ -63,7 +63,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var userId = student.Human?.UserId ?? Guid.Empty;
+            var userId = student.UserId;
             var listEventCode = request.TokenHistorys.Where(x => !string.IsNullOrEmpty(x.EventCode)).Select(x => x.EventCode!).ToList();
             if (listEventCode.Any())
             {

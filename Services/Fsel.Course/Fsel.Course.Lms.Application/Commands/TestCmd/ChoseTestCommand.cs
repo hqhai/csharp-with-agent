@@ -65,9 +65,9 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 return methodResult;
             }
 
-            if (student.Human == null)
+            if (student.User == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.Human));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.User));
                 return methodResult;
             }
 

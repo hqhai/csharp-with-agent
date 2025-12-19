@@ -5,6 +5,7 @@ using Fsel.Core.Extensions;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Models.CommandModels.Lessons;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Course.Domain.Models.EntityModels.DashboardModels;
 
 namespace Fsel.Course.Infrastructure.Maps
 {
@@ -14,6 +15,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<Lesson, LessonOverviewModel>().IgnoreAllNonExisting();
             CreateMap<Lesson, LessonHistoryModel>().IgnoreAllNonExisting();
+            CreateMap<Lesson, HomeNavigationTargetModel>().IgnoreAllNonExisting();
             CreateMap<Lesson, LessonModel>().IgnoreAllNonExisting();
             CreateMap<CreateLessonCommandModel, Lesson>().IgnoreAllNonExisting();
             CreateMap<UpdateLessonCommandModel, Lesson>().IgnoreAllNonExisting();

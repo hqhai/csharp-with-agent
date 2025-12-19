@@ -105,7 +105,7 @@ namespace Fsel.Course.Application.Queries.CourseQuery
                 var teachers = teacherResults.Content?.Result;
                 foreach (var item in courses)
                 {
-                    item.TeacherNames = teachers?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
+                    item.TeacherNames = teachers?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.User?.FullName ?? string.Empty).ToList();
                 }
             }
 

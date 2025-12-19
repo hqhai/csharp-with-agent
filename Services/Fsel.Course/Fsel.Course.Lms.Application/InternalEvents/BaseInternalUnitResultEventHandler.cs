@@ -23,6 +23,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.SystemService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -38,12 +39,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
         private readonly QuestBoardPublisher _questBoardPublisher;
         private readonly ILogger<BaseInternalUnitResultEventHandler> _logger;
         private readonly ILessonResultRepository _lessonResultRepository;
+        private readonly SaveUserSurveyAssignmentPublisher _saveUserSurveyAssignmentPublisher;
 
-        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILogger<BaseInternalUnitResultEventHandler> logger, NotificationMessagePublisher notificationMessagePublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
+        public BaseInternalUnitResultEventHandler(ISystemService systemService, AppSetting appSetting, ICourseUnitMockTestRepository courseUnitMockTestRepository, IMediator mediator, IUserService userService, SaveUserCourseSettingPublisher saveUserCourseSettingPublisher, IVideoResultRepository videoResultRepository, IClassForumResultRepository classForumResultRepository, IUnitResultRepository unitResultRepository, ICourseResultRepository courseResultRepository, ICourseRepository courseRepository, IUnitRepository unitRepository, IFinalTestResultRepository finalTestResultRepository, IMockTestResultRepository mockTestResultRepository, IHomeWorkResultRepository homeWorkResultRepository, QuestBoardPublisher questBoardPublisher, ILessonResultRepository lessonResultRepository, IOrderService orderService, ILessonNoteRepository lessonNoteRepository, ILogger<BaseInternalUnitResultEventHandler> logger, NotificationMessagePublisher notificationMessagePublisher, SaveUserSurveyAssignmentPublisher saveUserSurveyAssignmentPublisher) : base(systemService, appSetting, courseUnitMockTestRepository, mediator, userService, logger, saveUserCourseSettingPublisher, videoResultRepository, classForumResultRepository, unitResultRepository, courseResultRepository, courseRepository, unitRepository, finalTestResultRepository, mockTestResultRepository, homeWorkResultRepository, questBoardPublisher, orderService, lessonNoteRepository, lessonResultRepository, notificationMessagePublisher)
         {
             _questBoardPublisher = questBoardPublisher;
             _lessonResultRepository = lessonResultRepository;
             _logger = logger;
+            _saveUserSurveyAssignmentPublisher = saveUserSurveyAssignmentPublisher;
         }
 
         public async Task UpdateUnitResultAsync(IList<LessonResult>? lessonResults, Domain.Entities.Unit? unit, Guid courseId, Guid studentId, bool isDone, CancellationToken cancellationToken, bool isUnitUpdate = true)
@@ -72,6 +75,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                             unitResult.CompletionDate = DateTime.UtcNow;
                         }
                         unitResult.Status = EnumResultStatus.Done;
+
                         // await DoQuestBoard(userId, unitId, courseId, cancellationToken);
 
                         //send mail
@@ -85,6 +89,17 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                 FeatureUserReferral = EnumFeatureUserReferral.DoneUnit1,
                                 ReceiverId = unitResult.CreatedUserId,
                             }).ConfigureAwait(false);
+                        }
+                        var progressRequirement = ProgressRequirement(course, unitResult);
+                        if (progressRequirement != null)
+                        {
+                            await _saveUserSurveyAssignmentPublisher.Publish(new SaveUserSurveyAssignmentCommandModel()
+                            {
+                                CourseLevel = course.CourseLevel,
+                                CourseType = course.CourseType,
+                                ProgressRequirement = progressRequirement.Value,
+                                IsSurveyQuestBoard = false
+                            }, cancellationToken);
                         }
                     }
                     if (isUnitUpdate)
@@ -125,6 +140,48 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     }
                 }
             }
+        }
+
+        private EnumProgressRequirement? ProgressRequirement(Course course, UnitResult unitResult)
+        {
+            var index = course.CourseUnitMockTests.FirstOrDefault(p => p.UnitId == unitResult.UnitId)?.DisplayOrder;
+
+            if (index == null)
+                return null;
+
+            var academicMap = new Dictionary<int, EnumProgressRequirement>
+            {
+                {1, EnumProgressRequirement.DoneUnit1},
+                {2, EnumProgressRequirement.DoneUnit2},
+                {3, EnumProgressRequirement.DoneUnit3},
+                {4, EnumProgressRequirement.DoneUnit4},
+                {5, EnumProgressRequirement.DoneUnit5},
+                {6, EnumProgressRequirement.DoneUnit6},
+                {7, EnumProgressRequirement.DoneUnit7},
+                {8, EnumProgressRequirement.DoneUnit8},
+                {9, EnumProgressRequirement.DoneUnit9},
+                {10, EnumProgressRequirement.DoneUnit10},
+                {11, EnumProgressRequirement.DoneUnit11},
+                {12, EnumProgressRequirement.DoneUnit12},
+            };
+
+            var otherMap = new Dictionary<int, EnumProgressRequirement>
+            {
+                {1, EnumProgressRequirement.DoneUnit1},
+                {2, EnumProgressRequirement.DoneUnit2},
+                {3, EnumProgressRequirement.DoneUnit3},
+                {4, EnumProgressRequirement.DoneUnit4},
+                {6, EnumProgressRequirement.DoneUnit5},
+                {7, EnumProgressRequirement.DoneUnit6},
+                {8, EnumProgressRequirement.DoneUnit7},
+                {9, EnumProgressRequirement.DoneUnit8},
+            };
+
+            var map = course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation
+                ? academicMap
+                : otherMap;
+
+            return map.TryGetValue(index.Value, out var requirement) ? requirement : null;
         }
 
         private async Task DoQuestBoard(Guid studentId, CancellationToken cancellationToken)
@@ -321,6 +378,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
             var percentUnit = (int)unitResults.Average(p => p.Percent);
 
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = userId,
+                Template = (course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation) ? EnumSenderTemplate.SendMailMidCourseAcademic : EnumSenderTemplate.SendMailMidCourseIELT
+            });
+
+            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+
             var model = new SendStudentCompleteMidCourseModel()
             {
                 CourseLevel = course.CourseLevel.ToString(),
@@ -343,7 +408,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 IndexMiddleUnit = course.CourseType == EnumCourseType.Academic || course.CourseLevel != EnumCourseLevel.EFA1 ? "6" : "5",
                 TotalUnit = course.CourseType == EnumCourseType.Academic || course.CourseLevel != EnumCourseLevel.EFA1 ? "12" : "10",
                 HideSkillTest = course.CourseType == EnumCourseType.EnglishFoundation ? SendMailSetting.DisplayNone : default,
-                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkFullMockTestReport!, course.Id, mockTestId, userId)
+                LinkReport = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.LinkFullMockTestReport!, course.Id, mockTestId, userId),
+                AccessLink = accessLink
             };
 
             if (course.CourseType == EnumCourseType.Ielts && mockTestResult != null)
@@ -630,6 +696,15 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 
                 (parameter.ColorOther, parameter.CompareOther) = SendMailHelper.Compare(currentOther, previousOther);
             }
+
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = userId,
+                Template = parameter.SenderTemplate
+            });
+
+            parameter.AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+
             return parameter;
         }
 
@@ -731,11 +806,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return;
             }
             var student = studentResult.Content?.Result;
-            model.FullName = student?.Human?.FullName;
+            model.FullName = student?.User?.FullName;
 
             await _mediator.Send(new SenderCommand
             {
-                Email = student?.Human?.Email,
+                Email = student?.User?.Email,
                 Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.TitleUnit, model.UnitNumber),
                 Params = model,
                 Template = model.SenderTemplate,
@@ -752,11 +827,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return;
             }
             var student = studentResult.Content?.Result;
-            model.FullName = student?.Human?.FullName;
+            model.FullName = student?.User?.FullName;
 
             await _mediator.Send(new SenderCommand
             {
-                Email = student?.Human?.Email,
+                Email = student?.User?.Email,
                 Subject = SenderSettings.MidCourseTitle,
                 Params = model,
                 Template = model.CourseType == EnumCourseType.Academic || model.CourseType == EnumCourseType.EnglishFoundation ? EnumSenderTemplate.SendMailMidCourseAcademic : EnumSenderTemplate.SendMailMidCourseIELT,

@@ -84,8 +84,8 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
 
                     var commentModel = _mapper.Map<CommentModel>(item.Comment);
                     var actionLikes = _interactionActionRepository.Queryable.Where(x => x.ObjectId == item.Comment.Id && x.Type == EnumInteractionActionType.Like).ToList();
-                    commentModel.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.Comment.UserId)?.AvatarPath;
-                    commentModel.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.UserId == item.Comment.UserId)?.FullName;
+                    commentModel.AvatarPath = userResult.Content?.Result?.FirstOrDefault(x => x.Id == item.Comment.UserId)?.AvatarPath;
+                    commentModel.FullName = userResult.Content?.Result?.FirstOrDefault(x => x.Id == item.Comment.UserId)?.FullName;
                     commentModel.Comments = await GetCommentsByObjectIdAsync(item.Comment.Id, filter);
                     commentModel.CommentNumber = commentModel.Comments?.Count(x => x.Status == EnumCommentStatus.Approver) ?? default;
                     commentModel.LikeNumber = actionLikes.Count;
@@ -95,7 +95,6 @@ namespace Fsel.Interaction.Application.Queries.CommentQuery
                     commentModel.Status = item.Comment.Status;
                     results.Add(commentModel);
                 }
-
             }
 
             if (filter.HasValue)

@@ -11,11 +11,13 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public ResourceContent? ResourceContent { get; set; }
         public new Services? Services { get; set; }
+        public new Authentication? Authentication { get; set; }
         public GoogleSheetConfig? GoogleSheetConfig { get; set; }
         public UserReferralConfig? UserReferralConfig { get; set; }
         public UserDeletionConfig? UserDeletionConfig { get; set; }
         public CacheConfig? CacheConfig { get; set; }
         public CRMConfig? CRMConfig { get; set; }
+        public SenderJwt? SenderJwt { get; set; }
     }
 
     public class UserReferralConfig
@@ -35,6 +37,7 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? ConfirmOtpUrl { get; set; }
         public string? RegisterUrl { get; set; }
         public string? LinkResetProgress { get; set; }
+        public string? UpdateSenderSettingUrl { get; set; }
     }
 
     public class Services : BaseServices
@@ -74,6 +77,8 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
         public string? AddCoinFselEventSpreadSheetId { get; set; }
         public string? SummerSelfLearningSpreadSheetId { get; set; }
         public string? SummerSelfLearningSheet { get; set; }
+        public string? StudentRegisterFormSheetId { get; set; }
+        public string? StudentRegisterFormSheet { get; set; }
     }
 
     public class UserDeletionConfig
@@ -91,5 +96,90 @@ namespace Fsel.Identity.Infrastructure.ValueSettings
     public class CRMConfig
     {
         public string? SecretKey { get; set; }
+    }
+
+    public class SenderJwt
+    {
+        public string? SecretKey { get; set; }
+
+        public string? Issuer { get; set; }
+
+        public string? Audience { get; set; }
+
+        public int Expiration { get; set; }
+    }
+
+    public class Authentication
+    {
+        public OpenId? OpenId { get; set; }
+
+        public Google? Google { get; set; }
+
+        public Facebook? Facebook { get; set; }
+
+        public Zalo? Zalo { get; set; }
+
+        public Apple? Apple { get; set; }
+
+        public VnEdu? VnEdu { get; set; }
+    }
+
+    public class Google
+    {
+        public string? ClientId { get; set; }
+
+        public string? ClientSecret { get; set; }
+
+        public string? Callback { get; set; }
+
+        public IList<string>? RedirectUriParams { get; set; }
+    }
+
+    public class Facebook
+    {
+        public string? ClientId { get; set; }
+
+        public string? ClientSecret { get; set; }
+
+        public string? Callback { get; set; }
+
+        public IList<string>? RedirectUriParams { get; set; }
+    }
+
+    public class Zalo
+    {
+        public string? ClientId { get; set; }
+
+        public string? ClientSecret { get; set; }
+
+        public string? Callback { get; set; }
+
+        public string? AuthorizationEndpoint { get; set; }
+
+        public string? TokenEndpoint { get; set; }
+
+        public string? UserInformationEndpoint { get; set; }
+    }
+
+    public class Apple
+    {
+        public string? ClientId { get; set; }
+
+        public string? TeamId { get; set; }
+
+        public string? KeyId { get; set; }
+
+        public string? PrivateKey { get; set; }
+
+        public string? Callback { get; set; }
+    }
+
+    public class VnEdu
+    {
+        public string? Endpoint { get; set; }
+
+        public string? AppId { get; set; }
+
+        public string? ClientSecret { get; set; }
     }
 }

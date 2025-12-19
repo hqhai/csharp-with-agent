@@ -178,6 +178,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                             .ThenInclude(x => x.Exercise)
                             .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
                             .ThenInclude(x => x.Question)
+                            .Include(p => p.VideoSubFilePaths)
                             .Where(x => x.Id == id)
                             .Select(i => new VideoModel
                             {
@@ -222,6 +223,11 @@ namespace Fsel.Course.Infrastructure.Repositories
                                         }).ToList()
                                     }).ToList(),
                                 }).ToList(),
+                                VideoSubFilePaths = i.VideoSubFilePaths.Where(o => !o.IsDeleted).Select(vs => new VideoSubFilePathModel()
+                                {
+                                    Language = vs.Language,
+                                    SubFilePath = vs.SubFilePath
+                                }).ToList()
                             }).FirstOrDefaultAsync();
         }
 

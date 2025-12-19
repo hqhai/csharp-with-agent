@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 {
     using System.Globalization;
     using System.IO;
+    using System.Linq.Dynamic.Core;
     using System.Text;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
@@ -31,8 +32,16 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         private readonly SubmitAiSpeakingAnswerPublisher _submitAiSpeakingAnswerPublisher;
         private readonly ISectionGroupRepository _sectionGroupRepository;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly IMockTestAnswerRepository _mockTestAnswerRepository;
 
-        public SpeakingAIService(IMediator mediator, IMockTestResultRepository mockTestResultRepository, IMockTestScoreRepository mockTestScoreRepository, IProsodyScoreRepository prosodyScoreRepository, SubmitAiSpeakingAnswerPublisher submitAiSpeakingAnswerPublisher, ISectionGroupRepository sectionGroupRepository, ISectionGroupResultRepository sectionGroupResultRepository)
+        public SpeakingAIService(IMediator mediator,
+            IMockTestResultRepository mockTestResultRepository,
+            IMockTestScoreRepository mockTestScoreRepository,
+            IProsodyScoreRepository prosodyScoreRepository,
+            SubmitAiSpeakingAnswerPublisher submitAiSpeakingAnswerPublisher,
+            ISectionGroupRepository sectionGroupRepository,
+            ISectionGroupResultRepository sectionGroupResultRepository,
+            IMockTestAnswerRepository mockTestAnswerRepository)
         {
             _mediator = mediator;
             _mockTestResultRepository = mockTestResultRepository;
@@ -41,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             _submitAiSpeakingAnswerPublisher = submitAiSpeakingAnswerPublisher;
             _sectionGroupRepository = sectionGroupRepository;
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _mockTestAnswerRepository = mockTestAnswerRepository;
         }
 
         #region Handle
@@ -56,19 +66,30 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         {
             MethodResult<bool> methodResult = new MethodResult<bool>();
             var mockTestResult = _mockTestResultRepository.Queryable
-                .Include(x => x.MockTestAnswers)
-                .ThenInclude(x => x.SectionTimeCode)
-                .Include(x => x.SectionGroupResults)
-                .FirstOrDefault(x => x.Id == mockTestResultId);
+                                            .Include(x => x.SectionGroupResults)
+                                            .FirstOrDefault(x => x.Id == mockTestResultId);
 
             if (mockTestResult == null)
             {
                 return false;
             }
+            var sectionGroup = await _sectionGroupRepository.Queryable.Where(x => x.Id == sectionGroupId).FirstOrDefaultAsync(cancellationToken);
 
-            var (questionArray, answerArray, averagePronScore, count) = ExtractQuestionAnswerAndPronunciationScores(mockTestResult);
+            var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == sectionGroupId && x.MockTestResultId == mockTestResultId && x.CreatedDate >= mockTestResult.CreatedDate)
+                                                                       .FirstOrDefaultAsync(cancellationToken);
+
+            if (sectionGroupResult == null)
+            {
+                methodResult.Result = false;
+                return methodResult.Result;
+            }
+
+            var mockTestAnswers = await _mockTestAnswerRepository.Queryable.Include(x => x.SectionTimeCode).Where(x => x.MockTestResultId == mockTestResultId && x.SectionGroupResultId == sectionGroupResult.Id)
+                                                                           .AsNoTracking().ToListAsync(cancellationToken);
+
+            var (questionArray, answerArray, averagePronScore, count) = ExtractQuestionAnswerAndPronunciationScores(mockTestAnswers);
             var scoreRanges = _prosodyScoreRepository.Queryable.ToList();
-            (long bandScore, string feedBack) = GetBandScore(averagePronScore, scoreRanges);
+            (long bandScore, string? feedBack) = GetBandScore(averagePronScore, scoreRanges);
 
             List<MockTestScore> mockTestScores = new List<MockTestScore>
                                                         {
@@ -76,22 +97,11 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                                                         };
 
             var criteria = new List<EnumMockTestScoreCriteria>
-                                {
-                                    EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy,
-                                    EnumMockTestScoreCriteria.LexicalResource,
-                                    EnumMockTestScoreCriteria.FluencyAndCoherence
-            };
-
-            var sectionGroup = await _sectionGroupRepository.Queryable.Where(x => x.Id == sectionGroupId).FirstOrDefaultAsync(cancellationToken);
-
-            var sectionGroupResult = _sectionGroupResultRepository.Queryable.Where(x => x.SectionGroupId == sectionGroupId && x.MockTestResultId == mockTestResultId).FirstOrDefault();
-
-            if (sectionGroupResult == null)
             {
-                methodResult.Result = false;
-                return methodResult.Result;
-            }
-            //IList<SkillScores> skillScores = new List<SkillScores>();
+                EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy,
+                EnumMockTestScoreCriteria.LexicalResource,
+                EnumMockTestScoreCriteria.FluencyAndCoherence
+            };
 
             foreach (var item in criteria)
             {
@@ -166,16 +176,15 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// </summary>
         /// <param name="mockTestResult"></param>
         /// <returns></returns>
-        private static (IList<string> questionArray, IList<string> answerArray, double averagePronScore, int count) ExtractQuestionAnswerAndPronunciationScores(MockTestResult mockTestResult)
+        private static (IList<string> questionArray, IList<string> answerArray, double averagePronScore, int count) ExtractQuestionAnswerAndPronunciationScores(IList<MockTestAnswer>? mockTestAnswers)
         {
             IList<string> questionArray = new List<string>();
             IList<string> answerArray = new List<string>();
             double pronScore = 0;
             int count = 0;
 
-            mockTestResult.MockTestAnswers = mockTestResult.MockTestAnswers.Where(x => x.SectionGroupResult?.SkillScores?.FirstOrDefault()?.Skill == EnumCourseSkill.Speaking).ToList();
-
-            foreach (var item in mockTestResult.MockTestAnswers)
+            mockTestAnswers ??= new List<MockTestAnswer>();
+            foreach (var item in mockTestAnswers)
             {
                 questionArray.Add(item?.SectionTimeCode?.Name ?? string.Empty);
                 answerArray.Add(item?.SpeechTextAnswer ?? string.Empty);

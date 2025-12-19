@@ -174,6 +174,16 @@ namespace Fsel.Shared.Constants
             }
         }
 
+        public static class ExamPracticeWritingAIFeedBackHub
+        {
+            public const string Pattern = $"/exam-practice-writing";
+
+            public static class Methods
+            {
+                public const string ExamPracticeWritingAIFeedBack = $"ExamPracticeWritingAIFeedBack";
+            }
+        }
+
         public static class SetTimeExamPracticeHub
         {
             public const string Pattern = $"/set-time-exam-practice";

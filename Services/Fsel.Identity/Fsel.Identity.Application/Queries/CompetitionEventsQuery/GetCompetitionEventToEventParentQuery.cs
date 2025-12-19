@@ -32,7 +32,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
         private readonly ISystemService _systemService;
         private readonly IEventRegistrationRepository _eventRegistrationRepository;
         private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
-        private readonly IHumanRepository _humanRepository;
         private readonly UserManager<User> _userManager;
         private readonly ILogger<GetCompetitionEventToEventParentQueryHandler> _logger;
 
@@ -41,7 +40,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             ISystemService systemService,
             IEventRegistrationRepository eventRegistrationRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-            IHumanRepository humanRepository,
             UserManager<User> userManager,
             ILogger<GetCompetitionEventToEventParentQueryHandler> logger)
         {
@@ -50,7 +48,6 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             _systemService = systemService;
             _eventRegistrationRepository = eventRegistrationRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
-            _humanRepository = humanRepository;
             _userManager = userManager;
             _logger = logger;
         }
@@ -90,8 +87,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
             var studentToEvents = await (from baseQ in _studentRepository.Queryable
                                          join sce in _studentCompetitionEventsRepository.Queryable on baseQ.Id equals sce.StudentId
                                          join er in _eventRegistrationRepository.Queryable on baseQ.Id equals er.StudentId into erGroup
-                                         join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
-                                         join user in _userManager.Users on human.UserId equals user.Id
+                                         join user in _userManager.Users on baseQ.UserId equals user.Id
                                          where baseQ.SchoolId.HasValue && !erGroup.Any() && !baseQ.IsDeleted
                                          && competitionEventIds.Contains(sce.CompetitionEventId)
                                          group new { baseQ, user }
@@ -105,8 +101,7 @@ namespace Fsel.Identity.Application.Queries.CompetitionEventsQuery
 
             var studentToRegisters = await (from baseQ in _studentRepository.Queryable
                                             join er in _eventRegistrationRepository.Queryable on baseQ.Id equals er.StudentId
-                                            join human in _humanRepository.Queryable on baseQ.HumanId equals human.Id
-                                            join user in _userManager.Users on human.UserId equals user.Id
+                                            join user in _userManager.Users on baseQ.UserId equals user.Id
                                             where baseQ.SchoolId.HasValue && !baseQ.IsDeleted
                                             && competitionEventIds.Contains(er.CompetitionEventId)
                                             group new { baseQ, user }

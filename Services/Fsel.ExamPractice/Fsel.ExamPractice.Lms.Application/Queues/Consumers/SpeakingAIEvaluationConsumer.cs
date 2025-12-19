@@ -6,7 +6,7 @@ namespace Fsel.ExamPractice.Lms.Application.Queues.Consumers
     using Fsel.ExamPractice.Lms.Application.Services.AiService.SpeakingAIService;
     using Fsel.Shared.Models.ShareModels;
 
-    public class SpeakingAIEvaluationConsumer : BaseConsumer<SpeakingAIEvaluationModel>
+    public class SpeakingAIEvaluationConsumer : BaseConsumer<SpeakingExamPracticeAIEvaluationModel>
     {
         private readonly ISpeakingAIService _speakingAIService;
 
@@ -15,11 +15,11 @@ namespace Fsel.ExamPractice.Lms.Application.Queues.Consumers
             _speakingAIService = speakingAIService;
         }
 
-        public override async Task ConsumeQueue(SpeakingAIEvaluationModel? message)
+        public override async Task ConsumeQueue(SpeakingExamPracticeAIEvaluationModel? message)
         {
             if (message != null)
             {
-                await _speakingAIService.EvaluationSpeakingAI(message.MockTestResultId, message.SectionGroupId, CancellationToken.None).ConfigureAwait(false);
+                await _speakingAIService.EvaluationSpeakingAI(message.ExamPracticeResultId, message.ExamPracticeSectionId, CancellationToken.None).ConfigureAwait(false);
             }
         }
     }

@@ -4,6 +4,8 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <IsUseCore>true</IsUseCore>
+    <IsUseOpenId>true</IsUseOpenId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,10 +18,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Constants\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\..\..\Packages\IdentityServer\AspNetIdentity\src\IdentityServer4.AspNetIdentity.csproj" />
+    <ProjectReference Include="..\..\..\Packages\IdentityServer\EntityFramework.Storage\src\IdentityServer4.EntityFramework.Storage.csproj" />
+    <ProjectReference Include="..\..\..\Packages\IdentityServer\EntityFramework\src\IdentityServer4.EntityFramework.csproj" />
+    <ProjectReference Include="..\..\..\Packages\IdentityServer\IdentityServer4\src\IdentityServer4.csproj" />
+    <ProjectReference Include="..\..\..\Packages\IdentityServer\Storage\src\IdentityServer4.Storage.csproj" />
     <ProjectReference Include="..\..\Shared\Fsel.Shared\Fsel.Shared.csproj" />
   </ItemGroup>
 

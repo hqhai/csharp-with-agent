@@ -204,7 +204,7 @@ namespace Fsel.Course.Application.Queries.UnitQuery
 
                 foreach (var item in lists)
                 {
-                    item.TeacherNames = teachers?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.Human?.FullName ?? string.Empty).ToList();
+                    item.TeacherNames = teachers?.Where(x => item.TeacherIds!.Contains(x.Id)).Select(x => x.User?.FullName ?? string.Empty).ToList();
                     item.Status = unitStatus!.Any(x => x.UnitId == item.Id) ? (unitStatus!.FirstOrDefault(x => x.UnitId == item.Id)?.Status ?? EnumChatbotConfigStatus.InCompleted) : EnumChatbotConfigStatus.InCompleted;
                 }
             }

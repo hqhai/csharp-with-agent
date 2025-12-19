@@ -42,7 +42,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
             var userReferrals = await _userReferralRepository.Queryable.ToListAsync(cancellationToken);
             var senderIds = userReferrals.Select(x => x.SenderId).Distinct().ToList();
 
-            var users = _userManager.Users.Include(p => p.Human).Include(p => p.Senders).Where(p => senderIds != null && senderIds.Contains(p.Id));
+            var users = _userManager.Users.Include(p => p.Senders).Where(p => senderIds != null && senderIds.Contains(p.Id));
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
@@ -52,7 +52,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                 }
                 else
                 {
-                    var codeQuery = users.Where(m => m.Human != null && m.Human.Code!.Contains(request.Keyword));
+                    var codeQuery = users.Where(m => m.Code!.Contains(request.Keyword));
                     var fullNameQuery = users.Where(m => m.FullName!.Contains(request.Keyword));
                     users = codeQuery.Union(fullNameQuery);
                 }
@@ -64,7 +64,7 @@ namespace Fsel.Identity.Application.Queries.UserReferrals
                 FullName = x.FullName,
                 Email = x.Email,
                 UserName = x.UserName,
-                Code = x.Human != null ? x.Human.Code : null,
+                Code = x.Code,
                 NumberUser = x.Senders.Count(),
             });
             queryData = queryData?.OrderByDescending(p => p.NumberUser);

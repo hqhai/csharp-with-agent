@@ -3,15 +3,14 @@
 #Depending on the operating system of the host machines(s) that will build or run the containers, the image specified in the FROM statement may need to be changed.
 #For more information, please see https://aka.ms/containercompat
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.15 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS base
 RUN apt update \
     && apt install ffmpeg -y \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 EXPOSE 80
-EXPOSE 443
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0.408 AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 WORKDIR /src
 COPY ["Services/Fsel.ExamPractice/Fsel.ExamPractice.Lms.Api/Fsel.ExamPractice.Lms.Api.csproj", "Services/Fsel.ExamPractice/Fsel.ExamPractice.Lms.Api/"]
 COPY ["Services/Fsel.ExamPractice/Fsel.ExamPractice.Lms.Application/Fsel.ExamPractice.Lms.Application.csproj", "Services/Fsel.ExamPractice/Fsel.ExamPractice.Lms.Application/"]
@@ -30,7 +29,5 @@ RUN dotnet publish "Fsel.ExamPractice.Lms.Api.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 ENV ASPNETCORE_ENVIRONMENT=Testing
-ENV ASPNETCORE_HTTP_PORTS=80
-
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Fsel.ExamPractice.Lms.Api.dll"]

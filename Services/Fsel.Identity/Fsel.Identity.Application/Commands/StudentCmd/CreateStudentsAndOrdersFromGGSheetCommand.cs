@@ -99,8 +99,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 model.School = dataItem[4].ToString();
                 model.MonthNumber = isMonthNumber ? monthNumber : null;
                 model.ExpireDate = expireDate;
-                model.IsRevenue = true;
-                model.IsSendMail = true;
+                model.IsRevenue = dataItem[7].ToString() == "1";
+                model.IsSendMail = dataItem[8].ToString() == "1";
 
                 models.Users.Add(model);
             }

@@ -43,7 +43,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<IList<PlacementTestResultModel>> methodResult = new MethodResult<IList<PlacementTestResultModel>>();
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                 methodResult.Result = null;
                 return methodResult;
             }
-            int age = DateTimeHelper.GetYearOld(student?.Human?.Birthday);
+            int age = DateTimeHelper.GetYearOld(student?.User?.Birthday);
             var placementTestResultModels = _mapper.Map<IList<PlacementTestResultModel>>(placementTestResults);
 
             var placementTestResultInitial = placementTestResults.FirstOrDefault();

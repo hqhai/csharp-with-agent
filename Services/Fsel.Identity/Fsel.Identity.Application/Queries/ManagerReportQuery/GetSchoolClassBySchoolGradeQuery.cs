@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Application.Queries.ManagerReportQuery
 {
+    using System.Text;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Identity.Domain.IRepositories;
@@ -51,20 +52,17 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             {
                 query = query.WhereBulkContains(request.ListSchoolGrade, x => x.SchoolGrade);
             }
-
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
                 query = query.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
             }
 
             var schoolClass = await query.Select(x => x.SchoolClass!).Distinct().ToListAsync(cancellationToken);
-            methodResult.Result = schoolClass.OrderBy(x =>
-            {
-                // Tách phần số ra
-                var numberPart = new string(x.Where(char.IsDigit).ToArray());
-                return string.IsNullOrEmpty(numberPart) ? int.MaxValue : int.Parse(numberPart);
-            })
+
+            methodResult.Result = schoolClass.OrderBy(x => FirstInt(x))
             .ThenBy(y =>
             {
                 // Tách phần chữ cái sau số
@@ -73,6 +71,35 @@ namespace Fsel.Identity.Application.Queries.ManagerReportQuery
             }).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
+        }
+
+        private static long? FirstInt(string? s)
+        {
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                return null;
+            }
+            var sp = s.Normalize(NormalizationForm.FormKC).AsSpan(); // "lớp ９a7" -> "lớp 9a7"
+            int i = 0;
+            while (i < sp.Length && !char.IsDigit(sp[i]))
+            {
+                i++;       // tìm cụm số đầu tiên
+            }
+            if (i == sp.Length)
+            {
+                return null;
+            }
+            long n = 0;
+            while (i < sp.Length && char.IsDigit(sp[i]))
+            {
+                n = n * 10 + (long)char.GetNumericValue(sp[i]);        // hỗ trợ mọi chữ số Unicode
+                if (n > long.MaxValue)
+                {
+                    return long.MaxValue;            // clamp an toàn
+                }
+                i++;
+            }
+            return n;
         }
     }
 }

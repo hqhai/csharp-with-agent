@@ -79,8 +79,8 @@ namespace Fsel.Course.Lms.Application.Queries.FinalTestResultQuery
             {
                 var student = students?.FirstOrDefault(x => x.Id == item.StudentId);
                 item.IsCurrentStudent = student?.Id == finalTestResult.StudentId;
-                item.FullName = student?.Human?.FullName;
-                item.AvatarPath = student?.Human?.AvatarPath;
+                item.FullName = student?.User?.FullName;
+                item.AvatarPath = student?.User?.AvatarPath;
                 testResultRankings.Add(item);
             }
 

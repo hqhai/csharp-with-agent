@@ -42,12 +42,13 @@ namespace Fsel.Course.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var query = _homeWorkRepository.Queryable.Where(p => !p.IsArchive).Include(p => p.Program).Include(p => p.Level)
+            var query = _homeWorkRepository.Queryable.Where(p => !p.IsArchive && p.Type == request.Type).Include(p => p.Program).Include(p => p.Level)
                                     .Select(x => new HomeWorkSearchModel
                                     {
                                         Id = x.Id,
                                         Code = x.Code,
                                         Name = x.Name,
+                                        Type = x.Type,
                                         CreatedFullName = x.CreatedFullName,
                                         CreatedDate = x.CreatedDate,
                                         CourseLevel = x.CourseLevel,
