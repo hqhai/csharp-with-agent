@@ -49,22 +49,33 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         public async Task<Category?> GetProgramContainPtBySelectedProject(Guid projectId, CancellationToken cancellationToken = default)
         {
-            var categoryFound = await GetCategoryAsync(projectId, cancellationToken);
-            if (categoryFound == null)
+            var programFound = await _categoryRepository.ReadQueryable.Where(x => x.Id == projectId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (programFound == null)
             {
                 return null;
             }
 
-            var programs = categoryFound.Categorys.Where(x => x.Type == EnumTypeCategory.Program).ToList();
-
-            var programFound = programs.FirstOrDefault(x => x.TestMode == EnumTestMode.Default);
-            if (programFound != null)
+            if (programFound.TestMode is EnumTestMode.Not or EnumTestMode.Custom)
             {
                 return programFound;
             }
 
-            programFound = programs.FirstOrDefault(x => x.TestMode == EnumTestMode.Custom);
-            return programFound;
+            if (programFound.ParentId == null)
+            {
+                return null;
+            }
+
+            var parent = await _categoryCachingService.GetOrSetAsync(programFound.ParentId.Value.ToString(), async (ctx, _) =>
+            {
+                return await _categoryRepository.ReadQueryable
+                    .Where(x => x.Id == programFound.ParentId.Value)
+                    .Include(x => x.Categorys)
+                    .FirstOrDefaultAsync(cancellationToken);
+            }, token: cancellationToken);
+
+            return parent?.Categorys?.Where(x => x.TestMode == EnumTestMode.Custom && x.IsTestDefault).FirstOrDefault();
         }
 
 

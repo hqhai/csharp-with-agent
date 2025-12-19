@@ -90,38 +90,44 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
             var programContainPtFound = await _categoryService.GetProgramContainPtBySelectedProject(request.ProjectId, cancellationToken);
             if (programContainPtFound != null)
             {
-                var age = DateTimeHelper.GetYearOld(student.Human.Birthday);
-                var flowMatch = await _flowService.GetHierarchicalFlowByCondition(x => x.ProgramId == programContainPtFound.Id
-                                                                                       && x.Status == EnumStatus.Active
-                                                                                       && x.FromAge <= age && x.ToAge >= age);
-
-                if (flowMatch?.StepFlows.FirstOrDefault() == null)
+                if (programContainPtFound.TestMode is EnumTestMode.Custom)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(flowMatch));
-                    return methodResult;
-                }
+                    var age = DateTimeHelper.GetYearOld(student.Human.Birthday);
+                    var flowMatch = await _flowService.GetHierarchicalFlowByCondition(x => x.ProgramId == programContainPtFound.Id
+                                                                                           && x.Status == EnumStatus.Active
+                                                                                           && x.FromAge <= age && x.ToAge >= age);
 
-                var firstStepFlow = flowMatch.StepFlows?.FirstOrDefault();
-                if (firstStepFlow == null)
+                    if (flowMatch?.StepFlows.FirstOrDefault() == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(flowMatch));
+                        return methodResult;
+                    }
+
+                    var firstStepFlow = flowMatch.StepFlows?.FirstOrDefault();
+                    if (firstStepFlow == null)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(firstStepFlow));
+                        return methodResult;
+                    }
+
+                    var testGroupResult = await _testService.InitTestGroupResultForFlow(flowMatch.Id, programContainPtFound.Id, student.Id, EnumTestType.PlacementTest);
+
+                    var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
+                    await aggregate.Start();
+                    methodResult.Result = await aggregate.ExpotStateData();
+                }
+                else if (programContainPtFound.TestMode == EnumTestMode.Not)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(firstStepFlow));
-                    return methodResult;
+                    var testGroupResult = await _testService.InitTestGroupResultForFlow(null, request.ProjectId, student.Id, EnumTestType.PlacementTest, isByPass: true);
+                    methodResult.Result = new PtStateModel { Status = EnumResultStatus.ByPass, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
                 }
-
-                var testGroupResult = await _testService.InitTestGroupResultForFlow(flowMatch.Id, programContainPtFound.Id, student.Id, EnumTestType.PlacementTest);
-
-                var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
-                await aggregate.Start();
-                methodResult.Result = await aggregate.ExpotStateData();
-
-                return methodResult;
             }
             else
             {
-                var testGroupResult = await _testService.InitTestGroupResultForFlow(null, request.ProjectId, student.Id, EnumTestType.PlacementTest, isByPass: true);
-                methodResult.Result = new PtStateModel { Status = EnumResultStatus.ByPass, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
-                return methodResult;
+                methodResult.AddErrorBadRequest("Not found program contain PT");
             }
+
+            return methodResult;
         }
     }
 }
