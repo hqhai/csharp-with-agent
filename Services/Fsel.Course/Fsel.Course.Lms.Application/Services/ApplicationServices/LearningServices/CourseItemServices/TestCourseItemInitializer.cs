@@ -88,14 +88,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                     TestGroupResultId = testGroupResult.Id,
                 };
 
-                try
+                await _testResultRepository.BulkMergeAsync(new List<TestResult> { testResult }, bulk =>
                 {
-                    await _testResultRepository.BulkMergeAsync(new List<TestResult> { testResult }, bulk =>
-                    {
-                        bulk.ColumnPrimaryKeyExpression = c => new { c.TestGroupResultId, c.TestId, c.StudentId, c.IsDeleted };
-                    });
-                }
-                catch { }
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.TestGroupResultId, c.TestId, c.StudentId, c.IsDeleted };
+                });
             }
 
             return methodResult;
@@ -115,14 +111,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 Status = EnumResultStatus.New
             };
 
-            try
+            await _testGroupResultRepository.BulkMergeAsync(new List<TestGroupResult> { testGroupResult }, bulk =>
             {
-                await _testGroupResultRepository.BulkMergeAsync(new List<TestGroupResult> { testGroupResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.CourseModuleId, c.CourseResultId, c.IsDeleted };
-                });
-            }
-            catch { }
+                bulk.ColumnPrimaryKeyExpression = c => new { c.CourseModuleId, c.CourseResultId, c.IsDeleted };
+            });
         }
 
         private async Task<TestGroupResult?> GetTestGroupResultAsync(Guid courseResultId, Guid courseModuleId, CancellationToken cancellationToken)

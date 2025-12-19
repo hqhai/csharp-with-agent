@@ -186,7 +186,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         private async Task Commit()
         {
             var repositoryTestResult = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
-            if (repositoryTestResult.DbContext.ChangeTracker.HasChanges() )
+            if (repositoryTestResult.DbContext.ChangeTracker.HasChanges())
             {
                 await repositoryTestResult.UnitOfWork.SaveChangesAsync();
             }
