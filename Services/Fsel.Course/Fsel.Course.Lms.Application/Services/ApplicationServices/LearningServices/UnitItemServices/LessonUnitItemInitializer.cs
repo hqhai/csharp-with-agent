@@ -68,6 +68,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 UnitId = unitResult.UnitId,
                 LessonId = lesson.Id,
                 UnitResultId = unitResult.Id,
+                CourseId = unitResult.CourseId,
+                CourseResultId = unitResult.CourseResultId,
             };
 
             await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>

@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 ProgramId = test.ProgramId,
                 TestType = EnumTestType.FullTest,
                 StudentId = courseResult.StudentId,
-                Status = EnumResultStatus.New
+                Status = EnumResultStatus.New,
             };
 
             await _testGroupResultRepository.BulkMergeAsync(new List<TestGroupResult> { testGroupResult }, bulk =>

@@ -40,6 +40,7 @@ namespace Fsel.Course.Application.Commands.CategoryCmd
             MethodResult<CategoryModel> methodResult = new MethodResult<CategoryModel>();
 
             #region Validate
+
             var category = await _categoryRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
             if (category == null)
             {
@@ -79,7 +80,7 @@ namespace Fsel.Course.Application.Commands.CategoryCmd
                 return methodResult;
             }
 
-            #endregion
+            #endregion Validate
 
             await _categoryRepository.ExecuteTransactionAsync(async () =>
             {
