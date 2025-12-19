@@ -69,7 +69,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 ClassForumId = classForum.Id,
                 ResultStatus = EnumResultStatus.New,
                 LessonModuleId = lessonModule.Id,
-                SubmissionCount = EnumSubmissionCount.FirstSubmit
+                SubmissionCount = EnumSubmissionCount.FirstSubmit,
             };
 
             await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
