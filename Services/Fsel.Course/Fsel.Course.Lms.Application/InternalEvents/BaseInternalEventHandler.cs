@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -452,6 +453,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     await UpdateStudentTrialRegistration(currentAccountStatus, unitResultNext.CreatedUserId);
                     if (unitResultNext.Status == EnumResultStatus.Unfinished && currentAccountStatus == EnumTrialRegistrationStatus.Payment)
                     {
+                        unitResultNext.NewDate = DateTime.UtcNow;
                         unitResultNext.Status = EnumResultStatus.New;
                         await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResultNext }, bulk =>
                         {
@@ -464,6 +466,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var finalTestResultNext = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
                     if (finalTestResultNext != null && finalTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
+                        finalTestResultNext.NewDate = DateTime.UtcNow;
                         finalTestResultNext.Status = EnumResultStatus.New;
                         await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult> { finalTestResultNext }, bulk =>
                         {
@@ -476,6 +479,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var mockTestResultNext = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
                     if (mockTestResultNext != null && mockTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
+                        mockTestResultNext.NewDate = DateTime.UtcNow;
                         mockTestResultNext.Status = EnumResultStatus.New;
                         await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResultNext }, bulk =>
                         {
@@ -585,7 +589,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             var studentResult = await _userService.GetStudentsByStudentIdsAsync(new List<Guid> { studentId });
             var student = studentResult.Content?.Result?.FirstOrDefault();
 
-            if (student == null || student.Human == null)
+            if (student == null || student.User == null)
             {
                 return;
             }
@@ -606,7 +610,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     {
                         Property = "CreatedUserId",
                         Operator = EnumFilterOperator.Equal,
-                        Value = student.Human.UserId
+                        Value = student.UserId
                     },
                     new GenericFilterModel()
                     {
@@ -715,7 +719,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 return;
             }
 
-            var totalNote = await _lessonNoteRepository.Queryable.Include(p => p.LessonResult).Where(p => p.LessonResult != null && p.LessonResult.CourseId == course.Id && p.CreatedUserId == student.Human.UserId).CountAsync(cancellationToken);
+            var totalNote = await _lessonNoteRepository.Queryable.Include(p => p.LessonResult).Where(p => p.LessonResult != null && p.LessonResult.CourseId == course.Id && p.CreatedUserId == student.UserId).CountAsync(cancellationToken);
 
             var totalPlanet = course.CourseUnitMockTests.Count;
 
@@ -818,6 +822,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 review = iELTDescription.Description ?? string.Empty;
             }
 
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = student?.UserId ?? Guid.Empty,
+                Template = course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
+            });
+
+            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+
             var sendStudentCompleteCourseModel = new SendStudentCompleteCourseModel
             {
                 CoursePhoto = SendMailHelper.GetCoursePhoto(course.CourseLevel),
@@ -842,7 +854,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 TotalLesson = totalLesson.ToString(cultureInfo),
                 TotalLogin = studentDailyStreaks?.Count.ToString(cultureInfo),
                 TotalNote = totalNote.ToString(cultureInfo),
-                FullName = student.Human.FullName,
+                FullName = student.User.FullName,
                 Review1 = conquer,
                 Review2 = discover,
                 Display = display,
@@ -854,13 +866,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 BandScore = bandScore,
                 Review = review,
                 BackgroundVertical = courseResult.Percent >= 67 ? SendMailSetting.BackgroundVerticalGreen : SendMailSetting.BackgroundVerticalOrange,
-                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                AccessLink = accessLink
             };
 
             var sendResult = await _mediator.Send(new SenderCommand
             {
-                Email = student.Human.Email,
-                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course.Name, student.Human.FullName),
+                Email = student.User.Email,
+                Subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendStudentCompleteCourse, course.Name, student.User.FullName),
                 Params = sendStudentCompleteCourseModel,
                 CcEmail = student.ParentEmail,
                 Template = course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls

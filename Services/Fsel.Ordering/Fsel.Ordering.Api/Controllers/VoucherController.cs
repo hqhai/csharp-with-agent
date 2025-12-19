@@ -20,7 +20,6 @@ namespace Fsel.Ordering.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/voucher")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
     public class VoucherController : BaseController
     {
         private readonly IMediator _mediator;
@@ -36,6 +35,7 @@ namespace Fsel.Ordering.Api.Controllers
         [HttpGet("get-current-vouchers")]
         [ProducesResponseType(typeof(MethodResult<IList<UserVoucherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> Get()
         {
             MethodResult<IList<UserVoucherModel>> commandResult = await _mediator.Send(new GetListUserVoucherQuery()).ConfigureAwait(false);
@@ -60,6 +60,7 @@ namespace Fsel.Ordering.Api.Controllers
         [HttpGet("get-user-voucher-lock-by-user")]
         [ProducesResponseType(typeof(MethodResult<UserVoucherLockModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetUserVoucherLockByUser()
         {
             var queryResult = await _mediator.Send(new GetUserVoucherLockByUserQuery()).ConfigureAwait(false);
@@ -72,6 +73,7 @@ namespace Fsel.Ordering.Api.Controllers
         [HttpGet("search-voucher-by-user")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<VoucherModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetUserVoucherLockByUser([FromQuery] SearchVoucherByUserQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);

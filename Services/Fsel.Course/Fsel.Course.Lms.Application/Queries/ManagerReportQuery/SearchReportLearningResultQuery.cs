@@ -9,11 +9,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
+    using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -33,6 +34,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
         private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly ICourseUnitMockTestRepository _courseUnitMockTestRepository;
+        private readonly ISenderService _senderService;
 
         public SearchReportLearningResultQueryHandler(
             IMediator mediator,
@@ -43,7 +45,8 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             IMockTestResultRepository mockTestResultRepository,
             IFinalTestResultRepository finalTestResultRepository,
             ICourseUnitMockTestRepository courseUnitMockTestRepository
-            )
+,
+            ISenderService senderService)
         {
             _mediator = mediator;
             _mapper = mapper;
@@ -53,6 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             _mockTestResultRepository = mockTestResultRepository;
             _finalTestResultRepository = finalTestResultRepository;
             _courseUnitMockTestRepository = courseUnitMockTestRepository;
+            _senderService = senderService;
         }
 
         public async Task<MethodResult<SearchReportLearningResultModel>> Handle(SearchReportLearningResultQuery request, CancellationToken cancellationToken)
@@ -73,14 +77,14 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
+                ListOverallScore = request.ListOverallScore,
+                IsLearning = request.IsLearning,
+                ListCurrentLevel = request.ListCurrentLevel,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
-                CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
-                OverallScore = request.OverallScore,
-                LearningStatus = request.LearningStatus,
             }, cancellationToken);
             var reportLearningResult = _mapper.Map<SearchReportLearningResultModel>(dataOverallResult.Result);
             var userResults = await _mediator.Send(new GetStudentReportQuery
@@ -91,9 +95,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListCurrentLevel = request.ListCurrentLevel,
+                ListOverallScore = request.ListOverallScore,
 
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 EndDate = request.EndDate,
                 PageSize = request.PageSize,
                 Filters = request.Filters,
@@ -101,10 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 SortBy = request.SortBy,
                 Keyword = request.Keyword,
                 Page = request.Page,
-                CourseLevel = request.CourseLevel,
                 CourseType = request.CourseType,
-                OverallScore = request.OverallScore,
-                LearningStatus = request.LearningStatus,
                 ManagerReportType = EnumManagerReportType.ReportLearningResults,
                 IsSearchReport = true
             }, cancellationToken);
@@ -120,9 +124,23 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 methodResult.Result = reportLearningResult;
                 return methodResult;
             }
+
+            if (request.StudentIds != null && request.StudentIds.Any())
+            {
+                students = students.Where(p => request.StudentIds.Contains(p.Id)).ToList();
+            }
+
+            var userIds = students.Where(p => p.UserId.HasValue).Select(x => x.UserId ?? default).ToList();
             var studentIds = students.Select(x => x.Id).ToList();
             var courseIds = students.Select(x => x.CourseId).ToList();
             var dataStudent = students.Select(x => new { StudentId = x.Id, CourseId = x.CourseId.GetValueOrDefault() }).ToList();
+
+            var historiesSendMailResult = await _senderService.GetHistoriesSendMailLearningProgress(new GetHistoriesSendMailLearningProgressModel()
+            {
+                UserIds = userIds
+            });
+
+            var historiesSendMail = historiesSendMailResult.Content?.Result;
 
             var unitResultGroups = await (from baseQ in _courseResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                                           join cum in _courseUnitMockTestRepository.Queryable on baseQ.CourseId equals cum.CourseId
@@ -244,9 +262,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     UserName = item.UserName,
                     OverallPercent = overallPercent,
                     OverallModules = overallModuleReports.OrderBy(x => x.DisplayOrder).ToList(),
+                    NumberOfEmailsSent = historiesSendMail?.Where(p => item.UserId.HasValue && item.UserId == p.ReceiverId && p.Template == EnumSenderTemplate.LearningProgressWarning).Count() ?? 0,
                 };
 
                 datas.Add(learningResult);
+            }
+
+            if (request.LearningStatus.HasValue)
+            {
+                datas = datas.Where(p => p.LearningStatus == request.LearningStatus).ToList();
             }
 
             reportLearningResult.PagingItems = new PagingItemsModel<LearningResultModel>(datas, request, reportLearningResult.TotalStudent);

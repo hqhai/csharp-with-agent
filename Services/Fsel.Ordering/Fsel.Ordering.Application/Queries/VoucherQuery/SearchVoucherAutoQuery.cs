@@ -23,10 +23,12 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
     public class SearchVoucherAutoQueryHandler : IRequestHandler<SearchVoucherAutoQuery, MethodResult<PagingItemsModel<VoucherModel>>>
     {
         private readonly IVoucherRepository _voucherRepository;
+        private readonly IOrderRepository _orderRepository;
 
-        public SearchVoucherAutoQueryHandler(IVoucherRepository voucherRepository)
+        public SearchVoucherAutoQueryHandler(IVoucherRepository voucherRepository, IOrderRepository orderRepository)
         {
             _voucherRepository = voucherRepository;
+            _orderRepository = orderRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<VoucherModel>>> Handle(SearchVoucherAutoQuery request, CancellationToken cancellationToken)
@@ -34,14 +36,19 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<PagingItemsModel<VoucherModel>>();
 
-            var voucherQuery = await _voucherRepository.Queryable.Where(p => p.Source == EnumVoucherSource.Auto).Include(x => x.Orders).GroupBy(p => p.CodePrefix).ToListAsync(cancellationToken);
+            var voucherQuery = await _voucherRepository.Queryable.Where(p => p.Source == EnumVoucherSource.Auto).GroupBy(p => p.CodePrefix).ToListAsync(cancellationToken);
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
+
+            var voucherIds = voucherQuery.SelectMany(p => p.Select(x => x.Id)).ToList();
+
+            var orders = await _orderRepository.Queryable.WhereBulkContains(voucherIds, p => p.VoucherId).Where(p => p.Status == EnumOrderStatus.New || p.Status == EnumOrderStatus.Payment).ToListAsync(cancellationToken);
 
             var voucherModels = voucherQuery.Select(x =>
             {
                 {
-                    var quantityUsed = x.Where(p => p.Orders != null && p.Orders.Count > 0).Count();
+                    var ids = x.Select(x => x.Id).ToList();
+                    var quantityUsed = orders.Where(p => p.VoucherId.HasValue && ids.Contains(p.VoucherId.Value)).Count();
                     return new VoucherModel
                     {
                         Name = x.First().Name,
@@ -63,7 +70,7 @@ namespace Fsel.Ordering.Application.Queries.VoucherQuery
 
             if (!string.IsNullOrEmpty(request.Keyword))
             {
-                voucherModels = voucherModels.Where(m => (m.Name ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim()) || (m.Code ?? string.Empty).ToLower().Trim().Contains(request.Keyword.ToLower().Trim())).ToList();
+                voucherModels = voucherModels.Where(m => (!string.IsNullOrEmpty(m.Name) && m.Name.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)) || (!string.IsNullOrEmpty(m.Code) && m.Code.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)));
             }
 
             if (request.Status.HasValue)

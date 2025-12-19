@@ -57,9 +57,9 @@ namespace Fsel.Ordering.Application.Queries.Products
                 var createdUserIds = query.Select(p => p.CreatedUserId).Distinct().ToList();
                 var studentResults = await _userService.GetStudentsByIdsAsync(createdUserIds);
                 var students = studentResults.Content?.Result;
-                students = students?.Where(p => p.Human != null && p.Human.UserId.HasValue && (!string.IsNullOrEmpty(p.Human.FullName) && p.Human.FullName.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase) || (!string.IsNullOrEmpty(p.Human.Email) && p.Human.Email.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)))).ToList();
+                students = students?.Where(p => p.User != null && (!string.IsNullOrEmpty(p.User.FullName) && p.User.FullName.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase) || (!string.IsNullOrEmpty(p.User.Email) && p.User.Email.Contains(request.Keyword, StringComparison.InvariantCultureIgnoreCase)))).ToList();
 
-                var userIds = students?.Select(p => p.Human!.UserId).ToList();
+                var userIds = students?.Select(p => p!.UserId).ToList();
 
                 query = query.Where(p => (!string.IsNullOrEmpty(p.Code) && p.Code.Contains(request.Keyword) || (!string.IsNullOrEmpty(p.ProductCode) && p.ProductCode.Contains(request.Keyword)) || (userIds != null && userIds.Contains(p.CreatedUserId))));
             }
@@ -77,10 +77,10 @@ namespace Fsel.Ordering.Application.Queries.Products
 
             lists.ForEach(p =>
             {
-                var item = result?.FirstOrDefault(x => x.Human != null && x.Human.UserId == p.CreatedUserId);
-                p.StudentCode = item?.Human?.Code;
-                p.StudentName = item?.Human?.FullName;
-                p.Email = item?.Human?.Email;
+                var item = result?.FirstOrDefault(x => x.User != null && x.UserId == p.CreatedUserId);
+                p.StudentCode = item?.User?.Code;
+                p.StudentName = item?.User?.FullName;
+                p.Email = item?.User?.Email;
                 p.School = item?.School;
                 p.CreatedDate = p.CreatedDate.HasValue ? p.CreatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : null;
                 p.UpdatedDate = p.UpdatedDate.HasValue ? p.UpdatedDate.Value.ConvertTimeFromUtc(EnumCountryKey.Vietnam) : null;

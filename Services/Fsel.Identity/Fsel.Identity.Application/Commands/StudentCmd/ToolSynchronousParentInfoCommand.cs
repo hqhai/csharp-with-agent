@@ -1,5 +1,6 @@
 using System.Linq.Dynamic.Core;
 using Fsel.Common.ActionResults;
+using Fsel.Core.Base.Managers;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using MediatR;
@@ -17,14 +18,14 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         private readonly IParentStudentRepository _parentStudentRepository;
         private readonly IParentRepository _parentRepository;
         private readonly IStudentRepository _studentRepository;
-        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
 
-        public ToolSynchronousParentInfoCommandHandler(IParentStudentRepository parentStudentRepository, IParentRepository parentRepository, IStudentRepository studentRepository, IHumanRepository humanRepository)
+        public ToolSynchronousParentInfoCommandHandler(IParentStudentRepository parentStudentRepository, IParentRepository parentRepository, IStudentRepository studentRepository, UserManager<User> userManager)
         {
             _parentStudentRepository = parentStudentRepository;
             _parentRepository = parentRepository;
             _studentRepository = studentRepository;
-            _humanRepository = humanRepository;
+            _userManager = userManager;
         }
 
         public async Task<MethodResult<bool>> Handle(ToolSynchronousParentInfoCommand request, CancellationToken cancellationToken)
@@ -43,13 +44,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var query = await (from s in _studentRepository.Queryable
                                join ps in _parentStudentRepository.Queryable on s.Id equals ps.StudentId
                                join p in _parentRepository.Queryable on ps.ParentId equals p.Id
-                               join h in _humanRepository.Queryable on p.HumanId equals h.Id
+                               join u in _userManager.Users on s.UserId equals u.Id
                                select new
                                {
                                    StudentId = s.Id,
-                                   Email = h.Email,
-                                   PhoneNumber = h.PhoneNumber,
-                                   FullName = h.FullName
+                                   Email = u.Email,
+                                   PhoneNumber = u.PhoneNumber,
+                                   FullName = u.FullName
                                }).ToListAsync(CancellationToken.None);
 
             query = query.DistinctBy(p => p.StudentId).ToList();
@@ -87,28 +88,28 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
         {
             var query = await _studentRepository.Queryable.WhereBulkNotContains(studentIds, p => p.Id).Where(p => !string.IsNullOrEmpty(p.ParentEmail) || !string.IsNullOrEmpty(p.ParentPhoneNumber)).ToListAsync();
 
-            var humans = new List<Human>();
             var parents = new List<Parent>();
             var parentStudents = new List<ParentStudent>();
 
-            query.ForEach(p =>
+            query.ForEach(async p =>
             {
-                var humanId = Guid.NewGuid();
                 var parentId = Guid.NewGuid();
                 var parentStudentId = Guid.NewGuid();
 
-                humans.Add(new Human()
+                var user = new User()
                 {
-                    Id = humanId,
-                    FullName = "N/A",
+                    LastName = "N/A",
+                    FirstName = "N/A",
                     Email = string.IsNullOrEmpty(p.ParentEmail) ? null : p.ParentEmail,
                     PhoneNumber = string.IsNullOrEmpty(p.ParentPhoneNumber) ? null : p.ParentPhoneNumber,
-                });
+                };
+
+                await _userManager.CreateAsync(user);
 
                 parents.Add(new Parent()
                 {
                     Id = parentId,
-                    HumanId = humanId,
+                    UserId = user.Id,
                 });
 
                 parentStudents.Add(new ParentStudent()
@@ -119,9 +120,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
                 });
             });
 
-            await _humanRepository.ExecuteTransactionAsync(async () =>
+            await _parentRepository.ExecuteTransactionAsync(async () =>
             {
-                await _humanRepository.BulkMergeAsync(humans);
                 await _parentRepository.BulkMergeAsync(parents);
                 await _parentStudentRepository.BulkMergeAsync(parentStudents);
 

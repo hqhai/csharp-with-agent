@@ -8,12 +8,14 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.BaseModels;
+    using Fsel.Core.Base.Managers;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.LmsCourseService.Model;
     using Fsel.Identity.Application.Services.OrderService;
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.SystemService.QueryModels;
+    using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels.IntegrationModel;
     using Fsel.Identity.Domain.Models.QueryModels.Integration;
@@ -29,7 +31,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
     public class LeadsIntegrationQueryHandler : IRequestHandler<LeadsIntegrationQuery, MethodResult<PagingItemsModel<LeadsIntegrationModel>>>
     {
         private readonly IOrderService _orderService;
-        private readonly IHumanRepository _humanRepository;
+        private readonly UserManager<User> _userManager;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISystemService _systemService;
         private readonly IMapper _mapper;
@@ -38,7 +40,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
         private readonly BaseIntegrationQuery _baseIntegrationQuery;
 
         public LeadsIntegrationQueryHandler(IOrderService orderService,
-                                            IHumanRepository humanRepository,
+                                            UserManager<User> userManager,
                                             ILmsCourseService lmsCourseService,
                                             ISystemService systemService,
                                             IMapper mapper,
@@ -47,7 +49,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                             BaseIntegrationQuery baseIntegrationQuery)
         {
             _orderService = orderService;
-            _humanRepository = humanRepository;
+            _userManager = userManager;
             _lmsCourseService = lmsCourseService;
             _systemService = systemService;
             _mapper = mapper;
@@ -62,9 +64,32 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
 
             #region Lấy dữ liệu thay đổi trong khoảng thời gian
             List<Guid> distinctUserIds = new List<Guid>();
-            List<OrderSearchModel> orderClients = new List<OrderSearchModel>();
 
-            if (string.IsNullOrEmpty(request.Email))
+            if (!string.IsNullOrEmpty(request.Email))
+            {
+                var user = await _userManager.FindByEmailAsync(request.Email.Trim());
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
+                    return methodResult;
+                }
+
+                distinctUserIds.Add(user.Id);
+            }
+
+            else if (!string.IsNullOrEmpty(request.UserName))
+            {
+                var user = await _userManager.FindByNameAsync(request.UserName.Trim());
+                if (user == null)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
+                    return methodResult;
+                }
+
+                distinctUserIds.Add(user.Id);
+            }
+
+            else
             {
                 var userInteractedInRange = await _baseIntegrationQuery.UserInteractedInRange(request.StartDate, request.EndDate, false, cancellationToken);
                 if (!userInteractedInRange.IsOK || userInteractedInRange.Result == null)
@@ -74,45 +99,16 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                 }
 
                 distinctUserIds = userInteractedInRange.Result.ToList();
-
-                // lấy client
-                var clientUsers = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { StartDate = request.StartDate, EndDate = request.EndDate, Status = true });
-                if (!clientUsers.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(clientUsers.Error);
-                    return methodResult;
-                }
-
-                orderClients = clientUsers.Content?.Result?.ToList() ?? new List<OrderSearchModel>();
-            }
-            else
-            {
-                var user = await _humanRepository.Queryable.FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken);
-                if (user == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), $"{request.Email}");
-                    return methodResult;
-                }
-
-                distinctUserIds.Add(user.UserId!.Value);
-
-                // lấy client
-                var clientUsers = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
-                if (!clientUsers.IsSuccessStatusCode)
-                {
-                    methodResult.AddError(clientUsers.Error);
-                    return methodResult;
-                }
-
-                orderClients = clientUsers.Content?.Result?.ToList() ?? new List<OrderSearchModel>();
             }
             #endregion
 
             #region Lấy dữ liệu
             // bỏ những lead đã thành client
-            if (orderClients.Any())
+            var orderClients = await _orderService.GetOrderByStatusAsync(new GetOrderByStatusQueryModel { UserIds = distinctUserIds, Status = true });
+            var orderClientResults = orderClients.Content?.Result ?? new List<OrderSearchModel>();
+            if (orderClientResults.Any())
             {
-                var clientUserResultIds = orderClients.Select(x => x.UserId).Distinct().ToList();
+                var clientUserResultIds = orderClientResults.Select(x => x.UserId).Distinct().ToList();
                 distinctUserIds = distinctUserIds.Where(x => !clientUserResultIds.Contains(x)).ToList();
             }
 
@@ -137,13 +133,12 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             var infoCourses = infoCourseResults.Content?.Result;
 
             // lấy all user từ list hợp nhất
-            var userCombines = await _humanRepository.Queryable
-                                                     .Include(x => x.User)
+            var userCombines = await _userManager.Users
                                                      .Include(x => x.Student)
                                                      .ThenInclude(x => x!.ParentStudents)
                                                      .ThenInclude(x => x.Parent)
-                                                     .ThenInclude(x => x!.Human)
-                                                     .WhereBulkContains(paging, x => x.UserId)
+                                                     .ThenInclude(x => x!.User)
+                                                     .WhereBulkContains(paging, x => x.Id)
                                                      .ToListAsync(cancellationToken);
 
             // lấy thông tin trường học
@@ -160,7 +155,7 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
             {
                 GetCourseSuggestByUserIds = userCombines.Select(x => new GetCourseSuggestByUserIdsDetailModel
                 {
-                    UserId = x.UserId ?? Guid.Empty,
+                    UserId = x.Id,
                     Age = Shared.Helpers.DateTimeHelper.GetYearOld(x.Birthday),
                     BaseCourseLevel = x.Student?.BaseCourseLevel
                 }).ToList()
@@ -175,9 +170,9 @@ namespace Fsel.Identity.Application.Queries.IntegrationQuery
                                                        {
                                                            UserId = x.Key ?? Guid.Empty,
                                                            OTPPhoneNumber = x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.SMS) != null ?
-                                                                            x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.SMS)!.OTPCode : default,
+                                                                            x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.SMS)!.OtpCode : default,
                                                            OTPEmail = x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.Email) != null ?
-                                                                      x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.Email)!.OTPCode : default
+                                                                      x.OrderByDescending(c => c.CreatedDate).FirstOrDefault(c => c.Type == EnumUserOtpCodeType.Email)!.OtpCode : default
                                                        }).ToListAsync(cancellationToken);
 
             // lấy sự kiện

@@ -30,7 +30,12 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<IList<OrderModel>>();
-            var orders = await _orderRepository.Queryable.WhereBulkContains(request.UserIds, p => p.UserId).Where(x => x.Status == EnumOrderStatus.Payment && x.RevenueType == EnumPaymentRevenueType.Revenue && !x.IsTrial).Include(p => p.Package).OrderByDescending(p => p.CreatedDate).ToListAsync(cancellationToken);
+            var orders = await _orderRepository.Queryable.WhereBulkContains(request.UserIds, p => p.UserId)
+                                               .Where(x => x.Status == EnumOrderStatus.Payment && x.RevenueType == EnumPaymentRevenueType.Revenue && !x.IsTrial)
+                                               .Include(p => p.Package)
+                                               .OrderByDescending(p => p.CreatedDate)
+                                               .ToListAsync(cancellationToken);
+
             methodResult.Result = _mapper.Map<IList<OrderModel>>(orders);
             return methodResult;
         }

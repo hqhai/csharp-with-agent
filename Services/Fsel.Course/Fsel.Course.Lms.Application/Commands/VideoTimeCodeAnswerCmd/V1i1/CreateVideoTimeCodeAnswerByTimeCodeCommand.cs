@@ -187,7 +187,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
                 #region Do QuestBoard
 
-                var countAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => p.VideoTimeCodeResultId == videoTimeCodeResult.Id).CountAsync(cancellationToken);
+                var countAnswers = await _videoTimeCodeAnswerRepository.Queryable.Where(p => p.VideoTimeCodeResultId == videoTimeCodeResult.Id)
+                    .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
+                    .CountAsync(cancellationToken);
 
                 await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.DecodingTheNebula, countAnswers, cancellationToken);
                 await DoQuestBoard(videoResult.StudentId, EnumQuestBoardCategory.JourneyOfKnowledge, countAnswers, cancellationToken);
@@ -214,7 +216,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task<int> GetHighestStreak(VideoResult videoResult)
         {
-            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done)
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done && x.CreatedDate >= videoResult.CreatedDate)
                                                                                      .OrderBy(x => x.CreatedDate).ToListAsync();
             var highestStreak = 0;
             var maxHighestStreak = 0;
@@ -274,11 +276,16 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             var methodResult = new MethodResult<bool>();
             var videoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
             var updateVideoTimeCodeAnswers = new List<VideoTimeCodeAnswer>();
+
+            var answers = await _videoTimeCodeAnswerRepository.Queryable.WhereBulkContains(request.Answers.Select(x => x.QuestionId), x => x.QuestionId)
+                                                              .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
+                                                              .Where(x => x.VideoResultId == videoTimeCodeResult.VideoResultId && x.VideoTimeCodeId == request.VideoTimeCodeId)
+                                                              .ToListAsync(cancellationToken);
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
                 var exercise = question?.ExerciseQuestions.Select(x => x.Exercise).FirstOrDefault();
-                var answer = await _videoTimeCodeAnswerRepository.GetAsync(videoTimeCode.Id, videoTimeCodeResult.VideoResultId, question?.Id, exercise?.Id ?? default);
+                var answer = answers.FirstOrDefault(x => x.QuestionId == item.QuestionId && x.VideoResultId == videoTimeCodeResult.VideoResultId);
                 var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, answer?.Answer, videoTimeCodeResult.Status == EnumResultStatus.Process, false);
                 if (!questionResult.IsOK)
                 {
@@ -345,7 +352,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
         private async Task UpdateVideoResultAsync(VideoResult videoResult, CancellationToken cancellationToken)
         {
             var videoTimeCodeCount = await _videoTimeCodeRepository.Queryable.Where(x => x.VideoId == videoResult.VideoId).CountAsync(cancellationToken);
-            var videoTimeCodeResultCount = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done).CountAsync(cancellationToken);
+            var videoTimeCodeResultCount = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done && x.CreatedDate >= videoResult.CreatedDate).CountAsync(cancellationToken);
             if (videoTimeCodeCount == videoTimeCodeResultCount)
             {
                 await _mediator.Send(new ReviewLessonVideoCommand { LessonResultId = videoResult.LessonResultId }, cancellationToken).ConfigureAwait(false);
@@ -373,7 +380,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             {
                 return;
             }
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoTimeCode.Id, cancellationToken);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoTimeCode.Id && x.CreatedDate >= videoResult.CreatedDate, cancellationToken);
             if (videoTimeCodeResult == null)
             {
                 return;
@@ -444,7 +451,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                     CourseResultId =  courseResultId,
                     Mission = mission,
                     Type = EnumTokenHistoryType.Recevived,
-                    UserId = student.Human?.UserId ?? default,
+                    UserId = student?.UserId ?? default,
                 }
             };
 
@@ -580,7 +587,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.VideoTimeCodeId));
                 return methodResult;
             }
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == videoResult.Id && x.VideoTimeCodeId == videoTimeCode.Id, cancellationToken);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate && x.VideoTimeCodeId == videoTimeCode.Id, cancellationToken);
             if (videoTimeCodeResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoTimeCodeResult));
@@ -616,7 +623,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
 
         private async Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
         {
-            var exerciseIds = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id).Select(x => x.ExerciseId).Distinct().ToListAsync(cancellationToken);
+            var exerciseIds = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
+                .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
+                .Select(x => x.ExerciseId).Distinct().ToListAsync(cancellationToken);
             var exercises = await _exerciseRepository.Queryable.Include(x => x.ExerciseQuestions)
                                     .ThenInclude(x => x.Question)
                                     .ThenInclude(x => x!.VideoTimeCodeAnswers.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id))

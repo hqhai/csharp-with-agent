@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 methodResult.AddErrorBadRequest(videoResult.ErrorMessages);
                 return methodResult;
             }
-            var isVideoTimeCodeDone = await _videoTimeCodeResultRepository.Queryable.AnyAsync(x => x.VideoResultId == videoResult.Id && x.Status != EnumResultStatus.Done, cancellationToken);
+            var isVideoTimeCodeDone = await _videoTimeCodeResultRepository.Queryable.AnyAsync(x => x.VideoResultId == videoResult.Id && x.Status != EnumResultStatus.Done && x.CreatedDate >= videoResult.CreatedDate, cancellationToken);
             if (isVideoTimeCodeDone)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isVideoTimeCodeDone));

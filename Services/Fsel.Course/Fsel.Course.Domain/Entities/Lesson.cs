@@ -18,6 +18,12 @@ namespace Fsel.Course.Domain.Entities
         [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
+        [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Thumbnail { get; set; }
+
+        [MaxLength(250, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
+
         /// <summary>
         /// Nội dung hướng dẫn bài test
         /// </summary>

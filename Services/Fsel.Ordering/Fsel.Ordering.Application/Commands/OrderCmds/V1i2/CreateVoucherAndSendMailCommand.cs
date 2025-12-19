@@ -61,13 +61,13 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     return methodResult;
                 }
                 var student = studentResult.Content?.Result;
-                if (student == null || student.Human == null)
+                if (student == null || student.User == null)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
                     return methodResult;
                 }
 
-                var order = await _orderRepository.Queryable.Where(p => !p.IsTrial && p.Status == EnumOrderStatus.Payment && !p.VoucherId.HasValue && p.UserId == student.Human.UserId && p.DiscountPrice == 0).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                var order = await _orderRepository.Queryable.Where(p => !p.IsTrial && p.Status == EnumOrderStatus.Payment && !p.VoucherId.HasValue && p.UserId == student.UserId && p.DiscountPrice == 0).OrderByDescending(p => p.CreatedDate).FirstOrDefaultAsync(cancellationToken);
                 if (order == null || !order.PackageId.HasValue)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -76,7 +76,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
 
                 var voucherResult = await _mediator.Send(new CreateVoucherForRetailCommand()
                 {
-                    UserId = student.Human.UserId ?? default,
+                    UserId = student.UserId,
                     PackageId = order.PackageId.Value,
                 }, cancellationToken).ConfigureAwait(false);
                 if (!voucherResult.IsOK)

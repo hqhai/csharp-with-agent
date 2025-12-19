@@ -8,15 +8,14 @@ namespace Fsel.Identity.Application.Commands.LandingPages
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base.Managers;
-    using Fsel.Identity.Application.Services;
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.Models.CommandModels.LandingPages;
     using Fsel.Identity.Infrastructure.ValueSettings;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
+    using Fsel.Identity.Application.Services.SenderService;
 
     public class ReceiveDataFromLandingPageCommand : ReceiveDataFromLandingPageCommandModel, IRequest<MethodResult<bool>>
     {

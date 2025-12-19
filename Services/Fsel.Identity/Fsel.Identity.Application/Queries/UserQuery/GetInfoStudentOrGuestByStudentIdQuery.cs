@@ -37,7 +37,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentModel> methodResult = new MethodResult<StudentModel>();
 
-            var student = await _studentRepository.Queryable.Include(x => x.Human).FirstOrDefaultAsync(p => p.Id == request.StudentId, cancellationToken);
+            var student = await _studentRepository.Queryable.Include(x => x.User).FirstOrDefaultAsync(p => p.Id == request.StudentId, cancellationToken);
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
@@ -45,7 +45,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
             var studentModel = _mapper.Map<StudentModel>(student);
 
-            var user = await _userManager.Users.FirstOrDefaultAsync(p => p.Id == student.Human!.UserId, cancellationToken);
+            var user = await _userManager.Users.FirstOrDefaultAsync(p => p.Id == student.UserId, cancellationToken);
 
             if (user == null)
             {
@@ -55,7 +55,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
 
             var role = await _userManager.GetRolesAsync(user);
 
-            studentModel.Human!.Role = role.FirstOrDefault();
+            studentModel.Role = role.FirstOrDefault();
 
             methodResult.Result = studentModel;
             return methodResult;

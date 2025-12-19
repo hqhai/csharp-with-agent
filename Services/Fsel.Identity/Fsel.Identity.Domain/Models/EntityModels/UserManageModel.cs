@@ -23,12 +23,12 @@ namespace Fsel.Identity.Domain.Models.EntityModels
 
         public string? ManageUser { get; set; }
 
-        public Guid? GroupId { get; set; }
-
         public string? GroupName { get; set; }
 
         public string? UserName { get; set; }
 
         public EnumUserStatus? Status { get; set; }
+
+        public Guid? RoleId { get; set; }
     }
 }

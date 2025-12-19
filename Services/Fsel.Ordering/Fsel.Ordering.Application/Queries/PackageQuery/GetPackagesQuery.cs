@@ -19,20 +19,21 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
 
     public class GetPackagesQuery : IRequest<MethodResult<List<PackageModel>>>
     {
+        public bool? IsDefault { get; set; } = true;
     }
 
     public class GetPackagesQueryHandler : IRequestHandler<GetPackagesQuery, MethodResult<List<PackageModel>>>
     {
         private readonly IPackageRepository _packageRepository;
         private readonly IMapper _mapper;
-        private readonly IEventRepository _eventRepository;
         private readonly IMediator _mediator;
 
-        public GetPackagesQueryHandler(IPackageRepository packageRepository, IMapper mapper, IEventRepository eventRepository, IMediator mediator)
+        public GetPackagesQueryHandler(IPackageRepository packageRepository,
+                                       IMapper mapper,
+                                       IMediator mediator)
         {
             _packageRepository = packageRepository;
             _mapper = mapper;
-            _eventRepository = eventRepository;
             _mediator = mediator;
         }
 
@@ -45,7 +46,7 @@ namespace Fsel.Ordering.Application.Queries.PackageQuery
 
             var currentDate = DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam);
 
-            var eventResult = await _mediator.Send(new GetCurrentEventQuery(), cancellationToken).ConfigureAwait(false);
+            var eventResult = await _mediator.Send(new GetCurrentEventQuery { IsDefault = request.IsDefault }, cancellationToken).ConfigureAwait(false);
             var @event = eventResult.Result;
 
             if (@event == null || @event.PackageEvents == null)

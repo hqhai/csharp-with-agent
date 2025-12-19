@@ -116,7 +116,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
             }
             var student = studentResult.Content?.Result;
 
-            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student?.Human?.Code }, cancellationToken).ConfigureAwait(false);
+            var codeSend = await _mediator.Send(new GenerateRandomOrderQuery() { StudentCode = student?.User?.Code }, cancellationToken).ConfigureAwait(false);
             string code = codeSend.Result ?? string.Empty;
 
             if (string.IsNullOrEmpty(code) || await _orderRepository.Queryable.AnyAsync(x => x.Code == code, cancellationToken))
@@ -183,7 +183,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                     DiscountPrice = discountPrice,
                     TotalPrice = totalPrice,
                     Price = packageEvent.Price,
-                    StudentCode = student?.Human?.Code,
+                    StudentCode = student?.User?.Code,
                     VoucherId = voucherId,
                 }, cancellationToken).ConfigureAwait(false);
 
@@ -228,7 +228,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.V1i2
                 var changeStatusOrdersResult = await _mediator.Send(new ChangeStatusOrderCommand()
                 {
                     OrderIds = new[] { newOrder.Id },
-                    RevenueType = EnumPaymentRevenueType.NotRevenue,
+                    RevenueType = EnumPaymentRevenueType.Revenue,
                     Status = EnumOrderStatus.Payment
                 }, cancellationToken);
 

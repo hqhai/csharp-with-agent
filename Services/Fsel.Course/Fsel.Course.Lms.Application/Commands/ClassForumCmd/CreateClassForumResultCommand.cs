@@ -52,6 +52,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly SetTimeClassForumDonePublisher _setTimeClassForumDonePublisher;
         private readonly IHostEnvironment _environment;
         private readonly IClassForumResultFileRepository _classForumResultFileRepository;
+        private readonly ClassForumPronunciationPublisher _classForumPronunciationPublisher;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
         public const int DisplayOrderFirst = 0;
@@ -60,20 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         public CreateClassForumResultCommandHandler(IMapper mapper,
             ICourseResultRepository courseResultRepository,
             ILogger<CreateClassForumResultCommand> logger,
-            CreateTokenHistoryPublisher createTokenHistoryPublisher,
-            ICourseRepository courseRepository,
-            AuthContext authContext,
-            IUserService userService,
-            IClassForumResultRepository classForumResultRepository,
-            IClassForumRepository classForumRepository,
-            ILessonResultRepository lessonResultRepository,
-            SubmitClassForumGradingPublisher submitClassForumGradingPublisher,
-            ISystemService systemService,
-            IClassForumDetailResultRepository classForumDetailResultRepository,
-            SetTimeClassForumDonePublisher setTimeClassForumDonePublisher,
-            QuestBoardPublisher questBoardPublisher,
-            IHostEnvironment environment,
-            IClassForumResultFileRepository classForumResultFileRepository)
+            CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, QuestBoardPublisher questBoardPublisher, IHostEnvironment environment, ClassForumPronunciationPublisher classForumPronunciationPublisher, IClassForumResultFileRepository classForumResultFileRepository)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -91,6 +79,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _setTimeClassForumDonePublisher = setTimeClassForumDonePublisher;
             _questBoardPublisher = questBoardPublisher;
             _environment = environment;
+            _classForumPronunciationPublisher = classForumPronunciationPublisher;
             _classForumResultFileRepository = classForumResultFileRepository;
         }
 
@@ -223,6 +212,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             if (classForumDetailResult != null && request.IsSubmit)
             {
                 await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request, cancellationToken);
+
+                // chấm Pronunciation
+                if (classForum.CourseSkill == EnumCourseSkill.Speaking)
+                {
+                    await _classForumPronunciationPublisher.Publish(new ClassForumPronunciationConsumerModel { ClassForumDetailResultId = classForumDetailResult.Id }, cancellationToken);
+                }
             }
 
             var classForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => classForumResult != null && x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
@@ -238,7 +233,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         CourseResultId = _courseResultRepository.Queryable.FirstOrDefault(x=>x.CourseId == course.Id && x.StudentId == studentId)?.Id,
                         Mission = GetTokenMission(classForum,classForumResult),
                         Type = EnumTokenHistoryType.Recevived,
-                        UserId = student.Human?.UserId ?? default,
+                        UserId = student.UserId,
                     }
                 };
                 await _createTokenHistoryPublisher.Publish(tokenHistorys, cancellationToken);

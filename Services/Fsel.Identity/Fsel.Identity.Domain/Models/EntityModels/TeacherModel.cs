@@ -2,7 +2,6 @@
 
 namespace Fsel.Identity.Domain.Models.EntityModels
 {
-    using System;
     using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
@@ -15,6 +14,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public int NumberClass { get; set; }
 
         private string? _passportPath;
+
         public string? PassportPath
         {
             set { _passportPath = value; }
@@ -22,6 +22,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         }
 
         private string? _universityDegreePath;
+
         public string? UniversityDegreePath
         {
             set { _universityDegreePath = value; }
@@ -29,6 +30,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         }
 
         private string? _certificationPath;
+
         public string? CertificationPath
         {
             set { _certificationPath = value; }
@@ -36,15 +38,15 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         }
 
         private string? _policeClearancePath;
+
         public string? PoliceClearancePath
         {
             set { _policeClearancePath = value; }
             get { return _policeClearancePath.AddS3BaseUrl(); }
         }
 
-        public Guid HumanId { get; set; }
-
         public IList<TeacherBankAccountModel>? TeacherBankAccounts { get; set; }
-        public HumanModel? Human { get; set; }
+        public UserModel? User { get; set; }
+        public Guid UserId { get; set; }
     }
 }

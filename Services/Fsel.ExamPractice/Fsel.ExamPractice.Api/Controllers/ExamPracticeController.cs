@@ -94,5 +94,43 @@ namespace Fsel.ExamPractice.Api.Controllers
             MethodResult<PagingItemsModel<ExamPracticeSearchModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get ExamPractice Histories
+        /// </summary>
+        [HttpGet("histories")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ExamPracticeModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUnitHistory([FromQuery] GetHistoryExamPracticeQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Change Status ExamPractice
+        /// </summary>
+        [HttpPut("archive/{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ApiVersion(ApiSettings.APIVersion1)]
+        public async Task<IActionResult> ArchiveExamPratice([FromRoute] Guid id)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(new ArchiveExamPraticeCommand { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Change Status ExamPractice
+        /// </summary>
+        [HttpDelete("{id}")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ApiVersion(ApiSettings.APIVersion1)]
+        public async Task<IActionResult> DeleteExamPratice([FromRoute] Guid id)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(new DeleteExamPraticeCommand { Id = id }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

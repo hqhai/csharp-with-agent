@@ -40,6 +40,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public LevelModel? Level { get; set; }
         public ProgramModel? Program { get; set; }
         public IList<VideoTimeCodeModel>? VideoTimeCodes { get; set; }
+        public IList<VideoSubFilePathModel>? VideoSubFilePaths { get; set; }
         public VideoResultModel? VideoResult { get; set; }
     }
 }

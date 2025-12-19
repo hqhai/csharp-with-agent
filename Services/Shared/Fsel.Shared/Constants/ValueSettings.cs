@@ -14,6 +14,7 @@ namespace Fsel.Shared.Constants
         public const int ValueDefault = 0;
         public const int ValueDefaultTracingScore = 1;
 
+        public const int MaxPercent = 100;
         public const int DelayOneMinute = 1;
         public const int DelayThreeMinute = 3;
         public const int DelayTenMinutes = 10;
@@ -96,6 +97,7 @@ namespace Fsel.Shared.Constants
 
             public const int Temperature = 0;
             public const string Model = "gpt-4o";
+            public const string O4MINI = "o4-mini";
             public const int PresencePenalty = 0;
             public const int TopP = 0;
         }
@@ -256,6 +258,12 @@ namespace Fsel.Shared.Constants
         {
             public const int MinValue = 0;
             public const int MaxValue = 100;
+        }
+
+        public static class LanguageAIModule
+        {
+            public const string English = "en-US";
+            public const string Vietnamese = "vi-VN";
         }
     }
 }

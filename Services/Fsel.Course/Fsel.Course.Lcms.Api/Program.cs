@@ -17,8 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
@@ -106,6 +106,17 @@ builder.Services.AddScoped<IUnitModuleRepository, UnitModuleRepository>();
 builder.Services.AddScoped<IRubyAnnotationRepository, RubyAnnotationRepository>();
 builder.Services.AddScoped<IRubyScopeRepository, RubyScopeRepsitory>();
 builder.Services.AddScoped<IRubyService, RubyService>();
+builder.Services.AddScoped<ITopicRepository, TopicRepository>();
+builder.Services.AddScoped<ICurriculumStudentRepository, CurriculumStudentRepository>();
+builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
+builder.Services.AddScoped<IHomeWorkConfigRepository, HomeWorkConfigRepository>();
+builder.Services.AddScoped<IHomeWorkExtraPracticeAnswerRepository, HomeWorkExtraPracticeAnswerRepository>();
+builder.Services.AddScoped<IHomeWorkExtraPracticeResultRepository, HomeWorkExtraPracticeResultRepository>();
+builder.Services.AddScoped<IHomeWorkRetryRepository, HomeWorkRetryRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IVideoSubFilePathRepository, VideoSubFilePathRepository>();
+builder.Services.AddScoped<IStudentGoalAggregateRepository, StudentGoalAggregateRepository>();
+builder.Services.AddScoped<IStudentGoalSummaryRepository, StudentGoalSummaryRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();

@@ -20,14 +20,12 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     public class DeleteListUsersCommandHandler : IRequestHandler<DeleteListUsersCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly AuthContext _authContext;
         private readonly IUserGroupMemberShipRepository _userGroupMemberShipRepository;
 
-        public DeleteListUsersCommandHandler(UserManager<User> userManager, IHumanRepository humanRepository, IUserGroupMemberShipRepository userGroupMemberShipRepository, AuthContext authContext)
+        public DeleteListUsersCommandHandler(UserManager<User> userManager, IUserGroupMemberShipRepository userGroupMemberShipRepository, AuthContext authContext)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _userGroupMemberShipRepository = userGroupMemberShipRepository;
             _authContext = authContext;
         }
@@ -44,14 +42,9 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             }
 
             var usersToDelete = await _userManager.Users
-                .Include(x => x.Human)
-                .Include(x => x.UserGroups)
                 .WhereBulkContains(request.UserIds, x => x.Id)
                 .ToListAsync(cancellationToken);
 
-            var humans = usersToDelete.Where(x => x.Human != null).Select(x => x.Human!).ToList();
-
-            var userGroupMemberShips = usersToDelete.SelectMany(x => x.UserGroups).ToList();
 
             if (!usersToDelete.Any() || usersToDelete.Count != request.UserIds.Distinct().Count())
             {
@@ -59,12 +52,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                 return methodResult;
             }
 
-            await _humanRepository.ExecuteTransactionAsync(async () =>
+            await _userGroupMemberShipRepository.ExecuteTransactionAsync(async () =>
             {
-                await _humanRepository.DeleteListAsync(humans);
-
-                await _userGroupMemberShipRepository.DeleteListAsync(userGroupMemberShips);
-
                 await _userManager.Users
                     .Where(u => request.UserIds.Contains(u.Id))
                     .ExecuteUpdateAsync(setter => setter
@@ -74,7 +63,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                         .SetProperty(u => u.DeletedDate, DateTime.UtcNow)
                     , cancellationToken);
 
-                await _humanRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _userGroupMemberShipRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
                 methodResult.Result = true;
                 methodResult.StatusCode = StatusCodes.Status200OK;

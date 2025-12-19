@@ -90,7 +90,7 @@ namespace Fsel.System.Application.Queries.ErrorReportQuery
             errorReportModel.CourseName = courses?.FirstOrDefault(x => x.Id == errorReportModel.CourseId)?.Name;
             errorReportModel.UnitName = units?.FirstOrDefault(x => x.Id == errorReportModel.UnitId)?.Name;
             errorReportModel.LessonName = lessons?.FirstOrDefault(x => x.Id == errorReportModel.LessonId)?.Name;
-            errorReportModel.StudentCode = student?.Human?.Code;
+            errorReportModel.StudentCode = student?.User?.Code;
 
             methodResult.Result = errorReportModel;
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -8,6 +8,7 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
     using Fsel.Common.ActionResults;
     using Fsel.Ordering.Application.Services.SenderService;
     using Fsel.Ordering.Application.Services.UserService;
+    using Fsel.Ordering.Application.Services.UserService.Models;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
     using Fsel.Ordering.Infrastructure.ValueSettings;
@@ -69,6 +70,12 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
 
             var totalPrice = order.TotalPrice.ToString("C", numberFormat).Trim();
 
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = order.UserId,
+                Template = EnumSenderTemplate.MailPaymentForStudent
+            });
+
             await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
             {
                 ToEmails = new List<string> { order.Email ?? string.Empty },
@@ -84,23 +91,25 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds.v1i1
                     Package = GetPackageName(order.Package),
                     Price = price.ToString(CultureInfo.InvariantCulture),
                     TotalPrice = totalPrice.ToString(CultureInfo.InvariantCulture),
-                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                    ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                    AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, token?.Content?.Result ?? string.Empty)
                 },
                 Template = EnumSenderTemplate.MailPaymentForCustomer
             });
 
-            if (!string.IsNullOrEmpty(order.Email) && !string.IsNullOrEmpty(student.Human?.Email) && order.Email.ToLower(CultureInfo.InvariantCulture) != student.Human?.Email.ToLower(CultureInfo.InvariantCulture))
+            if (!string.IsNullOrEmpty(order.Email) && !string.IsNullOrEmpty(student.User?.Email) && order.Email.ToLower(CultureInfo.InvariantCulture) != student.User?.Email.ToLower(CultureInfo.InvariantCulture))
             {
                 await _serverServices.SendEmailAsync(new SendEmailByTemplateCommandModel()
                 {
-                    ToEmails = new List<string> { student.Human?.Email ?? string.Empty },
+                    ToEmails = new List<string> { student.User?.Email ?? string.Empty },
                     Subject = "Chào mừng bạn đến với FSEL!",
                     Params = new
                     {
-                        FullName = student.Human?.FullName,
+                        FullName = student.User?.FullName,
                         OrderCode = order.Code,
                         ExpiredDate = expiredDate,
-                        ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                        ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                        AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, token?.Content?.Result ?? string.Empty)
                     },
                     Template = EnumSenderTemplate.MailPaymentForStudent
                 });

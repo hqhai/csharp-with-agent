@@ -7,7 +7,6 @@ using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Lms.Application.Commands.CourseResultCmd;
-using Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd;
 using Fsel.Course.Lms.Application.Queries.CourseQuery.V1i1;
 using Fsel.Shared.Attributes;
 using Fsel.Shared.Constants;
@@ -19,7 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
 {
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/course")]
-    [Permission(role: nameof(EnumRole.Student))]
+    [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     [ApiController]
     public class CourseController : BaseController
     {
@@ -60,7 +59,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         [HttpPost("change-course-level")]
         [ProducesResponseType(typeof(MethodResult<IList<LevelDtoModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelByAdminCommand command)
+        public async Task<IActionResult> ChangeCourseLevel([FromBody] ChangeCourseLevelCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
@@ -72,7 +71,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         [HttpPost("retake-course")]
         [ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultByAdminCommand command)
+        public async Task<IActionResult> RetakeCourse([FromBody] RetakeCourseResultCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();

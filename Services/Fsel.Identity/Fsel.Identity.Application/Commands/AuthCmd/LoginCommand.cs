@@ -1,8 +1,10 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using System.Linq.Dynamic.Core;
 using Fsel.Common.ActionResults;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Core.Base.Managers;
+using Fsel.Core.Entities;
+using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Commands.UserDeletionCmd;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
@@ -10,10 +12,12 @@ using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Domain.Models.CommandModels.Auths;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Identity.Infrastructure;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Fsel.Identity.Application.Commands.AuthCmd
 {
@@ -23,32 +27,32 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
     public class LoginCommandHandler : IRequestHandler<LoginCommand, MethodResult<TokenModel>>
     {
-        private readonly UserManager<User> _userManager;
-        private readonly Microsoft.AspNetCore.Identity.SignInManager<User> _signInManager;
+        private UserManager<User> _userManager;
+        private Microsoft.AspNetCore.Identity.SignInManager<User> _signInManager;
+        private IPlatformRepository _platformRepository;
+        private IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
+        private IStudentRepository _studentRepository;
+        private ICompetitionEventsRepository _competitionEventsRepository;
         private readonly IMediator _mediator;
-        private readonly IPlatformRepository _platformRepository;
-        private readonly IStudentCompetitionEventsRepository _studentCompetitionEventsRepository;
-        private readonly IHumanRepository _humanRepository;
-        private readonly IStudentRepository _studentRepository;
-        private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IServiceProvider _serviceProvider;
 
         public LoginCommandHandler(UserManager<User> userManager,
             Microsoft.AspNetCore.Identity.SignInManager<User> signInManager,
             IMediator mediator,
             IPlatformRepository platformRepository,
             IStudentCompetitionEventsRepository studentCompetitionEventsRepository,
-            IHumanRepository humanRepository,
             IStudentRepository studentRepository,
-            ICompetitionEventsRepository competitionEventsRepository)
+            ICompetitionEventsRepository competitionEventsRepository,
+            IServiceProvider serviceProvider)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _mediator = mediator;
             _platformRepository = platformRepository;
             _studentCompetitionEventsRepository = studentCompetitionEventsRepository;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _competitionEventsRepository = competitionEventsRepository;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<TokenModel>> Handle(LoginCommand request, CancellationToken cancellationToken)
@@ -61,6 +65,17 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
             {
                 methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.UserNameAndPasswordNotEmpty), new Error(nameof(request.Username)), new Error(nameof(request.Password)));
                 return methodResult;
+            }
+
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            if (tenantProvider != null)
+            {
+                _userManager = await tenantProvider.CreateUserManagerAsync<User>(request.Username) ?? _userManager;
+                _signInManager = await tenantProvider.CreateSignInManagerAsync<User>(request.Username) ?? _signInManager;
+                _platformRepository = await tenantProvider.CreateRepositoryAsync<IPlatformRepository>(request.Username) ?? _platformRepository;
+                _studentCompetitionEventsRepository = await tenantProvider.CreateRepositoryAsync<IStudentCompetitionEventsRepository>(request.Username) ?? _studentCompetitionEventsRepository;
+                _studentRepository = await tenantProvider.CreateRepositoryAsync<IStudentRepository>(request.Username) ?? _studentRepository;
+                _competitionEventsRepository = await tenantProvider.CreateRepositoryAsync<ICompetitionEventsRepository>(request.Username) ?? _competitionEventsRepository;
             }
 
             var user = await _userManager.FindByNameAsync(request.Username);
@@ -96,11 +111,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 return methodResult;
             }
 
-            var competitionEvent = await (from baseQ in _humanRepository.Queryable
-                                          join s in _studentRepository.Queryable on baseQ.Id equals s.HumanId
+            var competitionEvent = await (from baseQ in _userManager.Users
+                                          join s in _studentRepository.Queryable on baseQ.Id equals s.UserId
                                           join sce in _studentCompetitionEventsRepository.Queryable on s.Id equals sce.StudentId
                                           join ce in _competitionEventsRepository.Queryable on sce.CompetitionEventId equals ce.Id
-                                          where baseQ.UserId == user.Id
+                                          where baseQ.Id == user.Id
                                           select ce).FirstOrDefaultAsync(cancellationToken);
 
             var isByPassEmailComfirm = competitionEvent?.EventContent?.IsByPassEmailComfirm ?? default;

@@ -1,0 +1,11 @@
+@if (string.IsNullOrEmpty(ViewBag.LogoPath))
+{
+    <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo img-fluid" />
+}
+else
+{
+    <div class="d-flex justify-content-center align-items-center">
+        <img src="/assets/img/fsel-logo.svg" alt="fsel-logo" class="logo img-fluid mr-3">
+        <img src="@ViewBag.LogoPath" alt="tenant-logo" class="logo img-fluid ml-3">
+    </div>
+}

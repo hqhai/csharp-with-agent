@@ -35,8 +35,8 @@ namespace Fsel.Course.Lms.Application.Services.InteractionService
         //[Post("/v1/customerSurvey")]
         //Task<IApiResponse<MethodResult<IList<CustomerSurveyModel>>>> CreateSurveyAsync([FromBody] CreateCustomerSurveyCommandModel model);
 
-        [Get("/v1/customerSurvey/check-survey")]
-        Task<IApiResponse<MethodResult<bool>>> CheckSurveyBySurveyFormType([FromQuery] CheckSurveyBySurveyFormTypeModel query);
+        [Get("/v1/customerSurvey/check-survey-pt")]
+        Task<IApiResponse<MethodResult<bool>>> CheckSurveyPT([FromQuery] CheckSurveyBySurveyFormTypeModel query);
 
         [Post("/v1/harmful-content/harmful-content-image-body")]
         Task<IApiResponse<MethodResult<bool>>> CheckHarmfulContentImage([FromBody] CheckHarmfulContentImageModel query);

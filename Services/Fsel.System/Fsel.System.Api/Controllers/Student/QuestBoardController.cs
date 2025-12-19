@@ -18,7 +18,7 @@ namespace Fsel.System.Api.Controllers.Student
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/quest-board")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class QuestBoardController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -37,6 +37,18 @@ namespace Fsel.System.Api.Controllers.Student
         public async Task<IActionResult> GetQuestBoards()
         {
             var commandResult = await _mediator.Send(new GetQuestBoardsByStudentQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get quest boards
+        /// </summary>
+        [HttpGet("dash-board/quest-boards")]
+        [ProducesResponseType(typeof(MethodResult<QuestBoardModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Gets()
+        {
+            var commandResult = await _mediator.Send(new GetQuestBoardStudentQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 

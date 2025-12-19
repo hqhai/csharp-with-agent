@@ -17,6 +17,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
     using Fsel.Identity.Domain.Models.CommandModels.Admins;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -227,7 +228,8 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
                     var user = new User();
                     user.UserName = item.UserName;
                     user.Email = item.Email;
-                    user.FullName = item.FullName ?? item.Email;
+                    user.FirstName = (item.FullName ?? item.Email).ParseFullName().FirstName;
+                    user.LastName = (item.FullName ?? item.Email).ParseFullName().LastName;
                     user.EmailConfirmed = true;
                     user.DefaultPassword = passWord;
                     if (!user.IsValid())

@@ -2,6 +2,7 @@
 
 namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
 {
+    using Fsel.Common.Enums;
     using Fsel.ExamPractice.Domain.Enums;
     using Fsel.Shared.Enums;
 
@@ -30,5 +31,11 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels.ExamPractices
 
         public int TotalAttempts { get; set; }
         public EnumExamPracticeStatus Status { get; set; }
+
+        public Guid OriginalId { get; set; }
+
+        public int Version { get; set; }
+
+        public EnumVersionStatus VersionStatus { get; set; }
     }
 }

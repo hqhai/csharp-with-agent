@@ -1,0 +1,139 @@
+@using Fsel.Identity.Authentication.OpenId
+@inject Microsoft.Extensions.Localization.IStringLocalizer Localizer
+@model Fsel.Identity.Domain.Models.CommandModels.OpenId.ExternalLoginModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutMain.cshtml";
+    var months = string.Join(",", new[] { "i18n_Jan", "i18n_Feb", "i18n_Mar", "i18n_Apr", "i18n_May", "i18n_Jun", "i18n_Jul", "i18n_Aug", "i18n_Sep", "i18n_Oct", "i18n_Nov", "i18n_Dec" }
+                    .Select(x => Localizer[x].ToString()));
+    // ViewData["Title"] = "Register";
+}
+
+@section styles {
+    <link rel="stylesheet" href="~/assets/css/pages/sign-up.css" />
+    <link href="~/lib/daterangepicker/css/daterangepicker.css" rel="stylesheet" />
+    <link href="~/lib/flatpickr/css/flatpickr.min.css" rel="stylesheet" />
+    <link href="~/lib/flatpickr/css/custom.css" rel="stylesheet" />
+}
+
+<div class="all-content">
+    <div class="content">
+        <div class="langs">
+            @await Component.InvokeAsync("Languages")
+        </div>
+        <div class="hidden" id="invalidBirthday" data-value="@Localizer["i18n_Invalid_birthday"]"></div>
+        @await Component.InvokeAsync("Logos")
+        <div class="item-title">@Localizer["i18n_update_info"].Value?.ToUpper()</div>
+        <form id="form-ExternalLogin" asp-route="ExternalLoginConfirmation">
+            <input type="hidden" asp-for="ReturnUrl" />
+            <input type="hidden" asp-for="IsEmailReadonly" />
+            @Html.AntiForgeryToken()
+
+            <!-- What’s your email? section -->
+            <div class="section-survey step-2 active">
+                <div class="row lastname-and-name">
+                    <div class="col-sm-6">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
+                                   name="LastName"
+                                   id="lastName"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   required
+                                   asp-for="LastName" />
+                            <label for="LastName" class="input-label">@Localizer["i18nSignUpLabelLastName"]</label>
+                        </div>
+                        @Html.CustomValidationMessageFor(model => model.LastName, Localizer, "", new { @class = "content-text-danger" })
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
+                                   name="FirstName"
+                                   id="firstName"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   required
+                                   asp-for="FirstName" />
+                            <label for="FirstName" class="input-label">@Localizer["i18nSignUpLabelFirstName"]</label>
+                        </div>
+                        @Html.CustomValidationMessageFor(model => model.FirstName, Localizer, "", new { @class = "content-text-danger" })
+                    </div>
+                </div>
+                <input hidden class="text-input"
+                       type="text"
+                       name="Email"
+                       id="email"
+                       placeholder=""
+                       autocomplete="off"
+                       required
+                       readonly
+                       asp-for="Email" />
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="float-input float-input-validate">
+                            <input class="text-input"
+                                   type="text"
+                                   name="PhoneNumber"
+                                   id="phoneNumber"
+                                   placeholder=""
+                                   autocomplete="off"
+                                   required
+                                   asp-for="PhoneNumber" />
+                            <label for="PhoneNumber" class="input-label">@Localizer["i18n_phone_number"]</label>
+                        </div>
+                        @Html.CustomValidationMessageFor(model => model.PhoneNumber, Localizer, "", new { @class = "content-text-danger" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+                        <p style="color: #cfd8e5;display: flex; align-items: center;gap: 8px;margin: 0 0 8px 4px;">
+                            @Localizer["i18nSignUpLabelBirthday"]
+                            <img src="~/assets/icons/question.png" alt="hỏi chấm" />
+                        </p>
+                        <div class="float-input float-input-validate">
+                            <input type="text"
+                                   placeholder="@Localizer["i18n_date_ddmmyy"]"
+                                   class="text-input text-input-place-holder text-input-date"
+                                   id="birthday"
+                                   name="Birthday"
+                                   asp-for="Birthday"
+                                   autocomplete="off" />
+                        </div>
+                        @Html.CustomValidationMessageFor(model => model.Birthday, Localizer, "", new { @class = "content-text-danger" })
+                    </div>
+                </div>
+
+                <div class="checkbox">
+                    <input type="checkbox" name="policy" id="policy" hidden checked="checked" />
+                    <label for="policy" class="service-policy">
+                        @Localizer["i18n_i_agree"] <a target="_blank" href="https://term-condition.fsel.edu.vn">@Localizer["i18n_term_of_services"]</a> @Localizer["i18n_and"]
+                        <a target="_blank" href="https://policy.fsel.edu.vn">@Localizer["i18n_privacy_policy"]</a>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn sign-up-btn">
+                @Localizer["i18n_next"]
+            </button>
+
+            <div class="text-footer">@Localizer["i18n_back"] <a href="@Url.Action("Login", "Account", new { Model.ReturnUrl })">@Localizer["i18n_login"]</a></div>
+        </form>
+    </div>
+
+    @await Component.InvokeAsync("RightBanner", new { Model.ReturnUrl })
+
+    <partial class="mt-3" name="_ValidationSummary" />
+</div>
+
+@section scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        <script src="~/lib/momentjs/js/moment.min.js"></script>
+        <script src="~/lib/daterangepicker/js/daterangepicker.min.js"></script>
+        <script src="~/lib/flatpickr/js/flatpickr.js"></script>
+        <script src="~/assets/js/pages/external-login.js"></script>
+    }
+}
+

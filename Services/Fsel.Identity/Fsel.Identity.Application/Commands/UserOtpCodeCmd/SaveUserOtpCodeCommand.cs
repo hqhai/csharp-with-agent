@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using MassTransit.Internals;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -51,7 +52,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                     userOtpCode = new UserOtpCode
                     {
                         UserId = request.Id,
-                        OTPCode = otp,
+                        OtpCode = otp,
                         Status = EnumOtpCodeStatus.New,
                         Type = EnumUserOtpCodeType.Email,
                         ExpiredTime = expiredTime
@@ -60,7 +61,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
                 }
                 else
                 {
-                    userOtpCode.OTPCode = otp;
+                    userOtpCode.OtpCode = otp;
                     userOtpCode.ExpiredTime = expiredTime;
                     _userOtpCodeRepository.Update(userOtpCode);
                 }
@@ -80,7 +81,7 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
         private async Task<string?> GetOtpCode()
         {
             var otp = NumberHelper.GetRandomCode();
-            var isUsedOtp = await _userOtpCodeRepository.Queryable.AnyAsync(x => x.OTPCode == otp && x.Status == EnumOtpCodeStatus.New);
+            var isUsedOtp = await _userOtpCodeRepository.Queryable.AnyAsync(x => x.OtpCode == otp && x.Status == EnumOtpCodeStatus.New);
             if (!isUsedOtp)
             {
                 return otp;

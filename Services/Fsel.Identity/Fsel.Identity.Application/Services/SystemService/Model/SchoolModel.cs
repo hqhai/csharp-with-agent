@@ -42,9 +42,4 @@ namespace Fsel.Identity.Application.Services.SystemService.Model
 
         public LocationModel? Location { get; set; }
     }
-
-    public class LocationModel
-    {
-        public string? LongPath { get; set; }
-    }
 }

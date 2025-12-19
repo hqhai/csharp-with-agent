@@ -8,6 +8,7 @@ using Fsel.Core.Entities;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Shared.Enums;
+using Fsel.Shared.Helpers;
 
 namespace Fsel.Course.Domain.Entities
 {
@@ -21,11 +22,25 @@ namespace Fsel.Course.Domain.Entities
         [RegexValid(Regex = @"^[^<>]*$", ErrorMessage = nameof(EnumVideoErrorCode.InvalidKeywordCharacter))]
         public string? Name { get; set; }
 
+        private string? _videoFilePath;
+
         /// <summary>
         /// Link Video
         /// </summary>
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        public string? VideoFilePath { get; set; }
+        public string? VideoFilePath
+        {
+            get { return _videoFilePath; }
+            set { _videoFilePath = value; TimeCount = MediaHelper.GetMediaDurationAsync(value); }
+        }
+
+        private int? _timeCount;
+
+        public int? TimeCount
+        {
+            get { return _timeCount == null ? MediaHelper.GetMediaDurationAsync(VideoFilePath) : _timeCount; }
+            set { _timeCount = value; }
+        }
 
         /// <summary>
         /// Sub File Path
@@ -67,5 +82,6 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<LessonVideo> LessonVideos { get; set; } = new List<LessonVideo>();
         public ICollection<VideoTimeCode> VideoTimeCodes { get; set; } = new List<VideoTimeCode>();
         public ICollection<VideoResult> VideoResults { get; set; } = new List<VideoResult>();
+        public ICollection<VideoSubFilePath> VideoSubFilePaths { get; set; } = new List<VideoSubFilePath>();
     }
 }

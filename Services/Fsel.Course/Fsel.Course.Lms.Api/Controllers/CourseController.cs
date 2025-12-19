@@ -23,7 +23,7 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/course")]
     [ApiController]
-    [Permission(role: nameof(EnumRole.Student))]
+    [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class CourseController : BaseController
     {
         private readonly IMediator _mediator;
@@ -68,7 +68,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Student))]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> Get([FromQuery] GetCourseQuery query)
         {
             MethodResult<CourseModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("get-course-studying")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Student))]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetCourseStudying()
         {
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseStudyingQuery()).ConfigureAwait(false);
@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("get-course-studied")]
         [ProducesResponseType(typeof(MethodResult<CourseModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Student))]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetCourseStudied()
         {
             MethodResult<CourseModel> commandResult = await _mediator.Send(new GetCourseStudiedQuery()).ConfigureAwait(false);
@@ -107,7 +107,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpPost("start/{courseResultId}")]
         [ProducesResponseType(typeof(MethodResult<CourseResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Student))]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> StartCourseResult([FromRoute] Guid courseResultId)
         {
             MethodResult<CourseResultModel> commandResult = await _mediator.Send(new StartCourseResultCommand { CourseResultId = courseResultId }).ConfigureAwait(false);
@@ -120,7 +120,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         [HttpGet("get-course-for-choose-level")]
         [ProducesResponseType(typeof(MethodResult<CourseForChooseLevelModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(role: nameof(EnumRole.Student))]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         public async Task<IActionResult> GetCourseForChooseLevel([FromQuery] GetCourseForChooseLevelQuery query)
         {
             var queryResult = await _mediator.Send(query).ConfigureAwait(false);

@@ -6,7 +6,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
-    using Fsel.Core.Base.Interfaces;
     using Fsel.Ordering.Application.Queues.Publishers;
     using Fsel.Ordering.Domain.Entities;
     using Fsel.Ordering.Domain.IRepositories;
@@ -57,7 +56,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
             return queryable.Where(x => x.ExpireDate != null && ((DateTime)x.ExpireDate).Date == compareWithCreateDate.Date && ((DateTime)x.ExpireDate).Month == compareWithCreateDate.Month && ((DateTime)x.ExpireDate).Year == compareWithCreateDate.Year);
         }
 
-
         /// <summary>
         /// List học sinh sắp hết hạn
         /// </summary>
@@ -91,7 +89,6 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
 
             return newStudentIds;
         }
-
 
         /// <summary>
         /// Tạo thông báo
