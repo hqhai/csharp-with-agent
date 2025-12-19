@@ -70,14 +70,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 UnitResultId = unitResult.Id,
             };
 
-            try
+            await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>
             {
-                await _lessonResultRepository.BulkMergeAsync(new List<LessonResult> { lessonResult }, bulk =>
-                {
-                    bulk.ColumnPrimaryKeyExpression = c => new { c.UnitModuleId, c.UnitResultId, c.IsDeleted };
-                });
-            }
-            catch { }
+                bulk.ColumnPrimaryKeyExpression = c => new { c.UnitModuleId, c.UnitResultId, c.IsDeleted };
+            });
             return methodResult;
         }
     }

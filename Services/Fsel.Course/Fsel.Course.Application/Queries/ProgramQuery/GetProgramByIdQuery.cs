@@ -99,7 +99,8 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
             {
                 if (program.TestOriginalIds != null && program.TestOriginalIds.Any())
                 {
-                    var tests = await _testRepository.Queryable.WhereBulkContains(program.TestOriginalIds, x => x.OriginalId).Select(x => new TestOriginalModel
+                    var tests = await _testRepository.Queryable.WhereBulkContains(program.TestOriginalIds, x => x.OriginalId)
+                    .Where(x => x.VersionStatus == Common.Enums.EnumVersionStatus.LastVersion).Select(x => new TestOriginalModel
                     {
                         Id = x.OriginalId,
                         Name = x.Code,
