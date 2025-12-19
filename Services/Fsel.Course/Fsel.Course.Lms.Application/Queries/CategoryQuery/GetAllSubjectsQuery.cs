@@ -38,11 +38,16 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                                 && x.Status == EnumStatus.Active
                                 && x.ParentId == null)
                     .ToListAsync(cancellationToken);
+                foreach (var category in categories)
+                {
+                    await LoadChildCategory(category);
+                }
 
                 return categories;
             }, token: cancellationToken);
 
-            return new MethodResult<IList<SubjectModel>>() { Result = GetSubjectModels(subjects).ToList(), StatusCode = 200 };
+            var subjectModels = subjects.Select(x => GetSubjectModels(x)).ToList();
+            return new MethodResult<IList<SubjectModel>>() { Result = subjectModels, StatusCode = 200 };
         }
 
         private async Task LoadChildCategory(Category category)
@@ -54,19 +59,22 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             }
         }
 
-        private static IEnumerable<SubjectModel> GetSubjectModels(IEnumerable<Category> categories)
+        private SubjectModel GetSubjectModels(Category category)
         {
-            foreach (var category in categories)
+            var subjectModel = new SubjectModel
             {
-                var subjectModel = new SubjectModel { Id = category.Id, Name = category.Name, };
-
-                if (category.Categorys != null && category.Categorys.Count > 0)
-                {
-                    subjectModel.ChildSubjects.AddRange(GetSubjectModels(category.Categorys));
-                }
-
-                yield return subjectModel;
+                Id = category.Id,
+                Name = category.Name,
+                Type = category.Type.ToString(),
+                TestMode = category.TestMode,
+                ChildSubjects = new List<SubjectModel>()
+            };
+            foreach (var child in category.Categorys)
+            {
+                subjectModel.ChildSubjects.Add(GetSubjectModels(child));
             }
+
+            return subjectModel;
         }
     }
 }
