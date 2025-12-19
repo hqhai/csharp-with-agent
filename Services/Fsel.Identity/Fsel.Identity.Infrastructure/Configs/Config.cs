@@ -82,6 +82,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-pre-prod.fsel.edu.vn",
                         "https://lms.fsel.edu.vn",
                         "http://lms.fsel.edu.vn",
+                        "https://lms-web-multi-subject-testing.fsel.edu.vn",
+                        "http://lms-web-multi-subject-testing.fsel.edu.vn",
                     },
                     PostLogoutRedirectUris =
                     {
@@ -111,6 +113,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-pre-prod.fsel.edu.vn/auth/login",
                         "https://lms.fsel.edu.vn/auth/login",
                         "http://lms.fsel.edu.vn/auth/login",
+                        "https://lms-web-multi-subject-testing.fsel.edu.vn/auth/login",
+                        "http://lms-web-multi-subject-testing.fsel.edu.vn/auth/login",
                     },
 
                     AllowOfflineAccess = true,
@@ -169,7 +173,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-pre-prod.fsel.edu.vn",
                         "https://lcms-pre-prod.fsel.edu.vn",
                         "http://lcms.fsel.edu.vn",
-                        "https://lcms.fsel.edu.vn"
+                        "https://lcms.fsel.edu.vn",
+                        "https://lcms-web-multi-subject-testing.fsel.edu.vn",
+                        "https://lcms-web-multi-subject-testing.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
@@ -192,7 +198,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-pre-prod.fsel.edu.vn",
                         "https://lcms-pre-prod.fsel.edu.vn",
                         "http://lcms.fsel.edu.vn",
-                        "https://lcms.fsel.edu.vn"
+                        "https://lcms.fsel.edu.vn",
+                        "http://lcms-web-multi-subject-testing.fsel.edu.vn",
+                        "https://lcms-web-multi-subject-testing.fsel.edu.vn",
                     },
 
                     AllowOfflineAccess = true,
@@ -248,7 +256,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lmsadmin-pre-prod.fsel.edu.vn",
                         "https://lmsadmin-pre-prod.fsel.edu.vn",
                         "http://lmsadmin.fsel.edu.vn",
-                        "https://lmsadmin.fsel.edu.vn"
+                        "https://lmsadmin.fsel.edu.vn",
+                        "http://lmsadmin-multi-subject-testing.fsel.edu.vn",
+                        "https://lmsadmin-multi-subject-testing.fsel.edu.vn",
                     },
                     PostLogoutRedirectUris =
                     {
@@ -271,7 +281,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lmsadmin-pre-prod.fsel.edu.vn",
                         "https://lmsadmin-pre-prod.fsel.edu.vn",
                         "http://lmsadmin.fsel.edu.vn",
-                        "https://lmsadmin.fsel.edu.vn"
+                        "https://lmsadmin.fsel.edu.vn",
+                        "http://lmsadmin-multi-subject-testing.fsel.edu.vn",
+                        "https://lmsadmin-multi-subject-testing.fsel.edu.vn",
                     },
 
                     AllowOfflineAccess = true,
