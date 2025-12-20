@@ -66,6 +66,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://localhost:4400",
                         "https://lms-dev.fsel.edu.vn",
                         "http://lms-dev.fsel.edu.vn",
+                        "https://lms-dev-tenant-1.fsel.edu.vn",
+                        "http://lms-dev-tenant-1.fsel.edu.vn",
                         "https://lms-dev-ufm.fsel.edu.vn",
                         "http://lms-dev-ufm.fsel.edu.vn",
                         "https://lms-testing.fsel.edu.vn",
@@ -80,6 +82,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-pre-prod.fsel.edu.vn",
                         "https://lms.fsel.edu.vn",
                         "http://lms.fsel.edu.vn",
+                        "https://lms-web-multi-subject-testing.fsel.edu.vn",
+                        "http://lms-web-multi-subject-testing.fsel.edu.vn",
                     },
                     PostLogoutRedirectUris =
                     {
@@ -93,6 +97,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://localhost:4400/auth/login",
                         "https://lms-dev.fsel.edu.vn/auth/login",
                         "http://lms-dev.fsel.edu.vn/auth/login",
+                        "https://lms-dev-tenant-1.fsel.edu.vn/auth/login",
+                        "http://lms-dev-tenant-1.fsel.edu.vn/auth/login",
                         "https://lms-dev-ufm.fsel.edu.vn/auth/login",
                         "http://lms-dev-ufm.fsel.edu.vn/auth/login",
                         "https://lms-testing.fsel.edu.vn/auth/login",
@@ -107,6 +113,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lms-pre-prod.fsel.edu.vn/auth/login",
                         "https://lms.fsel.edu.vn/auth/login",
                         "http://lms.fsel.edu.vn/auth/login",
+                        "https://lms-web-multi-subject-testing.fsel.edu.vn/auth/login",
+                        "http://lms-web-multi-subject-testing.fsel.edu.vn/auth/login",
                     },
 
                     AllowOfflineAccess = true,
@@ -150,6 +158,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://localhost:4200",
                         "http://lcms-web-dev.fsel.edu.vn",
                         "https://lcms-web-dev.fsel.edu.vn",
+                        "http://lcms-web-dev-tenant-1.fsel.edu.vn",
+                        "https://lcms-web-dev-tenant-1.fsel.edu.vn",
                         "http://lcms-web-dev-ufm.fsel.edu.vn",
                         "https://lcms-web-dev-ufm.fsel.edu.vn",
                         "http://lcms-web-testing.fsel.edu.vn",
@@ -163,7 +173,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-pre-prod.fsel.edu.vn",
                         "https://lcms-pre-prod.fsel.edu.vn",
                         "http://lcms.fsel.edu.vn",
-                        "https://lcms.fsel.edu.vn"
+                        "https://lcms.fsel.edu.vn",
+                        "https://lcms-web-multi-subject-testing.fsel.edu.vn",
+                        "https://lcms-web-multi-subject-testing.fsel.edu.vn"
                     },
                     PostLogoutRedirectUris =
                     {
@@ -171,6 +183,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://localhost:4200",
                         "http://lcms-web-dev.fsel.edu.vn",
                         "https://lcms-web-dev.fsel.edu.vn",
+                        "http://lcms-web-dev-tenant-1.fsel.edu.vn",
+                        "https://lcms-web-dev-tenant-1.fsel.edu.vn",
                         "http://lcms-web-dev-ufm.fsel.edu.vn",
                         "https://lcms-web-dev-ufm.fsel.edu.vn",
                         "http://lcms-web-testing.fsel.edu.vn",
@@ -184,7 +198,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lcms-pre-prod.fsel.edu.vn",
                         "https://lcms-pre-prod.fsel.edu.vn",
                         "http://lcms.fsel.edu.vn",
-                        "https://lcms.fsel.edu.vn"
+                        "https://lcms.fsel.edu.vn",
+                        "http://lcms-web-multi-subject-testing.fsel.edu.vn",
+                        "https://lcms-web-multi-subject-testing.fsel.edu.vn",
                     },
 
                     AllowOfflineAccess = true,
@@ -225,6 +241,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://localhost:4300",
                         "http://lms-admin-dev.fsel.edu.vn",
                         "https://lms-admin-dev.fsel.edu.vn",
+                        "http://lms-admin-dev-tenant-1.fsel.edu.vn",
+                        "https://lms-admin-dev-tenant-1.fsel.edu.vn",
                         "http://lms-admin-dev-ufm.fsel.edu.vn",
                         "https://lms-admin-dev-ufm.fsel.edu.vn",
                         "http://lms-admin-testing.fsel.edu.vn",
@@ -238,7 +256,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lmsadmin-pre-prod.fsel.edu.vn",
                         "https://lmsadmin-pre-prod.fsel.edu.vn",
                         "http://lmsadmin.fsel.edu.vn",
-                        "https://lmsadmin.fsel.edu.vn"
+                        "https://lmsadmin.fsel.edu.vn",
+                        "http://lmsadmin-multi-subject-testing.fsel.edu.vn",
+                        "https://lmsadmin-multi-subject-testing.fsel.edu.vn",
                     },
                     PostLogoutRedirectUris =
                     {
@@ -246,6 +266,8 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://localhost:4300",
                         "http://lms-admin-dev.fsel.edu.vn",
                         "https://lms-admin-dev.fsel.edu.vn",
+                        "http://lms-admin-dev-tenant-1.fsel.edu.vn",
+                        "https://lms-admin-dev-tenant-1.fsel.edu.vn",
                         "http://lms-admin-dev-ufm.fsel.edu.vn",
                         "https://lms-admin-dev-ufm.fsel.edu.vn",
                         "http://lms-admin-testing.fsel.edu.vn",
@@ -259,7 +281,9 @@ namespace Fsel.Authentication.Infrastructure.Configs
                         "http://lmsadmin-pre-prod.fsel.edu.vn",
                         "https://lmsadmin-pre-prod.fsel.edu.vn",
                         "http://lmsadmin.fsel.edu.vn",
-                        "https://lmsadmin.fsel.edu.vn"
+                        "https://lmsadmin.fsel.edu.vn",
+                        "http://lmsadmin-multi-subject-testing.fsel.edu.vn",
+                        "https://lmsadmin-multi-subject-testing.fsel.edu.vn",
                     },
 
                     AllowOfflineAccess = true,
@@ -507,7 +531,7 @@ namespace Fsel.Authentication.Infrastructure.Configs
                     },
 
                     AllowOfflineAccess = true, // Cho phép sử dụng refresh token
-                    AccessTokenLifetime = 60,
+                    AccessTokenLifetime = 3600,
                     UpdateAccessTokenClaimsOnRefresh = true,
                     RefreshTokenUsage = TokenUsage.OneTimeOnly, // Cấu hình việc sử dụng lại refresh token
                     RefreshTokenExpiration = TokenExpiration.Sliding, // Cấu hình thời gian sống của refresh token
