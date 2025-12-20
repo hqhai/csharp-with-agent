@@ -49,6 +49,7 @@ namespace Fsel.Identity.Infrastructure
         protected override void OnModelCreating(ModelBuilder builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
+            base.OnModelCreating(builder);
 
             //Dùng khi tạo migration, comment lại sau khi tạo xong
             builder.Ignore<OverallStudentModel>();
