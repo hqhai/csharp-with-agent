@@ -211,7 +211,7 @@ namespace Fsel.Ordering.Application.Commands.MarketplacePremiumCmd
             }
             else if (product.MarketPlaceType == EnumMarketPlaceType.FSEL && product.IsPremium)
             {
-                await RedeemProductFSEL(product, student.Human?.UserId ?? default, request, methodResult, cancellationToken);
+                await RedeemProductFSEL(product, student.UserId, request, methodResult, cancellationToken);
                 return methodResult;
             }
             else

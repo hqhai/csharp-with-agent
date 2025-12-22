@@ -18,5 +18,6 @@ namespace Fsel.Course.Domain.Models.CommandModels.Videos
         public Guid? OriginalId { get; set; }
         public IList<VideoPercentConfig>? VideoPercentConfigs { get; set; }
         public IList<CreateVideoTimeCodeCommandModel>? VideoTimeCodes { get; set; }
+        public IList<CreateVideoSubFilePathCommandModel>? VideoSubFilePaths { get; set; }
     }
 }

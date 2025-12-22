@@ -25,8 +25,8 @@ builder.Services.AddSwaggerGen();
 // Add services to the container.
 var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.AddDbContexts<TrainingDbContext, TrainingReadDbContext>();
 builder.Services.AddScoped<IClassRepository, ClassRepository>();
 builder.Services.AddScoped<IClassStudentRepository, ClassStudentRepository>();

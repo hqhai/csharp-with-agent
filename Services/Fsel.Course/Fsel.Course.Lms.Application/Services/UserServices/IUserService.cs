@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Constants;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
     using Fsel.Shared.Models.ShareModels.EntityModels;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
@@ -20,6 +21,9 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
     {
         [Get("/v1/student/execute-list-query")]
         Task<IApiResponse<MethodResult<IList<StudentModel>>>> ExecuteListQueryAsync([Query] BaseQueryModel query);
+
+        [Get("/v1/student/execute-list-query")]
+        Task<IApiResponse<MethodResult<IList<StudentDetailModel>>>> ExecuteListQueryDataAsync([Query] BaseQueryModel query);
 
         [Put("/v1/student/update-student-token")]
         Task<IApiResponse<MethodResult<StudentModel>>> UpdateStudentByTokenAsync([Body] UpdateStudentByTokenModel command);
@@ -174,5 +178,24 @@ namespace Fsel.Course.Lms.Application.Services.UserServices
 
         [Post("/v1/event/get-student-ids-in-event-by-student-ids")]
         Task<IApiResponse<MethodResult<IList<Guid>?>>> GetStudentsInEventByStudentIds([Body] GetStudentIdsInEventByStudentIdsQueryModel model);
+
+        [Post("/v1/student-export/get-by-user-ids")]
+        [RefitCache(CacheSettings.TimeCache.OneHour)]
+        Task<IApiResponse<MethodResult<IList<StudentModel>>>> GetStudentExportByIds([FromBody] IList<Guid>? userIds);
+
+        [Post("/v1/campus/update-expired-date-for-students")]
+        Task<IApiResponse<MethodResult<bool>>> UpdateExpiredDateForStudentsCampus([Body] UpdateExpiredDateForStudentsCampusCommandModels model);
+
+        [Post("/v1/campus/search-students-by-student-ids")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentCampusModel>>>> SearchStudentsByStudentIds([Body] SearchStudentsCampusByStudentIdsQueryModel model);
+
+        [Post("/v1/user-setting/sender-setting-generate-token")]
+        Task<IApiResponse<MethodResult<string>>> SenderSettingGenerateToken([Body] UpdateSenderSettingCommandModel command);
+
+        [Get("/v1/student/search-query")]
+        Task<IApiResponse<MethodResult<PagingItemsModel<StudentDetailModel>>>> SearchAsync([Query] BaseQueryModel query);
+
+        [Put("/v1/student/update-status/{studentId}")]
+        Task<IApiResponse<MethodResult<StudentModel>>> UpdateStatusStudentCampus([FromRoute] Guid studentId, [FromBody] UpdateStatusStudentMode command);
     }
 }

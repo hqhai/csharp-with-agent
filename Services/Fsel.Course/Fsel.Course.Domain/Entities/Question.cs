@@ -83,11 +83,11 @@ namespace Fsel.Course.Domain.Entities
         public ICollection<ExtraPracticeAnswer> ExtraPracticeAnswers { get; set; } = new List<ExtraPracticeAnswer>();
         public ICollection<HomeWorkQuestion> HomeWorkQuestions { get; set; } = new List<HomeWorkQuestion>();
         public ICollection<SectionQuestion> SectionQuestions { get; set; } = new List<SectionQuestion>();
-
-        public ICollection<QuestionExplanationError> QuestionExplanationErrors = new List<QuestionExplanationError>();
+        public ICollection<QuestionExplanationError> QuestionExplanationErrors { get; set; } = new List<QuestionExplanationError>();
         public ICollection<QuestionExplanationLog> QuestionExplanationLogs { get; set; } = new List<QuestionExplanationLog>();
         public ICollection<QuestionShuffle> QuestionShuffles { get; set; } = new List<QuestionShuffle>();
         public ICollection<TestSectionQuestion> TestSectionQuestions { get; set; } = new List<TestSectionQuestion>();
         public ICollection<TestAnswer> TestAnswers { get; set; } = new List<TestAnswer>();
+        public ICollection<HomeWorkExtraPracticeAnswer> HomeWorkExtraPracticeAnswers { get; set; } = new List<HomeWorkExtraPracticeAnswer>();
     }
 }

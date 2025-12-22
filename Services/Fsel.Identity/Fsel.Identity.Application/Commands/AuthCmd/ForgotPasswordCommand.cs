@@ -6,7 +6,9 @@ using Fsel.Common.Enums.ErrorCodes;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
+using Fsel.Identity.Application.Commands.UserSetttingCmd;
 using Fsel.Identity.Application.Services;
+using Fsel.Identity.Application.Services.SenderService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
@@ -79,11 +81,11 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (!string.IsNullOrEmpty(request.Email))
             {
-                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
+                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Student).FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
             }
             else if (!string.IsNullOrEmpty(request.PhoneNumber))
             {
-                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Human).FirstOrDefaultAsync(x => x.UserName == request.PhoneNumber.Trim(), cancellationToken);
+                user = await _userManager.Users.Include(p => p.UserOtpCodes).Include(x => x.Student).FirstOrDefaultAsync(x => x.UserName == request.PhoneNumber.Trim(), cancellationToken);
             }
 
             if (user == null)
@@ -98,8 +100,7 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                 methodResult.AddErrorBadRequest(nameof(EnumOTPCodeErrorCode.AttemptsExhausted), nameof(request.PhoneNumber), request.PhoneNumber);
                 return methodResult;
             }
-
-            if (!user.EmailConfirmed)
+            if (!user.EmailConfirmed && user.Student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(user));
                 return methodResult;
@@ -107,15 +108,25 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
 
             if (!string.IsNullOrEmpty(request.Email))
             {
+                var tokenResult = await _mediator.Send(new SenderSettingGenerateTokenCommand()
+                {
+                    UserId = user.Id,
+                    Template = EnumSenderTemplate.SendOtp
+                }, cancellationToken);
+
                 var userOtpCode = await _mediator.Send(new SaveUserOtpCodeCommand { Id = user.Id }, cancellationToken);
+
                 var param = new SendOtpTemplateModel
                 {
                     OtpCode = userOtpCode.Result,
-                    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime)
+                    OtpValidTime = string.Format(CultureInfo.InvariantCulture, SenderSettings.OtpValidMinute, _appSetting!.Otp!.StepTime),
+                    AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, tokenResult?.Result ?? string.Empty)
                 };
 
                 var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
+
                 var sendResult = new MethodResult<bool>();
+
                 if (!string.IsNullOrEmpty(request.Email))
                 {
                     sendResult = await _mediator.Send(new SenderCommand { Email = user.Email, Subject = subject, Params = param, Template = EnumSenderTemplate.SendOtp }, cancellationToken).ConfigureAwait(false);

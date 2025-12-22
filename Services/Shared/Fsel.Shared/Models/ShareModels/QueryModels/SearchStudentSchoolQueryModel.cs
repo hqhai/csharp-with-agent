@@ -10,18 +10,16 @@ namespace Fsel.Shared.Models.ShareModels.QueryModels
         public string? ListSchoolGrade { get; set; }
         public string? ListSchoolClass { get; set; }
         public string? ListSchool { get; set; }
-        public string? ListCourseType { get; set; }
-        public string? ListCourseLevel { get; set; }
         public string? ListDistrict { get; set; }
         public string? ListProvince { get; set; }
-
-        public string? SchoolGrade { get; set; }
-        public string? SchoolClass { get; set; }
-        public virtual bool? IsLearning { get; set; }
-        public EnumCompletionStatus? Status { get; set; }
-        public EnumLearningStatus? LearningStatus { get; set; }
+        public string? ListCompletionStatus { get; set; }
+        public string? ListLearningStatus { get; set; }
+        public string? ListOverallScore { get; set; }
+        public string? ListCourseLevel { get; set; }
+        public string? ListCurrentLevel { get; set; }
+        public string? ListCourseType { get; set; }
         public virtual EnumCourseType? CourseType { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
+        public virtual bool? IsLearning { get; set; }
         public DateTime? EndDate { get; set; }
     }
 }

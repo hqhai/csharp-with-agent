@@ -5,11 +5,10 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Helpers;
 using Fsel.Core.Base.Managers;
-using Fsel.Core.Entities;
 using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Commands.UserReferrals;
+using Fsel.Identity.Application.Commands.UserSetttingCmd;
 using Fsel.Identity.Application.Queries.UserReferrals;
-using Fsel.Identity.Application.Services.TrainingService;
 using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.Enums.ErrorCodes;
 using Fsel.Identity.Domain.IRepositories;
@@ -86,14 +85,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.PhoneNumberIsNotValid), nameof(request.PhoneNumber));
                     return methodResult;
                 }
-                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim(), cancellationToken: cancellationToken);
+                user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.PhoneNumber == request.PhoneNumber.Trim(), cancellationToken: cancellationToken);
 
                 if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
                 {
-                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
+                    methodResult.AddError(StatusCodes.Status400BadRequest, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
                     return methodResult;
                 }
-                if (user != null && (user.EmailConfirmed || user.Human != null))
+                if (user != null && (user.EmailConfirmed || user.Student != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicatePhoneNumber), nameof(request.PhoneNumber), request.PhoneNumber);
                     return methodResult;
@@ -106,14 +105,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.EmailIsNotValid), nameof(request.Email));
                     return methodResult;
                 }
-                user = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken: cancellationToken);
+                user = await _userManager.Users.Include(x => x.Student).FirstOrDefaultAsync(x => x.Email == request.Email.Trim(), cancellationToken: cancellationToken);
 
                 if (user != null && user.Status.HasValue && user.Status == EnumUserStatus.Disable)
                 {
-                    methodResult.AddError(StatusCodes.Status401Unauthorized, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
+                    methodResult.AddError(StatusCodes.Status400BadRequest, nameof(EnumAuthUserErrorCode.AccountHasBeenCutOff), new Error(nameof(request.Email), request.Email));
                     return methodResult;
                 }
-                if (user != null && (user.EmailConfirmed || user.Human != null))
+                if (user != null && (user.EmailConfirmed || user.Student != null))
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAuthUserErrorCode.DuplicateEmail), nameof(request.Email), request.Email);
                     return methodResult;
@@ -255,6 +254,14 @@ namespace Fsel.Identity.Application.Commands.AuthCmd
                         };
                         var subject = string.Format(CultureInfo.InvariantCulture, SenderSettings.SendOtpSubjectFullName, user.FullName);
                         var sendResult = new MethodResult<bool>();
+
+                        var tokenResult = await _mediator.Send(new SenderSettingGenerateTokenCommand()
+                        {
+                            UserId = user.Id,
+                            Template = EnumSenderTemplate.SendOtp
+                        }, cancellationToken);
+
+                        param.AccessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl?.UpdateSenderSettingUrl ?? string.Empty, tokenResult?.Result ?? string.Empty);
 
                         ArgumentNullException.ThrowIfNull(request);
                         if (!string.IsNullOrEmpty(request.Email))

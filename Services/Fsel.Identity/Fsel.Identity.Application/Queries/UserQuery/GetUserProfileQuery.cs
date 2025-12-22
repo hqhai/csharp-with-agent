@@ -12,6 +12,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
     using Fsel.Identity.Application.Services.SystemService;
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -32,8 +33,16 @@ namespace Fsel.Identity.Application.Queries.UserQuery
         private readonly IOrderService _orderService;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly ISystemService _systemService;
+        private readonly ISystemConfigRepository _systemConfigRepository;
 
-        public GetUserProfileQueryHandler(IMapper mapper, AuthContext authContext, UserManager<User> userManager, ITrainingService trainingService, IOrderService orderService, ILmsCourseService lmsCourseService, ISystemService systemService)
+        public GetUserProfileQueryHandler(IMapper mapper,
+            AuthContext authContext,
+            UserManager<User> userManager,
+            ITrainingService trainingService,
+            IOrderService orderService,
+            ILmsCourseService lmsCourseService,
+            ISystemService systemService,
+            ISystemConfigRepository systemConfigRepository)
         {
             _mapper = mapper;
             _authContext = authContext;
@@ -42,6 +51,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             _orderService = orderService;
             _lmsCourseService = lmsCourseService;
             _systemService = systemService;
+            _systemConfigRepository = systemConfigRepository;
         }
 
         public async Task<MethodResult<UserProfileModel>> Handle(GetUserProfileQuery request, CancellationToken cancellationToken)
@@ -58,74 +68,71 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = targetRoles.Any(r => r == userRoles.FirstOrDefault());
+
             User? userView = null;
             if (userRoles.FirstOrDefault() == EnumRole.CSO.ToString())
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                                   .ThenInclude(x => x!.CSO)
+                userView = await _userManager.Users.Include(x => x!.CSO)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString())
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                                   .ThenInclude(x => x!.Teacher)
+                userView = await _userManager.Users.Include(x => x!.Teacher)
                                                    .ThenInclude(x => x!.TeacherBankAccounts)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             }
-            else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
+            else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() || userRoles.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                                   .ThenInclude(x => x!.Student)
+                userView = await _userManager.Users.Include(x => x!.Student)
                                                    .ThenInclude(x => x!.ParentStudents)
-                                                   .Include(p => p.Receiver).ThenInclude(p => p.Sender).ThenInclude(p => p.Human)
+                                                   .Include(p => p.Receiver).ThenInclude(p => p.Sender)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
-                var student = userView?.Human?.Student;
+                var student = userView?.Student;
                 if (student != null && student.ParentStudents != null && student.ParentStudents.Count > 0)
                 {
-                    userView = await _userManager.Users.Include(x => x.Human)
-                                                  .ThenInclude(x => x!.Student)
+                    userView = await _userManager.Users.Include(x => x!.Student)
                                                   .ThenInclude(x => x!.ParentStudents)
                                                   .ThenInclude(x => x!.Parent)
-                                                  .ThenInclude(x => x!.Human)
-                                                  .Include(p => p.Receiver).ThenInclude(p => p.Sender).ThenInclude(p => p.Human)
+                                                  .ThenInclude(x => x!.User)
+                                                  .Include(p => p.Receiver).ThenInclude(p => p.Sender)
                                                   .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString())
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                                   .ThenInclude(x => x!.Parent)
+                userView = await _userManager.Users.Include(x => x!.Parent)
                                                    .ThenInclude(x => x!.ParentStudents)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
-                var parentStudents = userView?.Human?.Parent?.ParentStudents;
+                var parentStudents = userView?.Parent?.ParentStudents;
                 if (parentStudents != null && parentStudents.Count > 0)
                 {
-                    userView = await _userManager.Users.Include(x => x.Human)
-                                                                      .ThenInclude(x => x!.Parent)
+                    userView = await _userManager.Users.Include(x => x!.Parent)
                                                                       .ThenInclude(x => x!.ParentStudents)
                                                                       .ThenInclude(x => x.Student)
-                                                                      .ThenInclude(x => x!.Human)
                                                                       .ThenInclude(x => x!.User)
                                                                       .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
                 }
             }
-            else if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            else if (hasMatchedRole)
             {
-                userView = await _userManager.Users.Include(x => x.Human)
-                                                   .Include(x => x.UserSchools)
+                userView = await _userManager.Users.Include(x => x.UserSchools)
                                                    .FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId && x.EmailConfirmed, cancellationToken);
             }
             else if (userRoles.FirstOrDefault() == EnumRole.Moderator.ToString() || userRoles.FirstOrDefault() == EnumRole.MasterAdmin.ToString() || userRoles.FirstOrDefault() == EnumRole.Admin.ToString())
             {
-                userView = await _userManager.Users.Include(x => x.Human).FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
+                userView = await _userManager.Users.FirstOrDefaultAsync(x => x.Id == _authContext.CurrentUserId, cancellationToken);
             }
+            var isEnabledExtra = await _systemConfigRepository.Queryable.Select(x => x.IsEnabled).FirstOrDefaultAsync(cancellationToken);
 
             var userModel = _mapper.Map<UserProfileModel>(userView ?? user);
-            _mapper.Map(userView?.Human, userModel);
+            userModel.IsEnabledExtra = isEnabledExtra;
+            _mapper.Map(userView, userModel);
 
-            if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
+            if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() || userRoles.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
-                var student = userView?.Human?.Student;
+                var student = userView?.Student;
                 if (student != null)
                 {
                     var countResult = await _lmsCourseService.CountResultByStudentId(student.Id);
@@ -169,7 +176,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                             var parent = student.ParentStudents.FirstOrDefault()?.Parent;
                             if (parent != null)
                             {
-                                userModel.Parent = _mapper.Map<ParentProfileModel>(parent.Human);
+                                userModel.Parent = _mapper.Map<ParentProfileModel>(parent.User);
                                 userModel.Parent.Occupation = parent.Occupation;
                             }
                         }
@@ -202,14 +209,14 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         {
                             SenderId = userView.Receiver.Sender.Id,
                             FullName = userView.Receiver.Sender.FullName,
-                            Code = userView.Receiver.Sender.Human?.Code
+                            Code = userView.Receiver.Sender.Code
                         };
                     }
                 }
             }
             if (userRoles.FirstOrDefault() == EnumRole.Parent.ToString())
             {
-                var parent = userView?.Human?.Parent;
+                var parent = userView?.Parent;
                 if (parent != null && parent.ParentStudents != null && parent.ParentStudents.Count > 0)
                 {
                     userModel.Students = _mapper.Map<List<StudentProfileModel>>(parent.ParentStudents.Select(x => x.Student).ToList());
@@ -227,14 +234,14 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                         {
                             student.CodeClass = classStudent!.Content!.Result!.Code;
                         }
-                        var userName = parent.ParentStudents.Select(x => x.Student).FirstOrDefault(x => x!.Id == student.Id)?.Human?.User?.UserName;
+                        var userName = parent.ParentStudents.Select(x => x.Student).FirstOrDefault(x => x!.Id == student.Id)?.User?.UserName;
                         student.UserName = userName;
                     }
                 }
             }
             if (userRoles.FirstOrDefault() == EnumRole.Teacher.ToString())
             {
-                var teacher = userView?.Human?.Teacher;
+                var teacher = userView?.Teacher;
                 if (teacher != null)
                 {
                     userModel.TeacherBankAccounts = _mapper.Map<IList<TeacherBankAccountModel>>(teacher.TeacherBankAccounts);
@@ -243,9 +250,10 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
             if (userRoles.FirstOrDefault() == EnumRole.CSO.ToString())
             {
-                _mapper.Map(userView?.Human?.CSO, userModel);
+                _mapper.Map(userView?.CSO, userModel);
             }
-            if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+
+            if (hasMatchedRole)
             {
                 var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
                 if (schoolId.HasValue)

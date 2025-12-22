@@ -1,0 +1,74 @@
+[
+  {
+    "minInclusive": 0,
+    "maxInclusive": 3.5,
+    "correctAnswers": "0 - 14",
+    "courseSkill": "Reading",
+    "skillLevel": "Basic",
+    "level": "Below Band 3",
+    "description": "Below B1."
+  },
+  {
+    "minInclusive": 4,
+    "maxInclusive": 5.5,
+    "correctAnswers": "15 - 22",
+    "skillLevel": "Intermediate",
+    "courseSkill": "Reading",
+    "level": "3",
+    "description": "Can understand the main ideas of a standard passage or talk on familiar topics in daily situations.\nCan handle most situations happening at the moment.\nCan write basic texts related to familiar and personal topics.\nCan describe personal experiences, events, dreams, hopes and expectations with short descriptions and/or explainations."
+  },
+  {
+    "minInclusive": 6.0,
+    "maxInclusive": 8.0,
+    "correctAnswers": "23 - 32",
+    "courseSkill": "Reading",
+    "skillLevel": "Intermediate",
+    "level": "4",
+    "description": "Can understand the main ideas of a passage or talk about both concrete and abstract topics, including specialized issues related to the language users’ area of interest.\nCan produce fluent communication to native speakers without obstacles.\nCan produce compositions on various topics with reasonable examples and explainations."
+  },
+  {
+    "minInclusive": 8.5,
+    "maxInclusive": 10,
+    "correctAnswers": "33 - 40",
+    "courseSkill": "Reading",
+    "skillLevel": "Advanced",
+    "level": "5",
+    "description": "Can understand a number of text types with high complexity.\nCan show spontaneous and fluent use of language.\nCan use the language flexibily and effectively for different purposes such as in academic contexts, social life or specialized majors.\nCan produce coherent and detailed compositions on complex issues with advanced use of cohesive devices and good control of text genres."
+  },
+  {
+    "minInclusive": 0,
+    "maxInclusive": 3.5,
+    "correctAnswers": "0 - 13",
+    "courseSkill": "Listening",
+    "skillLevel": "Basic",
+    "level": "Below Band 3",
+    "description": "Below B1."
+  },
+  {
+    "minInclusive": 4,
+    "maxInclusive": 5.5,
+    "correctAnswers": "14 - 20",
+    "courseSkill": "Listening",
+    "skillLevel": "Intermediate",
+    "level": "3",
+    "description": "Can understand the main ideas of a standard passage or talk on familiar topics in daily situations.\nCan handle most situations happening at the moment.\nCan write basic texts related to familiar and personal topics.\nCan describe personal experiences, events, dreams, hopes and expectations with short descriptions and/or explainations."
+  },
+  {
+    "minInclusive": 6.0,
+    "maxInclusive": 8.0,
+    "correctAnswers": "21 - 28",
+    "courseSkill": "Listening",
+    "skillLevel": "Intermediate",
+    "level": "4",
+    "description": "Can understand the main ideas of a passage or talk about both concrete and abstract topics, including specialized issues related to the language users’ area of interest.\nCan produce fluent communication to native speakers without obstacles.\nCan produce compositions on various topics with reasonable examples and explainations."
+  },
+  {
+    "minInclusive": 8.5,
+    "maxInclusive": 10,
+    "correctAnswers": "29 - 35",
+    "courseSkill": "Listening",
+    "skillLevel": "Advanced",
+    "level": "5",
+    "description": "Can understand a number of text types with high complexity.\nCan show spontaneous and fluent use of language.\nCan use the language flexibily and effectively for different purposes such as in academic contexts, social life or specialized majors.\nCan produce coherent and detailed compositions on complex issues with advanced use of cohesive devices and good control of text genres."
+  }
+]

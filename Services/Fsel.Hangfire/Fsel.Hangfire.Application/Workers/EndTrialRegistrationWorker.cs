@@ -3,19 +3,20 @@
 namespace Fsel.Hangfire.Application.Workers
 {
     using System.Threading.Tasks;
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
+    using Microsoft.AspNetCore.Http;
 
-    public class EndTrialRegistrationWorker : IWorker
+    public class EndTrialRegistrationWorker : BaseWorker
     {
         private readonly UpdateStatusTrialStudentPublisher _updateStatusTrialStudentPublisher;
 
-        public EndTrialRegistrationWorker(UpdateStatusTrialStudentPublisher updateStatusTrialStudentPublisher)
+        public EndTrialRegistrationWorker(UpdateStatusTrialStudentPublisher updateStatusTrialStudentPublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _updateStatusTrialStudentPublisher = updateStatusTrialStudentPublisher;
         }
 
-        public async Task RunAsync()
+        public override async Task RunAsync()
         {
             await _updateStatusTrialStudentPublisher.Publish(CancellationToken.None);
         }

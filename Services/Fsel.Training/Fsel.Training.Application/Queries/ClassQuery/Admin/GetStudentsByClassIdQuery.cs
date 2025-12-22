@@ -52,8 +52,8 @@ namespace Fsel.Training.Application.Queries.ClassQuery.Admin
             var classStudents = students!.Select(x => new ClassStudentModel
             {
                 StudentId = x.Id,
-                StudentName = x.Human!.FullName,
-                Code = x.Human.Code,
+                StudentName = x.User?.FullName,
+                Code = x.User?.Code,
                 PackageId = x.PackageId
             }).ToList();
             if (!string.IsNullOrEmpty(request.KeyWord))

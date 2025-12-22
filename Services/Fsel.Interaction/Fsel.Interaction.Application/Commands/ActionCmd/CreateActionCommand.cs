@@ -301,8 +301,8 @@ namespace Fsel.Interaction.Application.Commands.ActionCmd
             var listUserQuery = await _userService.GetUsersByIdsAsync(model);
             var listUserQueryResult = listUserQuery?.Content?.Result!;
 
-            listNameUserLiked = listUserQueryResult.Where(x => x.UserId != userId).Select(x => x.FullName).ToList() ?? new List<string?>();
-            var userActionRecently = listUserQueryResult.Where(x => x.UserId == userId).Select(x => x.FullName).Single() ?? string.Empty;
+            listNameUserLiked = listUserQueryResult.Where(x => x.Id != userId).Select(x => x.FullName).ToList() ?? new List<string?>();
+            var userActionRecently = listUserQueryResult.Where(x => x.Id == userId).Select(x => x.FullName).Single() ?? string.Empty;
 
             int totalLiked = listNameUserLiked.Count + 1; // 1 like của người vừa like bài viết "userActionRecently"
 

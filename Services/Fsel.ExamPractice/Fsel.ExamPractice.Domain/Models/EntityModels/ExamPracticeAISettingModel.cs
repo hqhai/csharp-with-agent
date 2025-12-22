@@ -4,11 +4,11 @@ namespace Fsel.ExamPractice.Domain.Models.EntityModels
 {
     using System;
     using System.Collections.Generic;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.ExamPractice.Domain.Models.CommandModels.AiGradeSettings;
 
-    public class ExamPracticeAISettingModel : BaseModel
+    public class ExamPracticeAISettingModel
     {
+        public Guid Id { get; set; }
         public string? SystemRoleAlConfig { get; set; }
         public string? UserAlConfig { get; set; }
         public string? SettingModel { get; set; }

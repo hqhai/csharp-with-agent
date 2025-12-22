@@ -62,6 +62,9 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
         [Post("/v1/feature-access-time/get-feature-access-time-by-userIds")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimeByUserIdsAsync([FromBody] IList<Guid> userIds);
 
+        [Post("/v1/feature-access-time/feature-access/time-range")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetFeatureAccessTimeRangeByUserIds([FromBody] GetFeatureAccessTimesByUserIdsQueryModel query);
+
         [Post("/v1/google-sheet/add-error-report-explanation-question")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> AddErrorReportExplanationQuestionToGoogleSheet([FromBody] AddErrorReportExplanationQuestionModel model);
 
@@ -85,5 +88,11 @@ namespace Fsel.Course.Lms.Application.Services.SystemService
 
         [Post("/v1/feature-access-time/get-feature-access-time-by-user-ids")]
         Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetListFeatureAccessTimeByUserIds([Body] GetFeatureAccessTimesByUserIdsQueryModel model);
+
+        [Post("/v1/feature-access-time/get-last-feature-access-by-user-ids")]
+        Task<IApiResponse<MethodResult<IList<FeatureAccessTimeModel>>>> GetLastFeatureAccessByUserIdsAsync([Body] GetFeatureAccessTimesByUserIdsQueryModel model);
+
+        [Get("/v1/admin/course-goal/gets")]
+        Task<IApiResponse<MethodResult<IList<CourseGoalModel>>>> GetListCourseGoalAsync();
     }
 }

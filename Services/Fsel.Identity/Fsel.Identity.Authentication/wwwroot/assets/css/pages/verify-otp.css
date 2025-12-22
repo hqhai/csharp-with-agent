@@ -1,0 +1,146 @@
+.title {
+    font-weight: 600;
+    font-size: 22px;
+    line-height: 28px;
+}
+form {
+    gap: 0px;
+}
+.content form {
+  padding-top: 0px;
+}
+
+.sub-title {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  margin-top: 8px;
+  margin-bottom: 32px;
+}
+
+.resend-otp-2 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.resend-otp-3 {
+  padding-top: 8px;
+  padding-bottom: 8px;
+  margin-top: 16px;
+}
+
+.otps {
+  margin-bottom: 32px;
+}
+
+.number-list {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.number-list.number-list-error .number-item {
+  border-color: rgb(217, 140, 147) !important;
+  color: rgb(217, 140, 147) !important;
+}
+
+.number-list .number-item {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  color: var(--white-color);
+  font-size: 2.6rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.number-list .number-item.number-item--fail {
+  color: var(--error-text-color);
+  border-color: var(--error-border-color);
+}
+@media only screen and (max-width: 576px) {
+  .number-list .number-item {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.message-otp-error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  color: rgb(217, 140, 147) !important;
+  font-size: 1.6rem;
+  font-family: Inter, sans-serif;
+}
+
+.resend-otp {
+  text-align: center;
+  font-size: 1.6rem;
+  line-height: 1.5;
+  color: var(--white-color);
+  margin-bottom: 0px;
+}
+.resend-zalo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+.resend-otp a {
+  color: var(--secondary-color);
+  font-weight: 600;
+}
+.resend-otp button {
+  color: var(--secondary-color);
+  font-weight: 600;
+}
+.divider {
+  margin: 0 8px; /* khoảng cách 2 bên */
+  color: #fff; /* màu của dấu | */
+}
+@media only screen and (max-width: 576px) {
+  .number-list {
+    gap: 10px;
+  }
+
+  .resend-otp {
+    font-size: 1.6rem;
+  }
+}
+.text-footer {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  margin-top: 16px;
+  margin-bottom: 0px;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 28px;
+}
+.text-footer a{
+    color: #fff
+}
+.resend-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; 
+  background: none; 
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #4a90e2;
+}
+
+.resend-btn .icon {
+  object-fit: contain;
+}
+
+#submit-otp {
+    margin-top: 32px;
+}

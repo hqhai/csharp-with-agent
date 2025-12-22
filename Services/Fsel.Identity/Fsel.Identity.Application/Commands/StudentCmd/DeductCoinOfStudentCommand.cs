@@ -19,15 +19,13 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
     public class DeductCoinOfStudentCommandHandler : IRequestHandler<DeductCoinOfStudentCommand, MethodResult<bool>>
     {
         private readonly UserManager<User> _userManager;
-        private readonly IHumanRepository _humanRepository;
         private readonly IStudentRepository _studentRepository;
         private readonly AuthContext _authContext;
         private readonly ISystemService _systemService;
 
-        public DeductCoinOfStudentCommandHandler(UserManager<User> userManager, IHumanRepository humanRepository, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService)
+        public DeductCoinOfStudentCommandHandler(UserManager<User> userManager, IStudentRepository studentRepository, AuthContext authContext, ISystemService systemService)
         {
             _userManager = userManager;
-            _humanRepository = humanRepository;
             _studentRepository = studentRepository;
             _authContext = authContext;
             _systemService = systemService;
@@ -41,8 +39,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var userId = request.UserId ?? _authContext.CurrentUserId;
 
             var student = await (from u in _userManager.Users
-                                 join h in _humanRepository.Queryable on u.Id equals h.UserId
-                                 join s in _studentRepository.Queryable on h.Id equals s.HumanId
+                                 join s in _studentRepository.Queryable on u.Id equals s.UserId
                                  where u.Id == userId
                                  select s).FirstOrDefaultAsync(cancellationToken);
 

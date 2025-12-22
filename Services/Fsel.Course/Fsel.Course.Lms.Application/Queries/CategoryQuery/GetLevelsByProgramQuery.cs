@@ -68,9 +68,9 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 return new MethodResult<List<SelectionLevelModel>>();
             }
 
-            var human = studentResult?.Content?.Result?.Human;
+            var user = studentResult?.Content?.Result?.User;
 
-            if (human == null)
+            if (user == null)
             {
                 return new MethodResult<List<SelectionLevelModel>>();
             }
@@ -95,7 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 return new MethodResult<List<SelectionLevelModel>>();
             }
 
-            var age = DateTimeHelper.GetYearOld(human.Birthday);
+            var age = DateTimeHelper.GetYearOld(user.Birthday);
             var suggestCondition = await _subjectConditionRepository.ReadQueryable
                 .Where(x => x.CategoryId == program.ParentId && x.Status && x.Type == EnumConditionType.CourseSuggest)
                 .Include(x => x.SubjectConditionRules)

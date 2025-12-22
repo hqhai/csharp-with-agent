@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Lesson Overview
         /// </summary>
         [HttpGet("lesson-overview")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<LessonOverviewModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLessonOverview()

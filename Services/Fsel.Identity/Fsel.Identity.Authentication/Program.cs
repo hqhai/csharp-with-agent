@@ -1,92 +1,193 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using AutoMapper;
+using Fsel.Authentication.Infrastructure.Configs;
+using Fsel.Common.Constants;
+using Fsel.Core.Entities;
 using Fsel.Core.Extensions;
+using Fsel.Identity.Application.Events;
+using Fsel.Core.Middlewares;
 using Fsel.Identity.Application.Queries.IntegrationQuery;
-using Fsel.Identity.Application.Queues.Publishers;
-using Fsel.Identity.Application.Services;
-using Fsel.Identity.Application.Services.InteractionService;
-using Fsel.Identity.Application.Services.LmsCourseService;
-using Fsel.Identity.Application.Services.OrderService;
-using Fsel.Identity.Application.Services.SystemService;
-using Fsel.Identity.Application.Services.TrainingService;
+using Fsel.Identity.Authentication.Extensions;
 using Fsel.Identity.Domain.Entities;
-using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Common;
-using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
+using IdentityServer4.EntityFramework.Mappers;
+using IdentityServer4.Services;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var appSetting = builder.AddAppSettings<AppSetting>();
+
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<UserDbContext, UserReadDbContext>();
+builder.AddDbContexts<UserDbContext, UserReadDbContext, User, Role, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>();
 
-builder.AddIdentity<User, Role, UserDbContext>();
-builder.AddAuthenticationIdentity();
+builder.AddOIDC(appSetting);
 
-//Repository
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserTokenRepository, UserTokenRepository>();
-builder.Services.AddScoped<IHumanRepository, HumanRepository>();
-builder.Services.AddScoped<ITeacherRepository, TeacherRepository>();
-builder.Services.AddScoped<IParentRepository, ParentRepository>();
-builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-builder.Services.AddScoped<IUserOtpCodeRepository, UserOtpCodeRepository>();
-builder.Services.AddScoped<IParentStudentRepository, ParentStudentRepository>();
-builder.Services.AddScoped<ICSORepository, CSORepository>();
-builder.Services.AddScoped<ITeacherBankAccountRepository, TeacherBankAccountRepository>();
-builder.Services.AddScoped<IUserSettingRepository, UserSettingRepository>();
-builder.Services.AddScoped<IPlatformRepository, PlatformRepository>();
-builder.Services.AddScoped<IUserPlatformRepository, UserPlatformRepository>();
-builder.Services.AddScoped<IStudentDailyStreakRepository, StudentDailyStreakRepository>();
-builder.Services.AddScoped<IStudentRankingRepository, StudentRankingRepository>();
-builder.Services.AddScoped<IStudentTrialRegistrationRepository, StudentTrialRegistrationRepository>();
-builder.Services.AddScoped<IUserCourseSettingRepository, UserCourseSettingRepository>();
-builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
-builder.Services.AddScoped<IStudentFocusTimeRepository, StudentFocusTimeRepository>();
-builder.Services.AddScoped<IStudentCompetitionSnapShotRepository, StudentCompetitionSnapShotRepository>();
-builder.Services.AddScoped<ICompetitionEventsRepository, CompetitionEventsRepository>();
-builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
-builder.Services.AddScoped<IStudentCompetitionEventsRepository, StudentCompetitionEventRepository>();
-builder.Services.AddScoped<IStudentRankingEventRepository, StudentRankingEventRepository>();
-builder.Services.AddScoped<IUserReferralRepository, UserReferralRepository>();
-builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationRepository>();
-builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
-builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
-builder.Services.AddScoped<ISchoolImportHistoryRepository, SchoolImportHistoryRepository>();
-builder.Services.AddScoped<IPermissionGroupRepository, PermissionGroupRepository>();
-builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
-builder.Services.AddScoped<IRoleClaimRepository, RoleClaimRepository>();
-builder.Services.AddScoped<IUserGroupRepository, UserGroupRepository>();
-builder.Services.AddScoped<IUserGroupMemberShipRepository, UserGroupMemberShipRepository>();
-builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
-builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
-builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
-builder.Services.AddScoped<IMenuRepository, MenuRepository>();
-// Queue
-builder.Services.AddScoped<LeaderBoardPublisher>();
-builder.Services.AddScoped<QuestBoardPublisher>();
-builder.Services.AddScoped<NotificationMessagePublisher>();
-builder.Services.AddScoped<CreateTokenHistoryPublisher>();
-builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
-builder.Services.AddScoped<SendStudentsFromFilePublisher>();
+builder.Services.ConfigureExternalCookie(options =>
+{
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
 
-//Common
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+});
+
+builder.Services.AddSingleton<ICorsPolicyService>((container) =>
+{
+    var logger = container.GetRequiredService<ILogger<DefaultCorsPolicyService>>();
+    return new DefaultCorsPolicyService(logger)
+    {
+        AllowAll = true
+    };
+});
+
+#if DEBUG
+var env = builder.Environment;
+if (env.IsDevelopment() &&
+    builder.Configuration["Urls"]?.Contains("https://fsel-auth-dev.fsel.edu.vn:443") == true)
+{
+    builder.WebHost.ConfigureKestrel(serverOptions =>
+    {
+        serverOptions.ListenAnyIP(443, listenOptions =>
+        {
+            listenOptions.UseHttps("./Resources/CertificateSSL/fsel-auth-dev.fsel.edu.vn.pfx", "");
+        });
+    });
+}
+#endif
+
+builder.WebHost.UseKestrel();
+var fordwardedHeaderOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+    RequireHeaderSymmetry = false
+};
+fordwardedHeaderOptions.KnownNetworks.Clear();
+fordwardedHeaderOptions.KnownProxies.Clear();
+builder.Services.Configure<ForwardedHeadersOptions>(x => x = fordwardedHeaderOptions);
+
+builder.Services.AddMvc();
+builder.Services.AddMvcCore();
+builder.Services.AddControllers();
+builder.Services.AddControllersWithViews();
+builder.Services.AddLocalApiAuthentication();
+//builder.Services.AddHttpsRedirection(opt => opt.HttpsPort = 443);
+
+builder.AddRepositories();
+builder.AddHandlers();
+
+// Event
+builder.Services.AddTransient<IEventSink, TokenIssuedEventHandler>();
+
+builder.AddQueue();
+
 builder.Services.AddScoped<SaveOtpCodeConverter>();
 builder.Services.AddScoped<BaseIntegrationQuery>();
 
-//Refit
-builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
-builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
-builder.AddRefitClients(typeof(IInteractionService), appSetting?.Services?.InteractionApiUrl);
-builder.AddRefitClients(typeof(ITrainingService), appSetting?.Services?.ClassApiUrl);
-builder.AddRefitClients(typeof(ILmsCourseService), appSetting?.Services?.LmsCourseApiUrl);
-builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+builder.AddExternalServices(appSetting);
 
 builder.AddMassTransit(appSetting);
+
 //App config
 var app = builder.Build();
-app.UseServices();
-app.Run();
+app.UseForwardedHeaders(fordwardedHeaderOptions);
+app.UseStaticFiles();
+app.UseCertificateForwarding();
+app.UseRouting();
+app.UseTenantAwareMiddlewareHandler();
+app.UseLanguages();
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseIdentityServer();
+app.MapDefaultControllerRoute();
+//app.UseHttpsRedirection();
+app.UseCookiePolicy(new CookiePolicyOptions
+{
+    MinimumSameSitePolicy = SameSiteMode.None,
+    Secure = CookieSecurePolicy.Always
+});
+
+app.UseCors();
+app.UseCors(Settings.CorsPolicy);
+
+app.UseForwardedHeaders(fordwardedHeaderOptions);
+app.UseDefaultServices();
+
+#region Initialized Database
+
+using (var serviceScope = app.Services.GetService<IServiceScopeFactory>()!.CreateScope())
+{
+    serviceScope.ServiceProvider.GetRequiredService<IdentityServer4.EntityFramework.DbContexts.PersistedGrantDbContext>().Database.Migrate();
+
+    var context = serviceScope.ServiceProvider.GetRequiredService<IdentityServer4.EntityFramework.DbContexts.ConfigurationDbContext>();
+    context.Database.Migrate();
+
+    var mapperClient = new MapperConfiguration(cfg => cfg.AddProfile<ClientMapperProfile>()).CreateMapper();
+    var mapperIdentityResource = new MapperConfiguration(cfg => cfg.AddProfile<IdentityResourceMapperProfile>()).CreateMapper();
+    var mapperApiScope = new MapperConfiguration(cfg => cfg.AddProfile<ScopeMapperProfile>()).CreateMapper();
+    var mapperApiResource = new MapperConfiguration(cfg => cfg.AddProfile<ApiResourceMapperProfile>()).CreateMapper();
+
+    foreach (var client in Config.Clients)
+    {
+        var clientDB = await context.Clients
+                        .Include(x => x.RedirectUris)
+                        .Include(x => x.PostLogoutRedirectUris)
+                        .Include(x => x.ClientSecrets)
+                        .Include(x => x.Claims)
+                        .Include(x => x.AllowedScopes)
+                        .Include(x => x.AllowedCorsOrigins)
+                        .Include(x => x.AllowedGrantTypes)
+                        .Include(x => x.Properties)
+                        .Include(x => x.IdentityProviderRestrictions)
+                        .Where(c => c.ClientId == client.ClientId)
+                        .FirstOrDefaultAsync(x => x.ClientId == client.ClientId);
+        if (clientDB != null)
+        {
+            context.Clients.Remove(clientDB);
+        }
+        context.Clients.Add(client.ToEntity());
+    }
+
+    foreach (var resource in Config.IdentityResources)
+    {
+        var resourceDB = await context.IdentityResources.FirstOrDefaultAsync(x => x.Name == resource.Name);
+        if (resourceDB != null)
+        {
+            context.IdentityResources.Remove(resourceDB);
+        }
+        context.IdentityResources.Add(resource.ToEntity());
+    }
+
+    foreach (var apiScope in Config.ApiScopes)
+    {
+        var apiScopeDB = await context.ApiScopes.FirstOrDefaultAsync(x => x.Name == apiScope.Name);
+        if (apiScopeDB != null)
+        {
+            context.ApiScopes.Remove(apiScopeDB);
+        }
+        context.ApiScopes.Add(apiScope.ToEntity());
+    }
+
+    foreach (var apiResource in Config.ApiResources)
+    {
+        var apiResourceDB = await context.ApiResources.FirstOrDefaultAsync(x => x.Name == apiResource.Name);
+        if (apiResourceDB != null)
+        {
+            context.ApiResources.Remove(apiResourceDB);
+        }
+        context.ApiResources.Add(apiResource.ToEntity());
+    }
+
+    context.SaveChanges();
+}
+
+#endregion Initialized Database
+
+await app.RunAsync();

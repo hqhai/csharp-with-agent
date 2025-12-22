@@ -6,14 +6,13 @@ using Fsel.Realtime.Application.Hubs;
 using Fsel.Realtime.Application.Queues.Consumers;
 using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Constants;
-using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
 var appSetting = builder.AddAppSettings<BaseAppSetting>();
 builder.AddServices(appSetting);
-builder.AddSwaggerGens(appSetting);
-builder.AddAuthenticationJwtBearers(appSetting);
+builder.AddOpenIdSwaggerGens(appSetting);
+builder.AddOpenIdAuthenticationJwtBearers(appSetting);
 builder.Services.AddScoped<FeatureAccessTimePublisher>();
 builder.Services.AddScoped<SetTimeModulePublisher>();
 builder.Services.AddScoped<GetTimeModulePublisher>();
@@ -33,6 +32,7 @@ builder.Services.AddScoped<BuyBlindBoxHub>();
 builder.Services.AddScoped<DictionaryHub>();
 builder.Services.AddScoped<SetTimeExamPracticeHub>();
 builder.Services.AddScoped<QuestionTypeHub>();
+builder.Services.AddScoped<SendStudentsFromFileHub>();
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>
@@ -45,7 +45,8 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, typeof(ChatBotConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DisconnectSocketCalculateTime, typeof(DisconnectSocketCalculateTimeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
-    { QueueSettings.RealtimeQueue.NameQueue.ExamPracticeSpeaking, typeof(MockTestAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ExamPracticeSpeaking, typeof(ExamPracticeAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ExamPracticeWriting, typeof(ExamPracticeAIFeedBackConsumer) },
     { QueueSettings.LmsQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.SystemQueue.NameQueue.Techie, typeof(StudentTechieConsumer) },
     { QueueSettings.OrderingQueue.NameQueue.ChangeStatusOrder, typeof(ChangeStatusOrderConsumer) },
@@ -76,6 +77,7 @@ app.UseHubs<TranscriptHub>(RealtimeSettings.TranscriptHub.Pattern);
 app.UseHubs<BuyBlindBoxHub>(RealtimeSettings.SendNotifyBuyBlindBoxHub.Pattern);
 app.UseHubs<DictionaryHub>(RealtimeSettings.SendDictionaryHub.Pattern);
 app.UseHubs<ExamPracticeSpeakingHub>(RealtimeSettings.ExamPracticeSpeakingAIFeedBackHub.Pattern);
+app.UseHubs<ExamPracticeWritingHub>(RealtimeSettings.ExamPracticeWritingAIFeedBackHub.Pattern);
 app.UseHubs<SetTimeExamPracticeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
 app.UseHubs<QuestionTypeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
 app.UseHubs<QuestionTypeHub>(RealtimeSettings.QuestionTypeHub.Pattern);

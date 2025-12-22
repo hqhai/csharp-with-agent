@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
     using Fsel.Course.Domain.Enums.ErrorCodes;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.TrainingServices;
     using Fsel.Course.Lms.Application.Services.TrainingServices.CommandModels;
@@ -30,7 +29,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.AdminCmd
     public class ChangeCourseLevelByAdminCommand : IRequest<MethodResult<CourseResultModel>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
-
         public Guid UserId { get; set; }
     }
 

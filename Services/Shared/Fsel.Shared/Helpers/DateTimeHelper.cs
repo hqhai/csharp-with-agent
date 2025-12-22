@@ -4,6 +4,7 @@ namespace Fsel.Shared.Helpers
 {
     using System;
     using System.Globalization;
+    using Fsel.Common.Helpers;
 
     public static class DateTimeHelper
     {
@@ -225,6 +226,41 @@ namespace Fsel.Shared.Helpers
                 }
             }
             return DateTime.UtcNow;
+        }
+
+        public static int CalculateAge(DateTime birthday, DateTime currentDate)
+        {
+            int age = currentDate.Year - birthday.Year;
+            if (currentDate < birthday.AddYears(age))
+                age--;
+            return age;
+        }
+
+        public static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeNow(DateTime? dateTime = default)
+        {
+            var nowUtc = dateTime ?? DateTime.UtcNow;
+            var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
+
+            var startVn = GetWeekStartMonday(nowVn);
+            var endVn = startVn.AddDays(6);
+            return (startVn, endVn);
+        }
+
+        public static (DateTime weekStartUtc, DateTime weekEndUtc) GetCurrentWeekRangeUtc(DateTime? dateTime = default)
+        {
+            var nowUtc = dateTime ?? DateTime.UtcNow.Date;
+            var nowVn = nowUtc.ConvertTimeFromUtc(EnumCountryKey.Vietnam).Date;
+
+            var startVn = GetWeekStartMonday(nowVn);
+            var endVn = startVn.AddDays(6);
+            return (startVn.ConvertTimeToUtc(EnumCountryKey.UTC), endVn.ConvertTimeToUtc(EnumCountryKey.UTC));
+        }
+
+        public static DateTime GetWeekStartMonday(DateTime date)
+        {
+            var day = (int)date.DayOfWeek; // Sunday=0 ... Monday=1 ... Saturday=6
+            var offset = day == 0 ? -6 : 1 - day; // về thứ 2
+            return date.AddDays(offset);
         }
     }
 }

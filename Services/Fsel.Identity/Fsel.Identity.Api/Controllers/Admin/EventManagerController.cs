@@ -19,7 +19,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/admin/event-manager")]
     [ApiController]
-    //[Permission(roles: new[] { nameof(EnumRole.Admin), nameof(EnumRole.DepartmentAdmin) })]
     public class EventManagerController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -35,7 +34,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpPost("add-user-to-event")]
         [ProducesResponseType(typeof(MethodResult<EventManagerModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        //[Permission(roles: new[] { nameof(EnumRole.Admin), nameof(EnumRole.EducationDepartment), nameof(EnumRole.DepartmentAdmin) })]
         public async Task<IActionResult> AddUserToEvent([FromBody] AddUserToEventCommand command)
         {
             MethodResult<EventManagerModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -48,7 +46,6 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpDelete("remove-user-from-event")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        //[Permission(roles: new[] { nameof(EnumRole.Admin), nameof(EnumRole.EducationDepartment), nameof(EnumRole.DepartmentAdmin) })]
         public async Task<IActionResult> RemoveUserFromEvent([FromBody] RemoveUserFromEventCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -61,10 +58,11 @@ namespace Fsel.Identity.Api.Controllers.Admin
         [HttpGet("get-events-by-user/{userId}")]
         [ProducesResponseType(typeof(MethodResult<List<CompetitionEventsModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ServerCache(CacheSettings.TimeCache.FiveMinutes)]
         public async Task<IActionResult> GetEventsByUser([FromRoute] Guid userId)
         {
             MethodResult<List<CompetitionEventsModel>> commandResult = await _mediator.Send(new GetEventsByUserQuery { UserId = userId }).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
-} 
+}

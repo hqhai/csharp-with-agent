@@ -3,18 +3,23 @@
 using System.Net;
 using Asp.Versioning;
 using Fsel.Common.ActionResults;
+using Fsel.Common.Attributes;
 using Fsel.Common.Constants;
 using Fsel.Identity.Application.Commands.AuthCmd;
 using Fsel.Identity.Application.Commands.LandingPages;
 using Fsel.Identity.Application.Commands.UserCmd;
+using Fsel.Identity.Application.Commands.UserOtpCodeCmd;
 using Fsel.Identity.Application.Commands.UserReferrals;
 using Fsel.Identity.Application.Queries.UserQuery;
 using Fsel.Identity.Application.Queries.UserReferrals;
+using Fsel.Identity.Domain.Models.CommandModels.UserOtpCodes;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
 using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Fsel.Identity.Application.Queries.AuthQuery;
+using Fsel.Core.Applications.Attributes;
 
 namespace Fsel.Identity.Api.Controllers
 {
@@ -37,7 +42,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPost("change-password")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission]
+        [Permission]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
         {
             MethodResult<bool> commandResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -47,7 +52,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update profile user
         /// </summary>
-        [Common.Attributes.Permission]
+        [Permission]
         [HttpPut("update-profile-user")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -60,6 +65,7 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Update Code Student
         /// </summary>
+        [TenantAware]
         [HttpPut("update-code-student")]
         [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
@@ -72,10 +78,11 @@ namespace Fsel.Identity.Api.Controllers
         /// <summary>
         /// Get User Profile
         /// </summary>
-        [Common.Attributes.Permission]
+        [Permission]
         [HttpGet("get-user-profile")]
         [ProducesResponseType(typeof(MethodResult<UserProfileModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ServerCache(CacheSettings.TimeCache.OneMinutes)]
         public async Task<IActionResult> GetProfileUser()
         {
             MethodResult<UserProfileModel> commandResult = await _mediator.Send(new GetUserProfileQuery()).ConfigureAwait(false);
@@ -98,11 +105,11 @@ namespace Fsel.Identity.Api.Controllers
         /// Get users by ids
         /// </summary>
         [HttpPost("get-users-by-ids")]
-        [ProducesResponseType(typeof(MethodResult<IList<HumanModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<UserModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUsersByIds([FromBody] GetUsersByIdsQuery query)
         {
-            MethodResult<IList<HumanModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<IList<UserModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -110,11 +117,11 @@ namespace Fsel.Identity.Api.Controllers
         /// Get users by ids
         /// </summary>
         [HttpGet("get-user-by-id")]
-        [ProducesResponseType(typeof(MethodResult<HumanModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<UserModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUsersByIds([FromQuery] GetUserByIdQuery query)
         {
-            MethodResult<HumanModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            MethodResult<UserModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
@@ -148,7 +155,7 @@ namespace Fsel.Identity.Api.Controllers
         [HttpDelete]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission]
+        [Permission]
         public async Task<IActionResult> DeleteUser()
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteUserCommand()).ConfigureAwait(false);
@@ -183,7 +190,7 @@ namespace Fsel.Identity.Api.Controllers
         /// get user referrals
         /// </summary>
         [HttpGet("get-user-referrals")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<UserReferralsModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetUserReferral([FromQuery] GetUserReferralsByUserQuery query)
@@ -208,7 +215,7 @@ namespace Fsel.Identity.Api.Controllers
         /// check user referral code
         /// </summary>
         [HttpGet("get-sender-by-code")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+        [Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<SenderModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetSenderByCode([FromQuery] GetSenderByCodeQuery query)
@@ -228,6 +235,87 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> ToolGetOtp([FromQuery] ToolGetOtpQuery query)
         {
             MethodResult<UserOtpCodeModel> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Disconnect external connect
+        /// </summary>
+        /// <param name="command"></param>
+        /// <returns></returns>
+        [HttpPost("disconnect-external-provider")]
+        [Common.Attributes.Permission]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DisconnectExternalProvider([FromBody] DisconnectExternalAccountCommand command)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(command?.Provider);
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get external provider connects
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("get-external-provider-connects")]
+        [Common.Attributes.Permission]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetExternalProviderConnects([FromQuery] GetExternalConnectsQuery query)
+        {
+            var result = await _mediator.Send(query).ConfigureAwait(false);
+            return result.GetActionResult();
+        }
+
+        /// <summary>
+        /// get role by user ud
+        /// </summary>
+        [HttpGet("get-role-by-user-id/{userId}")]
+        [ProducesResponseType(typeof(MethodResult<string?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
+        [ServerCache(CacheSettings.TimeCache.OneHour)]
+        public async Task<IActionResult> GetRoleByUserId([FromRoute] string userId)
+        {
+            var commandResult = await _mediator.Send(new GetRoleByUserIdQuery() { UserId = userId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get User by user ud
+        /// </summary>
+        [HttpGet("{userId}")]
+        [ProducesResponseType(typeof(MethodResult<string?>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [ServerCache(CacheSettings.TimeCache.OneMinutes)]
+        public async Task<IActionResult> Get([FromRoute] Guid userId)
+        {
+            var commandResult = await _mediator.Send(new GetUserPublicQuery { Id = userId }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Send Otp SMS
+        /// </summary>
+        [HttpPost("send-otp-sms-check-user")]
+        [ProducesResponseType(typeof(MethodResult<SaveOTPForUserEventHaNoiCommandModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SendOtpSMS([FromBody] SendOtpForPhoneCheckUserCommand command)
+        {
+            var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Verify Otp SMS
+        /// </summary>
+        [HttpPost("verify-otp-sms-check-user")]
+        [ProducesResponseType(typeof(MethodResult<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> VerifyOtpSMS([FromBody] VerifyOtpToSMSCheckUserCommand command)
+        {
+            MethodResult<Guid> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

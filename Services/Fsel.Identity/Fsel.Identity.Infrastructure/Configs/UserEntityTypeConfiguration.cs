@@ -13,10 +13,12 @@ namespace Fsel.Identity.Infrastructure.Configs
         public void Configure(EntityTypeBuilder<User> builder)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            builder.HasOne(x => x.Human)
-                .WithOne(b => b.User)
-                .HasForeignKey<Human>(b => b.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Property(e => e.Gender)
+                 .HasMaxLength(100)
+                 .HasConversion(
+                    v => v.HasValue ? v.ToString() : null,
+                    v => v.EnumParse<EnumGender>());
 
             builder.Property(e => e.Status)
                  .HasMaxLength(100)
@@ -27,6 +29,9 @@ namespace Fsel.Identity.Infrastructure.Configs
             //builder.Metadata.RemoveIndex(builder.HasIndex(u => u.NormalizedUserName).Metadata.Properties);
             builder.HasIndex(x => x.NormalizedUserName)
                 .HasFilter("[NormalizedUserName] IS NOT NULL AND [IsDeleted] = 0");
+
+            builder.Property(x => x.FullName)
+                .HasComputedColumnSql($"CONCAT_WS(' ', [{nameof(User.LastName)}], [{nameof(User.FirstName)}])", stored: true);
 
             builder.HasIndex(x => new { x.IsDeleted, x.UserName });
             builder.HasIndex(x => new { x.IsDeleted, x.Email });

@@ -63,8 +63,8 @@ namespace Fsel.Identity.Application.Commands.StudentCmd
             var studentsAbsentIds = await _studentRepository.Queryable
                 .Where(x => x.ExpiredDate.HasValue
                                     && x.ExpiredDate.Value.Hour == currentHour
-                                    && x.ExpiredDate.Value.Date == targetDate && x.Human != null)
-                .Select(g => (g != null && g.Human != null && g.Human.UserId != null) ? (Guid)g.Human.UserId : Guid.Empty)
+                                    && x.ExpiredDate.Value.Date == targetDate && x.User != null)
+                .Select(g => g != null ? g.UserId : Guid.Empty)
                 .ToListAsync(cancellationToken);
 
             await SendNotificationMessage(studentsAbsentIds, content, cancellationToken);

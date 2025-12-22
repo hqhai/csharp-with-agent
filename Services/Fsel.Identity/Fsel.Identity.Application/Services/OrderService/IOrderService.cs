@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Services.OrderService
     using Fsel.Identity.Application.Services.OrderService.Model;
     using Fsel.Identity.Application.Services.OrderService.QueryModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -30,8 +31,11 @@ namespace Fsel.Identity.Application.Services.OrderService
         [Post("/v1/admin/order/create-order-for-student")]
         Task<IApiResponse<MethodResult<OrderModel>>> CreateOrderForStudentAsync([Body] CreateOrderByUserIdCommandModel command);
 
-        [Post("/v1/order/integration-order")]
-        Task<IApiResponse<MethodResult<IList<OrderSearchModel>>>> GetOrderByStatusAsync([Body] GetOrderByStatusQueryModel query);
+        [Get("/v1/order/get-order-by-status")]
+        Task<IApiResponse<MethodResult<IList<OrderSearchModel>>>> GetOrderByStatusAsync([FromQuery] GetOrderByStatusQueryModel query);
+
+        [Post("/v1.1/order/create-orders-from-crm")]
+        Task<IApiResponse<MethodResult<bool>>> CreateOrdersFromCRM([Body] CreateOrdersFromCRMModels command);
 
         [Delete("/v1/admin/order/delete-student/{id}")]
         Task<IApiResponse<MethodResult<bool>>> DeleteListDataUser([FromRoute] Guid id);
@@ -62,5 +66,14 @@ namespace Fsel.Identity.Application.Services.OrderService
 
         [Post("/v1.2/admin/order/get-users-has-order-revenue")]
         Task<IApiResponse<MethodResult<IList<OrderModel>>>> GetUserHasOrderRevenue([Body] GetUserHasOrderRevenueModel query);
+
+        [Post("/v1/campus/create-order-for-students-campus")]
+        Task<IApiResponse<MethodResult<bool>>> CreateOrderForStudentCampus([Body] CreateOrdersForStudentCampusCommandModels command);
+
+        [Post("/v1/campus/delete-order-of-students-campus")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteOrderOfStudentsCampus([Body] DeleteOrderOfStudentsCampusCommandModel command);
+
+        [Get("/v1/order/current-by-userid")]
+        Task<IApiResponse<MethodResult<OrderModel>>> GetCurrentByUserIdAsync([Query] GetCurrentOrderByUserIdQueryModel query);
     }
 }

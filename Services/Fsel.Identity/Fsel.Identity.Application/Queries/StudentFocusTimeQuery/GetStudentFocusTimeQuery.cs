@@ -39,7 +39,7 @@ namespace Fsel.Identity.Application.Queries.StudentFocusTimeQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<StudentFocusTimeModel> methodResult = new MethodResult<StudentFocusTimeModel>();
-            var student = await _studentRepository.Queryable.Include(x => x.Human).FirstOrDefaultAsync(x => x.Human!.UserId == _authContext.CurrentUserId, cancellationToken);
+            var student = await _studentRepository.Queryable.FirstOrDefaultAsync(x => x.UserId == _authContext.CurrentUserId, cancellationToken);
 
             if (student == null)
             {

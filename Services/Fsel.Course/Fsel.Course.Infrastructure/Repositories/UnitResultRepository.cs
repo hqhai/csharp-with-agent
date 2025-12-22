@@ -17,7 +17,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<bool> IsDoneAsync(LessonResult lessonResult)
         {
-            return await Queryable.AnyAsync(x => x.StudentId == lessonResult.StudentId && x.UnitId == lessonResult.UnitId && x.CourseId == lessonResult.CourseId && x.Status == EnumResultStatus.Done);
+            return await Queryable.Where(x => x.StudentId == lessonResult.StudentId && x.UnitId == lessonResult.UnitId)
+                                  .AnyAsync(x => x.CourseId == lessonResult.CourseId && x.Status == EnumResultStatus.Done);
         }
     }
 }

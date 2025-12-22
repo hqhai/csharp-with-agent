@@ -33,5 +33,7 @@ namespace Fsel.Sender.Domain.Entities
         public string? ResponseBody { get; set; }
 
         public EnumSenderTemplate? Template { get; set; }
+
+        public Guid? ReceiverId { get; set; }
     }
 }

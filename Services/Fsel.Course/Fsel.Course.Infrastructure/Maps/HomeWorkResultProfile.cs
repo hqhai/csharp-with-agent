@@ -14,6 +14,7 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<HomeWorkResult, HomeWorkResultModel>().IgnoreAllNonExisting();
             CreateMap<HomeWorkResult, ResultModel>().IgnoreAllNonExisting();
+            CreateMap<HomeWorkExtraPracticeResult, HomeWorkExtraPracticeResultModel>().IgnoreAllNonExisting();
         }
     }
 }

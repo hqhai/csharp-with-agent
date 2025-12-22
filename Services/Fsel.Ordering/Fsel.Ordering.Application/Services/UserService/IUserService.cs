@@ -34,12 +34,18 @@ namespace Fsel.Ordering.Application.Services.UserService
         Task<IApiResponse<MethodResult<IList<CompetitionEventsModel>>>> GetEventByUserId([Query] Guid? userId);
 
         [Get("/v1/student/get-student-by-email")]
-        Task<IApiResponse<MethodResult<StudentModel?>>> GetStudentByEmail([Query] string email);
+        Task<IApiResponse<MethodResult<StudentModel>>> GetStudentByEmail([Query] string email);
 
         [Put("/v1/admin-school/student/update-expired-date-for-students")]
         Task<IApiResponse<MethodResult<bool>>> UpdateExpiredDateForStudentsEvent([Body] UpdateExpiredDateForStudentsEventCommandModel model);
 
         [Post("/v1/student/deduct-coin-of-student")]
         Task<IApiResponse<MethodResult<bool>>> DeductCoinOfStudent([Body] DeductCoinOfStudentCommandModel model);
+
+        [Get("/v1/user/get-role-by-user-id/{userId}")]
+        Task<IApiResponse<MethodResult<string?>>> GetRoleByUserId([FromRoute] string userId);
+
+        [Post("/v1/user-setting/sender-setting-generate-token")]
+        Task<IApiResponse<MethodResult<string>>> SenderSettingGenerateToken([Body] UpdateSenderSettingCommandModel command);
     }
 }
