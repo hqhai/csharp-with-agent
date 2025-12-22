@@ -131,18 +131,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     }
 
                     questionModel.CorrectStatus = GetCorrectStatus(videoTimeCodeAnswer);
-                    questionModel.IsReportExplanation = questionExplanationErrors
-                        .Any(x => x.QuestionId == questionModel.Id);
+                    questionModel.IsReportExplanation = questionExplanationErrors.Any(x => x.QuestionId == questionModel.Id);
 
-                    if (isCheck)
-                    {
-                        questionModel.Config = _questionTypeConverter
-                       .QuestionTypeConverterObject(
-                           questionModel.Config,
-                           questionModel.QuestionType,
-                           isDisableAnswers: !isCheck)
-                       .Item1;
-                    }
+                    questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(questionModel.Config, questionModel.QuestionType, isDisableAnswers: !isCheck).Item1;
 
                     var questionShuffle = questionShuffles
                         .FirstOrDefault(x => x.QuestionId == questionModel.Id);
@@ -307,7 +298,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         .QuestionTypeConverterObject(
                             question.Config,
                             question.QuestionType,
-                            isDisableAnswers: true)
+                            isDisableAnswers: false)
                         .Item1;
 
                     exerciseModel.Questions.Add(questionModel);
