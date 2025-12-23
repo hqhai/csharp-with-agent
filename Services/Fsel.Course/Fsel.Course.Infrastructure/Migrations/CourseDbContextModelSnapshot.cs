@@ -3210,7 +3210,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<DateTime?>("ProcessDate")
                         .HasColumnType("datetime2");
-                        .HasColumnType("int");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
