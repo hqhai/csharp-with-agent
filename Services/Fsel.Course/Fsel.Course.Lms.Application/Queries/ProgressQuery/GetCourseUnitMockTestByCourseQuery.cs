@@ -74,7 +74,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
-            var course = await _courseRepository.Queryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
+            var course = await _courseRepository.ReadQueryable.Include(x => x.CourseUnitMockTests).FirstOrDefaultAsync(x => x.Id == request.CourseId, cancellationToken);
             if (course == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
@@ -112,10 +112,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<List<CourseUnitMockTestResultModel>> GetListToAcademicAsync(Course course, EnumLearnProcessType type, Guid studentId)
         {
             var units = await GetUnitsAsync(course.Id, studentId);
-            var finalTest = await _finalTestRepository.Queryable.Include(x => x.FinalTestResults.Where(x => x.StudentId == studentId && x.CourseId == course.Id))
-                                                      .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
-                                                      .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == course.Id))
-                                                      .FirstOrDefaultAsync();
+            var finalTest = await _finalTestRepository.ReadQueryable
+                                        .Include(x => x.FinalTestResults.Where(x => x.StudentId == studentId && x.CourseId == course.Id))
+                                        .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
+                                        .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == course.Id))
+                                        .FirstOrDefaultAsync();
             var listUnit = new List<CourseUnitMockTestResultModel>();
             foreach (var courseUnitMockTest in course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
             {
@@ -165,12 +166,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<List<CourseUnitMockTestResultModel>> GetListToIELTSAsync(Course course, EnumLearnProcessType type, Guid studentId)
         {
             var units = await GetUnitsAsync(course.Id, studentId);
-            var mockTests = await _mockTestRepository.Queryable.Include(x => x.MockTestSections)
-                                                      .ThenInclude(x => x.SectionGroup)
-                                                      .Include(x => x.MockTestResults.Where(x => x.StudentId == studentId && x.CourseId == course.Id))
-                                                      .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
-                                                      .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == course.Id))
-                                                      .ToListAsync();
+            var mockTests = await _mockTestRepository.ReadQueryable.Include(x => x.MockTestSections)
+                                                     .ThenInclude(x => x.SectionGroup)
+                                                     .Include(x => x.MockTestResults.Where(x => x.StudentId == studentId && x.CourseId == course.Id))
+                                                     .ThenInclude(x => x.SectionGroupResults.Where(x => x.StudentId == studentId))
+                                                     .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == course.Id))
+                                                     .ToListAsync();
             var listUnit = new List<CourseUnitMockTestResultModel>();
             foreach (var courseUnitMockTest in course.CourseUnitMockTests.OrderBy(x => x.DisplayOrder))
             {

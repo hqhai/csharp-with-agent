@@ -7,6 +7,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService.CommandModels
     public class SavePlacementTestDoneCommandModel
     {
         public Guid StudentId { get; set; }
+        public bool? IsSendLevel { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
     }
 }
