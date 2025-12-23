@@ -79,7 +79,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
 
             var classForums = await _classForumRepository.ReadQueryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
-                                                         .Where(x => x.LessonId.HasValue && lessonIds.Contains(x.LessonId))
+                                                         .Where(x => x.LessonId.HasValue && lessonIds.Contains(x.LessonId.Value))
                                                          .ToListAsync();
 
             var listDones = classForums.Select(x => new
