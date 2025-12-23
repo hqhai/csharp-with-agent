@@ -97,23 +97,31 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             // ✅ NEW: get TestSectionResults nhỏ (con) để map result cho section con nếu có
             var sectionIds = cached.Sections.Select(s => s.Id).ToList();
 
-            var sectionResultBySectionId = await _testSectionResultRepository.ReadQueryable
+            //var sectionResultBySectionId = await _testSectionResultRepository.ReadQueryable
+            //    .AsNoTracking()
+            //    .Where(r =>
+            //        r.TestResultId == testSectionResult.TestResultId &&
+            //        r.TestSectionId.HasValue &&
+            //        sectionIds.Contains(r.TestSectionId.Value))
+            //    .ToDictionaryAsync(r => r.TestSectionId!.Value, r => r, cancellationToken);
+
+            var sectionResultBySectionIds = await _testSectionResultRepository.ReadQueryable
                 .AsNoTracking()
                 .Where(r =>
                     r.TestResultId == testSectionResult.TestResultId &&
                     r.TestSectionId.HasValue &&
                     sectionIds.Contains(r.TestSectionId.Value))
-                .ToDictionaryAsync(r => r.TestSectionId!.Value, r => r, cancellationToken);
+                .ToListAsync(cancellationToken);
 
-            var rootModel = MapSectionNode(
-                rootSection,
-                childrenMap,
-                cached.QuestionIdsBySectionId,
-                answerByQuestionId,
-                questionById,
-                sectionResultBySectionId);
+            //var rootModel = MapSectionNode(
+            //    rootSection,
+            //    childrenMap,
+            //    cached.QuestionIdsBySectionId,
+            //    answerByQuestionId,
+            //    questionById,
+            //    sectionResultBySectionId);
 
-            return new MethodResult<SectionStateModel>(rootModel);
+            return new MethodResult<SectionStateModel>();
         }
 
         private async Task<CachedSectionTreeModel> GetTestSectionTreeCachedAsync(Guid rootSectionId)
@@ -213,6 +221,10 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
             var model = new SectionStateModel
             {
+                SkillScores = nodeResult?.SkillScores,
+                CorrectTotal = nodeResult?.CorrectTotal ?? 0,
+                HighestStreak = nodeResult?.HighestStreak,
+
                 SectionResultId = nodeResult?.Id,
                 Status = nodeResult?.Status ?? EnumResultStatus.New,
                 UpdatedDate = nodeResult?.UpdatedDate,

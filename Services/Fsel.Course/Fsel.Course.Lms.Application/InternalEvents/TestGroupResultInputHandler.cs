@@ -3,14 +3,12 @@
 namespace Fsel.Course.Lms.Application.InternalEvents
 {
     using Fsel.Core.Applications.InternalEvents;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule;
     using Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.SenderTemplates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -61,7 +59,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                         .Where(x => x.Id == testGroupResult.UnitModuleId)
                                         .Select(x => x.Percent)
                                         .FirstOrDefaultAsync(cancellationToken);
-                    await UpdateTestResultAsync(testResult, percentModule);
+                    if (unitResult.Status != EnumResultStatus.Done)
+                    {
+                        await UpdateTestResultAsync(testResult, percentModule);
+                    }
 
                     await _unitResultUpdater.UpdateUnitResultAsync(unitResult, testGroupResult.UnitModuleId.Value, cancellationToken);
                 }
@@ -77,8 +78,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                        .Where(x => x.Id == testGroupResult.CourseModuleId)
                                        .Select(x => x.Percent)
                                        .FirstOrDefaultAsync(cancellationToken);
-
-                    await UpdateTestResultAsync(testResult, percentModule);
+                    if (courseResult.Status != EnumResultStatus.Done)
+                    {
+                        await UpdateTestResultAsync(testResult, percentModule);
+                    }
 
                     await _courseResultUpdater.UpdateCourseResultAsync(courseResult, testGroupResult.CourseModuleId.Value, cancellationToken);
                 }
@@ -103,7 +106,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     entity.PercentModule
                 };
-            }).ConfigureAwait(false);
+            });
         }
     }
 }

@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 {
     using System.Linq;
+    using System.Linq.Dynamic.Core;
     using AutoMapper;
     using Core.Base.Interfaces;
     using Domain.Entities.TestConfigs;
@@ -19,6 +20,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
     public class GetPtQuestionByIdsQuery : IRequest<MethodResult<IList<QuestionModel>>>
     {
+        public Guid TestResultId { get; set; }
         public Guid StudentId { get; set; }
         public IList<QuestionAnswer> QuestionAnswerIds { get; set; } = new List<QuestionAnswer>();
     }
@@ -36,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         private readonly IMapper _mapper;
         private readonly IQuestionShuffleRepository _questionShuffleRepository;
         private readonly IRepository<TestAnswer> _testAnswerRepository;
+        private readonly ITestResultRepository _testResultRepository;
         private readonly AnswerTypeConverter _answerTypeConverter;
 
         public GetPtQuestionByIdsQueryHandler(IQuestionRepository questionRepository,
@@ -43,7 +46,8 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             QuestionTypeConverter questionTypeConverter,
             IMapper mapper,
             IQuestionShuffleRepository questionShuffleRepository,
-            IRepository<TestAnswer> testAnswerRepository)
+            IRepository<TestAnswer> testAnswerRepository,
+            ITestResultRepository testResultRepository)
         {
             _answerTypeConverter = answerTypeConverter;
             _questionRepository = questionRepository;
@@ -51,6 +55,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             _mapper = mapper;
             _questionShuffleRepository = questionShuffleRepository;
             _testAnswerRepository = testAnswerRepository;
+            _testResultRepository = testResultRepository;
         }
 
         public async Task<MethodResult<IList<QuestionModel>>> Handle(GetPtQuestionByIdsQuery request, CancellationToken cancellationToken)
@@ -70,6 +75,11 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
         private async Task<IList<QuestionModel>?> GetQuestionAsync(GetPtQuestionByIdsQuery request)
         {
             ArgumentNullException.ThrowIfNull(request.QuestionAnswerIds);
+            var testResult = await _testResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == request.TestResultId);
+            if (testResult == null)
+            {
+                return null;
+            }
 
             var questions = await _questionRepository.ReadQueryable.WhereBulkContains(request.QuestionAnswerIds.Select(x => x.QuestionId), x => x.Id).ToListAsync();
 
@@ -113,9 +123,15 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 var answer = testAnswers.FirstOrDefault(x => x.QuestionId == question.Id);
                 if (answer != null)
                 {
-                    questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer));
                     var answerDto = _mapper.Map<AnswerModel>(answer);
-                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, EnumResultStatus.Done);
+                    if (testResult.Status != EnumResultStatus.Done)
+                    {
+                        answerDto.IsCorrect = null;
+                        answerDto.Status = EnumAnswerStatus.Process;
+                    }
+                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, testResult.Status, testResult.Status == EnumResultStatus.Done);
+
+                    questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer), testResult.Status);
                     questionModel.ResultAnswer = answerDto;
                 }
 
@@ -126,13 +142,13 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             return listQuestion;
         }
 
-        private static EnumCorrectStatus? GetCorrectStatus(BaseAnswer? answer)
+        private static EnumCorrectStatus? GetCorrectStatus(BaseAnswer? answer, EnumResultStatus resultStatus)
         {
             EnumCorrectStatus? status = null;
             if (answer != null)
             {
                 status = EnumCorrectStatus.Process;
-                if (answer.Status == EnumAnswerStatus.Done)
+                if (answer.Status == EnumAnswerStatus.Done && resultStatus == EnumResultStatus.Done)
                 {
                     status = answer.IsCorrect.HasValue && answer.IsCorrect.Value ? EnumCorrectStatus.Correct : EnumCorrectStatus.Fail;
                 }

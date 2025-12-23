@@ -71,10 +71,17 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         public async Task<Test> GetHierachicalTestFirstOrDefault(Expression<Func<Test, bool>> predicate)
         {
-            var test = await _testRepository.ReadQueryable
+            var tests = await _testRepository.ReadQueryable
                 .Where(predicate)
                 .OrderBy(x => x.CreatedDate)
-                .FirstOrDefaultAsync();
+                .ToListAsync();
+
+            var test = tests.FirstOrDefault();
+            if (tests.Count > 1)
+            {
+                var index = new Random().Next(tests.Count);
+                test = tests.ElementAtOrDefault(index);
+            }
 
             if (test != null)
             {
@@ -120,12 +127,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         public async Task<TestGroupResult> InitTestGroupResult(Guid studentId, EnumTestType enumTestType, bool isByPass = false)
         {
-            var testGroupResult = new TestGroupResult
-            {
-                StudentId = studentId,
-                TestType = enumTestType,
-                Status = isByPass ? EnumResultStatus.ByPass : EnumResultStatus.New
-            };
+            var testGroupResult = new TestGroupResult { StudentId = studentId, TestType = enumTestType, Status = isByPass ? EnumResultStatus.ByPass : EnumResultStatus.New };
             _testGroupResultRepository.Add(testGroupResult);
             await _testGroupResultRepository.UnitOfWork.SaveChangesAsync();
             return testGroupResult;
@@ -188,6 +190,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     _testSectionResultRepository.Add(testSectionResult);
                     CreateTestSectionResultTree(section, testSectionResult, testResult);
                 }
+
                 await _testSectionResultRepository.UnitOfWork.SaveChangesAsync();
 
                 return testResult;

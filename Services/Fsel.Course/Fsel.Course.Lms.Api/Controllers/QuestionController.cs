@@ -70,7 +70,6 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// <summary>
         /// Get Question
         /// </summary>
-        [EncryptResponse]
         [HttpPost("get-pt-question-by-ids")]
         [ProducesResponseType(typeof(MethodResult<IList<QuestionModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
