@@ -48,6 +48,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         skillScore.SkillId = correspondSection?.SkillId;
                         skillScore.SkillName = correspondSection?.Skill?.Name;
                     }
+
                     return skillScores;
                 }).ToList();
             }
@@ -61,6 +62,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             }
 
             if (Children.Count <= 0)
+            {
+                return;
+            }
+
+            if (Children.Any(x => x is TestSectionResultComposite { TestSectionResult.Status: EnumResultStatus.Process }))
             {
                 return;
             }
