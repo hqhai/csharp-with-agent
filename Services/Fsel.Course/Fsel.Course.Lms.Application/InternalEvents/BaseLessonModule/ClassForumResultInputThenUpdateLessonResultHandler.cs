@@ -49,7 +49,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                                           .Where(x => x.Id == classForumResult.LessonModuleId)
                                           .Select(x => x.Percent)
                                           .FirstOrDefaultAsync(cancellationToken);
-                await UpdateClassForumResultAsync(classForumResult, percentModule);
+                if (lessonResult.Status != EnumResultStatus.Done)
+                {
+                    await UpdateClassForumResultAsync(classForumResult, percentModule);
+                }
 
                 await UpdateLessonResultAsync(lessonResult, classForumResult.LessonModuleId.Value, cancellationToken);
             }
@@ -73,7 +76,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                 {
                     entity.PercentModule
                 };
-            }).ConfigureAwait(false);
+            });
         }
     }
 }

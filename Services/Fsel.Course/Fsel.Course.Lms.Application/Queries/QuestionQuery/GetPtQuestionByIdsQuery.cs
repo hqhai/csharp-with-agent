@@ -129,9 +129,9 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                         answerDto.IsCorrect = null;
                         answerDto.Status = EnumAnswerStatus.Process;
                     }
+                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, testResult.Status, testResult.Status == EnumResultStatus.Done);
 
                     questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer), testResult.Status);
-                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, testResult.Status);
                     questionModel.ResultAnswer = answerDto;
                 }
 
