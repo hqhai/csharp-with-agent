@@ -37,8 +37,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     {
         public string? Name { get; set; }
 
-        [JsonProperty("ModuleId")]
-        public Guid? StepFlowId { get; set; }
+        [JsonProperty("ModuleId")] public Guid? StepFlowId { get; set; }
 
         public Guid? TestId { get; set; }
 
@@ -69,6 +68,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
                 {
                     continue;
                 }
+
                 sectionStateModel.UpdateDetailInfo(section);
             }
         }
@@ -90,12 +90,16 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
         public IList<SkillScores>? SkillScores { get; set; }
 
+        public int? Order { get; set; }
+
         public void UpdateDetailInfo(TestSection? section)
         {
             if (section == null)
             {
                 return;
             }
+
+            Order = section?.DisplayOrder;
             Name = section.Name ?? section.Skill?.Name;
             Config = section.Config;
             foreach (var sectionResult in Children)
@@ -110,6 +114,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
                 {
                     continue;
                 }
+
                 sectionStateModel.UpdateDetailInfo(sectionMatch);
             }
         }
