@@ -67,7 +67,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var studentId = student.Id;
-            var mockTestResult = await _mockTestResultRepository.Queryable.Include(x => x.MockTestScores).FirstOrDefaultAsync(x => x.Id == request.MockTestResultId && x.StudentId == studentId, cancellationToken);
+            var mockTestResult = await _mockTestResultRepository.ReadQueryable.Include(x => x.MockTestScores)
+                                                                .FirstOrDefaultAsync(x => x.Id == request.MockTestResultId && x.StudentId == studentId, cancellationToken);
             if (mockTestResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTestResult));
@@ -79,7 +80,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumMockTestResultErrorCode.MockTestResultMustDone), nameof(mockTestResult));
                 return methodResult;
             }
-            var mockTest = await _mockTestRepository.Queryable.Include(x => x.MockTestSections).ThenInclude(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == mockTestResult.MockTestId, cancellationToken);
+            var mockTest = await _mockTestRepository.ReadQueryable.Include(x => x.MockTestSections)
+                                                    .ThenInclude(x => x.SectionGroup)
+                                                    .FirstOrDefaultAsync(x => x.Id == mockTestResult.MockTestId, cancellationToken);
             if (mockTest == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(mockTest));

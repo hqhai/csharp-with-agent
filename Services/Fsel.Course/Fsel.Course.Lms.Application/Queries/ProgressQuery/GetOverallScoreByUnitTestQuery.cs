@@ -77,6 +77,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
             var (videoIds, courseResult) = method.Result;
+            if (courseResult == null || !videoIds.Any())
+            {
+                methodResult.Result = overallScoreReport;
+                return methodResult;
+            }
+
             var lessonResultIds = await GetLessonResultIdsAsync(request, courseResult.StudentId);
             var videoDuplicateIds = videoIds.GroupBy(x => x)
                 .Select(x => new
@@ -90,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             foreach (var videoId in videoIds.Distinct())
             {
                 var videoTimeCodeIds = await GetVideoTimeCodeUnitTestsAsync(videoId, cancellationToken);
-                var groupExercises = await _exerciseRepository.Queryable.Where(x => x.TimeCodeExercises.Any(x => videoTimeCodeIds.Contains(x.VideoTimeCodeId)))
+                var groupExercises = await _exerciseRepository.ReadQueryable.Where(x => x.TimeCodeExercises.Any(x => videoTimeCodeIds.Contains(x.VideoTimeCodeId)))
                     .GroupBy(x => x.CourseSkill)
                     .Select(x => new { x.Key, ExerciseIds = x.Select(x => x.Id).ToList() })
                     .ToListAsync(cancellationToken);
@@ -131,14 +137,26 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<Guid>> GetVideoTimeCodeUnitTestsAsync(Guid videoId, CancellationToken cancellationToken)
         {
-            return await _videoTimeCodeRepository.Queryable.Where(x => x.VideoId == videoId && x.TimeCodeType == EnumTimeCodeType.UnitTest).Select(x => x.Id).ToListAsync(cancellationToken);
+            return await _videoTimeCodeRepository.ReadQueryable.Where(x => x.VideoId == videoId && x.TimeCodeType == EnumTimeCodeType.UnitTest)
+                                                 .Select(x => x.Id)
+                                                 .ToListAsync(cancellationToken);
         }
 
         private async Task<SkillScores> GetSkillScoreVideoTimeCodeAnswerAsync(IList<Guid> questionIds, IList<Guid> videoResultIds, CancellationToken cancellationToken)
         {
-            var listScore = await _videoTimeCodeAnswerRepository.Queryable
+            if (!videoResultIds.Any() || !questionIds.Any())
+            {
+                return new SkillScores
+                {
+                    CorrectCount = default,
+                    CountQuestion = default,
+                };
+            }
+
+            var listScore = await _videoTimeCodeAnswerRepository.ReadQueryable
                                                .Where(x => x.VideoResultId.HasValue)
-                                               .WhereBulkContains(questionIds, x => x.QuestionId).WhereBulkContains(videoResultIds, x => x.VideoResultId)
+                                               .WhereBulkContains(questionIds, x => x.QuestionId)
+                                               .WhereBulkContains(videoResultIds, x => x.VideoResultId)
                                                .Select(x => x.CorrectCount)
                                                .ToListAsync(cancellationToken);
             return new SkillScores
@@ -150,19 +168,20 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<(SkillScores, IList<Guid>)> GetSkillScoreQuestionAsync(IList<Guid> exerciseIds, CancellationToken cancellationToken)
         {
-            var listScore = await _questionRepository.Queryable.Where(x => x.ExerciseQuestions.Any(x => exerciseIds.Contains(x.ExerciseId)))
-                                    .Where(x => !x!.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation)
-                                    .Select(x => new { x.CorrectTotal, x.Id }).ToListAsync(cancellationToken);
+            var listScore = await _questionRepository.ReadQueryable.Where(x => x.ExerciseQuestions.Any(x => exerciseIds.Contains(x.ExerciseId)))
+                                                                   .Where(x => !x!.Ungraded && x.QuestionType != EnumQuestionType.ExercisePreparation)
+                                                                   .Select(x => new { x.CorrectTotal, x.Id })
+                                                                   .ToListAsync(cancellationToken);
             return (new SkillScores
             {
-                TotalCount = listScore.Sum(x => x.CorrectTotal),
+                TotalCount = listScore.Any() ? listScore.Sum(x => x.CorrectTotal) : default,
                 TotalQuestion = listScore.Count,
             }, listScore.Select(x => x.Id).ToList());
         }
 
-        private async Task<MethodResult<(List<Guid>, CourseResult)>> Validate(GetOverallScoreByUnitTestQuery request, CancellationToken cancellationToken)
+        private async Task<MethodResult<(List<Guid>, CourseResult?)>> Validate(GetOverallScoreByUnitTestQuery request, CancellationToken cancellationToken)
         {
-            var methodResult = new MethodResult<(List<Guid>, CourseResult)>();
+            var methodResult = new MethodResult<(List<Guid>, CourseResult?)>();
             var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
@@ -181,12 +200,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(course));
                 return methodResult;
             }
-            var courseResult = await _courseResultRepository.Queryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == student.Id, cancellationToken);
+            var courseResult = await _courseResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.CourseId == request.CourseId && x.StudentId == student.Id, cancellationToken);
             if (courseResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(courseResult));
                 return methodResult;
             }
+
             var videoIds = await GetVideoIdsAsync(request);
             methodResult.Result = (videoIds, courseResult);
             return methodResult;
@@ -194,7 +213,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<Guid>> GetLessonIdsAsync(GetOverallScoreByUnitTestQuery request)
         {
-            return await _unitRepository.Queryable.Include(x => x.UnitLessons)
+            return await _unitRepository.ReadQueryable.Include(x => x.UnitLessons)
                                                   .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
                                                   .SelectMany(x => x.UnitLessons)
                                                   .Select(x => x.LessonId)
@@ -203,7 +222,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<Guid>> GetLessonResultIdsAsync(GetOverallScoreByUnitTestQuery request, Guid studentId)
         {
-            return await _lessonResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId)
+            return await _lessonResultRepository.ReadQueryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId)
                                                           .Select(x => x.Id)
                                                           .ToListAsync();
         }
@@ -211,7 +230,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
         private async Task<List<Guid>> GetVideoIdsAsync(GetOverallScoreByUnitTestQuery request)
         {
             var lessonIds = await GetLessonIdsAsync(request);
-            return await _lessonRepository.Queryable.Include(x => x.LessonVideos)
+            if (!lessonIds.Any())
+            {
+                return new List<Guid>();
+            }
+
+            return await _lessonRepository.ReadQueryable.Include(x => x.LessonVideos)
                                                   .WhereBulkContains(lessonIds, x => x.Id)
                                                   .SelectMany(x => x.LessonVideos)
                                                   .Select(x => x.VideoId)

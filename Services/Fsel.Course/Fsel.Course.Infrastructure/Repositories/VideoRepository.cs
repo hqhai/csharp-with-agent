@@ -65,21 +65,29 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<double> GetPercent(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResult).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResults = await _lessonResultRepository.ReadQueryable.Include(x => x.Lesson)
+                                                             .Include(x => x.VideoResult)
+                                                             .Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId)
+                                                             .ToListAsync();
 
-            var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
+            var lessonIds = lessonResults.Where(x => x.Lesson != null).Select(x => x.Lesson!.Id).ToList();
+            if (!lessonIds.Any())
+            {
+                return default;
+            }
+
             var videoResultIds = lessonResults.Where(x => x.VideoResult != null).Select(x => x.VideoResult!.Id).ToList();
 
-            var videoIds = await _lessonRepository.Queryable.Include(x => x.LessonVideos)
+            var videoIds = await _lessonRepository.ReadQueryable.Include(x => x.LessonVideos)
                                                 .WhereBulkContains(lessonIds, x => x.Id)
                                                 .SelectMany(x => x.LessonVideos)
                                                 .Select(x => x.VideoId)
                                                 .ToListAsync();
 
             var videos = await Queryable.Include(x => x.VideoTimeCodes)
-                                    .ThenInclude(x => x.VideoTimeCodeResults.Where(x => videoResultIds.Contains(x.VideoResultId)))
-                                    .Where(x => videoIds.Contains(x.Id))
-                                    .ToListAsync();
+                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => videoResultIds.Contains(x.VideoResultId)))
+                                        .Where(x => videoIds.Contains(x.Id))
+                                        .ToListAsync();
 
             var videoTimeCodes = videos.SelectMany(x => x.VideoTimeCodes).Where(x => x.TimeCodeType == EnumTimeCodeType.UnitTest).ToList();
             var videoTimeCodeResults = videoTimeCodes.SelectMany(x => x.VideoTimeCodeResults).Where(x => videoResultIds.Contains(x.VideoResultId)).Where(x => x.Status == EnumResultStatus.Done).ToList();
