@@ -144,6 +144,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
                     var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == testResult.Id);
                     testResult.SectionResults = hierarchicalTestResult.SectionResults;
+                    await testResultComposite.LoadTestHierarchicalData();
                 }
 
                 testResultComposite.GenerateChildren();
