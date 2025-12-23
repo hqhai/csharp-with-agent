@@ -242,7 +242,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 .ThenInclude(x => x.TestSection)
                 .ThenInclude(x => x.TestSectionQuestions)
                 .Include(x => x.TestAnswers)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync() ?? new TestResult();
         }
 
         public async Task CreateAnswers(SubmitAnswerCommandModel request)

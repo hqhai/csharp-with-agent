@@ -71,15 +71,17 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 return methodResult;
             }
 
-            var testResult = await _testResultRepository.ReadQueryable.Include(x => x.TestGroupResult)
-                .FirstOrDefaultAsync(x => x.Id == request.TestResultId, cancellationToken);
+            var testResult = await _testResultRepository.Queryable.Include(x => x.TestGroupResult)
+                                                        .Include(x => x.SectionResults)
+                                                        .FirstOrDefaultAsync(x => x.Id == request.TestResultId, cancellationToken);
 
             if (testResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testResult));
                 return methodResult;
             }
-            var testGroupResult = await _testGroupResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
+            var testGroupResult = await _testGroupResultRepository.Queryable.Include(x => x.TestResults)
+                                                                  .FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
             if (testGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testGroupResult));
@@ -89,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             if (testResult.Status == EnumResultStatus.New)
             {
                 var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
-                await aggregate.Start();
+                await aggregate.StartTest();
                 methodResult.Result = await aggregate.ExpotStateData();
 
                 return methodResult;
@@ -98,11 +100,6 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             {
                 var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
                 await aggregate.InitAggregate();
-
-                if (testResult.Status != EnumResultStatus.Done && testResult.Status != EnumResultStatus.ByPass)
-                {
-                    await aggregate.Start();
-                }
 
                 return new MethodResult<SingleTestStateModel> { Result = await aggregate.ExpotStateData() };
             }
