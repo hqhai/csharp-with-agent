@@ -162,8 +162,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                     };
                 });
 
-            await _lessonResultRepository.UnitOfWork
-                .SaveEntitiesAsync(cancellationToken)
+            await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
 

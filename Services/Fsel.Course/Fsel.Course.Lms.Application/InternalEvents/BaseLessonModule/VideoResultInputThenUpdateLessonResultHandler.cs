@@ -58,7 +58,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                                                     .Where(x => x.Id == videoResult.LessonModuleId)
                                                     .Select(x => x.Percent)
                                                     .FirstOrDefaultAsync(cancellationToken);
-                await UpdateVideoResultAsync(videoResult, percentModule);
+                if (lessonResult.Status != EnumResultStatus.Done)
+                {
+                    await UpdateVideoResultAsync(videoResult, percentModule);
+                }
 
                 await UpdateLessonResultAsync(lessonResult, videoResult.LessonModuleId.Value, cancellationToken);
             }
@@ -123,7 +126,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                     entity.Percent,
                     entity.PercentModule
                 };
-            }).ConfigureAwait(false);
+            });
         }
 
         private async Task<Video?> GetVideoAsync(Guid id)

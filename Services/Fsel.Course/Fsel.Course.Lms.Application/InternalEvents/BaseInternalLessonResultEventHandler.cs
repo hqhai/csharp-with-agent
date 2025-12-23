@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents
 {
     using System.Linq.Dynamic.Core;
     using System.Threading;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
@@ -111,7 +110,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 {
                     bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.LessonId };
                 });
-                await _lessonResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

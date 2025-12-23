@@ -220,7 +220,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             {
                 var testSectionResult = new TestSectionResult
                 {
-                    TestSectionId = child.Id, StudentId = parentSectionResult.StudentId, Status = EnumResultStatus.New, TestResultId = testResult.Id
+                    TestSectionId = child.Id,
+                    StudentId = parentSectionResult.StudentId,
+                    Status = EnumResultStatus.New,
+                    TestResultId = testResult.Id
                 };
                 testSectionResult.ParentTestSectionResult = parentSectionResult;
                 parentSectionResult.SectionResults.Add(testSectionResult);
