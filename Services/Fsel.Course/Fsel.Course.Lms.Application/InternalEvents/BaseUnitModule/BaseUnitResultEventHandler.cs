@@ -257,8 +257,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             IList<UnitModule> unitModules,
             UnitModule currentModule)
         {
+            var minOrder = unitModules.Where(m => m.OpenOrder > currentModule.OpenOrder).FirstOrDefault();
+            if (minOrder == null)
+            {
+                return new List<UnitModule>();
+            }
             return unitModules
-                .Where(m => m.OpenOrder == currentModule.OpenOrder + 1)
+                .Where(m => m.OpenOrder == minOrder.OpenOrder)
                 .OrderBy(m => m.OpenOrder)
                 .ToList();
         }

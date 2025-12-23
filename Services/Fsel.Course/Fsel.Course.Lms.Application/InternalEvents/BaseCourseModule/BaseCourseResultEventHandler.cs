@@ -174,7 +174,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
 
         private static IList<CourseModule> GetNextModules(IList<CourseModule> courseModules, CourseModule currentModule)
         {
-            return courseModules.Where(m => m.OpenOrder == currentModule.OpenOrder + 1)
+            var minOrder = courseModules.Where(m => m.OpenOrder > currentModule.OpenOrder).FirstOrDefault();
+            if (minOrder == null)
+            {
+                return new List<CourseModule>();
+            }
+            return courseModules.Where(m => m.OpenOrder == minOrder.OpenOrder)
                                 .OrderBy(m => m.OpenOrder)
                                 .ToList();
         }

@@ -252,10 +252,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             IList<LessonModule> lessonModules,
             LessonModule currentModule)
         {
-            return lessonModules
-                .Where(m => m.OpenOrder == currentModule.OpenOrder + 1)
-                .OrderBy(m => m.OpenOrder)
-                .ToList();
+            var minOrder = lessonModules.Where(m => m.OpenOrder > currentModule.OpenOrder).OrderBy(m => m.OpenOrder).FirstOrDefault();
+            if (minOrder == null)
+            {
+                return new List<LessonModule>();
+            }
+            return lessonModules.Where(m => m.OpenOrder == minOrder.OpenOrder)
+                                .OrderBy(m => m.OpenOrder).ToList();
         }
 
         private async Task UpdateNewResultLessonModule(
