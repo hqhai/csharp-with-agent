@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Common.ActionResults;
     using Domain.IRepositories;
     using Domain.Models.EntityModels;
@@ -97,31 +96,23 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             // ✅ NEW: get TestSectionResults nhỏ (con) để map result cho section con nếu có
             var sectionIds = cached.Sections.Select(s => s.Id).ToList();
 
-            //var sectionResultBySectionId = await _testSectionResultRepository.ReadQueryable
-            //    .AsNoTracking()
-            //    .Where(r =>
-            //        r.TestResultId == testSectionResult.TestResultId &&
-            //        r.TestSectionId.HasValue &&
-            //        sectionIds.Contains(r.TestSectionId.Value))
-            //    .ToDictionaryAsync(r => r.TestSectionId!.Value, r => r, cancellationToken);
-
-            var sectionResultBySectionIds = await _testSectionResultRepository.ReadQueryable
+            var sectionResultBySectionId = await _testSectionResultRepository.ReadQueryable
                 .AsNoTracking()
                 .Where(r =>
                     r.TestResultId == testSectionResult.TestResultId &&
                     r.TestSectionId.HasValue &&
                     sectionIds.Contains(r.TestSectionId.Value))
-                .ToListAsync(cancellationToken);
+                .ToDictionaryAsync(r => r.TestSectionId!.Value, r => r, cancellationToken);
 
-            //var rootModel = MapSectionNode(
-            //    rootSection,
-            //    childrenMap,
-            //    cached.QuestionIdsBySectionId,
-            //    answerByQuestionId,
-            //    questionById,
-            //    sectionResultBySectionId);
+            var rootModel = MapSectionNode(
+                rootSection,
+                childrenMap,
+                cached.QuestionIdsBySectionId,
+                answerByQuestionId,
+                questionById,
+                sectionResultBySectionId);
 
-            return new MethodResult<SectionStateModel>();
+            return new MethodResult<SectionStateModel>(rootModel);
         }
 
         private async Task<CachedSectionTreeModel> GetTestSectionTreeCachedAsync(Guid rootSectionId)
