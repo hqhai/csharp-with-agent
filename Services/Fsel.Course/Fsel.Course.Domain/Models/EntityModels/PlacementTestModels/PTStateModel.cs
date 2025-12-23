@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 {
     using System.Text.Json.Serialization;
     using Entities.TestConfigs;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Newtonsoft.Json;
     using Shared.Enums;
@@ -77,21 +78,17 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     {
         public string? Name { get; set; }
         public Guid? SectionId { get; set; }
-
         public EnumTestLayoutType? TestLayoutType { get; set; }
         public TestSectionConfig? Config { get; set; }
-
         public Guid? SectionResultId { get; set; }
-
         public int CorrectCount { get; set; }
-
+        public int CorrectTotal { get; set; }
         public double TotalCount { get; set; }
-
-        public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
-
         public double? WorkingTime { get; set; }
-
         public double? PercentResult { get; set; }
+        public int? HighestStreak { get; set; }
+        public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
+        public IList<SkillScores>? SkillScores { get; set; }
 
         public void UpdateDetailInfo(TestSection? section)
         {

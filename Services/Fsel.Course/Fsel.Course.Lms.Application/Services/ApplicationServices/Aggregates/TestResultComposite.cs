@@ -9,7 +9,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Microsoft.Extensions.DependencyInjection;
 
-    public class  TestResultComposite : ResultComposite
+    public class TestResultComposite : ResultComposite
     {
         public TestResult TestResult => Result as TestResult;
 
@@ -42,9 +42,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 {
                     var correspondSection = test.TestSections.FirstOrDefault(y => y.Id == x.TestSectionResult.TestSectionId);
                     var skillScores = x.TestSectionResult.SkillScores ?? new List<SkillScores>();
+
                     foreach (var skillScore in skillScores)
                     {
                         skillScore.SkillId = correspondSection?.SkillId;
+                        skillScore.SkillName = correspondSection?.Skill?.Name;
                     }
                     return skillScores;
                 }).ToList();

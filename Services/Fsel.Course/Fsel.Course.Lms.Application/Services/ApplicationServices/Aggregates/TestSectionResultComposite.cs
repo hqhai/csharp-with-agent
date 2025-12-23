@@ -23,7 +23,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 SectionResultId = TestSectionResult.Id,
                 Status = TestSectionResult.Status,
                 CorrectCount = TestSectionResult.CorrectCount,
-                TotalCount = TestSectionResult.SkillScores.Sum(x => x.TotalCount),
+                TotalCount = TestSectionResult.SkillScores?.Sum(x => x.TotalCount) ?? default,
                 WorkingTime = TestSectionResult.WorkingTime,
                 Children = new List<BaseTestStateModel>(),
                 UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
@@ -37,6 +37,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             }
             return sectionState;
         }
+
         public override BaseTestStateModel ExportForTestState()
         {
             var sectionState = new SectionStateModel
@@ -76,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             return sectionState;
         }
+
         public override void GenerateChildren()
         {
             if (TestSectionResult.TestAnswers.Any())
@@ -121,6 +123,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 {
                     new SkillScores
                     {
+                        CorrectQuestion = TestSectionResult.SectionResults.Where(x=>x.SkillScores != null && x.SkillScores.Any())
+                                                           .SelectMany(x => x.SkillScores)
+                                                           .Sum(x => x.CorrectQuestion),
                         TotalCount = TestSectionResult.SectionResults.Sum(x => x.CorrectTotal),
                         TotalQuestion = TestSectionResult.SectionResults.SelectMany(x => x.SkillScores).Sum(x => x.TotalQuestion)
                     }
@@ -160,7 +165,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     {
                         var firstSkillScore = TestSectionResult.SkillScores.First();
                         firstSkillScore.CountQuestion = TestSectionResult.TestAnswers.Count;
+                        firstSkillScore.CorrectQuestion = TestSectionResult.TestAnswers.Count(x => x.IsCorrect == true);
                         firstSkillScore.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+                        firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
+                        firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
 
@@ -171,8 +180,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                     {
                         var firstSkillScore = TestSectionResult.SkillScores.First();
-                        firstSkillScore.CountQuestion = TestSectionResult.SectionResults.SelectMany(x => x.SkillScores).Sum(x => x.CountQuestion);
-                        firstSkillScore.CorrectCount = TestSectionResult.SectionResults.SelectMany(x => x.SkillScores).Sum(x => x.CorrectCount);
+                        var skillScores = TestSectionResult.SectionResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores);
+
+                        firstSkillScore.CountQuestion = skillScores.Sum(x => x.CountQuestion);
+                        firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
+                        firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
+                        firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
+                        firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
 
@@ -184,8 +198,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                     {
                         var firstSkillScore = TestSectionResult.SkillScores.First();
-                        firstSkillScore.CountQuestion = TestSectionResult.SectionResults.SelectMany(x => x.SkillScores).Sum(x => x.CountQuestion);
-                        firstSkillScore.CorrectCount = TestSectionResult.SectionResults.SelectMany(x => x.SkillScores).Sum(x => x.CorrectCount);
+                        var skillScores = TestSectionResult.SectionResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores);
+
+                        firstSkillScore.CountQuestion = skillScores.Sum(x => x.CountQuestion);
+                        firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
+                        firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
+                        firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
+                        firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
 
