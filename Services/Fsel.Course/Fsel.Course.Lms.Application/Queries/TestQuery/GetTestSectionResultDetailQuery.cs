@@ -213,6 +213,10 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
             var model = new SectionStateModel
             {
+                SkillScores = nodeResult?.SkillScores,
+                CorrectTotal = nodeResult?.CorrectTotal ?? 0,
+                HighestStreak = nodeResult?.HighestStreak,
+
                 SectionResultId = nodeResult?.Id,
                 Status = nodeResult?.Status ?? EnumResultStatus.New,
                 UpdatedDate = nodeResult?.UpdatedDate,

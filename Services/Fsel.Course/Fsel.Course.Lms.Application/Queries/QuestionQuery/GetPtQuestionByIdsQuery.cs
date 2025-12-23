@@ -126,11 +126,12 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                     var answerDto = _mapper.Map<AnswerModel>(answer);
                     if (testResult.Status != EnumResultStatus.Done)
                     {
+                        answerDto.IsCorrect = null;
                         answerDto.Status = EnumAnswerStatus.Process;
                     }
 
                     questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer), testResult.Status);
-                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, EnumResultStatus.Done);
+                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, testResult.Status);
                     questionModel.ResultAnswer = answerDto;
                 }
 
