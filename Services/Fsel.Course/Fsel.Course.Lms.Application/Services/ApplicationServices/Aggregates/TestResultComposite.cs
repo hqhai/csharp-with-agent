@@ -13,6 +13,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     {
         public TestResult TestResult => Result as TestResult;
 
+        public Test? Test { get; set; }
+
         public override BaseTestStateModel ExportForTestState()
         {
             var childStates = Children.Select(c => c.ExportForTestState()).ToList();
@@ -71,11 +73,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 return;
             }
 
+            var skillsPairCompositeResults = Test?.TestSections.OrderBy(x => x.DisplayOrder).Select(x =>
+            {
+                var sectionResultComposite =
+                    Children.FirstOrDefault(y => y is TestSectionResultComposite tsr && tsr.TestSectionResult.TestSectionId == x.Id) as TestSectionResultComposite;
+                return new { Section = x, SectionResultComposite = sectionResultComposite };
+            }).Where(x => x.SectionResultComposite != null).ToList();
+
             var childCanStart =
-                Children.FirstOrDefault(x => x is TestSectionResultComposite
-                {
-                    TestSectionResult.Status: EnumResultStatus.New or EnumResultStatus.Unfinished
-                }) as TestSectionResultComposite;
+                skillsPairCompositeResults?.FirstOrDefault(x =>
+                    x.SectionResultComposite.TestSectionResult.Status is EnumResultStatus.New or EnumResultStatus.Unfinished)?.SectionResultComposite;
 
             childCanStart?.Start();
         }
@@ -118,6 +125,17 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
             };
             return stateModel;
+        }
+
+        public async Task LoadTestHierarchicalData()
+        {
+            if (TestResult.TestId == null)
+            {
+                return;
+            }
+
+            var testService = ServiceProvider.GetRequiredService<ITestService>();
+            Test = await testService.GetHierachicalTestById(TestResult.TestId.Value);
         }
     }
 }

@@ -44,6 +44,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 case nameof(PlacementTest):
                 case nameof(FinalTest):
                 case nameof(MockTest):
+                case nameof(Test):
                     await UpdateSectionGroupResultAsync(request);
                     break;
 
@@ -112,11 +113,6 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
         {
             var sectionGroupResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
 
-            if (sectionGroupResult?.TestSection?.Config?.ExecutionTime == null)
-            {
-                return;
-            }
-
             if (sectionGroupResult.Status == EnumResultStatus.Done && sectionGroupResult.UpdatedDate.HasValue &&
                 sectionGroupResult.UpdatedDate.Value.AddMinutes(3) < DateTime.UtcNow)
             {
@@ -124,7 +120,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
             }
 
             sectionGroupResult.WorkingTime =
-                _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.TestSection.Config.ExecutionTime.Value);
+                _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, sectionGroupResult.TestSection?.Config?.ExecutionTime ?? 0);
             var workingTime = (DateTime.UtcNow - sectionGroupResult.CreatedDate).TotalMilliseconds;
             if (sectionGroupResult.WorkingTime > workingTime)
             {

@@ -89,6 +89,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var testResultComposite = new TestResultComposite() { Result = testResult, ServiceProvider = ServiceProvider };
             TestResultComposites.Add(testResultComposite);
             testResultComposite.GenerateChildren();
+            await testResultComposite.LoadTestHierarchicalData();
             await testResultComposite.LoadTotalScoreData();
             testResult.Status = EnumResultStatus.Process;
         }
@@ -143,6 +144,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
                     var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == testResult.Id);
                     testResult.SectionResults = hierarchicalTestResult.SectionResults;
+                    await testResultComposite.LoadTestHierarchicalData();
                 }
 
                 testResultComposite.GenerateChildren();
@@ -179,7 +181,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         CorrectCount = skill.CorrectCount,
                         TotalCount = skill.CorrectTotal,
                         Status = skill.Status,
-                        UpdatedDate = skill?.UpdatedDate ?? skill?.CreatedDate
+                        UpdatedDate = skill?.UpdatedDate ?? skill?.CreatedDate,
+                        Order = skill.TestSection?.DisplayOrder
                     };
 
                     return sectionStateModel;

@@ -21,8 +21,6 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
     public class GetLevelsByProgramQuery : IRequest<MethodResult<List<SelectionLevelModel>>>
     {
-        public Guid SelectedProgramId { get; set; }
-
         public Guid UserId { get; set; }
     }
 
@@ -88,7 +86,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
             var program = await _categoryRepository.Queryable
                 .Include(x => x.Levels)
-                .FirstOrDefaultAsync(x => x.Id == request.SelectedProgramId, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Id == ptTestResult.ProgramId, cancellationToken);
 
             if (program == null)
             {
@@ -114,7 +112,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             var suggestLevels = program.Levels.Select(x =>
             {
                 var selectionLevel = _mapper.Map<SelectionLevelModel>(x);
-                selectionLevel.ProgramId = request.SelectedProgramId;
+                selectionLevel.ProgramId = ptTestResult.ProgramId.Value;
 
                 var matchCondition = GetMatchConditionValue(matchestRule?.ConditionValues, x.Id);
                 if (matchCondition != null)
