@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Application.Queues.Publishers
             _queueProvider = queueProvider;
         }
 
-        public async Task Publish(ClassForumAIResponseModel? request, CancellationToken cancellationToken)
+        public async Task Publish(ClassForumAIResponseModelV2? request, CancellationToken cancellationToken)
         {
             if (request == null)
             {

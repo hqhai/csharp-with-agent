@@ -87,7 +87,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             if (classForum != null && classForumResult != null && classForum.IsAlFeedBack)
             {
-                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModelV2
                 {
                     ClassForumResultId = classForumResult.Id,
                     WordContent = wordContent,
