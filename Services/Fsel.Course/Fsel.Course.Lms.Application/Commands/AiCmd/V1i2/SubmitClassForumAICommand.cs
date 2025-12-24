@@ -27,8 +27,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
     using Polly;
-    using Services.AiService.Models;
-    using Shared.Helpers;
 
     public class SubmitClassForumAICommand : ClassForumAIResponseModelV2, IRequest<bool>
     {
@@ -84,6 +82,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
             _aiPromptManagerRepository = aiPromptManagerRepository;
             _classForumRepository = classForumRepository;
         }
+
         public async Task<bool> Handle(SubmitClassForumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
@@ -226,8 +225,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                 {
                     if (classForumDetailResultOwner != null)
                     {
-                        var lessonResult = await _lessonResultRepository.GetIncludeByIdAsync(classForumDetailResultOwner.ClassForumResult!.LessonResultId);
-
                         var paramsLink = new List<object>
                         {
                             featureModuleResult?.CourseId.ToString() ?? string.Empty,
@@ -255,6 +252,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
 
             return true;
         }
+
         private static JsonElement GetFeedbackElement(string? aiResponse)
         {
             if (string.IsNullOrWhiteSpace(aiResponse))
