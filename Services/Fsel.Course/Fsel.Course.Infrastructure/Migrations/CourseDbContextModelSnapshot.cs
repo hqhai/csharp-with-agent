@@ -591,6 +591,9 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<string>("PronunciationAlFeedback")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("RetryTime")
+                        .HasColumnType("int");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -1870,6 +1873,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.HasIndex("SkillId");
 
                     b.ToTable("Exercises");
+                });
+
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.Exercise", b =>
+                {
+                    b.HasOne("Fsel.Course.Domain.Entities.Skill", "Skill")
+                        .WithMany("Exercises")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Skill");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ExerciseQuestion", b =>
@@ -4788,6 +4801,9 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<double?>("PronunciationScore")
                         .HasColumnType("float");
+
+                    b.Property<int>("RetryTime")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("SectionGroupResultId")
                         .HasColumnType("uniqueidentifier");
