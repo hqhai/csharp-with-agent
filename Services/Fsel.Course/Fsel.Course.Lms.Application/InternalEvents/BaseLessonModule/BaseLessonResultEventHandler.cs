@@ -73,15 +73,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                 .Where(x => x.LessonResultId == lessonResult.Id)
                 .ToListAsync(cancellationToken);
 
-            var hasUnfinished = videoResults.Any(x => x.Status != EnumResultStatus.Done)
-                                || documentResults.Any(x => x.Status != EnumResultStatus.Done)
-                                || classForumResults.Any(x => x.ResultStatus != EnumResultStatus.Done)
-                                || homeWorkResults.Any(x => x.Status != EnumResultStatus.Done);
-
-            if (hasUnfinished)
-            {
-                return;
-            }
             // Tất cả result đều Done => tính điểm tổng
             var totalPercentModule =
                   videoResults.Sum(x => x.PercentModule)
@@ -198,6 +189,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             var lessonDone = await IsLessonModulesCompletedAsync(
                 lessonResult,
                 lessonModules,
+                currentModule.Id,
                 cancellationToken);
 
             if (lessonDone)
@@ -211,29 +203,62 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
         /// SỐ MODULE CẦN LÀM == SỐ MODULE ĐÃ CÓ RESULT Ở TRẠNG THÁI DONE.
         /// </summary>
         private async Task<bool> IsLessonModulesCompletedAsync(
-        LessonResult lessonResult,
-        IList<LessonModule> lessonModules,
-        CancellationToken cancellationToken)
+         LessonResult lessonResult,
+         IList<LessonModule> lessonModules,
+         Guid currentModuleId,
+         CancellationToken cancellationToken)
         {
+            ArgumentNullException.ThrowIfNull(lessonResult);
+            lessonModules ??= Array.Empty<LessonModule>();
+
+            if (lessonModules.Count == 0)
+            {
+                return true;
+            }
             var resultId = lessonResult.Id;
 
-            var queryVideo = _videoResultRepository.ReadQueryable
-                    .Where(x => x.LessonResultId == resultId && x.Status == EnumResultStatus.Done)
-                    .Select(x => x.Id);
-            var queryDocument = _documentResultRepository.ReadQueryable
-                    .Where(x => x.LessonResultId == resultId && x.Status == EnumResultStatus.Done)
-                    .Select(x => x.Id);
+            // Tập module cần hoàn thành
+            var requiredModuleIds = lessonModules
+                .Select(m => m.Id) // hoặc m.OriginalId tuỳ bạn đang dùng gì để map
+                .ToHashSet();
 
-            var queryClassForum = _classForumResultRepository.ReadQueryable
-                    .Where(x => x.LessonResultId == resultId && x.ResultStatus == EnumResultStatus.Done)
-                    .Select(x => x.Id);
+            // Query các module đã done (lọc LessonModuleId != null)
+            var videoDone = _videoResultRepository.ReadQueryable
+                .Where(x => x.LessonResultId == resultId
+                            && x.Status == EnumResultStatus.Done
+                            && x.LessonModuleId != null)
+                .Select(x => x.LessonModuleId!.Value);
 
-            var queryHomeWork = _homeWorkResultRepository.ReadQueryable
-                    .Where(x => x.LessonResultId == resultId && x.Status == EnumResultStatus.Done)
-                    .Select(x => x.Id);
+            var docDone = _documentResultRepository.ReadQueryable
+                .Where(x => x.LessonResultId == resultId
+                            && x.Status == EnumResultStatus.Done)
+                .Select(x => x.LessonModuleId);
 
-            var doneModuleIds = await queryVideo.Union(queryHomeWork).Union(queryClassForum).Union(queryDocument).ToListAsync(cancellationToken);
-            return doneModuleIds.Count == lessonModules.Count;
+            var forumDone = _classForumResultRepository.ReadQueryable
+                .Where(x => x.LessonResultId == resultId
+                            && x.ResultStatus == EnumResultStatus.Done
+                            && x.LessonModuleId != null)
+                .Select(x => x.LessonModuleId!.Value);
+
+            var hwDone = _homeWorkResultRepository.ReadQueryable
+                .Where(x => x.LessonResultId == resultId
+                            && x.Status == EnumResultStatus.Done
+                            && x.LessonModuleId != null)
+                .Select(x => x.LessonModuleId!.Value);
+
+            var doneModuleIds = await videoDone
+                .Union(docDone)
+                .Union(forumDone)
+                .Union(hwDone)
+                .ToListAsync(cancellationToken);
+
+            // Chỉ tính những cái thuộc required (tránh tính module “rác”/ngoài danh sách)
+            var doneRequiredCount = doneModuleIds.Count(id => requiredModuleIds.Contains(id));
+            if (doneRequiredCount == requiredModuleIds.Count)
+            {
+                return true;
+            }
+            return doneRequiredCount == requiredModuleIds.Where(x => x != currentModuleId).Count();
         }
 
         private static LessonModule? FindCurrentModule(
@@ -258,7 +283,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                 return new List<LessonModule>();
             }
             return lessonModules.Where(m => m.OpenOrder == minOrder.OpenOrder)
-                                .OrderBy(m => m.OpenOrder).ToList();
+                                .OrderBy(m => m.OpenOrder)
+                                .ToList();
         }
 
         private async Task UpdateNewResultLessonModule(
