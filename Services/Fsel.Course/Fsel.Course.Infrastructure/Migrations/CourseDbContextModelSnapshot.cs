@@ -1875,6 +1875,16 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.ToTable("Exercises");
                 });
 
+            modelBuilder.Entity("Fsel.Course.Domain.Entities.Exercise", b =>
+                {
+                    b.HasOne("Fsel.Course.Domain.Entities.Skill", "Skill")
+                        .WithMany("Exercises")
+                        .HasForeignKey("SkillId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.Navigation("Skill");
+                });
+
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ExerciseQuestion", b =>
                 {
                     b.Property<Guid>("Id")
@@ -3061,9 +3071,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                     b.Property<Guid?>("SkillId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("SkillId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("TopicId")
                         .HasColumnType("uniqueidentifier");
 
@@ -3505,9 +3512,6 @@ namespace Fsel.Course.Infrastructure.Migrations
 
                     b.Property<DateTime?>("ProcessDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("RetryTime")
-                        .HasColumnType("int");
 
                     b.Property<string>("SkillScoresStr")
                         .HasColumnType("nvarchar(max)");
@@ -9752,16 +9756,6 @@ namespace Fsel.Course.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Curriculum");
-                });
-
-            modelBuilder.Entity("Fsel.Course.Domain.Entities.Exercise", b =>
-                {
-                    b.HasOne("Fsel.Course.Domain.Entities.Skill", "Skill")
-                        .WithMany("Exercises")
-                        .HasForeignKey("SkillId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("Skill");
                 });
 
             modelBuilder.Entity("Fsel.Course.Domain.Entities.ExerciseQuestion", b =>

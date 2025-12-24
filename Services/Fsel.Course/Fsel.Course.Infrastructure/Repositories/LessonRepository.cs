@@ -53,14 +53,18 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<double> GetPercentHomeWork(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResults).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResults = await _lessonResultRepository.ReadQueryable.Include(x => x.Lesson)
+                                                             .Include(x => x.VideoResults)
+                                                             .Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId)
+                                                             .ToListAsync();
+
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
 
             var lessons = await Queryable.Include(x => x.LessonResults.Where(x => lessonResultIds.Contains(x.Id)))
-                                    .ThenInclude(x => x.HomeWorkResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
-                                    .Include(x => x.LessonHomeWorks)
-                                    .Where(x => lessonIds.Contains(x.Id)).ToListAsync();
+                                         .ThenInclude(x => x.HomeWorkResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
+                                         .Include(x => x.LessonHomeWorks)
+                                         .Where(x => lessonIds.Contains(x.Id)).ToListAsync();
 
             var listDones = lessons.Select(x => new
             {
@@ -72,11 +76,16 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<double> GetPercentClassForum(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Include(x => x.Lesson).Include(x => x.VideoResults).Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResults = await _lessonResultRepository.ReadQueryable.Include(x => x.Lesson)
+                                                             .Include(x => x.VideoResults)
+                                                             .Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId)
+                                                             .ToListAsync();
             var lessonResultIds = lessonResults.Select(x => x.Id).ToList();
             var lessonIds = lessonResults.Select(x => x.Lesson!.Id).ToList();
 
-            var classForums = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId))).Where(x => x.LessonId.HasValue && lessonIds.Contains(x.LessonId.Value)).ToListAsync();
+            var classForums = await _classForumRepository.ReadQueryable.Include(x => x.ClassForumResults.Where(x => lessonResultIds.Contains(x.LessonResultId)))
+                                                         .Where(x => x.LessonId.HasValue && lessonIds.Contains(x.LessonId.Value))
+                                                         .ToListAsync();
 
             var listDones = classForums.Select(x => new
             {
@@ -88,7 +97,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 
         public async Task<double> GetPercentLesson(Guid courseId, Guid unitId, Guid? studentId)
         {
-            var lessonResults = await _lessonResultRepository.Queryable.Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
+            var lessonResults = await _lessonResultRepository.ReadQueryable.Where(x => x.CourseId == courseId && x.UnitId == unitId && x.StudentId == studentId).ToListAsync();
             var listDones = lessonResults.Select(x => new
             {
                 CountDone = x.Status == EnumResultStatus.Done ? 1 : default,
