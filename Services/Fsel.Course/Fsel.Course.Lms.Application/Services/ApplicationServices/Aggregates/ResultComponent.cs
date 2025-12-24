@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 {
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Shared.Enums;
 
     public abstract class ResultComponent
     {
@@ -18,6 +19,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         public abstract BaseTestStateModel ExportForTestState();
 
         public abstract Task Submit(Guid id);
+
+        public abstract Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null);
 
         public IServiceProvider ServiceProvider { get; set; }
     }

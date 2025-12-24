@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Shared.Enums;
     using Microsoft.Extensions.DependencyInjection;
 
     public class TestResultComposite : ResultComposite
@@ -35,6 +36,31 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         {
             var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(id));
             skillMatch?.Submit(id);
+            if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
+            {
+                var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);
+                TestResult.Status = EnumResultStatus.Done;
+                TestResult.CorrectCount = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.CorrectCount);
+                TestResult.SkillScores = Children.Cast<TestSectionResultComposite>().SelectMany(x =>
+                {
+                    var correspondSection = test.TestSections.FirstOrDefault(y => y.Id == x.TestSectionResult.TestSectionId);
+                    var skillScores = x.TestSectionResult.SkillScores ?? new List<SkillScores>();
+
+                    foreach (var skillScore in skillScores)
+                    {
+                        skillScore.SkillId = correspondSection?.SkillId;
+                        skillScore.SkillName = correspondSection?.Skill?.Name;
+                    }
+
+                    return skillScores;
+                }).ToList();
+            }
+        }
+
+        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        {
+            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(id));
+            skillMatch?.SubmitTest(id, TestResult.Test?.ScoringFormulaType);
             if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
             {
                 var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);

@@ -67,6 +67,9 @@ namespace Fsel.Shared.Constants
                 public const string ExamPracticeSpeaking = $"{KeyQueue}_ExamPracticeSpeaking";
                 public const string ExamPracticeWriting = $"{KeyQueue}_ExamPracticeWriting";
                 public const string QuestionType = $"{KeyQueue}_QuestionType";
+
+                public const string TestSpeaking = $"{KeyQueue}_TestSpeaking";
+                public const string TestWriting = $"{KeyQueue}_TestWriting";
             }
         }
 
@@ -145,6 +148,8 @@ namespace Fsel.Shared.Constants
                 public const string NotifyWeeklyReportCourseTarget = $"{KeyQueue}_NotifyWeeklyReportCourseTarget";
                 public const string NotifyWeeklyCourseGoalTarget = $"{KeyQueue}_NotifyWeeklyCourseGoalTarget";
                 public const string ClassForumPronunciationAi = $"{KeyQueue}_ClassForumPronunciationAi";
+
+                public const string SetTimeRetryTest = $"{KeyQueue}_SetTimeRetryTest";
             }
         }
 
@@ -152,8 +157,9 @@ namespace Fsel.Shared.Constants
         {
             public const string KeyQueue = nameof(ExamPracticeQueue);
 
-                public const string SubmitQuestionShortAnswerWordBase = $"{KeyQueue}_SubmitQuestionShortAnswerWordBase";
-                public const string ClassForumPronunciationAi = $"{KeyQueue}_ClassForumPronunciationAi";
+            public const string SubmitQuestionShortAnswerWordBase = $"{KeyQueue}_SubmitQuestionShortAnswerWordBase";
+            public const string ClassForumPronunciationAi = $"{KeyQueue}_ClassForumPronunciationAi";
+
             public static class NameQueue
             {
                 public const string GetTimeExamPractice = $"{KeyQueue}_GetTimeExamPractice";

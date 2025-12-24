@@ -16,8 +16,10 @@ namespace Fsel.Course.Domain.Models.CommandModels.Tests
 
     public class TestAnswerQuestionModel
     {
-        public Guid QuestionId { get; set; }
+        public Guid? TestSectionId { get; set; }
+        public Guid? QuestionId { get; set; }
         public object? Answer { get; set; }
+        public string? SpeechTextAnswer { get; set; }
     }
 
     public class TestAnswerSkillQuestionModel
