@@ -22,7 +22,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false);
 
-        Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass = false);
+        Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid programIdOfPt, Guid studentId, EnumTestType enumTestType, bool isByPass = false);
 
         Task<TestGroupResult> InitTestGroupResult(Guid studentId, EnumTestType enumTestType, bool isByPass = false);
 
@@ -199,11 +199,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return null;
         }
 
-        public async Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId, Guid studentId, EnumTestType enumTestType, bool isByPass = false)
+        public async Task<TestGroupResult> InitTestGroupResultForFlow(Guid? flowId, Guid programId,Guid programIdOfPt, Guid studentId, EnumTestType enumTestType, bool isByPass = false)
         {
             var testGroupResult = new TestGroupResult
             {
                 ProgramId = programId,
+                ProgramIdOfPt = programIdOfPt,
                 FlowId = flowId,
                 StudentId = studentId,
                 TestType = enumTestType,

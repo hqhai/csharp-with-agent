@@ -43,6 +43,8 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public Category? Category { get; set; }
 
+        public Guid? ProgramIdOfPt { get; set; }
+
         public ICollection<TestResult> TestResults { get; set; } = new List<TestResult>();
     }
 }

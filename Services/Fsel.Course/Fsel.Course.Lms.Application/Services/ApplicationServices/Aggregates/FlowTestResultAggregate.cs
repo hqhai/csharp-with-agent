@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 var testService = ServiceProvider.GetRequiredService<ITestService>();
 
                 var newTestResultTree =
-                    await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, node.StepFlow.Id, FlowTestResult.Id, FlowTestResult.ProgramId.Value);
+                    await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, node.StepFlow.Id, FlowTestResult.Id, FlowTestResult.ProgramIdOfPt.Value);
 
                 await AddNewTest(newTestResultTree);
             }
