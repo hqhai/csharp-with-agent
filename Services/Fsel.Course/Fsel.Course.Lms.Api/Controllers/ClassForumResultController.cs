@@ -23,7 +23,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
-    //[Permission]
     public class ClassForumResultController : BaseController
     {
         private readonly IMediator _mediator;

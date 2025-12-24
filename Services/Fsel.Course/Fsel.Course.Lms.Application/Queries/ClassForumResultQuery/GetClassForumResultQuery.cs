@@ -100,23 +100,23 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             });
 
             classForumResult = await _classForumResultRepository.Queryable
-                .Include(x => x.ClassForumDetailResults)
-                .ThenInclude(x => x.ClassForumResultFiles)
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Lesson)
-                .ThenInclude(x => x!.UnitLessons)
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Unit)
-                .ThenInclude(x => x!.CourseUnitMockTests)
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Course)
-                .Include(x => x.ClassForum)
-                .ThenInclude(x => x!.ClassForumFiles)
-                .Include(x => x.ClassForumResultFiles)
-                .Include(x => x.ClassForumScores)
-                .Where(x => x.Id == request.ClassForumResultId)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(cancellationToken);
+                        .Include(x => x.ClassForumDetailResults)
+                        .ThenInclude(x => x.ClassForumResultFiles)
+                        .Include(x => x.LessonResult)
+                        .ThenInclude(x => x!.Lesson)
+                        .ThenInclude(x => x!.UnitLessons)
+                        .Include(x => x.LessonResult)
+                        .ThenInclude(x => x!.Unit)
+                        .ThenInclude(x => x!.CourseUnitMockTests)
+                        .Include(x => x.LessonResult)
+                        .ThenInclude(x => x!.Course)
+                        .Include(x => x.ClassForum)
+                        .ThenInclude(x => x!.ClassForumFiles)
+                        .Include(x => x.ClassForumResultFiles)
+                        .Include(x => x.ClassForumScores)
+                        .Where(x => x.Id == request.ClassForumResultId)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(cancellationToken);
             if (classForumResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));

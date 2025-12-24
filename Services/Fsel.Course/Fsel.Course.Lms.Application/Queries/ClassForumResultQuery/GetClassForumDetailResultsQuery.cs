@@ -68,12 +68,12 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         {
             int targetScore = default;
             var classForum = classForumDetailResult.ClassForumResult?.ClassForum;
-            if (classForum?.CourseSkill == EnumCourseSkill.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
+            if (classForum?.Layout == Domain.Enums.EnumClassForumLayout.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
             {
                 ++targetScore;
             }
 
-            if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
+            if (classForum?.Layout == Domain.Enums.EnumClassForumLayout.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
             {
                 ++targetScore;
             }
