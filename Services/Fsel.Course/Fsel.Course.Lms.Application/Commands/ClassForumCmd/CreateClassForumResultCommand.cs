@@ -213,7 +213,6 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             {
                 await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request, cancellationToken);
 
-                // chấm Pronunciation
                 if (classForum.CourseSkill == EnumCourseSkill.Speaking)
                 {
                     await _classForumPronunciationPublisher.Publish(new ClassForumPronunciationConsumerModel { ClassForumDetailResultId = classForumDetailResult.Id }, cancellationToken);
@@ -458,7 +457,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         {
             if (classForum.IsAlFeedBack)
             {
-                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModelV2
+                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
                 {
                     ClassForumResultId = classForumDetailResult.ClassForumResultId,
                     ClassForumDetailResultId = classForumDetailResult.Id,

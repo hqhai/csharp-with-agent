@@ -18,7 +18,6 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using CreateClassForumResultCommand = Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2.CreateClassForumResultCommand;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]

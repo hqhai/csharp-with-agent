@@ -2,28 +2,29 @@
 
 namespace Fsel.Course.Lms.Application.Queues.Consumers
 {
-    using Fsel.Course.Lms.Application.Commands.AiCmd.V1i2;
+    using Commands.AiCmd;
     using MediatR;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Core.Base;
 
-    public class RealTimeAIResponseConsumer : BaseConsumer<ClassForumAIResponseModelV2>
+    public class RealTimeAIResponseConsumer : BaseConsumer<ClassForumAIResponseModel>
     {
         private readonly IMediator _mediator;
 
-        public RealTimeAIResponseConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
+        public RealTimeAIResponseConsumer(IMediator mediator, AuthContext authContext, Microsoft.AspNetCore.Http.IHttpContextAccessor httpContextAccessor) : base(authContext,
+            httpContextAccessor)
         {
             _mediator = mediator;
         }
 
-        public override async Task ConsumeQueue(ClassForumAIResponseModelV2? message)
+        public override async Task ConsumeQueue(ClassForumAIResponseModel? message)
         {
             if (message == null)
             {
                 return;
             }
 
-            await _mediator.Send(new SubmitClassForumAICommand
+            await _mediator.Send(new SubmitClassForumAiCommand
             {
                 ClassForumResultId = message.ClassForumResultId,
                 ClassForumDetailResultId = message.ClassForumDetailResultId,
