@@ -87,17 +87,6 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                 .SelectMany(x => x.TestResults ?? Enumerable.Empty<TestResult>())
                 .ToList();
 
-            // Check còn thằng nào chưa Done không
-            var hasUnfinishedLesson = lessonResultsAll.Any(x => x.Status != EnumResultStatus.Done);
-            var hasUnfinishedTestGroup = testGroupResultsAll.Any(x => x.Status != EnumResultStatus.Done);
-            var hasUnfinishedTestResult = testResultsAll.Any(x => x.Status != EnumResultStatus.Done);
-
-            if (hasUnfinishedLesson || hasUnfinishedTestGroup || hasUnfinishedTestResult)
-            {
-                // Còn item chưa Done => không tính điểm, không Done Unit
-                return;
-            }
-
             // Đến đây: tất cả con đều Done → tính tổng hợp
             var lessonResults = lessonResultsAll
                 .Where(x => x.Status == EnumResultStatus.Done)
@@ -212,6 +201,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             var unitDone = await IsUnitModulesCompletedAsync(
                 unitResult,
                 unitModules,
+                currentModule.Id,
                 cancellationToken);
 
             if (unitDone)
@@ -223,19 +213,32 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
         private async Task<bool> IsUnitModulesCompletedAsync(
         UnitResult unitResult,
         IList<UnitModule> unitModules,
+         Guid currentModuleId,
         CancellationToken cancellationToken)
         {
             var resultId = unitResult.Id;
+            // Tập module cần hoàn thành
+            var requiredModuleIds = unitModules
+                .Select(m => m.Id) // hoặc m.OriginalId tuỳ bạn đang dùng gì để map
+                .ToHashSet();
 
             var queryLesson = _lessonResultRepository.ReadQueryable
-                    .Where(x => x.UnitResultId == resultId && x.Status == EnumResultStatus.Done)
-                    .Select(x => x.Id);
+                    .Where(x => x.UnitResultId == resultId && x.Status == EnumResultStatus.Done
+                            && x.UnitModuleId != null)
+                    .Select(x => x.UnitModuleId!.Value);
             var queryTest = _testGroupResultRepository.ReadQueryable
-                    .Where(x => x.UnitResultId == resultId && x.Status == EnumResultStatus.Done)
-                    .Select(x => x.Id);
+                    .Where(x => x.UnitResultId == resultId && x.Status == EnumResultStatus.Done
+                            && x.UnitModuleId != null)
+                    .Select(x => x.UnitModuleId!.Value);
 
             var doneModuleIds = await queryLesson.Union(queryTest).ToListAsync(cancellationToken);
-            return doneModuleIds.Count == unitModules.Count;
+
+            var doneRequiredCount = doneModuleIds.Count(id => requiredModuleIds.Contains(id));
+            if (doneRequiredCount == requiredModuleIds.Count)
+            {
+                return true;
+            }
+            return doneRequiredCount == requiredModuleIds.Where(x => x != currentModuleId).Count();
         }
 
         private static UnitModule? FindCurrentModule(
