@@ -23,6 +23,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public IEnumerable<string>? VideoPaths => StringHelper.GetIframeUrls(MediaPost, false);
 
         public EnumCourseSkill CourseSkill { get; set; }
+        public EnumClassForumLayout Layout { get; set; }
         public Guid? SkillId { get; set; }
         public string? SkillName { get; set; }
 
