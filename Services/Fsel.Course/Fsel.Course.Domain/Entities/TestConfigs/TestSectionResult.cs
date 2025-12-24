@@ -2,11 +2,8 @@
 
 namespace Fsel.Course.Domain.Entities.TestConfigs
 {
-    using System.ComponentModel.DataAnnotations.Schema;
-
     public class TestSectionResult : BaseLearnResult
     {
-        [NotMapped]
         public override double PercentModule { get; set; }
 
         public Guid? TestResultId { get; set; }
@@ -19,10 +16,10 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
 
         public Guid? ParentTestSectionResultId { get; set; }
 
+        public Guid? CurrentSectionTimeCodeId { get; set; }
         public TestSectionResult? ParentTestSectionResult { get; set; }
-
         public ICollection<TestAnswer> TestAnswers { get; set; } = new List<TestAnswer>();
-
         public ICollection<TestSectionResult> SectionResults { get; set; } = new List<TestSectionResult>();
+        public ICollection<TestScore> TestScores { get; set; } = new List<TestScore>();
     }
 }

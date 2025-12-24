@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 {
     using System;
     using System.Threading.Tasks;
-    using Domain.Entities;
     using Domain.Models.EntityModels;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
@@ -45,6 +44,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         }
 
         public override async Task Submit(Guid id)
+        {
+            TestAnswer.Status = EnumAnswerStatus.Done;
+            await Task.CompletedTask;
+        }
+
+        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
         {
             TestAnswer.Status = EnumAnswerStatus.Done;
             await Task.CompletedTask;

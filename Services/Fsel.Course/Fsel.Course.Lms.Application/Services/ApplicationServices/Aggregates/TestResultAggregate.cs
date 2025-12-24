@@ -28,6 +28,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             TestResult = testResult;
         }
 
+        public async Task SubmitTest(Guid id)
+        {
+            await InitAggregate();
+            var testResultComposite = TestResultComposites.FirstOrDefault(t => t.IsBelongTo(id));
+            if (testResultComposite != null)
+            {
+                await testResultComposite.SubmitTest(id, TestResult.Test?.ScoringFormulaType);
+                await Commit();
+            }
+
+            await Start();
+        }
+
         public async Task Submit(Guid id)
         {
             await InitAggregate();
@@ -143,11 +156,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         private async Task AddNewTest(TestResult testResult)
         {
-            // if (!SingleTestResult.TestResults.Contains(testResult))
-            // {
-            //     SingleTestResult.TestResults.Add(testResult);
-            // }
-
             var testResultComposite = new TestResultComposite { Result = testResult, ServiceProvider = ServiceProvider };
             TestResultComposites.Add(testResultComposite);
             testResultComposite.GenerateChildren();
@@ -181,8 +189,21 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public async Task MakeAnswers(SubmitAnswerCommandModel request)
         {
+            ArgumentNullException.ThrowIfNull(request);
             var testService = ServiceProvider.GetRequiredService<ITestService>();
             await testService.CreateAnswers(request);
+
+            if (request.IsSubmit)
+            {
+                await Submit(request.SectionResultId);
+            }
+        }
+
+        public async Task MakeTestAnswers(SubmitAnswerCommandModel request)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var testService = ServiceProvider.GetRequiredService<ITestService>();
+            await testService.CreateTestAnswers(request);
 
             if (request.IsSubmit)
             {
@@ -206,7 +227,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TestResult.SectionResults = hierarchicalTestResult.SectionResults;
                 TestResult.TestAnswers = hierarchicalTestResult.TestAnswers;
             }
-
             testResultComposite.GenerateChildren();
         }
 
@@ -246,6 +266,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     return sectionStateModel;
                 }).ToList();
             }
+        }
+
+        private async Task UpdateLayoutAI(Guid sectionGroupId)
+        {
         }
 
         private async Task Commit()

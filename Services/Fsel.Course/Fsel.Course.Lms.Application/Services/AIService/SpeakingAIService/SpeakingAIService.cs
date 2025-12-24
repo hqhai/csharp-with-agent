@@ -2,10 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
 {
-    using System.Globalization;
-    using System.IO;
     using System.Linq.Dynamic.Core;
-    using System.Text;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
@@ -16,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Models;
-    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Fsel.Shared.Models.ShareModels;
@@ -92,9 +88,9 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             (long bandScore, string? feedBack) = GetBandScore(averagePronScore, scoreRanges);
 
             List<MockTestScore> mockTestScores = new List<MockTestScore>
-                                                        {
-                                                            CreateMockTestScore(EnumMockTestScoreCriteria.Pronunciation, bandScore, feedBack ?? string.Empty, sectionGroupId, mockTestResultId)
-                                                        };
+            {
+                CreateMockTestScore(EnumMockTestScoreCriteria.Pronunciation, bandScore, feedBack ?? string.Empty, sectionGroupId, mockTestResultId)
+            };
 
             var criteria = new List<EnumMockTestScoreCriteria>
             {
@@ -231,11 +227,11 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
         /// <returns></returns>
         private async Task<string> GetAIResponse(EnumMockTestScoreCriteria item, IList<string> questionArray, IList<string> answerArray, CancellationToken cancellationToken)
         {
-            string userAiConfig = CustomAnswerConfigToSendGPT(questionArray, answerArray, item);
+            string userAiConfig = BuildSpeakingPromptHelper.CustomAnswerConfigToSendGPT(questionArray, answerArray, item);
 
             var aIResponse = await _mediator.Send(new SubmitAICommand
             {
-                SystemRoleAlConfig = GetConfigByType(item, true),
+                SystemRoleAlConfig = BuildSpeakingPromptHelper.GetConfigByType(item, true),
                 UserAIConfig = userAiConfig,
                 SettingModel = "gpt-4o",
                 SettingTemperature = 1,
@@ -244,7 +240,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 SettingPresence = 0,
                 SettingTopP = 1
             }, cancellationToken).ConfigureAwait(false);
-
             return Shared.Helpers.StringHelper.RemoveMarkdownFromJson(aIResponse ?? string.Empty);
         }
 
@@ -270,12 +265,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
             {
                 bulk.IgnoreOnUpdateExpression = c => new { c.SectionGroupId, c.StudentId, c.PlacementTestResultId, c.FinalTestResultId, c.MockTestResultId, c.WorkingTime };
             });
-
-            //await _mockTestScoreRepository.ExecuteTransactionAsync(async () =>
-            //{
-            //return new MethodResult<bool>();
-
-            //});
         }
 
         private async Task SaveMockTestResultAsync(MockTestResult mockTestResult, CancellationToken cancellationToken)
@@ -338,127 +327,6 @@ namespace Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService
                 }
             }
             return (0, string.Empty); // Hoặc giá trị mặc định nếu không tìm thấy khoảng phù hợp
-        }
-
-        /// <summary>
-        /// config answer , question. để tạo thành prompt gửi cho chatgpt
-        /// </summary>
-        /// <param name="answer"></param>
-        /// <returns></returns>
-        private static string CustomAnswerConfigToSendGPT(IList<string> questions, IList<string> answers, EnumMockTestScoreCriteria criteria)
-        {
-            StringBuilder sb = new StringBuilder();
-            string defaultConfigByCriteria = GetConfigByType(criteria, false);
-
-            // Generate questions
-            sb.AppendLine("Speaking Test Questions:");
-            for (int i = 0; i < questions.Count; i++)
-            {
-                sb.AppendFormat(CultureInfo.InvariantCulture, "\"question{0}\": \"{1}\"\n", NumberToWords(i + 1), questions[i]);
-            }
-
-            sb.AppendLine();
-
-            // Generate answers
-            sb.AppendLine("Student Submission:");
-            for (int i = 0; i < answers.Count; i++)
-            {
-                sb.AppendFormat(CultureInfo.InvariantCulture, "\"answer{0}\": \"{1}\"\n", NumberToWords(i + 1), answers[i]);
-            }
-            sb.AppendLine();
-
-            string result = sb.ToString();
-
-            result = string.Concat(result, " ", defaultConfigByCriteria);
-
-            return result;
-        }
-
-        /// <summary>
-        /// Lấy config của AI Speaking theo tiêu chí
-        /// </summary>
-        /// <param name="criteria"></param>
-        /// <param name="isUserConfig"></param>
-        /// <returns></returns>
-        private static string GetConfigByType(EnumMockTestScoreCriteria criteria, bool isUserConfig)
-        {
-            string result = string.Empty;
-            switch (criteria)
-            {
-                case EnumMockTestScoreCriteria.GrammaticalRangeAndAccuracy:
-                    result = isUserConfig ? File.ReadAllText(ResourceSettings.SpeakingGrammarRole) : File.ReadAllText(ResourceSettings.SpeakingGrammar);
-                    break;
-
-                case EnumMockTestScoreCriteria.LexicalResource:
-                    result = isUserConfig ? File.ReadAllText(ResourceSettings.SpeakingLexicalRole) : File.ReadAllText(ResourceSettings.SpeakingLexical);
-                    break;
-
-                case EnumMockTestScoreCriteria.FluencyAndCoherence:
-                    result = isUserConfig ? File.ReadAllText(ResourceSettings.SpeakingFluencyRole) : File.ReadAllText(ResourceSettings.SpeakingFluency);
-
-                    break;
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Chuyển đổi số thành chữ
-        /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        private static string NumberToWords(int number)
-        {
-            if (number == 0)
-            {
-                return "Zero";
-            }
-            if (number < 0)
-            {
-                return "Minus" + NumberToWords(Math.Abs(number));
-            }
-
-            string words = "";
-
-            if ((number / 1000000) > 0)
-            {
-                words += NumberToWords(number / 1000000) + " Million ";
-                number %= 1000000;
-            }
-            if ((number / 1000) > 0)
-            {
-                words += NumberToWords(number / 1000) + " Thousand ";
-                number %= 1000;
-            }
-            if ((number / 100) > 0)
-            {
-                words += NumberToWords(number / 100) + " Hundred ";
-                number %= 100;
-            }
-            if (number > 0)
-            {
-                if (string.IsNullOrEmpty(words))
-                {
-                    words += "";
-                }
-                var unitsMap = new[] { "Zero", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen" };
-                var tensMap = new[] { "Zero", "Ten", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety" };
-
-                if (number < 20)
-                {
-                    words += unitsMap[number];
-                }
-                else
-                {
-                    words += tensMap[number / 10];
-                    if ((number % 10) > 0)
-                    {
-                        words += "-" + unitsMap[number % 10];
-                    }
-                }
-            }
-
-            return words;
         }
 
         #endregion Func

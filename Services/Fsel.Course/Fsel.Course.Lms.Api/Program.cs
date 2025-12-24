@@ -17,6 +17,7 @@ using Fsel.Course.Lms.Application.Queues.Consumers;
 using Fsel.Course.Lms.Application.Queues.Consumers.ExportFiles;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Queues.Publishers.ExportFiles;
+using Fsel.Course.Lms.Application.Queues.Publishers.Test;
 using Fsel.Course.Lms.Application.Services.AiService;
 using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
@@ -33,10 +34,11 @@ using Fsel.Course.Lms.Application.Services.OrderServices;
 using Fsel.Course.Lms.Application.Services.SenderService;
 using Fsel.Course.Lms.Application.Services.StorageServices;
 using Fsel.Course.Lms.Application.Services.SystemService;
+using Fsel.Course.Lms.Application.Services.TestServices;
+using Fsel.Course.Lms.Application.Services.TestServices.Interface;
 using Fsel.Course.Lms.Application.Services.TrainingServices;
 using Fsel.Course.Lms.Application.Services.UserServices;
 using Fsel.Shared.Constants;
-using Microsoft.CognitiveServices.Speech;
 using Refit;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -181,6 +183,10 @@ builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepositor
 builder.Services.AddScoped<ICategoryCachingService, CategoryCachingService>();
 builder.Services.AddScoped<ITestSectionResultRepository, TestSectionResultRepository>();
 
+builder.Services.AddScoped<ISpeakingAITestLayoutHandler, SpeakingAITestLayoutHandler>();
+builder.Services.AddScoped<IWritingAITestLayoutHandler, WritingAITestLayoutHandler>();
+builder.Services.AddScoped<ITestAiLayoutService, TestAiLayoutService>();
+
 builder.Services.AddScoped<IDocumentResultRepository, DocumentResultRepository>();
 builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
 builder.Services.AddScoped<ITestGroupResultRepository, TestGroupResultRepository>();
@@ -207,6 +213,8 @@ builder.Services.AddScoped<IVideoTimeCodeModelCachingService, VideoTimeCodeModel
 builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
 builder.Services.AddScoped<ITimeCodeQuestionCachingService, TimeCodeQuestionCachingService>();
 builder.Services.AddScoped<ITestSectionCachingService, TestSectionCachingService>();
+builder.Services.AddScoped<ISpeakingAITestLayoutHandler, SpeakingAITestLayoutHandler>();
+builder.Services.AddScoped<IWritingAITestLayoutHandler, WritingAITestLayoutHandler>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();
@@ -271,6 +279,9 @@ builder.Services.AddScoped<ExportFileExcelSchoolLearningProcessPublisher>();
 builder.Services.AddScoped<SpeechToTextPendingAiPublisher>();
 builder.Services.AddScoped<ClassForumPronunciationPublisher>();
 builder.Services.AddScoped<ExportFileUserInformationSupportSalePublisher>();
+builder.Services.AddScoped<SubmitTestAiSpeakingPublisher>();
+builder.Services.AddScoped<SubmitTestCriteriaPublisher>();
+builder.Services.AddScoped<SetTimeRetryTestPublisher>();
 
 // Refit
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);

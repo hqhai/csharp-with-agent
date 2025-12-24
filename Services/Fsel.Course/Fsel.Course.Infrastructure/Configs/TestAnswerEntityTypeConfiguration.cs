@@ -22,6 +22,16 @@ namespace Fsel.Course.Infrastructure.Configs
                    .HasForeignKey(p => p.QuestionId)
                    .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(a => a.TestSection)
+                   .WithMany(b => b.TestAnswers)
+                   .HasForeignKey(p => p.TestSectionId)
+                   .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(a => a.TestResult)
+                 .WithMany(b => b.TestAnswers)
+                 .HasForeignKey(p => p.TestResultId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
             builder.Property(e => e.Status)
                   .HasMaxLength(20)
                   .HasConversion(

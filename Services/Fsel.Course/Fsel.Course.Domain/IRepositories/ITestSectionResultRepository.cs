@@ -4,8 +4,8 @@ namespace Fsel.Course.Domain.IRepositories
 {
     using Core.Base.Interfaces;
     using Entities.TestConfigs;
-    public interface ITestSectionResultRepository: IRepository<TestSectionResult>
-    {
 
+    public interface ITestSectionResultRepository : IRepository<TestSectionResult>
+    {
     }
 }

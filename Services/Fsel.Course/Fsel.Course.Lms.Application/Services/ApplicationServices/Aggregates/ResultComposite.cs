@@ -4,6 +4,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 {
     using System;
     using System.Threading.Tasks;
+    using Fsel.Shared.Enums;
 
     public abstract class ResultComposite : ResultComponent
     {
@@ -32,6 +33,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             foreach (var child in Children)
             {
                 await child.Submit(id);
+            }
+        }
+
+        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        {
+            foreach (var child in Children)
+            {
+                await child.SubmitTest(id, scoringFormulaType);
             }
         }
     }

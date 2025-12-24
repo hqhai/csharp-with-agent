@@ -23,6 +23,14 @@ namespace Fsel.Shared.Models.ShareModels
         public string? GradingAlFeedBack { get; set; }
     }
 
+    public class SubmitTestResponseModel
+    {
+        public string? CriteriaName { get; set; }
+        public int? DisplayOrder { get; set; }
+        public Guid? TestResultId { get; set; }
+        public string? GradingAlFeedBack { get; set; }
+    }
+
     public class SubmitExamPracticeResponseModel
     {
         public string? CriteriaName { get; set; }
@@ -40,6 +48,14 @@ namespace Fsel.Shared.Models.ShareModels
         public string? BandDescriptionText { get; set; }
 
         public Guid MockTestResultId { get; set; }
+    }
+
+    public class SubmitTestAiSpeakingResponseModel
+    {
+        public string? CriteriaName { get; set; }
+        public double BandScore { get; set; }
+        public string? BandDescriptionText { get; set; }
+        public Guid TestResultId { get; set; }
     }
 
     public class SubmitExamPracticeAiSpeakingResponseModel

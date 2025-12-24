@@ -74,6 +74,26 @@ namespace Fsel.Shared.Constants
             }
         }
 
+        public static class TestWritingAIFeedBackHub
+        {
+            public const string Pattern = $"/test-writing";
+
+            public static class Methods
+            {
+                public const string TestWritingAIFeedBackHub = $"TestWritingAIFeedBackHub";
+            }
+        }
+
+        public static class TestSpeakingAIFeedBackHub
+        {
+            public const string Pattern = $"/test-speaking";
+
+            public static class Methods
+            {
+                public const string TestSpeakingAIFeedBack = $"TestSpeakingAIFeedBack";
+            }
+        }
+
         public static class MockTestWritingAIFeedBackHub
         {
             public const string Pattern = $"/mock-test-writing";

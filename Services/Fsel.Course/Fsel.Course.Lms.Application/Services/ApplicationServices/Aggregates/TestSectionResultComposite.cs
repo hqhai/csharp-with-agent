@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
@@ -188,6 +189,72 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
                         firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
+                    }
+
+                    TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
+                }
+                else
+                {
+                    // get layout and process
+                    if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
+                    {
+                        var firstSkillScore = TestSectionResult.SkillScores.First();
+                        var skillScores = TestSectionResult.SectionResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores);
+
+                        firstSkillScore.CountQuestion = skillScores.Sum(x => x.CountQuestion);
+                        firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
+                        firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
+                        firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
+                        firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                        TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
+                    }
+
+                    TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
+                }
+
+                TestSectionResult.Status = EnumResultStatus.Done;
+            }
+        }
+
+        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        {
+            await base.Submit(id);
+
+            if (Children.Count > 0)
+            {
+                if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == Shared.Enums.EnumAnswerStatus.Done))
+                {
+                    if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
+                    {
+                        var firstSkillScore = TestSectionResult.SkillScores.First();
+                        firstSkillScore.CountQuestion = TestSectionResult.TestAnswers.Count;
+                        firstSkillScore.CorrectQuestion = TestSectionResult.TestAnswers.Count(x => x.IsCorrect == true);
+                        firstSkillScore.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+                        firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
+                        firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+
+                        TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
+                    }
+
+                    TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+                }
+                else if (Children.All(c => c is TestSectionResultComposite))
+                {
+                    if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
+                    {
+                        var firstSkillScore = TestSectionResult.SkillScores.First();
+                        var skillScores = TestSectionResult.SectionResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores);
+
+                        firstSkillScore.CountQuestion = skillScores.Sum(x => x.CountQuestion);
+                        firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
+                        firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
+                        firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
+                        firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                        TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
+                        //if (scoringFormulaType != null)
+                        //{
+                        //    TestSectionResult.PercentModule = TestSectionResult.SectionResults.Select(x => x.TestSection)
+                        //}
                     }
 
                     TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
