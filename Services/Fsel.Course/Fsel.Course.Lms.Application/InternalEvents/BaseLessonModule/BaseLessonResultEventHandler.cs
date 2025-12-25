@@ -253,12 +253,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                 .ToListAsync(cancellationToken);
 
             // Chỉ tính những cái thuộc required (tránh tính module “rác”/ngoài danh sách)
-            var doneRequiredCount = doneModuleIds.Count(id => requiredModuleIds.Contains(id));
+            var doneModule = doneModuleIds.Where(id => requiredModuleIds.Contains(id));
+            var doneRequiredCount = doneModule.Count();
             if (doneRequiredCount == requiredModuleIds.Count)
             {
                 return true;
             }
-            return doneRequiredCount == requiredModuleIds.Where(x => x != currentModuleId).Count();
+            return doneModule.Where(x => x != currentModuleId).Count() == requiredModuleIds.Where(x => x != currentModuleId).Count();
         }
 
         private static LessonModule? FindCurrentModule(
