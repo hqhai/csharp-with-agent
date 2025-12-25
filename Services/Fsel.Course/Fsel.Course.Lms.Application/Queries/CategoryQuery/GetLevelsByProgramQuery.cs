@@ -85,14 +85,18 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 return new MethodResult<List<SelectionLevelModel>>();
             }
 
-            var program = await _categoryRepository.Queryable
-                .Include(x => x.Levels)
+            var program = await _categoryRepository.ReadQueryable
                 .FirstOrDefaultAsync(x => x.Id == ptTestResult.ProgramId, cancellationToken);
 
             if (program == null)
             {
                 return new MethodResult<List<SelectionLevelModel>>();
             }
+
+            var sliblingPrograms = await _categoryRepository.ReadQueryable
+                .Include(x => x.Levels)
+                .Where(x => x.ParentId == program.ParentId)
+                .ToListAsync(cancellationToken);
 
             var age = DateTimeHelper.GetYearOld(user.Birthday);
             var suggestCondition = await _subjectConditionRepository.ReadQueryable
@@ -115,14 +119,13 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 levelsOfMatchRule = await _levelRepository.ReadQueryable.Where(x => levelIdsOfMatchRule.Contains(x.Id)).Include(x => x.Category).ToListAsync(cancellationToken);
             }
 
-            foreach (var level in program.Levels)
+            foreach (var level in sliblingPrograms.SelectMany(x => x.Levels).DistinctBy(x => x.Id))
             {
                 if (!levelsOfMatchRule.Any(x => x.Id == level.Id))
                 {
                     levelsOfMatchRule.Add(level);
                 }
             }
-
 
             var suggestLevels = levelsOfMatchRule.Select(x =>
             {
