@@ -5,14 +5,15 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
     using System.Threading;
     using System.Threading.Tasks;
     using AutoMapper;
+    using Common.ActionResults;
     using Core.Base.Interfaces;
+    using Domain.Entities;
+    using Domain.Entities.SubjectConditionRuleConfigs;
     using Domain.Entities.TestConfigs;
     using Domain.Enums;
     using Domain.IRepositories;
-    using Common.ActionResults;
-    using Domain.Entities;
-    using Domain.Entities.SubjectConditionRuleConfigs;
     using Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Services.ApplicationServices;
@@ -27,12 +28,12 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
     public class GetLevelsByProgramQueryHandler : IRequestHandler<GetLevelsByProgramQuery, MethodResult<List<SelectionLevelModel>>>
     {
         private readonly IMapper _mapper;
+        private readonly ILevelRepository _levelRepository;
         private readonly ICategoryService _categoryService;
         private readonly IRepository<TestGroupResult> _testGroupResult;
         private readonly ICategoryRepository _categoryRepository;
         private readonly ISubjectConditionRepository _subjectConditionRepository;
         private readonly IUserService _userService;
-
 
         public GetLevelsByProgramQueryHandler(
             ICategoryService categoryService,
@@ -40,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             IRepository<TestGroupResult> testGroupResult,
             ISubjectConditionRepository subjectConditionRepository,
             IUserService userService,
+            ILevelRepository levelRepository,
             IMapper mapper)
         {
             _categoryService = categoryService;
@@ -48,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             _subjectConditionRepository = subjectConditionRepository;
             _userService = userService;
             _mapper = mapper;
+            _levelRepository = levelRepository;
         }
 
         public async Task<MethodResult<List<SelectionLevelModel>>> Handle(GetLevelsByProgramQuery request, CancellationToken cancellationToken)
@@ -73,7 +76,6 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 return new MethodResult<List<SelectionLevelModel>>();
             }
 
-
             var ptTestResult = await _testGroupResult.ReadQueryable
                 .Where(x => x.StudentId == student.Id && x.TestType == EnumTestType.PlacementTest)
                 .FirstOrDefaultAsync(cancellationToken);
@@ -82,7 +84,6 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             {
                 return new MethodResult<List<SelectionLevelModel>>();
             }
-
 
             var program = await _categoryRepository.Queryable
                 .Include(x => x.Levels)
@@ -99,7 +100,6 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 .Include(x => x.SubjectConditionRules)
                 .FirstOrDefaultAsync(cancellationToken);
 
-
             var matchestRule = suggestCondition?.SubjectConditionRules.Where(x => IsMatchRule(x, age, ptTestResult.CurrentLevelId))
                 .OrderBy(x =>
                 {
@@ -108,11 +108,27 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                 })
                 .FirstOrDefault();
 
+            var levelIdsOfMatchRule = matchestRule?.ConditionValues?.SelectMany(x => x.LevelIds ?? new List<Guid>()).Distinct().ToList() ?? new List<Guid>();
+            var levelsOfMatchRule = new List<Level>();
+            if (levelIdsOfMatchRule.Any())
+            {
+                levelsOfMatchRule = await _levelRepository.ReadQueryable.Where(x => levelIdsOfMatchRule.Contains(x.Id)).Include(x => x.Category).ToListAsync(cancellationToken);
+            }
 
-            var suggestLevels = program.Levels.Select(x =>
+            foreach (var level in program.Levels)
+            {
+                if (!levelsOfMatchRule.Any(x => x.Id == level.Id))
+                {
+                    levelsOfMatchRule.Add(level);
+                }
+            }
+
+
+            var suggestLevels = levelsOfMatchRule.Select(x =>
             {
                 var selectionLevel = _mapper.Map<SelectionLevelModel>(x);
-                selectionLevel.ProgramId = ptTestResult.ProgramId.Value;
+                selectionLevel.ProgramId = x.ProgramId;
+                selectionLevel.ProgramLevelName = x.Category?.Name;
 
                 var matchCondition = GetMatchConditionValue(matchestRule?.ConditionValues, x.Id);
                 if (matchCondition != null)
@@ -123,13 +139,14 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
 
                 if (!selectionLevel.CanSelect)
                 {
-                    selectionLevel.CanSelect = !ptTestResult.CurrentLevelId.HasValue ? true : ptTestResult.CurrentLevelId.Value == x.Id;
+                    selectionLevel.CanSelect = !ptTestResult.CurrentLevelId.HasValue || ptTestResult.CurrentLevelId.Value == x.Id;
                 }
 
                 selectionLevel.IsCurrentLevel = ptTestResult.CurrentLevelId == x.Id;
 
                 return selectionLevel;
             }).ToList();
+
             return new MethodResult<List<SelectionLevelModel>> { Result = suggestLevels, StatusCode = 200 };
         }
 
@@ -163,6 +180,7 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
                     case EnumOperatorType.Include:
                     case EnumOperatorType.Exclude:
                         break;
+
                     case EnumOperatorType.Equal when ageCondition.FromAge != age:
                     case EnumOperatorType.GreaterThan when age <= ageCondition.FromAge.Value:
                     case EnumOperatorType.LessThan when age >= ageCondition.FromAge.Value:

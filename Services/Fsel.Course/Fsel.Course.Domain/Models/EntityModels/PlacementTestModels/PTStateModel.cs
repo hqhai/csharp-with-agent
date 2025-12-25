@@ -19,6 +19,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public string? Level { get; set; }
 
+        public Guid? LevelId { get; set; }
+
         public EnumResultStatus? Status { get; set; }
 
         public ICollection<BaseTestStateModel> TestStates { get; set; } = new List<BaseTestStateModel>();
