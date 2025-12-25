@@ -233,12 +233,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
 
             var doneModuleIds = await queryLesson.Union(queryTest).ToListAsync(cancellationToken);
 
-            var doneRequiredCount = doneModuleIds.Count(id => requiredModuleIds.Contains(id));
+            // Chỉ tính những cái thuộc required (tránh tính module “rác”/ngoài danh sách)
+            var doneModule = doneModuleIds.Where(id => requiredModuleIds.Contains(id));
+            var doneRequiredCount = doneModule.Count();
             if (doneRequiredCount == requiredModuleIds.Count)
             {
                 return true;
             }
-            return doneRequiredCount == requiredModuleIds.Where(x => x != currentModuleId).Count();
+            return doneModule.Where(x => x != currentModuleId).Count() == requiredModuleIds.Where(x => x != currentModuleId).Count();
         }
 
         private static UnitModule? FindCurrentModule(
