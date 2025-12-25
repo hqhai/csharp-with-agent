@@ -45,12 +45,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private readonly ITestRepository _testRepository;
         private readonly ICategoryTestBankRepository _categoryTestBankRepository;
         private readonly IStepFlowRepository _stepFlowRepository;
-        private readonly Core.Base.Interfaces.IRepository<TestResult> _testResultRepository;
-        private readonly Core.Base.Interfaces.IRepository<TestGroupResult> _testGroupResultRepository;
+        private readonly IRepository<TestResult> _testResultRepository;
+        private readonly IRepository<TestGroupResult> _testGroupResultRepository;
         private readonly IRepository<TestSection> _testSectionRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly ISpeakingEvaluationAIService _evaluationAIService;
-        private readonly Core.Base.Interfaces.IRepository<TestAnswer> _testAnswerRepository;
+        private readonly IRepository<TestAnswer> _testAnswerRepository;
         private readonly QuestionConverter _questionConverter;
         private readonly ITestSectionResultRepository _testSectionResultRepository;
 
@@ -58,12 +58,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             ITestRepository testRepository,
             ICategoryTestBankRepository categoryTestBankRepository,
             IStepFlowRepository stepFlowRepository,
-            Core.Base.Interfaces.IRepository<TestResult> testResultRepository,
-            Core.Base.Interfaces.IRepository<TestGroupResult> testGroupResultRepository,
-            Core.Base.Interfaces.IRepository<TestSection> testSectionRepository,
+            IRepository<TestResult> testResultRepository,
+            IRepository<TestGroupResult> testGroupResultRepository,
+            IRepository<TestSection> testSectionRepository,
             IQuestionRepository questionRepository,
             ISpeakingEvaluationAIService evaluationAIService,
-            Core.Base.Interfaces.IRepository<TestAnswer> testAnswerRepository,
+            IRepository<TestAnswer> testAnswerRepository,
             QuestionConverter questionConverter,
             ITestSectionResultRepository testSectionResultRepository)
         {
@@ -110,7 +110,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 var test = await _testRepository.ReadQueryable
                     .Where(x => x.Id == id)
                     .Include(x => x.TestSections)
-                    .ThenInclude(x => x.Skill)
+                        .ThenInclude(x => x.Skill)
+                    .Include(x => x.TestSections)
+                        .ThenInclude(ts => ts.TestSectionQuestions)
                     .OrderBy(x => x.CreatedDate)
                     .FirstOrDefaultAsync(cancellationToken: _);
 
@@ -233,26 +235,55 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             return testGroupResult;
         }
 
-        private static void CreateTestSectionResultTree(TestSection parentTestSection, TestSectionResult parentSectionResult, TestResult testResult, EnumTestLayoutType? testLayoutType = EnumTestLayoutType.Basic)
+        private static void CreateTestSectionResultTree(TestSection parentTestSection, TestSectionResult parentSectionResult, TestResult testResult, EnumTestLayoutType? layoutType = null)
         {
             foreach (var child in parentTestSection.TestSections)
             {
+                if (IsInvalidSection(child, layoutType))
+                {
+                    continue;
+                }
+
                 var testSectionResult = new TestSectionResult
                 {
                     TestSectionId = child.Id,
                     StudentId = parentSectionResult.StudentId,
                     Status = EnumResultStatus.New,
-                    TestResultId = testResult.Id
+                    TestResultId = testResult.Id,
+                    ParentTestSectionResult = parentSectionResult
                 };
-                testSectionResult.ParentTestSectionResult = parentSectionResult;
                 parentSectionResult.SectionResults.Add(testSectionResult);
                 testResult.SectionResults.Add(testSectionResult);
 
-                if (testLayoutType == EnumTestLayoutType.Basic)
+                if (layoutType == EnumTestLayoutType.Basic)
                 {
-                    CreateTestSectionResultTree(child, testSectionResult, testResult, testLayoutType);
+                    CreateTestSectionResultTree(child, testSectionResult, testResult, layoutType);
                 }
             }
+        }
+
+        private static bool IsDeepestSection(TestSection testSection)
+        {
+            return testSection.TestSections == null || !testSection.TestSections.Any();
+        }
+
+        /// <summary>
+        /// Assume only Basic layout type section can have questions and loaded questions completely
+        /// </summary>
+        /// <param name="testSection"></param>
+        /// <param name="layoutType"></param>
+        /// <returns></returns>
+        private static bool IsInvalidSection(TestSection testSection, EnumTestLayoutType? layoutType)
+        {
+            if (IsDeepestSection(testSection) && layoutType == EnumTestLayoutType.Basic)
+            {
+                if (testSection.TestSectionQuestions == null || !testSection.TestSectionQuestions.Any())
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public async Task<TestResult> LoadHierachicalTestResult(Expression<Func<TestResult, bool>> predicate, bool isReadOnly = false)

@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Core.Base.Interfaces;
     using Domain.Entities.TestConfigs;
     using Domain.Enums;
-    using Domain.IRepositories;
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.PlacementTestModels;
     using Microsoft.EntityFrameworkCore;
