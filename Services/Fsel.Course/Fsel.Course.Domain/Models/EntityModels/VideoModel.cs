@@ -29,6 +29,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
             get { return _subFilePath.AddS3BaseUrl(); }
         }
 
+        public int? TimeCount { get; set; }
         public bool IsActive { get; set; }
         public bool IsUseStudent { get; set; }
         public int TotalQuestion { get; set; }
