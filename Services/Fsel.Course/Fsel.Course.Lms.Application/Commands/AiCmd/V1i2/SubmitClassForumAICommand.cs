@@ -26,6 +26,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Logging;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Common.Enums;
     using Polly;
 
     public class SubmitClassForumAICommand : ClassForumAIResponseModelV2, IRequest<bool>
@@ -109,8 +111,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                     .ThenInclude(x => x.Lesson)
                     .FirstOrDefault(x => x.Id == request.ClassForumDetailResultId);
 
-                _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} Start");
-
                 #region Retry
 
                 var retryAI = Policy.HandleResult<UserAiModel>(result => result.ClassForumAIs == null || result.ClassForumAIs.Count == 0 || !result.ConditionRetry)
@@ -143,7 +143,39 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                     }
 
                     var classForum = await _classForumRepository.GetByIdAsync(classForumDetailResult.ClassForumResult.ClassForumId);
-                    var aiConfig = await _aiCriteriaConfigRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == classForum.AiPromptCriteriaId, cancellationToken);
+
+                    // Xác định SubFeatureType dựa trên Layout
+                    var subFeatureType = classForum.Layout switch
+                    {
+                        EnumClassForumLayout.Speaking => EnumSubFeatureType.ClassForumSpeaking,
+                        EnumClassForumLayout.Writing => EnumSubFeatureType.ClassForumWriting,
+                        _ => throw new InvalidOperationException($"Unknown ClassForumLayout: {classForum.Layout}")
+                    };
+
+                    // Lookup AICriteria: ưu tiên custom theo ObjectId, nếu không có thì dùng default
+                    // 1. Tìm custom theo ObjectId = classForumId
+                    var aiConfig = await _aiCriteriaConfigRepository.ReadQueryable
+                        .Where(x => x.SubFeatureType == subFeatureType
+                            && x.ObjectId == classForum.Id
+                            && x.VersionStatus == EnumVersionStatus.LastVersion)
+                        .FirstOrDefaultAsync(cancellationToken);
+
+                    // 2. Nếu không có custom, lấy default (ObjectId == null)
+                    if (aiConfig == null)
+                    {
+                        aiConfig = await _aiCriteriaConfigRepository.ReadQueryable
+                            .Where(x => x.SubFeatureType == subFeatureType
+                                && x.ObjectId == null
+                                && x.VersionStatus == EnumVersionStatus.LastVersion)
+                            .FirstOrDefaultAsync(cancellationToken);
+                    }
+
+                    if (aiConfig == null)
+                    {
+                        _logger.LogWarning("Không tìm thấy AICriteriaConfig cho ClassForumId: {ClassForumId}, Layout: {Layout}", classForum.Id, classForum.Layout);
+                        return new UserAiModel { ClassForumAIs = null, ConditionRetry = false };
+                    }
+
                     var aiModel = await _aiPromptManagerRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == aiConfig.AiPromptManagerId, cancellationToken);
 
                     var successCriteriaSchema = ConvertHelper.Deserialize<object>(aiConfig.SettingAiJson);
@@ -152,7 +184,7 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                         .Send(
                             new V1i1.SubmitAICommand
                             {
-                                SettingModel = aiModel.AiModelName,
+                                SettingModel = aiModel?.Name ?? default,
                                 SettingTemperature = aiConfig.SettingTemperature ?? SettingTemperatureDefual,
                                 SettingFrequecy = aiConfig.SettingFrequency ?? SettingFrequencyDefual,
                                 SettingWordMaxLength = aiConfig.SettingWordMaxLength ?? SettingWordMaxLengthDefual,

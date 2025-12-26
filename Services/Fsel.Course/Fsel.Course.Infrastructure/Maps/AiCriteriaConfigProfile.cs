@@ -30,7 +30,7 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<AICriteriaConfigs, AiCriteriaModel>().IgnoreAllNonExisting();
             CreateMap<AICriteriaConfigs, CreateAiCriteriaConfigCommandModel>().IgnoreAllNonExisting();
             CreateMap<UpdateSettingAiFeatureCommandModel, AICriteriaConfigs>().IgnoreAllNonExisting();
-            CreateMap<CreateOrUpdateAiCriteriaCommand, AICriteriaConfigs>()
+            CreateMap<CreateOrUpdateAiCriteriaCommandModel, AICriteriaConfigs>()
                 .IgnoreAllNonExisting();
 
         }

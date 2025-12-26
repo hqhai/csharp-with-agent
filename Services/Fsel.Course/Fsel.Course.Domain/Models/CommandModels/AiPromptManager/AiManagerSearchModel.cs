@@ -7,8 +7,8 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiPromptManager
 
     public class AiManagerSearchModel : BaseModel
     {
-        public string? AiModelName { get; set; }
-        public string? InputModel { get; set; }
+        public string? Name { get; set; }
+        public string? Model { get; set; }
         public Guid? ParentId { get; set; }
         public EnumFeature FeatureAi { get; set; }
         public Guid? FeatureObjectId { get; set; }

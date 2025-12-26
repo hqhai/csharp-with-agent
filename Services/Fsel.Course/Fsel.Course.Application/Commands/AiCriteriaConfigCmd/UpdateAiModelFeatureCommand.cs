@@ -4,11 +4,14 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
 {
     using AutoMapper;
     using Common.ActionResults;
+    using Common.Enums;
     using Common.Enums.ErrorCodes;
     using Domain.Entities;
+    using Domain.Enums.ErrorCodes;
     using Domain.IRepositories;
     using Domain.Models.CommandModels.AiCriteriaConfig;
     using Domain.Models.EntityModels.AiPromptManagerModels;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -21,15 +24,19 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
     {
         private readonly IAiCriteriaConfigRepository _aiCriteriaConfigRepository;
         private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
+        private readonly IClassForumRepository _classForumRepository;
         private readonly IMapper _mapper;
 
-        public UpdateAiModelFeatureCommandHandler(IAiCriteriaConfigRepository aiCriteriaConfigRepository,
+        public UpdateAiModelFeatureCommandHandler(
+            IAiCriteriaConfigRepository aiCriteriaConfigRepository,
             IMapper mapper,
-            IAiPromptManagerRepository aiPromptManagerRepository)
+            IAiPromptManagerRepository aiPromptManagerRepository,
+            IClassForumRepository classForumRepository)
         {
             _aiCriteriaConfigRepository = aiCriteriaConfigRepository;
             _mapper = mapper;
             _aiPromptManagerRepository = aiPromptManagerRepository;
+            _classForumRepository = classForumRepository;
         }
 
         public async Task<MethodResult<AICriteriaConfigsModel>> Handle(UpdateAiModelFeatureCommand request, CancellationToken cancellationToken)
@@ -66,7 +73,7 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             var ids = items.Select(x => x.Id).Distinct().ToList();
 
             var existing = await _aiCriteriaConfigRepository.ReadQueryable
-                .Where(x => ids.Contains(x.Id) && !x.IsDeleted)//&& x.SubFeatureType == request.SubFeatureType && x.FeatureMultiple == request.FeatureMultiple)
+                .Where(x => ids.Contains(x.Id) && !x.IsDeleted)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
@@ -80,30 +87,60 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             await _aiCriteriaConfigRepository.ExecuteTransactionAsync(async () =>
             {
                 var updated = new List<AICriteriaConfigs>();
+                var newVersions = new List<AICriteriaConfigs>();
+
                 foreach (var it in items)
                 {
-                    var entity = existing.First(e => e.Id == it.Id);
-                    _mapper.Map(it, entity);
-                    if (request.AiPromptManagerId != Guid.Empty)
+                    var entity = await _aiCriteriaConfigRepository.GetByIdAsync(it.Id);
+
+                    // Check OldVersion
+                    if (entity.VersionStatus == EnumVersionStatus.OldVersion)
                     {
-                        var parent = await _aiPromptManagerRepository.GetByIdAsync(request.AiPromptManagerId);
-                        if (parent == null)
-                        {
-                            methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.AiPromptManagerId));
-                            return methodResult;
-                        }
-                        entity.AiPromptManagerId = request.AiPromptManagerId;
+                        methodResult.AddErrorBadRequest(nameof(EnumAiCriteriaConfigErrorCode.CannotEditOldVersion));
+                        return methodResult;
                     }
 
-                    entity = _aiCriteriaConfigRepository.Update(entity);
-                    updated.Add(entity);
+                    // Check dependencies
+                    var hasDependentRecords = await HasDependentRecords(entity.Id, cancellationToken);
+
+                    if (hasDependentRecords)
+                    {
+                        // Đánh dấu version hiện tại là OldVersion
+                        entity.VersionStatus = EnumVersionStatus.OldVersion;
+                        _aiCriteriaConfigRepository.Update(entity);
+
+                        // Tạo version mới
+                        var newVersion = CreateNewVersion(it, entity);
+                        _aiCriteriaConfigRepository.Add(newVersion);
+                        newVersions.Add(newVersion);
+                    }
+                    else
+                    {
+                        // Update trực tiếp
+                        _mapper.Map(it, entity);
+                        if (request.AiPromptManagerId != Guid.Empty)
+                        {
+                            var parent = await _aiPromptManagerRepository.GetByIdAsync(request.AiPromptManagerId);
+                            if (parent == null)
+                            {
+                                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.AiPromptManagerId));
+                                return methodResult;
+                            }
+                            entity.AiPromptManagerId = request.AiPromptManagerId;
+                        }
+
+                        entity = _aiCriteriaConfigRepository.Update(entity);
+                        updated.Add(entity);
+                    }
                 }
+
                 await _aiCriteriaConfigRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
+                var allResults = updated.Concat(newVersions).ToList();
                 var result = new AICriteriaConfigsModel
                 {
                     AiPromptManagerId = request.AiPromptManagerId,
-                    AiCriteriaModels = _mapper.Map<IList<AiCriteriaModel>>(updated)
+                    AiCriteriaModels = _mapper.Map<IList<AiCriteriaModel>>(allResults)
                 };
                 methodResult.Result = result;
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -112,7 +149,48 @@ namespace Fsel.Course.Application.Commands.AiCriteriaConfigCmd
             });
 
             return methodResult;
+        }
 
+        /// <summary>
+        /// Tạo version mới cho AICriteriaConfig
+        /// </summary>
+        private AICriteriaConfigs CreateNewVersion(UpdateAiCriteriaCommand updateRequest, AICriteriaConfigs originalEntity)
+        {
+            var newVersion = _mapper.Map<AICriteriaConfigs>(updateRequest);
+            newVersion.Id = Guid.NewGuid();
+            newVersion.OriginalId = originalEntity.OriginalId ?? originalEntity.Id;
+            newVersion.Version = originalEntity.Version + 1;
+            newVersion.VersionStatus = EnumVersionStatus.LastVersion;
+            newVersion.VersionType = EnumVersion.V2;
+
+            // Copy các properties không map được
+            if (updateRequest.AiPromptManagerId.HasValue && updateRequest.AiPromptManagerId.Value != Guid.Empty)
+            {
+                newVersion.AiPromptManagerId = updateRequest.AiPromptManagerId.Value;
+            }
+            else
+            {
+                newVersion.AiPromptManagerId = originalEntity.AiPromptManagerId;
+            }
+
+            return newVersion;
+        }
+
+        /// <summary>
+        /// Kiểm tra xem AiCriteriaConfig có bản ghi phụ thuộc hay không
+        /// Check ObjectId != null (đang được assign cho entity cụ thể)
+        /// </summary>
+        private async Task<bool> HasDependentRecords(Guid aiCriteriaConfigId, CancellationToken cancellationToken)
+        {
+            // Kiểm tra AICriteriaConfig có ObjectId != null (custom config cho entity cụ thể)
+            var criteriaConfig = await _aiCriteriaConfigRepository
+                .Queryable
+                .Where(x => x.Id == aiCriteriaConfigId)
+                .Select(x => new { x.ObjectId })
+                .FirstOrDefaultAsync(cancellationToken);
+
+            // Nếu có ObjectId => đang được assign cho entity cụ thể => cần versioning khi update
+            return criteriaConfig?.ObjectId.HasValue ?? false;
         }
 
         private static MethodResult<AICriteriaConfigsModel> Validation(MethodResult<AICriteriaConfigsModel> methodResult, UpdateAiCriteriaCommand request)
