@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
@@ -75,11 +76,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         public async Task<VideoModel?> GetVideoModelAsync(VideoResult videoResult, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
+
             var video = await GetVideoAsync(videoResult.VideoId);
             if (video == null)
             {
                 return null;
             }
+
             var videoModel = _mapper.Map<VideoModel>(video);
             videoModel.VideoTimeCodes = await GetVideoTimeCodesAsync(video, videoResult);
             return videoModel;
@@ -179,8 +182,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         private async Task<Dictionary<Guid, VideoTimeCodeResult?>> LoadVideoTimeCodeResultDictAsync(Guid videoResultId)
         {
             return await _videoTimeCodeResultRepository.ReadQueryable
-                .Where(x => x.VideoResultId == videoResultId)
-                .ToDictionaryAsync(x => x.VideoTimeCodeId, x => (VideoTimeCodeResult?)x);
+                                                       .Where(x => x.VideoResultId == videoResultId)
+                                                       .ToDictionaryAsync(x => x.VideoTimeCodeId, x => (VideoTimeCodeResult?)x);
         }
 
         private async Task<ILookup<Guid, TimeCodeQuestionModel>> LoadTimeCodeQuestionLookupAsync(Guid videoId)
@@ -285,15 +288,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         private async Task<Video?> GetVideoAsync(Guid id)
         {
-            return await _videoCachingService.GetOrSetAsync(id.ToString(), async (ctx, _) =>
-            {
-                var video = await _videoRepository.ReadQueryable
+            var video = await _videoRepository.ReadQueryable
                                                   .Where(x => x.Id == id)
                                                   .Include(v => v.VideoTimeCodes)
-                                                  .FirstOrDefaultAsync(_);
-
-                return video;
-            });
+                                                  .FirstOrDefaultAsync();
+            return video;
         }
 
         #endregion Build VideoModel

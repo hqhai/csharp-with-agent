@@ -191,7 +191,13 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
                 classForumResult.ResultStatus = EnumResultStatus.Done;
                 classForumResult.IsPendingSpeechToText = true;
                 await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult },
-                    bulk => bulk.IgnoreOnUpdateExpression = e => new { e.ClassForumId, e.LessonResultId, e.StudentId });
+                bulk => bulk.IgnoreOnUpdateExpression = e => new
+                {
+                    e.ClassForumId,
+                    e.LessonResultId,
+                    e.StudentId
+                });
+                await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 result.Result = true;
                 result.StatusCode = StatusCodes.Status200OK;

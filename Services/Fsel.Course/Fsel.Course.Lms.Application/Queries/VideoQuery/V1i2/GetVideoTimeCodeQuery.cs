@@ -2,6 +2,7 @@
 
 namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
 {
+    using System.Diagnostics;
     using System.Threading;
     using AutoMapper;
     using Common.ActionResults;
@@ -54,7 +55,6 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(videoResult));
                 return methodResult;
             }
-
             var videoModel = await _videoService.GetVideoModelAsync(videoResult, cancellationToken);
             if (videoModel == null)
             {
@@ -65,9 +65,7 @@ namespace Fsel.Course.Lms.Application.Queries.VideoQuery.V1i2
             videoModel.VideoResult = _mapper.Map<VideoResultModel>(videoResult);
             if (videoModel.VideoResult != null && videoResult.Status == EnumResultStatus.Done)
             {
-                var videoTimeLenght = MediaHelper.GetMediaDurationAsync(videoModel.VideoFilePath);
-                videoModel.AnswerTime = videoResult.VideoTimeCodeResults.Sum(x => x.WorkingTime + x.RetryWorkingTime) + (videoTimeLenght ?? 0);
-
+                videoModel.AnswerTime = videoResult.VideoTimeCodeResults.Sum(x => x.WorkingTime + x.RetryWorkingTime) + (videoModel.TimeCount ?? 0);
                 videoModel.Badge = GetBadgeName(videoResult.Percent);
                 videoModel.BadgeDescription = videoModel.Badge.GetDescription();
                 videoModel.IsShowToken = videoResult.IsShowToken;
