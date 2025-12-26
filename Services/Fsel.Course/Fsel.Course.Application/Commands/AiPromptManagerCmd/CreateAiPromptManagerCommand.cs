@@ -5,10 +5,11 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
     using AutoMapper;
     using Common.ActionResults;
     using Common.Enums.ErrorCodes;
-    using Domain.Entities;
     using Domain.IRepositories;
     using Domain.Models.CommandModels.AiPromptManager;
     using Domain.Models.EntityModels.AiPromptManagerModels;
+    using Fsel.Course.Infrastructure.Common.AiPromptManagerHelpers;
+    using Fsel.Course.Infrastructure.Common.VadilatorHelper;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -35,7 +36,7 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
             var methodResult = new MethodResult<AiPromptManagerModel>();
 
             var exits = await _aiModelManagerRepository.Queryable
-                .FirstOrDefaultAsync(x => x.AiModelName == request.AiModelName, cancellationToken);
+                .FirstOrDefaultAsync(x => x.Name == request.Name, cancellationToken);
 
             if (exits != null)
             {
@@ -45,9 +46,14 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
 
             #region  Validation
 
-            if (request.AiModelName == null || request.InputModelJson == null)
+            var validationErrors = ValidationHelper.CollectValidationErrors(
+                (!string.IsNullOrWhiteSpace(request.Name), nameof(request.Name)),
+                (request.AiModel != null, nameof(request.AiModel))
+            );
+
+            if (validationErrors.Length > 0)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.Required), validationErrors.ToString());
                 return methodResult;
             }
 
@@ -56,7 +62,11 @@ namespace Fsel.Course.Application.Commands.AiPromptManagerCmd
 
             await _aiModelManagerRepository.ExecuteTransactionAsync(async () =>
             {
-                var entity = _mapper.Map<AiPromptManager>(request);
+                // Use Factory to create entity with versioning
+                var entity = AiPromptManagerFactory
+                    .Create(request, _mapper)
+                    .Build();
+
                 entity = _aiModelManagerRepository.Add(entity);
                 await _aiModelManagerRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 

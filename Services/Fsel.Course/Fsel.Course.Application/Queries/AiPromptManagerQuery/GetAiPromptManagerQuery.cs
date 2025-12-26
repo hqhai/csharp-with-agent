@@ -10,7 +10,7 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
     using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.AiPromptManager;
-    using Fsel.Course.Domain.Models.QueryModels.AiModelManager;
+    using Fsel.Course.Domain.Models.QueryModels.AiPromptManager;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -43,10 +43,10 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
                 .Select(x => new AiManagerSearchModel
                 {
                     Id = x.Id,
-                    AiModelName = x.AiModelName,
+                    Name = x.Name,
                     CreatedDate = x.CreatedDate,
                     UpdatedDate = x.UpdatedDate,
-                    InputModel = x.InputModel,
+                    Model = x.AiModel,
                     FeatureObjectId = x.FeatureObjectId,
                 });
 
@@ -59,7 +59,7 @@ namespace Fsel.Course.Application.Queries.AiPromptManagerQuery
                 }
                 else
                 {
-                    aiModelQuery = aiModelQuery.Where(m => m.AiModelName != null && m.AiModelName.Contains(request.Keyword));
+                    aiModelQuery = aiModelQuery.Where(m => m.Name != null && m.Name.Contains(request.Keyword));
                 }
             }
 

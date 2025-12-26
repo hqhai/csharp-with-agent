@@ -5,10 +5,9 @@ namespace Fsel.Course.Domain.Models.CommandModels.AiCriteriaConfig
     using System;
     using System.Collections.Generic;
 
-    public class CreateOrUpdateAiCriteriaCommand
+    public class CreateOrUpdateAiCriteriaCommandModel
     {
         public Guid AiPromptManagerId { get; set; }
-        public CreateAiCriteriaConfigCommandModel? AiCriteriaModel { get; set; }
         public IList<CreateAiCriteriaConfigCommandModel>? AiCriteriaModels { get; set; }
         public double? SettingTemperature { get; set; }
         public double? SettingWordMaxLength { get; set; }

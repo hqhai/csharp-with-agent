@@ -8,9 +8,31 @@ namespace Fsel.Course.Domain.Entities
     using Common.Helpers;
     using Core.Entities;
     using Enums;
+    using Fsel.Common.Enums;
+    using Fsel.Shared.Enums;
 
     public class AICriteriaConfigs : Entity
     {
+        /// <summary>
+        /// Trạng thái version (LastVersion, OldVersion)
+        /// </summary>
+        public EnumVersionStatus VersionStatus { get; set; }
+
+        /// <summary>
+        /// Số phiên bản
+        /// </summary>
+        public int Version { get; set; }
+
+        /// <summary>
+        /// ID của entity gốc (null cho version đầu tiên)
+        /// </summary>
+        public Guid? OriginalId { get; set; }
+
+        /// <summary>
+        /// Loại version (V1, V2, V3)
+        /// </summary>
+        public EnumVersion VersionType { get; set; } = EnumVersion.V2;
+
         public Guid AiPromptManagerId { get; set; }
 
         public EnumFeatureMultiple? FeatureMultiple { get; set; }
