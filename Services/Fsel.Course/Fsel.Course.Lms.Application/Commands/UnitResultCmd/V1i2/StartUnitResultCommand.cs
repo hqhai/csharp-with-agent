@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
     using MediatR;
     using Microsoft.AspNetCore.Http;
@@ -25,39 +24,18 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
     {
         private readonly IUnitResultRepository _unitResultRepository;
         private readonly IUnitModuleRepository _unitModuleRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
-        private readonly ILessonRepository _lessonRepository;
-        private readonly ITestGroupResultRepository _testGroupResultRepository;
-        private readonly ITestResultRepository _testResultRepository;
-        private readonly ILessonModuleRepository _lessonModuleRepository;
-        private readonly ITestRepository _testRepository;
-        private readonly ILessonItemInitializerFactory _lessonItemInitializerFactory;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IUnitModuleCachingService _unitModuleCachingService;
         private readonly IUnitItemInitializerFactory _unitItemInitializerFactory;
 
         public StartUnitResultCommandHandler(IUnitResultRepository unitResultRepository,
             IUnitModuleRepository unitModuleRepository,
-            ILessonResultRepository lessonResultRepository,
-            ILessonRepository lessonRepository,
-            ITestGroupResultRepository testGroupResultRepository,
-            ITestResultRepository testResultRepository,
-            ILessonModuleRepository lessonModuleRepository,
-            ITestRepository testRepository,
-            ILessonItemInitializerFactory lessonItemInitializerFactory,
             ICourseResultRepository courseResultRepository,
             IUnitModuleCachingService unitModuleCachingService,
             IUnitItemInitializerFactory unitItemInitializerFactory)
         {
             _unitResultRepository = unitResultRepository;
             _unitModuleRepository = unitModuleRepository;
-            _lessonResultRepository = lessonResultRepository;
-            _lessonRepository = lessonRepository;
-            _testGroupResultRepository = testGroupResultRepository;
-            _testResultRepository = testResultRepository;
-            _lessonModuleRepository = lessonModuleRepository;
-            _testRepository = testRepository;
-            _lessonItemInitializerFactory = lessonItemInitializerFactory;
             _courseResultRepository = courseResultRepository;
             _unitModuleCachingService = unitModuleCachingService;
             _unitItemInitializerFactory = unitItemInitializerFactory;
@@ -96,34 +74,24 @@ namespace Fsel.Course.Lms.Application.Commands.UnitResultCmd.V1i2
             {
                 return methodResult;
             }
-
-            foreach (var unitModule in unitModules)
+            await _unitResultRepository.ExecuteTransactionAsync(async () =>
             {
-                await UpdateNewResultUnitModule(unitModule, unitResult, cancellationToken);
-            }
-
-            try
-            {
-                unitResult.Status = EnumResultStatus.Process;
-                await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult }, bulk =>
+                foreach (var unitModule in unitModules)
                 {
-                    bulk.ColumnInputExpression = c => new { c.Status };
-                });
-            }
-            catch { }
+                    await UpdateNewResultUnitModule(unitModule, unitResult, cancellationToken);
+                }
 
-            if (courseResult.Status == EnumResultStatus.New)
-            {
-                try
+                if (courseResult.Status == EnumResultStatus.New)
                 {
                     courseResult.Status = EnumResultStatus.Process;
-                    await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
-                    {
-                        bulk.ColumnInputExpression = c => new { c.Status };
-                    });
+                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
-                catch { }
-            }
+
+                unitResult.Status = EnumResultStatus.Process;
+                await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+                return methodResult;
+            });
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = true;

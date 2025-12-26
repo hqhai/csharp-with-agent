@@ -8,9 +8,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
-    using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -38,11 +36,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
         private readonly AuthContext _authContext;
         private readonly SaveUserCourseSettingPublisher _saveUserCourseSettingPublisher;
         private readonly ICourseModuleRepository _courseModuleRepository;
-        private readonly IUnitRepository _unitRepository;
-        private readonly ITestRepository _testRepository;
-        private readonly IUnitResultRepository _unitResultRepository;
-        private readonly IRepository<TestGroupResult> _testGroupResultRepository;
-        private readonly IRepository<TestResult> _testResultRepository;
         private readonly IMapper _mapper;
         private readonly ICourseModuleCachingService _courseModuleCachingService;
         private readonly ICourseItemInitializerFactory _courseItemInitializerFactory;
@@ -53,11 +46,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
             , AuthContext authContext
             , SaveUserCourseSettingPublisher saveUserCourseSettingPublisher
             , ICourseModuleRepository courseModuleRepository
-            , IUnitRepository unitRepository
-            , ITestRepository testRepository
-            , IUnitResultRepository unitResultRepository
-            , IRepository<TestGroupResult> testGroupResultRepository
-            , IRepository<TestResult> testResultRepository
             , IMapper mapper
             , ICourseModuleCachingService courseModuleCachingService
             , ICourseItemInitializerFactory courseItemInitializerFactory)
@@ -68,11 +56,6 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
             _authContext = authContext;
             _saveUserCourseSettingPublisher = saveUserCourseSettingPublisher;
             _courseModuleRepository = courseModuleRepository;
-            _unitRepository = unitRepository;
-            _testRepository = testRepository;
-            _unitResultRepository = unitResultRepository;
-            _testGroupResultRepository = testGroupResultRepository;
-            _testResultRepository = testResultRepository;
             _mapper = mapper;
             _courseModuleCachingService = courseModuleCachingService;
             _courseItemInitializerFactory = courseItemInitializerFactory;

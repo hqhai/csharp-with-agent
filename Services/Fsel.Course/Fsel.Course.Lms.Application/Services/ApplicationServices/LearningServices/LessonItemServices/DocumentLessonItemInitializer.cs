@@ -41,10 +41,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 if (documentResult.Status == EnumResultStatus.Unfinished)
                 {
                     documentResult.Status = EnumResultStatus.New;
-                    await _documentResultRepository.BulkUpdateList(new List<DocumentResult> { documentResult }, bulk =>
-                    {
-                        bulk.ColumnInputExpression = c => new { c.Status };
-                    });
+                    await _documentResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
 
                 return methodResult;

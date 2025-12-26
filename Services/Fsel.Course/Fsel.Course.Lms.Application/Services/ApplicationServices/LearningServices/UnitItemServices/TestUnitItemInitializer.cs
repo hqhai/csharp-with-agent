@@ -55,16 +55,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                         }
                         item.Status = EnumResultStatus.New;
                     }
-                    await _testResultRepository.BulkUpdateList(testGroupResult.TestResults.ToList(), bulk =>
-                    {
-                        bulk.ColumnInputExpression = c => new { c.Status };
-                    });
 
                     testGroupResult.Status = EnumResultStatus.New;
-                    await _testGroupResultRepository.BulkUpdateList(new List<TestGroupResult> { testGroupResult }, bulk =>
-                    {
-                        bulk.ColumnInputExpression = c => new { c.Status };
-                    });
+                    await _testGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
 
                 return methodResult;

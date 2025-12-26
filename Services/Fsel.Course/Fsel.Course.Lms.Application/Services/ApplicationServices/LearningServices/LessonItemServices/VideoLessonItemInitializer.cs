@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Infrastructure.Repositories;
     using Microsoft.EntityFrameworkCore;
 
     public class VideoLessonItemInitializer : ILessonItemInitializer
@@ -41,10 +42,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 if (videoResult.Status == EnumResultStatus.Unfinished)
                 {
                     videoResult.Status = EnumResultStatus.New;
-                    await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
-                    {
-                        bulk.ColumnInputExpression = c => new { c.Status };
-                    });
+                    await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
                 return methodResult;
             }
