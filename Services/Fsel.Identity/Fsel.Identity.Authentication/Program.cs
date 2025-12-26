@@ -3,9 +3,13 @@
 using AutoMapper;
 using Fsel.Authentication.Infrastructure.Configs;
 using Fsel.Common.Constants;
+using Fsel.Core.Entities;
 using Fsel.Core.Extensions;
 using Fsel.Identity.Application.Events;
+using Fsel.Core.Middlewares;
+using Fsel.Identity.Application.Queries.IntegrationQuery;
 using Fsel.Identity.Authentication.Extensions;
+using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Common;
 using Fsel.Identity.Infrastructure.ValueSettings;
@@ -19,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 var appSetting = builder.AddAppSettings<AppSetting>();
 
 builder.AddServices(appSetting);
-builder.AddDbContexts<UserDbContext>();
+builder.AddDbContexts<UserDbContext, UserReadDbContext, User, Role, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>();
 
 builder.AddOIDC(appSetting);
 
@@ -85,6 +89,7 @@ builder.Services.AddTransient<IEventSink, TokenIssuedEventHandler>();
 builder.AddQueue();
 
 builder.Services.AddScoped<SaveOtpCodeConverter>();
+builder.Services.AddScoped<BaseIntegrationQuery>();
 
 builder.AddExternalServices(appSetting);
 
@@ -93,9 +98,11 @@ builder.AddMassTransit(appSetting);
 //App config
 var app = builder.Build();
 app.UseForwardedHeaders(fordwardedHeaderOptions);
-app.UseLanguages();
 app.UseStaticFiles();
 app.UseCertificateForwarding();
+app.UseRouting();
+app.UseTenantAwareMiddlewareHandler();
+app.UseLanguages();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseIdentityServer();

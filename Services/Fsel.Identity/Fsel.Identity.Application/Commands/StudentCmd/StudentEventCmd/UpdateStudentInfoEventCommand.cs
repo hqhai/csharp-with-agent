@@ -23,10 +23,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
         public string? Email { get; set; }
 
         public DateTime Birthday { get; set; }
-
-        [Required]
         public string? ParentPhoneNumber { get; set; }
-
         public string? ParentEmail { get; set; }
     }
 
@@ -60,12 +57,7 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 return methodResult;
             }
 
-            if (string.IsNullOrEmpty(request.ParentPhoneNumber))
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ParentPhoneNumber), request.ParentPhoneNumber);
-                return methodResult;
-            }
-            if (!request.ParentPhoneNumber.IsValidPhoneNumber())
+            if (!string.IsNullOrEmpty(request.ParentPhoneNumber) && !request.ParentPhoneNumber.IsValidPhoneNumber())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ParentPhoneNumber), request.ParentPhoneNumber);
                 return methodResult;
@@ -76,8 +68,9 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ParentEmail), request.ParentEmail);
                 return methodResult;
             }
-            var userEmail = await _userManager.Users.FirstOrDefaultAsync(x => x.Email == request.Email, cancellationToken);
-            if (userEmail != null && userEmail.Id != _authContext.CurrentUserId)
+
+            var userEmail = await _userManager.Users.FirstOrDefaultAsync(x => x.Id != _authContext.CurrentUserId && x.Email == request.Email && x.EmailConfirmed, cancellationToken);
+            if (userEmail != null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.Email), request.Email);
                 return methodResult;
@@ -142,8 +135,17 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             {
                 student.CourseLevel = EnumCourseLevel.B1;
             }
-            student.ParentEmail = request.ParentEmail;
-            student.ParentPhoneNumber = request.ParentPhoneNumber;
+
+            if (!string.IsNullOrEmpty(request.ParentEmail))
+            {
+                student.ParentEmail = request.ParentEmail;
+            }
+
+            if (!string.IsNullOrEmpty(request.ParentPhoneNumber))
+            {
+                student.ParentPhoneNumber = request.ParentPhoneNumber;
+            }
+
             if (!student.IsValid())
             {
                 methodResult.AddErrorBadRequest(student.ErrorMessages);
@@ -152,7 +154,10 @@ namespace Fsel.Identity.Application.Commands.StudentCmd.StudentEventCmd
             _studentRepository.Update(student);
             await _studentRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            await AddParentAsync(request, student.Id, cancellationToken);
+            if (!string.IsNullOrEmpty(request.ParentPhoneNumber) || !string.IsNullOrEmpty(request.ParentEmail))
+            {
+                await AddParentAsync(request, student.Id, cancellationToken);
+            }
 
             return methodResult;
         }

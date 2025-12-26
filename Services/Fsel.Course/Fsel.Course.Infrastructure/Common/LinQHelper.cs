@@ -2,11 +2,11 @@
 
 namespace Fsel.Course.Infrastructure.Common
 {
-    using Fsel.Common.Helpers;
+    using System.Text.RegularExpressions;
 
-    public class LinQHelper
+    public static class LinQHelper
     {
-        public int GetHighestStreak(IList<bool>? data)
+        public static int GetHighestStreak(this IList<bool>? data)
         {
             if (data != null && data.Any())
             {
@@ -20,6 +20,16 @@ namespace Fsel.Course.Infrastructure.Common
                 return highestStreak > 0 ? highestStreak : default;
             }
             return default;
+        }
+
+        public static bool IsValidCode(this string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return false;
+            }
+            var regex = new Regex(@"^[^<>]*$");
+            return regex.IsMatch(input);
         }
     }
 }

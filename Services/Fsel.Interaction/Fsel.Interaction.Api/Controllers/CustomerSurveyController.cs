@@ -3,21 +3,23 @@
 namespace Fsel.Interaction.Api.Controllers
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Interaction.Application.Commands.CustomerSurveyCmd;
+    using Fsel.Interaction.Application.Commands.SurveyConfigCmd;
     using Fsel.Interaction.Application.Queries.CustomerSurveyQuery;
     using Fsel.Interaction.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Asp.Versioning;
-    using Fsel.Shared.Constants;
-    using Fsel.Interaction.Application.Queries.SurveyQuestionQuery;
 
     [ApiVersion(ApiSettings.APIVersion1)]
     [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/customerSurvey")]
     [ApiController]
+    [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class CustomerSurveyController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -38,7 +40,6 @@ namespace Fsel.Interaction.Api.Controllers
             MethodResult<IList<CustomerSurveyModel>> queryResult = await _mediator.Send(command).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
-
 
         /// <summary>
         /// Check Student by id
@@ -65,14 +66,74 @@ namespace Fsel.Interaction.Api.Controllers
         }
 
         /// <summary>
-        /// Check Student by id
+        /// Check survey pt
         /// </summary>
-        [HttpGet("check-survey")]
+        [HttpGet("check-survey-pt")]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> CheckSurveyBySurveyFormType([FromQuery] CheckSurveyBySurveyFormTypeQuery query)
+        public async Task<IActionResult> CheckSurveyBySurveyFormType([FromQuery] CheckSurveyPTQuery query)
         {
             MethodResult<bool> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Save User Survey Assignment
+        /// </summary>
+        [HttpPost("save-user-survey-assignment")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> SaveUserSurveyAssignment([FromBody] SaveUserSurveyAssignmentCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Do survey
+        /// </summary>
+        [HttpPost("do-survey")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> DoSurvey([FromBody] StudentDoSurveyCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Do survey
+        /// </summary>
+        [HttpPost("change-status-view-survey")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ChangeStatusViewSurvey([FromBody] ChangeStatusViewSurveyCommand command)
+        {
+            var queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get user surveys assignment
+        /// </summary>
+        [HttpGet("get-user-surveys-assignment")]
+        [ProducesResponseType(typeof(MethodResult<IList<UserSurveyAssignmentModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetUserSurveysAssignment()
+        {
+            var queryResult = await _mediator.Send(new SearchUserSurveyAssignmentQuery()).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get history do survey by user id
+        /// </summary>
+        [HttpGet("get-history-do-survey-by-user-id")]
+        [ProducesResponseType(typeof(MethodResult<SurveyConfigModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetHistoryDoSurveyByUserId([FromQuery] GetHistoryDoSurveyByUserIdQuery query)
+        {
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

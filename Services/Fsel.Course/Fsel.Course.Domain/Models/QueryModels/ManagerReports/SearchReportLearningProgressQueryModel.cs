@@ -2,7 +2,6 @@
 
 namespace Fsel.Course.Domain.Models.QueryModels.ManagerReports
 {
-    using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels.QueryModels;
 
     public class SearchReportLearningProgressQueryModel : SearchStudentSchoolQueryModel

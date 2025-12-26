@@ -12,6 +12,9 @@ namespace Fsel.Course.Domain.Entities
 
     public class VideoTimeCodeResult : BaseLearnResult, ITokenResult
     {
+        [NotMapped]
+        public override double PercentModule { get; set; }
+
         public VideoResult? VideoResult { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]

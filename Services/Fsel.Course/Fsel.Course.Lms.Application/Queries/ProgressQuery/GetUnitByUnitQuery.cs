@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
 
         private async Task<IList<UnitModel>?> GetListAsync(GetUnitByUnitQuery request, Guid? studentId)
         {
-            var units = await _unitRepository.Queryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
+            var units = await _unitRepository.ReadQueryable.Include(x => x.UnitResults.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId))
                                                        .Include(x => x.CourseUnitMockTests.Where(x => !x.IsDeleted && x.CourseId == request.CourseId))
                                                        .Where(x => x.CourseUnitMockTests.Any(x => x.CourseId == request.CourseId))
                                                        .ToListAsync();

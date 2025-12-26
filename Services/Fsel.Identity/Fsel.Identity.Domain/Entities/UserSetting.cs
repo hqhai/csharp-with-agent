@@ -47,5 +47,7 @@ namespace Fsel.Identity.Domain.Entities
         public string? Language { get; set; }
 
         public User? User { get; set; }
+
+        public ICollection<UserSenderSetting> UserSenderSettings { get; set; } = new List<UserSenderSetting>();
     }
 }

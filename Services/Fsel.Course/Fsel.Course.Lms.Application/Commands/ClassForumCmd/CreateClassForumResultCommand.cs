@@ -51,6 +51,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         private readonly IClassForumDetailResultRepository _classForumDetailResultRepository;
         private readonly SetTimeClassForumDonePublisher _setTimeClassForumDonePublisher;
         private readonly IHostEnvironment _environment;
+        private readonly IClassForumResultFileRepository _classForumResultFileRepository;
+        private readonly ClassForumPronunciationPublisher _classForumPronunciationPublisher;
         private readonly QuestBoardPublisher _questBoardPublisher;
 
         public const int DisplayOrderFirst = 0;
@@ -59,7 +61,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         public CreateClassForumResultCommandHandler(IMapper mapper,
             ICourseResultRepository courseResultRepository,
             ILogger<CreateClassForumResultCommand> logger,
-            CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, QuestBoardPublisher questBoardPublisher, IHostEnvironment environment)
+            CreateTokenHistoryPublisher createTokenHistoryPublisher, ICourseRepository courseRepository, AuthContext authContext, IUserService userService, IClassForumResultRepository classForumResultRepository, IClassForumRepository classForumRepository, ILessonResultRepository lessonResultRepository, SubmitClassForumGradingPublisher submitClassForumGradingPublisher, ISystemService systemService, IClassForumDetailResultRepository classForumDetailResultRepository, SetTimeClassForumDonePublisher setTimeClassForumDonePublisher, QuestBoardPublisher questBoardPublisher, IHostEnvironment environment, ClassForumPronunciationPublisher classForumPronunciationPublisher, IClassForumResultFileRepository classForumResultFileRepository)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -77,6 +79,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             _setTimeClassForumDonePublisher = setTimeClassForumDonePublisher;
             _questBoardPublisher = questBoardPublisher;
             _environment = environment;
+            _classForumPronunciationPublisher = classForumPronunciationPublisher;
+            _classForumResultFileRepository = classForumResultFileRepository;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -208,6 +212,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             if (classForumDetailResult != null && request.IsSubmit)
             {
                 await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request, cancellationToken);
+
+                // chấm Pronunciation
+                if (classForum.CourseSkill == EnumCourseSkill.Speaking)
+                {
+                    await _classForumPronunciationPublisher.Publish(new ClassForumPronunciationConsumerModel { ClassForumDetailResultId = classForumDetailResult.Id }, cancellationToken);
+                }
             }
 
             var classForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => classForumResult != null && x.ClassForumResultId == classForumResult.Id).ToListAsync(cancellationToken);
@@ -265,9 +275,27 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 methodResult.AddErrorBadRequest(classForumDetailResult.ErrorMessages);
                 return methodResult;
             }
-            classForumDetailResult = _classForumDetailResultRepository.Update(classForumDetailResult, false, x => x.ClassForumResultId, x => x.SubmissionCount);
-            await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
+            await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+            });
+            var classForumResultFileNews = classForumDetailResult.ClassForumResultFiles;
+
+            var classForumResultFiles = await _classForumResultFileRepository.Queryable.Where(x => x.ClassForumDetailResultId == classForumDetailResult.Id).ToListAsync(cancellationToken);
+            if (classForumResultFiles.Any())
+            {
+                await _classForumResultFileRepository.DeleteListAsync(classForumResultFiles);
+                await _classForumResultFileRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            }
+            if (classForumResultFileNews.Any())
+            {
+                foreach (var file in classForumResultFileNews)
+                {
+                    file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
+                }
+                await _classForumResultFileRepository.BulkMergeAsync(classForumResultFileNews);
+            }
             methodResult.Result = classForumDetailResult;
             return methodResult;
         }
@@ -299,7 +327,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                         methodResult.AddErrorBadRequest(classForumResult.ErrorMessages);
                         return methodResult;
                     }
-                    classForumResult = _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
+                    await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                    });
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
@@ -325,11 +356,22 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             };
 
             classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
-            _classForumDetailResultRepository.Add(classForumDetailResult);
 
             try
             {
-                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumDetailResultRepository.BulkMergeAsync(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                {
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.ClassForumResultId, c.SubmissionCount, c.IsDeleted };
+                });
+                var classForumResultFiles = classForumDetailResult.ClassForumResultFiles;
+                if (classForumResultFiles.Any())
+                {
+                    foreach (var file in classForumResultFiles)
+                    {
+                        file.ClassForumDetailResultId = classForumDetailResult.Id; // Set foreign key nếu cần
+                    }
+                    await _classForumResultFileRepository.BulkMergeAsync(classForumResultFiles);
+                }
             }
             catch (Exception ex)
             {
@@ -348,12 +390,16 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
                 ClassForumId = classForum.Id,
                 SubmissionCount = EnumSubmissionCount.FirstSubmit,
             };
-            classForumResult = _classForumResultRepository.Add(classForumResult);
+
             if (request.IsSubmit)
             {
                 classForumResult.TokenFirstTime = await GetTokenAsync(classForum, classForumResult, course.CourseType);
                 try
                 {
+                    await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
+                    {
+                        bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId, c.IsDeleted };
+                    });
                     await _classForumResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
@@ -364,14 +410,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
             }
             else
             {
-                try
+                await _classForumResultRepository.BulkMergeAsync(new List<ClassForumResult> { classForumResult }, bulk =>
                 {
-                    await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning($"Log Duplicate ClassForumResult : {ex.Message}");
-                }
+                    bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId, c.IsDeleted };
+                });
             }
             return classForumResult;
         }
@@ -416,19 +458,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd
         {
             if (classForum.IsAlFeedBack)
             {
-                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModelV2
                 {
                     ClassForumResultId = classForumDetailResult.ClassForumResultId,
                     ClassForumDetailResultId = classForumDetailResult.Id,
                     WordContent = request.WordContent,
-                    UserAIConfig = classForum.UserAlConfig,
-                    SettingModel = classForum.SettingModel,
-                    SettingFrequecy = classForum.SettingFrequecy,
-                    SettingPresence = classForum.SettingPresence,
-                    SettingTemperature = classForum.SettingTemperature,
-                    SettingTopP = classForum.SettingTopP,
-                    SettingWordMaxLength = classForum.SettingWordMaxLength,
-                    SystemRoleAlConfig = classForum.SystemRoleAlConfig,
                     SubmissionCount = classForumDetailResult.SubmissionCount ?? default
                 }, cancellationToken);
             }

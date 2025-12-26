@@ -56,6 +56,8 @@ namespace Fsel.Ordering.Application.Commands.OrderCmds
         private readonly IPackageEventRepository _packageEventRepository;
         private readonly IUserVoucherLockRepository _userVoucherLockRepository;
         private readonly AddCoinWhenCoursePurchasedPublisher _addCoinWhenCoursePurchasedPublisher;
+        private const string PaymentApproval = "Phê duyệt thanh toán";
+        private const string BuyPackage = "Thanh toán gói phí: ";
 
         public ChangeStatusOrderCommandHandler(IOrderRepository orderRepository
             , ITrainingService trainingService
@@ -120,6 +122,12 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
             }
             var student = studentResult.Content?.Result;
 
+            if (student == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
+                return methodResult;
+            }
+
             var package = await _packageRepository.GetByIdAsync(order.PackageId ?? default);
             if (package == null)
             {
@@ -149,6 +157,9 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
                         methodResult.AddErrorBadRequest(nameof(EnumEventErrorCode.EventNotExist), nameof(packageEvent));
                         return methodResult;
                     }
+
+                    var role = _authContext.Roles?.FirstOrDefault();
+
                     if (!order.ExpireDate.HasValue)
                     {
                         order.ExpireDate = DateTime.UtcNow.AddMonths(package.MonthNumber + packageEvent.MonthBonus);
@@ -158,17 +169,21 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
 
                         await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                         {
-                            StudentId = student!.Id,
+                            StudentEditHistoryType = GetStudentEditHistory(role, package.MonthNumber).Item1,
+                            StudentId = student.Id,
                             Month = package.MonthNumber + packageEvent.MonthBonus + monthBonus,
-                            Day = packageEvent.DayBonus
+                            Day = packageEvent.DayBonus,
+                            Description = GetStudentEditHistory(role, package.MonthNumber).Item2
                         }, cancellationToken);
                     }
                     else
                     {
                         await _addExpiredDateForStudentPublisher.Publish(new AddExpiredDateForStudentQueueModel()
                         {
-                            StudentId = student!.Id,
-                            ExpiredDate = order.ExpireDate
+                            StudentEditHistoryType = GetStudentEditHistory(role, package.MonthNumber).Item1,
+                            StudentId = student.Id,
+                            ExpiredDate = order.ExpireDate,
+                            Description = GetStudentEditHistory(role, package.MonthNumber).Item2
                         }, cancellationToken);
                     }
 
@@ -255,17 +270,17 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
                     }
                     await ResetUserVoucherLockAsync(order.UserId, cancellationToken).ConfigureAwait(false);
 
-                    //var blindBoxPackages = _appSetting.BlindBoxConfigs;
+                    var blindBoxPackages = _appSetting.BlindBoxConfigs;
 
-                    //if (order.RevenueType == EnumPaymentRevenueType.Revenue && blindBoxPackages != null && blindBoxPackages.Packages != null && blindBoxPackages.Packages.Contains(package.MonthNumber))
-                    //{
-                    //    await _systemService.AddUserIntoBlindBoxEvent(new AddUserIntoBlindBoxCommandModel()
-                    //    {
-                    //        UserId = order.UserId,
-                    //        IsWin = false,
-                    //        NumberOpen = 0
-                    //    });
-                    //}
+                    if (order.RevenueType == EnumPaymentRevenueType.Revenue)
+                    {
+                        await _systemService.AddUserIntoBlindBoxEvent(new AddUserIntoBlindBoxCommandModel()
+                        {
+                            UserId = order.UserId,
+                            IsWin = false,
+                            NumberOpen = 0
+                        });
+                    }
 
                     if (order.RevenueType == EnumPaymentRevenueType.Revenue && package.BonusCoins > 0)
                     {
@@ -339,6 +354,18 @@ AddCoinWhenCoursePurchasedPublisher addCoinWhenCoursePurchasedPublisher)
         private bool IsInteger(double number)
         {
             return number == (int)number;
+        }
+
+        private (EnumStudentEditHistoryType, string) GetStudentEditHistory(string? role, int package)
+        {
+            if (role == null || role == EnumRole.Student.ToString() || role == EnumRole.StudentCampus.ToString())
+            {
+                return (EnumStudentEditHistoryType.BuyPackage, BuyPackage + $"{package} tháng");
+            }
+            else
+            {
+                return (EnumStudentEditHistoryType.PaymentApproval, PaymentApproval);
+            }
         }
 
         private async Task ResetUserVoucherLockAsync(Guid userId, CancellationToken cancellationToken)

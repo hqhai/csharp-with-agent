@@ -27,7 +27,21 @@ namespace Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot
     public class MockTestAIGradingModel
     {
         public string? BandScore { get; set; }
-
         public string? BandDescriptorText { get; set; }
+    }
+
+    public class TestAIGradingModel
+    {
+        public string? BandScore { get; set; }
+        public string? BandDescriptorText { get; set; }
+    }
+
+    public class ClassForumAIResponseModelV2
+    {
+        public Guid ClassForumResultId { get; set; }
+        public Guid ClassForumDetailResultId { get; set; }
+        public string? WordContent { get; set; }
+        public bool? IsRetry { get; set; } = false;
+        public EnumSubmissionCount SubmissionCount { get; set; }
     }
 }

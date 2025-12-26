@@ -14,6 +14,7 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using MediatR;
     using OfficeOpenXml;
 
@@ -41,16 +42,19 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolClass = request.SchoolClass,
-                SchoolGrade = request.SchoolGrade,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListCurrentLevel = request.ListCurrentLevel,
+                ListLearningStatus = request.ListLearningStatus,
+                ListOverallScore = request.ListOverallScore,
+                CourseType = request.CourseType,
+                IsLearning = request.IsLearning,
+
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
-                Status = request.Status,
                 StartDate = request.StartDate,
-                CourseLevel = request.CourseLevel,
-                CurrentLevel = request.CurrentLevel,
                 SortBy = request.SortBy,
             }, cancellationToken);
             var dataOverallResult = await _mediator.Send(new GetOverallReportPlacementTestQuery
@@ -58,16 +62,19 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolClass = request.SchoolClass,
-                SchoolGrade = request.SchoolGrade,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCurrentLevel = request.ListCurrentLevel,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListOverallScore = request.ListOverallScore,
+                CourseType = request.CourseType,
+                IsLearning = request.IsLearning,
+
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
-                Status = request.Status,
                 StartDate = request.StartDate,
-                CourseLevel = request.CourseLevel,
-                CurrentLevel = request.CurrentLevel,
             }, cancellationToken);
             var userResult = await _userService.GetUserProfileAsync();
             string schoolName = userResult.Content?.Result?.SchoolName ?? string.Empty;
@@ -80,7 +87,8 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             ArgumentNullException.ThrowIfNull(request);
             MemoryStream memoryStream = new MemoryStream();
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.ManagerReportPlacementTestExcel)))
+            using (var templateStream = new FileStream(ResourceSettings.ManagerReportPlacementTestExcel, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (ExcelPackage excelPackage = new ExcelPackage(templateStream))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
                 FillParameterData(excelWorksheet, overallReportPlacementTest, schoolName);
@@ -97,35 +105,38 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             return memoryStream;
         }
 
+        private static object Format(object template, dynamic? values) => Shared.Helpers.StringHelper.FormatStringWithParam(template, values);
+
         private static void FillParameterData(ExcelWorksheet excelWorksheet, OverallReportPlacementTestModel? overallReport, string? schoolName)
         {
-            excelWorksheet.Cells["E3"].Value = schoolName;
-            excelWorksheet.Cells["E4"].Value = overallReport?.TotalStudent ?? default;
-            excelWorksheet.Cells["E5"].Value = overallReport?.TotalPlacementTest ?? default;
-            excelWorksheet.Cells["E6"].Value = overallReport?.TotalCompletePlacementTest ?? default;
+            excelWorksheet.Cells["D3"].Value = schoolName;
+            excelWorksheet.Cells["D4"].Value = overallReport?.TotalStudent ?? default;
+            excelWorksheet.Cells["D5"].Value = overallReport?.TotalPlacementTest ?? default;
+            excelWorksheet.Cells["D6"].Value = overallReport?.TotalCompletePlacementTest ?? default;
         }
 
         private static void FillSearchKeyData(ExcelWorksheet excelWorksheet, ExportFileExcelReportPlacementTestCommand request)
         {
-            excelWorksheet.Cells["L1"].Value = GetData(excelWorksheet.Cells["L1"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
-            excelWorksheet.Cells["F3"].Value = GetData(excelWorksheet.Cells["F3"].Value, request.Status?.GetDescription());
-            excelWorksheet.Cells["G3"].Value = GetData(excelWorksheet.Cells["G3"].Value, request.ListSchoolGrade ?? request.SchoolGrade);
-            excelWorksheet.Cells["H3"].Value = GetData(excelWorksheet.Cells["H3"].Value, request.ListSchoolClass ?? request.SchoolClass);
-            excelWorksheet.Cells["I3"].Value = GetData(excelWorksheet.Cells["I3"].Value, request.CurrentLevel);
-            excelWorksheet.Cells["J3"].Value = GetData(excelWorksheet.Cells["J3"].Value, request.CourseLevel);
-            excelWorksheet.Cells["K3"].Value = GetData(excelWorksheet.Cells["K3"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
-            excelWorksheet.Cells["L3"].Value = GetData(excelWorksheet.Cells["L3"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+            string completionStatusStr = string.Join(",", (request.ListCompletionStatus.ToList<EnumCompletionStatus>() ?? new List<EnumCompletionStatus>()).Select(x => x.GetDescription()));
+            excelWorksheet.Cells["K1"].Value = Format(excelWorksheet.Cells["K1"].Value, DateTime.UtcNow.ConvertTimeFromUtc(EnumCountryKey.Vietnam).ToString("dd/MM/yyyy hh:mm tt", CultureInfo.InvariantCulture));
+            excelWorksheet.Cells["E3"].Value = Format(excelWorksheet.Cells["E3"].Value, completionStatusStr);
+            excelWorksheet.Cells["F3"].Value = Format(excelWorksheet.Cells["F3"].Value, request.ListSchoolGrade ?? string.Empty);
+            excelWorksheet.Cells["G3"].Value = Format(excelWorksheet.Cells["G3"].Value, request.ListSchoolClass ?? string.Empty);
+            excelWorksheet.Cells["H3"].Value = Format(excelWorksheet.Cells["H3"].Value, request.ListCurrentLevel ?? string.Empty);
+            excelWorksheet.Cells["I3"].Value = Format(excelWorksheet.Cells["I3"].Value, request.ListCourseLevel ?? string.Empty);
+            excelWorksheet.Cells["J3"].Value = Format(excelWorksheet.Cells["J3"].Value, request.StartDate.HasValue ? request.StartDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
+            excelWorksheet.Cells["K3"].Value = Format(excelWorksheet.Cells["K3"].Value, request.EndDate.HasValue ? request.EndDate.Value.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture) : string.Empty);
         }
 
         private static void FillCourseLevelData(ExcelWorksheet excelWorksheet, OverallReportPlacementTestModel? overallReport)
         {
             var courseLevelProgress = overallReport?.CourseLevelProgresses;
-            excelWorksheet.Cells["E7"].Value = GetData(excelWorksheet.Cells["E7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.A1));
-            excelWorksheet.Cells["F7"].Value = GetData(excelWorksheet.Cells["F7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.A2));
-            excelWorksheet.Cells["G7"].Value = GetData(excelWorksheet.Cells["G7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B1));
-            excelWorksheet.Cells["H7"].Value = GetData(excelWorksheet.Cells["H7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B1Plus));
-            excelWorksheet.Cells["I7"].Value = GetData(excelWorksheet.Cells["I7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B2));
-            excelWorksheet.Cells["J7"].Value = GetData(excelWorksheet.Cells["J7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.C1));
+            excelWorksheet.Cells["D7"].Value = Format(excelWorksheet.Cells["D7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.A1));
+            excelWorksheet.Cells["E7"].Value = Format(excelWorksheet.Cells["E7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.A2));
+            excelWorksheet.Cells["F7"].Value = Format(excelWorksheet.Cells["F7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B1));
+            excelWorksheet.Cells["G7"].Value = Format(excelWorksheet.Cells["G7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B1Plus));
+            excelWorksheet.Cells["H7"].Value = Format(excelWorksheet.Cells["H7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.B2));
+            excelWorksheet.Cells["I7"].Value = Format(excelWorksheet.Cells["I7"].Value, GetTotalCount(courseLevelProgress, EnumCourseLevel.C1));
         }
 
         private static void FillPlacementTestData(ExcelWorksheet excelWorksheet, IList<PlacementTestReportModel> placementTestReports)
@@ -135,24 +146,17 @@ namespace Fsel.Course.Lms.Application.Commands.ManagerReportCmd
             {
                 excelWorksheet.Cells[startRow, 1].Value = item.FullName;
                 excelWorksheet.Cells[startRow, 2].Value = item.UserName;
-                excelWorksheet.Cells[startRow, 3].Value = item.Email;
-                excelWorksheet.Cells[startRow, 4].Value = item.PhoneNumber;
+                excelWorksheet.Cells[startRow, 3].Value = item.PhoneNumber;
+                excelWorksheet.Cells[startRow, 4].Value = item.Email;
                 excelWorksheet.Cells[startRow, 5].Value = item.Birthday?.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
-                excelWorksheet.Cells[startRow, 6].Value = item.SchoolName;
-                excelWorksheet.Cells[startRow, 7].Value = item.SchoolGrade;
-                excelWorksheet.Cells[startRow, 8].Value = item.SchoolClass;
-                excelWorksheet.Cells[startRow, 9].Value = item.ChooseLevelStr;
-                excelWorksheet.Cells[startRow, 10].Value = item.CurrentLevelStr;
-                excelWorksheet.Cells[startRow, 11].Value = item.StatusDescription;
-                excelWorksheet.Cells[startRow, 12].Value = item.ExpiredPTDate?.ToString("dd/MM/yyyy hh:mm", CultureInfo.InvariantCulture);
+                excelWorksheet.Cells[startRow, 6].Value = item.SchoolGrade;
+                excelWorksheet.Cells[startRow, 7].Value = item.SchoolClass;
+                excelWorksheet.Cells[startRow, 8].Value = item.ChooseLevelStr;
+                excelWorksheet.Cells[startRow, 9].Value = item.CurrentLevelStr;
+                excelWorksheet.Cells[startRow, 10].Value = item.StatusDescription;
+                excelWorksheet.Cells[startRow, 11].Value = item.ExpiredPTDate?.ToString("dd/MM/yyyy hh:mm", CultureInfo.InvariantCulture);
                 startRow++; // Di chuyển xuống dòng tiếp theo
             }
-        }
-
-        private static string GetData(object data, object? param)
-        {
-            string objStr = data?.ToString() ?? string.Empty;
-            return string.Format(objStr, param);
         }
 
         private static int GetTotalCount(IList<CourseLevelProgressModel>? courseLevelProgresses, EnumCourseLevel courseLevel)

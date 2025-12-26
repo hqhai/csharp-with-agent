@@ -15,6 +15,8 @@ namespace Fsel.Course.Infrastructure.Maps
         {
             CreateMap<Question, QuestionModel>().IgnoreAllNonExisting();
             CreateMap<CreateQuestionCommandModel, Question>().IgnoreAllNonExisting();
+            CreateMap<UpdateQuestionCommandModel, Question>().IgnoreAllNonExisting();
+            CreateMap<UpdateQuestionCommandModel, CreateQuestionCommandModel>().ForMember(p => p.Id, x => x.Ignore()).IgnoreAllNonExisting();
             CreateMap<Question, QuestionExplanationLogExportModel>().IgnoreAllNonExisting();
         }
     }

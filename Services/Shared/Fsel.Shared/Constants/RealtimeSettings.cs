@@ -74,6 +74,26 @@ namespace Fsel.Shared.Constants
             }
         }
 
+        public static class TestWritingAIFeedBackHub
+        {
+            public const string Pattern = $"/test-writing";
+
+            public static class Methods
+            {
+                public const string TestWritingAIFeedBackHub = $"TestWritingAIFeedBackHub";
+            }
+        }
+
+        public static class TestSpeakingAIFeedBackHub
+        {
+            public const string Pattern = $"/test-speaking";
+
+            public static class Methods
+            {
+                public const string TestSpeakingAIFeedBack = $"TestSpeakingAIFeedBack";
+            }
+        }
+
         public static class MockTestWritingAIFeedBackHub
         {
             public const string Pattern = $"/mock-test-writing";
@@ -161,6 +181,46 @@ namespace Fsel.Shared.Constants
             public static class Methods
             {
                 public const string Transcript = $"Transcript";
+            }
+        }
+
+        public static class ExamPracticeSpeakingAIFeedBackHub
+        {
+            public const string Pattern = $"/exam-practice-speaking";
+
+            public static class Methods
+            {
+                public const string ExamPracticeSpeakingAIFeedBack = $"ExamPracticeSpeakingAIFeedBack";
+            }
+        }
+
+        public static class ExamPracticeWritingAIFeedBackHub
+        {
+            public const string Pattern = $"/exam-practice-writing";
+
+            public static class Methods
+            {
+                public const string ExamPracticeWritingAIFeedBack = $"ExamPracticeWritingAIFeedBack";
+            }
+        }
+
+        public static class SetTimeExamPracticeHub
+        {
+            public const string Pattern = $"/set-time-exam-practice";
+
+            public static class Methods
+            {
+                public const string SetTimeExamPracticeHub = $"SetTimeExamPracticeHub";
+            }
+        }
+
+        public static class QuestionTypeHub
+        {
+            public const string Pattern = $"/question-type";
+
+            public static class Methods
+            {
+                public const string QuestionType = $"QuestionType";
             }
         }
     }

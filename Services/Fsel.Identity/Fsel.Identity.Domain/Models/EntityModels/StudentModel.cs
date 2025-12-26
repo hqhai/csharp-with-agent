@@ -14,17 +14,22 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public string? School { get; set; }
         public string? SchoolGrade { get; set; }
         public string? SchoolClass { get; set; }
-        public string? ParentEmail { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
         public EnumCourseLevel? BaseCourseLevel { get; set; }
         public string? Membership { get; set; }
         public Guid? ClassId { get; set; }
         public string? CodeClass { get; set; }
         public string? EmailParent { get; set; }
+        public string? ParentFullName { get; set; }
+        public string? ParentEmail { get; set; }
         public string? ParentPhoneNumber { get; set; }
         public long NumberOfToken { get; set; }
+        public long NumberOfTokenReceived { get; set; }
+        public string? Province { get; set; }
+        public string? District { get; set; }
         public Guid? ProvinceId { get; set; }
         public Guid? DistrictId { get; set; }
+        public Guid? SchoolClassId { get; set; }
         public Guid? SchoolId { get; set; }
         public Guid? CourseId { get; set; }
         public Guid? SenderId { get; set; }
@@ -34,5 +39,8 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public ParentProfileModel? Parent { get; set; }
         public Guid UserId { get; set; }
         public UserModel? User { get; set; }
+        public string? StudentCampusCode { get; set; }
+        public string? ClassCampusCode { get; set; }
+        public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
     }
 }

@@ -12,36 +12,32 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
+    using AutoMapper;
 
     public class PlacementTestGroupResultRepository : BaseRepository<PlacementTestGroupResult>, IPlacementTestGroupResultRepository
     {
-        public PlacementTestGroupResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public PlacementTestGroupResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 
-        public async Task<IList<Guid>> GetStudentIdsAsync(EnumCompletionStatus? status, IList<Guid> studentIds, EnumCourseLevel? currentLevel, EnumCourseLevel? courseLevel)
+        public async Task<IList<Guid>> GetStudentIdsAsync(IList<EnumCompletionStatus>? completionStatuses, IList<Guid> studentIds, IList<EnumCourseLevel>? suggetLevels, IList<EnumCourseLevel>? courseLevels)
         {
             var query = Queryable.WhereBulkContains(studentIds, x => x.StudentId);
-            if (status.HasValue)
+            if (completionStatuses?.Any() == true)
             {
-                switch (status.Value)
-                {
-                    case EnumCompletionStatus.Completed:
-                        query = query.Where(x => x.Status == EnumResultStatus.Done);
-                        break;
+                var hasCompleted = completionStatuses.Contains(EnumCompletionStatus.Completed);
+                var hasInProgress = completionStatuses.Contains(EnumCompletionStatus.InProgress);
+                query = query.Where(x => (hasCompleted && x.Status == EnumResultStatus.Done) || (hasInProgress && x.Status != EnumResultStatus.Done));
+            }
+            if (suggetLevels?.Any() == true)
+            {
+                query = query.Where(x => x.SuggetLevel.HasValue && suggetLevels.Contains(x.SuggetLevel.Value));
+            }
 
-                    case EnumCompletionStatus.InProgress:
-                        query = query.Where(x => x.Status != EnumResultStatus.Done);
-                        break;
-                }
-            }
-            if (currentLevel.HasValue)
+            if (courseLevels?.Any() == true)
             {
-                query = query.Where(x => x.SuggetLevel == currentLevel.Value);
-            }
-            if (courseLevel.HasValue)
-            {
-                query = query.Where(x => x.ChooseLevel == courseLevel.Value);
+                query = query.Where(x => x.ChooseLevel.HasValue && courseLevels.Contains(x.ChooseLevel.Value));
             }
             return await query.Select(x => x.StudentId).ToListAsync();
         }

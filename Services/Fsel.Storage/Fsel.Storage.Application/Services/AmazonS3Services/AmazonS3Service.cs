@@ -40,6 +40,7 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
             { EnumFolderType.Fsis, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.AG, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.HRM, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
+            { EnumFolderType.LHP, ByteSize.FromGigabytes(5).Bytes }, //maximum question size (5 GB)
             { EnumFolderType.Videos, ByteSize.FromGigabytes(5).Bytes }, //maximum video size (5 GB)
             { EnumFolderType.Files, ByteSize.FromGigabytes(5).Bytes }, //maximum file size (5 GB)
             { EnumFolderType.Questions, ByteSize.FromMegabytes(6).Bytes }, //maximum question size (6 MB)
@@ -189,28 +190,28 @@ namespace Fsel.Storage.Application.Services.AmazonS3Services
                 return result;
             }
 
-            //if (isValidEmpty && (file.IsFileType(Common.Enums.EnumFileType.Video) || file.IsFileType(Common.Enums.EnumFileType.Audio)))
-            //{
-            //    var text = await _cognitiveProvider.GetTranscriptionAsync(file);
-            //    if (string.IsNullOrEmpty(text))
-            //    {
-            //        result.AddErrorBadRequest(nameof(EnumMediaErrorCode.EmptyMediaFile), nameof(file), text);
-            //        return result;
-            //    }
+            if (isValidEmpty && (file.IsFileType(Common.Enums.EnumFileType.Video) || file.IsFileType(Common.Enums.EnumFileType.Audio)))
+            {
+                var text = await _cognitiveProvider.GetTranscriptionAsync(file);
+                if (string.IsNullOrEmpty(text))
+                {
+                    result.AddErrorBadRequest(nameof(EnumMediaErrorCode.EmptyMediaFile), nameof(file), text);
+                    return result;
+                }
 
-            //    var time = await MediaHelper.GetMediaDurationAsync(file, _systemFileProvider);
-            //    if (!time.HasValue)
-            //    {
-            //        result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(time), time);
-            //        return result;
-            //    }
+                var time = await MediaHelper.GetMediaDurationAsync(file, _systemFileProvider);
+                if (!time.HasValue)
+                {
+                    result.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(time), time);
+                    return result;
+                }
 
-            //    if (time / Shared.Helpers.StringHelper.CountWords(text) > 5)
-            //    {
-            //        result.AddErrorBadRequest(nameof(EnumMediaErrorCode.NotEnough1WordEvery5Seconds), nameof(time), time);
-            //        return result;
-            //    }
-            //}
+                if (time / Shared.Helpers.StringHelper.CountWords(text) > 5)
+                {
+                    result.AddErrorBadRequest(nameof(EnumMediaErrorCode.NotEnough1WordEvery5Seconds), nameof(time), time);
+                    return result;
+                }
+            }
 
             return result;
         }

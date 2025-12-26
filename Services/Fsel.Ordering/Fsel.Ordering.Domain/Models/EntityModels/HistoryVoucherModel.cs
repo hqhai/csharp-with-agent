@@ -6,6 +6,8 @@ namespace Fsel.Ordering.Domain.Models.EntityModels
     {
         public string? StudentCode { get; set; }
         public string? Email { get; set; }
+        public string? PhoneNumber { get; set; }
+        public string? FullName { get; set; }
         public string? VoucherCode { get; set; }
         public string? OrderCode { get; set; }
         public DateTime? DayUsed { get; set; }

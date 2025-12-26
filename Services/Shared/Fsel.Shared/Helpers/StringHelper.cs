@@ -8,6 +8,7 @@ namespace Fsel.Shared.Helpers
     using System.Text;
     using System.Text.Json;
     using System.Text.RegularExpressions;
+    using Fsel.Common.Helpers;
     using System.Web;
     using Fsel.Shared.Constants;
     using Nest;
@@ -50,7 +51,7 @@ namespace Fsel.Shared.Helpers
 
         public static IList<T>? ToList<T>(this string? str, char separator = ',')
         {
-            return str?.Split(separator).Select(x =>
+            return str?.Split(separator).Where(x => !string.IsNullOrEmpty(x)).Select(x =>
             {
                 if (TypeDescriptor.GetConverter(typeof(T)).IsValid(x))
                 {
@@ -368,6 +369,12 @@ namespace Fsel.Shared.Helpers
             return string.Format(objStr, param ?? Array.Empty<object>());
         }
 
+        public static string FormatStringWithParam(object data, dynamic? param)
+        {
+            string objStr = data?.ToString() ?? string.Empty;
+            return string.Format(objStr, param);
+        }
+
         public static bool ContainsSpecialChars(string input)
         {
             return Regex.IsMatch(input, @"^[\p{L}\s]+$");
@@ -447,6 +454,54 @@ namespace Fsel.Shared.Helpers
                     return answers ?? new List<string>();
                 }
                 return answers.Select(ans => CleanText(ans)).ToList();
+            }
+
+            private static readonly Regex ContentFieldsRx = new(
+            "\"BeforeClick\"\\s*:\\s*\"(?<before>(?:\\\\.|[^\"])*)\"\\s*,\\s*"
+            + "\"Transcript\"\\s*:\\s*\"(?<trans>(?:\\\\.|[^\"])*)\"\\s*,\\s*"
+            + "\"AfterQuestions\"\\s*:\\s*\"(?<after>(?:\\\\.|[^\"])*)\"",
+            RegexOptions.Singleline | RegexOptions.Compiled);
+
+            /// <summary>
+            /// Nhận chuỗi content (string chứa JSON), trả về content hợp nhất:
+            /// {BeforeClick}\n\n**Click to listen:**\n{"<Transcript JSON-string>"}\n\n{AfterQuestions}
+            /// </summary>
+            public static string NormalizeListeningContent(string rawContent)
+            {
+                if (string.IsNullOrWhiteSpace(rawContent))
+                {
+                    return string.Empty;
+                }
+                var m = ContentFieldsRx.Match(rawContent);
+                if (!m.Success)
+                {
+                    return rawContent; // Không đúng cấu trúc kỳ vọng thì trả nguyên văn
+                }
+                // Helper: giải escape JSON an toàn (kể cả emoji \uXXXX)
+                static string UnescapeJsonString(string s)
+                {
+                    // s đang là phần thân của một chuỗi JSON -> bọc thêm "..."
+                    return JsonSerializer.Deserialize<string>($"\"{s}\"") ?? string.Empty;
+                }
+
+                var before = UnescapeJsonString(m.Groups["before"].Value);
+                var trans = UnescapeJsonString(m.Groups["trans"].Value);
+                var after = UnescapeJsonString(m.Groups["after"].Value);
+
+                // Loại bỏ phần "Click to listen:" ở cuối BeforeClick (nếu có) để tránh lặp
+                before = Regex.Replace(before, @"\s*Click to listen:?\s*$", "", RegexOptions.IgnoreCase);
+
+                // Biểu diễn Transcript thành một JSON string literal hợp lệ (có dấu ngoặc kép & escape chuẩn)
+                var transJsonLiteral = trans.Serialize(); // ví dụ -> "Once upon a time..."
+
+                // Ghép theo format yêu cầu, bao quanh JSON string literal bởi {}
+                var merged =
+                    $"{before}\n\n" +
+                    $"**Click to listen:**\n" +
+                    $"{{{transJsonLiteral}}}\n\n" +
+                    $"{after}";
+
+                return StripTrailingEscapesAndEmojis(merged);
             }
         }
 
@@ -531,6 +586,43 @@ namespace Fsel.Shared.Helpers
                 return replace;
             }
             return input.Trim();
+        }
+
+        private static string StripTrailingEscapesAndEmojis(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+            {
+                return s;
+            }
+            // Xóa emoji thật ở cuối: 🌲 (U+1F332) và 😊 (U+1F60A), kèm khoảng trắng
+            s = Regex.Replace(
+                s,
+                @"(?:\s*(?:\uD83C\uDF32|\uD83D\uDE0A))+\s*$",
+                "",
+                RegexOptions.Singleline
+            );
+
+            // Xóa emoji ở dạng JSON-escaped ở cuối: \uD83C\uDF32 hoặc \uD83D\uDE0A
+            s = Regex.Replace(
+                s,
+                @"(?:\s*(?:\\uD83C\\uDF32|\\uD83D\\uDE0A))+\s*$",
+                "",
+                RegexOptions.Singleline
+            );
+
+            // Xóa mọi chuỗi escape JSON khác ở cuối (\\uXXXX, \\xXX, \\n, \\t, \\", \/, \\...)
+            s = Regex.Replace(
+                s,
+                @"(?:\s*(?:\\u[0-9A-Fa-f]{4}|\\x[0-9A-Fa-f]{2}|\\[0-7]{1,3}|\\[abefnrtv""\\/]|\\))+\s*$",
+                "",
+                RegexOptions.Singleline
+            );
+            return s;
+        }
+
+        public static string GenerateEmail(string localPath, string domainPath)
+        {
+            return localPath + domainPath;
         }
     }
 }

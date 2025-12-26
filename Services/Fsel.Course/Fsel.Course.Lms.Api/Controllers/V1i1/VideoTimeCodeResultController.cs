@@ -3,6 +3,7 @@
 namespace Fsel.Course.Lms.Api.Controllers.V1i1
 {
     using System.Net;
+    using Asp.Versioning;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Core.Base.BaseModels;
@@ -18,7 +19,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/video-time-code-result")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class VideoTimeCodeResultController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -70,6 +71,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         [HttpPost("action-time-code")]
         [ProducesResponseType(typeof(MethodResult<VideoResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [MapToApiVersion(ApiSettings.APIVersion1i1)]
         public async Task<IActionResult> ActionTimeCode([FromBody] ActionVideoTimeCodeCommand command)
         {
             var queryResult = await _mediator.Send(command).ConfigureAwait(false);

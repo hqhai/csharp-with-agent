@@ -12,6 +12,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
         public ConstantUrl? ConstantUrl { get; set; }
         public PaymentConfig? PaymentConfig { get; set; }
         public PayooConfig? PayooConfig { get; set; }
+        public PayooConfig? PayooGtelConfig { get; set; }
         public new Services? Services { get; set; }
         public UrBoxConfig? UrBoxConfig { get; set; }
         public VoucherConfigs? VoucherConfigs { get; set; }
@@ -72,6 +73,7 @@ namespace Fsel.Ordering.Infrastructure.ValueSettings
     public class ConstantUrl
     {
         public string? PaymentSuccessUrl { get; set; }
+        public string? UpdateSenderSettingUrl { get; set; }
     }
 
     public class UrBoxConfig

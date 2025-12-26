@@ -89,6 +89,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 EventCodeStr = request.EventCodeStr,
                 DistrictName = request.DistrictName,
                 StudentId = request.StudentId,
+                UserNameStr = request.UserNameStr
             });
 
             var studentEventRegistrations = studentEventRegistrationResults?.Content?.Result;
@@ -276,7 +277,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
             var courseType = request.CourseType;
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (ExcelPackage excelPackage = new ExcelPackage(new FileInfo(ResourceSettings.BaoCaoReportStudentEvent)))
+            using (var stream = File.OpenRead(ResourceSettings.BaoCaoReportStudentEvent))
+            using (var excelPackage = new ExcelPackage(stream))
             {
                 var excelWorksheet = excelPackage.Workbook.Worksheets[0];
                 if (courseType == EnumCourseType.EnglishFoundation)
@@ -300,6 +302,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                             border.Left.Style = ExcelBorderStyle.Thin;
                             border.Right.Style = ExcelBorderStyle.Thin;
                         }
+                        GC.Collect();
+
                         ExcelReportHelper.ProcessCell(excelNewWorksheet, RowExportReport, dem - 1, dem + 1, nameof(FinalTest));
                         dem++;
                         var rangeFinal = excelNewWorksheet.Cells[RowExportReport, dem].Address + ":" + excelNewWorksheet.Cells[RowExportReport + 1, dem].Address;
@@ -309,6 +313,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                         borderFinal.Bottom.Style = ExcelBorderStyle.Thin;
                         borderFinal.Left.Style = ExcelBorderStyle.Thin;
                         borderFinal.Right.Style = ExcelBorderStyle.Thin;
+                        GC.Collect();
 
                         // Ghi dữ liệu từ reportPlacementTestEvents
                         int startRow = 3;
@@ -348,6 +353,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
                                 startRow++;
                             }
+                            GC.Collect();
                         }
                     }
                 }
@@ -411,6 +417,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                         border.Right.Style = ExcelBorderStyle.Thin;
                     }
                 }
+                GC.Collect();
             }
             else
             {
@@ -427,6 +434,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                     border.Left.Style = ExcelBorderStyle.Thin;
                     border.Right.Style = ExcelBorderStyle.Thin;
                 }
+                GC.Collect();
+
                 ExcelReportHelper.ProcessCell(excelWorksheet, RowExportReport, dem - 1, dem + 1, nameof(FinalTest));
                 dem++;
                 var rangeFinal = excelWorksheet.Cells[RowExportReport, dem].Address + ":" + excelWorksheet.Cells[RowExportReport + 1, dem].Address;
@@ -436,6 +445,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 borderFinal.Bottom.Style = ExcelBorderStyle.Thin;
                 borderFinal.Left.Style = ExcelBorderStyle.Thin;
                 borderFinal.Right.Style = ExcelBorderStyle.Thin;
+                GC.Collect();
             }
 
             // Ghi dữ liệu từ reportPlacementTestEvents
@@ -476,6 +486,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
 
                     startRow++;
                 }
+                GC.Collect();
             }
         }
 

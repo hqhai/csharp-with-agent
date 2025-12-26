@@ -45,4 +45,37 @@ builder.Services.Configure<FormOptions>(x =>
 
 var app = builder.Build();
 app.UseGatewayServices();
+app.UseMiddleware<RequestTimeoutMiddleware>(TimeSpan.FromMinutes(5));
 app.Run();
+
+public class RequestTimeoutMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly TimeSpan _timeout;
+
+    public RequestTimeoutMiddleware(RequestDelegate next, TimeSpan timeout)
+    {
+        _next = next;
+        _timeout = timeout;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        using var cts = new CancellationTokenSource(_timeout);
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(context.RequestAborted, cts.Token);
+
+        var task = _next(context);
+        var delayTask = Task.Delay(Timeout.InfiniteTimeSpan, linkedCts.Token);
+
+        var completedTask = await Task.WhenAny(task, delayTask);
+        if (completedTask == task)
+        {
+            await task;
+        }
+        else
+        {
+            context.Response.StatusCode = StatusCodes.Status504GatewayTimeout;
+            await context.Response.WriteAsync("Request timed out");
+        }
+    }
+}

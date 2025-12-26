@@ -19,7 +19,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
     {
         private readonly IUnitRepository _unitRepository;
 
-        public DeleteUnitCommandHandler(IUnitRepository unitRepository)
+        public DeleteUnitCommandHandler(IUnitRepository unitRepository, IUnitResultRepository unitResultRepository)
         {
             _unitRepository = unitRepository;
         }
@@ -39,7 +39,7 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                 return methodResult;
             }
 
-            var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
+            var isUnitUsed = await _unitRepository.IsUsingByClient(request.Id);
             if (isUnitUsed)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);

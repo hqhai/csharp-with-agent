@@ -10,6 +10,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.Shared.Helpers;
@@ -20,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
     public class SavePlacementTestDoneCommand : IRequest<MethodResult<bool>>
     {
         public EnumCourseLevel CourseLevel { get; set; }
+        public bool? IsSendLevel { get; set; } = true;
         public Guid StudentId { get; set; }
     }
 
@@ -63,12 +65,15 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 return methodResult;
             }
 
-            var startingLevel = student.CourseLevel.Value.GetPlacementTestLevelByCourseLevel();
-            await SavePlacementTestDoneAsync(student, request.CourseLevel, startingLevel, cancellationToken);
+            int age = DateTimeHelper.GetYearOld(student.User?.Birthday);
+            var courseLevel = age >= ValueSettings.AgeMilestone.StudentAge ? EnumCourseLevel.B1 : EnumCourseLevel.A2;
+            var startingLevel = courseLevel.GetPlacementTestLevelByCourseLevel();
+
+            await SavePlacementTestDoneAsync(student, request.IsSendLevel, request.CourseLevel, startingLevel, cancellationToken);
             return methodResult;
         }
 
-        private async Task SavePlacementTestDoneAsync(StudentModel student, EnumCourseLevel desiredLevel, EnumPlacementTestLevel startingLevel, CancellationToken cancellationToken)
+        private async Task SavePlacementTestDoneAsync(StudentModel student, bool? isSendLevel, EnumCourseLevel desiredLevel, EnumPlacementTestLevel startingLevel, CancellationToken cancellationToken)
         {
             int age = DateTimeHelper.GetYearOld(student.User?.Birthday);
             var placementTestResultDone = await _placementTestResultRepository.Queryable.Where(x => x.Status == EnumResultStatus.Done && x.StudentId == student.Id)
@@ -80,7 +85,16 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 if (isLock)
                 {
                     await UpdatePlacementGroupResultDoneAsync(placementTestResultDone, desiredLevel, levelNext);
-                    await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel { Id = student?.UserId ?? default, CourseLevel = levelNext ?? default, BaseCourseLevel = levelNext ?? default });
+                    if (isSendLevel == true)
+                    {
+                        await _userService.UpdateStudentByLevelAsync(new UpdateStudentByLevelModel
+                        {
+                            Id = student?.UserId ?? default,
+                            CourseLevel = levelNext ?? default,
+                            BaseCourseLevel = levelNext ?? default
+                        });
+                    }
+
                     return;
                 }
                 else if (levelNext.HasValue)
@@ -92,7 +106,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 await AddPlacementTestResultAndGetPlacementTest(desiredLevel, startingLevel, startingLevel, student.Id, cancellationToken);
             }
-            await SavePlacementTestDoneAsync(student, desiredLevel, startingLevel, cancellationToken);
+            await SavePlacementTestDoneAsync(student, isSendLevel, desiredLevel, startingLevel, cancellationToken);
         }
 
         private async Task CreatePlacementGroupResultAsync(PlacementTest placementTest, Guid studentId)
@@ -107,11 +121,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
                 StudentId = studentId,
                 NewDate = DateTime.UtcNow,
                 ProcessDate = DateTime.UtcNow,
-                ProcessLevel = placementTest.Level,
+                ProcessLevel = placementTest.PlacementTestLevel,
                 Status = EnumResultStatus.Process
             };
-            _placementTestGroupResultRepository.Add(placementTestGroupResult);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestGroupResultRepository.BulkMergeAsync(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.IsDeleted };
+            });
         }
 
         private async Task UpdatePlacementGroupResultDoneAsync(PlacementTestResult placementTestResult, EnumCourseLevel desiredLevel, EnumCourseLevel? level)
@@ -129,8 +145,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             placementTestGroupResult.CurrentLevel = SendMailHelper.GetPreviousEnumValue(level ?? default);
             placementTestGroupResult.Status = EnumResultStatus.Done;
             placementTestGroupResult.Percent = placementTestResult.Percent;
-            _placementTestGroupResultRepository.Update(placementTestGroupResult, false, x => x.StudentId);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestGroupResultRepository.BulkUpdateList(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId };
+            });
         }
 
         private async Task AddPlacementTestResultAndGetPlacementTest(EnumCourseLevel desiredLevel, EnumPlacementTestLevel startingLevel, EnumPlacementTestLevel level, Guid studentId, CancellationToken cancellationToken)
@@ -142,7 +160,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             {
                 return;
             }
-            var placementTests = await placementTestQuery.Where(x => x.Level == level && x.IsActive).ToListAsync(cancellationToken);
+            var placementTests = await placementTestQuery.Where(x => x.PlacementTestLevel == level && x.IsActive).ToListAsync(cancellationToken);
             var placementTest = placementTests.OrderBy(x => random.Next()).FirstOrDefault();
             if (placementTest == null)
             {
@@ -152,15 +170,18 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd.V1i1
             var correctValue = PlacementTestHelper.GetCorrectCountToLevel(desiredLevel, startingLevel.GetCourseLevelByPlacementTestLevel(), level);
             placementTestResult = new PlacementTestResult
             {
-                Level = placementTest.Level,
+                Level = placementTest.PlacementTestLevel,
                 PlacementTestId = placementTest.Id,
                 StudentId = studentId,
                 Status = EnumResultStatus.Done,
                 CorrectCount = correctValue.Item1,
                 CorrectTotal = correctValue.Item2,
             };
-            _placementTestResultRepository.Add(placementTestResult);
-            await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.PlacementTestId, c.IsDeleted };
+            });
         }
     }
 }

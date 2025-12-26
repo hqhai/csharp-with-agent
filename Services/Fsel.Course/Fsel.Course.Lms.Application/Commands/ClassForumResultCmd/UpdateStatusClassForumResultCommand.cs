@@ -63,7 +63,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             var lesson = await _lessonResultRepository.GetIncludeByIdAsync(classForumResult.LessonResultId);
 
-            await _classForumResulRepository.ExecuteTransactionAsync(async () =>
+            await _classForumResulRepository.ExecuteTransactionAsync((Func<Task<VoidMethodResult>>)(async () =>
              {
                  classForumResult.Status = EnumClassForumResultStatus.Denied;
                  _classForumResulRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
@@ -71,7 +71,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
                  var objectOwnerId = CustomDataForParamMessage(classForumResult!);
 
-                 GetFeatureModuleQuery query = new GetFeatureModuleQuery
+                 var query = new GetFeatureModuleQuery
                  {
                      FeatureModule = EnumFeatureModule.ClassForumResult,
                      ObjectId = classForumResult?.Id ?? default
@@ -80,9 +80,9 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                  var featureModule = await _mediator.Send(query).ConfigureAwait(false);
                  var featureModuleResult = featureModule?.Result;
 
-                 List<object> paramLinksValue = new List<object> { featureModuleResult?.CourseId ?? default, featureModuleResult?.UnitId ?? default, featureModuleResult?.LessonId ?? default, featureModuleResult?.ClassForumDetailResultId ?? default };
+                 var paramLinksValue = new List<object> { featureModuleResult?.CourseId ?? default, featureModuleResult?.UnitId ?? default, featureModuleResult?.LessonId ?? default, featureModuleResult?.ClassForumDetailResultId ?? default };
 
-                 NotificationSendingQueueModel notificationQueueModel = new NotificationSendingQueueModel()
+                 var notificationQueueModel = new NotificationSendingQueueModel()
                  {
                      Type = EnumNotificationType.LinkPage,
                      Content = EnumNotificationContent.DeleteClassForumResult,
@@ -99,7 +99,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                  methodResult.StatusCode = StatusCodes.Status200OK;
                  methodResult.Result = true;
                  return methodResult;
-             });
+             }));
 
             return methodResult;
         }

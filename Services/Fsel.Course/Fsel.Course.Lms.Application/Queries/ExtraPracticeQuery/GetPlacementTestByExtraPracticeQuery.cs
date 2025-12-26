@@ -81,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Queries.ExtraPracticeQuery
                 {
                     Id = extraPractice.PlacementTest!.Id,
                     Name = extraPractice.PlacementTest.Name,
-                    Level = extraPractice.PlacementTest.Level,
+                    Level = extraPractice.PlacementTest.PlacementTestLevel,
                     CreatedDate = extraPractice.PlacementTest.CreatedDate,
                     IsActive = extraPractice.PlacementTest.IsActive,
                     SectionGroups = extraPractice.PlacementTest.PlacementTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel

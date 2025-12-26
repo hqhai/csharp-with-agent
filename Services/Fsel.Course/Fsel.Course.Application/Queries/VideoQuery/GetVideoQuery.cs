@@ -18,8 +18,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
     {
         private readonly IVideoRepository _videoRepository;
 
-        public GetVideoQueryHandler(IVideoRepository videoRepository
-            )
+        public GetVideoQueryHandler(IVideoRepository videoRepository)
         {
             _videoRepository = videoRepository;
         }
@@ -29,15 +28,21 @@ namespace Fsel.Course.Application.Queries.VideoQuery
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
-            var video = await _videoRepository.GetIncludeAllAsync(request.Id);
-
+            var video = await _videoRepository.GetByIdAsync(request.Id);
             if (video == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video), request.Id);
+                return methodResult;
+            }
+
+            var videoModel = await _videoRepository.GetIncludeAllAsync(video.Id);
+            if (videoModel == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
 
-            methodResult.Result = video;
+            methodResult.Result = videoModel;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }

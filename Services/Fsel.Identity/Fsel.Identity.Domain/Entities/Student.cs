@@ -10,6 +10,7 @@ namespace Fsel.Identity.Domain.Entities
     using Fsel.Common.Helpers;
     using Fsel.Core.Entities;
     using Fsel.Identity.Domain.Entities.BeginnerGuideConfigs;
+    using Fsel.Identity.Domain.Entities.Campus;
     using Fsel.Shared.Enums;
 
     public class Student : Entity
@@ -61,6 +62,15 @@ namespace Fsel.Identity.Domain.Entities
         public Guid? DistrictId { get; set; }
         public Guid? SchoolId { get; set; }
         public DateTime? ExpiredDate { get; set; }
+        public Guid? SchoolClassId { get; set; }
+
+        public string? StudentCampusCode { get; set; }
+
+        public string? ClassCampusCode { get; set; }
+
+        public SchoolClass? SchoolClassCampus { get; set; }
+
+        public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
 
         public virtual User? User { get; set; }
         public Guid UserId { get; set; }

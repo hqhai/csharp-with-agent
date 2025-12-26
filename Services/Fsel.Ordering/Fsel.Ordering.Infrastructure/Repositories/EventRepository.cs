@@ -9,7 +9,8 @@ namespace Fsel.Ordering.Infrastructure.Repositories
 
     public class EventRepository : BaseRepository<Event>, IEventRepository
     {
-        public EventRepository(OrderingDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public EventRepository(OrderingDbContext dbContext, OrderingReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

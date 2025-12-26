@@ -50,10 +50,12 @@ namespace IdentityServer4.Stores
             {
                 try
                 {
+                    Logger.LogCritical("ProtectedDataMessageStore_Log_ReadAsync: value: {0}", value);
                     var bytes = Base64Url.Decode(value);
                     bytes = Protector.Unprotect(bytes);
                     var json = Encoding.UTF8.GetString(bytes);
                     result = ObjectSerializer.FromString<Message<TModel>>(json);
+                    Logger.LogCritical("ProtectedDataMessageStore_Log_ReadAsync: json: {0}", json);
                 }
                 catch(Exception ex)
                 {
@@ -72,9 +74,11 @@ namespace IdentityServer4.Stores
             try
             {
                 var json = ObjectSerializer.ToString(message);
+                Logger.LogCritical("ProtectedDataMessageStore_Log_WriteAsync: json: {0}", json);
                 var bytes = Encoding.UTF8.GetBytes(json);
                 bytes = Protector.Protect(bytes);
                 value = Base64Url.Encode(bytes);
+                Logger.LogCritical("ProtectedDataMessageStore_Log_WriteAsync: value: {0}", value);
             }
             catch(Exception ex)
             {

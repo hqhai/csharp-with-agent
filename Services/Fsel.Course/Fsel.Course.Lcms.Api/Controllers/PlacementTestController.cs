@@ -12,10 +12,12 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Asp.Versioning;
 using Fsel.Shared.Constants;
+using Fsel.Course.Domain.Models.EntityModels.V1i1;
 
 namespace Fsel.Course.Lcms.Api.Controllers
 {
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/placement-test")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
@@ -99,6 +101,18 @@ namespace Fsel.Course.Lcms.Api.Controllers
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeletePlacementTestCommand { Id = id }).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Placement Tests By ProgramId
+        /// </summary>
+        [HttpGet("gets-by-program-id")]
+        [ProducesResponseType(typeof(MethodResult<IList<PlacementTestSearchModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetPlacementTestsByProgramId([FromQuery] GetPlacementTestsByProgramIdQuery query)
+        {
+            MethodResult<IList<PlacementTestSearchModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

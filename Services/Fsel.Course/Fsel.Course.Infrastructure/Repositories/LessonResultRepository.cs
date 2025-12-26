@@ -11,10 +11,12 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Microsoft.EntityFrameworkCore;
+    using AutoMapper;
 
     public class LessonResultRepository : BaseRepository<LessonResult>, ILessonResultRepository
     {
-        public LessonResultRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public LessonResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 
@@ -25,7 +27,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return default;
             }
             return await Queryable.Include(x => x.ClassForumResults.Where(x => ids.Contains(x.LessonResultId)))
-                                    .Include(x => x.VideoResult)
+                                    .Include(x => x.VideoResults)
                                     .Include(x => x.HomeWorkResults.Where(x => ids.Contains(x.LessonResultId)))
                                     .Where(x => ids.Contains(x.Id))
                                     .ToListAsync();
@@ -34,7 +36,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         public async Task<LessonResult?> GetAsync(Guid? courseId, Guid? unitId, Guid? lessonId, Guid? studentId)
         {
             return await Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
-                                    .Include(x => x.VideoResult)
+                                    .Include(x => x.VideoResults)
                                     .Include(x => x.Lesson)
                                     .Include(x => x.HomeWorkResults.Where(x => x.StudentId == studentId))
                                     .Where(x => x.CourseId == courseId && x.UnitId == unitId)
@@ -44,7 +46,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         public async Task<LessonResult?> GetAsync(Guid? studentId, Guid courseId)
         {
             return await Queryable.Include(x => x.Lesson).ThenInclude(x => x!.LessonInstructions)
-                                                        .Include(x => x.VideoResult)
+                                                        .Include(x => x.VideoResults)
                                                         .Include(x => x.HomeWorkResults)
                                                         .Include(x => x.ClassForumResults)
                                                         .Where(x => x.Status != EnumResultStatus.New && x.CourseId == courseId)
@@ -62,7 +64,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return default;
             }
             return await Queryable.Include(x => x.ClassForumResults)
-                                .Include(x => x.VideoResult)
+                                .Include(x => x.VideoResults)
                                 .Include(x => x.HomeWorkResults)
                                 .Where(x => x.UnitId == unitId && x.CourseId == courseId)
                                 .Where(x => lessonIds.Contains(x.LessonId) && x.StudentId == studentId)
@@ -73,7 +75,7 @@ namespace Fsel.Course.Infrastructure.Repositories
         public async Task<List<LessonResult>?> GetListAsync(CourseResultModel courseResult)
         {
             return await Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == courseResult.StudentId))
-                                     .Include(x => x.VideoResult)
+                                     .Include(x => x.VideoResults)
                                      .Include(x => x.HomeWorkResults.Where(x => x.StudentId == courseResult.StudentId))
                                      .Where(x => x.CourseId == courseResult.CourseId && x.StudentId == courseResult.StudentId).ToListAsync();
         }

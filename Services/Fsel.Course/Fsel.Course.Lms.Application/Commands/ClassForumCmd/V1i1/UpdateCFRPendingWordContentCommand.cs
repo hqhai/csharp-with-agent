@@ -42,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         private readonly CreateTokenHistoryPublisher _createTokenHistoryPublisher;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly SetTimeClassForumDonePublisher _setTimeClassForumDonePublisher;
+        private readonly ClassForumPronunciationPublisher _classForumPronunciationPublisher;
 
         public UpdateCFRPendingWordContentCommandHandler(IClassForumDetailResultRepository classForumDetailResultRepository,
                                                          IClassForumResultRepository classForumResultRepository,
@@ -52,7 +53,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                                                          ISystemService systemService,
                                                          CreateTokenHistoryPublisher createTokenHistoryPublisher,
                                                          ICourseResultRepository courseResultRepository,
-                                                         SetTimeClassForumDonePublisher setTimeClassForumDonePublisher)
+                                                         SetTimeClassForumDonePublisher setTimeClassForumDonePublisher,
+                                                         ClassForumPronunciationPublisher classForumPronunciationPublisher)
         {
             _classForumDetailResultRepository = classForumDetailResultRepository;
             _classForumResultRepository = classForumResultRepository;
@@ -64,6 +66,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
             _courseResultRepository = courseResultRepository;
             _setTimeClassForumDonePublisher = setTimeClassForumDonePublisher;
+            _classForumPronunciationPublisher = classForumPronunciationPublisher;
         }
 
         public async Task<MethodResult<bool>> Handle(UpdateCFRPendingWordContentCommand request, CancellationToken cancellationToken)
@@ -135,8 +138,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
                 classForumDetailResult.MediaType = MediaHelper.GetMediaType(classForumDetailResult.ClassForumResultFiles.Select(x => x.FilePath).FirstOrDefault());
                 classForumDetailResult.Status = string.IsNullOrEmpty(request.WordContent) ? EnumClassForumResultStatus.ErrorSpeechToText : EnumClassForumResultStatus.Pending;
 
-                _classForumDetailResultRepository.Update(classForumDetailResult);
-                await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+                await _classForumDetailResultRepository.BulkUpdateList(new List<ClassForumDetailResult> { classForumDetailResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumResultId, c.SubmissionCount };
+                });
 
                 var token = isFirst ? await GetTokenAsync(classForum, classForumResult, course.CourseType) : null;
                 await UpdateClassForumResult(classForumResult, token, cancellationToken);
@@ -148,6 +153,12 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
 
             // đẩy lên AI chấm điểm
             await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request.WordContent ?? string.Empty, cancellationToken);
+
+            // chấm Pronunciation
+            if (classForum.CourseSkill == EnumCourseSkill.Speaking)
+            {
+                await _classForumPronunciationPublisher.Publish(new ClassForumPronunciationConsumerModel { ClassForumDetailResultId = classForumDetailResult.Id }, cancellationToken);
+            }
 
             // cập nhật nhiệm vụ
             await DoQuestBoard(classForumResult.StudentId, EnumQuestBoardType.BeginnerQuests, EnumQuestBoardCategory.CompleteTheFirstClassForum, cancellationToken);
@@ -169,8 +180,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         {
             classForumResult.TokenFirstTime = token;
             classForumResult.IsPendingSpeechToText = false;
-            _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+            await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+            });
         }
 
         private async Task DoQuestBoard(Guid studentId, EnumQuestBoardType type, EnumQuestBoardCategory category, CancellationToken cancellationToken)
@@ -232,19 +245,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i1
         {
             if (classForum.IsAlFeedBack)
             {
-                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModelV2
                 {
                     ClassForumResultId = classForumDetailResult.ClassForumResultId,
                     ClassForumDetailResultId = classForumDetailResult.Id,
                     WordContent = wordContent,
-                    UserAIConfig = classForum.UserAlConfig,
-                    SettingModel = classForum.SettingModel,
-                    SettingFrequecy = classForum.SettingFrequecy,
-                    SettingPresence = classForum.SettingPresence,
-                    SettingTemperature = classForum.SettingTemperature,
-                    SettingTopP = classForum.SettingTopP,
-                    SettingWordMaxLength = classForum.SettingWordMaxLength,
-                    SystemRoleAlConfig = classForum.SystemRoleAlConfig,
                     SubmissionCount = classForumDetailResult.SubmissionCount ?? default
                 }, cancellationToken);
             }

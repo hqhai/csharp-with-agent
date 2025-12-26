@@ -115,6 +115,14 @@ namespace Fsel.Course.Infrastructure.Common
                     (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerTableCompletion(ref configAnswer, configOldAnswer.Deserialize<MultipleChoiceAnswerV1>(), question.Config.Deserialize<TableCompletionQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
                     break;
 
+                case EnumQuestionType.ColorMatchingType:
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleColorMatchingTypeAnswer(ref configAnswer, configOldAnswer.Deserialize<ColorMatchingTypeAnswer>(), question.Config.Deserialize<ColorMatchingTypeQuestion>(), isTryAgain, isSubmit, isMandatoryAnswer);
+                    break;
+
+                case EnumQuestionType.Tracing:
+                    (totalCorrect, isAnswerMissing, isAnswered) = HandleAnswerTracing(ref configAnswer, configOldAnswer.Deserialize<TracingAnswer>(), question.Config.Deserialize<TracingQuestion>(), isTryAgain, isSubmit);
+                    break;
+
                 default:
                     return default;
             }
@@ -143,6 +151,9 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.FlowChartCompletion:
                 case EnumQuestionType.TableCompletion:
                     return (short)(configAnswer.Deserialize<MultipleChoiceAnswerV1>()?.Answers.Count ?? default);
+
+                case EnumQuestionType.ColorMatchingType:
+                    return (short)(configAnswer.Deserialize<ColorMatchingTypeAnswer>()?.Answers.Count ?? default);
 
                 default:
                     return default;
@@ -373,6 +384,16 @@ namespace Fsel.Course.Infrastructure.Common
                     result = GetAnswer(matchingTaskQuestion, isShowSubStatus, status, isDisableAnswer);
                     break;
 
+                case EnumQuestionType.ColorMatchingType:
+                    var colorMatchingTypeAnswer = configAnswer.Deserialize<ColorMatchingTypeAnswer>();
+                    result = colorMatchingTypeAnswer;
+                    break;
+
+                case EnumQuestionType.Tracing:
+                    var tracingAnswer = configAnswer.Deserialize<TracingAnswer>();
+                    result = tracingAnswer;
+                    break;
+
                 default:
                     throw new ArgumentException("Invalid question type");
             }
@@ -554,6 +575,9 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.FlowChartCompletion:
                 case EnumQuestionType.TableCompletion:
                     return _linQAnswerHelper.IsDuplicateAnswerId(dataAnswer, nameof(ConfigAnswer.Id));
+
+                case EnumQuestionType.ColorMatchingType:
+                    return !_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(ColorMatchingTypeAnswers.IsChecked), false);
 
                 default:
                     return default;
@@ -1151,6 +1175,65 @@ namespace Fsel.Course.Infrastructure.Common
             return (number, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer.Answers, nameof(ConfigAnswerV1.Key)));
         }
 
+        private (short, bool, bool) HandleColorMatchingTypeAnswer(ref object? configAnswer, ColorMatchingTypeAnswer? dataOldAnswer, ColorMatchingTypeQuestion? dataQuestion, bool isTryAgain, bool isSubmit, bool isMandatoryAnswer)
+        {
+            short number = 0;
+            var dataAnswer = configAnswer.Deserialize<ColorMatchingTypeAnswer>();
+            bool isAnswerMissing = IsAnswerMissing(dataAnswer?.Answers, dataQuestion?.Contents, EnumQuestionType.ColorMatchingType, isSubmit, isMandatoryAnswer);
+            if (dataQuestion?.Contents == null || ((dataAnswer == null || dataAnswer.Answers == null) || !dataAnswer.Answers.Any()) || (isMandatoryAnswer && isAnswerMissing))
+            {
+                configAnswer = dataAnswer;
+                return (default, isAnswerMissing, false);
+            }
+            if (dataOldAnswer != null && dataOldAnswer.CountFail == dataQuestion.Trial)
+            {
+                dataAnswer = dataOldAnswer;
+            }
+            dataAnswer.IsFirstSubmit = isTryAgain;
+            foreach (var item in dataAnswer.Answers)
+            {
+                if (!item.IsChecked)
+                {
+                    item.IsExact = default;
+                    continue;
+                }
+
+                var isCorrect = dataQuestion.Contents.Any(x => x.Id == item.Id && x.IsCorrect == item.IsChecked);
+                item.IsExact = isCorrect;
+                number = isCorrect ? ++number : --number;
+            }
+            var correctQuestion = dataQuestion.Contents.Where(x => x.IsCorrect.HasValue && x.IsCorrect.Value).Count();
+            if (!isTryAgain && isSubmit && number != correctQuestion)
+            {
+                dataAnswer.Answers = new List<ColorMatchingTypeAnswers>();
+                dataAnswer.CountFail = ValueDefault;
+            }
+            configAnswer = dataAnswer;
+            return (number > 0 ? number : default, isAnswerMissing, _linQAnswerHelper.IsAnswerHaveData(dataAnswer.Answers, nameof(ColorMatchingTypeAnswers.IsChecked)));
+        }
+
+        private static (short, bool, bool) HandleAnswerTracing(ref object? configAnswer, TracingAnswer? dataOldAnswer, TracingQuestion? question, bool isTryAgain, bool isSubmit)
+        {
+            int valueDefaut = 0;
+            var dataAnswer = configAnswer.Deserialize<TracingAnswer>();
+
+            if (dataOldAnswer?.CountFail == question?.Trial)
+            {
+                dataAnswer = dataOldAnswer;
+            }
+
+            if (!isTryAgain && dataAnswer != null && !dataAnswer.IsExact && isSubmit)
+            {
+                dataAnswer.CountFail = valueDefaut;
+                dataAnswer.CountStrokes = valueDefaut;
+            }
+
+            short number = (dataAnswer != null && dataAnswer.IsExact) ? (short)1 : (short)valueDefaut;
+            bool isAnswerMissing = dataAnswer == null;
+            configAnswer = dataAnswer;
+            return (number, isAnswerMissing, true);
+        }
+
         #endregion V1
 
         #endregion Handle Answer
@@ -1207,6 +1290,9 @@ namespace Fsel.Course.Infrastructure.Common
                 case EnumQuestionType.FlowChartCompletion:
                 case EnumQuestionType.TableCompletion:
                     return new MultipleChoiceAnswerV1();
+
+                case EnumQuestionType.ColorMatchingType:
+                    return new ColorMatchingTypeAnswer();
 
                 default:
                     return default;

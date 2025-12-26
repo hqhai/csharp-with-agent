@@ -77,7 +77,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             {
                 queryStudent = queryStudent.Where(m => m.CourseLevel == request.CourseLevel);
             }
-            if (_authContext.Roles != null && _authContext.Roles.Contains(EnumRole.AdminSchool.ToString()))
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
+            if (hasMatchedRole)
             {
                 var schoolId = await _userSchoolRepository.GetSchoolIdAsync();
                 queryStudent = queryStudent.Where(x => x.SchoolId.HasValue && x.SchoolId == schoolId);
@@ -96,7 +98,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 }
                 else if (request.Keyword.IsValidPhoneNumber())
                 {
-                    query = query.Where(m => m.User.PhoneNumber == request.Keyword);
+                    var queryPhone = query.Where(m => m.User.PhoneNumber == request.Keyword);
+                    var queryStudentCampus = query.Where(m => m.Student.StudentCampusCode  != null && m.Student.StudentCampusCode == request.Keyword);
+                    query = queryPhone.Union(queryStudentCampus);
                 }
                 else if (Guid.TryParse(request.Keyword, out var guid))
                 {
@@ -106,7 +110,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 {
                     var queryUserName = query.Where(m => (m.User.UserName != null && m.User.UserName == request.Keyword));
                     var queryFullName = query.Where(m => m.User.FullName != null && EF.Functions.Contains(m.User.FullName, $"\"{request.Keyword}\"") && EF.Functions.Like(m.User.FullName, $"%{request.Keyword}%"));
-                    query = queryUserName.Union(queryFullName);
+                    var queryStudentCampus = query.Where(m => m.Student.StudentCampusCode  != null && m.Student.StudentCampusCode == request.Keyword);
+                    query = queryUserName.Union(queryFullName).Union(queryStudentCampus);
                 }
             }
 
@@ -127,7 +132,8 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
                 Grade = x.Student.SchoolGrade,
                 UserName = x.User.UserName,
                 PasswordDefault = x.User.DefaultPassword,
-                ExpiredDate = x.Student.ExpiredDate
+                ExpiredDate = x.Student.ExpiredDate,
+                StudentCampusCode = x.Student.StudentCampusCode,
             });
             int totalItem = await dataQuery.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
             var lists = await dataQuery

@@ -2,16 +2,13 @@
 
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
-    using System.Collections.Generic;
-    using System.Diagnostics;
     using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
-    using Fsel.Shared.Models.ShareModels.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using static Fsel.Shared.Constants.ValueSettings;
@@ -37,18 +34,21 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var methodResult = new MethodResult<OverallReportLearningProgressModel>();
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
+                Keyword = request.Keyword,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolClass = request.SchoolClass,
-                SchoolGrade = request.SchoolGrade,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
+                ListOverallScore = request.ListOverallScore,
+                ListCurrentLevel = request.ListCurrentLevel,
+
                 EndDate = request.EndDate,
-                Keyword = request.Keyword,
-                LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
-                CourseLevel = request.CourseLevel,
                 ManagerReportType = EnumManagerReportType.ReportLearningProgress,
             }, cancellationToken);
             if (!userResults.IsOK)
@@ -64,29 +64,39 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 {
                     CourseLevel = item,
                     TotalStudent = students?.Where(x => x.CourseLevel == item).Count() ?? default
-                }).ToList()
+                }).ToList(),
+                CourseTypeStudents = ConvertHelper.EnumToList<EnumCourseType>()
+                .Select(courseType =>
+                {
+                    var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(courseType).ToHashSet();
+                    return new CourseTypeStudentModel
+                    {
+                        CourseType = courseType,
+                        TotalStudent = students?.Where(x => x.CourseLevel.HasValue && courseLevels.Contains(x.CourseLevel.Value)).Count() ?? default,
+                    };
+                }).ToList(),
             };
 
-            await SetAverageProgress(overallReport, request, students);
+            //await SetAverageProgress(overallReport, request, students);
 
             methodResult.Result = overallReport;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
 
-        private async Task SetAverageProgress(OverallReportLearningProgressModel overallReport, GetOverallReportLearningProgressQuery request, IList<StudentDtoModel>? students)
-        {
-            if (students == null || !students.Any())
-            {
-                overallReport.ContentAverageProgress = $"{ValueDefault} / {GetTotalProgress(request)}";
-                return;
-            }
-            var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
-            var countProgress = await _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
+        //private async Task SetAverageProgress(OverallReportLearningProgressModel overallReport, GetOverallReportLearningProgressQuery request, IList<StudentDtoModel>? students)
+        //{
+        //    if (students == null || !students.Any())
+        //    {
+        //        overallReport.ContentAverageProgress = $"{ValueDefault} / {GetTotalProgress(request)}";
+        //        return;
+        //    }
+        //    var courseResults = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
+        //    var countProgress = await _managerProgressHelper.GetOverallCompleteAsync(courseResults, request.EndDate);
 
-            var totalProgress = await _managerProgressHelper.GetTotalCompleteCourseAsync(courseResults);
-            overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
-        }
+        //    var totalProgress = await _managerProgressHelper.GetTotalCompleteCourseAsync(courseResults);
+        //    overallReport.ContentAverageProgress = $"{countProgress} / {totalProgress}";
+        //}
 
         private static double GetTotalProgress(GetOverallReportLearningProgressQuery request)
         {

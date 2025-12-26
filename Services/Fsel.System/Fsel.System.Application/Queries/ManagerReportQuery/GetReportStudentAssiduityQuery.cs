@@ -42,11 +42,14 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
+                ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCourseType = request.ListCourseType,
+
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
             }, cancellationToken);
 
@@ -79,6 +82,7 @@ namespace Fsel.System.Application.Queries.ManagerReportQuery
                 {
                     FullName = student.FullName,
                     Email = student.Email,
+                    PhoneNumber = student.PhoneNumber,
                     SchoolName = student.School,
                     SchoolClass = student.SchoolClass,
                     SchoolGrade = student.SchoolGrade,

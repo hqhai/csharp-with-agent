@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class DisplayOrderConfigRepository : BaseRepository<DisplayOrderConfig>, IDisplayOrderConfigRepository
     {
-        public DisplayOrderConfigRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public DisplayOrderConfigRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

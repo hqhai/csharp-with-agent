@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
             var lessonComments = await _lessonResultRepository.Queryable
                                 .Include(x => x.Unit)
                                 .Include(x => x.Lesson)
-                                .Include(x => x.VideoResult)
+                                .Include(x => x.VideoResults)
                                 .Where(x => x.VideoResult != null && x.StudentId == request.StudentId && x.VideoResult.StudentId == request.StudentId && x.VideoResult.Status == EnumResultStatus.Done)
                                 .AsNoTracking()
                                 .Select(x => new LessonCommentByStudentModel

@@ -10,6 +10,9 @@ using Microsoft.EntityFrameworkCore;
 using Fsel.Identity.Domain.Entities;
 using AutoMapper;
 using Fsel.Identity.Domain.Models.EntityModels;
+using Fsel.Identity.Infrastructure;
+using Fsel.Core.Base.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 {
@@ -22,20 +25,25 @@ namespace Fsel.Identity.Application.Commands.UserOtpCodeCmd
 
     public class CreateUserOtpCommandHandler : IRequestHandler<CreateUserOtpCommand, MethodResult<UserOtpCodeModel>>
     {
-        private readonly IUserOtpCodeRepository _userOtpRepository;
+        private IUserOtpCodeRepository _userOtpRepository;
         private readonly IMapper _mapper;
+        private readonly IServiceProvider _serviceProvider;
         private readonly AppSetting _appSetting;
 
-        public CreateUserOtpCommandHandler(IUserOtpCodeRepository userOtpRepository, AppSetting appSetting, IMapper mapper)
+        public CreateUserOtpCommandHandler(IUserOtpCodeRepository userOtpRepository, AppSetting appSetting, IMapper mapper, IServiceProvider serviceProvider)
         {
             _userOtpRepository = userOtpRepository;
             _appSetting = appSetting;
             _mapper = mapper;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<UserOtpCodeModel>> Handle(CreateUserOtpCommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _userOtpRepository = tenantProvider != null ? await tenantProvider.CreateRepositoryAsync<IUserOtpCodeRepository>(userId: request.UserId) ?? _userOtpRepository : _userOtpRepository;
+
             var methodResult = new MethodResult<UserOtpCodeModel>();
 
             if (!request.UserId.HasValue && !request.VerifyId.HasValue)

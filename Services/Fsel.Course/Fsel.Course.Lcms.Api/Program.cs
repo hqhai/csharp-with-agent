@@ -1,11 +1,14 @@
 // Copyright (c) Atlantic. All rights reserved.
 
 using Fsel.Core.Extensions;
+using Fsel.Course.Application.Services.RubyService;
+using Fsel.Course.Application.Services.StorageServices;
 using Fsel.Course.Application.Services.SystemServices;
 using Fsel.Course.Application.Services.UserServices;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Infrastructure;
 using Fsel.Course.Infrastructure.Common;
+using Fsel.Course.Infrastructure.Common.LessonHelpers;
 using Fsel.Course.Infrastructure.Repositories;
 using Fsel.Course.Infrastructure.ValueSettings;
 
@@ -16,7 +19,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<CourseDbContext>();
+builder.AddDbContexts<CourseDbContext, CourseReadDbContext>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -79,24 +82,68 @@ builder.Services.AddScoped<IQuestionShuffleRepository, QuestionShuffleRepository
 builder.Services.AddScoped<IQuestionExplanationLogRepository, QuestionExplanationLogRepository>();
 builder.Services.AddScoped<IQuestionExplanationErrorRepository, QuestionExplanationErrorRepository>();
 builder.Services.AddScoped<IFinalTestSectionRepository, FinalTestSectionRepository>();
+builder.Services.AddScoped<IClassforumDetailResultHistoryRepository, ClassforumDetailResultHistoryRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<ILevelRepository, LevelRepository>();
+builder.Services.AddScoped<ISkillRepository, SkillRepository>();
+builder.Services.AddScoped<ISkillLevelRepository, SkillLevelRepository>();
+builder.Services.AddScoped<IFlowRepository, FlowRepository>();
+builder.Services.AddScoped<IActionFlowRepository, ActionFlowRepository>();
+builder.Services.AddScoped<IStepFlowRepository, StepFlowRepository>();
+builder.Services.AddScoped<ICategoryTestBankRepository, CategoryTestBankRepository>();
+builder.Services.AddScoped<ILessonModuleRepository, LessonModuleRepository>();
+builder.Services.AddScoped<IDocumentRepository, DocumentRepository>();
+builder.Services.AddScoped<ITestRepository, TestRepository>();
+builder.Services.AddScoped<ITestSectionRepository, TestSectionRepository>();
+builder.Services.AddScoped<ITestSectionQuestionRepository, TestConfigSectionQuestionRepository>();
+builder.Services.AddScoped<ITestAISettingRepository, TestAISettingRepository>();
+builder.Services.AddScoped<ITestAICriteriaSettingRepository, TestAICriteriaSettingRepository>();
+builder.Services.AddScoped<ISubjectConditionRepository, SubjectConditionRepository>();
+builder.Services.AddScoped<ISubjectConditionRuleRepository, SubjectConditionRuleRepository>();
+builder.Services.AddScoped<IKeyboardTextRepository, KeyboardTextRepository>();
+builder.Services.AddScoped<IKeyboardLayoutRepository, KeyboardLayoutRepository>();
+builder.Services.AddScoped<IUnitModuleRepository, UnitModuleRepository>();
+builder.Services.AddScoped<IRubyAnnotationRepository, RubyAnnotationRepository>();
+builder.Services.AddScoped<IRubyScopeRepository, RubyScopeRepsitory>();
+builder.Services.AddScoped<IRubyService, RubyService>();
+builder.Services.AddScoped<ITopicRepository, TopicRepository>();
+builder.Services.AddScoped<ICurriculumStudentRepository, CurriculumStudentRepository>();
+builder.Services.AddScoped<ICurriculumRepository, CurriculumRepository>();
+builder.Services.AddScoped<IHomeWorkConfigRepository, HomeWorkConfigRepository>();
+builder.Services.AddScoped<IHomeWorkExtraPracticeAnswerRepository, HomeWorkExtraPracticeAnswerRepository>();
+builder.Services.AddScoped<IHomeWorkExtraPracticeResultRepository, HomeWorkExtraPracticeResultRepository>();
+builder.Services.AddScoped<IHomeWorkRetryRepository, HomeWorkRetryRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IVideoSubFilePathRepository, VideoSubFilePathRepository>();
+builder.Services.AddScoped<IStudentGoalAggregateRepository, StudentGoalAggregateRepository>();
+builder.Services.AddScoped<IStudentGoalSummaryRepository, StudentGoalSummaryRepository>();
+builder.Services.AddScoped<IAiPromptManagerRepository, AiPromptManagerRepository>();
+builder.Services.AddScoped<IAiCriteriaConfigRepository, AiFeatureConfigRepository>();
+builder.Services.AddScoped<ICourseModuleRepository, CourseModuleRepository>();
+builder.Services.AddScoped<ITestResultRepository, TestResultRepository>();
+builder.Services.AddScoped<ITestGroupResultRepository, TestGroupResultRepository>();
+builder.Services.AddScoped<IDocumentResultRepository, DocumentResultRepository>();
 
 builder.Services.AddScoped<QuestionTypeConverter>();
 builder.Services.AddScoped<ExtraPracticeConverter>();
 builder.Services.AddScoped<AnswerTypeConverter>();
 builder.Services.AddScoped<VideoConverter>();
 builder.Services.AddScoped<CourseHelper>();
-builder.Services.AddScoped<UnitHelper>();
 builder.Services.AddScoped<QuestionConverter>();
 builder.Services.AddScoped<DateTimeConverter>();
 builder.Services.AddScoped<SectionGroupConverter>();
 builder.Services.AddScoped<SectionGroupManagerConverter>();
+builder.Services.AddScoped<ProgramConverter>();
+builder.Services.AddScoped<LessonConverter>();
+builder.Services.AddScoped<TestConverter>();
 
 // Helper
-builder.Services.AddScoped<LinQHelper>();
 builder.Services.AddScoped<LinQAnswerHelper>();
+builder.Services.AddScoped<SubjectConditionHelper>();
 
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ISystemService), appSetting?.Services?.SystemApiUrl);
+builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
 
 var app = builder.Build();
 

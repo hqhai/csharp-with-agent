@@ -45,5 +45,14 @@ namespace Fsel.Identity.Infrastructure.Repositories
             }
             return null;
         }
+
+        public async Task<UserOtpCode?> GetUserOtpCodeAsync(string? otpCode, string? phoneNumber)
+        {
+            if (string.IsNullOrEmpty(phoneNumber))
+            {
+                return null;
+            }
+            return await Queryable.FirstOrDefaultAsync(x => x.Status == EnumOtpCodeStatus.New && x.User != null && x.User.PhoneNumber == phoneNumber.Trim() && x.OtpCode == otpCode && x.Type == EnumUserOtpCodeType.SMS);
+        }
     }
 }

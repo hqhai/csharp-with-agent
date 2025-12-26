@@ -3,9 +3,9 @@
 using Fsel.Common.Constants;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
-using Fsel.Course.Domain.Models.EntityModels.ExportEventModels;
-using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
-using Fsel.Course.Domain.Models.EntityModels.ReportEventHaNoi;
+using Fsel.Course.Domain.Entities.FlowConfigs;
+using Fsel.Course.Domain.Entities.TestConfigs;
+using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Infrastructure.Configs;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +13,59 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fsel.Course.Infrastructure
 {
-    public class CourseDbContext : BaseDbContext
+    using Domain.Entities.LongAnswerConfig;
+
+    /// <summary>
+    /// Represents the read database context for the course service.
+    /// </summary>
+    public class CourseReadDbContext : CourseBaseDbContext
     {
-        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
+        protected override string Connection => Settings.ReadOnlyConnection;
+
+        public CourseReadDbContext(DbContextOptions<CourseReadDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+        }
+    }
+
+    /// <summary>
+    /// Represents for the master database context for the course service.
+    /// </summary>
+    public class CourseDbContext : CourseBaseDbContext
+    {
+        public CourseDbContext(DbContextOptions<CourseDbContext> options, IMediator mediator, AuthContext authContext)
+            : base(options, mediator, authContext)
+        {
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            ArgumentNullException.ThrowIfNull(optionsBuilder);
+            if (!optionsBuilder.IsConfigured)
+            {
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile(Settings.SettingFileName)
+                    .Build();
+                optionsBuilder.UseSqlServer(
+                    configuration.GetConnectionString(Connection),
+                    options => options.MigrationsAssembly(GetType().Assembly.GetName().Name));
+            }
+        }
+    }
+
+    public class CourseBaseDbContext : BaseDbContext
+    {
+        protected virtual string Connection => Settings.DefaultConnection;
+
+        public CourseBaseDbContext(DbContextOptions options, IMediator mediator, AuthContext authContext) : base(options, mediator, authContext)
         {
         }
 
@@ -87,42 +137,83 @@ namespace Fsel.Course.Infrastructure
         public DbSet<ClassForumDetailResult> ClassForumDetailResults { get; set; }
         public DbSet<MockTestAICriteriaSetting> MockTestAICriteriaSettings { get; set; }
         public DbSet<ProsodyScore> ProsodyScore { get; set; }
+        public DbSet<CurriculumConfig> CurriculumConfigs { get; set; }
+        public DbSet<CurriculumStudent> CurriculumStudents { get; set; }
         public DbSet<QuestionExplanationError> QuestionExplanationErrors { get; set; }
         public DbSet<QuestionExplanationLog> QuestionExplanationLogs { get; set; }
         public DbSet<QuestionShuffle> QuestionShuffles { get; set; }
+        public DbSet<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; }
+        public DbSet<Level> Levels { get; set; }
+        public DbSet<Category> Categorys { get; set; }
+        public DbSet<Skill> Skills { get; set; }
+        public DbSet<SkillLevel> SkillLevels { get; set; }
+        public DbSet<Flow> Flows { get; set; }
+        public DbSet<StepFlow> StepFlows { get; set; }
+        public DbSet<ActionFlow> ActionFlows { get; set; }
+        public DbSet<CategoryTestBank> CategoryTestBanks { get; set; }
+        public DbSet<LessonModule> LessonModules { get; set; }
+        public DbSet<Document> Documents { get; set; }
+        public DbSet<UnitModule> UnitModules { get; set; }
+        public DbSet<SubjectCondition> SubjectConditions { get; set; }
+        public DbSet<SubjectConditionRule> SubjectConditionRules { get; set; }
+        public DbSet<CourseModule> CourseModules { get; set; }
+        public DbSet<Test> Tests { get; set; }
+        public DbSet<TestSection> TestSections { get; set; }
+        public DbSet<TestSectionQuestion> TestSectionQuestions { get; set; }
+        public DbSet<TestAICriteriaSetting> TestAICriteriaSettings { get; set; }
+        public DbSet<TestAISetting> TestAISettings { get; set; }
+        public DbSet<KeyboardLayout> KeyboardLayouts { get; set; }
+        public DbSet<KeyboardText> KeyboardTexts { get; set; }
+        public DbSet<RubyAnnotation> RubyAnnotations { get; set; }
+        public DbSet<RubyScope> RubyScopes { get; set; }
+        public DbSet<AiPromptManager> AiPromptManagers { get; set; }
+        public DbSet<AICriteriaConfigs> AICriteriaConfigs { get; set; }
+        public DbSet<DocumentResult> DocumentResults { get; set; }
+        public DbSet<LongAnswerSetting> LongAnswerSettings { get; set; }
+        public DbSet<TestScore> TestScores { get; set; }
 
-        #region Report
+        //#region Report
 
-        public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
-        public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
-        public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
-        public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
-        public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
-        public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
-        public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
-        public DbSet<UnitDoneLearningProgressIeltsModel> UnitDoneLearningProgressIelts { get; set; }
-        public DbSet<UnitDoneLearningProgressAcademicModel> UnitDoneLearningProgressAcademics { get; set; }
-        public DbSet<LessonDoneLearningProgressIeltsModel> LessonDoneLearningProgressIelts { get; set; }
-        public DbSet<LessonDoneLearningProgressAcademicModel> LessonDoneLearningProgressAcademics { get; set; }
-        public DbSet<TotalLearningModel> TotalLearnings { get; set; }
-        public DbSet<RateLearningModel> RateLearnings { get; set; }
-        public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
-        public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
-        public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
-        public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
-        public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
-        public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
+        ////public DbSet<TotalEvaluateInputResultModel> TotalEvaluateInputResults { get; set; }
+        ////public DbSet<TotalDetailEvaluateInputResultModel> TotalDetailEvaluateInputResults { get; set; }
+        ////public DbSet<PercentEvaluateInputResultModel> PercentEvaluateInputResults { get; set; }
+        ////public DbSet<LevelEvaluateInputResultModel> LevelEvaluateInputResults { get; set; }
+        ////public DbSet<SchoolSummaryModel> SchoolSummarys { get; set; }
+        ////public DbSet<TotalLearningProgressModel> TotalLearningProgress { get; set; }
+        ////public DbSet<AverageLearningProgressModel> AverageLearningProgress { get; set; }
+        ////public DbSet<UnitDoneLearningProgressIeltsModel> UnitDoneLearningProgressIelts { get; set; }
+        ////public DbSet<UnitDoneLearningProgressAcademicModel> UnitDoneLearningProgressAcademics { get; set; }
+        ////public DbSet<LessonDoneLearningProgressIeltsModel> LessonDoneLearningProgressIelts { get; set; }
+        ////public DbSet<LessonDoneLearningProgressAcademicModel> LessonDoneLearningProgressAcademics { get; set; }
+        ////public DbSet<TotalLearningModel> TotalLearnings { get; set; }
+        ////public DbSet<RateLearningModel> RateLearnings { get; set; }
+        ////public DbSet<TotalLearningQualityModel> TotalLearningQualitys { get; set; }
+        ////public DbSet<TotalDetailLearningQualityModel> TotalDetailLearningQualitys { get; set; }
+        ////public DbSet<SchoolInfoModel> SchoolInfos { get; set; }
+        ////public DbSet<SchoolInfoFilterModel> SchoolInfoFilters { get; set; }
+        ////public DbSet<DistrictInfoModel> DistrictInfos { get; set; }
+        ////public DbSet<ExportSummaryReportCommandModel> ExportSummaryReports { get; set; }
 
-        #endregion Report
+        ////public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
+        ////public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
+        ////public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
 
-        public DbSet<CourseCompleteReportModel> CourseCompleteReports { get; set; }
+        ////public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
+        ////public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
+        ////public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
+
+        //#endregion Report
+
+        public DbSet<HomeWorkConfig> HomeWorkConfigs { get; set; }
         public DbSet<WeeklyReport> WeeklyReports { get; set; }
-        public DbSet<ReportLearningProcessModel> ReportLearningProcesses { get; set; }
-        public DbSet<ReportLearningResultModel> ReportLearningResults { get; set; }
-
-        public DbSet<ExportStudentEventModel> ExportStudentEvents { get; set; }
-        public DbSet<ExportDistrictEventModel> ExportDistrictEvents { get; set; }
-        public DbSet<ExportSchoolEventModel> ExportSchoolEvents { get; set; }
+        public DbSet<VideoSubFilePath> VideoSubFilePaths { get; set; }
+        public DbSet<HomeWorkExtraPracticeAnswer> HomeWorkExtraPracticeAnswers { get; set; }
+        public DbSet<HomeWorkExtraPracticeResult> HomeWorkExtraPracticeResults { get; set; }
+        public DbSet<HomeWorkRetry> HomeWorkRetries { get; set; }
+        public DbSet<Topic> Topics { get; set; }
+        public DbSet<StudentGoalAggregate> StudentGoalAggregates { get; set; }
+        public DbSet<StudentGoalSummary> StudentGoalSummaries { get; set; }
+        public DbSet<StatusStudentGoalHistory> StatusStudentGoalHistories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -140,6 +231,9 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new ExtraPracticeResultEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new ExtraPracticeExerciseResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CurriculumEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CurriculumStudentTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DocumentResultEntityTypeConfiguration());
 
             modelBuilder.ApplyConfiguration(new HomeWorkEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LessonEntityTypeConfiguration());
@@ -198,6 +292,46 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new QuestionExplanationErrorEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionExplanationLogEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new QuestionShuffleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ClassForumDetailResultHistoryTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CategoryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LevelEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SkillEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SkillLevelEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new FlowEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StepFlowEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new ActionFlowEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CategoryTestBankEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LessonModuleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new DocumentEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestAICriteriaSettingEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestAISettingEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestSectionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestSectionQuestionEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new UnitModuleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SubjectConditionTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new SubjectConditionRuleTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new CourseModuleEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new KeyboardLayoutEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new KeyboardTextEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new RubyAnnotationTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new RubyScopeTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestGroupResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestSectionResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkExtraPracticeAnswerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkExtraPracticeResultEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new HomeWorkRetryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TopicEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new VideoSubFilePathEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentGoalAggregateEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StudentGoalSummaryEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new StausStudentGoalHistoryTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AiPromptManagerEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new AICriteriaConfigsEntityTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new LongAnswerSettingTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestScoreEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();
@@ -218,6 +352,12 @@ namespace Fsel.Course.Infrastructure
             //modelBuilder.Ignore<CourseCompleteReportModel>();
             //modelBuilder.Ignore<SchoolInfoFilterModel>();
             //modelBuilder.Ignore<DistrictInfoModel>();
+            //modelBuilder.Ignore<ReportLearningProcessModel>();
+            //modelBuilder.Ignore<ReportLearningResultModel>();
+            //modelBuilder.Ignore<ExportSchoolEventModel>();
+            //modelBuilder.Ignore<ExportStudentEventModel>();
+            //modelBuilder.Ignore<ExportSummaryReportCommandModel>();
+            //modelBuilder.Ignore<ExportDistrictEventModel>();
 
             base.OnModelCreating(modelBuilder);
         }

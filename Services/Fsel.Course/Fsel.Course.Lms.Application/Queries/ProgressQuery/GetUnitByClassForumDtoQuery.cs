@@ -64,8 +64,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
                 return methodResult;
             }
-            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == studentId))
-                                                     .FirstOrDefaultAsync(x => x.Id == request.ClassForumId, cancellationToken);
+            var classForum = await _classForumRepository.ReadQueryable.Include(x => x.ClassForumResults.Where(x => x.LessonResultId == lessonResult.Id && x.StudentId == studentId))
+                                                        .FirstOrDefaultAsync(x => x.Id == request.ClassForumId, cancellationToken);
             if (classForum == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));

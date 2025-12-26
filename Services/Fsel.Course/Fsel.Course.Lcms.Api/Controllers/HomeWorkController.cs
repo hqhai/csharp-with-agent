@@ -15,7 +15,8 @@ namespace Fsel.Course.Lcms.Api.Controllers
     using Asp.Versioning;
     using Fsel.Shared.Constants;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/home-work")]
     [ApiController]
     [Common.Attributes.Permission(role: nameof(EnumRole.MasterAdmin))]
@@ -88,6 +89,30 @@ namespace Fsel.Course.Lcms.Api.Controllers
             command.Id = id;
             MethodResult<HomeWorkModel> commandResult = await _mediator.Send(command).ConfigureAwait(false);
             return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get Home Work By OriginalId
+        /// </summary>
+        [HttpGet("original/{originalId}")]
+        [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetHomeWorkByOriginal([FromRoute] Guid originalId)
+        {
+            MethodResult<HomeWorkModel> queryResult = await _mediator.Send(new GetHomeWorkByOriginalIdQuery { OriginalId = originalId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// Get detail Home Work By OriginalId
+        /// </summary>
+        [HttpGet("detail/{originalId}")]
+        [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetDetail([FromRoute] Guid originalId)
+        {
+            MethodResult<HomeWorkModel> queryResult = await _mediator.Send(new GetHomeWorkDetailByOriginalIdQuery { OriginalId = originalId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
         }
     }
 }

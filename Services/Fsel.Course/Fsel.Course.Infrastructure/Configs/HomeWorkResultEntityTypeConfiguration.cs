@@ -33,11 +33,16 @@ namespace Fsel.Course.Infrastructure.Configs
               .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(a => a.HomeWork)
-            .WithMany(b => b.HomeWorkResults)
-            .HasForeignKey(b => b.HomeWorkId)
-            .OnDelete(DeleteBehavior.Cascade);
+                .WithMany(b => b.HomeWorkResults)
+                .HasForeignKey(b => b.HomeWorkId)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(c => new { c.LessonResultId, c.HomeWorkId, c.StudentId }).IsUnique();
+            builder.HasOne(a => a.LessonModule)
+                .WithMany(b => b.HomeWorkResults)
+                .HasForeignKey(p => p.LessonModuleId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasIndex(c => new { c.LessonResultId, c.HomeWorkId, c.StudentId }).IsUnique().HasFilter("[IsDeleted] = 0");
             builder.HasIndex(c => new { c.StudentId });
             builder.HasIndexIncludeAllProperties(c => new { c.StudentId });
         }

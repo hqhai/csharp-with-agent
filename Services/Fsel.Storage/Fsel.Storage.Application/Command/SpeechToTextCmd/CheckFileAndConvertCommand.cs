@@ -22,7 +22,7 @@ namespace Fsel.Storage.Application.Command.SpeechToTextCmd
         private readonly ILogger<CheckFileAndConvertCommand> _logger;
         private readonly IHttpClientFactory _httpClient;
         private List<string> _codecs = new List<string> { "WebM", "ADTS" };
-        private List<string> _nameFiles = new List<string> { "AAC", "mp4", "WMA" };
+        private List<string> _nameFiles = new List<string> { "AAC", "mp4", "WMA", "m4a" };
         //private List<(string, string)> _fileCodecs = new List<(string, string)> { ("WMA", "Windows media") };
 
         public CheckFileAndConvertCommandHandler(IFFmpegServices fFmpegServices,

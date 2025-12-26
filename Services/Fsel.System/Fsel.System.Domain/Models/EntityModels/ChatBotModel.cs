@@ -2,11 +2,11 @@
 
 namespace Fsel.System.Domain.Models.EntityModels
 {
-    using Fsel.Common.Helpers;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.System.Domain.Entities.ChatBot;
     using global::System;
+
     public class ChatBotModel : BaseModel
     {
         public Guid? UnitId { get; set; }
@@ -16,8 +16,8 @@ namespace Fsel.System.Domain.Models.EntityModels
         public long RemainToken { get; set; }
 
         public Guid StudentId { get; set; }
-
-
+        public Guid? SkillId { get; set; }
+        public string? SkillName { get; set; }
         public EnumChatBotStatus Status { get; set; }
 
         public IList<ChatBotMessage>? Conversations { get; set; }
@@ -27,6 +27,5 @@ namespace Fsel.System.Domain.Models.EntityModels
         public ChatBotMessage? LastestQuestion { get; set; }
 
         public double ProgressRatio { get; set; }
-
     }
 }

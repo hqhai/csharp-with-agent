@@ -232,7 +232,7 @@ namespace Fsel.Identity.Application.Commands.AdminCmd
             var tokenResult = await _mediator.Send(new GenerateTokenCommand { Id = user.Id }, cancellationToken);
             if (tokenResult.Result?.AccessToken != null && _httpContextAccessor.HttpContext != null)
             {
-                _httpContextAccessor.HttpContext.SetHeader(HeaderNames.Authorization, "Bearer " + tokenResult.Result?.AccessToken);
+                _httpContextAccessor.HttpContext.Request.Headers[HeaderNames.Authorization] = "Bearer " + tokenResult.Result?.AccessToken;
             }
 
             var updateCode = await _mediator.Send(new UpdateCodeStudentCommand

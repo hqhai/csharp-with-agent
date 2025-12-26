@@ -7,7 +7,7 @@ namespace Fsel.System.Infrastructure.Repositories.BlindBoxes
 {
     public class BlindBoxChestConfigRepository : BaseRepository<BlindBoxChestConfig>, IBlindBoxChestConfigRepository
     {
-        public BlindBoxChestConfigRepository(SystemDbContext dbContext, AuthContext authContext, IMapper mapper) : base(dbContext, authContext, mapper)
+        public BlindBoxChestConfigRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

@@ -10,9 +10,10 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid StudentId { get; set; }
         public bool IsPlacementTest { get; set; }
         public Guid? ClassId { get; set; }
+        public Guid? CompetitionEventId { get; set; }
         public EnumCourseLevel? Level { get; set; }
         public EnumCourseLevel? BaseCourseLevel { get; set; }
-        public EnumPlacementTestLevel? PTLevel { get; set; }
+        public Guid? PTLevel { get; set; }
         public EnumCourseLevel? StartPTLevel { get; set; }
         public IList<EnumSchoolEventRuleAction>? Actions { get; set; }
         public IList<ActionConfig>? ActionConfigs { get; set; }

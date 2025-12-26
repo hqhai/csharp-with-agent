@@ -58,7 +58,8 @@ namespace Fsel.Sender.Application.Commands.SendEmailCmd
                 Content = body,
                 IsCCEmail = request.IsCCEmail,
                 IsCCEmailDefault = request.IsCCEmailDefault,
-                Template = request.Template
+                Template = request.Template,
+                Receivers = request.Receivers
             }, cancellationToken);
 
             #endregion Validation

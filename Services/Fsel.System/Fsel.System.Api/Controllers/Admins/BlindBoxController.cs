@@ -8,7 +8,6 @@ using Fsel.Shared.Enums;
 using Fsel.System.Application.Commands.BlindBoxes;
 using Fsel.System.Application.Queries.BlindBoxes;
 using Fsel.System.Domain.Models.EntityModels;
-using global::System.Net;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 

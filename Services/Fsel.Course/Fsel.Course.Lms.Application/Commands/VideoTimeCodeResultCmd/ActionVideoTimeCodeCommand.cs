@@ -14,7 +14,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeResultCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
     public class ActionVideoTimeCodeCommand : IRequest<MethodResult<VideoResultModel>>
@@ -65,12 +64,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeResultCmd
                 return methodResult;
             }
 
-            var videoTimeCodeResult = await _videoTimeCodeResultRepository.Queryable.FirstOrDefaultAsync(x => x.VideoResultId == request.VideoResultId && x.VideoTimeCodeId == request.VideoTimeCodeId, cancellationToken);
+            var videoTimeCodeResult = await _videoTimeCodeResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.VideoResultId == request.VideoResultId && x.VideoTimeCodeId == request.VideoTimeCodeId && x.CreatedDate >= videoResult.CreatedDate, cancellationToken);
             if (videoTimeCodeResult == null)
             {
                 videoResult.CurrentVideoTimeCodeId = request.VideoTimeCodeId;
-                videoResult = _videoResultRepository.Update(videoResult, false, x => x.StudentId, x => x.VideoId, x => x.LessonResultId);
-                await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
+                {
+                    bulk.ColumnInputExpression = c => new { c.CurrentVideoTimeCodeId };
+                });
             }
             methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);
             methodResult.StatusCode = StatusCodes.Status200OK;
@@ -81,7 +82,9 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeResultCmd
         {
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            var videoTimeCodes = await _videoTimeCodeRepository.Queryable.Where(x => x.VideoId == videoResult.VideoId).OrderBy(x => x.DisplayTime).ToListAsync(cancellationToken);
+            var videoTimeCodes = await _videoTimeCodeRepository.ReadQueryable.Where(x => x.VideoId == videoResult.VideoId)
+                                                               .OrderBy(x => x.DisplayTime)
+                                                               .ToListAsync(cancellationToken);
             var videoTimeCodeRequest = videoTimeCodes.FirstOrDefault(x => x.Id == videoTimeCode.Id);
             if (videoTimeCodeRequest == null)
             {
@@ -123,7 +126,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeResultCmd
             if (videoTimeCodes != null)
             {
                 var videoTimeCodePrevios = videoTimeCodes.Where(x => videoTimeCodes.IndexOf(x) < videoTimeCodes.IndexOf(videoTimeCodeRequest)).ToList();
-                var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Where(x => x.VideoResultId == videoResult.Id).ToListAsync();
+                var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable.Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate).ToListAsync();
 
                 if (videoTimeCodePrevios != null && videoTimeCodePrevios.Any())
                 {

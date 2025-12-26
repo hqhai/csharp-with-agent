@@ -72,8 +72,9 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
                 return methodResult;
             }
 
-            var finalTestResults = await _finalTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId && x.Status == EnumResultStatus.Done)
-                                                                             .ToListAsync(cancellationToken);
+            var finalTestResults = await _finalTestResultRepository.ReadQueryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId)
+                                                                   .Where(x => x.Status == EnumResultStatus.Done)
+                                                                   .ToListAsync(cancellationToken);
             if (!finalTestResults.Any())
             {
                 methodResult.StatusCode = StatusCodes.Status200OK;

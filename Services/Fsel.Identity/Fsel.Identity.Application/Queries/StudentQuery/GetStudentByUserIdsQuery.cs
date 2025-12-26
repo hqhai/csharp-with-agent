@@ -52,6 +52,9 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
                     CreatedDate = x.CreatedDate,
                     School = x.School,
                     SchoolId = x.SchoolId,
+                    SchoolClass = x.SchoolClass,
+                    SchoolGrade = x.SchoolGrade,
+                    BaseCourseLevel = x.BaseCourseLevel,
                     ExpiredDate = x.ExpiredDate,
                     UserId = x.UserId,
                     User = _mapper.Map<UserModel>(x.User)

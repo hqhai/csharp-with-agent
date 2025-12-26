@@ -4,9 +4,10 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
 {
     using System.ComponentModel.DataAnnotations;
     using System.Security.Claims;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Identity.Domain.Constants;
 
-    public class ExternalLoginModel
+    public class ExternalLoginModel : IRequestBodyTenantAware
     {
         public string? Email { get; set; }
 
@@ -34,5 +35,19 @@ namespace Fsel.Identity.Domain.Models.CommandModels.OpenId
         public ClaimsPrincipal? Principal { get; set; }
 
         public string? ReturnUrl { get; set; }
+
+        public string? Identity
+        {
+            get { return Email; }
+            set { Email = value; }
+        }
+
+        public string? UserName
+        {
+            get { return Email; }
+            set { Email = value; }
+        }
+
+        public Guid? UserId { get; set; }
     }
 }

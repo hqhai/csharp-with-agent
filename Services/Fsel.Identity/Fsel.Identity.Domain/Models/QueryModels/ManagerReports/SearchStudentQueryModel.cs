@@ -2,6 +2,7 @@
 
 namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
 {
+    using System.Text.Json.Serialization;
     using Fsel.Core.Base.BaseModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
@@ -10,7 +11,24 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
     {
         public string? ListSchoolGrade { get; set; }
         public string? ListSchoolClass { get; set; }
+        public string? ListDistrict { get; set; }
+        public string? SchoolIdsStr { get; set; }
+        public string? ListProvince { get; set; }
+        public string? ListStudentId { get; set; }
+        public string? ListCourseType { get; set; }
+        public string? ListCourseLevel { get; set; }
+        public string? ListLearningStatus { get; set; }
 
+        [JsonIgnore]
+        public IList<EnumCourseLevel>? CourseLevels
+        {
+            get
+            {
+                return ListCourseLevel.ToList<EnumCourseLevel>();
+            }
+        }
+
+        [JsonIgnore]
         public IList<string>? SchoolClasses
         {
             get
@@ -19,6 +37,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        [JsonIgnore]
         public IList<string>? SchoolGrades
         {
             get
@@ -27,10 +46,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
-        public string? SchoolGrade { get; set; }
-        public string? SchoolClass { get; set; }
-        public string? SchoolIdsStr { get; set; }
-
+        [JsonIgnore]
         public IList<Guid>? SchoolIds
         {
             get
@@ -39,8 +55,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
-        public string? ListDistrict { get; set; }
-
+        [JsonIgnore]
         public IList<Guid>? DistrictIds
         {
             get
@@ -49,8 +64,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
-        public string? ListProvince { get; set; }
-
+        [JsonIgnore]
         public IList<Guid>? ProvinceIds
         {
             get
@@ -59,8 +73,7 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
-        public string? ListStudentId { get; set; }
-
+        [JsonIgnore]
         public IList<Guid>? StudentIds
         {
             get
@@ -69,11 +82,27 @@ namespace Fsel.Identity.Domain.Models.QueryModels.ManagerReports
             }
         }
 
+        [JsonIgnore]
+        public IList<EnumCourseType>? CourseTypes
+        {
+            get
+            {
+                return ListCourseType.ToList<EnumCourseType>();
+            }
+        }
+
+        [JsonIgnore]
+        public IList<EnumLearningStatus>? LearningStatuses
+        {
+            get
+            {
+                return ListLearningStatus.ToList<EnumLearningStatus>();
+            }
+        }
+
         public bool? IsLearning { get; set; }
         public EnumCourseType? CourseType { get; set; }
         public EnumCourseLevel? CourseLevel { get; set; }
-        public EnumLearningStatus? LearningStatus { get; set; }
-        public EnumCompletionStatus? Status { get; set; }
         public bool IsCheckDate { get; set; }
     }
 }

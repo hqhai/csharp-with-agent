@@ -42,16 +42,19 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolClass = request.SchoolClass,
-                SchoolGrade = request.SchoolGrade,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCompletionStatus = request.ListCompletionStatus,
+                CourseType = request.CourseType,
+                ListOverallScore = request.ListOverallScore,
+                ListCurrentLevel = request.ListCurrentLevel,
+
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
-                Status = request.Status,
                 StartDate = request.StartDate,
-                CourseLevel = request.CourseLevel,
-                CurrentLevel = request.CurrentLevel,
                 ManagerReportType = EnumManagerReportType.ReportManagerPT,
             }, cancellationToken);
             if (!userResults.IsOK)
@@ -65,17 +68,23 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var studentIds = students.Select(x => x.Id).ToList();
-            var placementTestGroupResults = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken: cancellationToken);
-            var placementTestResults = (await _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken))
-                                        .GroupBy(x => x.StudentId)
-                                        .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
-                                        .ToList();
+            var placmentTestGroupResults = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+            .Select(x => new PlacementTestGroupResult
+            {
+                StudentId = x.StudentId,
+                Status = x.Status,
+                ChooseLevel = x.ChooseLevel,
+                CompletionLevel = x.CompletionLevel,
+                SuggetLevel = x.SuggetLevel,
+                CompletionDate = x.CompletionDate
+            })
+            .ToListAsync(cancellationToken);
+            var lists = placmentTestGroupResults.ToLookup(x => x.StudentId);
 
             var data = new List<PlacementTestReportModel>();
             foreach (var item in students)
             {
-                var placementTestGroupResult = placementTestGroupResults.FirstOrDefault(x => x.StudentId == item.Id);
-                var placementTestResult = placementTestResults.FirstOrDefault(x => x.StudentId == item.Id);
+                var placementTestGroupResult = lists[item.Id].FirstOrDefault();
                 data.Add(new PlacementTestReportModel
                 {
                     Birthday = item.BirthDay,
@@ -86,20 +95,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
                     UserName = item.UserName,
-                    Status = GetStatus(placementTestGroupResult),
+                    Status = placementTestGroupResult?.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.InProgress,
                     ChooseLevel = placementTestGroupResult?.ChooseLevel,
                     CurrentLevel = placementTestGroupResult?.SuggetLevel,
-                    ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
+                    ExpiredPTDate = placementTestGroupResult?.CompletionDate
                 });
             }
             methodResult.Result = data;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
-        }
-
-        private static EnumCompletionStatus GetStatus(PlacementTestGroupResult? placementTestGroupResult)
-        {
-            return placementTestGroupResult != null && placementTestGroupResult.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.InProgress;
         }
     }
 }

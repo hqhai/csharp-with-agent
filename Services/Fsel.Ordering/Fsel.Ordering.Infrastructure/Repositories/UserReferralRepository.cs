@@ -8,7 +8,7 @@ namespace Fsel.Ordering.Infrastructure.Repositories
 
     public class UserReferralRepository : BaseRepository<UserReferral>, IUserReferralRepository
     {
-        public UserReferralRepository(OrderingDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public UserReferralRepository(OrderingDbContext dbContext, OrderingReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
     }

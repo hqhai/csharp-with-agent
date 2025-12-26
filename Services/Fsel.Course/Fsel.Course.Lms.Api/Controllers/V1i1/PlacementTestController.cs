@@ -16,7 +16,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
     [ApiVersions(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/placement-test")]
     [ApiController]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     public class PlacementTestController : ControllerBase
     {
         private readonly IMediator _mediator;
@@ -30,7 +30,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i1
         /// Create PlacementTest Answers
         /// </summary>
         [HttpPost("create-answers")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> CreateAnswer([FromBody] CreatePlacementTestAnswerBySectionGroupCommand command)

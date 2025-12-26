@@ -9,6 +9,7 @@ using Fsel.Identity.Application.Commands.StudentFocusTimeCmd;
 using Fsel.Identity.Application.Queries.StudentFocusTimeQuery;
 using Fsel.Identity.Domain.Models.EntityModels;
 using Fsel.Shared.Constants;
+using Fsel.Shared.Enums;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,6 +55,16 @@ namespace Fsel.Identity.Api.Controllers
         public async Task<IActionResult> CheckSuperFireMode()
         {
             MethodResult<bool> commandResult = await _mediator.Send(new CheckSuperFireModeQuery()).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        [HttpPost("receive-token")]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
+        [ProducesResponseType(typeof(MethodResult<StudentFocusTimeModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> ReceiveToken()
+        {
+            MethodResult<StudentFocusTimeModel> commandResult = await _mediator.Send(new CreateTokenFocusTimeCommand()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }

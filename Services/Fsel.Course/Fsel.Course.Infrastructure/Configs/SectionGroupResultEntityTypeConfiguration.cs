@@ -45,9 +45,9 @@ namespace Fsel.Course.Infrastructure.Configs
                   .HasForeignKey(b => b.PlacementTestResultId)
                   .OnDelete(DeleteBehavior.NoAction);
 
-            builder.HasIndex(c => new { c.SectionGroupId, c.MockTestResultId }).IsUnique();
-            builder.HasIndex(c => new { c.SectionGroupId, c.FinalTestResultId }).IsUnique();
-            builder.HasIndex(c => new { c.SectionGroupId, c.PlacementTestResultId }).IsUnique();
+            builder.HasIndex(c => new { c.SectionGroupId, c.MockTestResultId }).IsUnique().HasFilter("MockTestResultId IS NOT NULL AND [IsDeleted] = 0");
+            builder.HasIndex(c => new { c.SectionGroupId, c.FinalTestResultId }).IsUnique().HasFilter("FinalTestResultId IS NOT NULL AND [IsDeleted] = 0");
+            builder.HasIndex(c => new { c.SectionGroupId, c.PlacementTestResultId }).IsUnique().HasFilter("PlacementTestResultId IS NOT NULL AND [IsDeleted] = 0");
             builder.HasIndex(c => new { c.StudentId });
         }
     }

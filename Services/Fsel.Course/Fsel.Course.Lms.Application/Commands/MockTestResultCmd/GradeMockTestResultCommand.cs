@@ -111,7 +111,7 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroups));
                 return methodResult;
             }
-            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).Where(x => sectionGroupIds.Contains(x.SectionGroupId) && x.MockTestResultId == mockTestResult.Id).ToListAsync(cancellationToken);
+            var sectionGroupResults = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).WhereBulkContains(sectionGroupIds, x => x.SectionGroupId).Where(x => x.MockTestResultId == mockTestResult.Id && x.CreatedDate >= mockTestResult.CreatedDate).ToListAsync(cancellationToken);
             if (sectionGroupResults == null || !sectionGroupResults.Any())
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(sectionGroupResults));
@@ -178,10 +178,16 @@ namespace Fsel.Course.Lms.Application.Commands.MockTestResultCmd
 
             await _mockTestResultRepository.ExecuteTransactionAsync(async () =>
             {
-                _sectionGroupResultRepository.UpdateList(sectionGroupResults, false, x => x.WorkingTime, x => x.SectionGroupId, x => x.PlacementTestResultId, x => x.MockTestResultId, x => x.FinalTestResultId, x => x.StudentId);
-                await _sectionGroupResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _sectionGroupResultRepository.BulkUpdateList(sectionGroupResults, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.WorkingTime, c.StudentId, c.SectionGroupId, c.PlacementTestResultId, c.MockTestResultId, c.FinalTestResultId };
+                });
                 await SendNotification(mockTestResult, cancellationToken);
-                _mockTestResultRepository.Update(mockTestResult, false, x => x.CourseId, x => x.UnitId, x => x.MockTestId, x => x.StudentId);
+
+                await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.MockTestId, c.UnitId };
+                });
                 await _mockTestResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
                 methodResult.StatusCode = StatusCodes.Status201Created;

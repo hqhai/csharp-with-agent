@@ -129,5 +129,17 @@ namespace Fsel.Course.Lcms.Api.Controllers
             MethodResult<List<CourseModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
+
+        /// <summary>
+        /// Get Course History
+        /// </summary>
+        [HttpGet("course-history")]
+        [ProducesResponseType(typeof(MethodResult<PagingItemsModel<CourseHistoryModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCourseHistory([FromQuery] GetHistoryCourseQuery query)
+        {
+            MethodResult<PagingItemsModel<CourseHistoryModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
     }
 }

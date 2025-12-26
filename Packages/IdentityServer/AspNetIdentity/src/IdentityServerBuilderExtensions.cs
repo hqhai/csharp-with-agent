@@ -4,6 +4,7 @@
 
 using System;
 using System.Linq;
+using Fsel.Core.Entities;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.AspNetIdentity;
@@ -28,7 +29,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="builder">The builder.</param>
         /// <returns></returns>
         public static IIdentityServerBuilder AddAspNetIdentity<TUser>(this IIdentityServerBuilder builder)
-            where TUser : class
+            where TUser : UserEntity
         {
             builder.Services.AddTransientDecorator<IUserClaimsPrincipalFactory<TUser>, UserClaimsFactory<TUser>>();
 

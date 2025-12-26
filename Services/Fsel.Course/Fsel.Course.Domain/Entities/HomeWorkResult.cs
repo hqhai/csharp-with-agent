@@ -2,8 +2,7 @@
 
 namespace Fsel.Course.Domain.Entities
 {
-    using System.ComponentModel.DataAnnotations;
-    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
 
@@ -11,16 +10,11 @@ namespace Fsel.Course.Domain.Entities
     {
         private EnumSubmissionCount? _submissionCount;
 
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid HomeWorkId { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid LessonResultId { get; set; }
-
-        public HomeWork? HomeWork { get; set; }
-        public LessonResult? LessonResult { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
 
         public EnumSubmissionCount? SubmissionCount
         {
@@ -31,6 +25,13 @@ namespace Fsel.Course.Domain.Entities
             set { _submissionCount = value; }
         }
 
+        public Guid HomeWorkId { get; set; }
+        public HomeWork? HomeWork { get; set; }
+        public Guid LessonResultId { get; set; }
+        public LessonResult? LessonResult { get; set; }
+
+        public LessonModule? LessonModule { get; set; }
+        public Guid? LessonModuleId { get; set; }
         public ICollection<HomeWorkAnswer> HomeWorkAnswers { get; set; } = new List<HomeWorkAnswer>();
     }
 }

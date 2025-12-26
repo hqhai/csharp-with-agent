@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
     using System;
-    using System.Diagnostics;
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Enums;
@@ -42,17 +41,20 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolClass = request.SchoolClass,
-                SchoolGrade = request.SchoolGrade,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+                CourseType = request.CourseType,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
+                ListOverallScore = request.ListOverallScore,
+                ListCurrentLevel = request.ListCurrentLevel,
+                IsLearning = request.IsLearning,
+
                 EndDate = request.EndDate,
                 Keyword = request.Keyword,
-                Status = request.Status,
                 SortBy = request.SortBy,
                 StartDate = request.StartDate,
-                CourseLevel = request.CourseLevel,
-                CurrentLevel = request.CurrentLevel,
                 ManagerReportType = EnumManagerReportType.ReportManagerPT,
             }, cancellationToken);
             if (!userResults.IsOK)
@@ -62,40 +64,48 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
             var students = userResults?.Result;
             var studentIds = students?.Select(x => x.Id).ToList() ?? new List<Guid>();
-            var query = _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).Where(x => x.CompletionLevel != EnumPlacementTestLevel.IELTS);
+            var placementTestGroupResults = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).Where(x => x.CompletionLevel != EnumPlacementTestLevel.IELTS)
+                .Select(x => new
+                {
+                    x.Status,
+                    x.StudentId,
+                    x.SuggetLevel,
+                    x.CurrentLevel
+                })
+                .ToListAsync(cancellationToken);
+
             var overallReportPlacementTest = new OverallReportPlacementTestModel
             {
                 TotalStudent = studentIds.Count,
-                TotalPlacementTest = await query.CountAsync(cancellationToken),
-                TotalCompletePlacementTest = await query.Where(x => x.Status == EnumResultStatus.Done).CountAsync(cancellationToken),
+                TotalPlacementTest = placementTestGroupResults.Count,
+                TotalCompletePlacementTest = placementTestGroupResults.Where(x => x.Status == EnumResultStatus.Done).Count(),
             };
-            if (request.Status.HasValue)
+
+            if (request.CompletionStatuses != null && request.CompletionStatuses.Any())
             {
-                switch (request.Status.Value)
-                {
-                    case EnumCompletionStatus.Completed:
-                        overallReportPlacementTest.TotalPlacementTest = overallReportPlacementTest.TotalPlacementTest;
-                        break;
+                var isCompleted = request.CompletionStatuses.Contains(EnumCompletionStatus.Completed);
+                var isInProgress = request.CompletionStatuses.Contains(EnumCompletionStatus.InProgress);
 
-                    case EnumCompletionStatus.InProgress:
-                        overallReportPlacementTest.TotalPlacementTest = await query.Where(x => x.Status != EnumResultStatus.Done).Select(x => x.StudentId).CountAsync(cancellationToken);
-                        break;
-                }
+                overallReportPlacementTest.TotalPlacementTest = placementTestGroupResults
+                        .Where(x => (isCompleted && x.Status == EnumResultStatus.Done) || (isInProgress && x.Status != EnumResultStatus.Done))
+                        .Select(x => x.StudentId)
+                        .Distinct()
+                        .Count();
             }
-            var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic);
-            var placementTestGroupResults = (await query.Where(x => x.Status == EnumResultStatus.Done && x.CurrentLevel.HasValue).ToListAsync(cancellationToken))
-                                                        .GroupBy(x => x.SuggetLevel)
-                                                        .Select(x => new
-                                                        {
-                                                            CurrentLevel = x.Key,
-                                                            CountStudent = x.Count()
-                                                        })
-                                                        .ToList();
 
-            overallReportPlacementTest.CourseLevelProgresses = new List<CourseLevelProgressModel>();
+            var courseLevels = EnumCourseLevelHelper.GetEnumCourseLevels(EnumCourseType.Academic);
+            var testGroupResults = placementTestGroupResults.Where(x => x.Status == EnumResultStatus.Done && x.CurrentLevel.HasValue)
+                                                            .GroupBy(x => x.SuggetLevel)
+                                                            .Select(x => new
+                                                            {
+                                                                CurrentLevel = x.Key,
+                                                                CountStudent = x.Count()
+                                                            })
+                                                            .ToList();
+
             foreach (var item in courseLevels)
             {
-                var studentLevel = placementTestGroupResults.FirstOrDefault(x => x.CurrentLevel == item);
+                var studentLevel = testGroupResults.FirstOrDefault(x => x.CurrentLevel == item);
                 overallReportPlacementTest.CourseLevelProgresses.Add(new CourseLevelProgressModel
                 {
                     CourseLevel = item,

@@ -76,16 +76,38 @@ namespace Fsel.Course.Domain.Entities
         }
 
         [NotMapped]
+        public double PronunciationScore
+        {
+            get
+            {
+                double score = default;
+
+                if (!string.IsNullOrEmpty(PronunciationAlFeedback))
+                {
+                    var pronunciationAI = Common.Helpers.ConvertHelper.Deserialize<PronunciationAssessmentModel>(PronunciationAlFeedback);
+                    if (pronunciationAI != null)
+                    {
+                        score = ScoreHelper.CalculatePronunciationScore(pronunciationAI.AccuracyScore, pronunciationAI.FluencyScore, pronunciationAI.ProsodyScore);
+                    }
+                }
+
+                return score;
+            }
+        }
+
+        [NotMapped]
         public double CorrectTotal
         {
             get
             {
-                return CorrectCount + Score;
+                return CorrectCount + Score + PronunciationScore;
             }
         }
 
         [MaxLength(10000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? GradingAlFeedback { get; set; }
+
+        public string? PronunciationAlFeedback { get; set; }
 
         public DateTime? ProcessDate { get; set; }
         public DateTime? CompletionDate { get; set; }
@@ -95,6 +117,8 @@ namespace Fsel.Course.Domain.Entities
         public ClassForumResult? ClassForumResult { get; set; }
 
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
+
+        public ICollection<ClassForumDetailResultHistory> ClassForumDetailResultHistories { get; set; } = new List<ClassForumDetailResultHistory>();
 
         public int RetryTime { get; set; }
 
