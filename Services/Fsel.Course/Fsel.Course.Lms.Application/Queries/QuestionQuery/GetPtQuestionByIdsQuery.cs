@@ -94,7 +94,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
 
             var listQuestionShuffle = new List<QuestionShuffle>();
             var questionShuffles = await _questionShuffleRepository.Queryable
-                .Where(x => questions.Select(x => x!.Id).Contains(x.QuestionId) && x.StudentId == request.StudentId)
+                .Where(x => questions.Select(y => y!.Id).Contains(x.QuestionId) && x.StudentId == request.StudentId)
                 .ToListAsync();
             foreach (var question in questions)
             {
@@ -110,7 +110,12 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                 {
                     if (questionShuffle == null)
                     {
-                        questionShuffle = new QuestionShuffle { QuestionId = question.Id, ShuffleConfigStr = questionShuffleStr };
+                        questionShuffle = new QuestionShuffle
+                        {
+                            QuestionId = question.Id,
+                            ShuffleConfigStr = questionShuffleStr,
+                            StudentId = testResult.StudentId,
+                        };
                     }
                     else
                     {

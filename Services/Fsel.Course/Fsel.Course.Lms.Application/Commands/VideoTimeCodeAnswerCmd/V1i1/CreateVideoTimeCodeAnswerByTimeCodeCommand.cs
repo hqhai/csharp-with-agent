@@ -29,7 +29,6 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
     using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
 
     public class CreateVideoTimeCodeAnswerByTimeCodeCommand : CreateVideoTimeCodeAnswerV1i1CommandModel, IRequest<MethodResult<VideoTimeCodeModel>>
     {
@@ -161,7 +160,14 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i1
             await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, request.IsSubmit, student, cancellationToken);
             if (request.IsSubmit)
             {
-                videoResult.TimeCodeHighestStreak = await GetHighestStreak(videoResult);
+                if (videoTimeCodeResult.Status == EnumResultStatus.New && videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
+                {
+                    videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
+                }
+                else
+                {
+                    videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
+                }
             }
             await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
             {

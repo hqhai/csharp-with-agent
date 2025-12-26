@@ -45,13 +45,13 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
         {
             ArgumentNullException.ThrowIfNull(courseResult);
             // Tính toán lại tiến độ hoàn thành bài học
-            var testResults = await _testGroupResultRepository.ReadQueryable
+            var testResults = await _testGroupResultRepository.Queryable.AsNoTracking()
                                                               .Where(x => x.CourseResultId == courseResult.Id)
                                                               .Where(x => !x.UnitModuleId.HasValue)
                                                               .SelectMany(x => x.TestResults)
                                                               .ToListAsync(cancellationToken);
 
-            var unitResults = await _unitResultRepository.ReadQueryable
+            var unitResults = await _unitResultRepository.Queryable.AsNoTracking()
                                                          .Where(x => x.CourseResultId == courseResult.Id)
                                                          .ToListAsync(cancellationToken);
 
@@ -150,14 +150,16 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
             .Select(m => m.Id) // hoặc m.OriginalId tuỳ bạn đang dùng gì để map
             .ToHashSet();
 
-            var queryUnit = _unitResultRepository.ReadQueryable
+            var queryUnit = _unitResultRepository.Queryable.AsNoTracking()
                     .Where(x => x.CourseResultId == resultId && x.Status == EnumResultStatus.Done
                     && x.CourseModuleId != null)
                     .Select(x => x.CourseModuleId!.Value);
-            var queryTest = _testGroupResultRepository.ReadQueryable
+
+            var queryTest = _testGroupResultRepository.Queryable.AsNoTracking()
                     .Where(x => x.CourseResultId == resultId && x.Status == EnumResultStatus.Done && !x.UnitModuleId.HasValue
                     && x.CourseModuleId != null)
                     .Select(x => x.CourseModuleId!.Value);
+
             var doneModuleIds = await queryUnit.Union(queryTest).ToListAsync(cancellationToken);
 
             // Chỉ tính những cái thuộc required (tránh tính module “rác”/ngoài danh sách)

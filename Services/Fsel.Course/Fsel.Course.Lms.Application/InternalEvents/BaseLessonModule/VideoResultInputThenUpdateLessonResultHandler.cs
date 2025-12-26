@@ -60,7 +60,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                                                     .FirstOrDefaultAsync(cancellationToken);
                 if (lessonResult.Status != EnumResultStatus.Done)
                 {
-                    await UpdateVideoResultAsync(videoResult, percentModule);
+                    await UpdateVideoResultAsync(videoResult, percentModule, cancellationToken);
                 }
 
                 await UpdateLessonResultAsync(lessonResult, videoResult.LessonModuleId.Value, cancellationToken);
@@ -70,7 +70,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             }
         }
 
-        private async Task UpdateVideoResultAsync(VideoResult videoResult, double percentModule)
+        private async Task UpdateVideoResultAsync(VideoResult videoResult, double percentModule, CancellationToken cancellationToken)
         {
             if (videoResult == null)
             {
@@ -118,15 +118,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
 
             videoResult.Percent = totalPercent;
             videoResult.PercentModule = NumberHelper.ConvertDoublePercent(totalPercent * percentModule, 2);
-            await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult },
-            bulk =>
-            {
-                bulk.ColumnInputExpression = entity => new
-                {
-                    entity.Percent,
-                    entity.PercentModule
-                };
-            });
+            await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         }
 
         private async Task<Video?> GetVideoAsync(Guid id)

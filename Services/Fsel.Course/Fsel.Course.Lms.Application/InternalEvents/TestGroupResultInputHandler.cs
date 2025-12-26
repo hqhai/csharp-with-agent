@@ -61,7 +61,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                         .FirstOrDefaultAsync(cancellationToken);
                     if (unitResult.Status != EnumResultStatus.Done)
                     {
-                        await UpdateTestResultAsync(testResult, percentModule);
+                        await UpdateTestResultAsync(testResult, percentModule, cancellationToken);
                     }
 
                     await _unitResultUpdater.UpdateUnitResultAsync(unitResult, testGroupResult.UnitModuleId.Value, cancellationToken);
@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                                        .FirstOrDefaultAsync(cancellationToken);
                     if (courseResult.Status != EnumResultStatus.Done)
                     {
-                        await UpdateTestResultAsync(testResult, percentModule);
+                        await UpdateTestResultAsync(testResult, percentModule, cancellationToken);
                     }
 
                     await _courseResultUpdater.UpdateCourseResultAsync(courseResult, testGroupResult.CourseModuleId.Value, cancellationToken);
@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
         }
 
-        private async Task UpdateTestResultAsync(TestResult? testResult, double percentModule)
+        private async Task UpdateTestResultAsync(TestResult? testResult, double percentModule, CancellationToken cancellationToken)
         {
             if (testResult == null)
             {
@@ -99,14 +99,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
             }
 
             testResult.PercentModule = NumberHelper.ConvertDoublePercent(testResult.Percent * percentModule, 2);
-            await _testResultRepository.BulkUpdateList(new List<TestResult> { testResult },
-            bulk =>
-            {
-                bulk.ColumnInputExpression = entity => new
-                {
-                    entity.PercentModule
-                };
-            });
+            await _testResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

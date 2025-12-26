@@ -56,7 +56,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
                                         .FirstOrDefaultAsync(cancellationToken);
                 if (courseResult.Status != EnumResultStatus.Done)
                 {
-                    await UpdateUnitResultAsync(unitResult, percentModule);
+                    await UpdateUnitResultAsync(unitResult, percentModule, cancellationToken);
                 }
                 await UpdateCourseResultAsync(courseResult, unitResult.CourseModuleId.Value, cancellationToken);
             }
@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
             }
         }
 
-        private async Task UpdateUnitResultAsync(UnitResult unitResult, double percentModule)
+        private async Task UpdateUnitResultAsync(UnitResult unitResult, double percentModule, CancellationToken cancellationToken)
         {
             if (unitResult == null)
             {
@@ -73,14 +73,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
             }
 
             unitResult.PercentModule = NumberHelper.ConvertDoublePercent(unitResult.Percent * percentModule, 2);
-            await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult },
-            bulk =>
-            {
-                bulk.ColumnInputExpression = entity => new
-                {
-                    entity.PercentModule
-                };
-            });
+            await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
 }

@@ -74,11 +74,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             }
 
             // Lấy tất cả LessonResult / TestGroupResult / TestResult thuộc UnitResult này
-            var lessonResultsAll = await _lessonResultRepository.ReadQueryable
+            var lessonResultsAll = await _lessonResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.UnitResultId == unitResult.Id)
                 .ToListAsync(cancellationToken);
 
-            var testGroupResultsAll = await _testGroupResultRepository.ReadQueryable
+            var testGroupResultsAll = await _testGroupResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.UnitResultId == unitResult.Id)
                 .Include(x => x.TestResults)
                 .ToListAsync(cancellationToken);
@@ -222,11 +222,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                 .Select(m => m.Id) // hoặc m.OriginalId tuỳ bạn đang dùng gì để map
                 .ToHashSet();
 
-            var queryLesson = _lessonResultRepository.ReadQueryable
+            var queryLesson = _lessonResultRepository.Queryable.AsNoTracking()
                     .Where(x => x.UnitResultId == resultId && x.Status == EnumResultStatus.Done
                             && x.UnitModuleId != null)
                     .Select(x => x.UnitModuleId!.Value);
-            var queryTest = _testGroupResultRepository.ReadQueryable
+            var queryTest = _testGroupResultRepository.Queryable.AsNoTracking()
                     .Where(x => x.UnitResultId == resultId && x.Status == EnumResultStatus.Done
                             && x.UnitModuleId != null)
                     .Select(x => x.UnitModuleId!.Value);

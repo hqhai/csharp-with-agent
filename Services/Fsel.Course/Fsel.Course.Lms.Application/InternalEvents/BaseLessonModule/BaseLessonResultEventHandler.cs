@@ -57,19 +57,19 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             ArgumentNullException.ThrowIfNull(lessonResult);
 
             // Lấy tất cả result của lesson
-            var videoResults = await _videoResultRepository.ReadQueryable
+            var videoResults = await _videoResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.LessonResultId == lessonResult.Id)
                 .ToListAsync(cancellationToken);
 
-            var documentResults = await _documentResultRepository.ReadQueryable
+            var documentResults = await _documentResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.LessonResultId == lessonResult.Id)
                 .ToListAsync(cancellationToken);
 
-            var classForumResults = await _classForumResultRepository.ReadQueryable
+            var classForumResults = await _classForumResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.LessonResultId == lessonResult.Id)
                 .ToListAsync(cancellationToken);
 
-            var homeWorkResults = await _homeWorkResultRepository.ReadQueryable
+            var homeWorkResults = await _homeWorkResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.LessonResultId == lessonResult.Id)
                 .ToListAsync(cancellationToken);
 
@@ -223,24 +223,24 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                 .ToHashSet();
 
             // Query các module đã done (lọc LessonModuleId != null)
-            var videoDone = _videoResultRepository.ReadQueryable
+            var videoDone = _videoResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.LessonResultId == resultId
                             && x.Status == EnumResultStatus.Done
                             && x.LessonModuleId != null)
                 .Select(x => x.LessonModuleId!.Value);
 
-            var docDone = _documentResultRepository.ReadQueryable
+            var docDone = _documentResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.LessonResultId == resultId
                             && x.Status == EnumResultStatus.Done)
                 .Select(x => x.LessonModuleId);
 
-            var forumDone = _classForumResultRepository.ReadQueryable
+            var forumDone = _classForumResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.LessonResultId == resultId
                             && x.ResultStatus == EnumResultStatus.Done
                             && x.LessonModuleId != null)
                 .Select(x => x.LessonModuleId!.Value);
 
-            var hwDone = _homeWorkResultRepository.ReadQueryable
+            var hwDone = _homeWorkResultRepository.Queryable.AsNoTracking()
                 .Where(x => x.LessonResultId == resultId
                             && x.Status == EnumResultStatus.Done
                             && x.LessonModuleId != null)
