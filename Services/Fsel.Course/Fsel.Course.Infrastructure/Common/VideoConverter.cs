@@ -812,9 +812,10 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
         {
             var answers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
-                                                                .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
-                                                                .OrderBy(x => x.Question!.CreatedDate)
-                                                                .Select(x => x.IsCorrect == true && x.IsFirstSubmit).ToListAsync();
+                                                .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
+                                                .Where(q => q.Question != null && !q.Question.Ungraded && q.Question.QuestionType != EnumQuestionType.ExercisePreparation)
+                                                .OrderBy(x => x.Question!.CreatedDate)
+                                                .Select(x => x.IsCorrect == true && x.IsFirstSubmit).ToListAsync();
             return answers.GetHighestStreak();
         }
 

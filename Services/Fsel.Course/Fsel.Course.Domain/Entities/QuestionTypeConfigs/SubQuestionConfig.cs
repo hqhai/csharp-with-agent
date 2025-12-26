@@ -6,6 +6,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs
     {
         public string? Id { get; set; }
         public int Index { get; set; }
+        public IList<int> Indexes { get; set; } = new List<int>();
     }
 
     public interface IConfigRuby

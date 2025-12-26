@@ -110,17 +110,18 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2
                 {
                     videoResult.HighestStreak = await _videoConverter.GetHighestStreak(videoResult);
                 }
-                else if (videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone)
+                else
                 {
                     videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
                 }
+                await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, videoTimeCodeResult, cancellationToken);
+            }
+            else
+            {
+                await HandleNonSubmitAsync(videoTimeCode, videoTimeCodeResult);
             }
 
-            await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, videoTimeCodeResult, request.IsSubmit, cancellationToken);
-            if (request.IsSubmit)
-            {
-                videoResult.TimeCodeHighestStreak = await GetHighestStreak(videoResult);
-            }
+            videoResult.TimeCodeHighestStreak = await GetHighestStreak(videoResult);
             await _videoResultRepository.BulkUpdateList(new List<VideoResult> { videoResult }, bulk =>
             {
                 bulk.IgnoreOnUpdateExpression = entity => new { entity.LessonResultId, entity.StudentId, entity.VideoId };
@@ -207,7 +208,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2
             }
         }
 
-        private async Task UpdateVideoTimeCodeResultAsync(VideoTimeCode videoTimeCode, VideoResult videoResult, VideoTimeCodeResult videoTimeCodeResult, bool isSubmit, CancellationToken cancellationToken)
+        private async Task UpdateVideoTimeCodeResultAsync(VideoTimeCode videoTimeCode, VideoResult videoResult, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
         {
             if (videoResult.LessonResult == null)
             {
@@ -224,40 +225,32 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2
                                                               .FirstOrDefaultAsync(cancellationToken);
 
             var shouldForceDoneAnswers = videoTimeCode.TimeCodeType != EnumTimeCodeType.Standalone || videoTimeCodeResult.Status == EnumResultStatus.Process;
-            if (isSubmit)
+            await _mediator.Send(new UpdateVideoTimeCodeAnswersCommand { VideoTimeCodeResultId = videoTimeCodeResult.Id }, cancellationToken).ConfigureAwait(false);
+
+            var correctCount = await _videoService.UpdateVideoAnswers(videoTimeCode, videoTimeCodeResult, shouldForceDoneAnswers, true, cancellationToken);
+            videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode, course.CourseType, correctCount);
+            await SendTokenHistoryAsync(videoTimeCodeResult, videoTimeCode, courseResultId, cancellationToken).ConfigureAwait(false);
+
+            var (skillScoreUngradeds, skillScores, isDone) = await _videoService.GetSkillScoresAsync(videoTimeCodeResult, videoTimeCode, cancellationToken);
+            skillScores ??= new List<SkillScores>();
+            skillScoreUngradeds ??= new List<SkillScores>();
+
+            if (skillScoreUngradeds != null && skillScoreUngradeds.Any())
             {
-                await _mediator.Send(new UpdateVideoTimeCodeAnswersCommand { VideoTimeCodeResultId = videoTimeCodeResult.Id }, cancellationToken).ConfigureAwait(false);
-
-                var correctCount = await _videoService.UpdateVideoAnswers(videoTimeCode, videoTimeCodeResult, shouldForceDoneAnswers, isSubmit, cancellationToken);
-                videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode, course.CourseType, correctCount);
-                await SendTokenHistoryAsync(videoTimeCodeResult, videoTimeCode, courseResultId, cancellationToken).ConfigureAwait(false);
-
-                var (skillScoreUngradeds, skillScores, isDone) = await _videoService.GetSkillScoresAsync(videoTimeCodeResult, videoTimeCode, cancellationToken);
-                skillScores ??= new List<SkillScores>();
-                skillScoreUngradeds ??= new List<SkillScores>();
-
-                if (skillScoreUngradeds != null && skillScoreUngradeds.Any())
-                {
-                    videoTimeCodeResult.CorrectCountUngraded = (int)skillScoreUngradeds.Sum(x => x.CorrectCount);
-                    videoTimeCodeResult.CorrectTotalUngraded = (int)skillScoreUngradeds.Sum(x => x.TotalCount);
-                }
-
-                videoTimeCodeResult.Status = isDone ? EnumResultStatus.Done : EnumResultStatus.Process;
-                videoTimeCodeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
-                videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
-                videoTimeCodeResult.SkillScores = skillScores;
-                videoTimeCodeResult.SkillScoreUngraded = skillScoreUngradeds;
-                videoTimeCodeResult.IsWorking = false;
-
-                await _videoTimeCodeResultRepository.BulkUpdateList(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
-                {
-                    bulk.IgnoreOnUpdateExpression = entity => new { entity.RetryWorkingTime, entity.WorkingTime, entity.VideoResultId, entity.VideoTimeCodeId };
-                });
+                videoTimeCodeResult.CorrectCountUngraded = (int)skillScoreUngradeds.Sum(x => x.CorrectCount);
+                videoTimeCodeResult.CorrectTotalUngraded = (int)skillScoreUngradeds.Sum(x => x.TotalCount);
             }
-            else
+            videoTimeCodeResult.Status = isDone ? EnumResultStatus.Done : EnumResultStatus.Process;
+            videoTimeCodeResult.CorrectCount = (int)skillScores.Sum(x => x.CorrectCount);
+            videoTimeCodeResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
+            videoTimeCodeResult.SkillScores = skillScores;
+            videoTimeCodeResult.SkillScoreUngraded = skillScoreUngradeds;
+            videoTimeCodeResult.IsWorking = false;
+
+            await _videoTimeCodeResultRepository.BulkUpdateList(new List<VideoTimeCodeResult> { videoTimeCodeResult }, bulk =>
             {
-                await HandleNonSubmitAsync(videoTimeCode, videoTimeCodeResult);
-            }
+                bulk.IgnoreOnUpdateExpression = entity => new { entity.RetryWorkingTime, entity.WorkingTime, entity.VideoResultId, entity.VideoTimeCodeId };
+            });
         }
 
         private async Task HandleNonSubmitAsync(VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult)
