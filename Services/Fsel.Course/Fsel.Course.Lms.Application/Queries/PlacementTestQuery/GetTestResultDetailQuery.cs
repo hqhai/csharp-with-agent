@@ -1,15 +1,10 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 {
     using Common.ActionResults;
-    using Core.Base.Interfaces;
-    using Domain.Entities.TestConfigs;
-    using Domain.Models.EntityModels;
     using Domain.Models.EntityModels.PlacementTestModels;
     using MediatR;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.DependencyInjection;
     using Services.ApplicationServices;
     using Services.ApplicationServices.Aggregates;
 
@@ -38,10 +33,12 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             }
             var testResultComposite = new TestResultComposite { Result = testResult, ServiceProvider = _serviceProvider };
             testResultComposite.GenerateChildren();
-            var testResultState = testResultComposite.ExportState();
+            await testResultComposite.LoadTestHierarchicalData();
+            var testResultState = testResultComposite.ExportState() as TestStateModel;
+            testResultState.UpdateDetailInfo(testResultComposite.Test);
             return new MethodResult<TestStateModel>
             {
-                Result = testResultState as TestStateModel,
+                Result = testResultState
             };
         }
     }
