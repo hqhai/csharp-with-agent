@@ -170,6 +170,7 @@ namespace Fsel.Course.Infrastructure
         public DbSet<AICriteriaConfigs> AICriteriaConfigs { get; set; }
         public DbSet<DocumentResult> DocumentResults { get; set; }
         public DbSet<LongAnswerSetting> LongAnswerSettings { get; set; }
+        public DbSet<TestScore> TestScores { get; set; }
 
         //#region Report
 
@@ -330,6 +331,7 @@ namespace Fsel.Course.Infrastructure
             modelBuilder.ApplyConfiguration(new AiPromptManagerEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new AICriteriaConfigsEntityTypeConfiguration());
             modelBuilder.ApplyConfiguration(new LongAnswerSettingTypeConfiguration());
+            modelBuilder.ApplyConfiguration(new TestScoreEntityTypeConfiguration());
 
             //modelBuilder.Ignore<TotalEvaluateInputResultModel>();
             //modelBuilder.Ignore<TotalDetailEvaluateInputResultModel>();

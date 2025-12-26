@@ -43,6 +43,9 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                 TestGroupResultId = testGroupResult?.Id,
                 StudentId = request.StudentId,
                 Level = testGroupResult?.CurrentLevel?.Name,
+                LevelId = testGroupResult?.CurrentLevel?.Id,
+                SelectedProgramId = testGroupResult?.ProgramId,
+                SelectedPtProgramId = testGroupResult?.ProgramIdOfPt,
                 Status = testGroupResult?.Status ?? EnumResultStatus.NotStarted
             };
 

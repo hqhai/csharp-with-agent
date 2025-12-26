@@ -67,7 +67,7 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
 
             // 0) CourseGoals
             var courseGoals = await GetCourseGoalsAsync(cancellationToken).ConfigureAwait(false);
-            var dateTimeUtcNow = request.ToDate ?? DateTime.UtcNow.Date;
+            var dateTimeUtcNow = request.ToDate ?? DateTime.UtcNow;
 
             // 1-2) Stream học viên theo trang → tạo Aggregate cho từng batch (giảm RAM)
             await foreach (var studentBatch in StreamStudentsByPageAsync(cancellationToken))
@@ -691,8 +691,8 @@ namespace Fsel.Course.Lms.Application.Commands.OtherFeatureCmd
                 {
                     // cập nhật weekly mới nhất
                     w.CompletedLessons = stat.week;
-                    w.TotalCompletedLessons = stat.total;
                     w.LastCompletedAt = stat.last;
+                    w.TotalCompletedLessons = course.total;
                     w.ProgressStatus = EnumCombinedProgressHelper.GetProgressStatusFromCounts(w.CompletedLessons, w.LessonsPerWeek);
                     weeklyToUpdate.Add(w);
 

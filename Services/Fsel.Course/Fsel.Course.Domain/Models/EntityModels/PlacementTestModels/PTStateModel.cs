@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 {
     using System.Text.Json.Serialization;
     using Entities.TestConfigs;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Newtonsoft.Json;
     using Shared.Enums;
@@ -18,7 +19,13 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
         public string? Level { get; set; }
 
+        public Guid? LevelId { get; set; }
+
         public EnumResultStatus? Status { get; set; }
+
+        public Guid? SelectedProgramId { get; set; }
+
+        public Guid? SelectedPtProgramId { get; set; }
 
         public ICollection<BaseTestStateModel> TestStates { get; set; } = new List<BaseTestStateModel>();
     }
@@ -36,8 +43,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     {
         public string? Name { get; set; }
 
-        [JsonProperty("ModuleId")]
-        public Guid? StepFlowId { get; set; }
+        [JsonProperty("ModuleId")] public Guid? StepFlowId { get; set; }
 
         public Guid? TestId { get; set; }
 
@@ -68,6 +74,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
                 {
                     continue;
                 }
+
                 sectionStateModel.UpdateDetailInfo(section);
             }
         }
@@ -77,21 +84,19 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     {
         public string? Name { get; set; }
         public Guid? SectionId { get; set; }
-
         public EnumTestLayoutType? TestLayoutType { get; set; }
         public TestSectionConfig? Config { get; set; }
-
         public Guid? SectionResultId { get; set; }
-
         public int CorrectCount { get; set; }
-
+        public int CorrectTotal { get; set; }
         public double TotalCount { get; set; }
-
-        public List<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
-
         public double? WorkingTime { get; set; }
-
         public double? PercentResult { get; set; }
+        public int? HighestStreak { get; set; }
+        public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
+        public IList<SkillScores>? SkillScores { get; set; }
+
+        public int? Order { get; set; }
 
         public void UpdateDetailInfo(TestSection? section)
         {
@@ -99,6 +104,8 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
             {
                 return;
             }
+
+            Order = section?.DisplayOrder;
             Name = section.Name ?? section.Skill?.Name;
             Config = section.Config;
             foreach (var sectionResult in Children)
@@ -113,6 +120,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
                 {
                     continue;
                 }
+
                 sectionStateModel.UpdateDetailInfo(sectionMatch);
             }
         }

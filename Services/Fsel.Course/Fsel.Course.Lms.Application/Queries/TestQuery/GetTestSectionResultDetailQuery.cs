@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Common.ActionResults;
     using Domain.IRepositories;
     using Domain.Models.EntityModels;
@@ -213,6 +212,10 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
             var model = new SectionStateModel
             {
+                SkillScores = nodeResult?.SkillScores,
+                CorrectTotal = nodeResult?.CorrectTotal ?? 0,
+                HighestStreak = nodeResult?.HighestStreak,
+
                 SectionResultId = nodeResult?.Id,
                 Status = nodeResult?.Status ?? EnumResultStatus.New,
                 UpdatedDate = nodeResult?.UpdatedDate,

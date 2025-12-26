@@ -58,7 +58,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             var unitResult = await _unitResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.UnitId == request.UnitId && x.CourseId == request.CourseId, cancellationToken);
             if (unitResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unitResult));
                 return methodResult;
             }
             unitResultModel = _mapper.Map<UnitResultModel>(unitResult);

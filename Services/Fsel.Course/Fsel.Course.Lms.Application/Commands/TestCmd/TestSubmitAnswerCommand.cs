@@ -4,8 +4,6 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
 {
     using Common.ActionResults;
     using Common.Enums.ErrorCodes;
-    using Core.Base.Interfaces;
-    using Domain.Entities.TestConfigs;
     using Domain.Enums;
     using Domain.IRepositories;
     using Domain.Models.CommandModels.Tests;
@@ -13,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Services.ApplicationServices.Aggregates;
-    using TestStateModel = Domain.Models.EntityModels.PlacementTestModels.TestStateModel;
 
     public class TestSubmitAnswerCommand : IRequest<MethodResult<SingleTestStateModel>>
     {
@@ -48,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
 
             if (testResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist));
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testResult), request.TestResultId);
                 return methodResult;
             }
             if (testResult.Status == EnumResultStatus.Done)
@@ -63,9 +60,14 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             }
 
             var testGroupResult = await _testGroupResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
+            if (testGroupResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testGroupResult), testResult.TestGroupResultId);
+                return methodResult;
+            }
             var aggregate = new TestResultAggregate(testGroupResult, _serviceProvider, testResult);
 
-            await aggregate.MakeAnswers(new SubmitAnswerCommandModel
+            await aggregate.MakeTestAnswers(new SubmitAnswerCommandModel
             {
                 SectionResultId = request.SectionResultId,
                 TestResultId = request.TestResultId,
@@ -74,7 +76,6 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             });
 
             methodResult.Result = await aggregate.ExpotStateData();
-
             return methodResult;
         }
     }

@@ -73,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
+
             if (student.User == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student.User));
@@ -109,7 +110,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         return methodResult;
                     }
 
-                    var testGroupResult = await _testService.InitTestGroupResultForFlow(flowMatch.Id, programContainPtFound.Id, student.Id, EnumTestType.PlacementTest);
+                    var testGroupResult =
+                        await _testService.InitTestGroupResultForFlow(flowMatch.Id, request.ProjectId, programContainPtFound.Id, student.Id, EnumTestType.PlacementTest);
 
                     var aggregate = new FlowTestResultAggregate(testGroupResult, _serviceProvider);
                     await aggregate.Start();
@@ -117,7 +119,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 }
                 else if (programContainPtFound.TestMode == EnumTestMode.Not)
                 {
-                    var testGroupResult = await _testService.InitTestGroupResultForFlow(null, request.ProjectId, student.Id, EnumTestType.PlacementTest, isByPass: true);
+                    var testGroupResult =
+                        await _testService.InitTestGroupResultForFlow(null, request.ProjectId, request.ProjectId, student.Id, EnumTestType.PlacementTest, isByPass: true);
                     methodResult.Result = new PtStateModel { Status = EnumResultStatus.ByPass, TestGroupResultId = testGroupResult.Id, StudentId = student.Id };
                 }
             }

@@ -47,45 +47,35 @@ namespace Fsel.Course.Lms.Application.Queries.CategoryQuery
             var ptTestResult = await _testGroupResult.ReadQueryable.Where(x => x.StudentId == request.StudentId && x.TestType == EnumTestType.PlacementTest)
                 .FirstOrDefaultAsync(cancellationToken);
 
-            if (ptTestResult == null)
+            if (ptTestResult?.Status != EnumResultStatus.ByPass && ptTestResult?.Status != EnumResultStatus.Done)
             {
                 return new MethodResult<List<ProgramModel>>();
             }
 
 
-            if (ptTestResult.Status == EnumResultStatus.ByPass)
-            {
-                var programs = await _categoryRepository.ReadQueryable
-                    .Where(x => x.Id == ptTestResult.ProgramId)
-                    .Include(x => x.Categorys)
-                    .SelectMany(x => x.Categorys).ToListAsync(cancellationToken);
+            var programOfPtTest = await _categoryRepository.ReadQueryable
+                .Where(x => x.Id == ptTestResult.ProgramId)
+                .FirstOrDefaultAsync(cancellationToken);
 
-                var programsMatchLevel = programs.Where(x => x.Levels.Any(l => l.Id == ptTestResult.LevelId)).ToList();
-                return new MethodResult<List<ProgramModel>> { Result = _mapper.Map<List<ProgramModel>>(programs), StatusCode = 200 };
+            if (programOfPtTest?.ParentId == null)
+            {
+                return new MethodResult<List<ProgramModel>>();
             }
 
-            if (ptTestResult.Status == EnumResultStatus.Done)
+            var programs = await _categoryRepository.ReadQueryable
+                .Where(x => x.Id == programOfPtTest.ParentId)
+                .Include(x => x.Categorys)
+                .ThenInclude(x => x.Levels)
+                .SelectMany(x => x.Categorys).ToListAsync(cancellationToken);
+
+            var programsMatchLevel = programs.ToList();
+
+            if (ptTestResult is { Status: EnumResultStatus.Done, CurrentLevelId: not null })
             {
-                var programOfPtTest = await _categoryRepository.ReadQueryable
-                    .Where(x => x.Id == ptTestResult.ProgramId)
-                    .FirstOrDefaultAsync(cancellationToken);
-
-                if (programOfPtTest == null)
-                {
-                    return new MethodResult<List<ProgramModel>>();
-                }
-
-                var programs = await _categoryRepository.ReadQueryable
-                    .Where(x => x.Id == programOfPtTest.ParentId)
-                    .Include(x => x.Categorys)
-                    .ThenInclude(x => x.Levels)
-                    .SelectMany(x => x.Categorys).ToListAsync(cancellationToken);
-
-                var programsMatchLevel = programs.Where(x => x.Levels.Any(l => l.Id == ptTestResult.CurrentLevelId)).ToList();
-                return new MethodResult<List<ProgramModel>> { Result = _mapper.Map<List<ProgramModel>>(programsMatchLevel), StatusCode = 200 };
+                programsMatchLevel = programs.Where(x => x.Levels.Any(l => l.Id == ptTestResult.CurrentLevelId)).ToList();
             }
 
-            return new MethodResult<List<ProgramModel>>();
+            return new MethodResult<List<ProgramModel>> { Result = _mapper.Map<List<ProgramModel>>(programsMatchLevel), StatusCode = 200 };
         }
     }
 }

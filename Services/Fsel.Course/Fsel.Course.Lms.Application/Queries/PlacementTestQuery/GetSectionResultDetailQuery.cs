@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 {
@@ -45,7 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
 
             if (testSectionResult.TestSection?.TestSectionQuestions != null)
             {
-                sectionStateModel.Children = testSectionResult.TestSection.TestSectionQuestions.Select(BaseTestStateModel (x) =>
+                sectionStateModel.Children = testSectionResult.TestSection.TestSectionQuestions.OrderBy(x => x.CreatedDate).Select(BaseTestStateModel (x) =>
                 {
                     var questionModel = new QuestionStateModel { QuestionId = x.QuestionId };
                     var testAnswer = testSectionResult?.TestAnswers.FirstOrDefault(t => t.QuestionId == x.QuestionId);

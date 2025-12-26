@@ -51,9 +51,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery
             }
             var studentId = studentResult?.Content?.Result?.Id;
 
-            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
+            var classForum = await _classForumRepository.ReadQueryable.Include(x => x.ClassForumResults.Where(x => x.StudentId == studentId))
                                                      .ThenInclude(x => x.ClassForumScores)
-                                                     .Where(x => x.Id == request.ClassForumId)
                                                      .FirstOrDefaultAsync(x => x.Id == request.ClassForumId, cancellationToken);
             if (classForum == null)
             {

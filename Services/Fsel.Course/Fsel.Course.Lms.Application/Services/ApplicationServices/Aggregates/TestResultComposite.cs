@@ -7,11 +7,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Shared.Enums;
     using Microsoft.Extensions.DependencyInjection;
 
-    public class  TestResultComposite : ResultComposite
+    public class TestResultComposite : ResultComposite
     {
         public TestResult TestResult => Result as TestResult;
+
+        public Test? Test { get; set; }
 
         public override BaseTestStateModel ExportForTestState()
         {
@@ -42,10 +45,38 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 {
                     var correspondSection = test.TestSections.FirstOrDefault(y => y.Id == x.TestSectionResult.TestSectionId);
                     var skillScores = x.TestSectionResult.SkillScores ?? new List<SkillScores>();
+
                     foreach (var skillScore in skillScores)
                     {
                         skillScore.SkillId = correspondSection?.SkillId;
+                        skillScore.SkillName = correspondSection?.Skill?.Name;
                     }
+
+                    return skillScores;
+                }).ToList();
+            }
+        }
+
+        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        {
+            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(id));
+            skillMatch?.SubmitTest(id, TestResult.Test?.ScoringFormulaType);
+            if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
+            {
+                var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);
+                TestResult.Status = EnumResultStatus.Done;
+                TestResult.CorrectCount = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.CorrectCount);
+                TestResult.SkillScores = Children.Cast<TestSectionResultComposite>().SelectMany(x =>
+                {
+                    var correspondSection = test.TestSections.FirstOrDefault(y => y.Id == x.TestSectionResult.TestSectionId);
+                    var skillScores = x.TestSectionResult.SkillScores ?? new List<SkillScores>();
+
+                    foreach (var skillScore in skillScores)
+                    {
+                        skillScore.SkillId = correspondSection?.SkillId;
+                        skillScore.SkillName = correspondSection?.Skill?.Name;
+                    }
+
                     return skillScores;
                 }).ToList();
             }
@@ -63,11 +94,21 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 return;
             }
 
+            if (Children.Any(x => x is TestSectionResultComposite { TestSectionResult.Status: EnumResultStatus.Process }))
+            {
+                return;
+            }
+
+            var skillsPairCompositeResults = Test?.TestSections.OrderBy(x => x.DisplayOrder).Select(x =>
+            {
+                var sectionResultComposite =
+                    Children.FirstOrDefault(y => y is TestSectionResultComposite tsr && tsr.TestSectionResult.TestSectionId == x.Id) as TestSectionResultComposite;
+                return new { Section = x, SectionResultComposite = sectionResultComposite };
+            }).Where(x => x.SectionResultComposite != null).ToList();
+
             var childCanStart =
-                Children.FirstOrDefault(x => x is TestSectionResultComposite
-                {
-                    TestSectionResult.Status: EnumResultStatus.New or EnumResultStatus.Unfinished
-                }) as TestSectionResultComposite;
+                skillsPairCompositeResults?.FirstOrDefault(x =>
+                    x.SectionResultComposite.TestSectionResult.Status is EnumResultStatus.New or EnumResultStatus.Unfinished)?.SectionResultComposite;
 
             childCanStart?.Start();
         }
@@ -110,6 +151,17 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
             };
             return stateModel;
+        }
+
+        public async Task LoadTestHierarchicalData()
+        {
+            if (TestResult.TestId == null)
+            {
+                return;
+            }
+
+            var testService = ServiceProvider.GetRequiredService<ITestService>();
+            Test = await testService.GetHierachicalTestById(TestResult.TestId.Value);
         }
     }
 }

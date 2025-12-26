@@ -3,7 +3,9 @@
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
+using Fsel.Realtime.Application.Hubs.Test;
 using Fsel.Realtime.Application.Queues.Consumers;
+using Fsel.Realtime.Application.Queues.Consumers.Test;
 using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Constants;
 
@@ -33,6 +35,8 @@ builder.Services.AddScoped<DictionaryHub>();
 builder.Services.AddScoped<SetTimeExamPracticeHub>();
 builder.Services.AddScoped<QuestionTypeHub>();
 builder.Services.AddScoped<SendStudentsFromFileHub>();
+builder.Services.AddScoped<TestSpeakingHub>();
+builder.Services.AddScoped<TestWritingHub>();
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>
@@ -56,6 +60,8 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.SystemQueue.NameQueue.SendNotifyBuyBlindBox, typeof(SendNotifyBuyBlindBoxConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SendDictionary, typeof(SendDictionaryConsumer) },
     { QueueSettings.ExamPracticeQueue.NameQueue.GetTimeExamPractice, typeof(GetTimeExamPracticeConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.TestSpeaking, typeof(TestAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.TestWriting, typeof(TestAIFeedBackConsumer) },
 });
 
 var app = builder.Build();
@@ -81,5 +87,7 @@ app.UseHubs<ExamPracticeWritingHub>(RealtimeSettings.ExamPracticeWritingAIFeedBa
 app.UseHubs<SetTimeExamPracticeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
 app.UseHubs<QuestionTypeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
 app.UseHubs<QuestionTypeHub>(RealtimeSettings.QuestionTypeHub.Pattern);
+app.UseHubs<TestWritingHub>(RealtimeSettings.TestWritingAIFeedBackHub.Pattern);
+app.UseHubs<TestSpeakingHub>(RealtimeSettings.TestSpeakingAIFeedBackHub.Pattern);
 
 app.Run();

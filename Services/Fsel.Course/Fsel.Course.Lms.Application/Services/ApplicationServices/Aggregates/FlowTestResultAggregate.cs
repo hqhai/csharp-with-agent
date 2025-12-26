@@ -6,7 +6,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Core.Base.Interfaces;
     using Domain.Entities.TestConfigs;
     using Domain.Enums;
-    using Domain.IRepositories;
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.PlacementTestModels;
     using Microsoft.EntityFrameworkCore;
@@ -67,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 var testService = ServiceProvider.GetRequiredService<ITestService>();
 
                 var newTestResultTree =
-                    await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, node.StepFlow.Id, FlowTestResult.Id, FlowTestResult.ProgramId.Value);
+                    await testService.MakeNewTestResultTree(FlowTestResult.StudentId.Value, node.StepFlow.Id, FlowTestResult.Id, FlowTestResult.ProgramIdOfPt.Value);
 
                 await AddNewTest(newTestResultTree);
             }
@@ -76,7 +75,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             {
                 await InitAggregate();
             }
-
 
             var inprogressTestResult = TestResultComposites.FirstOrDefault(t => t.TestResult.Status == EnumResultStatus.Process);
             inprogressTestResult?.Start();
@@ -90,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var testResultComposite = new TestResultComposite() { Result = testResult, ServiceProvider = ServiceProvider };
             TestResultComposites.Add(testResultComposite);
             testResultComposite.GenerateChildren();
+            await testResultComposite.LoadTestHierarchicalData();
             await testResultComposite.LoadTotalScoreData();
             testResult.Status = EnumResultStatus.Process;
         }
@@ -144,6 +143,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
                     var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == testResult.Id);
                     testResult.SectionResults = hierarchicalTestResult.SectionResults;
+                    await testResultComposite.LoadTestHierarchicalData();
                 }
 
                 testResultComposite.GenerateChildren();
@@ -180,7 +180,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         CorrectCount = skill.CorrectCount,
                         TotalCount = skill.CorrectTotal,
                         Status = skill.Status,
-                        UpdatedDate = skill?.UpdatedDate ?? skill?.CreatedDate
+                        UpdatedDate = skill?.UpdatedDate ?? skill?.CreatedDate,
+                        Order = skill.TestSection?.DisplayOrder
                     };
 
                     return sectionStateModel;

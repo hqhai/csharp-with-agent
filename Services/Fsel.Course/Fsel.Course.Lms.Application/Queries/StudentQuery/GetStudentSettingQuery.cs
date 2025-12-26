@@ -166,6 +166,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
             settingStudentModel.IsPlacementTest = testGroupResult != null;
             settingStudentModel.IsLockPT = testGroupResult?.Status is EnumResultStatus.ByPass or EnumResultStatus.Done;
+            settingStudentModel.PTLevel = testGroupResult?.CurrentLevelId;
         }
     }
 }

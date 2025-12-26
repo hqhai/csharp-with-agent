@@ -3,7 +3,6 @@
 namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i1
 {
     using System;
-    using System.Text.Json;
     using System.Threading;
     using System.Threading.Tasks;
     using Fsel.Common.Helpers;
@@ -31,11 +30,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i1
         public async Task<string?> Handle(SubmitAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            using var doc = JsonDocument.Parse(request.Text?.ToString() ?? throw new InvalidOperationException("Text (schema) is null"));
-            var root = doc.RootElement;
-            var schemaName   = root.GetProperty("name").GetString();
-            var strict       = root.GetProperty("strict").GetBoolean();
-            var schemaObject = root.GetProperty("schema");
 
             var response = await _openAIService.SubmitAIResponsesAsync(new RequestSchemaAIModel
             {
@@ -58,9 +52,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i1
                     Format = new
                     {
                         Type = "json_schema",
-                        Name = schemaName,
-                        Schema = schemaObject,
-                        Strict =  strict,
+                        Name = request.NameSchema,
+                        Schema = request.Text
                     }
                 },
                 Temperature = request.SettingTemperature,
