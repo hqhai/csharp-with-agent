@@ -94,6 +94,12 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public double? TotalScore { get; set; }
         public string? AudioPath { get; set; }
 
+        public string? MediaPostContent => Shared.Helpers.StringHelper.ProcessHtml(MediaPost, false);
+
+        public IEnumerable<string>? AudioPaths => Shared.Helpers.StringHelper.GetIframeUrls(MediaPost, true).AddS3BaseUrls();
+
+        public IEnumerable<string>? VideoPaths => Shared.Helpers.StringHelper.GetIframeUrls(MediaPost, false).AddS3BaseUrls();
+
         /// <summary>
         /// Media Post Ruby
         /// </summary>
