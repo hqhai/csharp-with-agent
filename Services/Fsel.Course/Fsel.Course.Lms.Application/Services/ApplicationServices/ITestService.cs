@@ -314,11 +314,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             {
                 return;
             }
-            var layoutType = testSectionResult.TestSection?.LayoutType;
-            if (layoutType == EnumTestLayoutType.Basic)
-            {
-                await SubmitQuestions(request);
-            }
+            await SubmitQuestions(request);
         }
 
         public async Task CreateTestAnswers(SubmitAnswerCommandModel request)
