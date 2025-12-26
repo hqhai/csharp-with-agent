@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
     using MediatR;
@@ -56,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(LessonResult), request.LessonResultId);
                 return methodResult;
             }
-            if (lessonResult.Status != Domain.Enums.EnumResultStatus.New)
+            if (lessonResult.Status != EnumResultStatus.New)
             {
                 return methodResult;
             }
@@ -69,14 +70,16 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
 
             await UpdateNewResultLessonModule(currentModule, lessonResult, cancellationToken);
 
-            lessonResult.Status = EnumResultStatus.Process;
-            await _lessonResultRepository.BulkUpdateList(new List<LessonResult> { lessonResult }, bulk =>
+            await _lessonResultRepository.ExecuteTransactionAsync(async () =>
             {
-                bulk.ColumnInputExpression = entity => new { entity.Status };
+                lessonResult.Status = EnumResultStatus.Process;
+                await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
+
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = _mapper.Map<LessonResultModel>(lessonResult);
+                return methodResult;
             });
 
-            methodResult.StatusCode = StatusCodes.Status200OK;
-            methodResult.Result = _mapper.Map<LessonResultModel>(lessonResult);
             return methodResult;
         }
 
