@@ -28,6 +28,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
             get { return _avatarPath.AddS3BaseUrl(); }
         }
 
+        public bool IsEnabledExtra { get; set; }
         public Guid? ClassId { get; set; }
         public string? CodeClass { get; set; }
         public IList<string>? Roles { get; set; }
@@ -73,5 +74,7 @@ namespace Fsel.Identity.Domain.Models.EntityModels
         public IList<StudentProfileModel>? Students { get; set; }
         public ParentProfileModel? Parent { get; set; }
         public SenderModel? Sender { get; set; }
+
+        public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
     }
 }

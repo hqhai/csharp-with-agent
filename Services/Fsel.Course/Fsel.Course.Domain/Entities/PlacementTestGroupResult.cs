@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities
 {
     using Fsel.Core.Entities;
+    using Fsel.Course.Domain.Entities.FlowConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
@@ -41,6 +42,9 @@ namespace Fsel.Course.Domain.Entities
         public DateTime? NewDate { get; set; }
         public EnumResultStatus Status { get; set; }
         public Guid StudentId { get; set; }
+
+        public Flow? Flow { get; set; }
+        public Guid? FlowId { get; set; }
         public ICollection<PlacementTestResult> PlacementTestResults { get; set; } = new List<PlacementTestResult>();
     }
 }

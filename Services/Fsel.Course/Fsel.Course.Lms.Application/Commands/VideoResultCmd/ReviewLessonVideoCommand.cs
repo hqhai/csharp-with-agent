@@ -66,21 +66,21 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
                 methodResult.AddErrorBadRequest(videoResult.ErrorMessages);
                 return methodResult;
             }
-            var isVideoTimeCodeDone = await _videoTimeCodeResultRepository.Queryable.AnyAsync(x => x.VideoResultId == videoResult.Id && x.Status != EnumResultStatus.Done, cancellationToken);
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable.Where(x => x.VideoResultId == videoResult.Id).ToListAsync(cancellationToken);
+            var isVideoTimeCodeDone = videoTimeCodeResults.Any(x => x.Status != EnumResultStatus.Done);
             if (isVideoTimeCodeDone)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(isVideoTimeCodeDone));
                 return methodResult;
             }
-            var video = await _videoRepository.Queryable.Include(x => x.VideoTimeCodes)
-                                                        .ThenInclude(x => x.VideoTimeCodeResults.Where(x => x.VideoResultId == videoResult.Id && x.Status == EnumResultStatus.Done))
-                                                        .FirstOrDefaultAsync(x => x.Id == videoResult.VideoId, cancellationToken: cancellationToken);
+
+            var video = await _videoRepository.ReadQueryable.Include(x => x.VideoTimeCodes)
+                                              .FirstOrDefaultAsync(x => x.Id == videoResult.VideoId, cancellationToken: cancellationToken);
             if (video == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
-            var videoTimeCodeResults = video.VideoTimeCodes.Where(x => x.VideoTimeCodeResults.Any()).Select(x => x.VideoTimeCodeResults).ToList();
             if (videoTimeCodeResults.Count != video.VideoTimeCodes.Count)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoTimeCodeErrorCode.VideoTimeCodesNotCompleted), nameof(videoTimeCodeResults));
@@ -96,6 +96,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoResultCmd
             {
                 bulk.IgnoreOnUpdateExpression = entity => new { entity.LessonResultId, entity.StudentId, entity.VideoId };
             });
+            await _videoResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
 
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = _mapper.Map<VideoResultModel>(videoResult);

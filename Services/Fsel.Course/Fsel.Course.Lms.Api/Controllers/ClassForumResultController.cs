@@ -13,16 +13,16 @@ namespace Fsel.Course.Lms.Api.Controllers
     using Fsel.Course.Lms.Application.Commands.ClassForumCmd;
     using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.ClassForumResultQuery;
+    using Fsel.Shared.Attributes;
+    using Fsel.Shared.Constants;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Mvc;
-    using Fsel.Shared.Constants;
-    using Fsel.Shared.Attributes;
-    using Microsoft.AspNetCore.Authorization;
+    using CreateClassForumResultCommand = Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2.CreateClassForumResultCommand;
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/class-forum-result")]
     [ApiController]
-    //[Permission]
     public class ClassForumResultController : BaseController
     {
         private readonly IMediator _mediator;
@@ -143,6 +143,31 @@ namespace Fsel.Course.Lms.Api.Controllers
         public async Task<IActionResult> CheckFFmpeg([FromQuery] CheckFFmpegCommand command)
         {
             MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get Class forum
+        /// </summary>
+        [HttpPost("update-class-forum-detail")]
+        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.CSO) })]
+        public async Task<IActionResult> UpdateClassForumDetailResult([FromBody] UpdateClassForumDetailResultCommand command)
+        {
+            MethodResult<bool> queryResult = await _mediator.Send(command).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get Class forum detail results
+        /// </summary>
+        [HttpGet("get-class-forum-details")]
+        [ProducesResponseType(typeof(MethodResult<IList<ClassForumDetailResultModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetClassForumDetailResults([FromQuery] GetClassForumDetailResultsQuery query)
+        {
+            MethodResult<IList<ClassForumDetailResultModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

@@ -2,13 +2,14 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 using System.ComponentModel.DataAnnotations;
+using Fsel.Core.Base.Interfaces;
 
 namespace Fsel.Identity.Authentication.OpenId.Account
 {
-    public class LoginInputModel
+    public class LoginInputModel : IRequestBodyTenantAware
     {
         [Required(ErrorMessage = "i18n_Username_cannot_be_empty")]
-        public string? Username { get; set; }
+        public string? UserName { get; set; }
 
         [Required(ErrorMessage = "i18n_Password_cannot_be_empty")]
         public string? Password { get; set; }
@@ -16,5 +17,9 @@ namespace Fsel.Identity.Authentication.OpenId.Account
         public bool RememberLogin { get; set; }
 
         public string? ReturnUrl { get; set; }
+
+        public string? Identity { get; set; }
+
+        public Guid? UserId { get; set; }
     }
 }

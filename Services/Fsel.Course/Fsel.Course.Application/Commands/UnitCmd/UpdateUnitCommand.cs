@@ -1,19 +1,20 @@
 // Copyright (c) Atlantic. All rights reserved.
 
-using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Units;
 using Fsel.Course.Domain.Models.EntityModels;
-using Fsel.Course.Infrastructure.Common;
+using Fsel.Course.Infrastructure.Common.UnitHelper;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Unit = Fsel.Course.Domain.Entities.Unit;
 
 namespace Fsel.Course.Application.Commands.UnitCmd
 {
+    using Fsel.Core.Base.Interfaces;
+    using Microsoft.AspNetCore.Http;
+
     public class UpdateUnitCommand : UpdateUnitCommandModel, IRequest<MethodResult<UnitModel>>
     {
     }
@@ -21,68 +22,84 @@ namespace Fsel.Course.Application.Commands.UnitCmd
     public class UpdateUnitCommandHandler : IRequestHandler<UpdateUnitCommand, MethodResult<UnitModel>>
     {
         private readonly IUnitRepository _unitRepository;
-        private readonly UnitHelper _unitHelper;
-        private readonly IMapper _mapper;
+        private readonly IVersionEntityUpdater<Unit> _versionEntityUpdater;
+        private readonly IServiceProvider _serviceProvider;
 
         public UpdateUnitCommandHandler(IUnitRepository unitTestRepository,
-            UnitHelper unitHelper,
-            IMapper mapper)
+            IVersionEntityUpdater<Unit> versionEntityUpdater,
+            IServiceProvider serviceProvider)
         {
             _unitRepository = unitTestRepository;
-            _unitHelper = unitHelper;
-            _mapper = mapper;
+            _versionEntityUpdater = versionEntityUpdater;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<MethodResult<UnitModel>> Handle(UpdateUnitCommand request, CancellationToken cancellationToken)
         {
-            ArgumentNullException.ThrowIfNull(request);
-            MethodResult<UnitModel> methodResult = new MethodResult<UnitModel>();
-
-            #region Validation
-
-            var isUnitUsed = await _unitRepository.IsUnitUsed(request.Id);
-            if (isUnitUsed)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumUnitErrorCode.UnitUsed), nameof(request.Id), request.Id);
-                return methodResult;
-            }
-
-            var method = await _unitHelper.Validate(request);
-            if (!method.IsOK)
-            {
-                methodResult.AddErrorBadRequest(method.ErrorMessages);
-                return methodResult;
-            }
-
-            #endregion Validation
+            var methodResult = new MethodResult<UnitModel>();
 
             var unit = await _unitRepository.Queryable
-                                  .Include(e => e.UnitLessons)
-                                  .Include(e => e.UnitSkillMockTests)
-                                  .FirstOrDefaultAsync(e => e.Id == request.Id, cancellationToken: cancellationToken);
+                                  .Where(e => e.Id == request.Id)
+                                  .Include(e => e.UnitModules)
+                                  .FirstOrDefaultAsync(cancellationToken: cancellationToken);
             if (unit == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(unit));
                 return methodResult;
             }
-            _mapper.Map(request, unit);
-            _unitHelper.SetUnitData(unit, request);
-            if (!unit.IsValid())
+
+            var newVersionUnit = UnitFactory.Create(request).Build();
+            if (!await newVersionUnit.IsValid(_serviceProvider))
             {
-                methodResult.AddErrorBadRequest(unit.ErrorMessages);
+                methodResult.AddErrorBadRequest(newVersionUnit.ErrorMessages);
                 return methodResult;
             }
 
-            await _unitRepository.ExecuteTransactionAsync(async () =>
-            {
-                unit = _unitRepository.Update(unit);
-                await _unitRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+            await _versionEntityUpdater.UpdateEntity(unit, newVersionUnit,
+                async (_, entity) => await _unitRepository.IsUsingByClient(entity.Id),
+                async (oldEntity, newEntity) =>
+                {
+                    oldEntity.Code = newEntity.Code;
+                    oldEntity.Name = newEntity.Name;
+                    oldEntity.LessonCount = newEntity.LessonCount;
+                    oldEntity.TestCount = newEntity.TestCount;
+                    oldEntity.LevelId = newEntity.LevelId;
+                    oldEntity.ProgramId = newEntity.ProgramId;
+                    oldEntity.HighlightRange = newEntity.HighlightRange;
 
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<UnitModel>(unit);
-                return methodResult;
-            });
+                    var removedModules = unit.UnitModules
+                        .ExceptBy(newVersionUnit.UnitModules.Select(x => $"{x.OriginalId}-{x.UnitConfigType}"), u => $"{u.OriginalId}-{u.UnitConfigType}")
+                        .ToList();
+                    if (removedModules.Any())
+                    {
+                        removedModules.ForEach(module =>
+                        {
+                            unit.UnitModules.Remove(module);
+                        });
+                    }
 
+                    foreach (var module in newEntity.UnitModules)
+                    {
+                        var existingModule = unit.UnitModules
+                            .FirstOrDefault(m => m.OriginalId == module.OriginalId && m.UnitConfigType == module.UnitConfigType);
+                        if (existingModule != null)
+                        {
+                            existingModule.Percent = module.Percent;
+                            existingModule.OpenOrder = module.OpenOrder;
+                            existingModule.DisplayOrder = module.DisplayOrder;
+                            existingModule.DisplayNumber = module.DisplayNumber;
+                        }
+                        else
+                        {
+                            oldEntity.UnitModules.Add(module);
+                        }
+                    }
+
+                    await Task.Yield();
+                }
+            );
+
+            methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
     }

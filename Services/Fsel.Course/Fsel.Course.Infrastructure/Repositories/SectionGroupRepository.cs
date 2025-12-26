@@ -8,10 +8,11 @@ namespace Fsel.Course.Infrastructure.Repositories
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using Microsoft.EntityFrameworkCore;
+    using AutoMapper;
 
     public class SectionGroupRepository : BaseRepository<SectionGroup>, ISectionGroupRepository
     {
-        public SectionGroupRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public SectionGroupRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
         {
         }
 

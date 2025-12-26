@@ -57,7 +57,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
             var placementTests = await _placementTestRepository.Queryable.Include(x => x.PlacementTestSections)
                                                         .ThenInclude(x => x.SectionGroup)
                                                         .ThenInclude(x => x!.Sections)
-                                                        .Where(x => x.Level == request.Level && x.IsActive)
+                                                        .Where(x => x.PlacementTestLevel == request.Level && x.IsActive)
                                                         .ToListAsync(cancellationToken);
 
             if (placementTests == null || placementTests.Count == 0)
@@ -66,7 +66,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                 return methodResult;
             }
 
-            var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -91,7 +91,7 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                     return methodResult;
                 }
             }
-            var query = _placementTestRepository.Queryable.Where(x => x.Level == request.Level && x.IsActive);
+            var query = _placementTestRepository.Queryable.Where(x => x.PlacementTestLevel == request.Level && x.IsActive);
 
             PlacementTestBankModel bankModel = new PlacementTestBankModel();
             bankModel.Level = request.Level;

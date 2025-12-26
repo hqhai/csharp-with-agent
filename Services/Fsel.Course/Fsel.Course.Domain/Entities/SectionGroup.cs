@@ -24,6 +24,8 @@ namespace Fsel.Course.Domain.Entities
 
         public string? AudioPath { get; set; }
         public EnumCourseSkill CourseSkill { get; set; }
+        public Skill? Skill { get; set; }
+        public Guid? SkillId { get; set; }
 
         public ICollection<Section> Sections { get; set; } = new List<Section>();
         public ICollection<MockTestScore> MockTestScores { get; set; } = new List<MockTestScore>();

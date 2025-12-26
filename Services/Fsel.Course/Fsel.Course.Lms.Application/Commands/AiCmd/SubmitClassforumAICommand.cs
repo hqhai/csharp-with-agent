@@ -12,7 +12,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.ValueSettings;
-    using Fsel.Course.Lms.Application.Commands.ClassForumResultCmd;
     using Fsel.Course.Lms.Application.Queries.OtherFeatureQuery;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Course.Lms.Application.Services.SenderService;
@@ -76,12 +75,6 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
         public async Task<bool> Handle(SubmitClassForumAICommand request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-
-            var checkForbidden = await _mediator.Send(new CheckForbiddenClassForumCommand { ClassForumDetailResultId = request.ClassForumDetailResultId }, cancellationToken);
-            if (checkForbidden != null && checkForbidden.Result)
-            {
-                return false;
-            }
 
             try
             {
@@ -191,7 +184,12 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                 _classForumDetailResultRepository.Update(classForumDetailResult, false
                 , x => x.WordContent, x => x.Content
                 , x => x.WordCount, x => x.SubmissionCount
-                , x => x.ProcessDate, x => x.CompletionDate, x => x.Status);
+                , x => x.ProcessDate, x => x.CompletionDate
+                , x => x.Status
+                // task 5307 chưa lên prod
+                //, x => x.IsForbiddenImage
+                //, x => x.IsForbiddenWork, x => x.GradingAiForbidden
+                , x => x.PronunciationAlFeedback);
                 await _classForumDetailResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
                 _logger.LogInformation($"SubmitAIResponseCommand Id: {request.ClassForumDetailResultId} classForumDetailResult 3: {classForumDetailResult.Serialize(options)}");

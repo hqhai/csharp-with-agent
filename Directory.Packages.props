@@ -3,6 +3,16 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
+  <!-- OpenId -->
+  <ItemGroup Label="Use OpenId" Condition="'$(IsUseOpenId)' == 'true'">
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="7.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="7.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="7.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" Version="7.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="7.0.3" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.4" />
+  </ItemGroup>
   <!-- Core -->
   <ItemGroup Label="Use Core" Condition="'$(IsUseCore)' != 'false'">
     <PackageReference Include="MMLib.SwaggerForOcelot" Version="6.2.0" />
@@ -11,7 +21,7 @@
     <PackageReference Include="AWSSDK.Extensions.NETCore.Setup" Version="3.7.5" />
     <PackageReference Include="AWSSDK.SimpleEmail" Version="3.7.0.195" />
     <PackageReference Include="JWT" Version="10.1.1" />
-    <PackageReference Include="Fsel.Core" Version="1.2.46" />
+    <PackageReference Include="Fsel.Core" Version="1.2.48.3-rc.1.tenant.3" />
   </ItemGroup>
   <!-- Tests -->
   <ItemGroup Label="Tests Packages" Condition="'$(IsTestProject)' == 'true'">

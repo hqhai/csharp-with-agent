@@ -4,7 +4,6 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
 {
     using Fsel.Common.ActionResults;
     using Fsel.Course.Domain.Entities;
-    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Domain.Models.EntityModels.ManagerReportModels;
     using Fsel.Course.Domain.Models.QueryModels.ManagerReports;
@@ -22,18 +21,12 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     {
         private readonly IMediator _mediator;
         private readonly ManagerProgressHelper _managerProgressHelper;
-        private readonly ICourseRepository _courseRepository;
-        private readonly ICourseResultRepository _courseResultRepository;
 
         public GetReportLearningProgressStudentQueryHandler(IMediator mediator,
-            ManagerProgressHelper managerProgressHelper,
-            ICourseRepository courseRepository,
-            ICourseResultRepository courseResultRepository)
+            ManagerProgressHelper managerProgressHelper)
         {
             _mediator = mediator;
             _managerProgressHelper = managerProgressHelper;
-            _courseRepository = courseRepository;
-            _courseResultRepository = courseResultRepository;
         }
 
         public async Task<MethodResult<IList<LearningProgressModel>>> Handle(GetReportLearningProgressStudentQuery request, CancellationToken cancellationToken)
@@ -42,18 +35,19 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             var methodResult = new MethodResult<IList<LearningProgressModel>>();
             var userResults = await _mediator.Send(new GetStudentReportQuery
             {
+                Keyword = request.Keyword,
+                ListSchoolClass = request.ListSchoolClass,
+                ListSchoolGrade = request.ListSchoolGrade,
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
-                ListSchoolClass = request.ListSchoolClass,
-                ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
+
                 EndDate = request.EndDate,
-                Keyword = request.Keyword,
-                LearningStatus = request.LearningStatus,
                 CourseType = request.CourseType,
-                CourseLevel = request.CourseLevel,
                 ManagerReportType = EnumManagerReportType.ReportLearningProgress,
                 SortBy = request.SortBy,
             }, cancellationToken);
@@ -69,23 +63,29 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 return methodResult;
             }
             var lists = students.Select(x => new CourseResultModel { CourseId = x.CourseId.GetValueOrDefault(), StudentId = x.Id }).ToList();
-            var courseCompletes = await _managerProgressHelper.GetProgressCompleteModuleAsync(lists, request.EndDate);
+            var courseCompletes = await _managerProgressHelper.GetProgressCompleteLessonAsync(lists, request.EndDate);
+
+            var courseCompleteDict = courseCompletes.ToDictionary(x => x.StudentId);
+            var dateTimeUTC = DateTime.UtcNow;
             methodResult.Result = students.Select(item =>
             {
-                var courseComplete = courseCompletes.FirstOrDefault(x => x.StudentId == item.Id);
+                courseCompleteDict.TryGetValue(item.Id, out var courseComplete);
                 return new LearningProgressModel
                 {
-                    Email = item.Email,
+                    StudentId = item.Id,
                     FullName = item.FullName,
-                    SchoolClass = item.SchoolClass,
-                    SchoolGrade = item.SchoolGrade,
-                    SchoolName = item.School,
                     UserName = item.UserName,
-                    Status = item.ExpiredDate > DateTime.UtcNow ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
+                    PhoneNumber = item.PhoneNumber,
+                    Email = item.Email,
+                    SchoolGrade = item.SchoolGrade,
+                    SchoolClass = item.SchoolClass,
+                    CourseType = item.CourseLevel.GetEnumCourseType(),
                     CourseLevel = item.CourseLevel,
-                    ContentProgress = $"{courseComplete?.CountComplete} / {courseComplete?.TotalComplete}",
+                    ContentProgress = $"{courseComplete?.TotalLessonDone} / {courseComplete?.TotalLesson}",
                     UnitName = $"{nameof(Domain.Entities.Unit)} {courseComplete?.UnitDisplayOrder}",
-                    LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}"
+                    LessonName = $"{nameof(Lesson)} {courseComplete?.LessonDisplayOrder}",
+                    SchoolName = item.School,
+                    Status = item.ExpiredDate > dateTimeUTC ? EnumLearningStatus.InProgress : EnumLearningStatus.Expired,
                 };
             }).ToList();
             methodResult.StatusCode = StatusCodes.Status200OK;

@@ -51,6 +51,9 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             }
 
             var userRoles = await _userManager.GetRolesAsync(user);
+            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var hasMatchedRole = targetRoles.Any(r => r == userRoles.FirstOrDefault());
+
             User? userView = null;
             if (userRoles.FirstOrDefault() == EnumRole.CSO.ToString())
             {
@@ -63,7 +66,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                    .ThenInclude(x => x!.TeacherBankAccounts)
                                                    .FirstOrDefaultAsync(x => x.Id == request.UserId, cancellationToken);
             }
-            else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString())
+            else if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() || userRoles.FirstOrDefault() == EnumRole.StudentCampus.ToString())
             {
                 userView = await _userManager.Users.Include(x => x!.Student)
                                                    .FirstOrDefaultAsync(x => x.Id == request.UserId && x.EmailConfirmed, cancellationToken);
@@ -83,7 +86,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                                                    .ThenInclude(x => x.Student)
                                                    .FirstOrDefaultAsync(x => x.Id == request.UserId && x.EmailConfirmed, cancellationToken);
             }
-            else if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+            else if (hasMatchedRole)
             {
                 userView = await _userManager.Users.Include(x => x.UserSchools)
                                                    .FirstOrDefaultAsync(x => x.Id == request.UserId && x.EmailConfirmed, cancellationToken);
@@ -95,7 +98,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
             var userModel = _mapper.Map<UserProfileModel>(userView ?? user);
             if (userView != null)
             {
-                if (userRoles.FirstOrDefault() == EnumRole.Student.ToString() && userView.Student?.CreatedByParent == false && userView.Student?.ParentStudents.Count > 0)
+                if ((userRoles.FirstOrDefault() == EnumRole.Student.ToString() || userRoles.FirstOrDefault() == EnumRole.StudentCampus.ToString()) && userView.Student?.CreatedByParent == false && userView.Student?.ParentStudents.Count > 0)
                 {
                     var classStudent = await _trainingService.GetClassToStudentId(userView!.Student.Id);
                     userModel!.Parent = _mapper.Map<ParentProfileModel>(userView!.Student!.ParentStudents!.FirstOrDefault()!.Parent);
@@ -133,7 +136,7 @@ namespace Fsel.Identity.Application.Queries.UserQuery
                 {
                     _mapper.Map(userView.CSO, userModel);
                 }
-                if (userRoles.FirstOrDefault() == EnumRole.AdminSchool.ToString())
+                if (hasMatchedRole)
                 {
                     var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
                     if (schoolId.HasValue)

@@ -9,7 +9,7 @@ namespace Fsel.System.Infrastructure.Repositories
 
     public class GameVocabularyRepository : BaseRepository<GameVocabulary>, IGameVocabularyRepository
     {
-        public GameVocabularyRepository(SystemDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public GameVocabularyRepository(SystemDbContext dbContext, SystemReadDbContext readDbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, readDbContext, authContext, mapper)
         {
         }
         public override async Task<GameVocabulary?> GetIncludeByIdAsync(Guid id)

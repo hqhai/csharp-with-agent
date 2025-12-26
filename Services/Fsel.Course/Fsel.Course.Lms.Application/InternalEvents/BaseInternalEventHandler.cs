@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents
     using Fsel.Course.Lms.Application.Services.OrderServices;
     using Fsel.Course.Lms.Application.Services.SystemService;
     using Fsel.Course.Lms.Application.Services.UserServices;
+    using Fsel.Course.Lms.Application.Services.UserServices.CommandModels;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
@@ -289,7 +290,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 skillScores.TotalCount = x.Sum(x => x.TotalCount);
                 skillScores.CorrectCount = x.Sum(x => x.CorrectCount);
                 return skillScores;
-            };
+            }
+            ;
             return skillScores;
         }
 
@@ -451,9 +453,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     await UpdateStudentTrialRegistration(currentAccountStatus, unitResultNext.CreatedUserId);
                     if (unitResultNext.Status == EnumResultStatus.Unfinished && currentAccountStatus == EnumTrialRegistrationStatus.Payment)
                     {
+                        unitResultNext.NewDate = DateTime.UtcNow;
                         unitResultNext.Status = EnumResultStatus.New;
-                        _unitResultRepository.Update(unitResultNext, false, x => x.UnitId, x => x.StudentId, x => x.CourseId);
-                        await _unitResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResultNext }, bulk =>
+                        {
+                            bulk.IgnoreOnUpdateExpression = c => new { c.UnitId, c.StudentId, c.CourseId };
+                        });
                     }
                     break;
 
@@ -461,9 +466,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var finalTestResultNext = await _finalTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.FinalTestId == courseUnitMockTest.FinalTestId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
                     if (finalTestResultNext != null && finalTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
+                        finalTestResultNext.NewDate = DateTime.UtcNow;
                         finalTestResultNext.Status = EnumResultStatus.New;
-                        _finalTestResultRepository.Update(finalTestResultNext, false, x => x.FinalTestId, x => x.StudentId, x => x.CourseId);
-                        await _finalTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        await _finalTestResultRepository.BulkUpdateList(new List<FinalTestResult> { finalTestResultNext }, bulk =>
+                        {
+                            bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.FinalTestId };
+                        });
                     }
                     break;
 
@@ -471,9 +479,12 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     var mockTestResultNext = await _mockTestResultRepository.Queryable.FirstOrDefaultAsync(x => x.StudentId == studentId && x.MockTestId == courseUnitMockTest.MockTestId && x.CourseId == courseUnitMockTest.CourseId, cancellationToken);
                     if (mockTestResultNext != null && mockTestResultNext.Status == EnumResultStatus.Unfinished)
                     {
+                        mockTestResultNext.NewDate = DateTime.UtcNow;
                         mockTestResultNext.Status = EnumResultStatus.New;
-                        _mockTestResultRepository.Update(mockTestResultNext, false, x => x.MockTestId, x => x.UnitId, x => x.StudentId, x => x.CourseId);
-                        await _mockTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        await _mockTestResultRepository.BulkUpdateList(new List<MockTestResult> { mockTestResultNext }, bulk =>
+                        {
+                            bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId, c.UnitId, c.MockTestId };
+                        });
                     }
                     break;
 
@@ -500,8 +511,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                     courseResult.CorrectTotal = (int)skillScores.Sum(x => x.TotalCount);
                     courseResult.Percent = NumberHelper.ConvertRound(percent);
                     courseResult.SkillScores = skillScores;
-                    _courseResultRepository.Update(courseResult, false, x => x.StudentId, x => x.CourseId);
-                    await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                    await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
+                    {
+                        bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                    });
                 }
             }
             catch (Exception ex)
@@ -558,8 +571,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 }
 
                 courseResult.Status = EnumResultStatus.Done;
-                _courseResultRepository.Update(courseResult, false, x => x.StudentId, x => x.CourseId);
-                await _courseResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.CourseId, c.StudentId };
+                });
+
                 await SendStudentCompleteCourse(studentId, course.Id, courseResult, cancellationToken);
             }
             catch (Exception ex)
@@ -806,6 +822,14 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 review = iELTDescription.Description ?? string.Empty;
             }
 
+            var token = await _userService.SenderSettingGenerateToken(new UpdateSenderSettingCommandModel
+            {
+                UserId = student?.UserId ?? Guid.Empty,
+                Template = course.CourseType == EnumCourseType.Academic || course.CourseType == EnumCourseType.EnglishFoundation ? EnumSenderTemplate.SendStudentCompleteCourseAcademic : EnumSenderTemplate.SendStudentCompleteCourseIetls
+            });
+
+            string accessLink = string.Format(CultureInfo.InvariantCulture, _appSetting.ConstantUrl!.UpdateSenderSettingUrl!, token?.Content?.Result ?? string.Empty);
+
             var sendStudentCompleteCourseModel = new SendStudentCompleteCourseModel
             {
                 CoursePhoto = SendMailHelper.GetCoursePhoto(course.CourseLevel),
@@ -842,7 +866,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents
                 BandScore = bandScore,
                 Review = review,
                 BackgroundVertical = courseResult.Percent >= 67 ? SendMailSetting.BackgroundVerticalGreen : SendMailSetting.BackgroundVerticalOrange,
-                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl
+                ContinueLearn = _appSetting.ResourceContent?.LmsWebsiteUrl,
+                AccessLink = accessLink
             };
 
             var sendResult = await _mediator.Send(new SenderCommand

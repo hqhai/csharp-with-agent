@@ -6,12 +6,14 @@ using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class PlacementTestRepository : BaseRepository<PlacementTest>, IPlacementTestRepository
     {
-        public PlacementTestRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public PlacementTestRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 
@@ -21,7 +23,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 var query = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
 
-                if (query != null && query.Level == EnumPlacementTestLevel.IELTS)
+                if (query != null && query.PlacementTestLevel == EnumPlacementTestLevel.IELTS)
                 {
                     query = await Queryable.Include(x => x.ExtraPractice)
                                 .Include(x => x.PlacementTestSections.Where(n => n.SectionGroup != null))
@@ -60,7 +62,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 var query = await Queryable.FirstOrDefaultAsync(x => x.Id == id);
 
                 PlacementTestModel? placement = null;
-                if (query != null && query.Level == EnumPlacementTestLevel.IELTS)
+                if (query != null && query.PlacementTestLevel == EnumPlacementTestLevel.IELTS)
                 {
                     placement = await Queryable.Include(x => x.PlacementTestSections.Where(y => !y.IsDeleted))
                                     .ThenInclude(x => x.SectionGroup)
@@ -73,14 +75,16 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     {
                                         Id = x.Id,
                                         Name = x.Name,
-                                        Level = x.Level,
+                                        Level = x.PlacementTestLevel,
                                         CreatedDate = x.CreatedDate,
                                         IsActive = x.IsActive,
                                         SectionGroups = x.PlacementTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel
                                         {
                                             Id = x!.Id,
-                                            ExecutionTime = x!.ExecutionTime,
+                                            ExecutionTime = x.ExecutionTime,
                                             CourseSkill = x.CourseSkill,
+                                            SkillId = x.SkillId,
+                                            SkillName = x.Skill != null ? x.Skill.Name : null,
                                             Sections = x.Sections.OrderBy(x => x.DisplayOrder).Select(x => new SectionModel
                                             {
                                                 Id = x.Id,
@@ -121,7 +125,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                    {
                                        Id = x.Id,
                                        Name = x.Name,
-                                       Level = x.Level,
+                                       Level = x.PlacementTestLevel,
                                        CreatedDate = x.CreatedDate,
                                        IsActive = x.IsActive,
                                        SectionGroups = x.PlacementTestSections.Select(x => x.SectionGroup).OrderBy(x => x!.CreatedDate).Select(x => new SectionGroupModel

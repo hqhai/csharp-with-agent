@@ -32,6 +32,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
         private readonly ILessonHomeWorkRepository _lessonHomeWorkRepository;
         private readonly ILessonInstructionRepository _lessonInstructionRepository;
         private readonly IExtraPracticeRepository _extraPracticeRepository;
+        private readonly ISkillRepository _skillRepository;
 
         public UpdateLessonCommandHandler(ILessonRepository lessonRepository
             , IMapper mapper, IHomeWorkRepository homeWorkRepository
@@ -41,7 +42,8 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             , ILessonVideoRepository lessonVideoRepository
             , ILessonHomeWorkRepository lessonHomeWorkRepository
             , ILessonInstructionRepository lessonInstructionRepository
-            , IExtraPracticeRepository extraPracticeRepository)
+            , IExtraPracticeRepository extraPracticeRepository
+            , ISkillRepository skillRepository)
         {
             _lessonRepository = lessonRepository;
             _mapper = mapper;
@@ -53,6 +55,7 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             _lessonHomeWorkRepository = lessonHomeWorkRepository;
             _lessonInstructionRepository = lessonInstructionRepository;
             _extraPracticeRepository = extraPracticeRepository;
+            _skillRepository = skillRepository;
         }
 
         public async Task<MethodResult<LessonModel>> Handle(UpdateLessonCommand request, CancellationToken cancellationToken)
@@ -68,18 +71,38 @@ namespace Fsel.Course.Application.Commands.LessonCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lesson));
                 return methodResult;
             }
-            if (!lesson.IsValid())
+            if (request.ClassForum == null)
             {
-                methodResult.AddErrorBadRequest(lesson.ErrorMessages);
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ClassForum));
                 return methodResult;
             }
-
+            var skillId = request.ClassForum.SkillId;
+            if (skillId.HasValue)
+            {
+                var skillExists = await _skillRepository.AnyGuidAsync(skillId.Value);
+                if (!skillExists)
+                {
+                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(skillId), skillId);
+                    return methodResult;
+                }
+            }
             if (request.LessonInstructions == null || request.LessonInstructions.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LessonInstructions));
                 return methodResult;
             }
-
+            foreach (var lessonInstruction in request.LessonInstructions)
+            {
+                if (lessonInstruction.SkillId.HasValue)
+                {
+                    var skillExists = await _skillRepository.AnyGuidAsync(lessonInstruction.SkillId.Value);
+                    if (!skillExists)
+                    {
+                        methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonInstruction.SkillId), lessonInstruction.SkillId);
+                        return methodResult;
+                    }
+                }
+            }
             if (request.HomeWorkIds == null || request.HomeWorkIds.Count == 0)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.HomeWorkIds));
@@ -134,7 +157,11 @@ namespace Fsel.Course.Application.Commands.LessonCmd
             await _lessonRepository.ExecuteTransactionAsync(async () =>
             {
                 _mapper.Map(request, lesson);
-
+                if (!lesson.IsValid())
+                {
+                    methodResult.AddErrorBadRequest(lesson.ErrorMessages);
+                    return methodResult;
+                }
                 await UpdateLessonExtraPracticeAsync(lesson, request.ExtraPracticeIds, cancellationToken);
                 await UpdateLessonHomeWorkAsync(lesson, request.HomeWorkIds, cancellationToken);
                 await UpdateLessonVideoAsync(lesson, request.VideoIds, cancellationToken);

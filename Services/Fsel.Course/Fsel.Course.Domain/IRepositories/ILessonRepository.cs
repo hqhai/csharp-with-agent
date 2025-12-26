@@ -2,6 +2,7 @@
 
 using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Entities.V1i1;
 
 namespace Fsel.Course.Domain.IRepositories
 {
@@ -20,5 +21,7 @@ namespace Fsel.Course.Domain.IRepositories
         Task<Lesson?> GetIncludeByIdNoTrackingAsync(Guid id);
 
         Task<Lesson?> GetAsync(Guid? lessonId);
+
+        Task<(IDictionary<Guid, (Lesson, LessonResult)>, IDictionary<Guid, Lesson>)> BuildLessonLookupsAsync(UnitResult unitResult, IList<UnitModule> unitModules);
     }
 }

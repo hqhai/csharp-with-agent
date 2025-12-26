@@ -112,8 +112,8 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         {
             ArgumentNullException.ThrowIfNull(request);
             MethodResult<FeatureModuleModel> methodResult = new MethodResult<FeatureModuleModel>();
-            var userId = request.UserId == null ? _authContext.CurrentUserId : request.UserId;
-            var studentResult = await _userService.GetStudentByUserIdAsync(userId ?? default);
+            var userId = !request.UserId.HasValue ? _authContext.CurrentUserId : request.UserId.Value;
+            var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(userId);
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
@@ -507,7 +507,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             }
             else
             {
-                lessonId = await _classForumRepository.Queryable.Where(x => x.Id == classForumId).Select(x => x.LessonId).FirstOrDefaultAsync();
+                lessonId = await _classForumRepository.Queryable.Where(x => x.Id == classForumId && x.LessonId.HasValue).Select(x => x.LessonId!.Value).FirstOrDefaultAsync();
             }
             featureModule = await GetFeatureModuleToLesson(featureModule, lessonId);
             var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumResults.Where(x => x.LessonResultId == featureModule.LessonResultId))

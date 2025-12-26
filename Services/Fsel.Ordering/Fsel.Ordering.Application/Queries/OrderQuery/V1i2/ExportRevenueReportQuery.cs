@@ -148,7 +148,7 @@ namespace Fsel.Ordering.Application.Queries.OrderQuery.V1i2
                     item.StudentEmail ?? string.Empty
                 };
 
-                // Lưu dữ liệu vào ConcurrentBag (thay vì ghi vào Excel ngay)
+                // Lưu dữ li ệu vào ConcurrentBag (thay vì ghi vào Excel ngay)
                 dataBag.Add((startRow + (int)index, rowValues));
             });
 

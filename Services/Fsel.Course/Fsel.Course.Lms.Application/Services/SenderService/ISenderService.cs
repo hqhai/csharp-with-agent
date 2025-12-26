@@ -6,6 +6,8 @@ namespace Fsel.Course.Lms.Application.Services.SenderService
     using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.SenderTemplates;
+    using Fsel.Shared.Models.ShareModels.QueryModels;
     using Refit;
 
     public interface ISenderService
@@ -15,6 +17,9 @@ namespace Fsel.Course.Lms.Application.Services.SenderService
 
         [Post("/v1/send-email/send-by-template")]
         Task<IApiResponse<MethodResult<bool>>> SendEmailAsync([Body] SendEmailByTemplateCommandModel command);
+
+        [Post("/v1/send-email/get-histories-send-mail-learning-progress")]
+        Task<IApiResponse<MethodResult<IList<HistorySendMailLearningProgressModel>>>> GetHistoriesSendMailLearningProgress([Body] GetHistoriesSendMailLearningProgressModel model);
     }
 
     public class SendEmailCommandModel
@@ -26,6 +31,7 @@ namespace Fsel.Course.Lms.Application.Services.SenderService
         public string? Content { get; set; }
         public bool? IsCCEmail { get; set; }
         public bool? IsCCEmailDefault { get; set; }
+        public IList<SendReceiverCommandModel> Receivers { get; set; } = new List<SendReceiverCommandModel>();
     }
 
     public class SendEmailByTemplateCommandModel : SendEmailCommandModel

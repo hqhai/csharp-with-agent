@@ -30,7 +30,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<OrderingDbContext>();
+builder.AddDbContexts<OrderingDbContext, OrderingReadDbContext>();
 
 builder.Services.AddDataProtection();
 

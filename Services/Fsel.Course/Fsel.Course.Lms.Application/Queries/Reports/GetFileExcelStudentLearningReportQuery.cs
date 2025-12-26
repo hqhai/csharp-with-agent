@@ -5,7 +5,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
     using System;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Lms.Application.Queues.Publishers;
+    using Fsel.Course.Lms.Application.Queues.Publishers.ExportFiles;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.QueryModels;
     using Fsel.Shared.Constants;
@@ -19,6 +19,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
         public string? EventCodeStr { get; set; }
         public string? DistrictName { get; set; }
         public Guid? StudentId { get; set; }
+        public string? UserNameStr { get; set; }
         public EnumCourseType CourseType { get; set; }
     }
 
@@ -44,6 +45,7 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 EventCodeStr = request.EventCodeStr,
                 DistrictName = request.DistrictName,
                 StudentId = request.StudentId,
+                UserNameStr = request.UserNameStr
             });
 
             var studentEventRegistrations = studentEventRegistrationResults?.Content?.Result;
@@ -60,7 +62,8 @@ namespace Fsel.Course.Lms.Application.Queries.Reports
                 DistrictName = request.DistrictName,
                 StudentId = request.StudentId,
                 EventCodeStr = request.EventCodeStr,
-                FileName = fileName
+                FileName = fileName,
+                UserNameStr = request.UserNameStr
             }, cancellationToken);
 
             methodResult.Result = ValueSettings.FSEL_PUBLIC_FILES_URL + fileName;

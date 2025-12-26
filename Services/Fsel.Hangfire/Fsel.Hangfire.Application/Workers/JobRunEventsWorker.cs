@@ -3,19 +3,20 @@
 namespace Fsel.Hangfire.Application.Workers
 {
     using System.Threading.Tasks;
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
+    using Microsoft.AspNetCore.Http;
 
-    public class JobRunEventsWorker : IWorker
+    public class JobRunEventsWorker : BaseWorker
     {
         private readonly JobRunEventsPublisher _jobRunEventPublisher;
 
-        public JobRunEventsWorker(JobRunEventsPublisher jobRunEventPublisher)
+        public JobRunEventsWorker(JobRunEventsPublisher jobRunEventPublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _jobRunEventPublisher = jobRunEventPublisher;
         }
 
-        public async Task RunAsync()
+        public override async Task RunAsync()
         {
             await _jobRunEventPublisher.Publish(CancellationToken.None);
         }

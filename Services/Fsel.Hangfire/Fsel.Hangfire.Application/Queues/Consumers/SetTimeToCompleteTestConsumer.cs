@@ -3,12 +3,10 @@
 namespace Fsel.Hangfire.Application.Queues.Consumers
 {
     using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
     using Fsel.Core.Extensions;
     using Fsel.Hangfire.Application.Workers;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Models.ShareModels;
-    using MassTransit;
 
     public class SetTimeToCompleteTestConsumer : BaseConsumer<SetTimeToCompleteTestModel>
     {

@@ -29,7 +29,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
     public class GetCurrentClassForumQuery : IRequest<MethodResult<ClassForumByStudentModel>>
     {
-        public Guid LessonResultId { get; set; }
+        public Guid ClassForumResultId { get; set; }
     }
 
     public class GetCurrentClassForumQueryHandler : IRequestHandler<GetCurrentClassForumQuery, MethodResult<ClassForumByStudentModel>>
@@ -37,7 +37,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         private readonly IMapper _mapper;
         private readonly IClassForumResultRepository _classForumResultRepository;
         private readonly IClassForumRepository _classForumRepository;
-        private readonly ILessonResultRepository _lessonResultRepository;
         private readonly IUserService _userService;
         private readonly INotificationService _notificationService;
         private readonly IInteractionService _interactionService;
@@ -48,7 +47,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         public GetCurrentClassForumQueryHandler(IMapper mapper,
             IClassForumResultRepository classForumResultRepository,
             IClassForumRepository classForumRepository,
-            ILessonResultRepository lessonResultRepository,
             IUserService userService,
             INotificationService notificationService,
             IInteractionService interactionService,
@@ -59,7 +57,6 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
             _mapper = mapper;
             _classForumResultRepository = classForumResultRepository;
             _classForumRepository = classForumRepository;
-            _lessonResultRepository = lessonResultRepository;
             _userService = userService;
             _notificationService = notificationService;
             _interactionService = interactionService;
@@ -75,44 +72,50 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             var studentResult = await _userService.GetStudentByUserIdAsync(_authContext.CurrentUserId);
             var student = studentResult.Content?.Result;
+
             if (!studentResult.IsSuccessStatusCode)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumServicesErrorCode.CallUserServiceError), nameof(studentResult));
                 return methodResult;
             }
+
             if (student == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(student));
                 return methodResult;
             }
 
-            var lessonResult = await _lessonResultRepository.GetByIdAsync(request.LessonResultId);
-            if (lessonResult == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(lessonResult));
-                return methodResult;
-            }
-
-            var classForum = await _classForumRepository.Queryable.Include(x => x.ClassForumFiles).Where(x => x.LessonId == lessonResult.LessonId).FirstOrDefaultAsync(cancellationToken);
-            if (classForum == null)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
-                return methodResult;
-            }
-            var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
-
             var classForumResult = await _classForumResultRepository.Queryable
                 .Include(x => x.ClassForumDetailResults)
                 .ThenInclude(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumResultFiles)
                 .Include(x => x.ClassForumScores)
-                .Where(x => x.LessonResultId == request.LessonResultId && x.ClassForumId == classForum.Id)
+                .Where(x => x.Id == request.ClassForumResultId)
                 .FirstOrDefaultAsync(cancellationToken: cancellationToken);
+
+            if (classForumResult == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(classForumResult), request.ClassForumResultId);
+                return methodResult;
+            }
+
+            var classForum = await _classForumRepository.ReadQueryable.Include(x => x.Skill)
+                                                        .Include(x => x.ClassForumFiles)
+                                                        .Where(x => x.Id == classForumResult.ClassForumId)
+                                                        .FirstOrDefaultAsync(cancellationToken);
+
+            if (classForum == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForum));
+                return methodResult;
+            }
+
+            var classForumByStudentModel = _mapper.Map<ClassForumByStudentModel>(classForum);
 
             classForumByStudentModel.ClassForumResultCurrentStudent = _mapper.Map<ClassForumResultModel>(classForumResult);
             var classForumResultModel = classForumByStudentModel.ClassForumResultCurrentStudent;
 
-            if (classForumResultModel != null && classForumResult != null)
+            if (classForumResultModel != null)
             {
                 classForumResultModel.ClassForumDetailResults = classForumResult.ClassForumDetailResults.Select(x =>
                 {
@@ -127,7 +130,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                 {
                     classForumResult.Id
                 };
-                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel { ObjectIds = classForumResultIds.ToList(), UserId = _authContext.CurrentUserId });
+                var actionsResult = await _interactionService.GetsActionAsync(new InteractionActionCommandModel
+                {
+                    ObjectIds = classForumResultIds.ToList(),
+                    UserId = _authContext.CurrentUserId
+                });
                 var actions = actionsResult.Content?.Result;
 
                 if (actions != null)
@@ -155,7 +162,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
 
             #region Do QuestBoard
 
-            if (classForumByStudentModel != null && classForumResult != null && classForumResult.ClassForumDetailResults.Any(x => !string.IsNullOrEmpty(x.GradingAlFeedback)))
+            if (classForumByStudentModel != null && classForumResult.ClassForumDetailResults.Any(x => !string.IsNullOrEmpty(x.GradingAlFeedback)))
             {
                 await DoQuestBoard(student.Id, EnumQuestBoardCategory.MessagesFromAI, cancellationToken);
             }
@@ -169,11 +176,11 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
         {
             int targetScore = default;
             var classForum = classForumResult.ClassForum;
-            if (classForum?.CourseSkill == EnumCourseSkill.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
+            if (classForum?.Layout == EnumClassForumLayout.Writing && classForum?.TaggetWordLimit <= classForumDetailResult.WordCount)
             {
                 ++targetScore;
             }
-            if (classForum?.CourseSkill == EnumCourseSkill.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
+            if (classForum?.Layout == EnumClassForumLayout.Speaking && classForum?.TaggetTimeLimit <= classForumDetailResult.TimeCount)
             {
                 ++targetScore;
             }

@@ -54,6 +54,12 @@ namespace Fsel.Identity.Domain.Entities
 
         public EnumUserStatus? Status { get; set; } = EnumUserStatus.Active;
 
+        public Guid? ManageUserId { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Position { get; set; }
+
+
         public virtual ICollection<UserOtpCode> UserOtpCodes { get; set; } = new List<UserOtpCode>();
 
         public virtual ICollection<UserSetting> UserSettings { get; set; } = new List<UserSetting>();

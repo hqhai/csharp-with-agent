@@ -4,7 +4,7 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 {
     using System.Text.Json.Serialization;
 
-    public class ShortAnswerQuestionWordCountBaseQuestion
+    public class ShortAnswerQuestionWordCountBaseQuestion : IConfigRuby
     {
         [JsonRequired]
         public string? Name { get; set; }
@@ -14,5 +14,9 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
 
         [JsonRequired]
         public bool? IsSpeakRequired { get; set; }
+
+        public string? NameRuby { get; set; }
+        public string? InstructionRuby { get; set; }
+        public string? PopupRuby { get; set; }
     }
 }

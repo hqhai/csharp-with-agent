@@ -135,29 +135,30 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
                                                            .ThenInclude(x => x!.SectionGroupResults.Where(x => x.StudentId == studentId));
             if (placementTestResult == null)
             {
-                var placementTests = await placementTestQuery.Where(x => x.Level == level && x.IsActive).ToListAsync(cancellationToken);
+                var placementTests = await placementTestQuery.Where(x => x.PlacementTestLevel == level && x.IsActive).ToListAsync(cancellationToken);
                 placementTest = placementTests.OrderBy(x => random.Next()).FirstOrDefault();
                 if (placementTest != null)
                 {
                     var placementTestGroupResult = await SavePlacementGroupResultAsync(placementTest, studentId);
                     placementTestResult = new PlacementTestResult
                     {
-                        Level = placementTest.Level,
+                        Level = placementTest.PlacementTestLevel,
                         PlacementTestId = placementTest.Id,
                         StudentId = studentId,
                         Status = EnumResultStatus.New,
                         PlacementTestGroupResultId = placementTestGroupResult.Id
                     };
-                    _placementTestResultRepository.Add(placementTestResult);
 
                     try
                     {
-                        await _placementTestResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                        await _placementTestResultRepository.BulkMergeAsync(new List<PlacementTestResult> { placementTestResult }, bulk =>
+                        {
+                            bulk.ColumnPrimaryKeyExpression = c => new { c.PlacementTestId, c.StudentId, c.IsDeleted };
+                        });
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         placementTestResult = await _placementTestResultRepository.Queryable.Where(x => x.StudentId == studentId && x.Level == level).FirstOrDefaultAsync(cancellationToken);
-                        _logger.LogWarning($"Log Duplicate PlacementTestResult : {ex.Message}");
                     }
                 }
             }
@@ -178,12 +179,14 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestResultQuery
             placementTestGroupResult = new PlacementTestGroupResult
             {
                 StudentId = studentId,
-                ProcessLevel = placementTest.Level,
+                ProcessLevel = placementTest.PlacementTestLevel,
                 NewDate = DateTime.UtcNow,
                 Status = EnumResultStatus.New,
             };
-            _placementTestGroupResultRepository.Add(placementTestGroupResult);
-            await _placementTestGroupResultRepository.UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
+            await _placementTestGroupResultRepository.BulkMergeAsync(new List<PlacementTestGroupResult> { placementTestGroupResult }, bulk =>
+            {
+                bulk.ColumnPrimaryKeyExpression = c => new { c.StudentId, c.IsDeleted };
+            });
             return placementTestGroupResult;
         }
     }

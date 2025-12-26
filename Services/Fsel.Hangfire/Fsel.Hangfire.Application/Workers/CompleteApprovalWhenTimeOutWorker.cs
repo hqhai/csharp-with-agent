@@ -3,20 +3,21 @@
 namespace Fsel.Hangfire.Application.Workers
 {
     using System.Threading.Tasks;
-    using Fsel.Core.Base.Interfaces;
+    using Fsel.Core.Base;
     using Fsel.Hangfire.Application.Queues.Publishers;
     using Fsel.Shared.Models.ShareModels;
+    using Microsoft.AspNetCore.Http;
 
-    public class CompleteApprovalWhenTimeOutWorker : IWorker<SetTimeCompleteApprovalModel>
+    public class CompleteApprovalWhenTimeOutWorker : BaseWorker<SetTimeCompleteApprovalModel>
     {
         private readonly CompleteApprovalPosWhenTimeOutPublisher _completeApprovalPosWhenTimeOutPublisher;
 
-        public CompleteApprovalWhenTimeOutWorker(CompleteApprovalPosWhenTimeOutPublisher completeApprovalPosWhenTimeOutPublisher)
+        public CompleteApprovalWhenTimeOutWorker(CompleteApprovalPosWhenTimeOutPublisher completeApprovalPosWhenTimeOutPublisher, AuthContext authContext, IHttpContextAccessor httpContextAccessor) : base(authContext, httpContextAccessor)
         {
             _completeApprovalPosWhenTimeOutPublisher = completeApprovalPosWhenTimeOutPublisher;
         }
 
-        public async Task RunAsync(SetTimeCompleteApprovalModel? data)
+        public override async Task RunAsync(SetTimeCompleteApprovalModel? data)
         {
             if (data != null)
             {

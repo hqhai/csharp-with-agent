@@ -1,4 +1,6 @@
 variables:
+  SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+  GIT_DEPTH: "0" 
   DOCKER_TLS_CERTDIR: ''
   DOCKER_DRIVER: overlay2
   #DOCKER_HOST: tcp://docker:2375
@@ -19,6 +21,7 @@ before_script:
 stages:
 - build-image
 - deploy
+- build-multi-subject-testing
 
 ".build-image-gitlab-registry":
   stage: build-image
@@ -28,43 +31,21 @@ stages:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
 
-build-dev-auth:
-  stage: build-image
+build-multi-subject-testing-auth:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
-    DOCKERFILE: "./Environments/Development/Auth.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-auth:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
     DOCKERFILE: "./Environments/Testing/Auth.Testing.Dockerfile"
@@ -74,131 +55,19 @@ build-test-auth:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-auth:
-  stage: build-image
+build-multi-subject-testing-gateway:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
-    DOCKERFILE: "./Environments/Staging/Auth.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-auth:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
-    DOCKERFILE: "./Environments/Staging/Auth.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-auth:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
-    DOCKERFILE: "./Environments/Production/Auth.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-auth:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/auth
-    DOCKERFILE: "./Environments/Production/Auth.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-gateway:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
-    DOCKERFILE: "./Environments/Development/Gateway.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Gateway/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-gateway:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
     DOCKERFILE: "./Environments/Testing/Gateway.Testing.Dockerfile"
@@ -208,130 +77,19 @@ build-test-gateway:
     - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-gateway:
-  stage: build-image
+build-multi-subject-testing-hangfire:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
-    DOCKERFILE: "./Environments/Staging/Gateway.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-gateway:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
-    DOCKERFILE: "./Environments/Staging/Gateway.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-gateway:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
-    DOCKERFILE: "./Environments/Production/Gateway.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-gateway:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/api-gateway
-    DOCKERFILE: "./Environments/Production/Gateway.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Gateway/Fsel.Gateway.Api/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-
-build-dev-hangfire:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
-    DOCKERFILE: "./Environments/Development/Hangfire.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Hangfire/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-hangfire:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
     DOCKERFILE: "./Environments/Testing/Hangfire.Testing.Dockerfile"
@@ -341,131 +99,19 @@ build-test-hangfire:
     - Services/Fsel.Hangfire/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-hangfire:
-  stage: build-image
+build-multi-subject-testing-interaction:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
-    DOCKERFILE: "./Environments/Staging/Hangfire.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Hangfire/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-hangfire:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
-    DOCKERFILE: "./Environments/Staging/Hangfire.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Hangfire/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-hangfire:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
-    DOCKERFILE: "./Environments/Production/Hangfire.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Hangfire/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-hangfire:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/hangfire
-    DOCKERFILE: "./Environments/Production/Hangfire.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Hangfire/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-interaction:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
-    DOCKERFILE: "./Environments/Development/Interaction.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Interaction/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-interaction:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
     DOCKERFILE: "./Environments/Testing/Interaction.Testing.Dockerfile"
@@ -475,131 +121,19 @@ build-test-interaction:
     - Services/Fsel.Interaction/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-interaction:
-  stage: build-image
+build-multi-subject-testing-lcmsapi:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
-    DOCKERFILE: "./Environments/Staging/Interaction.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Interaction/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-interaction:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
-    DOCKERFILE: "./Environments/Staging/Interaction.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Interaction/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-interaction:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
-    DOCKERFILE: "./Environments/Production/Interaction.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Interaction/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-interaction:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/interaction
-    DOCKERFILE: "./Environments/Production/Interaction.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Interaction/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-lcmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
-    DOCKERFILE: "./Environments/Development/Lcms.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-lcmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
     DOCKERFILE: "./Environments/Testing/Lcms.Testing.Dockerfile"
@@ -609,131 +143,19 @@ build-test-lcmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-lcmsapi:
-  stage: build-image
+build-multi-subject-testing-lmsapi:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
-    DOCKERFILE: "./Environments/Staging/Lcms.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-lcmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
-    DOCKERFILE: "./Environments/Staging/Lcms.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-lcmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
-    DOCKERFILE: "./Environments/Production/Lcms.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-lcmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lcmsapi
-    DOCKERFILE: "./Environments/Production/Lcms.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-lmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
-    DOCKERFILE: "./Environments/Development/Lms.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-lmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
     DOCKERFILE: "./Environments/Testing/Lms.Testing.Dockerfile"
@@ -743,131 +165,19 @@ build-test-lmsapi:
     - Services/Fsel.Course/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-lmsapi:
-  stage: build-image
+build-multi-subject-testing-notification:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
-    DOCKERFILE: "./Environments/Staging/Lms.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-lmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
-    DOCKERFILE: "./Environments/Staging/Lms.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-lmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
-    DOCKERFILE: "./Environments/Production/Lms.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-lmsapi:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/lmsapi
-    DOCKERFILE: "./Environments/Production/Lms.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Course/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-notification:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
-    DOCKERFILE: "./Environments/Development/Notification.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Notification/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-notification:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
     DOCKERFILE: "./Environments/Testing/Notification.Testing.Dockerfile"
@@ -877,131 +187,19 @@ build-test-notification:
     - Services/Fsel.Notification/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-notification:
-  stage: build-image
+build-multi-subject-testing-ordering:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
-    DOCKERFILE: "./Environments/Staging/Notification.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Notification/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-notification:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
-    DOCKERFILE: "./Environments/Staging/Notification.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Notification/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-notification:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
-    DOCKERFILE: "./Environments/Production/Notification.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Notification/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-notification:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/notification
-    DOCKERFILE: "./Environments/Production/Notification.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Notification/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-ordering:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
-    DOCKERFILE: "./Environments/Development/Ordering.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Ordering/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-ordering:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
     DOCKERFILE: "./Environments/Testing/Ordering.Testing.Dockerfile"
@@ -1011,131 +209,19 @@ build-test-ordering:
     - Services/Fsel.Ordering/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-ordering:
-  stage: build-image
+build-multi-subject-testing-realtime:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
-    DOCKERFILE: "./Environments/Staging/Ordering.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Ordering/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-ordering:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
-    DOCKERFILE: "./Environments/Staging/Ordering.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Ordering/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-ordering:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
-    DOCKERFILE: "./Environments/Production/Ordering.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Ordering/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-ordering:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/ordering
-    DOCKERFILE: "./Environments/Production/Ordering.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Ordering/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-realtime:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
-    DOCKERFILE: "./Environments/Development/Realtime.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Realtime/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-realtime:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
     DOCKERFILE: "./Environments/Testing/Realtime.Testing.Dockerfile"
@@ -1145,131 +231,19 @@ build-test-realtime:
     - Services/Fsel.Realtime/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-realtime:
-  stage: build-image
+build-multi-subject-testing-sender:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
-    DOCKERFILE: "./Environments/Staging/Realtime.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Realtime/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-realtime:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
-    DOCKERFILE: "./Environments/Staging/Realtime.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Realtime/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-realtime:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
-    DOCKERFILE: "./Environments/Production/Realtime.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Realtime/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-realtime:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/realtime
-    DOCKERFILE: "./Environments/Production/Realtime.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Realtime/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-sender:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
-    DOCKERFILE: "./Environments/Development/Sender.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Sender/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-sender:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
     DOCKERFILE: "./Environments/Testing/Sender.Testing.Dockerfile"
@@ -1279,131 +253,19 @@ build-test-sender:
     - Services/Fsel.Sender/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-sender:
-  stage: build-image
+build-multi-subject-testing-storage:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
-    DOCKERFILE: "./Environments/Staging/Sender.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Sender/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-sender:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
-    DOCKERFILE: "./Environments/Staging/Sender.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Sender/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-sender:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
-    DOCKERFILE: "./Environments/Production/Sender.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Sender/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-sender:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/sender
-    DOCKERFILE: "./Environments/Production/Sender.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Sender/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-storage:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
-    DOCKERFILE: "./Environments/Development/Storage.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Storage/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-storage:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
     DOCKERFILE: "./Environments/Testing/Storage.Testing.Dockerfile"
@@ -1413,131 +275,19 @@ build-test-storage:
     - Services/Fsel.Storage/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-storage:
-  stage: build-image
+build-multi-subject-testing-system:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
-    DOCKERFILE: "./Environments/Staging/Storage.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Storage/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-storage:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
-    DOCKERFILE: "./Environments/Staging/Storage.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Storage/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-storage:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
-    DOCKERFILE: "./Environments/Production/Storage.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Storage/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-storage:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/storage
-    DOCKERFILE: "./Environments/Production/Storage.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Storage/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-system:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
-    DOCKERFILE: "./Environments/Development/System.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.System/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-system:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
     DOCKERFILE: "./Environments/Testing/System.Testing.Dockerfile"
@@ -1547,131 +297,19 @@ build-test-system:
     - Services/Fsel.System/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-system:
-  stage: build-image
+build-multi-subject-testing-training:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
-    DOCKERFILE: "./Environments/Staging/System.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.System/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-system:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
-    DOCKERFILE: "./Environments/Staging/System.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.System/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-system:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
-    DOCKERFILE: "./Environments/Production/System.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.System/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-system:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/system
-    DOCKERFILE: "./Environments/Production/System.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.System/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-training:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
-    DOCKERFILE: "./Environments/Development/Training.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Training/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-training:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
     DOCKERFILE: "./Environments/Testing/Training.Testing.Dockerfile"
@@ -1681,131 +319,19 @@ build-test-training:
     - Services/Fsel.Training/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-training:
-  stage: build-image
+build-multi-subject-testing-identity:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
-    DOCKERFILE: "./Environments/Staging/Training.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Training/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-training:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
-    DOCKERFILE: "./Environments/Staging/Training.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Training/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-training:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
-    DOCKERFILE: "./Environments/Production/Training.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Training/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-training:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/training
-    DOCKERFILE: "./Environments/Production/Training.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Training/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-identity:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
-    DOCKERFILE: "./Environments/Development/User.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-identity:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
     DOCKERFILE: "./Environments/Testing/User.Testing.Dockerfile"
@@ -1815,131 +341,19 @@ build-test-identity:
     - Services/Fsel.Identity/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-identity:
-  stage: build-image
+build-multi-subject-testing-cms-planetdefender:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
-    DOCKERFILE: "./Environments/Staging/User.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - staging
-
-build-1m-identity:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
-    DOCKERFILE: "./Environments/Staging/User.Staging.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - Fsel-1M
-
-build-demo-identity:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
-    DOCKERFILE: "./Environments/Production/User.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-identity:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/user
-    DOCKERFILE: "./Environments/Production/User.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Identity/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
-
-build-dev-cms-planetdefender:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:dev-$IMAGE_VALUES .
-    - docker push $IMAGE_NAME:dev-$IMAGE_VALUES
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
-    DOCKERFILE: "./Environments/Development/Cms.PlanetDefender.Development.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Cms.PlanetDefender/**/*
-    - Services/Shared/**/*
-    refs:
-    - ntdo/feature/auth-openid
-
-build-test-cms-planetdefender:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
     DOCKERFILE: "./Environments/Testing/Cms.PlanetDefender.Testing.Dockerfile"
@@ -1949,72 +363,48 @@ build-test-cms-planetdefender:
     - Services/Fsel.Cms.PlanetDefender/**/*
     - Services/Shared/**/*
     refs:
-    - testing
+    - testing-multiple-subject
 
-build-staging-cms-planetdefender:
-  stage: build-image
+# build-multi-subject-testing-exam-practice:
+#   stage: build-multi-subject-testing
+#   tags:
+#   - docker-runner
+#   retry:
+#     max: 2
+#   script:
+#     - apk add --update coreutils && rm -rf /var/cache/apk/*
+#     - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+#     - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+#     - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
+#   variables:
+#     IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice
+#     DOCKERFILE: "./Environments/Testing/ExamPractice.Testing.Dockerfile"
+#   extends: ".build-image-gitlab-registry"
+#   only:
+#     changes:
+#     - Services/Fsel.ExamPractice/**/*
+#     - Services/Shared/**/*
+#     refs:
+#     - testing-multiple-subject
+
+build-multi-subject-testing-exam-practice-lms:
+  stage: build-multi-subject-testing
   tags:
   - docker-runner
   retry:
     max: 2
   script:
     - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
+    - docker login registry.fsel.edu.vn -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -f $DOCKERFILE -t $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES .
+    - docker push $IMAGE_NAME:multi-subject-testing-$IMAGE_VALUES
   variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
-    DOCKERFILE: "./Environments/Staging/Cms.PlanetDefender.Staging.Dockerfile"
+    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/exam-practice-lms
+    DOCKERFILE: "./Environments/Testing/ExamPracticeLms.Testing.Dockerfile"
   extends: ".build-image-gitlab-registry"
   only:
     changes:
-    - Services/Fsel.Cms.PlanetDefender/**/*
+    - Services/Fsel.ExamPractice/**/*
     - Services/Shared/**/*
     refs:
-    - staging
-
-build-demo-cms-planetdefender:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
-    DOCKERFILE: "./Environments/Production/Cms.PlanetDefender.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  only:
-    changes:
-    - Services/Fsel.Cms.PlanetDefender/**/*
-    - Services/Shared/**/*
-    refs:
-    - demo
-
-build-prod-cms-planetdefender:
-  stage: build-image
-  tags:
-  - docker-runner
-  retry:
-    max: 2
-  script:
-    - apk add --update coreutils && rm -rf /var/cache/apk/*
-    - docker login registry.fsel.edu.vn -u admin_gitlab@atlantic.edu.vn -p glpat-vT8Sy-u4dyNA9CnRsmmT
-    - docker build -f $DOCKERFILE -t $IMAGE_NAME:$TAG .
-    - docker push $IMAGE_NAME:$TAG
-  variables:
-    IMAGE_NAME: registry.fsel.edu.vn/fsel/api/fsel_src/cms-planetdefender
-    DOCKERFILE: "./Environments/Production/Cms.PlanetDefender.Production.Dockerfile"
-  extends: ".build-image-gitlab-registry"
-  rules:
-  - changes:
-    - Services/Fsel.Cms.PlanetDefender/**/*
-    - Services/Shared/**/*
-    if: '$CI_COMMIT_REF_NAME =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: always
-  - if: '$CI_COMMIT_TAG =~ /^prod-[0-9]+\.[0-9]+\.[0-9]+$/'
-    when: never
+    - testing-multiple-subject

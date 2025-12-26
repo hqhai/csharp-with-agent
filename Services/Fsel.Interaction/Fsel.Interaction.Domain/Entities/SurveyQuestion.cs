@@ -17,6 +17,9 @@ namespace Fsel.Interaction.Domain.Entities
         public string? Question { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Title { get; set; }
+
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Description { get; set; }
 
         [MaxLength(500, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
@@ -29,6 +32,8 @@ namespace Fsel.Interaction.Domain.Entities
         public EnumSurveyFormType SurveyFormType { get; set; }
 
         public bool? IsPilot { get; set; }
+
+        public bool? IsRequired { get; set; }
 
         public EnumSurveyQuestion Type { get; set; }
 
@@ -43,6 +48,9 @@ namespace Fsel.Interaction.Domain.Entities
         }
 
         public Guid? CompetitionEventId { get; set; }
+
+        public Guid? SurveyConfigId { get; set; }
+        public SurveyConfig? SurveyConfig { get; set; }
 
         public IList<CustomerSurvey> CustomerSurveys { get; set; } = new List<CustomerSurvey>();
 

@@ -94,5 +94,14 @@ namespace Fsel.Shared.Enums
 
         [Description("Flow chart completion")]
         FlowChartCompletion,
+
+        [Description("Tracing")]
+        Tracing,
+
+        [Description("Color Matching Type")]
+        ColorMatchingType,
+
+        [Description("Long Answer")]
+        LongAnswer,
     }
 }

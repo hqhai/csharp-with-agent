@@ -9,6 +9,7 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
     using Fsel.Identity.Domain.Models.EntityModels;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Models.ShareModels;
+    using Fsel.Shared.Models.ShareModels.CampusModel;
     using Microsoft.AspNetCore.Mvc;
     using Refit;
 
@@ -79,5 +80,26 @@ namespace Fsel.Identity.Application.Services.LmsCourseService
 
         [Post("/v1/report/aggregate-data-students-in-event")]
         Task<IApiResponse<MethodResult<IList<AggregateDataLearnStudentsInEventModel>>>> AggregateDataStudentsInEvent([Body] AggregateDataLearnStudentsInEventQueryModel students);
+
+        [Delete("/v1/admin/other/{studentId}/pt-and-course")]
+        Task<IApiResponse<MethodResult<bool>>> DeletePTAndCourseAsync([FromRoute] Guid studentId);
+
+        [Post("/v1/course-integration/info-course-integration")]
+        Task<IApiResponse<MethodResult<IList<InfoCourseIntegrationModel>>>> GetInfoCourseIntegration([FromBody] CourseIntegrationQueryModel query);
+
+        [Post("/v1/curriculum/add-students-to-curriculum")]
+        Task<IApiResponse<MethodResult<bool>>> AddStudentToCurriculum([FromBody] AddStudentsToCurriculumCommandModel query);
+
+        [Post("/v1/curriculum/get-students-learning-progress")]
+        Task<IApiResponse<MethodResult<IList<StudentCampusLearningProgressModel>>>> GetStudentsLearningProgress([FromBody] GetStudentsLearningProgressQueryModel query);
+
+        [Post("/v1/curriculum/delete-curriculums-by-student-ids")]
+        Task<IApiResponse<MethodResult<bool>>> DeleteCurriculumsByStudentIds([FromBody] DeleteCurriculumsByStudentIdsCommandModel model);
+
+        [Get("/v1/curriculum-student/get-student-ids-by-curriculum-id/{id}")]
+        Task<IApiResponse<MethodResult<IList<Guid>>>> GetStudentIdsByCurriculumId([FromRoute] Guid id);
+
+        [Get("/v1/curriculum/get-by-id")]
+        Task<IApiResponse<MethodResult<CurriculumModel>>> GetCurriculumById([FromQuery] GetCurriculumByIdQueryModel model);
     }
 }

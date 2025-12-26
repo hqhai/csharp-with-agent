@@ -38,5 +38,20 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// AdultFoundation not accepts SkillTest
         /// </summary>
         AdultFoundationNotAcceptsSkillTest,
+
+        /// <summary>
+        /// The keyword cannot contain the < or > symbols.
+        /// </summary>
+        InvalidKeywordCharacter,
+
+        /// <summary>
+        /// NotEdited
+        /// </summary>
+        NotEdited,
+
+        /// <summary>
+        /// NotDelete
+        /// </summary>
+        NotDelete,
     }
 }

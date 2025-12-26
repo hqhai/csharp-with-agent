@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
     {
         public Guid StudentId { get; set; }
         public string? UserName { get; set; }
+        public string? PhoneNumber { get; set; }
         public string? FullName { get; set; }
         public string? Email { get; set; }
         public string? SchoolName { get; set; }
@@ -37,6 +38,13 @@ namespace Fsel.Course.Domain.Models.EntityModels.ManagerReportModels
             }
         }
 
+        public bool LearningStatus
+        {
+            get { return OverallPercent >= 70; }
+        }
+
         public DateTime? ExpiredDate { get; set; }
+
+        public int NumberOfEmailsSent { get; set; }
     }
 }

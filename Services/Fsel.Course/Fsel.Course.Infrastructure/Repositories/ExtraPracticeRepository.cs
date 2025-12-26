@@ -5,29 +5,20 @@ using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace Fsel.Course.Infrastructure.Repositories
 {
     public class ExtraPracticeRepository : BaseRepository<ExtraPractice>, IExtraPracticeRepository
     {
-        public ExtraPracticeRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public ExtraPracticeRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 
         public async Task<ExtraPracticeModel?> GetIncludeAllAsync(Guid? id)
         {
             return await Queryable.Include(x => x.ExtraPracticeChapters.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x.ExtraPracticeExercises.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x.Exercise)
-                                    .ThenInclude(x => x!.ExerciseQuestions.Where(n => !n.IsDeleted))
-                                    .ThenInclude(x => x.Question)
-                                    .Include(x => x.LessonExtraPractices.Where(n => !n.IsDeleted))
-                                    .Include(x => x.Video)
-                                    .ThenInclude(x => x!.VideoTimeCodes.Where(x => !x.IsDeleted))
-                                    .ThenInclude(x => x.TimeCodeExercises.Where(x => !x.IsDeleted && x.Exercise != null))
-                                    .ThenInclude(x => x.Exercise)
-                                    .ThenInclude(x => x!.ExerciseQuestions.Where(x => !x.IsDeleted))
-                                    .ThenInclude(x => x.Question)
                                     .Where(x => x.Id == id).Select(x => new ExtraPracticeModel
                                     {
                                         Id = x.Id,
@@ -60,6 +51,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                 MediaPost = x.MediaPost,
                                                 Name = x.Name,
                                                 CourseSkill = x.CourseSkill,
+                                                SkillId = x.SkillId,
+                                                SkillName = x.Skill != null ? x.Skill.Name : null,
                                                 Questions = x.ExerciseQuestions.Select(x => x.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                                                 {
                                                     Id = m!.Id,
@@ -92,6 +85,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                                     Name = n.Name,
                                                     MediaPost = n.MediaPost,
                                                     CourseSkill = n.CourseSkill,
+                                                    SkillId = n.SkillId,
+                                                    SkillName = n.Skill != null ? n.Skill.Name : null,
                                                     Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                                                     {
                                                         Id = m!.Id,
@@ -110,6 +105,8 @@ namespace Fsel.Course.Infrastructure.Repositories
                                             Name = n.Name,
                                             MediaPost = n.MediaPost,
                                             CourseSkill = n.CourseSkill,
+                                            SkillId = n.SkillId,
+                                            SkillName = n.Skill != null ? n.Skill.Name : null,
                                             Questions = n.ExerciseQuestions.Where(m => m.Question != null && !m.IsDeleted).Select(m => m.Question).OrderBy(x => x!.CreatedDate).Select(m => new QuestionModel()
                                             {
                                                 Id = m!.Id,
@@ -162,6 +159,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                                     .ThenInclude(x => x.SectionParts)
                                     .ThenInclude(x => x.SectionQuestions)
                                     .ThenInclude(x => x.Question)
+                                    .Include(x => x.MockTest)
+                                    .ThenInclude(x => x!.MockTestSections)
+                                    .ThenInclude(x => x.SectionGroup)
+                                    .ThenInclude(x => x.Skill)
                                     .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
@@ -177,7 +178,9 @@ namespace Fsel.Course.Infrastructure.Repositories
                 return await Queryable.Include(x => x.ExtraPracticeExercises)
                                 .ThenInclude(x => x.Exercise)
                                 .ThenInclude(x => x!.ExerciseQuestions)
-                                .ThenInclude(x => x.Question)
+                                .ThenInclude(x => x.Question).Include(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x.Skill)
                                 .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
@@ -196,6 +199,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                                 .ThenInclude(x => x.Exercise)
                                 .ThenInclude(x => x!.ExerciseQuestions)
                                 .ThenInclude(x => x.Question)
+                                .Include(x => x.Video)
+                                .ThenInclude(x => x!.VideoTimeCodes)
+                                .ThenInclude(x => x.TimeCodeExercises)
+                                .ThenInclude(x => x.Exercise).ThenInclude(x => x.Skill)
                                 .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
@@ -213,6 +220,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                                 .ThenInclude(x => x.Exercise)
                                 .ThenInclude(x => x!.ExerciseQuestions)
                                 .ThenInclude(x => x.Question)
+                                .Include(x => x.ExtraPracticeChapters)
+                                .ThenInclude(x => x.ExtraPracticeExercises)
+                                .ThenInclude(x => x.Exercise)
+                                .ThenInclude(x => x.Skill)
                                 .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)
@@ -231,6 +242,10 @@ namespace Fsel.Course.Infrastructure.Repositories
                                 .ThenInclude(x => x!.Sections)
                                 .ThenInclude(x => x.SectionQuestions)
                                 .ThenInclude(x => x.Question)
+                                .Include(x => x.PlacementTest)
+                                .ThenInclude(x => x!.PlacementTestSections)
+                                .ThenInclude(x => x.SectionGroup)
+                                .ThenInclude(x => x.Skill)
                                 .FirstOrDefaultAsync(x => x.Id == id);
             }
             catch (Exception)

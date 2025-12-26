@@ -38,6 +38,7 @@ namespace Fsel.Shared.Models.ShareModels
         public IList<string>? HowToParticipate { get; set; }
 
         public string? InstructionalVideo { get; set; }
+        public string? InstructionalTitle { get; set; }
 
         public string? FormDescription { get; set; }
         public string? AwardPromotional { get; set; }
@@ -68,6 +69,7 @@ namespace Fsel.Shared.Models.ShareModels
         public string? NoticeDescription { get; set; }
         public bool? IsDisplayGift { get; set; }
         public bool? IsParentEvent { get; set; }
+        public string? DefaultOtp { get; set; }
     }
 
     public enum EnumSchoolEventRuleAction
@@ -83,7 +85,8 @@ namespace Fsel.Shared.Models.ShareModels
         WarningScreen,
         DailyQuiz,
         EventRegistrationSuccess,
-        EventGiftDisplay
+        EventGiftDisplay,
+        DisableChangePasswordToEvent,
     }
 
     public enum EnumByPassPaymentType

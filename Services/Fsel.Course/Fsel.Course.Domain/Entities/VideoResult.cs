@@ -7,9 +7,9 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
-    using Newtonsoft.Json;
 
     public class VideoResult : BaseResult, IHighestStreak, ITokenResult
     {
@@ -37,17 +37,11 @@ namespace Fsel.Course.Domain.Entities
             set { VideoSkillScoresStr = ConvertHelper.Serialize(value); }
         }
 
-        public LessonResult? LessonResult { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid LessonResultId { get; set; }
-
-        public Guid? CurrentVideoTimeCodeId { get; set; }
-        public Video? Video { get; set; }
-
-        [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        public Guid VideoId { get; set; }
-
+        public override double Percent { get; set; }
+        public int? TokenFirstTime { get; set; }
+        public int? TokenLastTime { get; set; }
+        public bool IsShowToken { get; set; }
+        public EnumPlaybackSpeed PlaybackSpeed { get; set; } = EnumPlaybackSpeed.Normal;
         public int? HighestStreak { get; set; }
         public int? TimeCodeHighestStreak { get; set; }
 
@@ -60,10 +54,13 @@ namespace Fsel.Course.Domain.Entities
             }
         }
 
-        public int? TokenFirstTime { get; set; }
-        public int? TokenLastTime { get; set; }
-        public bool IsShowToken { get; set; }
-        public EnumPlaybackSpeed PlaybackSpeed { get; set; } = EnumPlaybackSpeed.Normal;
+        public Guid? CurrentVideoTimeCodeId { get; set; }
+        public Guid? LessonModuleId { get; set; }
+        public LessonModule? LessonModule { get; set; }
+        public Guid LessonResultId { get; set; }
+        public LessonResult? LessonResult { get; set; }
+        public Video? Video { get; set; }
+        public Guid VideoId { get; set; }
         public ICollection<VideoTimeCodeResult> VideoTimeCodeResults { get; set; } = new List<VideoTimeCodeResult>();
         public ICollection<VideoTimeCodeAnswer> VideoTimeCodeAnswers { get; set; } = new List<VideoTimeCodeAnswer>();
     }

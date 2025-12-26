@@ -12,11 +12,11 @@ namespace Fsel.Course.Infrastructure.Maps
     {
         public SectionGroupProfile()
         {
-            CreateMap<SectionGroup, SectionGroupModel>().ForMember(m => m.Sections, opt => opt.Ignore()).IgnoreAllNonExisting();
+            CreateMap<SectionGroup, SectionGroupModel>().ForMember(m => m.Sections, opt => opt.Ignore()).ForMember(p => p.SkillName, x => x.MapFrom(n => n.Skill != null ? n.Skill.Name : null));
             CreateMap<CreateSectionGroupCommandModel, SectionGroup>().IgnoreAllNonExisting();
             CreateMap<UpdateSectionGroupCommandModel, SectionGroup>().IgnoreAllNonExisting();
             CreateMap<SectionQuestion, SectionQuestionModel>().IgnoreAllNonExisting();
-            CreateMap<SectionGroup, SectionGroupDtoModel>().IgnoreAllNonExisting();
+            CreateMap<SectionGroup, SectionGroupDtoModel>().ForMember(p => p.SkillName, x => x.MapFrom(n => n.Skill != null ? n.Skill.Name : null));
         }
     }
 }

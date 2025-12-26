@@ -1,0 +1,151 @@
+// Copyright (c) Atlantic. All rights reserved.
+
+namespace Fsel.Course.Application.Commands.TestCmd
+{
+    using System.Threading;
+    using System.Threading.Tasks;
+    using AutoMapper;
+    using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Core.Base.Interfaces;
+    using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.IRepositories;
+    using Fsel.Course.Domain.Models.CommandModels.Tests;
+    using Fsel.Course.Domain.Models.EntityModels.TestModels;
+    using Fsel.Course.Infrastructure.Common;
+    using Fsel.Course.Infrastructure.Common.TestHelper;
+    using MediatR;
+    using Microsoft.AspNetCore.Http;
+
+    public class UpdateTestCommand : UpdateTestCommandModel, IRequest<MethodResult<TestModel>>
+    {
+    }
+
+    public class UpdateTestConfigCommandHandler : IRequestHandler<UpdateTestCommand, MethodResult<TestModel>>
+    {
+        private readonly IMapper _mapper;
+        private readonly ITestRepository _testRepository;
+        private readonly TestConverter _testHelper;
+        private readonly QuestionConverter _questionConverter;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly TestConverter _testConverter;
+        private readonly IVersionEntityUpdater<Test> _versionEntityUpdater;
+        private readonly ILevelRepository _levelRepository;
+        private readonly ICategoryRepository _categoryRepository;
+
+        public UpdateTestConfigCommandHandler(IMapper mapper
+            , ITestRepository testRepository
+            , TestConverter testHelper
+            , QuestionConverter questionConverter
+            , IServiceProvider serviceProvider
+            , TestConverter testConverter
+            , IVersionEntityUpdater<Test> versionEntityUpdater
+            , ILevelRepository levelRepository
+            , ICategoryRepository categoryRepository
+            )
+        {
+            _mapper = mapper;
+            _testRepository = testRepository;
+            _testHelper = testHelper;
+            _questionConverter = questionConverter;
+            _serviceProvider = serviceProvider;
+            _testConverter = testConverter;
+            _versionEntityUpdater = versionEntityUpdater;
+            _levelRepository = levelRepository;
+            _categoryRepository = categoryRepository;
+        }
+
+        public async Task<MethodResult<TestModel>> Handle(UpdateTestCommand request, CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(request);
+            var methodResult = new MethodResult<TestModel>();
+
+            var test = await _testRepository.GetByIdAsync(request.Id);
+            if (test == null)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.Id), request.Id);
+                return methodResult;
+            }
+            var isUsingByClient = await _testRepository.IsUsingByClient(test.OriginalId);
+            if (isUsingByClient && request.ScoringFormulaType != test.ScoringFormulaType)
+            {
+                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataAlreadyExist), nameof(request.ScoringFormulaType));
+                return methodResult;
+            }
+
+            var newVersionTest = TestFactory.Create(request, _mapper, _questionConverter).Build(test.OriginalId, true);
+            if (await newVersionTest.ValidateDuplicateTest(_testRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
+                return methodResult;
+            }
+
+            if (!await test.ValidateLevel(_levelRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                return methodResult;
+            }
+            if (!await test.ValidateProgram(_categoryRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                return methodResult;
+            }
+            if (!newVersionTest.ValidateScoringFormula())
+            {
+                methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
+                return methodResult;
+            }
+            if (!newVersionTest.ValidateReportContentBankConfigs())
+            {
+                methodResult.AddErrorBadRequest(test.ErrorMessages);
+                return methodResult;
+            }
+            var method = _testConverter.IsValidateQuestion(request.TestSections);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
+            if (!await newVersionTest.IsValid(_serviceProvider))
+            {
+                methodResult.AddErrorBadRequest(newVersionTest.ErrorMessages);
+                return methodResult;
+            }
+
+            if (isUsingByClient)
+            {
+                await _versionEntityUpdater.UpdateEntity(test, newVersionTest,
+                        async (_, entity) => isUsingByClient,
+                        async (oldEntity, newEntity) =>
+                        {
+                            await Task.Yield();
+                        }
+                    );
+            }
+            else
+            {
+                _mapper.Map(request, test);
+                var methodHelper = await _testHelper.UpdateSectionRecursive(request.TestSections, test: test);
+                if (!methodHelper.IsOK)
+                {
+                    methodResult.AddErrorBadRequest(methodHelper.ErrorMessages);
+                    return methodResult;
+                }
+                await _testRepository.ExecuteTransactionAsync(async () =>
+                {
+                    // Cập nhật Test
+                    await _testHelper.DeleteDataAsync(test);
+
+                    _testRepository.Update(test);
+                    await _testRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = _mapper.Map<TestModel>(test);
+                    return methodResult;
+                });
+            }
+
+            return methodResult;
+        }
+    }
+}

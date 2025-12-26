@@ -5,15 +5,13 @@ namespace Fsel.Identity.Authentication.Extensions
 {
     using System;
     using System.Globalization;
-    using System.IdentityModel.Tokens.Jwt;
     using System.Reflection;
     using System.Security.Claims;
-    using System.Security.Cryptography;
     using System.Text.Json;
-    using AspNet.Security.OAuth.Apple;
     using Fsel.Authentication.Infrastructure.Configs;
     using Fsel.Common.Constants;
     using Fsel.Core.Extensions;
+    using Fsel.Core.Infrastructure.Tenants;
     using Fsel.Identity.Application.Events;
     using Fsel.Identity.Application.Handlers.Implementations;
     using Fsel.Identity.Application.Handlers.Interfaces;
@@ -30,13 +28,12 @@ namespace Fsel.Identity.Authentication.Extensions
     using Fsel.Identity.Infrastructure;
     using Fsel.Identity.Infrastructure.Providers;
     using Fsel.Identity.Infrastructure.Repositories;
+    using Fsel.Core.Middlewares.Authentication;
     using Fsel.Identity.Infrastructure.ValueSettings;
     using Fsel.Shared.Constants;
-    using IdentityServer4;
     using Microsoft.AspNetCore.Authentication;
     using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authentication.OAuth;
-    using Microsoft.AspNetCore.Authentication.OpenIdConnect;
     using Microsoft.AspNetCore.DataProtection;
     using Microsoft.AspNetCore.Http.Extensions;
     using Microsoft.AspNetCore.Identity;
@@ -44,14 +41,7 @@ namespace Fsel.Identity.Authentication.Extensions
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.FileProviders;
-    using Microsoft.Extensions.FileProviders.Physical;
-    using Microsoft.IdentityModel.JsonWebTokens;
-    using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-    using Microsoft.IdentityModel.Tokens;
-    using Org.BouncyCastle.Crypto.Parameters;
-    using Org.BouncyCastle.OpenSsl;
-    using Org.BouncyCastle.Security;
-    using Refit;
+    using Microsoft.Extensions.Options;
     using static IdentityServer4.IdentityServerConstants;
 
     public static class ServicesRegisterExtension
@@ -104,8 +94,18 @@ namespace Fsel.Identity.Authentication.Extensions
             builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
             builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
             builder.Services.AddScoped<ISchoolImportHistoryRepository, SchoolImportHistoryRepository>();
+            builder.Services.AddScoped<IPermissionGroupRepository, PermissionGroupRepository>();
+            builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+            builder.Services.AddScoped<IRoleClaimRepository, RoleClaimRepository>();
+            builder.Services.AddScoped<IUserGroupRepository, UserGroupRepository>();
+            builder.Services.AddScoped<IUserGroupMemberShipRepository, UserGroupMemberShipRepository>();
             builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
             builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
+            builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
+            builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+            builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped<ISystemConfigRepository, SystemConfigRepository>();
             return builder;
         }
 
@@ -118,6 +118,7 @@ namespace Fsel.Identity.Authentication.Extensions
             builder.Services.AddScoped<CreateTokenHistoryPublisher>();
             builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
             builder.Services.AddScoped<SendStudentsFromFilePublisher>();
+            builder.Services.AddScoped<CreateStudentsAndParentsFromFilePublisher>();
 
             return builder;
         }
@@ -137,8 +138,9 @@ namespace Fsel.Identity.Authentication.Extensions
         public static WebApplicationBuilder AddOIDC(this WebApplicationBuilder builder, AppSetting appSetting)
         {
             ArgumentNullException.ThrowIfNull(builder);
-            var defaultConnString = builder.Configuration.GetConnectionString(Settings.DefaultConnection);
-            var assembly = typeof(UserDbContext).Assembly.GetName().Name;
+            var assembly = typeof(TenantMasterDbContext).Assembly.GetName().Name;
+            var tenantMasterConnection = builder.Configuration.GetConnectionString(Settings.TenantMasterConnection);
+
             builder.AddConfigureIdentityOptions();
             builder.Services.AddDataProtection().PersistKeysToDbContext<UserDbContext>();
             builder.Services.AddAntiforgery();
@@ -155,16 +157,21 @@ namespace Fsel.Identity.Authentication.Extensions
             .AddInMemoryApiResources(Config.ApiResources)
             .AddInMemoryClients(Config.Clients)
             .AddAspNetIdentity<User>()
-            .AddConfigurationStore(options => options.ConfigureDbContext = b => b.UseSqlServer(defaultConnString, opt => opt.MigrationsAssembly(assembly)))
+            .AddConfigurationStore(options => options.ConfigureDbContext = b => b.UseSqlServer(tenantMasterConnection, opt => opt.MigrationsAssembly(assembly)))
             .AddConfigurationStoreCache()
             .AddOperationalStore(options =>
             {
-                options.ConfigureDbContext = b => b.UseSqlServer(defaultConnString, opt => opt.MigrationsAssembly(assembly));
+                options.ConfigureDbContext = b => b.UseSqlServer(tenantMasterConnection, opt => opt.MigrationsAssembly(assembly));
                 options.EnableTokenCleanup = true;
                 options.TokenCleanupInterval = 3600;
             })
-            .AddDeveloperSigningCredential()
-            .AddProfileService<UserProfileService>();
+                .AddDeveloperSigningCredential()
+                .AddProfileService<UserProfileService>();
+
+            // Post-configure cookie options với tenant-aware events
+            //builder.Services.AddHttpContextAccessor();
+            //builder.Services.AddScoped<TenantAwareCookieEvents>();
+            //builder.Services.AddSingleton<IPostConfigureOptions<CookieAuthenticationOptions>, TenantAwareCookieOptionsPostConfigure>();
 
             builder.Services.AddAuthentication()
                 .AddGoogle(options =>

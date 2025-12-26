@@ -3,6 +3,7 @@
 namespace Fsel.Identity.Application.Handlers.Interfaces
 {
     using Fsel.Identity.Domain.Models.CommandModels.OpenId;
+    using Microsoft.AspNetCore.Identity;
 
     public interface IUserRegisterHandler
     {
@@ -12,6 +13,6 @@ namespace Fsel.Identity.Application.Handlers.Interfaces
 
         Task<(bool, OtpSessionInfo)> VerifyUserAsync(string phoneNumber, string otpCode);
 
-        Task<bool> CreateUserAsync(string phoneNumber, string otpCode);
+        Task<IdentityResult> CreateUserAsync(string phoneNumber, string otpCode);
     }
 }

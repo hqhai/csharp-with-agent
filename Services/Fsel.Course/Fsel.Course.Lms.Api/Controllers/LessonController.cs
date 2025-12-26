@@ -18,7 +18,7 @@ namespace Fsel.Course.Lms.Api.Controllers
 
     [ApiVersions(ApiSettings.APIVersion1)]
     [Route(Settings.APIDefaultRoute + "/lesson")]
-    [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+   [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
     [ApiController]
     public class LessonController : ControllerBase
     {
@@ -33,6 +33,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get List lesson by unit
         /// </summary>
         [HttpGet]
+        [MapToApiVersion(ApiSettings.APIVersion1)]
         [ProducesResponseType(typeof(MethodResult<LessonsMockTestModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [ApiVersion(ApiSettings.APIVersion1)]

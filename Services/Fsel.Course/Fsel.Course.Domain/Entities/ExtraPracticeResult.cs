@@ -2,8 +2,13 @@
 
 namespace Fsel.Course.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations.Schema;
+
     public class ExtraPracticeResult : BaseScoreResult
     {
+        [NotMapped]
+        public override double PercentModule { get; set; }
+
         public ExtraPractice? ExtraPractice { get; set; }
         public Guid ExtraPracticeId { get; set; }
         public Guid? CurrentVideoTimeCodeId { get; set; }

@@ -1,0 +1,269 @@
+[
+  {
+    "id": "89b8e2df-df40-4cb6-9f86-7a7fa315a194",
+    "claimType": "HomeDashboard",
+    "name": "Home/Dashboard",
+    "description": null,
+    "status": true,
+    "menuId": "77eee0bb-70b0-4672-964c-35adb0a4df6f",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "e758b51b-74de-4a2b-87b3-394f701bce9f",
+    "claimType": "ForbiddenWordsStorage",
+    "name": "Kho từ cấm",
+    "description": null,
+    "status": true,
+    "menuId": "2d1222ff-8e49-4689-8c47-c6ebca08fb61",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "f9142961-5fe0-4015-8d01-9e12d202a7ae",
+    "claimType": "AuthorizationManagement",
+    "name": "Quản lý phân quyền",
+    "description": null,
+    "status": true,
+    "menuId": "efb2d814-6b8b-4c12-92a4-21fde9feeb54",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "e4961eb7-931a-4403-b94a-fb2f7860b80e",
+    "claimType": "PriceManagement",
+    "name": "Quản lý bảng giá",
+    "description": null,
+    "status": true,
+    "menuId": "6ee1bea6-02ea-4502-b8cc-92671e6430fc",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "d9679732-17a3-44ff-b4ed-b39f631c3e13",
+    "claimType": "BannerManagement",
+    "name": "Quản lý banner",
+    "description": null,
+    "status": true,
+    "menuId": "19f86ebc-e6e9-4baf-84d8-f0e90489b2a1",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "a1a7a7be-8865-49b1-a0be-bb573b888fd3",
+    "claimType": "ReportManagementByAdminSchool",
+    "name": "Quản lý báo cáo của Admin School",
+    "description": null,
+    "status": true,
+    "menuId": "18e09c83-8f23-4509-a39c-7d3d32c4d81b",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "ab4582fd-e613-4904-bdc3-c50ff03a1d4d",
+    "claimType": "ErrorReportManagement",
+    "name": "Quản lý báo cáo lỗi",
+    "description": null,
+    "status": true,
+    "menuId": "6bd509c9-3986-4780-8ea0-e02059c9d9e9",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "68e5e3d2-90a1-4c60-9b8f-77a03381dc92",
+    "claimType": "StudentManagement",
+    "name": "Quản lý học sinh",
+    "description": null,
+    "status": true,
+    "menuId": "56f3a987-a5cf-4eee-88b7-baac8a82caee",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "b0a0b3b1-35aa-4ef5-8c17-95a5b7cf7a2b",
+    "claimType": "ClassManagement",
+    "name": "Quản lý lớp",
+    "description": null,
+    "status": true,
+    "menuId": "d5b153cc-1481-40d3-b39f-b35a67dd54e6",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "b652d6d2-f5f0-4c5d-a8b1-ec58860cc6d7",
+    "claimType": "ReferralCodeManagement",
+    "name": "Quản lý mã giới thiệu",
+    "description": null,
+    "status": true,
+    "menuId": "464add9c-629a-4a83-99e0-70d020d72a04",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "df96b682-99c5-4ae2-9516-329d2f2d3054",
+    "claimType": "CourseGoalManagement",
+    "name": "Quản lý mục tiêu khóa học",
+    "description": null,
+    "status": true,
+    "menuId": "be37f400-f10b-40b6-bc01-ad0e3d114fce",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "c9c55ef5-01e0-4fa6-b68a-3aaea1089548",
+    "claimType": "UserManagement",
+    "name": "Quản lý người dùng",
+    "description": null,
+    "status": true,
+    "menuId": "de64d9a6-6011-4a25-b73f-af31a0c530a1",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "95a2cf57-3b18-41b4-b5d5-9291a7bb87a5",
+    "claimType": "TaskManagement",
+    "name": "Quản lý nhiệm vụ",
+    "description": null,
+    "status": true,
+    "menuId": "4aff9531-9c38-4ef9-a965-923585d9d47a",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "5f09fd6f-3a0b-4c40-85b6-0d5cbd85c3ce",
+    "claimType": "UserGroupManagement",
+    "name": "Quản lý nhóm người dùng",
+    "description": null,
+    "status": true,
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "31bafbd0-7346-4aaf-a1fa-bf2194b1be68",
+    "claimType": "RoleGroupManagement",
+    "name": "Quản lý nhóm quyền",
+    "description": null,
+    "status": true,
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "3d33a7c7-2cf2-4383-9487-e88c0640d12c",
+    "claimType": "GiftManagement",
+    "name": "Quản lý quà tặng",
+    "description": null,
+    "status": true,
+    "menuId": "e7b3e33f-c1cb-48e7-bbe0-39be74dd5e36",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "b369b45f-2b8e-4cb0-91c2-2ad73d29d88d",
+    "claimType": "PaymentManagement",
+    "name": "Quản lý thanh toán",
+    "description": null,
+    "status": true,
+    "menuId": "c13b856d-a3ee-40fa-a018-2d33ce028f6a",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "22960350-3a0f-468b-849f-bf0fd7db264b",
+    "claimType": "PopupOrderManagement",
+    "name": "Quản lý thứ tự popup",
+    "description": null,
+    "status": true,
+    "menuId": "600f483b-dd9e-4aa3-9364-bbdca16a391a",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "39d8915b-4373-4ed2-9a79-d59db3a5285f",
+    "claimType": "StudentProgressManagement",
+    "name": "Quản lý tiến độ học sinh",
+    "description": null,
+    "status": true,
+    "menuId": "049a2515-641d-447b-b27b-e46f41e64ef3",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "b2b1272c-3b9d-4c6e-91f4-60c302c7d7e1",
+    "claimType": "PromotionManagement",
+    "name": "Quản lý ưu đãi",
+    "description": null,
+    "status": true,
+    "menuId": "cd067ac8-af65-47bd-bbd4-0bf3b9ad90fb",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "57cbd9f0-87d5-4c5c-8986-08e6fae58d99",
+    "claimType": "VoucherManagement",
+    "name": "Quản lý voucher",
+    "description": null,
+    "status": true,
+    "menuId": "1c9b88c3-c865-4d91-89df-3b84fec63843",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "9fc99947-c7a9-44aa-b9eb-ea42b28590fc",
+    "claimType": "PermissionManagement",
+    "name": "Quản lý quyền",
+    "description": null,
+    "status": true,
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "6f12e0d0-774c-4868-a062-e94b0b6ecf2d",
+    "claimType": "AddStudentToBlindBox",
+    "name": "Thêm học sinh vào túi mù",
+    "description": null,
+    "status": true,
+    "menuId": "53416e56-89d7-4fec-bb3f-c9225878470d",
+    "createdDate": "2025-04-09"
+  },
+  {
+    "id": "618be731-43b3-45ed-bfad-262945ef0d51",
+    "claimType": "SchoolStudentManagement",
+    "name": "Quản lý học sinh của AdminSchool, CSO",
+    "description": null,
+    "status": true,
+    "menuId": "06641b23-3857-4b6d-b1d7-096fc98fa8b9",
+    "createdDate": "2025-06-15"
+  },
+  {
+    "id": "933dca96-a6a7-4b37-870b-b423f3c2165c",
+    "claimType": "DashboardManagementByAdminSchool",
+    "name": "Quản lý Dashboard của AdminSchool",
+    "description": null,
+    "status": true,
+    "menuId": "68365a87-73fa-4926-acb6-24f1403f77ad",
+    "createdDate": "2025-07-01"
+  },
+  {
+    "id": "58cfa719-3af0-43a0-be7f-0a476151e7bd",
+    "claimType": "CurriculumManagement",
+    "name": "Quản lý giáo trình",
+    "description": null,
+    "status": true,
+    "menuId": "40217f52-0b4b-4c95-b5f8-c1317deba995",
+    "createdDate": "2025-09-13"
+  },
+  {
+    "id": "642f9c9c-c338-48fa-a42a-6d22e766bfca",
+    "claimType": "StudentCampusManagement",
+    "name": "Quản lý học sinh Campus",
+    "description": null,
+    "status": true,
+    "menuId": "9b06098b-4328-43b0-a1bd-0d0d12d87d7c",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "0b734124-0372-488c-8321-2129484f8adb",
+    "claimType": "SchoolClassCampusManagement",
+    "name": "Quản lý lớp Campus",
+    "description": null,
+    "status": true,
+    "menuId": "d7c5e83c-5ec4-479e-b0dc-4dd3784e36e4",
+    "createdDate": "2025-09-18"
+  },
+  {
+    "id": "d99eb96a-55dd-4fed-b755-9f33fe52f0e7",
+    "claimType": "SurveyManagement",
+    "name": "Quản lý khảo sát",
+    "description": null,
+    "status": true,
+    "menuId": "49dece94-b2de-4271-88ef-72f3e2461a2f",
+    "createdDate": "2025-08-05"
+  },
+  {
+    "id": "bcd6001c-6bd4-4054-ba56-ee7e2e3a1cd5",
+    "claimType": "StudentProgressWeeklyManagement",
+    "name": "Quản lý tiến độ học sinh tuần",
+    "description": null,
+    "status": true,
+    "menuId": "b40fbc8d-355c-47f2-ad01-cc5655fcd66a",
+    "createdDate": "2025-09-24"
+  }
+]

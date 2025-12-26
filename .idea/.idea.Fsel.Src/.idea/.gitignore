@@ -1,9 +1,9 @@
-# Default ignored files
+﻿# Default ignored files
 /shelf/
 /workspace.xml
 # Rider ignored files
-/modules.xml
 /contentModel.xml
+/modules.xml
 /projectSettingsUpdater.xml
 /.idea.Fsel.Src.iml
 # Editor-based HTTP Client requests

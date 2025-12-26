@@ -9,6 +9,7 @@ using Fsel.System.Application.Queues.Publisher;
 using Fsel.System.Application.Services.AIServices;
 using Fsel.System.Application.Services.CourseServices;
 using Fsel.System.Application.Services.DictionaryServices;
+using Fsel.System.Application.Services.FFmpegServices;
 using Fsel.System.Application.Services.GoogleSheetServices;
 using Fsel.System.Application.Services.OrderServices;
 using Fsel.System.Application.Services.SenderServices;
@@ -16,11 +17,13 @@ using Fsel.System.Application.Services.StorageServices;
 using Fsel.System.Application.Services.UserServices;
 using Fsel.System.Domain.IRepositories;
 using Fsel.System.Domain.IRepositories.BlindBoxes;
+using Fsel.System.Domain.IRepositories.CourseGoals;
 using Fsel.System.Domain.IRepositories.DailyQuizs;
 using Fsel.System.Infrastructure;
 using Fsel.System.Infrastructure.Common;
 using Fsel.System.Infrastructure.Repositories;
 using Fsel.System.Infrastructure.Repositories.BlindBoxes;
+using Fsel.System.Infrastructure.Repositories.CourseGoals;
 using Fsel.System.Infrastructure.Repositories.DailyQuizs;
 using Fsel.System.Infrastructure.ValueSettings;
 using Microsoft.EntityFrameworkCore;
@@ -33,7 +36,7 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<SystemDbContext>();
+builder.AddDbContexts<SystemDbContext, SystemReadDbContext>();
 
 builder.Services.AddDbContext<CrmDbContext>(
         options => options.UseSqlServer(appSetting?.ConnectionStrings?.CrmConnection));
@@ -85,14 +88,17 @@ builder.Services.AddScoped<IBlindBoxHistoryRepository, BlindBoxHistoryRepository
 builder.Services.AddScoped<IBlindBoxUserRepository, BlindBoxUserRepository>();
 builder.Services.AddScoped<IDictionaryRepository, DictionaryRepository>();
 builder.Services.AddScoped<IUnknownWordRepository, UnknownWordRepository>();
-
 builder.Services.AddScoped<IFselRatingRepository, FselRatingRepository>();
 builder.Services.AddScoped<IDisplayOrderConfigRepository, DisplayOrderConfigRepository>();
-
 builder.Services.AddScoped<IDailyQuizAnswerRepository, DailyQuizAnswerRepository>();
 builder.Services.AddScoped<IDailyQuizHistoryRepository, DailyQuizHistoryRepository>();
 builder.Services.AddScoped<IDailyQuizQuestionRepository, DailyQuizQuestionRepository>();
 builder.Services.AddScoped<IDailyQuizWinnerRepository, DailyQuizWinnerRepository>();
+builder.Services.AddScoped<ICourseGoalRepository, CourseGoalRepository>();
+builder.Services.AddScoped<ICourseGoalConfigRepository, CourseGoalConfigRepository>();
+
+builder.Services.AddScoped<ISenderConfigRepository, SenderConfigRepository>();
+builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
 
 builder.Services.AddScoped<SetCompleteApprovalPublisher>();
 builder.Services.AddScoped<TokenConfigsConverter>();
@@ -112,13 +118,13 @@ builder.Services.AddSingleton<IGoogleSheetService>(provider =>
     return new GoogleSheetService(ResourceSettings.I18NCredentialsFilePath);
 });
 
-
 builder.AddRefitClients(typeof(IUserService), appSetting?.Services?.UserApiUrl);
 builder.AddRefitClients(typeof(ICourseService), appSetting?.Services?.LmsCourseApiUrl);
 builder.AddRefitClients(typeof(IOrderService), appSetting?.Services?.OrderApiUrl);
 builder.AddRefitClients(typeof(IDictionaryService), appSetting?.Services?.DictionaryApiUrl);
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
 builder.AddRefitClients(typeof(IStorageService), appSetting?.Services?.StorageApiUrl);
+builder.AddRefitClients(typeof(IFFmpegServices), appSetting?.Services?.FFmpegApiUrl);
 builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (IServiceProvider serviceProvider, HttpClient httpClient)
 {
     httpClient.BaseAddress = new Uri(appSetting?.OpenAiConfig?.Uri ?? string.Empty);
@@ -127,8 +133,6 @@ builder.Services.AddRefitClient<IOpenAIService>().ConfigureHttpClient(delegate (
         httpClient.DefaultRequestHeaders.Add("Authorization", $"{Settings.Bearer} {appSetting?.OpenAiConfig?.ApiKey}");
     }
 });
-
-
 
 builder.AddMassTransit(appSetting,
 queues: new Dictionary<string, Type>

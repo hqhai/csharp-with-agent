@@ -22,18 +22,15 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
     public class SearchReportPlacementTestQueryHandler : IRequestHandler<SearchReportPlacementTestQuery, MethodResult<SearchReportPlacementTestModel>>
     {
         private readonly IPlacementTestGroupResultRepository _placementTestGroupResultRepository;
-        private readonly IPlacementTestResultRepository _placementTestResultRepository;
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
 
         public SearchReportPlacementTestQueryHandler(
             IPlacementTestGroupResultRepository placementTestGroupResultRepository,
-            IPlacementTestResultRepository placementTestResultRepository,
             IMediator mediator,
             IMapper mapper)
         {
             _placementTestGroupResultRepository = placementTestGroupResultRepository;
-            _placementTestResultRepository = placementTestResultRepository;
             _mediator = mediator;
             _mapper = mapper;
         }
@@ -52,16 +49,19 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCurrentLevel = request.ListCurrentLevel,
+                CourseType = request.CourseType,
+                IsLearning = request.IsLearning,
+                ListOverallScore = request.ListOverallScore,
+
                 Keyword = request.Keyword,
-                Status = request.Status,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                CourseLevel = request.CourseLevel,
-                CurrentLevel = request.CurrentLevel,
             }, cancellationToken);
             var reportPlacementTest = _mapper.Map<SearchReportPlacementTestModel>(dataOverallResult.Result);
 
@@ -70,21 +70,24 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                 ListDistrict = request.ListDistrict,
                 ListProvince = request.ListProvince,
                 ListSchool = request.ListSchool,
-                SchoolGrade = request.SchoolGrade,
-                SchoolClass = request.SchoolClass,
                 ListSchoolClass = request.ListSchoolClass,
                 ListSchoolGrade = request.ListSchoolGrade,
+                ListCourseLevel = request.ListCourseLevel,
+                IsLearning = request.IsLearning,
+                CourseType = request.CourseType,
+                ListLearningStatus = request.ListLearningStatus,
+                ListCompletionStatus = request.ListCompletionStatus,
+                ListCurrentLevel = request.ListCurrentLevel,
+                ListOverallScore = request.ListOverallScore,
+
                 Filters = request.Filters,
                 IncludePaths = request.IncludePaths,
                 Keyword = request.Keyword,
                 Page = request.Page,
                 SortBy = request.SortBy,
                 PageSize = request.PageSize,
-                Status = request.Status,
                 StartDate = request.StartDate,
                 EndDate = request.EndDate,
-                CourseLevel = request.CourseLevel,
-                CurrentLevel = request.CurrentLevel,
                 ManagerReportType = EnumManagerReportType.ReportManagerPT,
                 IsSearchReport = true
             }, cancellationToken);
@@ -101,26 +104,23 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
             }
 
             var studentIds = students.Select(x => x.Id).ToList();
-            var lists = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
+
+            var placmentTestGroupResults = await _placementTestGroupResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId)
                 .Select(x => new
                 {
                     StudentId = x.StudentId,
                     Status = x.Status,
                     ChooseLevel = x.ChooseLevel,
                     CompletionLevel = x.CompletionLevel,
-                    CurrentLevel = x.SuggetLevel,
+                    SuggetLevel = x.SuggetLevel,
+                    x.CompletionDate
                 })
                 .ToListAsync(cancellationToken);
-
-            var placementTestResults = (await _placementTestResultRepository.Queryable.WhereBulkContains(studentIds, x => x.StudentId).ToListAsync(cancellationToken))
-                                        .GroupBy(x => x.StudentId)
-                                        .Select(x => x.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault())
-                                        .ToList();
+            var lists = placmentTestGroupResults.ToLookup(x => x.StudentId);
 
             var datas = students.Select(item =>
             {
-                var groupResult = lists.FirstOrDefault(x => x.StudentId == item.Id);
-                var placementTestResult = placementTestResults.FirstOrDefault(x => x != null && x.StudentId == item.Id);
+                var groupResult = lists[item.Id].FirstOrDefault();
                 var placementTestReport = new PlacementTestReportModel
                 {
                     StudentId = item.Id,
@@ -132,14 +132,11 @@ namespace Fsel.Course.Lms.Application.Queries.ManagerReportQuery
                     SchoolGrade = item.SchoolGrade,
                     SchoolName = item.School,
                     UserName = item.UserName,
-                    ExpiredPTDate = placementTestResult?.UpdatedDate ?? placementTestResult?.CreatedDate,
-                    Status = groupResult != null && groupResult.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.InProgress
+                    ExpiredPTDate = groupResult?.CompletionDate,
+                    Status = groupResult?.Status == EnumResultStatus.Done ? EnumCompletionStatus.Completed : EnumCompletionStatus.InProgress,
+                    ChooseLevel = groupResult?.ChooseLevel,
+                    CurrentLevel = groupResult?.SuggetLevel
                 };
-                if (groupResult != null)
-                {
-                    placementTestReport.ChooseLevel = groupResult.ChooseLevel;
-                    placementTestReport.CurrentLevel = groupResult.CurrentLevel;
-                }
                 return placementTestReport;
             }).ToList();
 

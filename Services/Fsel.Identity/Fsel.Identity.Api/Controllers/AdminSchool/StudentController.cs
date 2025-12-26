@@ -81,7 +81,7 @@ namespace Fsel.Identity.Api.Controllers.AdminSchool
             {
                 return commandResult.GetActionResult();
             }
-            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Import_StudentHN.xlsx");
+            return File(commandResult.Result, Settings.Excels.ContentType, "Template_Import_Students.xlsx");
         }
 
         /// <summary>

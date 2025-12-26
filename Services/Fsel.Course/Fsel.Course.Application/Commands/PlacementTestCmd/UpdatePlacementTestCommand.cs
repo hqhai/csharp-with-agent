@@ -69,7 +69,7 @@ namespace Fsel.Course.Application.Commands.PlacementTestCmd
             var sectionParts = sectionGroups.SelectMany(x => x.Sections).SelectMany(x => x.SectionParts).ToList();
             IList<Question> questions;
             IList<SectionQuestion> sectionQuestions;
-            if (placementTest.Level == EnumPlacementTestLevel.IELTS)
+            if (placementTest.PlacementTestLevel == EnumPlacementTestLevel.IELTS)
             {
                 sectionQuestions = sectionParts.SelectMany(x => x.SectionQuestions).ToList();
                 questions = sectionQuestions.Select(x => x.Question ?? new Question()).ToList();

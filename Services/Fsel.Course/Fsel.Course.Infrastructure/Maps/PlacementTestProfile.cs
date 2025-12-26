@@ -9,6 +9,8 @@ using Fsel.Course.Domain.Models.EntityModels;
 
 namespace Fsel.Course.Infrastructure.Maps
 {
+    using Domain.Entities.TestConfigs;
+
     public class PlacementTestProfile : Profile
     {
         public PlacementTestProfile()
@@ -18,6 +20,7 @@ namespace Fsel.Course.Infrastructure.Maps
             CreateMap<UpdatePlacementTestCommandModel, PlacementTest>().IgnoreAllNonExisting();
             CreateMap<PlacementTest, PlacementTestDtoModel>().IgnoreAllNonExisting();
             CreateMap<PlacementTestAnswer, AnswerModel>().IgnoreAllNonExisting();
+            CreateMap<TestAnswer, AnswerModel>().IgnoreAllNonExisting();
             CreateMap<CreatePlacementTestAnswerCommandModel, PlacementTestAnswer>().IgnoreAllNonExisting();
         }
     }

@@ -4,12 +4,12 @@ namespace Fsel.Identity.Application.Services.UserProfileService
 {
     using System;
     using System.Data;
-    using System.IdentityModel.Tokens.Jwt;
+    using System.Globalization;
     using System.Security.Claims;
     using System.Threading.Tasks;
     using Fsel.Common.Constants;
     using Fsel.Common.Helpers;
-    using Fsel.Core.Base.Managers;
+    using Fsel.Core.Base.Interfaces;
     using Fsel.Identity.Application.Services.InteractionService;
     using Fsel.Identity.Application.Services.LmsCourseService;
     using Fsel.Identity.Application.Services.OrderService;
@@ -17,6 +17,7 @@ namespace Fsel.Identity.Application.Services.UserProfileService
     using Fsel.Identity.Application.Services.TrainingService;
     using Fsel.Identity.Domain.Constants;
     using Fsel.Identity.Domain.Entities;
+    using Fsel.Identity.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using IdentityModel;
     using IdentityServer4;
@@ -26,17 +27,23 @@ namespace Fsel.Identity.Application.Services.UserProfileService
     using IdentityServer4.Services;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.Extensions.DependencyInjection;
+    using static Fsel.Identity.Domain.Constants.IdentityServerSettings;
 
     public class UserProfileService : ProfileService<User>, IProfileService
     {
-        private readonly Core.Base.Managers.UserManager<User> _userManager;
-        private readonly Core.Base.Managers.RoleManager<Role> _roleManager;
+        private Core.Base.Managers.UserManager<User> _userManager;
+        private Core.Base.Managers.RoleManager<Role> _roleManager;
         private readonly IInteractionService _interactionService;
         private readonly ITrainingService _trainingService;
         private readonly ILmsCourseService _lmsCourseService;
         private readonly IOrderService _orderService;
+        private readonly ISystemConfigRepository _systemConfigRepository;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ICompetitionEventsRepository _competitionEventsRepository;
+        private readonly IUserSchoolRepository _userSchoolRepository;
 
-        public UserProfileService(Core.Base.Managers.UserManager<User> usermanager, Core.Base.Managers.RoleManager<Role> roleManager, IUserClaimsPrincipalFactory<User> userClaimsPrincipalFactory, IInteractionService interactionService, ITrainingService trainingService, ILmsCourseService lmsCourseService, IOrderService orderService)
+        public UserProfileService(Core.Base.Managers.UserManager<User> usermanager, Core.Base.Managers.RoleManager<Role> roleManager, IUserClaimsPrincipalFactory<User> userClaimsPrincipalFactory, IInteractionService interactionService, ITrainingService trainingService, ILmsCourseService lmsCourseService, IOrderService orderService, ISystemConfigRepository systemConfigRepository, IServiceProvider serviceProvider, ICompetitionEventsRepository competitionEventsRepository, IUserSchoolRepository userSchoolRepository)
             : base(usermanager, userClaimsPrincipalFactory)
         {
             _userManager = usermanager;
@@ -45,15 +52,27 @@ namespace Fsel.Identity.Application.Services.UserProfileService
             _trainingService = trainingService;
             _lmsCourseService = lmsCourseService;
             _orderService = orderService;
+            _systemConfigRepository = systemConfigRepository;
+            _serviceProvider = serviceProvider;
+            _competitionEventsRepository = competitionEventsRepository;
+            _userSchoolRepository = userSchoolRepository;
         }
 
         public override async Task GetProfileDataAsync(ProfileDataRequestContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
 
-            var userId = _userManager.GetUserId(context.Subject).Parse<Guid>();
-            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Student).FirstOrDefaultAsync(x => x.Id == userId);
+            var userId = _userManager.GetUserId(context.Subject);
 
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            var tenant = tenantProvider != null ? await tenantProvider.GetTenantAsync(string.Empty, userId.Parse<Guid>()) : null;
+            if (tenantProvider != null)
+            {
+                _userManager = await tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager;
+                _roleManager = await tenantProvider.CreateRoleManagerAsync<Role>(userId: userId.Parse<Guid>()) ?? _roleManager;
+            }
+
+            var user = await _userManager.Users.Include(x => x.UserSchools).Include(x => x.Student).FirstOrDefaultAsync(x => x.Id ==  userId.Parse<Guid>());
             if (user != null)
             {
                 var claims = (await _userManager.GetClaimsAsync(user)).ToList();
@@ -71,13 +90,21 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                     }
                 }
 
+                var isEnabledExtra = await _systemConfigRepository.Queryable.Select(x => x.IsEnabled).FirstOrDefaultAsync();
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Profile))
                 {
-                    claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString()));
+                    claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString(), ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.FullName, user.FullName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.Surname, user.LastName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.GivenName, user.FirstName ?? string.Empty, ClaimValueTypes.String));
+                    claims.Add(new Claim(JwtApiClaimNames.IsEnabledExtra, isEnabledExtra.ToString(), ClaimValueTypes.Boolean));
+
+                    var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
+                    if (schoolId.HasValue)
+                    {
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.SchoolId, schoolId.Value.ToString()));
+                    }
 
                     #region Custom Profile
 
@@ -106,38 +133,36 @@ namespace Fsel.Identity.Application.Services.UserProfileService
                         }
 
                         claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.Code, user.Code ?? string.Empty, ClaimValueTypes.String));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.Status, user.Status?.ToString() ?? string.Empty, ClaimValueTypes.String));
                         claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.ClassId, classId.ToString() ?? string.Empty, ClaimValueTypes.String));
                         claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.ClassCode, classCode ?? string.Empty, ClaimValueTypes.String));
-                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsPlacementTest, isPlacementTest?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
-                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsSurvey, isSurvey?.ToString() ?? string.Empty, ClaimValueTypes.Boolean));
-                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsOrder, isOrder.ToString(), ClaimValueTypes.Boolean));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsPlacementTest, isPlacementTest?.ToString(CultureInfo.InvariantCulture) ?? string.Empty, ClaimValueTypes.Boolean));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsSurvey, isSurvey?.ToString(CultureInfo.InvariantCulture) ?? string.Empty, ClaimValueTypes.Boolean));
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.IsOrder, isOrder.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Boolean));
                     }
                     else if (roles.Contains(EnumRole.AdminSchool.ToString()))
                     {
-                        var schoolId = user.UserSchools.FirstOrDefault()?.SchoolId;
-                        if (schoolId.HasValue)
-                        {
-                            claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.SchoolId, schoolId.Value.ToString()));
-                        }
+                        claims.Add(new Claim(IdentityServerSettings.JwtApiClaimNames.EventCode, await _competitionEventsRepository.GetEventCodeAsync(schoolId)));
                     }
 
-                    #endregion
+                    #endregion Custom Profile
                 }
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Email))
                 {
                     claims.Add(new Claim(JwtClaimTypes.Email, user.Email ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(JwtClaimTypes.EmailVerified, user.EmailConfirmed.ToString(), ClaimValueTypes.Boolean));
+                    claims.Add(new Claim(JwtClaimTypes.EmailVerified, user.EmailConfirmed.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Boolean));
                 }
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.Phone))
                 {
                     claims.Add(new Claim(JwtClaimTypes.PhoneNumber, user.PhoneNumber ?? string.Empty, ClaimValueTypes.String));
-                    claims.Add(new Claim(JwtClaimTypes.PhoneNumberVerified, user.PhoneNumberConfirmed.ToString(), ClaimValueTypes.Boolean));
+                    claims.Add(new Claim(JwtClaimTypes.PhoneNumberVerified, user.PhoneNumberConfirmed.ToString(CultureInfo.InvariantCulture), ClaimValueTypes.Boolean));
                 }
 
                 if (context.RequestedResources.ParsedScopes.Any(x => x.ParsedName == IdentityServerConstants.StandardScopes.OpenId))
                 {
+                    claims.Add(new Claim(JwtClaimNames.TenantId, tenant?.Id.ToString() ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.UserName, user.UserName ?? string.Empty, ClaimValueTypes.String));
                     claims.Add(new Claim(JwtClaimNames.UserId, user.Id.ToString()));
                 }
@@ -151,6 +176,10 @@ namespace Fsel.Identity.Application.Services.UserProfileService
         public override async Task IsActiveAsync(IsActiveContext context)
         {
             ArgumentNullException.ThrowIfNull(context);
+            var userId = _userManager.GetUserId(context.Subject);
+
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _userManager = tenantProvider != null ? await tenantProvider.CreateUserManagerAsync<User>(userId: userId.Parse<Guid>()) ?? _userManager : _userManager;
 
             var sub = context.Subject.GetSubjectId();
             var user = await _userManager.FindByIdAsync(sub);

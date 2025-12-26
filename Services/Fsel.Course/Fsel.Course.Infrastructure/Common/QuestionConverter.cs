@@ -93,6 +93,13 @@ namespace Fsel.Course.Infrastructure.Common
                 });
                 return methodResult;
             }
+
+            var method = _questionTypeConverter.ValidateQuestionV1(question.Config, question.QuestionType);
+            if (!method.IsOK)
+            {
+                methodResult.AddErrorBadRequest(method.ErrorMessages);
+                return methodResult;
+            }
             if (!question.IsValid())
             {
                 methodResult.AddErrorBadRequest(question.ErrorMessages);

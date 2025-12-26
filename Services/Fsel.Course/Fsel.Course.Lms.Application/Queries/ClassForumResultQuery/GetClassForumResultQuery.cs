@@ -13,6 +13,7 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.InteractionService;
     using Fsel.Course.Lms.Application.Services.InteractionService.Models;
     using Fsel.Course.Lms.Application.Services.UserServices;
@@ -92,27 +93,30 @@ namespace Fsel.Course.Lms.Application.Queries.ClassForumResultQuery
                     }
                 }
             }
-            classForumResult = _classForumResultRepository.Update(classForumResult);
-            await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+            {
+                bulk.IgnoreOnUpdateExpression = c => new { c.ClassForumId, c.StudentId, c.LessonResultId };
+            });
 
             classForumResult = await _classForumResultRepository.Queryable
-                .Include(x => x.ClassForumDetailResults)
-                .ThenInclude(x => x.ClassForumResultFiles)
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Lesson)
-                .ThenInclude(x => x!.UnitLessons)
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Unit)
-                .ThenInclude(x => x!.CourseUnitMockTests)
-                .Include(x => x.LessonResult)
-                .ThenInclude(x => x!.Course)
-                .Include(x => x.ClassForum)
-                .ThenInclude(x => x!.ClassForumFiles)
-                .Include(x => x.ClassForumResultFiles)
-                .Include(x => x.ClassForumScores)
-                .Where(x => x.Id == request.ClassForumResultId)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(cancellationToken);
+                        .Include(x => x.ClassForumDetailResults)
+                        .ThenInclude(x => x.ClassForumResultFiles)
+                        .Include(x => x.LessonResult)
+                        .ThenInclude(x => x!.Lesson)
+                        .ThenInclude(x => x!.UnitLessons)
+                        .Include(x => x.LessonResult)
+                        .ThenInclude(x => x!.Unit)
+                        .ThenInclude(x => x!.CourseUnitMockTests)
+                        .Include(x => x.LessonResult)
+                        .ThenInclude(x => x!.Course)
+                        .Include(x => x.ClassForum)
+                        .ThenInclude(x => x!.ClassForumFiles)
+                        .Include(x => x.ClassForumResultFiles)
+                        .Include(x => x.ClassForumScores)
+                        .Where(x => x.Id == request.ClassForumResultId)
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(cancellationToken);
             if (classForumResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(classForumResult));

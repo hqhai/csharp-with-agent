@@ -4,10 +4,12 @@ namespace Fsel.Course.Lms.Api.Controllers
 {
     using System.Net;
     using Asp.Versioning;
+    using Domain.Enums;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Commands.PlacementTestCmd;
+    using Fsel.Course.Lms.Application.Queries.CategoryQuery;
     using Fsel.Course.Lms.Application.Queries.PlacementTestQuery;
     using Fsel.Shared.Attributes;
     using Fsel.Shared.Constants;
@@ -31,7 +33,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get Levels By Student
         /// </summary>
         [HttpGet("levels")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<object>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetLevelsByStudentsAsync([FromQuery] GetLevelsByStudentQuery query)
@@ -44,7 +46,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Choose Student Course
         /// </summary>
         [HttpPost("choose-student-course")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> ChooseStudentCourse([FromBody] ChooseStudentLevelToCourseCommand command)
@@ -57,7 +59,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Get PlacementTest
         /// </summary>
         [HttpGet("level")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<PlacementTestBankModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Get([FromQuery] GetPlacementTestQuery query)
@@ -94,7 +96,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get PlacementTest Result
         /// </summary>
         [HttpGet("get-result")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<PlacementTestResultModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetResult()
@@ -107,7 +109,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// get list PlacementTest Result
         /// </summary>
         [HttpGet("get-list-result")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> GetListResult()
@@ -120,7 +122,7 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Create PlacementTest Answers
         /// </summary>
         [HttpPost("create-answers")]
-        [Common.Attributes.Permission(role: nameof(EnumRole.Student))]
+       [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Student), nameof(EnumRole.StudentCampus) })]
         [ProducesResponseType(typeof(MethodResult<IList<PlacementTestResultModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
         [MapToApiVersion(ApiSettings.APIVersion1)]
@@ -134,12 +136,66 @@ namespace Fsel.Course.Lms.Api.Controllers
         /// Check done pt by StudentId
         /// </summary>
         [HttpGet("check-done-pt/{studentId}")]
-        [ProducesResponseType(typeof(MethodResult<bool>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<EnumResultStatus>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO) })]
-        public async Task<IActionResult> CheckDonePTByStudentId([FromRoute] Guid studentId)
+        [Common.Attributes.Permission(roles: new string[] { nameof(EnumRole.Admin), nameof(EnumRole.AdminSchool), nameof(EnumRole.CSO), nameof(EnumRole.Student) })]
+        public async Task<IActionResult> CheckDonePtByStudentId([FromRoute] Guid studentId)
         {
-            MethodResult<bool> queryResult = await _mediator.Send(new CheckDonePTByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(new CheckDonePtByStudentIdQuery { StudentId = studentId }).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-subjects")]
+        public async Task<IActionResult> GetSubjects()
+        {
+            var getProgramQuery = new GetAllSubjectsQuery();
+            var queryResult = await _mediator.Send(getProgramQuery).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-section-result-detail/{id:guid}")]
+        public async Task<IActionResult> GetTestSectionResultDetail(Guid id)
+        {
+            var getSectionResultDetailQuery = new GetSectionResultDetailQuery { SectionResultId = id };
+            var queryResult = await _mediator.Send(getSectionResultDetailQuery).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-test-result-detail/{id:guid}")]
+        public async Task<IActionResult> GetTestResultDetail(Guid id)
+        {
+            var getTestResultDetailQuery = new GetTestResultDetailQuery { TestResultId = id };
+            var queryResult = await _mediator.Send(getTestResultDetailQuery).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpPost("select/{projectId:guid}")]
+        public async Task<IActionResult> SelectPtFlowByProgramId(Guid projectId)
+        {
+            var chosePtFlowCommand = new ChosePtFlowCommand(projectId);
+            var queryResult = await _mediator.Send(chosePtFlowCommand).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpPost("continue/{studentId:guid}")]
+        public async Task<IActionResult> GetPtFlowForStudent(Guid studentId)
+        {
+            var continueCommand = new ContinuePTCommand { StudentId = studentId };
+            var queryResult = await _mediator.Send(continueCommand).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpPost("submit-answer")]
+        public async Task<IActionResult> GetPtState([FromBody] SubmitAnswerCommand submitCommand)
+        {
+            var queryResult = await _mediator.Send(submitCommand).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        [HttpGet("get-levels-by-selected-program")]
+        public async Task<IActionResult> GetLevelsBySelectedProgram([FromQuery] GetLevelsByProgramQuery request)
+        {
+            var queryResult = await _mediator.Send(request).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
     }

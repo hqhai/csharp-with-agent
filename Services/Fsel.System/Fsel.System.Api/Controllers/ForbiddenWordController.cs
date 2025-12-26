@@ -14,8 +14,10 @@ namespace Fsel.System.Api.Controllers
     using Microsoft.AspNetCore.Mvc;
     using Asp.Versioning;
     using Fsel.Shared.Constants;
+    using Fsel.Common.Attributes;
 
-    [ApiVersion(ApiSettings.APIVersion1)][ApiVersion(ApiSettings.APIVersion1i1)]
+    [ApiVersion(ApiSettings.APIVersion1)]
+    [ApiVersion(ApiSettings.APIVersion1i1)]
     [Route(Settings.APIDefaultRoute + "/forbidden-word")]
     [ApiController]
     public class ForbiddenWordController : ControllerBase
@@ -33,22 +35,23 @@ namespace Fsel.System.Api.Controllers
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<ForbiddenWordModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ForbiddenWordsStorage.View)]
         public async Task<IActionResult> Search([FromQuery] SearchForbiddenWordQuery query)
         {
             MethodResult<PagingItemsModel<ForbiddenWordModel>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
-
         /// <summary>
         /// get list
         /// </summary>
         [HttpGet("get-list-forbidden-word")]
-        [ProducesResponseType(typeof(MethodResult<IList<String>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(MethodResult<IList<string>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission]
         public async Task<IActionResult> CheckContainForbiddenWord([FromQuery] CheckContainForbiddenWordQuery query)
         {
-            MethodResult<IList<String>> queryResult = await _mediator.Send(query).ConfigureAwait(false);
+            var queryResult = await _mediator.Send(query).ConfigureAwait(false);
             return queryResult.GetActionResult();
         }
 
@@ -58,6 +61,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(MethodResult<ForbiddenWordModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ForbiddenWordsStorage.Add)]
         public async Task<IActionResult> Create([FromBody] CreateForbiddenWordCommand command)
         {
             MethodResult<ForbiddenWordModel> queryResult = await _mediator.Send(command).ConfigureAwait(false);
@@ -70,6 +74,7 @@ namespace Fsel.System.Api.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(typeof(MethodResult<ForbiddenWordModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ForbiddenWordsStorage.Update)]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateForbiddenWordCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
@@ -84,6 +89,7 @@ namespace Fsel.System.Api.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(typeof(MethodResult<ForbiddenWordModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ForbiddenWordsStorage.Update)]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             MethodResult<bool> commandResult = await _mediator.Send(new DeleteForbiddenWordCommand { Id = id }).ConfigureAwait(false);
@@ -96,6 +102,7 @@ namespace Fsel.System.Api.Controllers
         [HttpDelete("list-forbidden-word")]
         [ProducesResponseType(typeof(MethodResult<ForbiddenWordModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ForbiddenWordsStorage.Update)]
         public async Task<IActionResult> DeleteListForbiddenWord([FromBody] DeleteListForbiddenWordCommand delete)
         {
             MethodResult<bool> commandResult = await _mediator.Send(delete).ConfigureAwait(false);
@@ -108,6 +115,7 @@ namespace Fsel.System.Api.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(typeof(MethodResult<ForbiddenWordModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        [Permission(ForbiddenWordsStorage.View)]
         public async Task<IActionResult> Get([FromRoute] Guid id)
         {
             MethodResult<ForbiddenWordModel> commandResult = await _mediator.Send(new GetForbiddenWordQuery { Id = id }).ConfigureAwait(false);

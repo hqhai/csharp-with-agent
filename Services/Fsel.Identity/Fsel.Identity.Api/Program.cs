@@ -1,6 +1,8 @@
 // Copyright (c) Atlantic. All rights reserved.
 
+using Fsel.Core.Entities;
 using Fsel.Core.Extensions;
+using Fsel.Identity.Application.Queries.IntegrationQuery;
 using Fsel.Identity.Application.Queues.Consumers;
 using Fsel.Identity.Application.Queues.Publishers;
 using Fsel.Identity.Application.Services.InteractionService;
@@ -13,6 +15,7 @@ using Fsel.Identity.Domain.Entities;
 using Fsel.Identity.Domain.IRepositories;
 using Fsel.Identity.Infrastructure;
 using Fsel.Identity.Infrastructure.Common;
+using Fsel.Identity.Infrastructure.Providers;
 using Fsel.Identity.Infrastructure.Repositories;
 using Fsel.Identity.Infrastructure.ValueSettings;
 using Fsel.Shared.Constants;
@@ -24,10 +27,10 @@ var appSetting = builder.AddAppSettings<AppSetting>();
 builder.AddServices(appSetting);
 builder.AddOpenIdSwaggerGens(appSetting);
 builder.AddOpenIdAuthenticationJwtBearers(appSetting);
-builder.AddDbContexts<UserDbContext>();
+builder.AddDbContexts<UserDbContext, UserReadDbContext, User, Role, UserClaimEntity, UserRole, UserLoginEntity, UserToken, RoleClaim>();
 
-builder.AddIdentity<User, Role, UserDbContext>();
 builder.AddConfigureIdentityOptions();
+builder.AddIdentity<User, Role, UserDbContext>().AddTotpProvider();
 
 //Repository
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -57,8 +60,18 @@ builder.Services.AddScoped<IEventRegistrationRepository, EventRegistrationReposi
 builder.Services.AddScoped<IUserDeletionRepository, UserDeletionRepository>();
 builder.Services.AddScoped<IUserSchoolRepository, UserSchoolRepository>();
 builder.Services.AddScoped<ISchoolImportHistoryRepository, SchoolImportHistoryRepository>();
+builder.Services.AddScoped<IPermissionGroupRepository, PermissionGroupRepository>();
+builder.Services.AddScoped<IPermissionRepository, PermissionRepository>();
+builder.Services.AddScoped<IRoleClaimRepository, RoleClaimRepository>();
+builder.Services.AddScoped<IUserGroupRepository, UserGroupRepository>();
+builder.Services.AddScoped<IUserGroupMemberShipRepository, UserGroupMemberShipRepository>();
 builder.Services.AddScoped<IEventManagerRepository, EventManagerRepository>();
 builder.Services.AddScoped<IStudentEventLearningRecordRepository, StudentEventLearningRecordRepository>();
+builder.Services.AddScoped<IStudentEditHistoryRepository, StudentEditHistoryRepository>();
+builder.Services.AddScoped<IMenuRepository, MenuRepository>();
+builder.Services.AddScoped<ISchoolClassRepository, SchoolClassRepository>();
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<ISystemConfigRepository, SystemConfigRepository>();
 
 //Publisher
 builder.Services.AddScoped<QuestBoardPublisher>();
@@ -67,9 +80,11 @@ builder.Services.AddScoped<NotificationMessagePublisher>();
 builder.Services.AddScoped<CreateTokenHistoryPublisher>();
 builder.Services.AddScoped<CreateStudentsFromFilePublisher>();
 builder.Services.AddScoped<SendStudentsFromFilePublisher>();
+builder.Services.AddScoped<CreateStudentsAndParentsFromFilePublisher>();
 
 //Common
 builder.Services.AddScoped<SaveOtpCodeConverter>();
+builder.Services.AddScoped<BaseIntegrationQuery>();
 
 //Refit
 builder.AddRefitClients(typeof(ISenderService), appSetting?.Services?.SenderApiUrl);
@@ -99,7 +114,8 @@ queues: new Dictionary<string, Type>
     { QueueSettings.UserQueue.NameQueue.JobRunEvents, typeof(JobRunEventsConsumer) },
     { QueueSettings.UserQueue.NameQueue.CheckUserDeletion, typeof(CheckUserDeletionConsumer) },
     { QueueSettings.UserQueue.NameQueue.CreateStudentsFromFile, typeof(CreateStudentsFromFileConsumer) },
-    { QueueSettings.UserQueue.NameQueue.AggregateDataStudentsInEvent, typeof(AggregateDataStudentsInEventConsumer) }
+    { QueueSettings.UserQueue.NameQueue.AggregateDataStudentsInEvent, typeof(AggregateDataStudentsInEventConsumer) },
+    { QueueSettings.UserQueue.NameQueue.CreateStudentsAndParentsFromFile, typeof(CreateStudentsAndParentsFromFileConsumer) }
 });
 var app = builder.Build();
 app.UseServices();

@@ -7,7 +7,6 @@ using Fsel.Core.Extensions;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Domain.Models.QueryModels.PlacementTests;
-using Fsel.Shared.Helpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -45,7 +44,7 @@ namespace Fsel.Course.Application.Queries.PlacementTestQuery
                                          Name = i.Name,
                                          InstructionContent = i.InstructionContent,
                                          IsActive = i.IsActive,
-                                         Level = i.Level,
+                                         Level = i.PlacementTestLevel,
                                          CreatedDate = i.CreatedDate,
                                          CreatedUserId = i.CreatedUserId,
                                          CreatedFullName = i.CreatedFullName,

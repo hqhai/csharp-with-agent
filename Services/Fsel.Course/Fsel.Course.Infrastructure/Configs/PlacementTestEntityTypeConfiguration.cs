@@ -14,11 +14,21 @@ namespace Fsel.Course.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Property(e => e.Level)
+            builder.Property(e => e.PlacementTestLevel)
                 .HasMaxLength(100)
                 .HasConversion(
                     v => v.ToString(),
                     v => v.EnumParse<EnumPlacementTestLevel>());
+
+            builder.HasOne(a => a.Level)
+                  .WithMany(b => b.PlacementTests)
+                  .HasForeignKey(b => b.LevelId)
+                  .OnDelete(DeleteBehavior.NoAction);
+
+            builder.HasOne(a => a.Program)
+                  .WithMany(b => b.PlacementTests)
+                  .HasForeignKey(b => b.ProgramId)
+                  .OnDelete(DeleteBehavior.NoAction);
         }
     }
 }

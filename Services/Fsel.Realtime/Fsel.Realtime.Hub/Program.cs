@@ -3,10 +3,11 @@
 using Fsel.Common.ValueSettings;
 using Fsel.Core.Extensions;
 using Fsel.Realtime.Application.Hubs;
+using Fsel.Realtime.Application.Hubs.Test;
 using Fsel.Realtime.Application.Queues.Consumers;
+using Fsel.Realtime.Application.Queues.Consumers.Test;
 using Fsel.Realtime.Application.Queues.Publishers;
 using Fsel.Shared.Constants;
-using MassTransit;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,10 @@ builder.Services.AddScoped<GetTimeModulePublisher>();
 builder.Services.AddScoped<ChatBotPublisher>();
 builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<DictionaryPublisher>();
+builder.Services.AddScoped<SetTimeExamPracticePublisher>();
+builder.Services.AddScoped<GetTimeExamPracticePublisher>();
+builder.Services.AddScoped<QuestionTypePublisher>();
+
 builder.Services.AddScoped<SetTimeModuleHub>();
 builder.Services.AddScoped<TechieHub>();
 builder.Services.AddScoped<BannerHub>();
@@ -27,6 +32,11 @@ builder.Services.AddScoped<BannerPublisher>();
 builder.Services.AddScoped<TranscriptHub>();
 builder.Services.AddScoped<BuyBlindBoxHub>();
 builder.Services.AddScoped<DictionaryHub>();
+builder.Services.AddScoped<SetTimeExamPracticeHub>();
+builder.Services.AddScoped<QuestionTypeHub>();
+builder.Services.AddScoped<SendStudentsFromFileHub>();
+builder.Services.AddScoped<TestSpeakingHub>();
+builder.Services.AddScoped<TestWritingHub>();
 
 builder.AddMassTransit(appSetting,
 multicastQueues: new Dictionary<string, Type>
@@ -39,6 +49,8 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.ChatBotRealTime, typeof(ChatBotConsumer) },
     { QueueSettings.LmsQueue.NameQueue.DisconnectSocketCalculateTime, typeof(DisconnectSocketCalculateTimeConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.MockTestSpeaking, typeof(MockTestAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ExamPracticeSpeaking, typeof(ExamPracticeAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.ExamPracticeWriting, typeof(ExamPracticeAIFeedBackConsumer) },
     { QueueSettings.LmsQueue.NameQueue.GetTimeModule, typeof(GetTimeModuleConsumer) },
     { QueueSettings.SystemQueue.NameQueue.Techie, typeof(StudentTechieConsumer) },
     { QueueSettings.OrderingQueue.NameQueue.ChangeStatusOrder, typeof(ChangeStatusOrderConsumer) },
@@ -46,7 +58,10 @@ multicastQueues: new Dictionary<string, Type>
     { QueueSettings.RealtimeQueue.NameQueue.BannerRealTime, typeof(BannerConsumer) },
     { QueueSettings.RealtimeQueue.NameQueue.SpeechToTextRealTime, typeof(SpeechToTextConsumer) },
     { QueueSettings.SystemQueue.NameQueue.SendNotifyBuyBlindBox, typeof(SendNotifyBuyBlindBoxConsumer) },
-    { QueueSettings.SystemQueue.NameQueue.SendDictionary, typeof(SendDictionaryConsumer) }
+    { QueueSettings.SystemQueue.NameQueue.SendDictionary, typeof(SendDictionaryConsumer) },
+    { QueueSettings.ExamPracticeQueue.NameQueue.GetTimeExamPractice, typeof(GetTimeExamPracticeConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.TestSpeaking, typeof(TestAISpeakingConsumer) },
+    { QueueSettings.RealtimeQueue.NameQueue.TestWriting, typeof(TestAIFeedBackConsumer) },
 });
 
 var app = builder.Build();
@@ -67,5 +82,12 @@ app.UseHubs<BannerHub>(RealtimeSettings.BannerHub.Pattern);
 app.UseHubs<TranscriptHub>(RealtimeSettings.TranscriptHub.Pattern);
 app.UseHubs<BuyBlindBoxHub>(RealtimeSettings.SendNotifyBuyBlindBoxHub.Pattern);
 app.UseHubs<DictionaryHub>(RealtimeSettings.SendDictionaryHub.Pattern);
+app.UseHubs<ExamPracticeSpeakingHub>(RealtimeSettings.ExamPracticeSpeakingAIFeedBackHub.Pattern);
+app.UseHubs<ExamPracticeWritingHub>(RealtimeSettings.ExamPracticeWritingAIFeedBackHub.Pattern);
+app.UseHubs<SetTimeExamPracticeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
+app.UseHubs<QuestionTypeHub>(RealtimeSettings.SetTimeExamPracticeHub.Pattern);
+app.UseHubs<QuestionTypeHub>(RealtimeSettings.QuestionTypeHub.Pattern);
+app.UseHubs<TestWritingHub>(RealtimeSettings.TestWritingAIFeedBackHub.Pattern);
+app.UseHubs<TestSpeakingHub>(RealtimeSettings.TestSpeakingAIFeedBackHub.Pattern);
 
 app.Run();

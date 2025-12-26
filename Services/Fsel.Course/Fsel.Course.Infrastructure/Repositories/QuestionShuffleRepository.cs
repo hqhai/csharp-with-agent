@@ -4,6 +4,7 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
@@ -11,7 +12,8 @@ namespace Fsel.Course.Infrastructure.Repositories
 
     public class QuestionShuffleRepository : BaseRepository<QuestionShuffle>, IQuestionShuffleRepository
     {
-        public QuestionShuffleRepository(CourseDbContext dbContext, AuthContext authContext, AutoMapper.IMapper mapper) : base(dbContext, authContext, mapper)
+        public QuestionShuffleRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper)
+            : base(dbContext, readDbContext, authContext, mapper)
         {
         }
 
@@ -25,18 +27,22 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 if (createQuestionShuffles != null && createQuestionShuffles.Any())
                 {
-                    await AddList(createQuestionShuffles);
-                    await UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                }
-                await ExecuteTransactionAsync(async () =>
-                {
-                    if (updateQuestionShuffles != null && updateQuestionShuffles.Any())
+                    await BulkMergeAsync(createQuestionShuffles, bulk =>
                     {
-                        UpdateList(updateQuestionShuffles);
-                        await UnitOfWork.SaveChangesAsync().ConfigureAwait(false);
-                    }
-                    return methodResult;
-                });
+                        bulk.ColumnPrimaryKeyExpression = entity => new { entity.StudentId, entity.QuestionId };
+                    });
+                }
+                if (updateQuestionShuffles != null && updateQuestionShuffles.Any())
+                {
+                    await ExecuteTransactionAsync(async () =>
+                    {
+                        await BulkUpdateList(updateQuestionShuffles, bulk =>
+                        {
+                            bulk.IgnoreOnUpdateExpression = entity => new { entity.StudentId, entity.QuestionId, entity.IsDeleted };
+                        });
+                        return methodResult;
+                    });
+                }
             }
             catch { }
 

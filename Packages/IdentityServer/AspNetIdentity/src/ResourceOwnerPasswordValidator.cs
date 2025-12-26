@@ -11,6 +11,9 @@ using static IdentityModel.OidcConstants;
 using IdentityServer4.Services;
 using IdentityServer4.Events;
 using System;
+using Fsel.Core.Base.Interfaces;
+using Fsel.Core.Entities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace IdentityServer4.AspNetIdentity
 {
@@ -20,10 +23,11 @@ namespace IdentityServer4.AspNetIdentity
     /// <typeparam name="TUser">The type of the user.</typeparam>
     /// <seealso cref="IdentityServer4.Validation.IResourceOwnerPasswordValidator" />
     public class ResourceOwnerPasswordValidator<TUser> : IResourceOwnerPasswordValidator
-        where TUser : class
+        where TUser : UserEntity
     {
-        private readonly SignInManager<TUser> _signInManager;
-        private readonly UserManager<TUser> _userManager;
+        private SignInManager<TUser> _signInManager;
+        private UserManager<TUser> _userManager;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ResourceOwnerPasswordValidator<TUser>> _logger;
 
         /// <summary>
@@ -35,10 +39,12 @@ namespace IdentityServer4.AspNetIdentity
         public ResourceOwnerPasswordValidator(
             UserManager<TUser> userManager,
             SignInManager<TUser> signInManager,
+            IServiceProvider serviceProvider,
             ILogger<ResourceOwnerPasswordValidator<TUser>> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _serviceProvider = serviceProvider;
             _logger = logger;
         }
 
@@ -51,6 +57,9 @@ namespace IdentityServer4.AspNetIdentity
         {
             ArgumentNullException.ThrowIfNull(context);
 
+            var tenantProvider = _serviceProvider.GetService<ITenantProvider>();
+            _userManager = tenantProvider != null ? await tenantProvider.CreateUserManagerAsync<TUser>(context.UserName) ?? _userManager : _userManager;
+            _signInManager = tenantProvider != null ? await tenantProvider.CreateSignInManagerAsync<TUser>(context.UserName) ?? _signInManager : _signInManager;
             var user = await _userManager.FindByNameAsync(context.UserName);
             if (user != null)
             {

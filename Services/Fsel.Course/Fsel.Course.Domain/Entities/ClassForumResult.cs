@@ -9,6 +9,7 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
+    using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
@@ -51,6 +52,8 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumClassForumResultStatus? Status { get; set; }
 
+        public EnumResultStatus ResultStatus { get; set; }
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid LessonResultId { get; set; }
 
@@ -69,7 +72,7 @@ namespace Fsel.Course.Domain.Entities
         public DateTime? CheckStartDate { get; set; }
 
         public DateTime? GradingStartDate { get; set; }
-
+        public double PercentModule { get; set; }
         public bool IsViewed { get; set; }
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
@@ -124,10 +127,10 @@ namespace Fsel.Course.Domain.Entities
 
         public bool IsPendingSpeechToText { get; set; }
 
+        public Guid? LessonModuleId { get; set; }
+        public LessonModule? LessonModule { get; set; }
         public ICollection<ClassForumScore> ClassForumScores { get; set; } = new List<ClassForumScore>();
-
         public ICollection<ClassForumResultFile> ClassForumResultFiles { get; set; } = new List<ClassForumResultFile>();
-
         public ICollection<ClassForumResultRandom> ClassForumResultRandoms { get; set; } = new List<ClassForumResultRandom>();
         public ICollection<ClassForumDetailResult> ClassForumDetailResults { get; set; } = new List<ClassForumDetailResult>();
     }

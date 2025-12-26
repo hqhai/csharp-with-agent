@@ -85,7 +85,7 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 Country = "Viet Nam",
                 CourseId = course.Id,
                 CourseLevel = request.Level,
-                FullName = student.User?.FullName,
+                FullName = student?.User?.FullName,
                 PaymentMethod = EnumPaymentMethodStatus.BankTransfer,
                 CodeCourse = course.Code,
                 UserId = _authContext.CurrentUserId

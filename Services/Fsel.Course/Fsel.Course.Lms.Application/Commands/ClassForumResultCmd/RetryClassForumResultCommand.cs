@@ -70,9 +70,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
 
             await _classForumResultRepository.ExecuteTransactionAsync(async () =>
             {
-                classForumResult = _classForumResultRepository.Update(classForumResult, false, x => x.LessonResultId, x => x.ClassForumId, x => x.StudentId);
-
-                await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+                await _classForumResultRepository.BulkUpdateList(new List<ClassForumResult> { classForumResult }, bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.LessonResultId, c.ClassForumId };
+                });
                 await SendToAIGrading(classForum, classForumResult, request.WordContent!, cancellationToken);
                 methodResult.StatusCode = StatusCodes.Status200OK;
                 methodResult.Result = _mapper.Map<ClassForumResultModel>(classForumResult);
@@ -86,18 +87,10 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
         {
             if (classForum != null && classForumResult != null && classForum.IsAlFeedBack)
             {
-                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModel
+                await _submitClassForumGradingPublisher.Publish(new ClassForumAIResponseModelV2
                 {
                     ClassForumResultId = classForumResult.Id,
                     WordContent = wordContent,
-                    UserAIConfig = classForum.UserAlConfig,
-                    SettingModel = classForum.SettingModel,
-                    SettingFrequecy = classForum.SettingFrequecy,
-                    SettingPresence = classForum.SettingPresence,
-                    SettingTemperature = classForum.SettingTemperature,
-                    SettingTopP = classForum.SettingTopP,
-                    SettingWordMaxLength = classForum.SettingWordMaxLength,
-                    SystemRoleAlConfig = classForum.SystemRoleAlConfig,
                     IsRetry = true,
                 }, cancellationToken);
             }
