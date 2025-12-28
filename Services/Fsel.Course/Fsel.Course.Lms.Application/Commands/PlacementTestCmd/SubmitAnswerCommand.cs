@@ -74,7 +74,8 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                 SectionResultId = request.SectionResultId,
                 TestResultId = request.TestResultId,
                 Answers = request.Answers,
-                IsSubmit = request.IsSubmit
+                IsSubmit = request.IsSubmit,
+                StudentId = request.StudentId
             });
 
             return new MethodResult<PtStateModel>

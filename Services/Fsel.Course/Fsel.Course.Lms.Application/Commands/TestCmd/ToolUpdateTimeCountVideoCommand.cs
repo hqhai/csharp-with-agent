@@ -4,6 +4,8 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
 {
     using System.Threading;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Helpers;
+    using Fsel.Core.Extensions;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Helpers;
     using MediatR;
@@ -27,14 +29,13 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
         {
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<bool>();
-            var videos = await _videoRepository.Queryable.ToListAsync(cancellationToken);
+            var videos = await _videoRepository.Queryable.Where(x => !x.TimeCount.HasValue).ToListAsync(cancellationToken);
             foreach (var item in videos)
             {
                 if (item.TimeCount.HasValue)
                 {
                     continue;
                 }
-                item.TimeCount = MediaHelper.GetMediaDurationAsync(item.VideoFilePath);
             }
             await _videoRepository.BulkUpdateList(videos, bulk =>
             {
