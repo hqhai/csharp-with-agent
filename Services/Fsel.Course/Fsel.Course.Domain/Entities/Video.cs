@@ -33,14 +33,18 @@ namespace Fsel.Course.Domain.Entities
         public string? VideoFilePath
         {
             get { return _videoFilePath; }
-            set { _videoFilePath = value; TimeCount = MediaHelper.GetMediaDurationAsync(value); }
+            set { _videoFilePath = value; TimeCount = MediaHelper.GetMediaDurationAsync(value.AddS3BaseUrl()); }
         }
 
         private int? _timeCount;
 
         public int? TimeCount
         {
-            get { return _timeCount == null ? MediaHelper.GetMediaDurationAsync(VideoFilePath) : _timeCount; }
+            get
+            {
+                _timeCount ??= MediaHelper.GetMediaDurationAsync(VideoFilePath.AddS3BaseUrl());
+                return _timeCount;
+            }
             set { _timeCount = value; }
         }
 
