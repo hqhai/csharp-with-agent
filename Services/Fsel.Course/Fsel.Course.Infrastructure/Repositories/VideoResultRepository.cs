@@ -10,8 +10,15 @@ namespace Fsel.Course.Infrastructure.Repositories
 {
     public class VideoResultRepository : BaseRepository<VideoResult>, IVideoResultRepository
     {
-        public VideoResultRepository(CourseDbContext dbContext, CourseReadDbContext readDbContext, AuthContext authContext, IMapper mapper): base(dbContext, readDbContext, authContext, mapper)
+        private readonly ILessonResultRepository _lessonResultRepository;
+
+        public VideoResultRepository(CourseDbContext dbContext,
+            CourseReadDbContext readDbContext,
+            AuthContext authContext,
+            IMapper mapper,
+            ILessonResultRepository lessonResultRepository) : base(dbContext, readDbContext, authContext, mapper)
         {
+            _lessonResultRepository = lessonResultRepository;
         }
 
         public async Task<VideoResult?> GetIncludeTimeCodeAnswerByIdAsync(Guid videoId, Guid lessonResultId, Guid studentId)
@@ -25,6 +32,14 @@ namespace Fsel.Course.Infrastructure.Repositories
             {
                 throw;
             }
+        }
+
+        public async Task<List<VideoResult>> GetVideoResultsAsync(Guid courseId, Guid studentId)
+        {
+            return await (from lr in _lessonResultRepository.ReadQueryable.AsNoTracking()
+                          join vr in ReadQueryable.Include(x => x.LessonModule) on lr.Id equals vr.LessonResultId
+                          where lr.CourseId == courseId && lr.StudentId == studentId
+                          select vr).ToListAsync();
         }
     }
 }

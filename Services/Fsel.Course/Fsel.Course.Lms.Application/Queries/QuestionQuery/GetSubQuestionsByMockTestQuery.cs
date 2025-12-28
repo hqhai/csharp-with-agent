@@ -53,11 +53,11 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                                                 .ToList();
 
             var questionIds = await _sectionGroupRepository.Queryable.Include(x => x.Sections).ThenInclude(x => x.SectionQuestions)
-                                                        .Where(x => x.Id == request.SectionGroupId)
-                                                        .SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions)
-                                                        .Where(x => x.QuestionId.HasValue)
-                                                        .Select(x => x.QuestionId!.Value)
-                                                        .ToListAsync(cancellationToken);
+                                                           .Where(x => x.Id == request.SectionGroupId)
+                                                           .SelectMany(x => x.Sections).SelectMany(x => x.SectionQuestions)
+                                                           .Where(x => x.QuestionId.HasValue)
+                                                           .Select(x => x.QuestionId!.Value)
+                                                           .ToListAsync(cancellationToken);
             var listSubQuestion = new List<SubQuestionModel>();
 
             var questions = await _questionRepository.Queryable.Where(x => questionIds.Contains(x.Id)).OrderBy(x => x.CreatedDate).ToListAsync(cancellationToken);
