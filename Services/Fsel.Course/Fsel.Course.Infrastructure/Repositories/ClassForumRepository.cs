@@ -3,6 +3,7 @@
 using Fsel.Common.Enums;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Entities.SkillScoresConfigs;
 using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
@@ -90,6 +91,60 @@ namespace Fsel.Course.Infrastructure.Repositories
             var classForumDics = await GetClassForumDicAsync(pendingClassForumOriginalIds);
 
             return (classForumResultsByOriginalId, classForumDics);
+        }
+
+        public async Task<IList<SkillScores>> GetSkillScoresAsync(List<Guid> classForumIds)
+        {
+            if (classForumIds == null || classForumIds.Count == 0)
+            {
+                return new List<SkillScores>();
+            }
+
+            // multiplier nếu ids duplicate (giống video/homework)
+            var idCounts = classForumIds.GroupBy(x => x).ToDictionary(g => g.Key, g => g.Count());
+            var distinctIds = idCounts.Keys.ToList();
+
+            var rows = await ReadQueryable
+                .AsNoTracking()
+                .Where(x => distinctIds.Contains(x.Id))
+                .Select(x => new
+                {
+                    ClassForumId = x.Id,
+                    x.CourseSkill,
+                    x.SkillId,
+                    SkillName = x.Skill != null ? x.Skill.Name : string.Empty
+                })
+                .ToListAsync();
+
+            // mỗi forum = 1 question, totalCount nếu có field CorrectTotal/MaxScore thì map vào đây
+            var perForumSkill = rows
+                .GroupBy(x => new { x.ClassForumId, x.SkillId, x.CourseSkill, x.SkillName })
+                .Select(g =>
+                {
+                    var multiplier = idCounts.TryGetValue(g.Key.ClassForumId, out var m) ? m : 1;
+
+                    return new SkillScores
+                    {
+                        SkillId = g.Key.SkillId,
+                        Skill = g.Key.CourseSkill,
+                        SkillName = g.Key.SkillName,
+                        TotalQuestion = 1 * multiplier,
+                        TotalCount = 1 * multiplier // nếu muốn total count = số forum
+                    };
+                })
+                .ToList();
+
+            return perForumSkill
+                .GroupBy(x => new { x.SkillId, x.Skill, x.SkillName })
+                .Select(g => new SkillScores
+                {
+                    SkillId = g.Key.SkillId,
+                    Skill = g.Key.Skill,
+                    SkillName = g.Key.SkillName,
+                    TotalQuestion = g.Sum(x => x.TotalQuestion),
+                    TotalCount = g.Sum(x => x.TotalCount)
+                })
+                .ToList();
         }
     }
 }

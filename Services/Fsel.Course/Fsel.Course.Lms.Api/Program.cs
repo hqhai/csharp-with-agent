@@ -24,6 +24,7 @@ using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
 using Fsel.Course.Lms.Application.Services.ApplicationServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
+using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices.BuildModules;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.CourseItemServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
@@ -207,14 +208,19 @@ builder.Services.AddScoped<ICourseItemInitializerFactory, CourseItemInitializerF
 builder.Services.AddScoped<ICourseResultUpdater, BaseCourseResultEventHandler>();
 builder.Services.AddScoped<IUnitResultUpdater, BaseUnitResultEventHandler>();
 
-builder.Services.AddScoped<IVideoService, VideoService>();
-builder.Services.AddScoped<IVideoCachingService, VideoCachingService>();
 builder.Services.AddScoped<IVideoTimeCodeModelCachingService, VideoTimeCodeModelCachingService>();
-builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
 builder.Services.AddScoped<ITimeCodeQuestionCachingService, TimeCodeQuestionCachingService>();
 builder.Services.AddScoped<ITestSectionCachingService, TestSectionCachingService>();
 builder.Services.AddScoped<ISpeakingAITestLayoutHandler, SpeakingAITestLayoutHandler>();
 builder.Services.AddScoped<IWritingAITestLayoutHandler, WritingAITestLayoutHandler>();
+builder.Services.AddScoped<ICourseSkillScoresCachingService, CourseSkillScoresCachingService>();
+builder.Services.AddScoped<ICourseBuildCachingService, CourseBuildCachingService>();
+
+builder.Services.AddScoped<IProgressService, ProgressService>();
+builder.Services.AddScoped<ICourseService, CourseService>();
+builder.Services.AddScoped<IVideoService, VideoService>();
+builder.Services.AddScoped<IVideoCachingService, VideoCachingService>();
+builder.Services.AddScoped<IVideoTimeCodeService, VideoTimeCodeService>();
 
 builder.Services.AddScoped<QuestBoardPublisher>();
 builder.Services.AddScoped<SubmitMockTestAnswerPublisher>();

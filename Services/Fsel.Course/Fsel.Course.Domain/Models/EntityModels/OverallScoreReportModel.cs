@@ -16,5 +16,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public int? HighestStreak { get; set; }
         public IList<SkillScores>? SkillScores { get; set; }
         public IList<EnumCourseSkill>? CourseSkills { get; set; }
+        public IList<string>? Skills { get; set; }
     }
 }

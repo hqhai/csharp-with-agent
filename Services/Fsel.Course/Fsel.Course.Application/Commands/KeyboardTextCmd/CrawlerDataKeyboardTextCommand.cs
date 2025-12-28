@@ -10,6 +10,7 @@ namespace Fsel.Course.Application.Commands.KeyboardTextCmd
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Application.Services.StorageServices;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Shared.Enums;
     using MediatR;
@@ -108,7 +109,8 @@ namespace Fsel.Course.Application.Commands.KeyboardTextCmd
                     {
                         Name = text,
                         Unicode = codePoint,
-                        FilePath = linkS3
+                        FilePath = linkS3,
+                        VectorLibrary = EnumVectorLibrary.Kvg
                     });
                 }
                 finally
@@ -191,7 +193,7 @@ namespace Fsel.Course.Application.Commands.KeyboardTextCmd
 
             var filePartS3 = await _storageService.UpLoadFile(
                 EnumFolderType.Images,
-                EnumBucketType.FselPublic,
+                EnumBucketType.Fsel,
                 streamPart,
                 isAddSuffix: true);
 

@@ -4,10 +4,12 @@ using AutoMapper;
 using Fsel.Common.Enums;
 using Fsel.Core.Base;
 using Fsel.Course.Domain.Entities;
+using Fsel.Course.Domain.Entities.SkillScoresConfigs;
 using Fsel.Course.Domain.Entities.V1i1;
 using Fsel.Course.Domain.Enums;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.EntityModels;
+using Fsel.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fsel.Course.Infrastructure.Repositories
@@ -16,17 +18,23 @@ namespace Fsel.Course.Infrastructure.Repositories
     {
         private readonly ILessonModuleRepository _lessonModuleRepository;
         private readonly IHomeWorkResultRepository _homeWorkResultRepository;
+        private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
+        private readonly IQuestionRepository _questionRepository;
 
         public HomeWorkRepository(CourseDbContext dbContext,
             CourseReadDbContext readDbContext,
             AuthContext authContext,
             IMapper mapper,
             ILessonModuleRepository lessonModuleRepository,
-            IHomeWorkResultRepository homeWorkResultRepository)
+            IHomeWorkResultRepository homeWorkResultRepository,
+            IHomeWorkQuestionRepository homeWorkQuestionRepository,
+            IQuestionRepository questionRepository)
             : base(dbContext, readDbContext, authContext, mapper)
         {
             _lessonModuleRepository = lessonModuleRepository;
             _homeWorkResultRepository = homeWorkResultRepository;
+            _homeWorkQuestionRepository = homeWorkQuestionRepository;
+            _questionRepository = questionRepository;
         }
 
         public async Task<IDictionary<Guid, HomeWork>> GetHomeWorkDicAsync(IList<Guid>? originalIds)
@@ -228,6 +236,83 @@ namespace Fsel.Course.Infrastructure.Repositories
         {
             return await DbContext.Set<HomeWorkResult>().AsQueryable()
                   .AnyAsync(x => x.HomeWorkId == id);
+        }
+
+        public async Task<IList<SkillScores>> GetSkillScoresAsync(List<Guid> ids)
+        {
+            if (ids == null || ids.Count == 0)
+            {
+                return new List<SkillScores>();
+            }
+
+            // 1) Multiplier theo số lần HomeWorkId xuất hiện
+            var idCounts = ids
+                .GroupBy(x => x)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var distinctIds = idCounts.Keys.ToList();
+
+            // 2) Query base: lấy rows theo HomeWorkId + Skill + Question
+            //    Nếu Skill là navigation: có thể Join bảng Skill thay vì dùng navigation.
+            var rows = await (
+                from hw in ReadQueryable.AsNoTracking()
+                join hwq in _homeWorkQuestionRepository.ReadQueryable.AsNoTracking()
+                    on hw.Id equals hwq.HomeWorkId
+                join q in _questionRepository.ReadQueryable.AsNoTracking()
+                    on hwq.QuestionId equals q.Id
+                where distinctIds.Contains(hw.Id)
+                      && !q.Ungraded
+                      && q.QuestionType != EnumQuestionType.ExercisePreparation
+                select new
+                {
+                    HomeWorkId = hw.Id,
+                    hw.CourseSkill,
+                    hw.SkillId,
+                    SkillName = hw.Skill != null ? hw.Skill.Name : string.Empty,
+                    QuestionId = q.Id,
+                    q.CorrectTotal
+                }
+            ).ToListAsync();
+
+            if (rows.Count == 0)
+            {
+                return new List<SkillScores>();
+            }
+
+            // 3) Gom theo (HomeWorkId, Skill) => totals cho 1 lần xuất hiện homework
+            //    rồi nhân theo số lần homework xuất hiện trong ids
+            var perHomeWorkSkill = rows
+                .GroupBy(x => new { x.HomeWorkId, x.SkillId, x.CourseSkill, x.SkillName })
+                .Select(g =>
+                {
+                    var totalQuestion = g.Select(x => x.QuestionId).Distinct().Count();
+                    var totalCount = g.Sum(x => x.CorrectTotal);
+
+                    var multiplier = idCounts.TryGetValue(g.Key.HomeWorkId, out var m) ? m : 1;
+
+                    return new SkillScores
+                    {
+                        SkillId = g.Key.SkillId,
+                        Skill = g.Key.CourseSkill,
+                        SkillName = g.Key.SkillName,
+                        TotalQuestion = totalQuestion * multiplier,
+                        TotalCount = totalCount * multiplier
+                    };
+                })
+                .ToList();
+
+            // 4) Gom cuối theo Skill
+            return perHomeWorkSkill
+                .GroupBy(x => new { x.SkillId, x.Skill, x.SkillName })
+                .Select(g => new SkillScores
+                {
+                    SkillId = g.Key.SkillId,
+                    Skill = g.Key.Skill,
+                    SkillName = g.Key.SkillName,
+                    TotalQuestion = g.Sum(x => x.TotalQuestion),
+                    TotalCount = g.Sum(x => x.TotalCount)
+                })
+                .ToList();
         }
     }
 }

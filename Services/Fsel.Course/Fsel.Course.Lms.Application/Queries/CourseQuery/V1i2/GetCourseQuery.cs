@@ -123,6 +123,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery.V1i2
                 var course = await _courseRepository.ReadQueryable
                                                     .Include(x => x.CourseTeachers)
                                                     .Include(x => x.Level)
+                                                    .Include(x => x.Program)
                                                     .Where(x => x.Id == id)
                                                     .FirstOrDefaultAsync(_);
                 return course;
