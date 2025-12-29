@@ -18,6 +18,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public abstract Task LoadTotalScoreData();
 
+        public abstract Task LoadTestHierarchicalData();
+
         public override bool IsBelongTo(Guid id)
         {
             if (Result != null && Result.Id == id)
@@ -28,19 +30,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return Children?.Any(c => c.IsBelongTo(id)) ?? false;
         }
 
-        public override async Task Submit(Guid id)
+        public override async Task Submit(SubmitContext context)
         {
             foreach (var child in Children)
             {
-                await child.Submit(id);
+                await child.Submit(context);
             }
         }
 
-        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        public override async Task SubmitTest(SubmitContext context)
         {
             foreach (var child in Children)
             {
-                await child.SubmitTest(id, scoringFormulaType);
+                await child.SubmitTest(context);
             }
         }
     }

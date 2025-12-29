@@ -9,12 +9,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
     using Fsel.Shared.Enums;
+    using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.DependencyInjection;
 
     public class TestSectionResultComposite : ResultComposite
     {
         public TestSectionResult TestSectionResult => (TestSectionResult)Result;
+
+        public TestSection? TestSection { get; set; }
 
         public override BaseTestStateModel ExportState()
         {
@@ -154,9 +157,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             }
         }
 
-        public override async Task Submit(Guid id)
+        public override async Task Submit(SubmitContext context)
         {
-            await base.Submit(id);
+            await base.Submit(context);
 
             if (Children.Count > 0)
             {
@@ -175,6 +178,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     }
 
                     TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
+                    {
+                        TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((TestSectionResult.Percent * TestSection.Percent.Value), 2);
+                    }
                 }
                 else if (Children.All(c => c is TestSectionResultComposite))
                 {
@@ -192,6 +200,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     }
 
                     TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
+
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
+                    {
+                        var totelChildPercentModule = TestSectionResult.SectionResults.Sum(x => x.PercentModule);
+                        TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((totelChildPercentModule * TestSection.Percent.Value), 2);
+                    }
                 }
                 else
                 {
@@ -216,9 +230,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             }
         }
 
-        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        public override async Task SubmitTest(SubmitContext context)
         {
-            await base.Submit(id);
+            await base.Submit(context);
 
             if (Children.Count > 0)
             {
@@ -237,6 +251,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     }
 
                     TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
+                    {
+                        TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((TestSectionResult.Percent * TestSection.Percent.Value), 2);
+                    }
                 }
                 else if (Children.All(c => c is TestSectionResultComposite))
                 {
@@ -251,13 +270,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
                         firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
-                        //if (scoringFormulaType != null)
-                        //{
-                        //    TestSectionResult.PercentModule = TestSectionResult.SectionResults.Select(x => x.TestSection)
-                        //}
                     }
 
                     TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
+
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
+                    {
+                        var totelChildPercentModule = TestSectionResult.SectionResults.Sum(x => x.PercentModule);
+                        TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((totelChildPercentModule * TestSection.Percent.Value), 2);
+                    }
                 }
                 else
                 {
@@ -279,6 +300,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 }
 
                 TestSectionResult.Status = EnumResultStatus.Done;
+            }
+        }
+
+        public override async Task LoadTestHierarchicalData()
+        {
+            if (TestSection?.TestSections != null && Children != null && Children.Any())
+            {
+                foreach (var child in Children)
+                {
+                    if (child is TestSectionResultComposite testSectionResultComposite)
+                    {
+                        var testSection = TestSection.TestSections.FirstOrDefault(x => x.Id == testSectionResultComposite.TestSectionResult.TestSectionId);
+                        if (testSection != null)
+                        {
+                            testSectionResultComposite.TestSection = testSection;
+                            await testSectionResultComposite.LoadTestHierarchicalData();
+                        }
+                    }
+                }
             }
         }
     }

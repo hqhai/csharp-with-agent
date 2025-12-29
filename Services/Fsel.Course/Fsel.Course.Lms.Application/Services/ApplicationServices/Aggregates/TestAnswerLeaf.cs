@@ -43,13 +43,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return Result != null && Result.Id == id;
         }
 
-        public override async Task Submit(Guid id)
+        public override async Task Submit(SubmitContext context)
         {
             TestAnswer.Status = EnumAnswerStatus.Done;
             await Task.CompletedTask;
         }
 
-        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        public override async Task SubmitTest(SubmitContext context)
         {
             TestAnswer.Status = EnumAnswerStatus.Done;
             await Task.CompletedTask;

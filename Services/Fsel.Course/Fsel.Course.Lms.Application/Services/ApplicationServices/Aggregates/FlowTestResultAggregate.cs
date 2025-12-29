@@ -31,7 +31,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var testResultComposite = TestResultComposites?.FirstOrDefault(t => t.IsBelongTo(id));
             if (testResultComposite != null)
             {
-                await testResultComposite.Submit(id);
+                await testResultComposite.Submit(new SubmitContext { Id = id, ScoringFormulaType = testResultComposite.Test?.ScoringFormulaType });
                 await Commit();
             }
 
@@ -143,10 +143,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     var testService = ServiceProvider.GetRequiredService<ITestService>();
                     var hierarchicalTestResult = await testService.LoadHierachicalTestResult(x => x.Id == testResult.Id);
                     testResult.SectionResults = hierarchicalTestResult.SectionResults;
+                    testResultComposite.GenerateChildren();
                     await testResultComposite.LoadTestHierarchicalData();
                 }
-
-                testResultComposite.GenerateChildren();
+                else
+                {
+                    testResultComposite.GenerateChildren();
+                }
             }
         }
 

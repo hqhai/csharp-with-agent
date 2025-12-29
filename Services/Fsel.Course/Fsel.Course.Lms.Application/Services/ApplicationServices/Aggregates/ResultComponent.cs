@@ -18,10 +18,17 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public abstract BaseTestStateModel ExportForTestState();
 
-        public abstract Task Submit(Guid id);
+        public abstract Task Submit(SubmitContext context);
 
-        public abstract Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null);
+        public abstract Task SubmitTest(SubmitContext context);
 
         public IServiceProvider ServiceProvider { get; set; }
+    }
+
+    public class SubmitContext
+    {
+        public Guid Id { get; set; }
+        public EnumScoringFormulaType? ScoringFormulaType { get; set; }
+
     }
 }

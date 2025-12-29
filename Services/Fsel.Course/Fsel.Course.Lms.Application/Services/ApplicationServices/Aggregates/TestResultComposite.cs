@@ -32,10 +32,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return stateModel;
         }
 
-        public override async Task Submit(Guid id)
+        public override async Task Submit(SubmitContext context)
         {
-            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(id));
-            skillMatch?.Submit(id);
+            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(context.Id));
+            skillMatch?.Submit(context);
+
             if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
             {
                 var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);
@@ -54,13 +55,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                     return skillScores;
                 }).ToList();
+
+                if (context.ScoringFormulaType.HasValue)
+                {
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent)
+                    {
+                        TestResult.PercentModule = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.PercentModule);
+                    }
+                    else if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore)
+                    {
+                        // Apply complex scoring formula
+                    }
+                }
             }
         }
 
-        public override async Task SubmitTest(Guid id, EnumScoringFormulaType? scoringFormulaType = null)
+        public override async Task SubmitTest(SubmitContext context)
         {
-            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(id));
-            skillMatch?.SubmitTest(id, TestResult.Test?.ScoringFormulaType);
+            var skillMatch = Children.FirstOrDefault(x => x.IsBelongTo(context.Id));
+            skillMatch?.SubmitTest(context);
             if (Children.All(c => c is TestSectionResultComposite tcr && tcr.TestSectionResult.Status == EnumResultStatus.Done))
             {
                 var test = await ServiceProvider.GetRequiredService<ITestService>().GetHierachicalTestById(TestResult.TestId.Value);
@@ -79,6 +92,18 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                     return skillScores;
                 }).ToList();
+
+                if (context.ScoringFormulaType.HasValue)
+                {
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent)
+                    {
+                        TestResult.PercentModule = Children.Cast<TestSectionResultComposite>().Sum(x => x.TestSectionResult.PercentModule);
+                    }
+                    else if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore)
+                    {
+                        // Apply complex scoring formula
+                    }
+                }
             }
         }
 
@@ -153,7 +178,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             return stateModel;
         }
 
-        public async Task LoadTestHierarchicalData()
+        public override async Task LoadTestHierarchicalData()
         {
             if (TestResult.TestId == null)
             {
@@ -162,6 +187,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             var testService = ServiceProvider.GetRequiredService<ITestService>();
             Test = await testService.GetHierachicalTestById(TestResult.TestId.Value);
+
+            if (Children != null && Test != null)
+            {
+                foreach (var child in Children.Where(x => x is TestSectionResultComposite).Cast<TestSectionResultComposite>())
+                {
+                    var testSection = Test.TestSections.FirstOrDefault(x => x.Id == child.TestSectionResult.TestSectionId);
+                    if (testSection != null)
+                    {
+                        child.TestSection = testSection;
+                        await child.LoadTestHierarchicalData();
+                    }
+                }
+            }
         }
     }
 }

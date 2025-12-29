@@ -34,7 +34,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var testResultComposite = TestResultComposites.FirstOrDefault(t => t.IsBelongTo(id));
             if (testResultComposite != null)
             {
-                await testResultComposite.SubmitTest(id, TestResult.Test?.ScoringFormulaType);
+                await testResultComposite.SubmitTest(new SubmitContext { Id = id, ScoringFormulaType = TestResult.Test?.ScoringFormulaType });
                 await Commit();
             }
 
@@ -47,7 +47,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var testResultComposite = TestResultComposites.FirstOrDefault(t => t.IsBelongTo(id));
             if (testResultComposite != null)
             {
-                await testResultComposite.Submit(id);
+                await testResultComposite.Submit(new SubmitContext { Id = id, ScoringFormulaType = TestResult.Test?.ScoringFormulaType });
                 await Commit();
             }
 
