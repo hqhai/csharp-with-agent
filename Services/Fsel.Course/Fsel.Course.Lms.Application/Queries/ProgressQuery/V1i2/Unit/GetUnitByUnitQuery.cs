@@ -148,6 +148,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
             {
                 if (item.UnitResult != null)
                 {
+                    item.Percent = list.FirstOrDefault(x => x.UnitId == item.Id).Percent;
                     item.UnitResult.ProgressPercent = list.FirstOrDefault(x => x.UnitId == item.Id).Percent;
                 }
             }
