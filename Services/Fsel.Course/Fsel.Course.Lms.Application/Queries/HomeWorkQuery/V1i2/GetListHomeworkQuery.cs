@@ -8,6 +8,7 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery.V1i2
     using System.Threading.Tasks;
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.V1i1;
@@ -106,25 +107,98 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery.V1i2
             public LessonModule? LessonModule { get; set; }
         }
 
-        private async Task<IList<ModuleHomeWorkResult>> GetHomeWorkResultsAsync(Guid? lessonModuleId, LessonResult lessonResult)
+        private async Task<IList<ModuleHomeWorkResult>> GetHomeWorkResultsAsync(
+        Guid? lessonModuleId,
+        LessonResult lessonResult)
         {
-            var query = from baseQ in _homeWorkRepository.Queryable.Include(x => x.HomeWorkQuestions)
+            ArgumentNullException.ThrowIfNull(lessonResult);
 
-                        join lessonModule in _lessonModuleRepository.Queryable on baseQ.OriginalId equals lessonModule.OriginalId
-                        where lessonModule.LessonId == lessonResult.LessonId && lessonModule.LessonConfigType == EnumLessonConfigType.HomeWork
-                        && (!lessonModuleId.HasValue || lessonModule.Id == lessonModuleId)
+            // 1) LessonModules (HomeWork type)
+            var lessonModules = await _lessonModuleRepository.ReadQueryable
+                .AsNoTracking()
+                .Where(m => m.LessonId == lessonResult.LessonId
+                            && m.LessonConfigType == EnumLessonConfigType.HomeWork
+                            && (!lessonModuleId.HasValue || m.Id == lessonModuleId.Value))
+                .Select(m => new
+                {
+                    m.Id,
+                    m.OriginalId,
+                    Entity = m
+                })
+                .ToListAsync();
 
-                        join homeWorkResult in _homeWorkResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id)
-                                on lessonModule.Id equals homeWorkResult.LessonModuleId into homeWorkResultJoin
-                        from homeWorkResult in homeWorkResultJoin.DefaultIfEmpty()
-                        select new ModuleHomeWorkResult
-                        {
-                            HomeWork = baseQ,
-                            HomeWorkResult = homeWorkResult,
-                            LessonModule = lessonModule,
-                        };
-            var data = await query.ToListAsync();
-            return data;
+            if (lessonModules.Count == 0)
+            {
+                return new List<ModuleHomeWorkResult>();
+            }
+            var moduleIds = lessonModules.Select(x => x.Id).ToList();
+            var originalIds = lessonModules.Select(x => x.OriginalId).Distinct().ToList();
+
+            // 2) HomeWorkResults by LessonModuleId
+            var homeWorkResults = await _homeWorkResultRepository.ReadQueryable
+                .AsNoTracking()
+                .Where(r => r.LessonResultId == lessonResult.Id)
+                .ToListAsync();
+
+            var resultByModuleId = homeWorkResults.Where(x => x.LessonModuleId.HasValue)
+                .GroupBy(r => r.LessonModuleId!.Value)
+                .ToDictionary(g => g.Key, g => g
+                    .OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
+                    .ThenByDescending(x => x.Id)
+                    .First());
+
+            // 3) HomeWork snapshot theo Result.HomeWorkId (ưu tiên đúng version lúc làm)
+            var homeWorkIdsFromResults = homeWorkResults
+                .Select(x => x.HomeWorkId)
+                .Distinct()
+                .ToList();
+
+            var homeWorksById = await _homeWorkRepository.ReadQueryable
+                .AsNoTracking()
+                .Include(x => x.HomeWorkQuestions)
+                .Where(hw => homeWorkIdsFromResults.Contains(hw.Id))
+                .ToDictionaryAsync(hw => hw.Id);
+
+            // 4) HomeWork LastVersion theo OriginalId (fallback)
+            var lastVersionHomeWorks = await _homeWorkRepository.ReadQueryable
+                .AsNoTracking()
+                .Include(x => x.HomeWorkQuestions)
+                .Where(hw => originalIds.Contains(hw.OriginalId) && hw.VersionStatus == EnumVersionStatus.LastVersion)
+                .ToListAsync();
+
+            var lastHomeWorkByOriginalId = lastVersionHomeWorks
+                .Where(x => x != null)
+                .ToDictionary(x => x.OriginalId, x => x);
+
+            // 5) Map
+            var results = new List<ModuleHomeWorkResult>(lessonModules.Count);
+
+            foreach (var m in lessonModules)
+            {
+                resultByModuleId.TryGetValue(m.Id, out var r);
+
+                HomeWork? hw = null;
+
+                // Ưu tiên theo HomeWorkId trong result
+                if (r != null && homeWorksById.TryGetValue(r.HomeWorkId, out var hwById))
+                {
+                    hw = hwById;
+                }
+                else
+                {
+                    // fallback LastVersion theo OriginalId
+                    lastHomeWorkByOriginalId.TryGetValue(m.OriginalId, out hw);
+                }
+
+                results.Add(new ModuleHomeWorkResult
+                {
+                    LessonModule = m.Entity,
+                    HomeWorkResult = r,
+                    HomeWork = hw
+                });
+            }
+
+            return results;
         }
 
         private LessonHomeWorkResultModel GetHomeWork(HomeWork? h, int? questionCompleted, HomeWorkResult? homeWorkResult)
