@@ -7,7 +7,7 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
     using Fsel.Common.ActionResults;
     using Fsel.Common.Constants;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Queries.HomeWorkQuery;
+    using Fsel.Course.Lms.Application.Queries.HomeWorkQuery.V1i2;
     using Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2;
     using Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2;
     using Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Overall;

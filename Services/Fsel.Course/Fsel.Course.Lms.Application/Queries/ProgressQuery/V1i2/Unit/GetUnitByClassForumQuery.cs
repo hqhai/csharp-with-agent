@@ -162,31 +162,34 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
         }
 
         private async Task<Dictionary<(Guid UnitId, Guid LessonOriginalId), IList<(ClassForum, string, Guid?)>>>
-            GetClassForumsAsync(GetUnitByClassForumQuery request, Guid studentId)
+    GetClassForumsAsync(GetUnitByClassForumQuery request, Guid studentId)
         {
-            var rows = await (from baseQ in _lessonResultRepository.ReadQueryable
-                              join l in _lessonRepository.ReadQueryable on baseQ.LessonId equals l.Id
-                              join clr in _classForumResultRepository.ReadQueryable on baseQ.Id equals clr.LessonResultId
-                              join cl in _classForumRepository.ReadQueryable on clr.ClassForumId equals cl.Id
-                              where baseQ.UnitId == studentId && baseQ.UnitId == request.UnitId && baseQ.CourseId == request.CourseId
-                              select new
-                              {
-                                  UnitId = baseQ.UnitId,
-                                  LessonOriginalId = l.OriginalId,
-                                  ClassForum = cl,
-                                  LessonName = l.Name,
-                                  ClassForumResultId = clr.Id,
-                              }).ToListAsync();
+            var rows = await (
+                from baseQ in _lessonResultRepository.ReadQueryable
+                join l in _lessonRepository.ReadQueryable on baseQ.LessonId equals l.Id
+                join clr in _classForumResultRepository.ReadQueryable on baseQ.Id equals clr.LessonResultId
+                join cl in _classForumRepository.ReadQueryable on clr.ClassForumId equals cl.Id
+                where baseQ.StudentId == studentId
+                      && baseQ.UnitId == request.UnitId
+                      && baseQ.CourseId == request.CourseId
+                select new
+                {
+                    UnitId = baseQ.UnitId,
+                    LessonOriginalId = l.OriginalId,
+                    ClassForum = cl,
+                    LessonName = l.Name,
+                    ClassForumResultId = (Guid?)clr.Id,   // ✅ ép sang Guid?
+                })
+                .AsNoTracking()
+                .ToListAsync();
 
-            // Group theo (UnitId, LessonOriginalId) -> list forums
-            var dict = rows.GroupBy(x => (x.UnitId, x.LessonOriginalId))
-
+            var dict = rows
+                .GroupBy(x => (x.UnitId, x.LessonOriginalId))
                 .ToDictionary(
-                               g => g.Key,
-                               g => (IList<(ClassForum, string, Guid?)>)g
-                                   .Select(x => (x.ClassForum, x.LessonName, x.ClassForumResultId))
-                                   .ToList()
-                           );
+                    g => g.Key,
+                    g => (IList<(ClassForum, string, Guid?)>)g
+                        .Select(x => (x.ClassForum, x.LessonName, x.ClassForumResultId)) // ✅ giờ đúng type
+                        .ToList());
 
             return dict;
         }
@@ -196,26 +199,29 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
             var classForumResults = await (from baseQ in _lessonResultRepository.ReadQueryable
                                            join l in _lessonRepository.ReadQueryable on baseQ.LessonId equals l.Id
                                            join clr in _classForumResultRepository.ReadQueryable.Include(x => x.ClassForumDetailResults) on baseQ.Id equals clr.LessonResultId
-                                           where baseQ.UnitId == studentId && baseQ.UnitId == request.UnitId && baseQ.CourseId == request.CourseId
+                                           where baseQ.StudentId == studentId && baseQ.UnitId == request.UnitId && baseQ.CourseId == request.CourseId
                                            select clr).ToListAsync();
 
             return classForumResults;
         }
 
         private async Task<IList<ClassForumReportModel>> GetClassForumReportsAsync(
-            GetUnitByClassForumQuery request,
-            Guid studentId)
+       GetUnitByClassForumQuery request,
+       Guid studentId)
         {
             ArgumentNullException.ThrowIfNull(request);
 
             var classForumsConfigDict = await GetClassForumsAsync(request);
             var classForumsStudentDict = await GetClassForumsAsync(request, studentId);
 
+            // Merge: ưu tiên item có ClassForumResultId (Item3) khác null
             var mergedDict = new Dictionary<(Guid UnitId, Guid LessonOriginalId), IList<(ClassForum, string, Guid?)>>();
+
             foreach (var kv in classForumsConfigDict)
             {
                 mergedDict[kv.Key] = kv.Value;
             }
+
             foreach (var kv in classForumsStudentDict)
             {
                 if (!mergedDict.TryGetValue(kv.Key, out var existing))
@@ -226,8 +232,23 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
 
                 mergedDict[kv.Key] = existing
                     .Concat(kv.Value)
-                    .GroupBy(x => x.Item1.Id)
-                    .Select(g => g.First())
+                    .GroupBy(x => x.Item1.Id) // group theo ClassForumId
+                    .Select(g =>
+                    {
+                        // ✅ ưu tiên record có ResultId
+                        var best = g.OrderByDescending(x => x.Item3.HasValue).First();
+
+                        // ✅ nếu LessonName null/empty, lấy cái có tên (thường từ config)
+                        var name = g.Select(x => x.Item2)
+                                    .FirstOrDefault(s => !string.IsNullOrWhiteSpace(s))
+                                   ?? best.Item2;
+
+                        // ✅ lấy ResultId nếu trong group có (từ student)
+                        var resultId = g.Select(x => x.Item3)
+                                        .FirstOrDefault(id => id.HasValue);
+
+                        return (best.Item1, name, resultId);
+                    })
                     .ToList();
             }
 
@@ -237,27 +258,45 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Unit
             }
 
             var classForumResults = await GetClassForumResultsAsync(request, studentId);
-            return mergedDict.SelectMany(x => x.Value).Select(x =>
-            {
-                var classForumResult = classForumResults.FirstOrDefault(y => y.Id == x.Item3);
-                var classForumReport = _mapper.Map<ClassForumReportModel>(x.Item1);
-                classForumReport.Name = x.Item2;
-                classForumReport.LessonResultId = classForumResult?.LessonResultId;
-                if (classForumResult != null)
-                {
-                    classForumReport.ClassForumResultScore = new ClassForumResultScoreModel
-                    {
-                        Id = classForumResult.Id,
-                        CorrectCount = classForumResult.CorrectCount,
-                        TotalCorrect = classForumResult.CorrectTotal,
-                        Percent = classForumResult.Percent,
-                        Status = classForumResult.Status,
-                        ProcessDate = classForumResult.ClassForumDetailResults.Where(x => x.ProcessDate.HasValue).OrderBy(x => x.CreatedDate).FirstOrDefault()?.ProcessDate
-                    };
-                }
 
-                return classForumReport;
-            }).ToList();
+            // ✅ O(1) lookup theo Id
+            var resultDict = classForumResults
+                .GroupBy(x => x.Id)
+                .Select(g => g.First())
+                .ToDictionary(x => x.Id, x => x);
+
+            return mergedDict
+                .SelectMany(x => x.Value)
+                .Select(item =>
+                {
+                    // item: (ClassForum forum, string lessonName, Guid? classForumResultId)
+                    resultDict.TryGetValue(item.Item3 ?? Guid.Empty, out var classForumResult);
+
+                    var classForumReport = _mapper.Map<ClassForumReportModel>(item.Item1);
+                    classForumReport.Name = item.Item2;
+
+                    classForumReport.LessonResultId = classForumResult?.LessonResultId;
+
+                    if (classForumResult != null)
+                    {
+                        classForumReport.ClassForumResultScore = new ClassForumResultScoreModel
+                        {
+                            Id = classForumResult.Id,
+                            CorrectCount = classForumResult.CorrectCount,
+                            TotalCorrect = classForumResult.CorrectTotal,
+                            Percent = classForumResult.Percent,
+                            Status = classForumResult.Status,
+                            ProcessDate = classForumResult.ClassForumDetailResults
+                                .Where(d => d.ProcessDate.HasValue)
+                                .OrderBy(d => d.CreatedDate)
+                                .Select(d => d.ProcessDate)
+                                .FirstOrDefault()
+                        };
+                    }
+
+                    return classForumReport;
+                })
+                .ToList();
         }
     }
 }
