@@ -77,6 +77,14 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
                 sectionStateModel.UpdateDetailInfo(section);
             }
+
+            if (Children != null && Children.Any() && Children.All(c => c is SectionStateModel o && o.Order.HasValue))
+            {
+                Children = Children
+                    .Cast<SectionStateModel>()
+                    .OrderBy(s => s.Order)
+                    .ToList<BaseTestStateModel>();
+            }
         }
     }
 
@@ -122,6 +130,14 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
                 }
 
                 sectionStateModel.UpdateDetailInfo(sectionMatch);
+            }
+
+            if (Children != null && Children.Any() && Children.All(c => c is SectionStateModel o && o.Order.HasValue))
+            {
+                Children = Children
+                    .Cast<SectionStateModel>()
+                    .OrderBy(s => s.Order)
+                    .ToList<BaseTestStateModel>();
             }
         }
     }
