@@ -83,10 +83,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 {
                     competencyRadar.SkillScores = unitResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
                         .SelectMany(x => x.SkillScores!)
-                        .GroupBy(x => x.Skill)
+                        .GroupBy(x => x.SkillId)
                         .Select(x => new SkillScores
                         {
-                            Skill = x.Key,
+                            SkillId = x.Key,
+                            SkillName = x.Select(n => n.SkillName).FirstOrDefault(),
                             CorrectCount = x.Sum(x => x.CorrectCount),
                             TotalCount = x.Sum(x => x.TotalCount),
                             Scores = x.Average(x => x.Scores),
