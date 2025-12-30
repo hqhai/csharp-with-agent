@@ -98,10 +98,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 else
                 {
                     var testResult = await _testResultRepository.Queryable
+                        .Where(x => x.StudentId == student.Id
+                            && x.Status == EnumResultStatus.Done
+                            && x.TestGroupResult!.TestType == EnumTestType.PlacementTest)
                         .OrderByDescending(x => x.CreatedDate)
-                        .FirstOrDefaultAsync(x => x.StudentId == student.Id
-                        && x.Status == EnumResultStatus.Done
-                        && x.TestGroupResult!.TestType == EnumTestType.PlacementTest, cancellationToken);
+                        .FirstOrDefaultAsync(cancellationToken);
                     competencyRadar.SkillScores = testResult?.SkillScores;
                 }
             }
