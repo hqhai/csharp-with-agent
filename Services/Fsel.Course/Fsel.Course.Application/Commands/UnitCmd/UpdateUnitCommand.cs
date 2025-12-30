@@ -65,7 +65,8 @@ namespace Fsel.Course.Application.Commands.UnitCmd
                     oldEntity.TestCount = newEntity.TestCount;
                     oldEntity.LevelId = newEntity.LevelId;
                     oldEntity.ProgramId = newEntity.ProgramId;
-                    oldEntity.HighlightRange = newEntity.HighlightRange;
+                    oldEntity.ProgressSpeedometerRanges = newEntity.ProgressSpeedometerRanges;
+                    oldEntity.HighlightRanges = newEntity.HighlightRanges;
 
                     var removedModules = unit.UnitModules
                         .ExceptBy(newVersionUnit.UnitModules.Select(x => $"{x.OriginalId}-{x.UnitConfigType}"), u => $"{u.OriginalId}-{u.UnitConfigType}")

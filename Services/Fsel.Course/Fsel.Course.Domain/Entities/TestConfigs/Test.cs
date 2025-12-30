@@ -16,14 +16,18 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
     public class Test : Entity, IVersionEntity
     {
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
-        [RegexValid(Regex = @"^[a-zA-Z0-9_ ]{1,150}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
-        [MaxLength(150, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^[^\[\]]{1,200}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(200, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Name { get; set; }
 
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         [RegexValid(Regex = @"^[a-zA-Z0-9_]{1,150}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         [MaxLength(150, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
         public string? Code { get; set; }
+
+        [RegexValid(Regex = @"^(?!.*[\[\]])[a-zA-Z0-9]{0,1000}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        public string? Description { get; set; }
 
         public bool IsArchive { get; set; }
         public Guid OriginalId { get; set; }

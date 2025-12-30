@@ -30,8 +30,7 @@ namespace Fsel.Course.Infrastructure.Maps
                 : default
             ));
             CreateMap<Unit, UnitModel>()
-                .ForMember(x => x.IsActive, p => p.MapFrom(o => o.CourseUnitMockTests.Any()))
-                .ForMember(x => x.HighlightRanges, opt => opt.ConvertUsing(new JsonToObjectConverter<IList<HighlightRange>>(), src => src.HighlightRange));
+                .ForMember(x => x.IsActive, p => p.MapFrom(o => o.CourseUnitMockTests.Any()));
 
             CreateMap<UnitResult, CourseUnitMockTestResultModel>().IgnoreAllNonExisting();
             CreateMap<UnitModule, UnitModuleDTO>().IgnoreAllNonExisting();
