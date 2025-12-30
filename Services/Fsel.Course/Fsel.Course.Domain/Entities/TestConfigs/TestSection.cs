@@ -120,7 +120,7 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
     public class ScoringFormulaConfig
     {
         public int From { get; set; }
-        public int? Equal { get; set; }
+        public double? Equal { get; set; }
     }
 
     public class ReportContentBankConfig
