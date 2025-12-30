@@ -7,5 +7,6 @@ namespace Fsel.Course.Domain.IRepositories
 
     public interface ISkillLevelRepository : IRepository<SkillLevel>
     {
+        Task<IList<Skill>> GetDefaultSkillsByProgramIdAsync(Guid? programId);
     }
 }

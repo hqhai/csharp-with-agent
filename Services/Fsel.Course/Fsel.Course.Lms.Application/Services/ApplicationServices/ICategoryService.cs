@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 {
@@ -6,25 +6,52 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using Domain.Entities;
     using Domain.Enums;
     using Domain.IRepositories;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Microsoft.EntityFrameworkCore;
-    using Shared.Enums;
 
     public interface ICategoryService
     {
         Task<Category?> GetCategoryAsync(Guid id, CancellationToken cancellationToken = default);
 
         Task<Category?> GetProgramContainPtBySelectedProject(Guid projectId, CancellationToken cancellationToken = default);
+
+        Task<IList<SkillScores>> GetDefaultSkillScoresAsync(Guid? programId, CancellationToken cancellationToken = default);
     }
 
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryCachingService _categoryCachingService;
+        private readonly IProgramSkillScoresCachingService _programSkillScoresCachingService;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly ISkillLevelRepository _skillLevelRepository;
 
-        public CategoryService(ICategoryCachingService categoryCachingService, ICategoryRepository categoryRepository)
+        public CategoryService(
+            ICategoryCachingService categoryCachingService,
+            IProgramSkillScoresCachingService programSkillScoresCachingService,
+            ICategoryRepository categoryRepository,
+            ISkillLevelRepository skillLevelRepository)
         {
             _categoryCachingService = categoryCachingService;
+            _programSkillScoresCachingService = programSkillScoresCachingService;
             _categoryRepository = categoryRepository;
+            _skillLevelRepository = skillLevelRepository;
+        }
+
+        public async Task<IList<SkillScores>> GetDefaultSkillScoresAsync(Guid? programId, CancellationToken cancellationToken = default)
+        {
+            if (programId == null)
+            {
+                return new List<SkillScores>();
+            }
+            return await _programSkillScoresCachingService.GetOrSetAsync(programId.Value.ToString(), async (ctx, _) =>
+            {
+                var skills = await _skillLevelRepository.GetDefaultSkillsByProgramIdAsync(programId);
+                return skills.Select(x => new SkillScores
+                {
+                    SkillId = x.Id,
+                    SkillName = x.Name,
+                }).ToList();
+            }, token: cancellationToken);
         }
 
         public async Task<Category?> GetCategoryAsync(Guid id, CancellationToken cancellationToken = default)
