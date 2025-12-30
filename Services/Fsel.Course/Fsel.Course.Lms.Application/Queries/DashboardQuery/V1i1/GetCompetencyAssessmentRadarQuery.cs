@@ -12,11 +12,14 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels.DashboardModels;
+    using Fsel.Course.Infrastructure.Repositories;
+    using Fsel.Course.Lms.Application.Services.ApplicationServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
+    using MassTransit.Initializers;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -32,20 +35,23 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUnitResultRepository _unitResultRepository;
-        private readonly ITestResultRepository _testResultRepository;
+        private readonly ITestGroupResultRepository _testGroupResultRepository;
+        private readonly ICategoryService _categoryService;
 
         public GetCompetencyAssessmentRadarQueryHandler(
             IUserService userService,
             ICourseResultRepository courseResultRepository,
             AuthContext authContext,
             IUnitResultRepository unitResultRepository,
-            ITestResultRepository testResultRepository)
+            ITestGroupResultRepository testGroupResultRepository,
+            ICategoryService categoryService)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
             _authContext = authContext;
             _unitResultRepository = unitResultRepository;
-            _testResultRepository = testResultRepository;
+            _testGroupResultRepository = testGroupResultRepository;
+            _categoryService = categoryService;
         }
 
         public async Task<MethodResult<CompetencyRadarModel>> Handle(GetCompetencyAssessmentRadarQuery request, CancellationToken cancellationToken)
@@ -97,13 +103,23 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 }
                 else
                 {
-                    var testResult = await _testResultRepository.Queryable
+                    var testGroupResult = await _testGroupResultRepository.Queryable
+                        .Include(x => x.TestResults)
                         .Where(x => x.StudentId == student.Id
                             && x.Status == EnumResultStatus.Done
-                            && x.TestGroupResult!.TestType == EnumTestType.PlacementTest)
+                            && x.TestType == EnumTestType.PlacementTest)
                         .OrderByDescending(x => x.CreatedDate)
                         .FirstOrDefaultAsync(cancellationToken);
+                    var testResult = testGroupResult?.TestResults
+                        .Where(x => x.Status == EnumResultStatus.Done)
+                        .OrderByDescending(x => x.CreatedDate)
+                        .FirstOrDefault();
+
                     competencyRadar.SkillScores = testResult?.SkillScores;
+                    if (competencyRadar.SkillScores == null)
+                    {
+                        competencyRadar.SkillScores = await _categoryService.GetDefaultSkillScoresAsync(courseResult.Course?.ProgramId, cancellationToken);
+                    }
                 }
             }
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.DashboardI18n);

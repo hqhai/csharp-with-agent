@@ -213,7 +213,7 @@ builder.Services.AddScoped<ITimeCodeQuestionCachingService, TimeCodeQuestionCach
 builder.Services.AddScoped<ITestSectionCachingService, TestSectionCachingService>();
 builder.Services.AddScoped<ISpeakingAITestLayoutHandler, SpeakingAITestLayoutHandler>();
 builder.Services.AddScoped<IWritingAITestLayoutHandler, WritingAITestLayoutHandler>();
-builder.Services.AddScoped<ICourseSkillScoresCachingService, CourseSkillScoresCachingService>();
+builder.Services.AddScoped<IProgramSkillScoresCachingService, ProgramSkillScoresCachingService>();
 builder.Services.AddScoped<ICourseBuildCachingService, CourseBuildCachingService>();
 
 builder.Services.AddScoped<IProgressService, ProgressService>();

@@ -38,8 +38,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseModuleRepository _courseModuleRepository;
         private readonly ICourseModuleCachingService _courseModuleCachingService;
-        private readonly ICourseSkillScoresCachingService _courseSkillScoresCachingService;
         private readonly ICourseService _courseService;
+        private readonly ICategoryService _categoryService;
 
         public GetOverallScoreQueryHandler(AuthContext authContext
             , ICourseRepository courseRepository
@@ -52,9 +52,11 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
             , ICourseModuleRepository courseModuleRepository
             , ICourseModuleCachingService courseModuleCachingService
             , IUnitRepository unitRepository
-            , ICourseSkillScoresCachingService courseSkillScoresCachingService
+            , ISkillLevelRepository skillLevelRepository
+            , IProgramSkillScoresCachingService programSkillScoresCachingService
             , ICourseService courseService
-            )
+,
+ICategoryService categoryService)
         {
             _authContext = authContext;
             _courseRepository = courseRepository;
@@ -66,8 +68,8 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
             _lessonRepository = lessonRepository;
             _courseModuleRepository = courseModuleRepository;
             _courseModuleCachingService = courseModuleCachingService;
-            _courseSkillScoresCachingService = courseSkillScoresCachingService;
             _courseService = courseService;
+            _categoryService = categoryService;
         }
 
         public async Task<MethodResult<OverallScoreModel>> Handle(GetOverallScoreQuery request, CancellationToken cancellationToken)
@@ -133,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
                                                 .FirstOrDefaultAsync(cancellationToken);
                     if (testGroupResult != null && testGroupResult.Status == EnumResultStatus.ByPass)
                     {
-                        overallScoreModel.SkillScores = await GetSkillScoresAsync(request.CourseId);
+                        overallScoreModel.SkillScores = await _categoryService.GetDefaultSkillScoresAsync(course.ProgramId, cancellationToken);
                         overallScoreModel.IsPlacement = true;
                     }
                     else
@@ -163,31 +165,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
             methodResult.StatusCode = StatusCodes.Status200OK;
             methodResult.Result = overallScoreModel;
             return methodResult;
-        }
-
-        private async Task<IList<SkillScores>> GetSkillScoresAsync(Guid courseId)
-        {
-            return await _courseSkillScoresCachingService.GetOrSetAsync(courseId.ToString(), async (ctx, _) =>
-            {
-                var course = await _courseService.GetCourseBuildModel(courseId);
-
-                var originalIds = course.CourseModules.Where(x => x.ConfigType == EnumCourseConfigType.Unit)
-                                        .SelectMany(x => x.UnitModuleBuilds)
-                                        .Where(x => x.ConfigType == EnumUnitConfigType.Lesson)
-                                        .Select(x => x.OriginalId)
-                                        .ToList();
-                var lessons = await _lessonRepository.ReadQueryable.Include(x => x.LessonInstructions)
-                                            .ThenInclude(x => x.Skill)
-                                            .Where(x => originalIds.Contains(x.OriginalId) && x.VersionStatus == EnumVersionStatus.LastVersion)
-                                            .ToListAsync(_);
-                return lessons.SelectMany(x => x.LessonInstructions).GroupBy(x => new { x.CourseSkill, x.Skill?.Name, x.SkillId })
-                              .Select(x => new SkillScores
-                              {
-                                  SkillId = x.Key.SkillId,
-                                  SkillName = x.Key.Name,
-                                  Skill = x.Key.CourseSkill,
-                              }).ToList();
-            });
         }
 
         private async Task<MethodResult<StudentModel>> GetStudentAsync()
