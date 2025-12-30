@@ -32,20 +32,20 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly AuthContext _authContext;
         private readonly IUnitResultRepository _unitResultRepository;
-        private readonly IPlacementTestResultRepository _placementTestResultRepository;
+        private readonly ITestResultRepository _testResultRepository;
 
         public GetCompetencyAssessmentRadarQueryHandler(
             IUserService userService,
             ICourseResultRepository courseResultRepository,
             AuthContext authContext,
             IUnitResultRepository unitResultRepository,
-            IPlacementTestResultRepository placementTestResultRepository)
+            ITestResultRepository testResultRepository)
         {
             _userService = userService;
             _courseResultRepository = courseResultRepository;
             _authContext = authContext;
             _unitResultRepository = unitResultRepository;
-            _placementTestResultRepository = placementTestResultRepository;
+            _testResultRepository = testResultRepository;
         }
 
         public async Task<MethodResult<CompetencyRadarModel>> Handle(GetCompetencyAssessmentRadarQuery request, CancellationToken cancellationToken)
@@ -97,9 +97,12 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 }
                 else
                 {
-                    var placementTestScore = await _placementTestResultRepository.Queryable.OrderByDescending(x => x.CreatedDate)
-                                                                                 .FirstOrDefaultAsync(x => x.StudentId == student.Id && x.Status == EnumResultStatus.Done, cancellationToken);
-                    competencyRadar.SkillScores = placementTestScore?.SkillScores;
+                    var testResult = await _testResultRepository.Queryable
+                        .OrderByDescending(x => x.CreatedDate)
+                        .FirstOrDefaultAsync(x => x.StudentId == student.Id
+                        && x.Status == EnumResultStatus.Done
+                        && x.TestGroupResult!.TestType == EnumTestType.PlacementTest, cancellationToken);
+                    competencyRadar.SkillScores = testResult?.SkillScores;
                 }
             }
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, ResourceSettings.DashboardI18n);
