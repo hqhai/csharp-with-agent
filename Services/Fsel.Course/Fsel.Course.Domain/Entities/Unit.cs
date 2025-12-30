@@ -7,6 +7,7 @@ using Fsel.Shared.Enums;
 
 namespace Fsel.Course.Domain.Entities
 {
+    using System.ComponentModel.DataAnnotations.Schema;
     using Common.ActionResults;
     using Common.Helpers;
     using Enums.ErrorCodes;
@@ -51,7 +52,23 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumVersionStatus VersionStatus { get; set; }
 
-        public string? HighlightRange { get; set; }
+        public string? ProgressSpeedometerRangeStr { get; set; }
+
+        [NotMapped]
+        public IList<HighlightRange>? ProgressSpeedometerRanges
+        {
+            get { return ConvertHelper.Deserialize<IList<HighlightRange>>(ProgressSpeedometerRangeStr); }
+            set { ProgressSpeedometerRangeStr = ConvertHelper.Serialize(value); }
+        }
+
+        public string? HighlightRangeStr { get; set; }
+
+        [NotMapped]
+        public IList<HighlightRange>? HighlightRanges
+        {
+            get { return ConvertHelper.Deserialize<IList<HighlightRange>>(HighlightRangeStr); }
+            set { HighlightRangeStr = ConvertHelper.Serialize(value); }
+        }
 
         public int Version { get; set; }
 
@@ -88,14 +105,70 @@ namespace Fsel.Course.Domain.Entities
                 });
             }
 
-            var highlightRanges = HighlightRange?.Deserialize<IList<HighlightRange>>();
+            if (HighlightRanges == null || !HighlightRanges.Any())
+            {
+                AddErrorResults(new ErrorResult
+                {
+                    ErrorCode = nameof(EnumSystemErrorCode.DataNotExist),
+                    Errors = { new Error(nameof(ProgressSpeedometerRangeStr)) }
+                });
+            }
+            else
+            {
+                if (HighlightRanges.First().From != ValueSettings.HighlightRangeConstants.MinValue
+                    || HighlightRanges.Last().To != ValueSettings.HighlightRangeConstants.MaxValue)
+                {
+                    AddErrorResults(new ErrorResult { ErrorCode = nameof(EnumUnitErrorCode.HighlightRangeMissingBoundary) });
+                }
+
+                HighlightRanges.ForEachWithPrevious((prev, current) =>
+                {
+                    if (prev != null && current.From != prev.To + 1)
+                    {
+                        AddErrorResults(new ErrorResult
+                        {
+                            ErrorCode = nameof(EnumUnitErrorCode.HighlightRangeOverlapOrGap),
+                            Errors = { new Error
+                            {
+                                ErrorValues = new List<object> { current},
+                            } }
+                        });
+                    }
+
+                    if (current.To <= current.From)
+                    {
+                        AddErrorResults(new ErrorResult
+                        {
+                            ErrorCode = nameof(EnumUnitErrorCode.InvalidHighlightRange),
+                            Errors = { new Error
+                            {
+                                ErrorValues = new List<object> { current},
+                            } }
+                        });
+                    }
+
+                    if (current.From < ValueSettings.HighlightRangeConstants.MinValue || current.To > ValueSettings.HighlightRangeConstants.MaxValue)
+                    {
+                        AddErrorResults(new ErrorResult
+                        {
+                            ErrorCode = nameof(EnumUnitErrorCode.HighlightRangeInvalidInnerValue),
+                            Errors = { new Error
+                            {
+                                ErrorValues = new List<object> { current},
+                            } }
+                        });
+                    }
+                });
+            }
+
+            var highlightRanges = ProgressSpeedometerRanges;
 
             if (highlightRanges == null || !highlightRanges.Any())
             {
                 AddErrorResults(new ErrorResult
                 {
                     ErrorCode = nameof(EnumSystemErrorCode.DataNotExist),
-                    Errors = { new Error(nameof(HighlightRange)) }
+                    Errors = { new Error(nameof(ProgressSpeedometerRangeStr)) }
                 });
             }
             else

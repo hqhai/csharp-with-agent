@@ -33,17 +33,12 @@ namespace Fsel.Course.Infrastructure.Common.UnitHelper
                 VersionStatus = EnumVersionStatus.LastVersion,
                 Version = version,
                 LevelId = _createRequest.LevelId,
-                ProgramId = _createRequest.ProgramId
+                ProgramId = _createRequest.ProgramId,
+                HighlightRanges = _createRequest.HighlightRanges,
+                ProgressSpeedometerRanges = _createRequest.ProgressSpeedometerRanges
             };
             unit.OriginalId = originalId.HasValue ? originalId.Value : unit.Id;
-
             unit.UnitModules = UnitModuleClassification(_createRequest.Modules, unit.Id).ToList();
-
-            if (_createRequest.HighlightRanges != null && _createRequest.HighlightRanges.Any())
-            {
-                unit.HighlightRange = _createRequest.HighlightRanges.Serialize();
-            }
-
             return unit;
         }
 
