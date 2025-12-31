@@ -98,6 +98,10 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
                 return methodResult;
             }
             var moduleLessons = await GetLessonModelsAsync(lessonResult, lesson, lessonModules);
+            if (moduleLessons.Any())
+            {
+                moduleLessons = GroupHomeWorkModuleLesson(moduleLessons);
+            }
 
             var lessonDto = _mapper.Map<LessonDtoModel>(lesson);
             if (lessonDto != null)
@@ -145,6 +149,35 @@ namespace Fsel.Course.Lms.Application.Queries.LessonQuery.V1i2
             }
 
             return moduleResults;
+        }
+
+        private static List<ModuleLessonModel> GroupHomeWorkModuleLesson(IList<ModuleLessonModel> moduleLessonModels)
+        {
+            var homeWorkModules = moduleLessonModels
+                .Where(x => x.LessonConfigType == EnumLessonConfigType.HomeWork)
+                .ToList();
+
+            homeWorkModules = homeWorkModules
+                .GroupBy(x => new { x.OpenOrder })
+                .Select(g =>
+                {
+                    var first = g.First();
+                    if (g.Count() > 1)
+                    {
+                        first = new ModuleLessonModel
+                        {
+                            LessonConfigType = first.LessonConfigType,
+                            LessonId = first.LessonId,
+                            OpenOrder = g.Key.OpenOrder,
+                            Name = first.Name,
+                            SubModules = g.ToList(),
+                        };
+                    }
+                    return first;
+                })
+                .ToList();
+
+            return moduleLessonModels.Where(x => x.LessonConfigType != EnumLessonConfigType.HomeWork).Concat(homeWorkModules).ToList();
         }
 
         private void BuildVideoModuleLesson(
