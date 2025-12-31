@@ -20,5 +20,17 @@ namespace Fsel.Course.Domain.Enums.ErrorCodes
         /// AiCriteriaConfig đang được sử dụng bởi ClassForum hoặc entities khác
         /// </summary>
         AiCriteriaConfigInUse,
+
+        /// <summary>
+        /// AiCriteriaConfig not found for ObjectId
+        /// Không tìm thấy AICriteriaConfig cho ObjectId
+        /// </summary>
+        NotFoundForObjectId,
+
+        /// <summary>
+        /// AiPromptManager not found
+        /// Không tìm thấy AiPromptManager
+        /// </summary>
+        AiPromptManagerNotFound,
     }
 }

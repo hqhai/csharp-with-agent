@@ -5,12 +5,8 @@ namespace Fsel.Course.Lms.Application.Services.AIService.Models
     using System.Text.Json.Serialization;
     using Refit;
 
-    public class RequestSchemaAIModel
+    public class RequestSchemaAIModel : BaseRequestAIModel
     {
-        [AliasAs("model")]
-        [JsonPropertyName("model")]
-        public string? Model { get; set; }
-
         [AliasAs("input")]
         [JsonPropertyName("input")]
         public IList<object>? Input { get; set; }
@@ -18,13 +14,5 @@ namespace Fsel.Course.Lms.Application.Services.AIService.Models
         [AliasAs("text")]
         [JsonPropertyName("text")]
         public object? Text { get; set; }
-
-        [AliasAs("temperature")]
-        [JsonPropertyName("temperature")]
-        public double Temperature { get; set; }
-
-        [AliasAs("top_p")]
-        [JsonPropertyName("top_p")]
-        public double TopP { get; set; }
     }
 }
