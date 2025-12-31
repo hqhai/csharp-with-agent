@@ -3,6 +3,7 @@
 namespace Fsel.Course.Domain.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using Fsel.Common.Attributes;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Entities;
     using Fsel.Course.Domain.Entities.FlowConfigs;
@@ -17,6 +18,7 @@ namespace Fsel.Course.Domain.Entities
         public string? Code { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
+        [RegexValid(Regex = @"^(?!.*[<>])[a-zA-Z0-9]{0,1000}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Description { get; set; }
 
         public int LevelOrder { get; set; }
