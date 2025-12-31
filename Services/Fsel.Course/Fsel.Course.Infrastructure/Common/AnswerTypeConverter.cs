@@ -577,7 +577,7 @@ namespace Fsel.Course.Infrastructure.Common
                     return _linQAnswerHelper.IsDuplicateAnswerId(dataAnswer, nameof(ConfigAnswer.Id));
 
                 case EnumQuestionType.ColorMatchingType:
-                    return !_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || _linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(ColorMatchingTypeAnswers.IsChecked), false);
+                    return !_linQAnswerHelper.CheckAnswerCount(dataAnswer, dataQuestion) || !_linQAnswerHelper.IsNullOrEmptyData(dataAnswer, nameof(ColorMatchingTypeAnswers.IsChecked), false);
 
                 default:
                     return default;
