@@ -114,7 +114,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2
                 {
                     videoTimeCodeResult.HighestStreak = await _videoConverter.GetHighestStreak(videoTimeCodeResult);
                 }
-                await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, videoTimeCodeResult, cancellationToken);
+                await UpdateVideoTimeCodeResultAsync(videoTimeCode, videoResult, videoTimeCodeResult, request.IsTimeUp, cancellationToken);
             }
             else
             {
@@ -208,7 +208,8 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2
             }
         }
 
-        private async Task UpdateVideoTimeCodeResultAsync(VideoTimeCode videoTimeCode, VideoResult videoResult, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken)
+        private async Task UpdateVideoTimeCodeResultAsync(VideoTimeCode videoTimeCode,
+        VideoResult videoResult, VideoTimeCodeResult videoTimeCodeResult, bool isTimeUp, CancellationToken cancellationToken)
         {
             if (videoResult.LessonResult == null)
             {
@@ -231,7 +232,7 @@ namespace Fsel.Course.Lms.Application.Commands.VideoTimeCodeAnswerCmd.V1i2
             videoTimeCodeResult = await GetTokenVideoTimeCodeResult(videoTimeCodeResult, videoTimeCode, course.CourseType, correctCount);
             await SendTokenHistoryAsync(videoTimeCodeResult, videoTimeCode, courseResultId, cancellationToken).ConfigureAwait(false);
 
-            var (skillScoreUngradeds, skillScores, isDone) = await _videoService.GetSkillScoresAsync(videoTimeCodeResult, videoTimeCode, cancellationToken);
+            var (skillScoreUngradeds, skillScores, isDone) = await _videoService.GetSkillScoresAsync(videoTimeCodeResult, videoTimeCode, isTimeUp, cancellationToken);
             skillScores ??= new List<SkillScores>();
             skillScoreUngradeds ??= new List<SkillScores>();
 

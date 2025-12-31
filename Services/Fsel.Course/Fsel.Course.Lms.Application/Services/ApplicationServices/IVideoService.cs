@@ -24,7 +24,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     {
         Task<VideoModel?> GetVideoModelAsync(VideoResult videoResult, CancellationToken cancellationToken = default);
 
-        Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, CancellationToken cancellationToken = default);
+        Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(VideoTimeCodeResult videoTimeCodeResult, VideoTimeCode videoTimeCode, bool isTimeUp, CancellationToken cancellationToken = default);
 
         Task<VoidMethodResult> CreateAnswers(CreateVideoTimeCodeAnswerV1i1CommandModel request, VideoTimeCode videoTimeCode, VideoTimeCodeResult videoTimeCodeResult, CancellationToken cancellationToken = default);
 
@@ -410,6 +410,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         public async Task<(IList<SkillScores>?, IList<SkillScores>, bool)> GetSkillScoresAsync(
         VideoTimeCodeResult videoTimeCodeResult,
         VideoTimeCode videoTimeCode,
+        bool isTimeUp,
         CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(videoTimeCode);
@@ -435,9 +436,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             // Còn câu nào chưa Done không?
 
             var hasNotDone = false;
-            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone && videoTimeCodeAnswers.Count == timeCodeQuestions.Count)
+            if (videoTimeCode.TimeCodeType == EnumTimeCodeType.Standalone)
             {
-                hasNotDone = videoTimeCodeResult.Status != EnumResultStatus.New || videoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done);
+                if (videoTimeCodeAnswers.Count == timeCodeQuestions.Count)
+                {
+                    hasNotDone = videoTimeCodeResult.Status != EnumResultStatus.New || videoTimeCodeAnswers.All(x => x.Status == EnumAnswerStatus.Done);
+                }
+                else if (isTimeUp)
+                {
+                    hasNotDone = videoTimeCodeResult.Status != EnumResultStatus.New;
+                }
             }
             else if (videoTimeCode.TimeCodeType == EnumTimeCodeType.UnitTest || videoTimeCode.TimeCodeType == EnumTimeCodeType.SkillTest)
             {
