@@ -12,6 +12,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.VideoTimeCodeAnswers
         [JsonIgnore]
         public Guid? StudentId { get; set; }
 
+        public bool IsTimeUp { get; set; }
         public bool IsSubmit { get; set; }
         public IList<VideoTimeCodeAnswerQuestionModel> Answers { get; set; } = new List<VideoTimeCodeAnswerQuestionModel>();
     }
