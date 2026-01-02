@@ -142,6 +142,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                         _questionTypeConverter.QuestionShuffleConverterObject(
                             questionModel.Config,
                             questionModel.QuestionType,
+                            isCheck,
                             questionShuffle?.ShuffleConfigs);
 
                     if (!string.IsNullOrEmpty(questionShuffleStr) &&

@@ -99,12 +99,13 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             foreach (var question in questions)
             {
                 var questionModel = _mapper.Map<QuestionModel>(question);
+                var isResultDone = testResult.Status == EnumResultStatus.Done;
 
                 questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: false).Item1;
 
                 var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
                 (questionModel.Config, string? questionShuffleStr) =
-                    _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                    _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, isResultDone, questionShuffle?.ShuffleConfigs);
 
                 if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
                 {
@@ -134,7 +135,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
                         answerDto.IsCorrect = null;
                         answerDto.Status = EnumAnswerStatus.Process;
                     }
-                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, testResult.Status, testResult.Status == EnumResultStatus.Done);
+                    answerDto.Answer = _answerTypeConverter.AnswerTypeConverterObject(answerDto.Answer, question.QuestionType, false, testResult.Status, isResultDone);
 
                     questionModel.CorrectStatus = GetCorrectStatus(_mapper.Map<BaseAnswer>(answer), testResult.Status);
                     questionModel.ResultAnswer = answerDto;
