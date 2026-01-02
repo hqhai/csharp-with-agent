@@ -7,6 +7,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
@@ -48,8 +49,10 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             }
 
             var homeWork = await _homeWorkRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
-                                             .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                             .FirstOrDefaultAsync(cancellationToken);
+                .Include(x => x.HomeWorkQuestions)
+                .Include(x => x.Skill)
+                .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                .FirstOrDefaultAsync(cancellationToken);
 
             if (homeWork == null)
             {
@@ -64,6 +67,16 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 Status = EnumResultStatus.New,
                 HomeWorkId = homeWork.Id,
                 LessonModuleId = lessonModule.Id,
+                SkillScores = new List<SkillScores>
+                {
+                    new SkillScores
+                    {
+                        Skill = homeWork.CourseSkill,
+                        SkillId = homeWork.SkillId,
+                        SkillName = homeWork.Skill?.Name,
+                        TotalQuestion = homeWork.HomeWorkQuestions?.Count ?? 0,
+                    },
+                },
             };
             await _homeWorkResultRepository.BulkMergeAsync(new List<HomeWorkResult> { homeWorkResult }, bulk =>
             {
