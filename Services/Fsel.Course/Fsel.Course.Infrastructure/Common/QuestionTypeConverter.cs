@@ -851,10 +851,10 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.DragAndDropListSentenceOrder:
                     var dragAndDropList = config.Deserialize<DragAndDropListSentenceOrderQuestion>();
-                    if (dragAndDropList != null)
+                    if (dragAndDropList != null && !isResultDone)
                     {
                         dragAndDropList.Contents = GenerateRandomLoop(dragAndDropList.Contents, shuffleConfigs);
-                        if (shuffleConfigs == null && !isResultDone)
+                        if (shuffleConfigs == null)
                         {
                             questionShuffleStr = dragAndDropList.Contents?.Select((x, index) => new SubQuestionConfig
                             {
