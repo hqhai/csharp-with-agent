@@ -914,7 +914,7 @@ namespace Fsel.Course.Infrastructure.Common
                     questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
 
                     var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
-                    (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                    (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, isCheck, questionShuffle?.ShuffleConfigs);
                     if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
                     {
                         if (questionShuffle == null)
@@ -975,7 +975,7 @@ namespace Fsel.Course.Infrastructure.Common
                 questionModel.Config = _questionTypeConverter.QuestionTypeConverterObject(question.Config, question.QuestionType, isDisableAnswers: !(isCheck)).Item1;
 
                 var questionShuffle = questionShuffles.FirstOrDefault(x => x.QuestionId == question.Id);
-                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, questionShuffle?.ShuffleConfigs);
+                (questionModel.Config, string? questionShuffleStr) = _questionTypeConverter.QuestionShuffleConverterObject(questionModel.Config, question.QuestionType, isCheck, questionShuffle?.ShuffleConfigs);
                 if (!string.IsNullOrEmpty(questionShuffleStr) && (questionShuffle == null || questionShuffle.ShuffleConfigStr != questionShuffleStr))
                 {
                     if (questionShuffle == null)

@@ -809,7 +809,7 @@ namespace Fsel.Course.Infrastructure.Common
             }
         }
 
-        public (object?, string?) QuestionShuffleConverterObject(object? config, EnumQuestionType type, IList<SubQuestionConfig>? shuffleConfigs = null)
+        public (object?, string?) QuestionShuffleConverterObject(object? config, EnumQuestionType type, bool isResultDone = false, IList<SubQuestionConfig>? shuffleConfigs = null)
         {
             object? result = config;
             string questionShuffleStr = shuffleConfigs != null ? shuffleConfigs.Serialize() : string.Empty;
@@ -834,7 +834,7 @@ namespace Fsel.Course.Infrastructure.Common
 
                 case EnumQuestionType.GapFillWordBankScoreByGap:
                     var gapFillQuestion = config.Deserialize<GapFillQuestion>();
-                    if (gapFillQuestion != null)
+                    if (gapFillQuestion != null && !isResultDone)
                     {
                         gapFillQuestion.Contents = GenerateRandomLoop(gapFillQuestion.Contents, shuffleConfigs);
                         if (shuffleConfigs == null)
@@ -854,7 +854,7 @@ namespace Fsel.Course.Infrastructure.Common
                     if (dragAndDropList != null)
                     {
                         dragAndDropList.Contents = GenerateRandomLoop(dragAndDropList.Contents, shuffleConfigs);
-                        if (shuffleConfigs == null)
+                        if (shuffleConfigs == null && !isResultDone)
                         {
                             questionShuffleStr = dragAndDropList.Contents?.Select((x, index) => new SubQuestionConfig
                             {
@@ -870,6 +870,11 @@ namespace Fsel.Course.Infrastructure.Common
                 {
                     var drag = config.Deserialize<DragAndDropSentenceOrderQuestion>();
                     if (drag?.Contents == null || drag.Contents.Count == 0)
+                    {
+                        result = drag;
+                        break;
+                    }
+                    if (isResultDone)
                     {
                         result = drag;
                         break;

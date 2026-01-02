@@ -31,7 +31,6 @@ namespace Fsel.Course.Lms.Api.Controllers.V1i2
         /// <summary>
         /// Get Home Work
         /// </summary>
-        [EncryptResponse]
         [HttpGet]
         [ProducesResponseType(typeof(MethodResult<HomeWorkModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
