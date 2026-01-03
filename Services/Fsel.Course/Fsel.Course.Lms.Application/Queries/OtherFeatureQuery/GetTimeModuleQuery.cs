@@ -100,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             };
         }
 
-        private async Task<GetTimeModuleModel?> GetSectionResultAsync(GetTimeModuleQuery request)
+        private async Task<GetTimeModuleModel?> GetSectionGroupResultAsync(GetTimeModuleQuery request)
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
             var sectionGroup = sectionGroupResult?.SectionGroup;
@@ -117,7 +117,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             };
         }
 
-        private async Task<GetTimeModuleModel?> GetSectionGroupResultAsync(GetTimeModuleQuery request)
+        private async Task<GetTimeModuleModel?> GetSectionResultAsync(GetTimeModuleQuery request)
         {
             var sectionGroupResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
             var sectionGroup = sectionGroupResult?.TestSection;
