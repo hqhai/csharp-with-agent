@@ -7,7 +7,6 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Lms.Application.Services.AIService.Models;
     using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -18,15 +17,18 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
         private readonly IAiCriteriaConfigRepository _aiCriteriaConfigRepository;
         private readonly IAiPromptManagerRepository _aiPromptManagerRepository;
         private readonly IMediator _mediator;
+        private readonly ILogger<AIConfigSubmitService> _logger;
 
         public AIConfigSubmitService(
             IAiCriteriaConfigRepository aiCriteriaConfigRepository,
             IAiPromptManagerRepository aiPromptManagerRepository,
-            IMediator mediator)
+            IMediator mediator,
+            ILogger<AIConfigSubmitService> logger)
         {
             _aiCriteriaConfigRepository = aiCriteriaConfigRepository;
             _aiPromptManagerRepository = aiPromptManagerRepository;
             _mediator = mediator;
+            _logger = logger;
         }
 
         public async Task<string?> SubmitByObjectIdAsync(
@@ -89,34 +91,19 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
             var aiModel = await _aiPromptManagerRepository.ReadQueryable
                 .FirstOrDefaultAsync(x => x.Id == aiPromptManagerId, cancellationToken);
 
-            return aiModel?.Name ?? AIConstant.DefaultModel;
+            return aiModel?.AiModel ?? AIConstant.DefaultModel;
         }
 
         private async Task<string?> SubmitStandardAICommandAsync(AICriteriaConfigs aiConfig, string modelName, string content, CancellationToken cancellationToken)
         {
-            var requestModel = new RequestAIModel
-            {
-                Model = modelName,
-                Temperature = aiConfig.SettingTemperature!.Value,
-                MaxTokens = aiConfig.SettingWordMaxLength!.Value,
-                TopP = aiConfig.SettingTopP!.Value,
-                FrequencyPenalty = aiConfig.SettingFrequency!.Value,
-                PresencePenalty = aiConfig.SettingPresence!.Value,
-                Messages = new List<object>
-                {
-                    new { Role = "system", Content = aiConfig.UserRole ?? string.Empty },
-                    new { Role = "user", Content = content }
-                }
-            };
-
             var command = new Commands.AiCmd.SubmitAICommand
             {
-                SettingModel = requestModel.Model,
-                SettingTemperature = requestModel.Temperature,
-                SettingFrequecy = requestModel.FrequencyPenalty,
-                SettingWordMaxLength = requestModel.MaxTokens,
-                SettingPresence = requestModel.PresencePenalty,
-                SettingTopP = requestModel.TopP,
+                SettingModel = modelName,
+                SettingTemperature = aiConfig.SettingTemperature!.Value,
+                SettingFrequecy = aiConfig.SettingFrequency!.Value,
+                SettingWordMaxLength = aiConfig.SettingWordMaxLength!.Value,
+                SettingPresence = aiConfig.SettingFrequency!.Value,
+                SettingTopP = aiConfig.SettingTopP!.Value,
                 SystemRoleAlConfig = aiConfig.SettingAiConfig ?? string.Empty,
                 UserAIConfig = content
             };
@@ -126,7 +113,7 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
 
         private async Task<string?> SubmitStructuredAICommandAsync(AICriteriaConfigs aiConfig, string modelName, string content, CancellationToken cancellationToken)
         {
-            var jsonSchema = ConvertHelper.Deserialize<object>(aiConfig.SettingAiJson);
+            var jsonSchema = DeserializeJsonSchema(aiConfig.SettingAiJson);
 
             var command = new Commands.AiCmd.V1i1.SubmitAICommand
             {
@@ -139,10 +126,23 @@ namespace Fsel.Course.Lms.Application.Services.AIConfigService
                 SystemRoleAlConfig = aiConfig.SettingAiConfig ?? string.Empty,
                 UserAIConfig = content,
                 Text = jsonSchema,
-                NameSchema = AIConstant.CriteriaSchema
+                NameSchema = aiConfig.SchemaName,
+                SchemaType = aiConfig.SchemaType
             };
 
             return await _mediator.Send(command, cancellationToken);
+        }
+
+        private static object DeserializeJsonSchema(string? jsonSchemaString)
+        {
+            var trimmedJson = jsonSchemaString?.Trim();
+            if (!string.IsNullOrEmpty(trimmedJson) && trimmedJson.StartsWith("\""))
+            {
+                var innerJsonString = ConvertHelper.Deserialize<string>(jsonSchemaString);
+                return ConvertHelper.Deserialize<object>(innerJsonString!)!;
+            }
+
+            return ConvertHelper.Deserialize<object>(jsonSchemaString!)!;
         }
 
         #endregion

@@ -30,5 +30,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Ais
         public object? Text { get; set; }
 
         public string? NameSchema { get; set; }
+
+        public string? SchemaType { get; set; }
     }
 }

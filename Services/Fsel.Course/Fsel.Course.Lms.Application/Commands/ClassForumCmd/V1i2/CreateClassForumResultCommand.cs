@@ -53,6 +53,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
         private readonly IHostEnvironment _environment;
         private readonly IClassForumResultFileRepository _classForumResultFileRepository;
         private readonly QuestBoardPublisher _questBoardPublisher;
+        private readonly ClassForumPronunciationPublisher _classForumPronunciationPublisher;
 
         public const int DisplayOrderFirst = 0;
         public const int DisplayOrderSecond = 1;
@@ -73,7 +74,8 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             SetTimeClassForumDonePublisher setTimeClassForumDonePublisher,
             QuestBoardPublisher questBoardPublisher,
             IHostEnvironment environment,
-            IClassForumResultFileRepository classForumResultFileRepository)
+            IClassForumResultFileRepository classForumResultFileRepository,
+            ClassForumPronunciationPublisher classForumPronunciationPublisher)
         {
             _mapper = mapper;
             _createTokenHistoryPublisher = createTokenHistoryPublisher;
@@ -92,6 +94,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             _questBoardPublisher = questBoardPublisher;
             _environment = environment;
             _classForumResultFileRepository = classForumResultFileRepository;
+            _classForumPronunciationPublisher = classForumPronunciationPublisher;
         }
 
         public async Task<MethodResult<ClassForumResultModel>> Handle(CreateClassForumResultCommand request, CancellationToken cancellationToken)
@@ -239,6 +242,11 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumCmd.V1i2
             if (classForumDetailResult != null && request.IsSubmit)
             {
                 await PublishAIClassForumResponseAsync(classForumDetailResult, classForum, request, cancellationToken);
+
+                if (classForum.CourseSkill == EnumCourseSkill.Speaking)
+                {
+                    await _classForumPronunciationPublisher.Publish(new ClassForumPronunciationConsumerModel { ClassForumDetailResultId = classForumDetailResult.Id }, cancellationToken);
+                }
             }
 
             var classForumDetailResults = await _classForumDetailResultRepository.Queryable.Where(x => classForumResult != null && x.ClassForumResultId == classForumResult.Id)

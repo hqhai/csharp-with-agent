@@ -77,13 +77,28 @@ namespace Fsel.Course.Domain.Entities
         [Range(1, 10000, ErrorMessage = nameof(EnumSystemErrorCode.Min))]
         public int? MaximumToken { get; set; } = 4000;
 
+        public string? SchemaType { get; set; }
+
+        public string? SchemaName { get; set; }
+
         public AiPromptManager? AiPromptManager { get; set; }
 
         [NotMapped]
         public object? JsonConfig
         {
             get { return ConvertHelper.Deserialize<object>(SettingAiJson); }
-            set { SettingAiJson = ConvertHelper.Serialize(value); }
+            set
+            {
+                // If value is already a JSON string, assign directly to avoid double-encoding
+                if (value is string jsonString)
+                {
+                    SettingAiJson = jsonString;
+                }
+                else
+                {
+                    SettingAiJson = ConvertHelper.Serialize(value);
+                }
+            }
         }
     }
 }
