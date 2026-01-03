@@ -69,10 +69,14 @@ namespace Fsel.Course.Lms.Application.Commands.CourseCmd
                 return methodResult;
             }
 
-            var priority = await _courseRepository.Queryable.Where(x => x.ParentCourseId.HasValue && x.ParentCourseId == course.Id).CountAsync(cancellationToken);
+            var priority = await _courseRepository.ReadQueryable.Where(x => x.ParentCourseId.HasValue && x.ParentCourseId == course.Id).CountAsync(cancellationToken);
             courseClone.Status = EnumCourseStatus.Clone;
             courseClone.Code = course.Code + "_" + priority;
             courseClone.ParentCourseId = course.Id;
+            courseClone.ProgramId = course.ProgramId;
+            courseClone.LevelId = course.LevelId;
+            courseClone.VersionStatus = course.VersionStatus;
+            courseClone.Version = course.Version;
             courseClone.Priority = priority;
             await _courseRepository.ExecuteTransactionAsync(async () =>
             {
