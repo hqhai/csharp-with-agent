@@ -86,17 +86,11 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 .GroupBy(s => s.ParentId!.Value)
                 .ToDictionary(g => g.Key, g => g.OrderBy(x => x.DisplayOrder).ToList());
 
-            var answerByQuestionId = (testSectionResult.TestAnswers ?? new List<TestAnswer>())
-                .Where(x => x.QuestionId.HasValue && x.QuestionId.Value != Guid.Empty)
-                .GroupBy(a => a.QuestionId!.Value)
-                .ToDictionary(
-                    g => g.Key,
-                    g => g.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate).FirstOrDefault());
-
             // ✅ NEW: get TestSectionResults nhỏ (con) để map result cho section con nếu có
             var sectionIds = cached.Sections.Select(s => s.Id).ToList();
 
             var sectionResultBySectionId = await _testSectionResultRepository.ReadQueryable
+                .Include(x => x.TestAnswers)
                 .AsNoTracking()
                 .Where(r =>
                     r.TestResultId == testSectionResult.TestResultId &&
@@ -104,11 +98,30 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                     sectionIds.Contains(r.TestSectionId.Value))
                 .ToDictionaryAsync(r => r.TestSectionId!.Value, r => r, cancellationToken);
 
+            // Key của answer có thể là QuestionId hoặc TestSectionId (data lẫn)
+            // => gom tất cả answers và build map theo "key thực tế"
+            var answerByKey = sectionResultBySectionId.Values
+                .Where(sr => sr.TestAnswers != null && sr.TestAnswers.Count > 0)
+                .SelectMany(sr => sr.TestAnswers)
+                .Select(a => new
+                {
+                    Key = a.QuestionId != Guid.Empty
+                        ? a.QuestionId : (a.TestSectionId ?? Guid.Empty), // nếu model có TestSectionId
+                    Answer = a
+                })
+                .Where(x => x.Key != Guid.Empty)
+                .GroupBy(x => x.Key!.Value)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.Answer)
+                          .OrderByDescending(a => a.UpdatedDate ?? a.CreatedDate)
+                          .FirstOrDefault());
+
             var rootModel = MapSectionNode(
                 rootSection,
                 childrenMap,
                 cached.QuestionIdsBySectionId,
-                answerByQuestionId,
+                answerByKey,
                 questionById,
                 sectionResultBySectionId);
 
@@ -203,7 +216,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             TestSection node,
             Dictionary<Guid, List<TestSection>> childrenMap,
             Dictionary<Guid, List<Guid>> questionsBySectionId,
-            Dictionary<Guid, TestAnswer?> answerByQuestionId,
+            Dictionary<Guid, TestAnswer?> answerByKey,
             Dictionary<Guid, Question> questionById,
             Dictionary<Guid, TestSectionResult> sectionResultBySectionId)
         {
@@ -240,7 +253,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                         childSection,
                         childrenMap,
                         questionsBySectionId,
-                        answerByQuestionId,
+                        answerByKey,
                         questionById,
                         sectionResultBySectionId));
                 }
@@ -251,12 +264,37 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             {
                 foreach (var questionId in questionIds)
                 {
-                    children.Add(MapQuestionLeaf(questionId, answerByQuestionId, questionById));
+                    children.Add(MapQuestionLeaf(questionId, answerByKey, questionById));
                 }
+            }
+            // => add 1 leaf dưới section
+            if (answerByKey.TryGetValue(node.Id, out var sectionAns) && sectionAns is not null)
+            {
+                children.Add(MapSectionAnswerLeaf(node.Id, sectionAns));
             }
 
             model.Children = children;
             return model;
+        }
+
+        private QuestionStateModel MapSectionAnswerLeaf(Guid sectionId, TestAnswer ans)
+        {
+            return new QuestionStateModel
+            {
+                // dùng sectionId làm key để FE/Client còn trace được
+                TestSectionId = sectionId,
+                TestAnswerId = ans.Id,
+                Answer = new AnswerModel
+                {
+                    Answer = ans.Answer,
+                    CorrectCount = ans.CorrectCount,
+                    IsCorrect = ans.IsCorrect,
+                    Status = ans.Status
+                },
+
+                Status = ans.Status == EnumAnswerStatus.Done ? EnumResultStatus.Done : EnumResultStatus.New,
+                UpdatedDate = ans.UpdatedDate ?? ans.CreatedDate,
+            };
         }
 
         private QuestionStateModel MapQuestionLeaf(

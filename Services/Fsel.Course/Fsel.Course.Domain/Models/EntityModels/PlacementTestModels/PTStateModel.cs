@@ -104,6 +104,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public IList<BaseTestStateModel> Children { get; set; } = new List<BaseTestStateModel>();
         public IList<SkillScores>? SkillScores { get; set; }
 
+        public Guid? TestAnswerId { get; set; }
+        public AnswerModel? Answer { get; set; }
+
         public int? Order { get; set; }
 
         public void UpdateDetailInfo(TestSection? section)
@@ -144,6 +147,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
 
     public class QuestionStateModel : BaseTestStateModel
     {
+        public Guid? TestSectionId { get; set; }
         public Guid? QuestionId { get; set; }
         public Guid? TestAnswerId { get; set; }
         public QuestionModel? Question { get; set; }

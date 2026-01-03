@@ -15,6 +15,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
+    using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
     using static Fsel.Shared.Constants.ValueSettings;
 
@@ -518,6 +519,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             TestSectionResultId = partResult.Id,
                             TestResultId = request.TestResultId,
                             QuestionId = question.Id,
+                            TestSectionId = partResult.TestSectionId,
                             StudentId = request.StudentId
                         };
                         _testAnswerRepository.Add(testAnswer);
