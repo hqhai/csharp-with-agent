@@ -31,6 +31,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels
         public EnumVersion VersionType { get; set; }
 
         public Guid AiPromptManagerId { get; set; }
+
+        public string? SchemaType { get; set; }
+        public string? SchemaName { get; set; }
         public IList<AiCriteriaModel>? AiCriteriaModels { get; set; }
         public double? SettingTemperature { get; set; }
         public double? SettingWordMaxLength { get; set; }
@@ -53,7 +56,18 @@ namespace Fsel.Course.Domain.Models.EntityModels.AiPromptManagerModels
         public object? JsonConfig
         {
             get { return ConvertHelper.Deserialize<object>(SettingAiJson); }
-            set { SettingAiJson = ConvertHelper.Serialize(value); }
+            set
+            {
+                // If value is already a JSON string, assign directly to avoid double-encoding
+                if (value is string jsonString)
+                {
+                    SettingAiJson = jsonString;
+                }
+                else
+                {
+                    SettingAiJson = ConvertHelper.Serialize(value);
+                }
+            }
         }
     }
 }
