@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
 {
     using System;
     using System.Threading.Tasks;
+    using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Infrastructure.Common;
     using Fsel.Course.Lms.Application.Queues.Publishers;
     using Fsel.Shared.Models.ShareModels;
@@ -24,13 +25,19 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
         private readonly GetTimeModulePublisher _getTimeModulePublisher;
         private readonly DateTimeConverter _dateTimeConverter;
         private readonly ISectionGroupResultRepository _sectionGroupResultRepository;
+        private readonly ITestSectionResultRepository _testSectionResultRepository;
 
-        public GetTimeModuleQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository, GetTimeModulePublisher getTimeModulePublisher, DateTimeConverter dateTimeConverter, ISectionGroupResultRepository sectionGroupResultRepository)
+        public GetTimeModuleQueryHandler(IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
+            GetTimeModulePublisher getTimeModulePublisher,
+            DateTimeConverter dateTimeConverter,
+            ISectionGroupResultRepository sectionGroupResultRepository,
+            ITestSectionResultRepository testSectionResultRepository)
         {
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _getTimeModulePublisher = getTimeModulePublisher;
             _dateTimeConverter = dateTimeConverter;
             _sectionGroupResultRepository = sectionGroupResultRepository;
+            _testSectionResultRepository = testSectionResultRepository;
         }
 
         public async Task<GetTimeModuleModel> Handle(GetTimeModuleQuery request, CancellationToken cancellationToken)
@@ -47,6 +54,10 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                 case nameof(FinalTest):
                 case nameof(MockTest):
                     getTimeModule = await GetSectionGroupResultAsync(request);
+                    break;
+
+                case nameof(Test):
+                    getTimeModule = await GetSectionResultAsync(request);
                     break;
 
                 default:
@@ -89,7 +100,7 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             };
         }
 
-        private async Task<GetTimeModuleModel?> GetSectionGroupResultAsync(GetTimeModuleQuery request)
+        private async Task<GetTimeModuleModel?> GetSectionResultAsync(GetTimeModuleQuery request)
         {
             var sectionGroupResult = await _sectionGroupResultRepository.Queryable.Include(x => x.SectionGroup).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
             var sectionGroup = sectionGroupResult?.SectionGroup;
@@ -102,6 +113,24 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
             {
                 WorkingTime = workingTime,
                 RemainingTime = sectionGroup.ExecutionTime - workingTime > 0 ? sectionGroup.ExecutionTime - workingTime : default,
+                UserId = sectionGroupResult.CreatedUserId
+            };
+        }
+
+        private async Task<GetTimeModuleModel?> GetSectionGroupResultAsync(GetTimeModuleQuery request)
+        {
+            var sectionGroupResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection).FirstOrDefaultAsync(x => x.Id == request.ObjectId);
+            var sectionGroup = sectionGroupResult?.TestSection;
+            if (sectionGroupResult == null || sectionGroup == null)
+            {
+                return default;
+            }
+            var executionTime = sectionGroup.Config?.ExecutionTime ?? default;
+            var workingTime = _dateTimeConverter.SetWorkingTime(sectionGroupResult.WorkingTime, request.AccessTime, executionTime);
+            return new GetTimeModuleModel
+            {
+                WorkingTime = workingTime,
+                RemainingTime = executionTime - workingTime > 0 ? executionTime - workingTime : default,
                 UserId = sectionGroupResult.CreatedUserId
             };
         }
