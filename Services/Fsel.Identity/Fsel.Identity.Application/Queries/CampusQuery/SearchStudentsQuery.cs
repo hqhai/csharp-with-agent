@@ -147,7 +147,10 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
 
                 var studentIds = lists.Select(p => p.StudentId).ToList();
 
-                var learningProgressResults = await _lmsCourseService.GetStudentsLearningProgress(new GetStudentsLearningProgressQueryModel() { StudentIds = studentIds });
+                var learningProgressResults = await _lmsCourseService.GetStudentsLearningProgress(new GetStudentsLearningProgressQueryModel()
+                {
+                    StudentIds = studentIds
+                });
                 var learningProgress = learningProgressResults.Content?.Result;
 
                 lists.ForEach(p =>

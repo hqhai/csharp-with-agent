@@ -73,6 +73,9 @@ namespace Fsel.Shared.Models.ShareModels.CampusModel
 
         public EnumCourseType CourseType { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public string? ProgramName { get; set; }
+        public string? LevelName { get; set; }
+
         public string? CourseName { get; set; }
         public string? CurriculumName { get; set; }
         public Guid CurriculumId { get; set; }
