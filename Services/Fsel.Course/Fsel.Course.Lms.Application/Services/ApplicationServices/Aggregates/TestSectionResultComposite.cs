@@ -232,75 +232,70 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
         public override async Task SubmitTest(SubmitContext context)
         {
-            await base.Submit(context);
+            await base.SubmitTest(context);
 
-            if (Children.Count > 0)
+            if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == EnumAnswerStatus.Done))
             {
-                if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == Shared.Enums.EnumAnswerStatus.Done))
+                if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                 {
-                    if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
-                    {
-                        var firstSkillScore = TestSectionResult.SkillScores.First();
-                        firstSkillScore.CountQuestion = TestSectionResult.TestAnswers.Count;
-                        firstSkillScore.CorrectQuestion = TestSectionResult.TestAnswers.Count(x => x.IsCorrect == true);
-                        firstSkillScore.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
-                        firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
-                        firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                    var firstSkillScore = TestSectionResult.SkillScores.First();
+                    firstSkillScore.CountQuestion = TestSectionResult.TestAnswers.Count;
+                    firstSkillScore.CorrectQuestion = TestSectionResult.TestAnswers.Count(x => x.IsCorrect == true);
+                    firstSkillScore.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+                    firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
+                    firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
 
-                        TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
-                    }
-
-                    TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
-
-                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
-                    {
-                        TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((TestSectionResult.Percent * TestSection.Percent.Value), 2);
-                    }
-                }
-                else if (Children.All(c => c is TestSectionResultComposite))
-                {
-                    if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
-                    {
-                        var firstSkillScore = TestSectionResult.SkillScores.First();
-                        var skillScores = TestSectionResult.SectionResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores);
-
-                        firstSkillScore.CountQuestion = skillScores.Sum(x => x.CountQuestion);
-                        firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
-                        firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
-                        firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
-                        firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
-                        TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
-                    }
-
-                    TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
-
-                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
-                    {
-                        var totelChildPercentModule = TestSectionResult.SectionResults.Sum(x => x.PercentModule);
-                        TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((totelChildPercentModule * TestSection.Percent.Value), 2);
-                    }
-                }
-                else
-                {
-                    // get layout and process
-                    if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
-                    {
-                        var firstSkillScore = TestSectionResult.SkillScores.First();
-                        var skillScores = TestSectionResult.SectionResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores);
-
-                        firstSkillScore.CountQuestion = skillScores.Sum(x => x.CountQuestion);
-                        firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
-                        firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
-                        firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
-                        firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
-                        TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
-                    }
-
-                    TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
+                    TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                 }
 
-                TestSectionResult.Status = EnumResultStatus.Done;
+                TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+
+                if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
+                {
+                    TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((TestSectionResult.Percent * TestSection.Percent.Value), 2);
+                }
             }
+            else if (Children.All(c => c is TestSectionResultComposite))
+            {
+                if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
+                {
+                    var firstSkillScore = TestSectionResult.SkillScores.First();
+                    var skillScores = TestSectionResult.SectionResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores!);
+
+                    firstSkillScore.CountQuestion = skillScores.Sum(x => x.CountQuestion);
+                    firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
+                    firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
+                    firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
+                    firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                    TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
+                }
+
+                TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
+
+                if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
+                {
+                    var totelChildPercentModule = TestSectionResult.SectionResults.Sum(x => x.PercentModule);
+                    TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((totelChildPercentModule * TestSection.Percent.Value), 2);
+                }
+            }
+            else
+            {
+                // get layout and process
+                if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
+                {
+                    var firstSkillScore = TestSectionResult.SkillScores.First();
+                    var skillScores = TestSectionResult.SectionResults.Where(x => x.SkillScores != null).SelectMany(x => x.SkillScores);
+
+                    firstSkillScore.CountQuestion = skillScores.Sum(x => x.CountQuestion);
+                    firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
+                    firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
+                    firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
+                    firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                    TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
+                }
+                TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
+            }
+            TestSectionResult.Status = EnumResultStatus.Done;
         }
 
         public override async Task LoadTestHierarchicalData()
