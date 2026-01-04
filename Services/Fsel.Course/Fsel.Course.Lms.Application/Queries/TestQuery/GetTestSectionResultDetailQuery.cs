@@ -272,31 +272,17 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
             // => add 1 leaf dưới section
             if (answerByKey.TryGetValue(node.Id, out var sectionAns) && sectionAns is not null)
             {
-                children.Add(MapSectionAnswerLeaf(node.Id, sectionAns));
+                model.Answer = new AnswerModel
+                {
+                    Answer = sectionAns.Answer,
+                    CorrectCount = sectionAns.CorrectCount,
+                    IsCorrect = sectionAns.IsCorrect,
+                    Status = model.Status == EnumResultStatus.Done ? sectionAns.Status : EnumAnswerStatus.Process
+                };
             }
 
             model.Children = children;
             return model;
-        }
-
-        private QuestionStateModel MapSectionAnswerLeaf(Guid sectionId, TestAnswer ans)
-        {
-            return new QuestionStateModel
-            {
-                // dùng sectionId làm key để FE/Client còn trace được
-                TestSectionId = sectionId,
-                TestAnswerId = ans.Id,
-                Answer = new AnswerModel
-                {
-                    Answer = ans.Answer,
-                    CorrectCount = ans.CorrectCount,
-                    IsCorrect = ans.IsCorrect,
-                    Status = ans.Status
-                },
-
-                Status = ans.Status == EnumAnswerStatus.Done ? EnumResultStatus.Done : EnumResultStatus.New,
-                UpdatedDate = ans.UpdatedDate ?? ans.CreatedDate,
-            };
         }
 
         private QuestionStateModel MapQuestionLeaf(
