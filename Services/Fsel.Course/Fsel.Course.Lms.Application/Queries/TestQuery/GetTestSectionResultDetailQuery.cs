@@ -242,6 +242,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 TotalCount = nodeResult?.CorrectTotal ?? 0,
                 WorkingTime = nodeResult?.WorkingTime ?? 0,
                 SectionId = node.Id,
+                CurrentSectionTimeCodeId = nodeResult?.CurrentSectionTimeCodeId,
             };
 
             var children = new List<BaseTestStateModel>();

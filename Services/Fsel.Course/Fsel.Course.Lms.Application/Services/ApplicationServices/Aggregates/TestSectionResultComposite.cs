@@ -51,7 +51,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 Status = TestSectionResult.Status,
                 TestLayoutType = TestSectionResult.TestSection?.LayoutType,
                 CorrectCount = TestSectionResult.CorrectCount,
-                TotalCount = TestSectionResult.SkillScores.Sum(x => x.TotalCount),
+                TotalCount = TestSectionResult.SkillScores?.Sum(x => x.TotalCount) ?? default,
                 WorkingTime = TestSectionResult.WorkingTime,
                 Children = new List<BaseTestStateModel>(),
                 UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
@@ -163,7 +163,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             if (Children.Count > 0)
             {
-                if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == Shared.Enums.EnumAnswerStatus.Done))
+                if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == EnumAnswerStatus.Done))
                 {
                     if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                     {
