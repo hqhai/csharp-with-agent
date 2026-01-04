@@ -35,7 +35,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (testResultComposite != null)
             {
                 await testResultComposite.SubmitTest(new SubmitContext { Id = id, ScoringFormulaType = TestResult.Test?.ScoringFormulaType });
-                await Commit();
+                if (TestResult.Status == EnumResultStatus.Done)
+                {
+                    SingleTestResult.Status = EnumResultStatus.Done;
+                    await CommitTest();
+                }
+                else
+                {
+                    await Commit();
+                }
             }
 
             await StartTest();
@@ -275,10 +283,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             }
         }
 
-        private async Task UpdateLayoutAI(Guid sectionGroupId)
-        {
-        }
-
         private async Task Commit()
         {
             var repositoryTestResult = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
@@ -294,6 +298,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (repositoryTestResult.DbContext.ChangeTracker.HasChanges())
             {
                 await repositoryTestResult.UnitOfWork.SaveEntitiesAsync();
+            }
+
+            var repositoryTestGroupResult = ServiceProvider.GetRequiredService<IRepository<TestGroupResult>>();
+            if (repositoryTestGroupResult.DbContext.ChangeTracker.HasChanges())
+            {
+                await repositoryTestGroupResult.UnitOfWork.SaveEntitiesAsync();
             }
         }
     }
