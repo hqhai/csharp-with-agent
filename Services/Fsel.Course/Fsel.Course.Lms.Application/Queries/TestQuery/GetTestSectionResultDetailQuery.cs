@@ -100,16 +100,18 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
             // Key của answer có thể là QuestionId hoặc TestSectionId (data lẫn)
             // => gom tất cả answers và build map theo "key thực tế"
-            var answerByKey = sectionResultBySectionId.Values
-                .Where(sr => sr.TestAnswers != null && sr.TestAnswers.Count > 0)
-                .SelectMany(sr => sr.TestAnswers)
-                .Select(a => new
-                {
-                    Key = a.QuestionId != Guid.Empty
-                        ? a.QuestionId : (a.TestSectionId ?? Guid.Empty), // nếu model có TestSectionId
-                    Answer = a
-                })
-                .Where(x => x.Key != Guid.Empty)
+
+            var answers = sectionResultBySectionId.Values
+                             .Where(sr => sr.TestAnswers != null && sr.TestAnswers.Count > 0)
+                             .SelectMany(sr => sr.TestAnswers)
+                             .Select(a => new
+                             {
+                                 Key = a.QuestionId.HasValue && a.QuestionId.Value != Guid.Empty ? a.QuestionId : (a.TestSectionId ?? Guid.Empty), // nếu model có TestSectionId
+                                 Answer = a
+                             }).Where(x => x.Key != Guid.Empty)
+                            .ToList();
+
+            var answerByKey = answers
                 .GroupBy(x => x.Key!.Value)
                 .ToDictionary(
                     g => g.Key,

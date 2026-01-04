@@ -15,7 +15,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
     using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Shared.Enums;
-    using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.EntityFrameworkCore;
     using static Fsel.Shared.Constants.ValueSettings;
 
@@ -386,7 +385,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             if (testSections.Any())
             {
                 var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+                var sectionIds = testSections.Select(x => x.Id).ToList();
 
+                var partResults = await _testSectionResultRepository.ReadQueryable.Where(x => x.TestSectionId.HasValue && sectionIds.Contains(x.TestSectionId.Value))
+                                                                    .Where(x => x.TestResultId == request.TestResultId)
+                                                                    .ToListAsync();
                 foreach (var item in request.Answers)
                 {
                     var testSection = testSections.FirstOrDefault(x => x.Id == item.TestSectionId);
@@ -394,6 +397,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     {
                         return;
                     }
+                    var partId = testSection.Id;
+                    var partResult = partResults.FirstOrDefault(x => x.TestSectionId == partId);
+                    if (partResult == null)
+                    {
+                        return;
+                    }
+
                     int answerLength = item.Answer?.ToString()?.Length ?? default;
                     if (testSection.DisplayOrder == AnswerLength.Section0 && answerLength > AnswerLength.MaxLengthDisplayOrder0)
                     {
@@ -409,8 +419,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     {
                         testAnswer = new TestAnswer
                         {
-                            TestSectionResultId = request.SectionResultId,
-                            QuestionId = testSection.Id,
+                            TestResultId = request.TestResultId,
+                            TestSectionResultId = partResult.Id,
+                            TestSectionId = item.TestSectionId,
                             StudentId = request.StudentId
                         };
                         _testAnswerRepository.Add(testAnswer);
@@ -437,12 +448,23 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             if (testSections.Any())
             {
                 await UpdateTestSecionResult(testSectionResult, testSections.ToList());
+                var sectionIds = testSections.Select(x => x.ParentId).ToList();
+                var partResults = await _testSectionResultRepository.ReadQueryable.Where(x => x.TestSectionId.HasValue && sectionIds.Contains(x.TestSectionId.Value))
+                                                                    .Where(x => x.TestResultId == request.TestResultId)
+                                                                    .ToListAsync();
+
                 var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
 
                 foreach (var item in request.Answers)
                 {
                     var testSection = testSections.FirstOrDefault(x => x.Id == item.TestSectionId);
                     if (testSection == null)
+                    {
+                        return;
+                    }
+                    var partId = testSection.ParentId;
+                    var partResult = partResults.FirstOrDefault(x => x.TestSectionId == partId);
+                    if (partResult == null)
                     {
                         return;
                     }
@@ -453,8 +475,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     {
                         testAnswer = new TestAnswer
                         {
-                            TestSectionResultId = request.SectionResultId,
-                            QuestionId = testSection.Id,
+                            TestResultId = request.TestResultId,
+                            TestSectionResultId = partResult.Id,
+                            TestSectionId = item.TestSectionId,
                             StudentId = request.StudentId
                         };
                         _testAnswerRepository.Add(testAnswer);
