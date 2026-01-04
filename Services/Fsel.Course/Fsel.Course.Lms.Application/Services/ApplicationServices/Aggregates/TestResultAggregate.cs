@@ -38,7 +38,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 await Commit();
             }
 
-            await Start();
+            await StartTest();
         }
 
         public async Task Submit(Guid id)
@@ -207,7 +207,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             if (request.IsSubmit)
             {
-                await Submit(request.SectionResultId);
+                await SubmitTest(request.SectionResultId);
             }
         }
 
