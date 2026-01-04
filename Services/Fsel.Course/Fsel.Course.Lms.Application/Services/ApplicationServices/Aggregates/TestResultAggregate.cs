@@ -128,7 +128,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var inprogressTestResult = TestResultComposites.FirstOrDefault(t => t.TestResult.Status == EnumResultStatus.Process);
             inprogressTestResult?.Start();
 
-            await Commit();
+            if (TestResult.Status == EnumResultStatus.Done)
+            {
+                await CommitTest();
+            }
+            else
+            {
+                await Commit();
+            }
         }
 
         public async Task InitAggregateTest()
@@ -278,6 +285,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             if (repositoryTestResult.DbContext.ChangeTracker.HasChanges())
             {
                 await repositoryTestResult.UnitOfWork.SaveChangesAsync();
+            }
+        }
+
+        private async Task CommitTest()
+        {
+            var repositoryTestResult = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
+            if (repositoryTestResult.DbContext.ChangeTracker.HasChanges())
+            {
+                await repositoryTestResult.UnitOfWork.SaveEntitiesAsync();
             }
         }
     }
