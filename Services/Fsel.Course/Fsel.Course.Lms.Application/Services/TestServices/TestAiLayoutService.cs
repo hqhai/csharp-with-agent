@@ -32,6 +32,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             var testSectionResult = await _testSectionResultRepository.Queryable
                 .Include(x => x.SectionResults)
                 .Include(x => x.TestSection)
+                .ThenInclude(x => x.Skill)
                 .FirstOrDefaultAsync(x => x.Id == testSectionResultId, cancellationToken);
 
             if (testSectionResult == null)

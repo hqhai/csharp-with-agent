@@ -243,7 +243,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     firstSkillScore.CorrectQuestion = TestSectionResult.TestAnswers.Count(x => x.IsCorrect == true);
                     firstSkillScore.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
                     firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
-                    firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                    firstSkillScore.SkillName = TestSection?.Skill?.Name;
+                    firstSkillScore.SkillFilePath = TestSection?.Skill?.FilePath;
 
                     TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                 }
@@ -266,7 +267,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
                     firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
                     firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
-                    firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                    firstSkillScore.SkillName = TestSection?.Skill?.Name;
+                    firstSkillScore.SkillFilePath = TestSection?.Skill?.FilePath;
                     TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                 }
 
@@ -290,7 +292,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     firstSkillScore.CorrectCount = skillScores.Sum(x => x.CorrectCount);
                     firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
                     firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
-                    firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                    firstSkillScore.SkillName = TestSection?.Skill?.Name;
+                    firstSkillScore.SkillFilePath = TestSection?.Skill?.FilePath;
                     TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                 }
                 TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);

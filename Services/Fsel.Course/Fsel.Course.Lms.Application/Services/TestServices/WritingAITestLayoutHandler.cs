@@ -13,10 +13,11 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.QueryModels.ClassForumAutoDot;
     using Fsel.Course.Infrastructure.ValueSettings;
-    using Fsel.Course.Lms.Application.Commands.AiCmd.V1i1;
+    using Fsel.Course.Lms.Application.Commands.AiCmd;
     using Fsel.Course.Lms.Application.Queues.Publishers.Test;
     using Fsel.Course.Lms.Application.Services.SenderService;
     using Fsel.Course.Lms.Application.Services.TestServices.Interface;
@@ -74,81 +75,282 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             _appSetting = appSetting;
         }
 
+        /// <summary>
+        /// Refactor: xử lý ALL TestSectionResult của 1 TestResult.
+        /// Answers map theo TestSectionId trong Answer, tương ứng TestSectionId trong SectionResult.
+        /// Update Result bé (section) + Result lớn (test).
+        /// </summary>
         public async Task HandleAsync(TestSectionResult testSectionResult, TestResult testResult, CancellationToken cancellationToken)
         {
-            var testAnswers = await LoadAnswersAsync(testSectionResult.Id, cancellationToken);
-            if (testAnswers.Count == 0)
+            // 1) Load toàn bộ SectionResult thuộc TestResult (ví dụ Writing có 3 section result)
+            var sectionResults = await LoadAllSectionResultsAsync(testSectionResult.Id, cancellationToken);
+            if (sectionResults.Count == 0)
             {
                 return;
             }
 
-            if (!testSectionResult.TestSectionId.HasValue)
+            // 2) Map TestSectionId -> SectionResult
+            var sectionResultBySectionId = sectionResults
+                .Where(x => x.TestSectionId.HasValue)
+                .GroupBy(x => x.TestSectionId!.Value)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            // 3) Load all answers của các SectionResultId
+            var sectionResultIds = sectionResults.Select(x => x.Id).ToList();
+            var allAnswers = await LoadAnswersBySectionResultIdsAsync(sectionResultIds, cancellationToken);
+            if (allAnswers.Count == 0)
             {
                 return;
             }
 
-            var aiConfig = await LoadAiConfigAsync(testSectionResult.TestSectionId.Value, cancellationToken);
-            if (!IsValidAiConfig(aiConfig))
-            {
-                return;
-            }
-
-            if (testSectionResult.SkillScores == null)
-            {
-                return;
-            }
-
+            // 4) Student info
             var student = await LoadStudentAsync(testResult.StudentId);
-            var sectionDisplayOrder = testSectionResult.TestSection?.DisplayOrder ?? 0;
-            var skillId = testSectionResult.TestSection?.SkillId;
-
-            // SkillScores trên section result
-            var sectionSkillScores = EnsureSectionSkillScore(
-                current: testSectionResult.SkillScores.ToList(),
-                skillId: skillId);
-
-            var sectionSkillScore = sectionSkillScores.First(x => x.SkillId == skillId);
-
-            // Chạy từng Answer 1 (for loop)
-            for (int i = 0; i < testAnswers.Count; i++)
+            var scoringFormulaType = testResult.Test?.ScoringFormulaType;
+            // 5) Ensure SkillScores của Result lớn
+            testSectionResult.SkillScores = new List<SkillScores>()
             {
-                var answer = testAnswers[i];
-                int runOrder = i == 0 ? First_Run_Order : (i + 1);
+                new SkillScores
+                {
+                    SkillId = testSectionResult.TestSection?.SkillId,
+                    SkillName = testSectionResult.TestSection?.Skill?.Name,
+                    SkillFilePath = testSectionResult.TestSection?.Skill?.FilePath,
+                    TotalQuestion = 2,
+                    CountQuestion = 2,
+                }
+            };
 
-                await EvaluateSingleAnswerAsync(
-                    answer: answer,
-                    aiConfig: aiConfig!,
-                    wordContent: BuildWritingContent(answer),
-                    sectionDisplayOrder: sectionDisplayOrder,
-                    testResultId: testResult.Id,
-                    runOrder: runOrder,
-                    sectionSkillScore: sectionSkillScore,
-                    studentEmail: student?.User?.Email,
-                    testName: testResult.Test?.Name,
-                    cancellationToken: cancellationToken);
+            // global run order theo skill (blend Result lớn theo công thức hiện tại)
+            var globalRunOrderBySkill = new Dictionary<Guid, int>();
+
+            // 6) Group answers theo TestSectionId (đúng yêu cầu)
+            var answersBySectionId = allAnswers
+                .Where(a => a.TestSectionId.HasValue)
+                .GroupBy(a => a.TestSectionId!.Value)
+                .ToList();
+
+            foreach (var sectionGroup in answersBySectionId)
+            {
+                var sectionId = sectionGroup.Key;
+
+                if (!sectionResultBySectionId.TryGetValue(sectionId, out var currentSectionResult))
+                {
+                    continue;
+                }
+
+                // guard
+                if (!currentSectionResult.TestSectionId.HasValue)
+                {
+                    continue;
+                }
+                currentSectionResult.SkillScores ??= new List<SkillScores>()
+                {
+                    new SkillScores
+                    {
+                        SkillId = testSectionResult.TestSection?.SkillId,
+                        SkillName = testSectionResult.TestSection?.Skill?.Name,
+                        SkillFilePath = testSectionResult.TestSection?.Skill?.FilePath,
+                        TotalQuestion = 1,
+                        CountQuestion = 1,
+                    }
+                };
+
+                var sectionDisplayOrder = currentSectionResult.TestSection?.DisplayOrder ?? 0;
+                var skillId = currentSectionResult.TestSection?.SkillId;
+                if (!skillId.HasValue)
+                {
+                    continue;
+                }
+
+                // load AI config theo sectionId
+                var aiConfig = await LoadAiConfigAsync(currentSectionResult.TestSectionId.Value, cancellationToken);
+                if (!IsValidAiConfig(aiConfig))
+                {
+                    continue;
+                }
+
+                // Result bé: Ensure section skill score
+                var sectionSkillScores = EnsureSectionSkillScore(
+                    current: currentSectionResult.SkillScores.ToList(),
+                    skillId: skillId);
+
+                var sectionSkillScore = sectionSkillScores.First(x => x.SkillId == skillId);
+
+                // Result lớn: Ensure test skill score
+                var testSkillScore = EnsureTestSkillScore(testSectionResult.SkillScores.ToList(), skillId.Value);
+
+                var sectionAnswers = sectionGroup.ToList();
+                for (int i = 0; i < sectionAnswers.Count; i++)
+                {
+                    var answer = sectionAnswers[i];
+
+                    // run order riêng theo section (result bé)
+                    var sectionRunOrder = i == 0 ? First_Run_Order : (i + 1);
+
+                    // run order global theo skill (result lớn)
+                    var globalRunOrder = NextGlobalRunOrder(globalRunOrderBySkill, skillId.Value);
+
+                    await EvaluateSingleAnswerAndBlendAsync(
+                        answer: answer,
+                        aiConfig: aiConfig!,
+                        wordContent: BuildWritingContent(answer),
+                        sectionDisplayOrder: sectionDisplayOrder,
+                        testResultId: testResult.Id,
+                        sectionRunOrder: sectionRunOrder,
+                        globalRunOrder: globalRunOrder,
+                        sectionSkillScore: sectionSkillScore,
+                        testSkillScore: testSkillScore,
+                        studentEmail: student?.User?.Email,
+                        testName: testResult.Test?.Name,
+                        cancellationToken: cancellationToken);
+                }
+
+                // update Result bé
+                currentSectionResult.SkillScores = sectionSkillScores;
+                currentSectionResult.CorrectCount = (int)sectionSkillScore.CorrectCount;
+                currentSectionResult.CorrectTotal = (int)sectionSkillScore.TotalCount;
+                if (scoringFormulaType == EnumScoringFormulaType.Percent)
+                {
+                    var percent = testSectionResult.TestSection?.Percent ?? default;
+                    currentSectionResult.PercentModule = NumberHelper.ConvertDoublePercent(percent * currentSectionResult.Percent);
+                }
+
+                testSectionResult.SkillScores = new List<SkillScores> { testSkillScore };
+                testSectionResult.CorrectCount = (int)testSkillScore.CorrectCount;
+                testSectionResult.CorrectTotal = (int)testSkillScore.TotalCount;
+            }
+            if (scoringFormulaType == EnumScoringFormulaType.Percent)
+            {
+                var percent = testSectionResult.TestSection?.Percent ?? default;
+                testSectionResult.PercentModule = NumberHelper.ConvertDoublePercent(sectionResults.Sum(x => x.PercentModule) * percent);
             }
 
-            // Update lại skill scores + correct count cho section result
-            testSectionResult.SkillScores = sectionSkillScores;
-            testSectionResult.CorrectCount = (int)sectionSkillScore.CorrectCount;
-
-            // Merge lên TestResult theo nhiều Skill (bỏ check TestType)
-            testResult.SkillScores = MergeSkillScores(
-                current: testResult.SkillScores?.ToList(),
-                updatedSectionScores: sectionSkillScores,
-                skillId: skillId);
-
-            // Persist: answers + sectionResult + testResult
-            await PersistAnswersAsync(testAnswers, cancellationToken);
-            await SaveTestSectionResultAsync(testSectionResult, cancellationToken);
-            await PersistTestResultAsync(testResult, cancellationToken);
+            // 7) Persist
+            await PersistAnswersAsync(allAnswers, cancellationToken);
+            await SaveTestSectionResultsAsync(sectionResults, cancellationToken);
+            await UpdateTestResultIfDoneAsync(testResult, cancellationToken);
         }
 
-        private async Task<List<TestAnswer>> LoadAnswersAsync(Guid testSectionResultId, CancellationToken cancellationToken)
+        private async Task UpdateTestResultIfDoneAsync(TestResult testResult, CancellationToken cancellationToken)
+        {
+            if (testResult.Status != EnumResultStatus.Done)
+            {
+                return;
+            }
+
+            // Load tất cả TestSectionResult gốc (không phải con) của TestResult này
+            var rootSectionResults = await _testSectionResultRepository.ReadQueryable
+                .Where(x => x.TestResultId == testResult.Id)
+                .Where(x => !x.ParentTestSectionResultId.HasValue)
+                .ToListAsync(cancellationToken);
+
+            if (rootSectionResults.Count == 0)
+            {
+                return;
+            }
+
+            // =========================
+            // Tổng hợp SkillScores từ các section results
+            // =========================
+            var mergedSkillScores = MergeSkillScoresFromSectionResults(rootSectionResults);
+
+            testResult.SkillScores = mergedSkillScores;
+            testResult.CorrectCount = (int)mergedSkillScores.Sum(x => x.CorrectCount);
+            testResult.CorrectTotal = (int)mergedSkillScores.Sum(x => x.TotalCount);
+
+            // =========================
+            // Percent (nếu có)
+            // =========================
+            if (testResult.Test?.ScoringFormulaType == EnumScoringFormulaType.Percent)
+            {
+                testResult.PercentModule = NumberHelper.ConvertDoublePercent(rootSectionResults.Sum(x => x.PercentModule));
+            }
+
+            // Persist TestResult
+            await _testResultRepository.BulkUpdateList(
+                new List<TestResult> { testResult },
+                bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new
+                    {
+                        c.StudentId,
+                        c.TestGroupResultId
+                    };
+                });
+
+            await _testResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private static List<SkillScores> MergeSkillScoresFromSectionResults(List<TestSectionResult> sectionResults)
+        {
+            var dict = new Dictionary<Guid, SkillScores>();
+
+            foreach (var sr in sectionResults)
+            {
+                if (sr.SkillScores == null)
+                {
+                    continue;
+                }
+
+                foreach (var s in sr.SkillScores)
+                {
+                    if (!s.SkillId.HasValue)
+                    {
+                        continue;
+                    }
+
+                    if (!dict.TryGetValue(s.SkillId.Value, out var existed))
+                    {
+                        existed = new SkillScores
+                        {
+                            SkillId = s.SkillId,
+                            SkillName = s.SkillName,
+                            SkillFilePath = s.SkillFilePath,
+                        };
+                        dict.Add(s.SkillId.Value, existed);
+                    }
+
+                    // Weighted average score theo TotalCount
+                    var totalBefore = existed.TotalCount;
+                    var totalAfter = totalBefore + s.TotalCount;
+
+                    if (totalAfter > 0)
+                    {
+                        existed.Scores =
+                            ((existed.Scores * totalBefore) + (s.Scores * s.TotalCount))
+                            / totalAfter;
+                    }
+
+                    existed.CorrectCount += s.CorrectCount;
+                    existed.TotalCount += s.TotalCount;
+                }
+            }
+
+            foreach (var skill in dict.Values)
+            {
+                skill.Scores = NumberHelper.RoundReduceNumber(skill.Scores);
+            }
+
+            return dict.Values.ToList();
+        }
+
+        // =========================
+        // Load data
+        // =========================
+
+        private async Task<List<TestSectionResult>> LoadAllSectionResultsAsync(Guid testResultId, CancellationToken cancellationToken)
+        {
+            // TODO: đổi đúng field FK của bạn nếu không phải TestResultId
+            return await _testSectionResultRepository.ReadQueryable
+                .Include(x => x.TestSection)
+                .Where(x => x.ParentTestSectionResultId == testResultId)
+                .ToListAsync(cancellationToken);
+        }
+
+        private async Task<List<TestAnswer>> LoadAnswersBySectionResultIdsAsync(List<Guid> sectionResultIds, CancellationToken cancellationToken)
         {
             return await _testAnswerRepository.Queryable
                 .Include(x => x.TestSection)
-                .Where(x => x.TestSectionResultId == testSectionResultId)
+                .Where(x => x.TestSectionResultId.HasValue && sectionResultIds.Contains(x.TestSectionResultId.Value))
                 .ToListAsync(cancellationToken);
         }
 
@@ -184,14 +386,20 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             return studentResults.Content?.Result?.FirstOrDefault();
         }
 
-        private async Task EvaluateSingleAnswerAsync(
+        // =========================
+        // Core evaluate + blend (Result bé + Result lớn)
+        // =========================
+
+        private async Task EvaluateSingleAnswerAndBlendAsync(
             TestAnswer answer,
             TestAISetting aiConfig,
             string wordContent,
             int sectionDisplayOrder,
             Guid testResultId,
-            int runOrder,
+            int sectionRunOrder,
+            int globalRunOrder,
             SkillScores sectionSkillScore,
+            SkillScores testSkillScore,
             string? studentEmail,
             string? testName,
             CancellationToken cancellationToken)
@@ -230,14 +438,17 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                 return;
             }
 
-            // 7) Tính điểm + blend vào skillScore
+            // 7) Tính điểm
             (double averageScore, double totalScore) = CalculateOverallAverage(
                 parsed.TaskResponse!,
                 parsed.Coherence!,
                 parsed.LexicalResource!,
                 parsed.GrammaticalRange!);
 
-            BlendWritingScore(sectionSkillScore, averageScore, totalScore, runOrder);
+            // 8) Blend vào Result bé (theo section run order)
+            BlendWritingScore(sectionSkillScore, totalScore);
+
+            BlendWritingScore(testSkillScore, averageScore, totalScore, globalRunOrder);
         }
 
         private async Task<Dictionary<EnumMockTestAIType, string>> CallAiForAnswerAsync(
@@ -257,7 +468,7 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
                     var prompt = string.Concat(new[] { aiConfig.Task!, Environment.NewLine, item.AIConfigs!.Single().PromptContent! });
                     var userAiConfig = prompt.Replace("{0}", wordContent, StringComparison.CurrentCulture);
 
-                    var aiResponse = await SendChatGPT(aiConfig, item.AIConfigStr!, userAiConfig, cancellationToken);
+                    var aiResponse = await SendChatGPT(aiConfig, item.UserRoleStr!, userAiConfig, cancellationToken);
                     aiResponse = SharedStringHelper.RemoveMarkdownFromJson(aiResponse);
 
                     var type = item.AIConfigs![0].Type;
@@ -307,31 +518,84 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             bool IsValid)
             ParseFeedback(object feedback)
         {
-            // feedback là anonymous object -> serialize rồi deserialize theo key
             var json = ConvertHelper.Serialize(feedback);
             var dict = ConvertHelper.Deserialize<Dictionary<string, string>>(json);
 
-            var taskResponse = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("TaskResponse"));
-            var coherence = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("Coherence"));
-            var lexical = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("LexicalResource"));
-            var grammar = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("GrammaticalRange"));
+            var taskResponse = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("taskResponse"));
+            var coherence = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("coherence"));
+            var lexical = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("lexicalResource"));
+            var grammar = ConvertHelper.Deserialize<List<TestAIGradingModel>>(dict?.GetValueOrDefault("grammaticalRange"));
 
             var ok = taskResponse != null && coherence != null && lexical != null && grammar != null;
 
             return (taskResponse, coherence, lexical, grammar, ok);
         }
 
-        private static void BlendWritingScore(SkillScores skillScore, double averageScore, double totalScore, int runOrder)
+        private static void BlendWritingScore(SkillScores skillScore, double totalScore)
         {
-            // init
             if (skillScore.TotalCount == 0)
             {
                 skillScore.TotalCount = CorrectTotal_Writing;
             }
+            skillScore.TotalQuestion = 1;
+            skillScore.CorrectCount = totalScore;
+            skillScore.Scores = NumberHelper.ConvertRound(totalScore / 4, 2);
+        }
 
-            // blend theo công thức cũ, nhưng runOrder theo vòng for
-            skillScore.CorrectCount = (int)CaculateAverageScoreWritingSection(skillScore.CorrectCount, totalScore, runOrder);
-            skillScore.Scores = CaculateAverageScoreWritingSection(skillScore.Scores, averageScore, runOrder);
+        private static void BlendWritingScore(SkillScores skillScore, double averageScore, double totalScore, int runOrder)
+        {
+            if (skillScore.TotalCount == 0)
+            {
+                skillScore.TotalCount = CorrectTotal_Writing;
+                skillScore.CorrectCount = totalScore;
+                skillScore.Scores = averageScore;
+                skillScore.TotalQuestion = 2;
+                skillScore.CountQuestion = 2;
+            }
+            else
+            {
+                skillScore.CorrectCount = (int)CaculateAverageScoreWritingSection(skillScore.CorrectCount, totalScore, runOrder);
+                skillScore.Scores = CaculateAverageScoreWritingSection(skillScore.Scores, averageScore, runOrder);
+            }
+        }
+
+        // =========================
+        // Result lớn helpers
+        // =========================
+
+        private static SkillScores EnsureTestSkillScore(List<SkillScores> testSkillScores, Guid skillId)
+        {
+            var existed = testSkillScores.FirstOrDefault(x => x.SkillId == skillId);
+            if (existed != null)
+            {
+                return existed;
+            }
+
+            var created = new SkillScores
+            {
+                SkillId = skillId,
+                CorrectCount = 0,
+                Scores = 0,
+                TotalCount = CorrectTotal_Writing,
+                TotalQuestion = 0,
+                CountQuestion = 0,
+            };
+
+            testSkillScores.Add(created);
+            return created;
+        }
+
+        private static int NextGlobalRunOrder(Dictionary<Guid, int> globalRunOrderBySkill, Guid skillId)
+        {
+            if (!globalRunOrderBySkill.TryGetValue(skillId, out var current))
+            {
+                globalRunOrderBySkill[skillId] = 1;
+                return 1;
+            }
+
+            var next = current + 1;
+            globalRunOrderBySkill[skillId] = next;
+            return next;
         }
 
         // =========================
@@ -373,6 +637,10 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             }
         }
 
+        // =========================
+        // Persist
+        // =========================
+
         private async Task PersistAnswersAsync(List<TestAnswer> answers, CancellationToken cancellationToken)
         {
             await _testAnswerRepository.ExecuteTransactionAsync(async () =>
@@ -383,30 +651,17 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             });
         }
 
-        private async Task SaveTestSectionResultAsync(TestSectionResult testSectionResult, CancellationToken cancellationToken)
+        private async Task SaveTestSectionResultsAsync(List<TestSectionResult> sectionResults, CancellationToken cancellationToken)
         {
-            await _testSectionResultRepository.BulkUpdateList(new List<TestSectionResult> { testSectionResult }, bulk =>
+            await _testSectionResultRepository.BulkUpdateList(sectionResults, bulk =>
             {
-                bulk.ColumnInputExpression = c => new { c.SkillScoresStr };
+                bulk.ColumnInputExpression = c => new { c.SkillScoresStr, c.CorrectTotal, c.CorrectCount, c.Percent, c.PercentModule };
             });
         }
 
-        private async Task PersistTestResultAsync(TestResult testResult, CancellationToken cancellationToken)
-        {
-            try
-            {
-                await _testResultRepository.BulkUpdateList(new List<TestResult> { testResult }, bulk =>
-                {
-                    bulk.IgnoreOnUpdateExpression = c => new { c.TestGroupResultId, c.StudentId };
-                });
-
-                await _testResultRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-            }
-            catch
-            {
-                // log nếu cần
-            }
-        }
+        // =========================
+        // SkillScores helpers
+        // =========================
 
         private static List<SkillScores> EnsureSectionSkillScore(List<SkillScores> current, Guid? skillId)
         {
@@ -434,36 +689,15 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
             return current;
         }
 
-        private static List<SkillScores> MergeSkillScores(
-            List<SkillScores>? current,
-            List<SkillScores> updatedSectionScores,
-            Guid? skillId)
-        {
-            current ??= new List<SkillScores>();
-
-            if (skillId == null)
-            {
-                return updatedSectionScores;
-            }
-
-            // remove old skill
-            var cloned = current.Where(x => x.SkillId != skillId).ToList();
-
-            // add updated skill
-            var toAdd = updatedSectionScores.FirstOrDefault(x => x.SkillId == skillId);
-            if (toAdd != null)
-            {
-                cloned.Add(toAdd);
-            }
-
-            return cloned;
-        }
-
         private static string BuildWritingContent(TestAnswer answer)
         {
             // TODO: đổi sang field writing thật của bạn nếu không phải SpeechTextAnswer
-            return answer.SpeechTextAnswer ?? string.Empty;
+            return answer.AnswerStr ?? string.Empty;
         }
+
+        // =========================
+        // Calculate
+        // =========================
 
         private static double CaculateAverageScore(List<TestAIGradingModel>? bandScoreDescription)
         {
@@ -503,6 +737,10 @@ namespace Fsel.Course.Lms.Application.Services.TestServices
 
             return NumberHelper.RoundNumberDouble((average + firstScore * 2) / 3);
         }
+
+        // =========================
+        // AI send + websocket
+        // =========================
 
         private async Task<string> SendChatGPT(TestAISetting aiConfig, string systemRole, string userAiConfig, CancellationToken cancellationToken)
         {
