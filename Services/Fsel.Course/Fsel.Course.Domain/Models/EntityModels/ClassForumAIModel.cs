@@ -2,6 +2,8 @@
 
 namespace Fsel.Course.Domain.Models.EntityModels
 {
+    using System.Globalization;
+
     public class ClassForumAIModel
     {
         private const string DeterminationYES = "YES";
@@ -17,7 +19,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         {
             get
             {
-                return SuccessCriteriaItemDetermination == DeterminationYES ? 2 : SuccessCriteriaItemDetermination == DeterminationPARTIAL ? 1 : default;
+                return SuccessCriteriaItemDetermination?.ToLower(CultureInfo.CurrentCulture) == DeterminationYES.ToLower(CultureInfo.CurrentCulture) ? 2 : SuccessCriteriaItemDetermination?.ToLower(CultureInfo.CurrentCulture) == DeterminationPARTIAL.ToLower(CultureInfo.CurrentCulture) ? 1 : default;
             }
         }
     }
