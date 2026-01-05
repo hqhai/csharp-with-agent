@@ -18,7 +18,7 @@ namespace Fsel.Course.Domain.Entities
         public string? Code { get; set; }
 
         [MaxLength(1000, ErrorMessage = nameof(EnumSystemErrorCode.MaxLength))]
-        [RegexValid(Regex = @"^(?!.*[<>])[a-zA-Z0-9]{0,1000}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
+        [RegexValid(Regex = @"^[^<>]{0,1000}$", ErrorMessage = nameof(EnumSystemErrorCode.InValidFormat))]
         public string? Description { get; set; }
 
         public int LevelOrder { get; set; }
