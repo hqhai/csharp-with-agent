@@ -59,7 +59,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 };
             }
 
-            var testGroupResult = await _testGroupResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
+            var testGroupResult = await _testGroupResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
             if (testGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testGroupResult), testResult.TestGroupResultId);
