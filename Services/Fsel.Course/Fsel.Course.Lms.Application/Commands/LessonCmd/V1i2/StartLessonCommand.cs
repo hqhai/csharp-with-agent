@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
     using MediatR;
@@ -61,14 +60,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
             {
                 return methodResult;
             }
-            var lessonModules = await GetLessonModulesAsync(lessonResult.LessonId);
-            var currentModule = lessonModules.OrderBy(x => x.OpenOrder).FirstOrDefault();
-            if (currentModule == null)
-            {
-                return methodResult;
-            }
-
-            await UpdateNewResultLessonModule(currentModule, lessonResult, cancellationToken);
 
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>
             {
@@ -83,15 +74,53 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
             return methodResult;
         }
 
-        private async Task UpdateNewResultLessonModule(LessonModule nextModule, LessonResult lessonResult, CancellationToken cancellationToken)
+        /// <summary>
+        /// Được gọi khi 1 LessonModule hoàn thành.
+        /// - Mở tất cả module phía sau.
+        /// - Nếu số module có Result Done == số module cần làm → Done lesson.
+        /// </summary>
+        public async Task UpdateLessonResultAsync(
+            LessonResult lessonResult,
+            Guid lessonModuleId,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(lessonResult);
+
+            var lessonModules = await GetLessonModulesAsync(lessonResult.LessonId);
+            var nextModules = GetNextModules(lessonModules);
+            if (nextModules.Any())
+            {
+                foreach (var nextModule in nextModules)
+                {
+                    await UpdateNewResultLessonModule(nextModule, lessonResult, cancellationToken);
+                }
+            }
+        }
+
+        private async Task UpdateNewResultLessonModule(
+        LessonModule nextModule,
+        LessonResult lessonResult,
+        CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(nextModule);
+
             var initializer = _lessonItemInitializerFactory.Get(nextModule.LessonConfigType);
             if (initializer != null)
             {
                 await initializer.InitializeAsync(nextModule, lessonResult, cancellationToken);
             }
-            return;
+        }
+
+        private static IList<LessonModule> GetNextModules(IList<LessonModule> lessonModules)
+        {
+            var minOrder = lessonModules.OrderBy(m => m.OpenOrder).FirstOrDefault();
+            if (minOrder == null)
+            {
+                return new List<LessonModule>();
+            }
+            return lessonModules.Where(m => m.OpenOrder == minOrder.OpenOrder)
+                                .OrderBy(m => m.OpenOrder)
+                                .ToList();
         }
 
         private async Task<IList<LessonModule>> GetLessonModulesAsync(Guid id)

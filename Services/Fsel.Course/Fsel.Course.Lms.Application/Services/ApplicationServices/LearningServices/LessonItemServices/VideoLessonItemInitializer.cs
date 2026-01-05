@@ -10,7 +10,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Infrastructure.Repositories;
     using Microsoft.EntityFrameworkCore;
 
     public class VideoLessonItemInitializer : ILessonItemInitializer
