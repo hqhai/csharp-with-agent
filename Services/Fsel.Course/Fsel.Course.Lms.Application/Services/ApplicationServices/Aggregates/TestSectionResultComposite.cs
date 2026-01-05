@@ -225,9 +225,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                     TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
                 }
-
-                TestSectionResult.Status = EnumResultStatus.Done;
             }
+
+            TestSectionResult.Status = EnumResultStatus.Done;
         }
 
         public override async Task SubmitTest(SubmitContext context)
