@@ -60,6 +60,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
             {
                 return methodResult;
             }
+            await UpdateLessonResultAsync(lessonResult, cancellationToken);
 
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>
             {
@@ -81,7 +82,6 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
         /// </summary>
         public async Task UpdateLessonResultAsync(
             LessonResult lessonResult,
-            Guid lessonModuleId,
             CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
