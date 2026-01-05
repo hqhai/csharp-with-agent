@@ -384,12 +384,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             var testSections = await _testSectionRepository.GetByIdsAsync(sectionTimeCodeIds);
             if (testSections.Any())
             {
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
                 var sectionIds = testSections.Select(x => x.Id).ToList();
 
                 var partResults = await _testSectionResultRepository.ReadQueryable.Where(x => x.TestSectionId.HasValue && sectionIds.Contains(x.TestSectionId.Value))
                                                                     .Where(x => x.TestResultId == request.TestResultId)
                                                                     .ToListAsync();
+                var testSectionResultIds = partResults.Select(x => x.Id).ToList();
+                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value)).ToListAsync();
+
                 foreach (var item in request.Answers)
                 {
                     var testSection = testSections.FirstOrDefault(x => x.Id == item.TestSectionId);
@@ -422,11 +424,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             TestResultId = request.TestResultId,
                             TestSectionResultId = partResult.Id,
                             TestSectionId = item.TestSectionId,
-                            StudentId = request.StudentId
+                            StudentId = request.StudentId ?? partResult.StudentId
                         };
                         _testAnswerRepository.Add(testAnswer);
                     }
-                    testAnswer.Answer = request.Answers;
+                    testAnswer.Answer = item.Answer;
                     testAnswer.Status = EnumAnswerStatus.Done;
                     if (!testAnswer.IsValid())
                     {
@@ -453,7 +455,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                                     .Where(x => x.TestResultId == request.TestResultId)
                                                                     .ToListAsync();
 
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+                var testSectionResultIds = partResults.Select(x => x.Id).ToList();
+                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId.HasValue && testSectionResultIds.Contains(x.TestSectionResultId.Value)).ToListAsync();
 
                 foreach (var item in request.Answers)
                 {
@@ -478,13 +481,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             TestResultId = request.TestResultId,
                             TestSectionResultId = partResult.Id,
                             TestSectionId = item.TestSectionId,
-                            StudentId = request.StudentId
+                            StudentId = request.StudentId ?? partResult.StudentId
                         };
                         _testAnswerRepository.Add(testAnswer);
                     }
                     testAnswer.SpeechTextAnswer = item.SpeechTextAnswer;
                     testAnswer.PronunciationScore = pronScore;
-                    testAnswer.Answer = request.Answers;
+                    testAnswer.Answer = item.Answer;
                     testAnswer.Status = EnumAnswerStatus.Done;
                     if (!testAnswer.IsValid())
                     {
@@ -543,7 +546,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                             TestResultId = request.TestResultId,
                             QuestionId = question.Id,
                             TestSectionId = partResult.TestSectionId,
-                            StudentId = request.StudentId
+                            StudentId = request.StudentId ?? partResult.StudentId
                         };
                         _testAnswerRepository.Add(testAnswer);
                     }

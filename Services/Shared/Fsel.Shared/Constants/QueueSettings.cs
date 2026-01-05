@@ -150,6 +150,7 @@ namespace Fsel.Shared.Constants
                 public const string ClassForumPronunciationAi = $"{KeyQueue}_ClassForumPronunciationAi";
 
                 public const string SetTimeRetryTest = $"{KeyQueue}_SetTimeRetryTest";
+                public const string SubmitTestAi = $"{KeyQueue}_SubmitTestAi";
             }
         }
 
