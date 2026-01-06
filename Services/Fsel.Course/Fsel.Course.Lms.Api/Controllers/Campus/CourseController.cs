@@ -48,7 +48,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         [HttpGet("search-homework")]
         [ProducesResponseType(typeof(MethodResult<PagingItemsModel<HomeWorkSearchModel>>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(CurriculumManagement.View)]
         public async Task<IActionResult> SearchHomeWork([FromQuery] SearchHomeWorkForCurriculumQuery query)
         {
             var commandResult = await _mediator.Send(query).ConfigureAwait(false);

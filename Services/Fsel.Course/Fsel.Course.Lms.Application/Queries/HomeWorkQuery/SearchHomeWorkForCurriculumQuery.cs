@@ -28,11 +28,17 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
     {
         private readonly IHomeWorkRepository _homeWorkRepository;
         private readonly IHomeWorkConfigRepository _homeWorkConfigRepository;
+        private readonly ISkillRepository _skillRepository;
+        private readonly ILevelRepository _levelRepository;
+        private readonly ICategoryRepository _categoryRepository;
 
-        public SearchHomeWorkForCurriculumQueryHandler(IHomeWorkRepository homeWorkRepository, IHomeWorkConfigRepository homeWorkConfigRepository)
+        public SearchHomeWorkForCurriculumQueryHandler(IHomeWorkRepository homeWorkRepository, IHomeWorkConfigRepository homeWorkConfigRepository, ISkillRepository skillRepository, ILevelRepository levelRepository, ICategoryRepository categoryRepository)
         {
             _homeWorkRepository = homeWorkRepository;
             _homeWorkConfigRepository = homeWorkConfigRepository;
+            _skillRepository = skillRepository;
+            _levelRepository = levelRepository;
+            _categoryRepository = categoryRepository;
         }
 
         public async Task<MethodResult<PagingItemsModel<HomeWorkSearchModel>>> Handle(SearchHomeWorkForCurriculumQuery request, CancellationToken cancellationToken)
@@ -46,19 +52,27 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 return methodResult;
             }
 
-            var query = _homeWorkRepository.Queryable.Where(p => !p.IsArchive && p.Type == EnumHomeWorkType.HomeworkExtra)
-                                   .Select(x => new HomeWorkSearchModel
-                                   {
-                                       Id = x.Id,
-                                       Code = x.Code,
-                                       Name = x.Name,
-                                       CreatedFullName = x.CreatedFullName,
-                                       CreatedDate = x.CreatedDate,
-                                       IsActive = x.LessonHomeWorks.Any(),
-                                       CourseLevel = x.CourseLevel,
-                                       CourseSkill = x.CourseSkill,
-                                       CreatedUserId = x.CreatedUserId,
-                                   });
+            var query = from h in _homeWorkRepository.Queryable.Where(p => !p.IsArchive && p.Type == EnumHomeWorkType.HomeworkExtra)
+                        join p in _categoryRepository.Queryable.Include(x => x.CategoryParent) on h.ProgramId equals p.Id
+                        join s in _skillRepository.Queryable on h.SkillId equals s.Id
+                        join l in _levelRepository.Queryable on h.LevelId equals l.Id
+                        select new HomeWorkSearchModel
+                        {
+                            Id = h.Id,
+                            Code = h.Code,
+                            Name = h.Name,
+                            CreatedFullName = h.CreatedFullName,
+                            CreatedDate = h.CreatedDate,
+                            IsActive = h.LessonHomeWorks.Any(),
+                            LevelId = l.Id,
+                            Level = l.Name,
+                            SkillId = s.Id,
+                            SkillName = s.Name,
+                            CreatedUserId = h.CreatedUserId,
+                            ProgramId = h.ProgramId,
+                            SubjectId = p.ParentId,
+                            Subject = p.CategoryParent != null ? p.CategoryParent.Name : null,
+                        };
 
             var homeworkIds = await _homeWorkConfigRepository.Queryable.Where(p => p.CurriculumId == request.CurriculumId).Select(x => x.HomeWorkId).ToListAsync(cancellationToken);
 
@@ -78,26 +92,23 @@ namespace Fsel.Course.Lms.Application.Queries.HomeWorkQuery
                 }
             }
 
-            if (request.CourseTypes != null && request.CourseTypes.Any())
+            var programIds = query.Where(p => p.ProgramId.HasValue).Select(p => p.ProgramId ?? default).ToList();
+
+            var programs = await _categoryRepository.Queryable.Include(p => p.CategoryParent).WhereBulkContains(programIds, p => p.Id).ToListAsync(cancellationToken);
+
+            if (request.SubjectIds != null && request.SubjectIds.Any())
             {
-                var courseLevels = new List<EnumCourseLevel>();
-
-                request.CourseTypes.ForEach(courseLevel =>
-                {
-                    courseLevels.AddRange(courseLevel.GetEnumCourseLevels());
-                });
-
-                query = query.Where(m => courseLevels.Contains(m.CourseLevel));
+                query = query.Where(p => p.SubjectId.HasValue && request.SubjectIds.Contains(p.SubjectId.Value));
             }
 
-            if (request.CourseLevels != null && request.CourseLevels.Any())
+            if (request.ProgramIds != null && request.ProgramIds.Any())
             {
-                query = query.Where(m => request.CourseLevels.Contains(m.CourseLevel));
+                query = query.Where(p => p.ProgramId.HasValue && request.ProgramIds.Contains(p.ProgramId.Value));
             }
 
-            if (request.CourseSkills != null && request.CourseSkills.Any())
+            if (request.LevelIds != null && request.LevelIds.Any())
             {
-                query = query.Where(m => request.CourseSkills.Contains(m.CourseSkill));
+                query = query.Where(p => p.LevelId.HasValue && request.LevelIds.Contains(p.LevelId.Value));
             }
 
             if (request.CreatedUserIds != null && request.CreatedUserIds.Any())
