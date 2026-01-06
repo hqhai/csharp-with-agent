@@ -51,7 +51,7 @@ namespace Fsel.System.Application.Queries.SchoolQuery
                 query = query.Where(m => m.GlobalId.ToString() == request.Keyword || (m.Name ?? string.Empty).Trim().Contains(request.Keyword.Trim()));
             }
 
-            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var targetRoles = new List<string> { nameof(EnumRole.AdminSchool), nameof(EnumRole.TeacherCampus), nameof(EnumRole.AdminCampus) };
             var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
             if (hasMatchedRole)
             {

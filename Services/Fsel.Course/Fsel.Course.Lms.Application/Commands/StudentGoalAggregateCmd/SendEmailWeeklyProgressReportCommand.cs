@@ -29,7 +29,8 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
         private readonly IUserService _userService;
         private const string Subject = "[FSEL] Cùng FSEL quay lại đúng nhịp nhé";
 
-        public SendEmailWeeklyProgressReportCommandHandler(ISenderService senderService, IStudentGoalAggregateRepository studentGoalAggregateRepository, IStudentGoalSummaryRepository studentGoalSummaryRepository, IUserService userService)
+        public SendEmailWeeklyProgressReportCommandHandler(ISenderService senderService, IStudentGoalAggregateRepository studentGoalAggregateRepository,
+            IStudentGoalSummaryRepository studentGoalSummaryRepository, IUserService userService)
         {
             _senderService = senderService;
             _studentGoalAggregateRepository = studentGoalAggregateRepository;
@@ -53,29 +54,29 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
             var weekEndUtc = weekStartUtc.AddDays(7).Date;
 
             var queryData = await (from baseQ in _studentGoalAggregateRepository.Queryable.Where(x => x.IsActive)
-                                   join sum in _studentGoalSummaryRepository.Queryable on baseQ.Id equals sum.StudentGoalAggregateId
-                                   where sum.StartDate.Date <= weekEndUtc && sum.EndDate.Date >= weekStartUtc
-                                   select new StudentGoalAggregateModel
-                                   {
-                                       Id = baseQ.Id,
-                                       ClassName = baseQ.ClassName,
-                                       CombinedProgress = baseQ.CombinedProgress,
-                                       TotalCompletedLessons = baseQ.TotalCompletedLessons,
-                                       CreatedFullName = baseQ.CreatedFullName,
-                                       CreatedDate = baseQ.CreatedDate,
-                                       CourseType = baseQ.CourseType,
-                                       CourseLevel = baseQ.CourseLevel,
-                                       CourseId = baseQ.CourseId,
-                                       ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
-                                       CompletedLessons = sum.CompletedLessons, // tổng số lesson đã hoàn thành trong tuần
-                                       CreatedUserId = baseQ.CreatedUserId,
-                                       StudentId = baseQ.StudentId,
-                                       UpdatedDate = baseQ.UpdatedDate,
-                                       UpdatedFullName = baseQ.UpdatedFullName,
-                                       UpdatedUserId = baseQ.UpdatedUserId,
-                                       TotalTargetLessons = sum.TotalTargetLessons, // tổng số lượng lesson của course
-                                       LessonsPerWeek = sum.LessonsPerWeek, // target tuần
-                                   }).ToListAsync(cancellationToken);
+                join sum in _studentGoalSummaryRepository.Queryable on baseQ.Id equals sum.StudentGoalAggregateId
+                where sum.StartDate.Date <= weekEndUtc && sum.EndDate.Date >= weekStartUtc
+                select new StudentGoalAggregateModel
+                {
+                    Id = baseQ.Id,
+                    ClassName = baseQ.ClassName,
+                    CombinedProgress = baseQ.CombinedProgress,
+                    TotalCompletedLessons = baseQ.TotalCompletedLessons,
+                    CreatedFullName = baseQ.CreatedFullName,
+                    CreatedDate = baseQ.CreatedDate,
+                    CourseType = baseQ.CourseType,
+                    LevelId = baseQ.LevelId,
+                    CourseId = baseQ.CourseId,
+                    ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
+                    CompletedLessons = sum.CompletedLessons, // tổng số lesson đã hoàn thành trong tuần
+                    CreatedUserId = baseQ.CreatedUserId,
+                    StudentId = baseQ.StudentId,
+                    UpdatedDate = baseQ.UpdatedDate,
+                    UpdatedFullName = baseQ.UpdatedFullName,
+                    UpdatedUserId = baseQ.UpdatedUserId,
+                    TotalTargetLessons = sum.TotalTargetLessons, // tổng số lượng lesson của course
+                    LessonsPerWeek = sum.LessonsPerWeek, // target tuần
+                }).ToListAsync(cancellationToken);
 
             if (queryData.Any())
             {
@@ -94,46 +95,19 @@ namespace Fsel.Course.Lms.Application.Commands.StudentGoalAggregateCmd
                 }
 
                 var tasks = queryData
-                             .Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.IsValidEmail())
-                             .Select(p => _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel()
-                             {
-                                 ToEmails = new List<string> { p.Email ?? string.Empty },
-                                 Subject = Subject,
-                                 Template = GetSenderTemplate(p.CombinedProgress),
-                                 Params = new
-                                 {
-                                     StudentName = p.FullName,
-                                     NumberLesson = p.CompletedLessons,
-                                     TargetLesson = p.LessonsPerWeek,
-                                     TotalLesson = p.TotalTargetLessons
-                                 },
-                                 Receivers = new List<SendReceiverCommandModel>()
-                                 {
-                                     new SendReceiverCommandModel()
-                                     {
-                                         Email = p.Email,
-                                         ReceiverId = p.UserId
-                                     }
-                                 }
-                             }))
-                             .ToList();
+                    .Where(p => !string.IsNullOrEmpty(p.Email) && p.Email.IsValidEmail())
+                    .Select(p => _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel()
+                    {
+                        ToEmails = new List<string> { p.Email ?? string.Empty },
+                        Subject = Subject,
+                        Template = GetSenderTemplate(p.CombinedProgress),
+                        Params = new { StudentName = p.FullName, NumberLesson = p.CompletedLessons, TargetLesson = p.LessonsPerWeek, TotalLesson = p.TotalTargetLessons },
+                        Receivers = new List<SendReceiverCommandModel>() { new() { Email = p.Email, ReceiverId = p.UserId } }
+                    }))
+                    .ToList();
 
                 await Task.WhenAll(tasks);
             }
-
-            //await _senderService.SendEmailAsync(new SendEmailByTemplateCommandModel()
-            //{
-            //    ToEmails = new List<string> { "nguyenhuukhoa5462@gmail.com" },
-            //    Subject = Subject,
-            //    Template = request.SenderTemplate,
-            //    Params = new
-            //    {
-            //        StudentName = "Khoa Ozil",
-            //        NumberLesson = 1,
-            //        TargetLesson = 12,
-            //        TotalLesson = 123
-            //    }
-            //});
 
             return methodResult;
         }

@@ -19,6 +19,7 @@ namespace Fsel.Course.Domain.Entities
         public EnumCombinedProgress? CurrentCombinedProgress { get; set; }
         public EnumCombinedProgress? CombinedProgress { get; set; }
         public EnumCourseLevel CourseLevel { get; set; }
+        public Guid? LevelId { get; set; }
         public EnumCourseType CourseType { get; set; }
         public bool IsActive { get; set; }
 

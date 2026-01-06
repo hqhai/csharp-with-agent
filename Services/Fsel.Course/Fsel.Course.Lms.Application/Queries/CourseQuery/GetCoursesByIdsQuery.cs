@@ -7,10 +7,10 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
-    using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums.ErrorCodes;
-    using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
+    using Common.ActionResults;
+    using Common.Enums.ErrorCodes;
+    using Domain.IRepositories;
+    using Domain.Models.EntityModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -35,7 +35,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
         public async Task<MethodResult<IList<CourseModel>>> Handle(GetCoursesByIdsQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
-            MethodResult<IList<CourseModel>> methodResult = new MethodResult<IList<CourseModel>>();
+            var methodResult = new MethodResult<IList<CourseModel>>();
 
             if (request.CourseIds == null || request.CourseIds.Count == 0)
             {
@@ -44,21 +44,22 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             }
 
             var query = from c in _courseRepository.Queryable.WhereBulkContains(request.CourseIds, x => x.Id)
-                        join cu in _curriculumRepository.Queryable on c.Id equals cu.CourseCloneId into g
-                        from cu in g.DefaultIfEmpty()
-                        select new CourseModel
-                        {
-                            Id = c.Id,
-                            Code = c.Code,
-                            Name = cu != null ? cu.CurriculumName : c.Name,
-                            CourseLevel = c.CourseLevel,
-                            CourseType = c.CourseType,
-                            Status = c.Status,
-                            CreatedDate = c.CreatedDate,
-                            UpdatedDate = c.UpdatedDate,
-                        };
+                join cu in _curriculumRepository.Queryable on c.Id equals cu.CourseCloneId into g
+                from cu in g.DefaultIfEmpty()
+                select new CourseModel
+                {
+                    Id = c.Id,
+                    Code = c.Code,
+                    Name = cu != null ? cu.CurriculumName : c.Name,
+                    LevelId = c.LevelId,
+                    CourseLevel = c.CourseLevel,
+                    CourseType = c.CourseType,
+                    Status = c.Status,
+                    CreatedDate = c.CreatedDate,
+                    UpdatedDate = c.UpdatedDate,
+                };
             var courses = await query.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
-                                     .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken);
             methodResult.Result = courses;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

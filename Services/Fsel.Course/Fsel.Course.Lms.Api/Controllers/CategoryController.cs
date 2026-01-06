@@ -1,4 +1,4 @@
-﻿// Copyright (c) Atlantic. All rights reserved.
+// Copyright (c) Atlantic. All rights reserved.
 
 namespace Fsel.Course.Lms.Api.Controllers
 {
@@ -45,15 +45,5 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
-        [HttpGet("get-program-match-student/{studentId:guid}")]
-        public async Task<IActionResult> GetProgramsMatchingStudent(Guid studentId)
-        {
-            var getProgramQuery = new GetProgramsMatchUserQuery
-            {
-                StudentId = studentId
-            };
-            var queryResult = await _mediator.Send(getProgramQuery).ConfigureAwait(false);
-            return queryResult.GetActionResult();
-        }
     }
 }

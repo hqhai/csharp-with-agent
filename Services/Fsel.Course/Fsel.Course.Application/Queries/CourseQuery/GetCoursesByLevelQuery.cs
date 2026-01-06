@@ -4,10 +4,10 @@ namespace Fsel.Course.Application.Queries.CourseQuery
 {
     using System.Threading;
     using System.Threading.Tasks;
-    using Fsel.Common.ActionResults;
-    using Fsel.Course.Domain.IRepositories;
-    using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Shared.Enums;
+    using Common.ActionResults;
+    using Domain.IRepositories;
+    using Domain.Models.EntityModels;
+    using Shared.Enums;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;

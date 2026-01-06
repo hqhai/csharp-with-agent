@@ -2,15 +2,15 @@
 
 namespace Fsel.System.Application.Queries.CourseGoalQuery
 {
-    using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
-    using Fsel.System.Application.Services.UserServices;
-    using Fsel.System.Domain.IRepositories.CourseGoals;
-    using Fsel.System.Domain.Models.EntityModels;
-    using Fsel.System.Domain.Models.QueryModels;
+    using Common.ActionResults;
+    using Core.Base;
+    using Core.Base.BaseModels;
+    using Shared.Enums;
+    using Shared.Helpers;
+    using Services.UserServices;
+    using Domain.IRepositories.CourseGoals;
+    using Domain.Models.EntityModels;
+    using Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -35,10 +35,9 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
 
         public async Task<MethodResult<PagingItemsModel<CourseGoalModel>>> Handle(SearchCourseGoalQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<CourseGoalModel>> methodResult = new MethodResult<PagingItemsModel<CourseGoalModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<CourseGoalModel>>();
             ArgumentNullException.ThrowIfNull(request);
-            var courseLevels = request.CourseLevelStr.ToList<EnumCourseLevel>();
-            var courseTypes = request.CourseTypeStr.ToList<EnumCourseType>();
+            var courseTypeByLevelIds = request.CourseTypeStr.ToList<Guid>();
             var schoolIds = request.SchoolIdStr.ToList<Guid>();
             var classIds = request.ClassIdStr.ToList<Guid>();
             if (request.PageSize > 100)
@@ -46,9 +45,10 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+
             Guid? schoolId = null;
 
-            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var targetRoles = new List<string> { nameof(EnumRole.AdminSchool), nameof(EnumRole.TeacherCampus), nameof(EnumRole.AdminCampus) };
             var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
             if (hasMatchedRole)
             {
@@ -67,24 +67,11 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
                 query = query.Where(x => x.Name != null && x.Name.Contains(request.Keyword));
             }
 
-            if (courseLevels != null && courseLevels.Any())
+            if (courseTypeByLevelIds != null && courseTypeByLevelIds.Any())
             {
-                query = query.Where(x => courseLevels.Contains(x.CourseLevel));
+                query = query.Where(x => x.LevelId != null && courseTypeByLevelIds.Contains(x.LevelId.Value));
             }
 
-            if (courseTypes != null && courseTypes.Any())
-            {
-                query = query.Where(x => courseTypes.Contains(x.CourseType));
-            }
-
-            if (request.CourseType.HasValue)
-            {
-                query = query.Where(x => x.CourseType == request.CourseType);
-            }
-            if (request.CourseLevel.HasValue)
-            {
-                query = query.Where(x => x.CourseLevel == request.CourseLevel);
-            }
             if (schoolIds != null && schoolIds.Any())
             {
                 query = query.Where(x => x.SchoolId != null).WhereBulkContains(schoolIds, x => x.SchoolId);
