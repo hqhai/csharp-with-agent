@@ -17,7 +17,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
     public class GetCoursesByLevelQuery : IRequest<MethodResult<IList<CourseModel>>>
     {
         public EnumCourseStatus? DifferentStatus { get; set; }
-        public EnumCourseLevel? CourseLevel { get; set; }
+        public Guid? CourseLevel { get; set; }
         public bool? IsDefault { get; set; }
         public Guid? SchoolId { get; set; }
     }
@@ -46,12 +46,12 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
             var methodResult = new MethodResult<IList<CourseModel>>();
 
             var queryCourse = _courseRepository.Queryable.Where(x => !x.IsArchive)
-                                .Where(x => !request.DifferentStatus.HasValue || x.Status != request.DifferentStatus)
-                                .Where(x => request.CourseLevel != null && x.CourseLevel == request.CourseLevel);
+                .Where(x => !request.DifferentStatus.HasValue || x.Status != request.DifferentStatus)
+                .Where(x => request.CourseLevel != null && x.LevelId == request.CourseLevel);
 
             var queryCurriculum = _curriculumRepository.Queryable;
 
-            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var targetRoles = new List<string> { nameof(EnumRole.AdminSchool), nameof(EnumRole.TeacherCampus), nameof(EnumRole.AdminCampus) };
             var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
             if (hasMatchedRole)
             {
@@ -65,9 +65,9 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
 
             IQueryable<CourseModel> query;
             var baseQuery = from c in queryCourse
-                            join cu in queryCurriculum on c.Id equals cu.CourseCloneId into g
-                            from cu in g.DefaultIfEmpty()
-                            select new { c, cu };
+                join cu in queryCurriculum on c.Id equals cu.CourseCloneId into g
+                from cu in g.DefaultIfEmpty()
+                select new { c, cu };
 
             if (request.IsDefault is true)
             {
@@ -80,7 +80,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         Code = x.c.Code,
                         Status = x.c.Status,
                         Name = x.c.Name,
-                        CourseLevel = x.c.CourseLevel,
+                        CourseLevel = x.c.LevelId,
                         CreatedDate = x.c.CreatedDate,
                         UpdatedDate = x.c.UpdatedDate,
                     });
@@ -96,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         Code = x.c.Code,
                         Status = x.c.Status,
                         Name = x.cu.CurriculumName,
-                        CourseLevel = x.c.CourseLevel,
+                        CourseLevel = x.c.LevelId,
                         CreatedDate = x.c.CreatedDate,
                         UpdatedDate = x.c.UpdatedDate,
                     });
@@ -111,14 +111,14 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         Code = x.c.Code,
                         Status = x.c.Status,
                         Name = x.cu != null ? x.cu.CurriculumName : x.c.Name,
-                        CourseLevel = x.c.CourseLevel,
+                        CourseLevel = x.c.LevelId,
                         CreatedDate = x.c.CreatedDate,
                         UpdatedDate = x.c.UpdatedDate,
                     });
             }
 
             var courses = await query.OrderByDescending(x => x.UpdatedDate ?? x.CreatedDate)
-                                     .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken);
             methodResult.Result = courses;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;

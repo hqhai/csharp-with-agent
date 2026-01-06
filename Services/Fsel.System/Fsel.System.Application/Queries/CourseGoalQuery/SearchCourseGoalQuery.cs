@@ -35,10 +35,9 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
 
         public async Task<MethodResult<PagingItemsModel<CourseGoalModel>>> Handle(SearchCourseGoalQuery request, CancellationToken cancellationToken)
         {
-            MethodResult<PagingItemsModel<CourseGoalModel>> methodResult = new MethodResult<PagingItemsModel<CourseGoalModel>>();
+            var methodResult = new MethodResult<PagingItemsModel<CourseGoalModel>>();
             ArgumentNullException.ThrowIfNull(request);
-            var courseLevels = request.CourseLevelStr.ToList<EnumCourseLevel>();
-            var courseTypes = request.CourseTypeStr.ToList<EnumCourseType>();
+            var courseTypeByLevelIds = request.CourseTypeStr.ToList<Guid>();
             var schoolIds = request.SchoolIdStr.ToList<Guid>();
             var classIds = request.ClassIdStr.ToList<Guid>();
             if (request.PageSize > 100)
@@ -46,9 +45,10 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
                 methodResult.StatusCode = StatusCodes.Status400BadRequest;
                 return methodResult;
             }
+
             Guid? schoolId = null;
 
-            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var targetRoles = new List<string> { nameof(EnumRole.AdminSchool), nameof(EnumRole.TeacherCampus), nameof(EnumRole.AdminCampus) };
             var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
             if (hasMatchedRole)
             {
@@ -67,24 +67,11 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
                 query = query.Where(x => x.Name != null && x.Name.Contains(request.Keyword));
             }
 
-            if (courseLevels != null && courseLevels.Any())
+            if (courseTypeByLevelIds != null && courseTypeByLevelIds.Any())
             {
-                query = query.Where(x => courseLevels.Contains(x.CourseLevel));
+                query = query.Where(x => courseTypeByLevelIds.Contains(x.LevelId));
             }
 
-            if (courseTypes != null && courseTypes.Any())
-            {
-                query = query.Where(x => courseTypes.Contains(x.CourseType));
-            }
-
-            if (request.CourseType.HasValue)
-            {
-                query = query.Where(x => x.CourseType == request.CourseType);
-            }
-            if (request.CourseLevel.HasValue)
-            {
-                query = query.Where(x => x.CourseLevel == request.CourseLevel);
-            }
             if (schoolIds != null && schoolIds.Any())
             {
                 query = query.Where(x => x.SchoolId != null).WhereBulkContains(schoolIds, x => x.SchoolId);

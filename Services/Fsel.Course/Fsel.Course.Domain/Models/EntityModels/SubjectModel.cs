@@ -14,6 +14,30 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
         public EnumTestMode? TestMode { get; set; }
 
+        public List<LevelModel>? Levels { get; set; } = new List<LevelModel>();
+
         public List<SubjectModel> ChildSubjects { get; set; } = new List<SubjectModel>();
+
+
+        public bool HasLevel()
+        {
+            if (Levels != null && Levels.Any())
+            {
+                return true;
+            }
+
+            if (ChildSubjects != null && ChildSubjects.Any())
+            {
+                foreach (var child in ChildSubjects)
+                {
+                    if (child.HasLevel())
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 }
