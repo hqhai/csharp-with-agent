@@ -72,15 +72,15 @@ namespace Fsel.Course.Infrastructure.Repositories
                                           }).ToListAsync();
 
                 var videoOriginalIdsHasResult = videoResults
-                          .Where(x => x.Video != null && x.Video.OriginalId.HasValue)
+                          .Where(x => x.Video != null)
                           .Select(x => new
                           {
-                              OriginalId = x.Video.OriginalId!.Value,
+                              OriginalId = x.Video.OriginalId,
                               Id = x.LessonModule.Id
                           }).ToHashSet();
 
                 videoResultsByOriginalId = videoResults
-                          .Where(x => x.Video != null && x.Video.OriginalId.HasValue)
+                          .Where(x => x.Video != null)
                           .ToDictionary(
                               x => x.LessonModule.Id,
                               x => (Video: x.Video!, LessonModule: x.LessonModule, VideoResult: x.VideoResult));
@@ -118,7 +118,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                                             .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
                                             .ToListAsync();
 
-            return videos.Where(x => x.OriginalId.HasValue).ToDictionary(x => x.OriginalId!.Value);
+            return videos.ToDictionary(x => x.OriginalId);
         }
 
         public async Task<bool> IsVideoUsed(Guid? id)
