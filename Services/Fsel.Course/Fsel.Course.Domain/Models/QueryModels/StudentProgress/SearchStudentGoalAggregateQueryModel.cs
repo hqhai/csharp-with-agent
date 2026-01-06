@@ -7,7 +7,7 @@ namespace Fsel.Course.Domain.Models.QueryModels.StudentProgress
 
     public class SearchStudentGoalAggregateQueryModel : BaseQueryModel
     {
-        public EnumCourseType? CourseType { get; set; }
+        public Guid? LevelId { get; set; }
         public Guid? SchoolId { get; set; }
         public string? ClassIdStr { get; set; }
         public EnumCombinedProgress? CombinedProgress { get; set; }

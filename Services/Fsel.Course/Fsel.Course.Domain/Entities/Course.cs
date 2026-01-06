@@ -75,7 +75,7 @@ namespace Fsel.Course.Domain.Entities
 
         public EnumVersionStatus VersionStatus { get; set; }
 
-        public Guid LevelId { get; set; }
+        public Guid? LevelId { get; set; }
 
         public Level? Level { get; set; }
 

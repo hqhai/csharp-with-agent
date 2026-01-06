@@ -80,7 +80,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         Code = x.c.Code,
                         Status = x.c.Status,
                         Name = x.c.Name,
-                        CourseLevel = x.c.LevelId,
+                        CourseLevel = x.c.CourseLevel,
+                        LevelId = x.c.LevelId,
                         CreatedDate = x.c.CreatedDate,
                         UpdatedDate = x.c.UpdatedDate,
                     });
@@ -96,7 +97,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         Code = x.c.Code,
                         Status = x.c.Status,
                         Name = x.cu.CurriculumName,
-                        CourseLevel = x.c.LevelId,
+                        CourseLevel = x.c.CourseLevel,
+                        LevelId = x.c.LevelId,
                         CreatedDate = x.c.CreatedDate,
                         UpdatedDate = x.c.UpdatedDate,
                     });
@@ -111,7 +113,8 @@ namespace Fsel.Course.Lms.Application.Queries.CourseQuery
                         Code = x.c.Code,
                         Status = x.c.Status,
                         Name = x.cu != null ? x.cu.CurriculumName : x.c.Name,
-                        CourseLevel = x.c.LevelId,
+                        CourseLevel = x.c.CourseLevel,
+                        LevelId = x.c.LevelId,
                         CreatedDate = x.c.CreatedDate,
                         UpdatedDate = x.c.UpdatedDate,
                     });

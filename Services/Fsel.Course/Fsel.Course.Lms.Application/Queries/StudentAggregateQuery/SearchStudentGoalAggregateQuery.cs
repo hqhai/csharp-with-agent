@@ -54,7 +54,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
             Guid? schoolId = null;
 
-            var targetRoles = new List<string> { EnumRole.AdminSchool.ToString(), EnumRole.TeacherCampus.ToString(), EnumRole.AdminCampus.ToString() };
+            var targetRoles = new List<string> { nameof(EnumRole.AdminSchool), nameof(EnumRole.TeacherCampus), nameof(EnumRole.AdminCampus) };
 
             var hasMatchedRole = _authContext.Roles != null && _authContext.Roles.Any(r => targetRoles.Contains(r));
             if (hasMatchedRole)
@@ -68,9 +68,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                 query = query.Where(x => x.SchoolId == schoolId);
             }
 
-            if (request.CourseType.HasValue)
+            if (request.LevelId.HasValue)
             {
-                query = query.Where(x => x.CourseType == request.CourseType);
+                query = query.Where(x => x.LevelId == request.LevelId);
             }
 
             if (request.SchoolId.HasValue)
@@ -108,7 +108,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     CreatedFullName = baseQ.CreatedFullName,
                     CreatedDate = baseQ.CreatedDate,
                     CourseType = baseQ.CourseType,
-                    CourseLevel = baseQ.CourseLevel,
+                    LevelId = baseQ.LevelId,
                     CourseId = baseQ.CourseId,
                     ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
                     CompletedLessons = sum.CompletedLessons,
@@ -167,8 +167,9 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
 
             if (request.StatusStudentCampus != null && request.StatusStudentCampus.Any())
             {
-                var statusList = request.StatusStudentCampus;;
-                lists = lists .Where(l => l.StatusStudentCampus.HasValue && statusList.Contains(l.StatusStudentCampus.Value))
+                var statusList = request.StatusStudentCampus;
+                ;
+                lists = lists.Where(l => l.StatusStudentCampus.HasValue && statusList.Contains(l.StatusStudentCampus.Value))
                     .ToList();
             }
 
@@ -190,6 +191,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     ordered = ordered.OrderBy(l => l.TotalCompletedLessons);
                 }
             }
+
             if (!string.IsNullOrEmpty(request.SortCompletedConfig))
             {
                 if (request.SortCompletedConfig.Equals("desc", StringComparison.OrdinalIgnoreCase))
@@ -201,6 +203,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     ordered = ordered.OrderBy(l => l.TotalTargetLessons);
                 }
             }
+
             if (!string.IsNullOrEmpty(request.SortSlowProgress))
             {
                 if (request.SortSlowProgress.Equals("desc", StringComparison.OrdinalIgnoreCase))
@@ -212,6 +215,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentAggregateQuery
                     ordered = ordered.OrderBy(l => l.ConsecutiveBehindWeeks);
                 }
             }
+
             if (!string.IsNullOrEmpty(request.SortDir))
             {
                 if (request.SortDir.Equals("za", StringComparison.OrdinalIgnoreCase))

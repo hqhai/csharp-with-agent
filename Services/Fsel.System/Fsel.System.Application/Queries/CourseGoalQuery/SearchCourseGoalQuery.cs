@@ -2,15 +2,15 @@
 
 namespace Fsel.System.Application.Queries.CourseGoalQuery
 {
-    using Fsel.Common.ActionResults;
-    using Fsel.Core.Base;
-    using Fsel.Core.Base.BaseModels;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Helpers;
-    using Fsel.System.Application.Services.UserServices;
-    using Fsel.System.Domain.IRepositories.CourseGoals;
-    using Fsel.System.Domain.Models.EntityModels;
-    using Fsel.System.Domain.Models.QueryModels;
+    using Common.ActionResults;
+    using Core.Base;
+    using Core.Base.BaseModels;
+    using Shared.Enums;
+    using Shared.Helpers;
+    using Services.UserServices;
+    using Domain.IRepositories.CourseGoals;
+    using Domain.Models.EntityModels;
+    using Domain.Models.QueryModels;
     using MediatR;
     using Microsoft.AspNetCore.Http;
 
@@ -69,7 +69,7 @@ namespace Fsel.System.Application.Queries.CourseGoalQuery
 
             if (courseTypeByLevelIds != null && courseTypeByLevelIds.Any())
             {
-                query = query.Where(x => courseTypeByLevelIds.Contains(x.LevelId));
+                query = query.Where(x => x.LevelId != null && courseTypeByLevelIds.Contains(x.LevelId.Value));
             }
 
             if (schoolIds != null && schoolIds.Any())

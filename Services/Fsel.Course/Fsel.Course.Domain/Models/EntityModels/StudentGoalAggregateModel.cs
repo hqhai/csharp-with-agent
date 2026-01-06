@@ -18,7 +18,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public EnumCombinedProgress? CombinedProgress { get; set; }
         public EnumProgressStatus ProgressStatus { get; set; }
         public EnumCourseType CourseType { get; set; }
-        public EnumCourseLevel CourseLevel { get; set; }
+        public Guid? LevelId { get; set; }
         public EnumStatusStudentCampus? StatusStudentCampus { get; set; }
         public string? StudentCampusCode { get; set; }
         public string? ClassCampusCode { get; set; }

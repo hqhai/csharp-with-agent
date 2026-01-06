@@ -65,7 +65,7 @@ namespace Fsel.Course.Lms.Api.Controllers.Admin
         [Permission(StudentProgressWeeklyManagement.View)]
         public async Task<IActionResult> Get([FromQuery] SearchStudentGoalAggregateQuery query)
         {
-            MethodResult<PagingItemsModel<StudentGoalAggregateModel>> commandResult = await _mediator.Send(query).ConfigureAwait(false);
+            var commandResult = await _mediator.Send(query).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
 
