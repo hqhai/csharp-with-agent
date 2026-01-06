@@ -14,10 +14,10 @@ namespace Fsel.Course.Infrastructure.Maps
         public DocumentProfile()
         {
             CreateMap<Document, DocumentModel>().IgnoreAllNonExisting();
+            CreateMap<DocumentResult, ResultModel>().IgnoreAllNonExisting();
             CreateMap<DocumentFile, DocumentFileModel>().IgnoreAllNonExisting();
             CreateMap<CreateDocumentCommandModel, Document>().IgnoreAllNonExisting();
             CreateMap<DocumentResult, DocumentResultModel>().IgnoreAllNonExisting();
-
         }
     }
 }
