@@ -107,11 +107,11 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video));
                 return methodResult;
             }
-            if (video.VersionStatus == EnumVersionStatus.OldVersion)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.NotEdited), nameof(video.VersionStatus), video.VersionStatus);
-                return methodResult;
-            }
+            //if (video.VersionStatus == EnumVersionStatus.OldVersion)
+            //{
+            //    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.NotEdited), nameof(video.VersionStatus), video.VersionStatus);
+            //    return methodResult;
+            //}
             if (await _videoResultRepository.Queryable.AnyAsync(x => x.VideoId == request.Id, cancellationToken))
             {
                 video.VersionStatus = EnumVersionStatus.OldVersion;

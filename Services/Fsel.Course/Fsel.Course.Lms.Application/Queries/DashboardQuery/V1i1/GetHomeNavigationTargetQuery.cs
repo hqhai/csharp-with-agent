@@ -121,6 +121,12 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             }
             var overall = MapLessonOverview(lesson, lessonResult, lessonOverview);
             overall.CourseId = course.Id;
+
+            var unitResult = await _unitResultRepository.ReadQueryable
+                .FirstOrDefaultAsync(x => x.UnitId == overall.UnitId && x.CourseResultId == courseResult.Id, cancellationToken);
+
+            overall.UnitResultId = unitResult?.Id;
+
             methodResult.Result = overall;
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
