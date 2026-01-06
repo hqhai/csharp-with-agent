@@ -9,7 +9,6 @@ namespace Fsel.Course.Domain.Entities.QuestionTypeConfigs.Questions
         [JsonRequired]
         public string? Content { get; set; }
 
-        [JsonRequired]
         public string? ImagePath { get; set; }
 
         public string? NameRuby { get; set; }
