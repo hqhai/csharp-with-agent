@@ -86,7 +86,7 @@ namespace Fsel.Course.Infrastructure.Common.VideoHelpers
             }
             foreach (var questionRequest in request.Questions)
             {
-                var question = _mapper.Map<Question>(request);
+                var question = _mapper.Map<Question>(questionRequest);
                 question.Id = Guid.Empty;
 
                 var questionResult = _questionConverter.HandleQuestion(question);
