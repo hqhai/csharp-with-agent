@@ -202,7 +202,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
             return await _videoRepository.ReadQueryable
                 .AsNoTracking()
-                .Where(x => x.OriginalId.HasValue && originalIds.Contains(x.OriginalId.Value))
+                .Where(x => originalIds.Contains(x.OriginalId))
                 .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
                 .ToListAsync(ct);
         }
@@ -462,8 +462,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     .ToDictionary(g => g.Key, g => g.First().Id);
 
                 var videoIdByOriginalId = videos
-                    .Where(x => x.OriginalId.HasValue)
-                    .GroupBy(x => x.OriginalId!.Value)
+                    .GroupBy(x => x.OriginalId)
                     .ToDictionary(g => g.Key, g => g.First().Id);
 
                 return new CourseBuildContext(

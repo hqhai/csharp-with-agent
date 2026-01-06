@@ -115,12 +115,12 @@ namespace Fsel.Course.Application.Commands.TestCmd
             if (isUsingByClient)
             {
                 await _versionEntityUpdater.UpdateEntity(test, newVersionTest,
-                        async (_, entity) => isUsingByClient,
-                        async (oldEntity, newEntity) =>
-                        {
-                            await Task.Yield();
-                        }
-                    );
+                    async (_, entity) => isUsingByClient,
+                    async (oldEntity, newEntity) =>
+                    {
+                        await Task.Yield();
+                    }
+                );
             }
             else
             {
