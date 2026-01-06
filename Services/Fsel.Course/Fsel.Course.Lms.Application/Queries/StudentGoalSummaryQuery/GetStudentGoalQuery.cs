@@ -61,11 +61,6 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                 query = query.Where(x => x.SchoolId == schoolId);
             }
 
-            if (request.CourseType.HasValue)
-            {
-                query = query.Where(x => x.CourseType == request.CourseType);
-            }
-
             if (request.SchoolId.HasValue)
             {
                 query = query.Where(x => x.SchoolId == request.SchoolId);
@@ -101,7 +96,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                     CreatedFullName = baseQ.CreatedFullName,
                     CreatedDate = baseQ.CreatedDate,
                     CourseType = baseQ.CourseType,
-                    CourseLevel = baseQ.CourseLevel,
+                    LevelId = baseQ.LevelId,
                     CourseId = baseQ.CourseId,
                     ConsecutiveBehindWeeks = baseQ.ConsecutiveBehindWeeks,
                     CompletedLessons = sum.CompletedLessons,
@@ -142,7 +137,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
                 item.ClassCampusCode = student?.ClassCampusCode;
                 item.StudentCampusCode = student?.StudentCampusCode;
                 item.PhoneNumber = student?.User?.PhoneNumber;
-                item.StatusStudentCampus =  student?.StatusStudentCampus;
+                item.StatusStudentCampus = student?.StatusStudentCampus;
                 if (summarySumMap.TryGetValue(item.Id, out var totalScore))
                 {
                     item.IsActive = totalScore <= item.TotalTargetLessons;
@@ -165,7 +160,7 @@ namespace Fsel.Course.Lms.Application.Queries.StudentGoalSummaryQuery
 
             if (request.StatusStudentCampus != null && request.StatusStudentCampus.Any())
             {
-                var statusList = request.StatusStudentCampus;;
+                var statusList = request.StatusStudentCampus;
                 lists = lists.Where(l => l.StatusStudentCampus.HasValue && statusList.Contains(l.StatusStudentCampus.Value))
                     .ToList();
             }
