@@ -125,6 +125,9 @@ namespace Fsel.Course.Domain.Entities
             set { SkillScoresStr = Common.Helpers.ConvertHelper.Serialize(value); }
         }
 
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
         public bool IsPendingSpeechToText { get; set; }
 
         public Guid? LessonModuleId { get; set; }

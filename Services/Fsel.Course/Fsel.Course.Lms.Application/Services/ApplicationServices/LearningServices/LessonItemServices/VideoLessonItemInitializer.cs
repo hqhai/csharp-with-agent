@@ -41,6 +41,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 if (videoResult.Status == EnumResultStatus.Unfinished)
                 {
                     videoResult.Status = EnumResultStatus.New;
+                    videoResult.NewDate = DateTime.UtcNow;
                     await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
                 return methodResult;
@@ -62,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 LessonResultId = lessonResult.Id,
                 StudentId = lessonResult.StudentId,
                 Status = EnumResultStatus.New,
+                NewDate = DateTime.UtcNow,
                 VideoId = video.Id,
             };
 

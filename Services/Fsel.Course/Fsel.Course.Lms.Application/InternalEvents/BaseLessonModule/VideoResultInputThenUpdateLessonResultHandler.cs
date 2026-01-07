@@ -115,7 +115,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                 var typeWeightedPercent = NumberHelper.ConvertDoublePercent(typeCorrectPercent * weightPercent, 2);
                 totalPercent += typeWeightedPercent;
             }
-
+            if (!videoResult.CompletionDate.HasValue)
+            {
+                videoResult.CompletionDate = DateTime.UtcNow;
+            }
             videoResult.Percent = totalPercent;
             videoResult.PercentModule = NumberHelper.ConvertDoublePercent(totalPercent * percentModule, 2);
             await _videoResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);

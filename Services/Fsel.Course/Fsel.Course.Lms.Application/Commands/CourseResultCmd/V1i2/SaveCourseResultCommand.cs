@@ -83,6 +83,7 @@ namespace Fsel.Course.Lms.Application.Commands.CourseResultCmd.V1i2
                     CourseId = request.CourseId,
                     StudentId = request.StudentId,
                     Status = EnumResultStatus.New,
+                    NewDate = DateTime.UtcNow,
                     WorkingStatus = EnumWorkingStatus.Active
                 };
                 try

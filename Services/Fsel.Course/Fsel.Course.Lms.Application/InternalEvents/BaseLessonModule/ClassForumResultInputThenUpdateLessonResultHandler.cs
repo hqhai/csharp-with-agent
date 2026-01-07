@@ -67,7 +67,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             {
                 return;
             }
-
+            if (!classForumResult.CompletionDate.HasValue)
+            {
+                classForumResult.CompletionDate = DateTime.UtcNow;
+            }
             classForumResult.PercentModule = NumberHelper.ConvertDoublePercent(classForumResult.Percent * percentModule, 2);
             await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         }

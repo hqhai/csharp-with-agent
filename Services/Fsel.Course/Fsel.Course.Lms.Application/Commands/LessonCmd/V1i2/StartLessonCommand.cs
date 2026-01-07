@@ -65,6 +65,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
             await _lessonResultRepository.ExecuteTransactionAsync(async () =>
             {
                 lessonResult.Status = EnumResultStatus.Process;
+                lessonResult.ProcessDate = DateTime.UtcNow;
                 await _lessonResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
 
                 methodResult.StatusCode = StatusCodes.Status200OK;
@@ -80,9 +81,7 @@ namespace Fsel.Course.Lms.Application.Commands.LessonCmd.V1i2
         /// - Mở tất cả module phía sau.
         /// - Nếu số module có Result Done == số module cần làm → Done lesson.
         /// </summary>
-        public async Task UpdateLessonResultAsync(
-            LessonResult lessonResult,
-            CancellationToken cancellationToken)
+        public async Task UpdateLessonResultAsync(LessonResult lessonResult, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(lessonResult);
 

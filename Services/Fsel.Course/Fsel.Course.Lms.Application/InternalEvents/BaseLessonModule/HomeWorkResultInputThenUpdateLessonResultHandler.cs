@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
     using Fsel.Shared.Helpers;
     using MediatR;
+    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
 
     public class HomeWorkResultInputThenUpdateLessonResultHandler : BaseLessonResultEventHandler, INotificationHandler<EntityChangedEvent<HomeWorkResult>>
@@ -69,9 +70,11 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             {
                 return;
             }
-
-            //homeWorkResult.PercentModule = NumberHelper.ConvertDoublePercent(homeWorkResult.Percent * percentModule, 2);
-            homeWorkResult.PercentModule = homeWorkResult.Percent;
+            if (!homeWorkResult.CompletionDate.HasValue)
+            {
+                homeWorkResult.CompletionDate = DateTime.UtcNow;
+            }
+            homeWorkResult.PercentModule = NumberHelper.ConvertDoublePercent(homeWorkResult.Percent * percentModule, 2);
             await _homeWorkResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         }
     }
