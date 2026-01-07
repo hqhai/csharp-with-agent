@@ -27,8 +27,8 @@ namespace Fsel.Course.Infrastructure.Common.CourseHelpers
                 Code = _createRequest.Code,
                 Name = _createRequest.Name,
                 InstructionContent = _createRequest.InstructionContent,
-                UnitCount = _createRequest.Modules?.Count(m => m.CourseConfigType == EnumCourseConfigType.Unit) ?? default,
-                TestCount = _createRequest.Modules?.Count(m => m.CourseConfigType == EnumCourseConfigType.Test) ?? default,
+                UnitCount = _createRequest.CourseModules?.Count(m => m.CourseConfigType == EnumCourseConfigType.Unit) ?? default,
+                TestCount = _createRequest.CourseModules?.Count(m => m.CourseConfigType == EnumCourseConfigType.Test) ?? default,
                 VersionStatus = EnumVersionStatus.LastVersion,
                 Version = version,
                 LevelId = _createRequest.LevelId,
@@ -37,7 +37,7 @@ namespace Fsel.Course.Infrastructure.Common.CourseHelpers
             };
             course.OriginalId = originalId.HasValue ? originalId.Value : course.Id;
 
-            course.CourseModules = CourseModuleClassification(_createRequest.Modules).ToList();
+            course.CourseModules = CourseModuleClassification(_createRequest.CourseModules).ToList();
             course.CourseTeachers = CourseTeacherClassification(_createRequest.CourseTeachers).ToList();
 
             return course;

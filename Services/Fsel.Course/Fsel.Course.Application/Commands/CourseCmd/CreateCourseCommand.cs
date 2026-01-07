@@ -77,9 +77,9 @@ namespace Fsel.Course.Application.Commands.CourseCmd
         {
             VoidMethodResult methodResult = new VoidMethodResult();
 
-            if (request.Modules == null || !request.Modules.Any())
+            if (request.CourseModules == null || !request.CourseModules.Any())
             {
-                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseModulesNotNull), nameof(request.Modules), request.Modules);
+                methodResult.AddErrorBadRequest(nameof(EnumCourseErrorCode.CourseModulesNotNull), nameof(request.CourseModules), request.CourseModules);
                 return methodResult;
             }
 

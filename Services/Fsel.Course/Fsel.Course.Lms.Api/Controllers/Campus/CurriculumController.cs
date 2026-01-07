@@ -36,7 +36,6 @@ namespace Fsel.Course.Lms.Api.Controllers.Campus
         [HttpPost("create")]
         [ProducesResponseType(typeof(MethodResult<CurriculumModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        [Permission(CurriculumManagement.Add)]
         public async Task<IActionResult> CreateCurriculum([FromBody] CreateCurriculumCommand command)
         {
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);

@@ -48,7 +48,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             var query = await (from baseQuery in _curriculumStudentRepository.Queryable.WhereBulkContains(request.StudentIds, p => p.StudentId)
                                join cu in _curriculumRepository.Queryable on baseQuery.CurriculumId equals cu.Id
                                join c in _courseRepository.Queryable on cu.CourseId equals c.Id
-                               join cc in _courseRepository.Queryable.Include(x => x.Program).Include(x => x.Level) on cu.CourseCloneId equals cc.Id
+                               join cc in _courseRepository.Queryable.Include(x => x.Program).ThenInclude(x => x.CategoryParent).Include(x => x.Level) on cu.CourseCloneId equals cc.Id
                                select new
                                {
                                    CurriculumStudent = baseQuery,
@@ -84,7 +84,7 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                             CourseName = c.CourseClone.Name,
                             ProgramName = c.CourseClone.Program != null ? c.CourseClone.Program.Name : string.Empty,
                             LevelName = c.CourseClone.Level != null ? c.CourseClone.Level.Name : string.Empty,
-
+                            SubjectName = c.CourseClone.Program?.CategoryParent?.Name,
                             StudentId = p,
                             CurriculumId = c.Curriculum.Id,
                             StartDate = c.Curriculum.StartDate,
