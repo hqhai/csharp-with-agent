@@ -10,6 +10,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.TestModels
     {
         public string? Name { get; set; }
         public string? Code { get; set; }
+        public string? Description { get; set; }
         public Guid ProgramId { get; set; }
         public Guid LevelId { get; set; }
         public EnumScoringFormulaType ScoringFormulaType { get; set; }
