@@ -12,19 +12,10 @@ namespace Fsel.Course.Domain.Entities
     public class BaseAnswer : Entity
     {
         [NotMapped]
-        public override Guid? UpdatedUserId { get; set; }
-
-        [NotMapped]
         public override Guid? DeletedUserId { get; set; }
 
         [NotMapped]
-        public override string? UpdatedFullName { get; set; }
-
-        [NotMapped]
         public override string? DeletedFullName { get; set; }
-
-        [NotMapped]
-        public override DateTime? UpdatedDate { get; set; }
 
         [NotMapped]
         public override DateTime? DeletedDate { get; set; }
