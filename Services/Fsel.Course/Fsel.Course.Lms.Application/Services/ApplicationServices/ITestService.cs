@@ -308,11 +308,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             }
 
             var testSectionResult = await _testSectionResultRepository.Queryable.Include(x => x.TestSection)
+                                                                      .Include(x => x.SectionResults)
                                                                       .Where(x => x.Id == request.SectionResultId)
                                                                       .FirstOrDefaultAsync();
-            if (testSectionResult == null)
+            if (testSectionResult == null || testSectionResult.Status == EnumResultStatus.Done || testSectionResult.SectionResults.Any())
             {
-                return;
+                throw new InvalidOperationException("TestSectionResult Invalid");
             }
             await SubmitQuestions(request);
         }
