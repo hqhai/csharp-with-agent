@@ -311,7 +311,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                                                                       .Include(x => x.SectionResults)
                                                                       .Where(x => x.Id == request.SectionResultId)
                                                                       .FirstOrDefaultAsync();
-            if (testSectionResult == null || testSectionResult.Status == EnumResultStatus.Done || testSectionResult.SectionResults.Any())
+            if (testSectionResult == null || testSectionResult.Status == EnumResultStatus.Done)
             {
                 throw new InvalidOperationException("TestSectionResult Invalid");
             }
