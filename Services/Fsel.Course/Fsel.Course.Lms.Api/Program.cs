@@ -64,6 +64,7 @@ builder.Services.AddScoped<ICourseCachingService, CourseCachingService>();
 builder.Services.AddScoped<IUnitModuleCachingService, UnitModuleCachingService>();
 builder.Services.AddScoped<ICourseModuleCachingService, CourseModuleCachingService>();
 builder.Services.AddScoped<ILessonModuleCachingService, LessonModuleCachingService>();
+builder.Services.AddScoped<IAggregateResultQueryService, AggregateResultQueryService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
