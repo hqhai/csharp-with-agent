@@ -36,6 +36,7 @@ namespace Fsel.Course.Infrastructure.Common.VideoHelpers
             video.Version = version;
             video.VersionType = EnumVersion.V2;
             video.OriginalId = originalId ?? video.Id;
+            video.Id = Guid.NewGuid();
             AddTimeCodes(video, _request.VideoTimeCodes);
             return video;
         }
