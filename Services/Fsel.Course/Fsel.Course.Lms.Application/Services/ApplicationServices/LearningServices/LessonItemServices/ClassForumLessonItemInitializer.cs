@@ -35,13 +35,14 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             }
 
             var classForumResult = await _classForumResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id)
-                                                .Where(x => x.LessonModuleId == lessonModule.Id)
-                                                .FirstOrDefaultAsync(cancellationToken);
+                                                                    .Where(x => x.LessonModuleId == lessonModule.Id)
+                                                                    .FirstOrDefaultAsync(cancellationToken);
             if (classForumResult != null)
             {
                 if (classForumResult.ResultStatus == EnumResultStatus.Unfinished)
                 {
                     classForumResult.ResultStatus = EnumResultStatus.New;
+                    classForumResult.NewDate = DateTime.UtcNow;
                     await _classForumResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
 
@@ -49,8 +50,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             }
 
             var classForum = await _classForumRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
-                                                .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                                .FirstOrDefaultAsync(cancellationToken);
+                                                        .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                        .FirstOrDefaultAsync(cancellationToken);
 
             if (classForum == null)
             {
@@ -64,6 +65,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 StudentId = lessonResult.StudentId,
                 ClassForumId = classForum.Id,
                 ResultStatus = EnumResultStatus.New,
+                NewDate = DateTime.UtcNow,
                 LessonModuleId = lessonModule.Id,
                 SubmissionCount = EnumSubmissionCount.FirstSubmit,
             };

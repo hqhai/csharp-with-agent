@@ -42,6 +42,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 if (homeWorkResult.Status == EnumResultStatus.Unfinished)
                 {
                     homeWorkResult.Status = EnumResultStatus.New;
+                    homeWorkResult.NewDate = DateTime.UtcNow;
                     await _homeWorkResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
 
@@ -65,6 +66,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 LessonResultId = lessonResult.Id,
                 StudentId = lessonResult.StudentId,
                 Status = EnumResultStatus.New,
+                NewDate = DateTime.UtcNow,
                 HomeWorkId = homeWork.Id,
                 LessonModuleId = lessonModule.Id,
                 SkillScores = new List<SkillScores>

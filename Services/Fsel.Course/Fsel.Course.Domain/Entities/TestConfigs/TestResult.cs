@@ -19,6 +19,10 @@ namespace Fsel.Course.Domain.Entities.TestConfigs
         public Guid? ActionFlowId { get; set; }
         public ActionFlow? ActionFlow { get; set; }
 
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
+
         public ICollection<TestSectionResult> SectionResults { get; set; } = new List<TestSectionResult>();
         public ICollection<TestAnswer> TestAnswers { get; set; } = new List<TestAnswer>();
         public ICollection<TestScore> TestScores { get; set; } = new List<TestScore>();

@@ -377,7 +377,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             switch (lm.LessonConfigType)
             {
                 case EnumLessonConfigType.HomeWork:
-                    lmBuild.HọmeWorkId = ctx.TryGetHomeWorkId(lm.OriginalId);
+                    lmBuild.HomeWorkId = ctx.TryGetHomeWorkId(lm.OriginalId);
                     break;
 
                 case EnumLessonConfigType.Video:

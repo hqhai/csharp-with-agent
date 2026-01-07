@@ -34,21 +34,22 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             }
 
             var documentResult = await _documentResultRepository.Queryable.Where(x => x.LessonResultId == lessonResult.Id)
-                                                          .Where(x => x.LessonModuleId == lessonModule.Id)
-                                                          .FirstOrDefaultAsync(cancellationToken);
+                                                                .Where(x => x.LessonModuleId == lessonModule.Id)
+                                                                .FirstOrDefaultAsync(cancellationToken);
             if (documentResult != null)
             {
                 if (documentResult.Status == EnumResultStatus.Unfinished)
                 {
                     documentResult.Status = EnumResultStatus.New;
+                    documentResult.NewDate = DateTime.UtcNow;
                     await _documentResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
                 }
 
                 return methodResult;
             }
             var document = await _documentRepository.ReadQueryable.Where(x => x.OriginalId == lessonModule.OriginalId)
-                                      .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
-                                      .FirstOrDefaultAsync(cancellationToken);
+                                                    .Where(x => x.VersionStatus == EnumVersionStatus.LastVersion)
+                                                    .FirstOrDefaultAsync(cancellationToken);
 
             if (document == null)
             {
@@ -62,6 +63,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 LessonResultId = lessonResult.Id,
                 StudentId = lessonResult.StudentId,
                 Status = EnumResultStatus.New,
+                NewDate = DateTime.UtcNow,
                 DocumentId = document.Id,
             };
 

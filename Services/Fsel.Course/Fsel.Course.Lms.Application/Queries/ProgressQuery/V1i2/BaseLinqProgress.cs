@@ -93,12 +93,12 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
                 .Where(x => x.ConfigType == EnumUnitConfigType.Lesson)
                 .SelectMany(x => x.LessonModuleBuilds)
                 .Where(x => x.ConfigType == EnumLessonConfigType.HomeWork
-                            && x.HọmeWorkId.HasValue)
+                            && x.HomeWorkId.HasValue)
                 .Select(x => new
                 {
                     LessonModuleId = x.Id,
                     OriginalId = x.OriginalId,
-                    CurrentId = x.HọmeWorkId!.Value
+                    CurrentId = x.HomeWorkId!.Value
                 })
                 .ToList();
 
