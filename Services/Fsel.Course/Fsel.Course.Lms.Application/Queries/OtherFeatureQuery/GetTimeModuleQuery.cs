@@ -50,12 +50,12 @@ namespace Fsel.Course.Lms.Application.Queries.OtherFeatureQuery
                     getTimeModule = await GetVideoTimeCodeAsync(request);
                     break;
 
-                case nameof(PlacementTest):
                 case nameof(FinalTest):
                 case nameof(MockTest):
                     getTimeModule = await GetSectionGroupResultAsync(request);
                     break;
 
+                case nameof(PlacementTest):
                 case nameof(Test):
                     getTimeModule = await GetSectionResultAsync(request);
                     break;
