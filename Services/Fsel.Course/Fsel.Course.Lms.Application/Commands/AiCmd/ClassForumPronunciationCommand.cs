@@ -104,13 +104,15 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd
                         return methodResult;
                     });
 
-                   
+
                     await _submitAIResponsePublisher.Publish(new SubmitAIResponseModel
                     {
                         PronunciationAlFeedback = ConvertHelper.Serialize(response),
                         ClassForumResultId = classForumDetailResult.ClassForumResultId,
                         EnumSubmissionCount = classForumDetailResult.SubmissionCount ?? EnumSubmissionCount.FirstSubmit,
-                        PronunciationScore = classForumDetailResult.PronunciationScore
+                        PronunciationScore = classForumDetailResult.PronunciationScore,
+                        CorrectTotal = classForumDetailResult.CorrectTotal,
+                        CorrectCount = classForumDetailResult.CorrectCount
                     }, cancellationToken);
 
                     return methodResult;

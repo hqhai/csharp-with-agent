@@ -13,6 +13,9 @@ namespace Fsel.Shared.Models.ShareModels
         public string? PronunciationAlFeedback { get; set; }
 
         public double? PronunciationScore { get; set; }
+
+        public double? CorrectTotal { get; set; }
+        public double? CorrectCount { get; set; }
     }
 
     public class SubmitMockTestResponseModel
