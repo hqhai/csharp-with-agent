@@ -607,7 +607,8 @@ namespace Fsel.Course.Infrastructure.Common
         {
             ArgumentNullException.ThrowIfNull(videoResult);
 
-            var videoTimeCodeResults = await _videoTimeCodeResultRepository.Queryable.Include(x => x.VideoTimeCode)
+            var videoTimeCodeResults = await _videoTimeCodeResultRepository.ReadQueryable
+                                                .Include(x => x.VideoTimeCode)
                                                 .Where(x => x.VideoResultId == videoResult.Id && x.CreatedDate >= videoResult.CreatedDate)
                                                 .Where(x => !(videoResult.Status == EnumResultStatus.Done) || x.UpdatedDate <= videoResult.UpdatedDate)
                                                 .ToListAsync(cancellationToken);
@@ -638,6 +639,7 @@ namespace Fsel.Course.Infrastructure.Common
                          s.Skill,      // EnumCourseSkill (cũ)
                          s.SkillId,    // Guid? / int? (mới)
                          s.SkillName,  // string? (mới)
+                         s.SkillFilePath,
                          TimeCodeType = g.Key
                      })
                      .Select(x => new
@@ -645,6 +647,7 @@ namespace Fsel.Course.Infrastructure.Common
                          Type = x.Key.TimeCodeType,
                          Skill = x.Key.Skill,
                          SkillId = x.Key.SkillId,
+                         SkillFilePath = x.Key.SkillFilePath,
                          SkillName = x.Key.SkillName,
                          CorrectCount = x.Sum(y => y.CorrectCount),
                          TotalCount = x.Sum(y => y.TotalCount),
@@ -668,6 +671,7 @@ namespace Fsel.Course.Infrastructure.Common
                             Skill = x.Skill,        // EnumCourseSkill (dùng hiện tại)
                             SkillId = x.SkillId,      // dùng dần về sau
                             SkillName = x.SkillName,    // dùng dần về sau
+                            SkillFilePath = x.SkillFilePath,
                             TotalCount = x.TotalCount,
                             CorrectQuestion = x.CorrectQuestion,
                             CorrectCount = x.CorrectCount,
@@ -702,7 +706,8 @@ namespace Fsel.Course.Infrastructure.Common
                                 TotalAnswer = x.Sum(y => y.CountQuestion),
                                 TokenReceived = x.Sum(x => x.TokenReceived)
                             })).ToList();
-            var videoTimeCodes = await _videoTimeCodeRepository.ReadQueryable.Include(x => x.TimeCodeExercises)
+            var videoTimeCodes = await _videoTimeCodeRepository.ReadQueryable
+                                    .Include(x => x.TimeCodeExercises)
                                     .ThenInclude(x => x.Exercise)
                                     .ThenInclude(x => x!.ExerciseQuestions)
                                     .ThenInclude(x => x.Question)

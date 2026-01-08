@@ -50,6 +50,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 {
                     SkillId = x.Id,
                     SkillName = x.Name,
+                    SkillFilePath = x.FilePath,
                 }).ToList();
             }, token: cancellationToken);
         }
@@ -104,7 +105,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
             return parent?.Categorys?.Where(x => x.TestMode == EnumTestMode.Custom && x.IsTestDefault).FirstOrDefault();
         }
-
 
         private async Task LoadChildren(Category category)
         {

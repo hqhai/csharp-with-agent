@@ -88,6 +88,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     {
                         skillScore.SkillId = correspondSection?.SkillId;
                         skillScore.SkillName = correspondSection?.Skill?.Name;
+                        skillScore.SkillFilePath = correspondSection?.Skill?.FilePath;
                     }
 
                     return skillScores;

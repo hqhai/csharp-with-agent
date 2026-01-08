@@ -269,6 +269,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                     hw.CourseSkill,
                     hw.SkillId,
                     SkillName = hw.Skill != null ? hw.Skill.Name : string.Empty,
+                    SkillFilePath = hw.Skill != null ? hw.Skill.FilePath : string.Empty,
                     QuestionId = q.Id,
                     q.CorrectTotal
                 }
@@ -282,7 +283,7 @@ namespace Fsel.Course.Infrastructure.Repositories
             // 3) Gom theo (HomeWorkId, Skill) => totals cho 1 lần xuất hiện homework
             //    rồi nhân theo số lần homework xuất hiện trong ids
             var perHomeWorkSkill = rows
-                .GroupBy(x => new { x.HomeWorkId, x.SkillId, x.CourseSkill, x.SkillName })
+                .GroupBy(x => new { x.HomeWorkId, x.SkillId, x.CourseSkill })
                 .Select(g =>
                 {
                     var totalQuestion = g.Select(x => x.QuestionId).Distinct().Count();
@@ -292,9 +293,11 @@ namespace Fsel.Course.Infrastructure.Repositories
 
                     return new SkillScores
                     {
+                        SkillFilePath = g.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
+                        SkillName = g.Where(x => x.SkillName != null).FirstOrDefault()?.SkillName,
+
                         SkillId = g.Key.SkillId,
                         Skill = g.Key.CourseSkill,
-                        SkillName = g.Key.SkillName,
                         TotalQuestion = totalQuestion * multiplier,
                         TotalCount = totalCount * multiplier
                     };
@@ -303,12 +306,13 @@ namespace Fsel.Course.Infrastructure.Repositories
 
             // 4) Gom cuối theo Skill
             return perHomeWorkSkill
-                .GroupBy(x => new { x.SkillId, x.Skill, x.SkillName })
+                .GroupBy(x => new { x.SkillId, x.Skill })
                 .Select(g => new SkillScores
                 {
+                    SkillFilePath = g.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
+                    SkillName = g.Where(x => x.SkillName != null).FirstOrDefault()?.SkillName,
                     SkillId = g.Key.SkillId,
                     Skill = g.Key.Skill,
-                    SkillName = g.Key.SkillName,
                     TotalQuestion = g.Sum(x => x.TotalQuestion),
                     TotalCount = g.Sum(x => x.TotalCount)
                 })

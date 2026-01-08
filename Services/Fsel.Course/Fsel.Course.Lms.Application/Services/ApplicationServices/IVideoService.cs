@@ -455,7 +455,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             // Group theo CourseSkill (lấy từ timeCodeQuestions)
             var groupedBySkill = timeCodeQuestions
                 .Where(x => x.Question != null)
-                .GroupBy(x => new { x.CourseSkill, x.Skill?.Id, x.Skill?.Name });     // nếu property tên khác thì sửa lại chỗ này
+                .GroupBy(x => new { x.CourseSkill, x.Skill });     // nếu property tên khác thì sửa lại chỗ này
 
             var ungradedScores = new List<SkillScores>();
             var gradedScores = new List<SkillScores>();
@@ -463,8 +463,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
             foreach (var skillGroup in groupedBySkill)
             {
                 var courseSkill = skillGroup.Key.CourseSkill;
-                var skillId = skillGroup.Key.Id;
-                var skillName = skillGroup.Key.Name;
+                var skill = skillGroup.Key.Skill;
 
                 // Câu hỏi chưa chấm (Ungraded)
                 var ungradedQuestions = skillGroup
@@ -478,13 +477,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     .Select(x => x.Question!)
                     .ToList();
 
-                var ungraded = BuildSkillScores(ungradedQuestions, answersByQuestionId, courseSkill, skillId, skillName);
+                var ungraded = BuildSkillScores(ungradedQuestions, answersByQuestionId, courseSkill, skill);
                 if (ungraded != null)
                 {
                     ungradedScores.Add(ungraded);
                 }
 
-                var graded = BuildSkillScores(gradedQuestions, answersByQuestionId, courseSkill, skillId, skillName);
+                var graded = BuildSkillScores(gradedQuestions, answersByQuestionId, courseSkill, skill);
                 if (graded != null)
                 {
                     gradedScores.Add(graded);
@@ -498,8 +497,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
         IList<Question> questions,
         IDictionary<Guid, List<VideoTimeCodeAnswer>> answersByQuestionId,
         EnumCourseSkill courseSkill,
-        Guid? skillId,
-        string? skillName)
+        SkillViewModel? skill)
         {
             if (questions == null || questions.Count == 0)
             {
@@ -524,8 +522,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 CountQuestion = allAnswers.Count,
                 Skill = courseSkill,
                 TotalCount = totalCount,
-                SkillId = skillId,
-                SkillName = skillName,
+                SkillId = skill?.Id,
+                SkillName = skill?.Name,
+                SkillFilePath = skill?.FilePath,
                 TotalQuestion = totalQuestion,
                 Scores = correctCount.GetIeltsScore(courseSkill),
                 TokenReceived = tokenReceived

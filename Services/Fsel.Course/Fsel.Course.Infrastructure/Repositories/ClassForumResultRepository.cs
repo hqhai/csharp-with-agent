@@ -39,6 +39,7 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .Select(g => new SkillScores
                 {
                     SkillId = g.Key.SkillId,
+                    SkillFilePath = g.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
                     Skill = g.Key.Skill,
                     SkillName = g.Key.SkillName,
                     CorrectCount = g.Sum(s => s.CorrectCount),

@@ -28,7 +28,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Overall
         private readonly AuthContext _authContext;
         private readonly IUserService _userService;
         private readonly ICourseService _courseService;
-
         private readonly IClassForumRepository _classForumRepository;
         private readonly IClassForumResultRepository _classForumResultRepository;
 
@@ -46,15 +45,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Overall
             _classForumResultRepository = classForumResultRepository;
         }
 
-        public async Task<MethodResult<OverallScoreReportModel>> Handle(
-            GetOverallScoreByClassForumQuery request,
-            CancellationToken cancellationToken)
+        public async Task<MethodResult<OverallScoreReportModel>> Handle(GetOverallScoreByClassForumQuery request, CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request);
 
             var methodResult = new MethodResult<OverallScoreReportModel>();
 
-            var student = await GetStudentOrErrorAsync(methodResult, cancellationToken);
+            var student = await GetStudentOrErrorAsync(methodResult);
             if (student == null)
             {
                 return methodResult;
@@ -97,18 +94,19 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Overall
                 CorrectTotal = merged.Sum(x => x.TotalCount),
                 CourseSkills = merged.Select(x => x.Skill).Distinct().ToList(),
                 Skills = merged.Where(x => !string.IsNullOrWhiteSpace(x.SkillName))
-                               .Select(x => x.SkillName!)
-                               .Distinct()
-                               .ToList()
+                               .Select(x => new SkillViewModel
+                               {
+                                   Id = x.SkillId,
+                                   Name = x.SkillName,
+                                   FilePath = x.SkillFilePath
+                               }).ToList()
             };
 
             methodResult.Result = report;
             return methodResult;
         }
 
-        private async Task<StudentModel?> GetStudentOrErrorAsync(
-            MethodResult<OverallScoreReportModel> methodResult,
-            CancellationToken cancellationToken)
+        private async Task<StudentModel?> GetStudentOrErrorAsync(MethodResult<OverallScoreReportModel> methodResult)
         {
             var studentResult = await _userService.GetStudentByUserIdWithCacheAsync(_authContext.CurrentUserId);
             if (!studentResult.IsSuccessStatusCode)

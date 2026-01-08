@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
 
     public class OverallScoreModel
     {
+        public EnumScoringFormulaType? ScoringFormulaType { get; set; } = EnumScoringFormulaType.Percent;
         public IList<SkillScores>? SkillScores { get; set; }
         public double Percent { get; set; }
         public bool IsPlacement { get; set; }

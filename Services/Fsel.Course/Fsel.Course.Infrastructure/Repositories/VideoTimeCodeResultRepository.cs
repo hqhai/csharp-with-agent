@@ -37,12 +37,14 @@ namespace Fsel.Course.Infrastructure.Repositories
                               select baseQ;
             var videoTimeCodeResults = await queryResult.ToListAsync();
             return videoTimeCodeResults.Where(x => x.SkillScores != null && x.SkillScores.Any()).SelectMany(x => x.SkillScores!)
-                .GroupBy(x => new { x.SkillId, x.Skill, x.SkillName })
+                .GroupBy(x => new { x.SkillId, x.Skill })
                 .Select(x => new SkillScores
                 {
+                    SkillFilePath = x.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
+                    SkillName = x.Where(x => x.SkillName != null).FirstOrDefault()?.SkillName,
+
                     SkillId = x.Key.SkillId,
                     Skill = x.Key.Skill,
-                    SkillName = x.Key.SkillName,
                     CorrectCount = x.Sum(s => s.CorrectCount),
                     CorrectQuestion = x.Sum(s => s.CorrectQuestion ?? 0),
                     CountQuestion = x.Sum(s => s.CountQuestion),

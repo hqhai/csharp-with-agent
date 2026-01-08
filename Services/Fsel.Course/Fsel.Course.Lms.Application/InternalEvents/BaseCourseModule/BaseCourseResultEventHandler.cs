@@ -73,6 +73,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
                       Skill = first.Skill,
                       SkillId = first.SkillId,
                       SkillName = first.SkillName,
+                      SkillFilePath = first.SkillFilePath,
 
                       // Tổng hợp các giá trị
                       Scores = g.Sum(x => x.Scores),

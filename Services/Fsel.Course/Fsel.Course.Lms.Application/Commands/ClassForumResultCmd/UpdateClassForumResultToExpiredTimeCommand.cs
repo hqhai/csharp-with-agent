@@ -196,6 +196,7 @@ namespace Fsel.Course.Lms.Application.Commands.ClassForumResultCmd
                         Skill = classForumResult.ClassForum?.CourseSkill ?? default,
                         SkillId = classForumResult.ClassForum?.SkillId ?? default,
                         SkillName = classForumResult.ClassForum?.Skill?.Name ?? default,
+                        SkillFilePath = classForumResult.ClassForum?.Skill?.FilePath ?? default
                     }
                 };
             }
