@@ -6,9 +6,10 @@ namespace Fsel.Course.Domain.Entities
     using Fsel.Course.Domain.IEntities;
     using Fsel.Shared.Enums;
 
-    public class HomeWorkResult : BaseScoreResult, ITokenResult, ISubmissionCount
+    public class HomeWorkResult : BaseScoreResult, ITokenResult, ISubmissionCount, IHighestStreak
     {
         private EnumSubmissionCount? _submissionCount;
+        public int? HighestStreak { get; set; }
 
         public int? TokenFirstTime { get; set; }
         public int? TokenLastTime { get; set; }
