@@ -207,7 +207,9 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                     {
                         GradingAlFeedback = ConvertHelper.Serialize(retryResult.ClassForumAIs),
                         ClassForumResultId = request.ClassForumResultId,
-                        EnumSubmissionCount = request.SubmissionCount
+                        EnumSubmissionCount = request.SubmissionCount,
+                        CorrectTotal = classForumDetailResult.CorrectTotal,
+                        CorrectCount = classForumDetailResult?.CorrectCount,
                     }, cancellationToken);
 
                 if (retryResult.ClassForumAIs != null && retryResult.ClassForumAIs.Count > 0)
