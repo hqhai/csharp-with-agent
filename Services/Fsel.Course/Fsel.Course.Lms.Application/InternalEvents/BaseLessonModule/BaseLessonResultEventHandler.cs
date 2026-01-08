@@ -111,6 +111,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                     {
                         Skill = first.Skill,
                         SkillId = first.SkillId,
+                        SkillFilePath = first.SkillFilePath,
                         SkillName = first.SkillName,
                         Scores = g.Sum(x => x.Scores),
                         TotalCount = g.Sum(x => x.TotalCount),

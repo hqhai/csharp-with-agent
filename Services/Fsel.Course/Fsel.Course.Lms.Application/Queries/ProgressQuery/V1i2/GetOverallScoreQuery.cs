@@ -3,9 +3,7 @@
 namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
 {
     using System.Linq.Dynamic.Core;
-    using AutoMapper;
     using Fsel.Common.ActionResults;
-    using Fsel.Common.Enums;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
@@ -13,7 +11,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
     using Fsel.Course.Lms.Application.Services.ApplicationServices;
-    using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
     using Fsel.Shared.Helpers;
@@ -35,10 +32,6 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
         private readonly IUserService _userService;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
         private readonly ITestResultRepository _testResultRepository;
-        private readonly ILessonRepository _lessonRepository;
-        private readonly ICourseModuleRepository _courseModuleRepository;
-        private readonly ICourseModuleCachingService _courseModuleCachingService;
-        private readonly ICourseService _courseService;
         private readonly ICategoryService _categoryService;
 
         public GetOverallScoreQueryHandler(AuthContext authContext
@@ -48,15 +41,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
             , IUserService userService
             , ITestGroupResultRepository testGroupResultRepository
             , ITestResultRepository testResultRepository
-            , ILessonRepository lessonRepository
-            , ICourseModuleRepository courseModuleRepository
-            , ICourseModuleCachingService courseModuleCachingService
-            , IUnitRepository unitRepository
-            , ISkillLevelRepository skillLevelRepository
-            , IProgramSkillScoresCachingService programSkillScoresCachingService
-            , ICourseService courseService
-,
-ICategoryService categoryService)
+            , ICategoryService categoryService)
         {
             _authContext = authContext;
             _courseRepository = courseRepository;
@@ -65,10 +50,6 @@ ICategoryService categoryService)
             _userService = userService;
             _testGroupResultRepository = testGroupResultRepository;
             _testResultRepository = testResultRepository;
-            _lessonRepository = lessonRepository;
-            _courseModuleRepository = courseModuleRepository;
-            _courseModuleCachingService = courseModuleCachingService;
-            _courseService = courseService;
             _categoryService = categoryService;
         }
 
@@ -95,7 +76,8 @@ ICategoryService categoryService)
                 return methodResult;
             }
 
-            var courseResult = await _courseResultRepository.ReadQueryable.Where(x => x.StudentId == studentId && x.CourseId == request.CourseId)
+            var courseResult = await _courseResultRepository.ReadQueryable.Where(x => x.WorkingStatus == Shared.Enums.EnumWorkingStatus.Active)
+                                                            .Where(x => x.StudentId == studentId && x.CourseId == request.CourseId)
                                                             .FirstOrDefaultAsync(cancellationToken);
 
             if (courseResult != null && courseResult.Status == EnumResultStatus.Done)
@@ -114,11 +96,12 @@ ICategoryService categoryService)
                 {
                     overallScoreModel.SkillScores = unitResults.Where(x => x.SkillScores != null && x.SkillScores.Any())
                         .SelectMany(x => x.SkillScores!)
-                        .GroupBy(x => new { x.Skill, x.SkillId, x.SkillName })
+                        .GroupBy(x => new { x.Skill, x.SkillId })
                         .Select(x => new SkillScores
                         {
                             Skill = x.Key.Skill,
-                            SkillName = x.Key.SkillName,
+                            SkillFilePath = x.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
+                            SkillName = x.Where(x => x.SkillName != null).FirstOrDefault()?.SkillName,
                             SkillId = x.Key.SkillId,
                             CorrectCount = x.Sum(x => x.CorrectCount),
                             TotalCount = x.Sum(x => x.TotalCount),
@@ -140,16 +123,20 @@ ICategoryService categoryService)
                     }
                     else
                     {
-                        var testResult = await _testResultRepository.ReadQueryable
-                           .Where(x => testGroupResult != null && x.TestGroupResultId == testGroupResult.Id && x.Status == EnumResultStatus.Done)
-                           .OrderByDescending(x => x.CreatedDate).FirstOrDefaultAsync(cancellationToken);
+                        var testResult = await _testResultRepository.ReadQueryable.Include(x => x.Test)
+                                   .Where(x => x.Status == EnumResultStatus.Done)
+                                   .Where(x => testGroupResult != null && x.TestGroupResultId == testGroupResult.Id)
+                                   .OrderByDescending(x => x.CreatedDate)
+                                   .FirstOrDefaultAsync(cancellationToken);
                         if (testResult == null)
                         {
                             return methodResult;
                         }
+                        overallScoreModel.BandScores = testResult.Score ?? default;
+                        overallScoreModel.ScoringFormulaType = testResult.Test?.ScoringFormulaType;
                         overallScoreModel.SkillScores = testResult.SkillScores;
                         overallScoreModel.IsPlacement = true;
-                        overallScoreModel.Percent = testResult.Percent;
+                        overallScoreModel.Percent = testResult.PercentModule;
                     }
                 }
             }

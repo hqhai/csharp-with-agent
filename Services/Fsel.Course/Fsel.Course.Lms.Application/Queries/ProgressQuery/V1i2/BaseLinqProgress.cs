@@ -21,6 +21,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2
             }
             return new SkillScores
             {
+                SkillFilePath = list.First().SkillFilePath,
                 SkillId = list.First().SkillId,
                 Skill = list.First().Skill,
                 SkillName = list.First().SkillName,

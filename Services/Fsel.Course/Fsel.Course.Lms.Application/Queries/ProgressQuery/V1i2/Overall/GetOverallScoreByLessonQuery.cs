@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Overall
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
+    using Fsel.Course.Domain.Models.EntityModels.SkillModels;
     using Fsel.Course.Lms.Application.Services.ApplicationServices;
     using Fsel.Course.Lms.Application.Services.UserServices;
     using Fsel.Course.Lms.Application.Services.UserServices.Models;
@@ -86,7 +87,13 @@ namespace Fsel.Course.Lms.Application.Queries.ProgressQuery.V1i2.Overall
             overallScoreReport.CorrectTotal = merged.Sum(x => x.TotalCount);
             overallScoreReport.CountQuestion = merged.Sum(x => x.CountQuestion);
             overallScoreReport.CourseSkills = merged.Select(x => x.Skill).Distinct().ToList();
-            overallScoreReport.Skills = merged.Where(x => x.SkillName != null).Select(x => x.SkillName!).Distinct().ToList();
+            overallScoreReport.Skills = merged.Where(x => !string.IsNullOrWhiteSpace(x.SkillName))
+                                              .Select(x => new SkillViewModel
+                                              {
+                                                  Id = x.SkillId,
+                                                  Name = x.SkillName,
+                                                  FilePath = x.SkillFilePath
+                                              }).ToList();
             methodResult.Result = overallScoreReport;
             return methodResult;
         }

@@ -112,22 +112,24 @@ namespace Fsel.Course.Infrastructure.Repositories
                     ClassForumId = x.Id,
                     x.CourseSkill,
                     x.SkillId,
+                    SkillFilePath = x.Skill != null ? x.Skill.FilePath : string.Empty,
                     SkillName = x.Skill != null ? x.Skill.Name : string.Empty
                 })
                 .ToListAsync();
 
             // mỗi forum = 1 question, totalCount nếu có field CorrectTotal/MaxScore thì map vào đây
             var perForumSkill = rows
-                .GroupBy(x => new { x.ClassForumId, x.SkillId, x.CourseSkill, x.SkillName })
+                .GroupBy(x => new { x.ClassForumId, x.SkillId, x.CourseSkill })
                 .Select(g =>
                 {
                     var multiplier = idCounts.TryGetValue(g.Key.ClassForumId, out var m) ? m : 1;
 
                     return new SkillScores
                     {
+                        SkillFilePath = g.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
+                        SkillName = g.Where(x => x.SkillName != null).FirstOrDefault()?.SkillName,
                         SkillId = g.Key.SkillId,
                         Skill = g.Key.CourseSkill,
-                        SkillName = g.Key.SkillName,
                         TotalQuestion = 1 * multiplier,
                         TotalCount = 1 * multiplier // nếu muốn total count = số forum
                     };
@@ -135,12 +137,13 @@ namespace Fsel.Course.Infrastructure.Repositories
                 .ToList();
 
             return perForumSkill
-                .GroupBy(x => new { x.SkillId, x.Skill, x.SkillName })
+                .GroupBy(x => new { x.SkillId, x.Skill })
                 .Select(g => new SkillScores
                 {
+                    SkillFilePath = g.Where(x => x.SkillFilePath != null).FirstOrDefault()?.SkillFilePath,
+                    SkillName = g.Where(x => x.SkillName != null).FirstOrDefault()?.SkillName,
                     SkillId = g.Key.SkillId,
                     Skill = g.Key.Skill,
-                    SkillName = g.Key.SkillName,
                     TotalQuestion = g.Sum(x => x.TotalQuestion),
                     TotalCount = g.Sum(x => x.TotalCount)
                 })
