@@ -12,6 +12,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.LessonItemServices;
     using Fsel.Shared.Constants;
+    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.EntityFrameworkCore;
 
     public class BaseLessonResultEventHandler
@@ -137,6 +138,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             lessonResult.CorrectCount = totalCorrectCount;
             lessonResult.CorrectTotal = totalCorrectTotal;
             lessonResult.Percent = totalPercentModule;
+            if (lessonResult.Status == EnumResultStatus.Done)
+            {
+                lessonResult.CompletionDate = DateTime.UtcNow;
+            }
             lessonResult.Status = EnumResultStatus.Done;
 
             await _lessonResultRepository.BulkUpdateList(
@@ -149,7 +154,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
                         entity.CorrectTotal,
                         entity.Percent,
                         entity.SkillScoresStr,
-                        entity.Status
+                        entity.Status,
+                        entity.CompletionDate
                     };
                 });
 

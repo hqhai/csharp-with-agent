@@ -15,14 +15,15 @@ using Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule;
 using Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule;
 using Fsel.Course.Lms.Application.Queues.Consumers;
 using Fsel.Course.Lms.Application.Queues.Consumers.ExportFiles;
+using Fsel.Course.Lms.Application.Queues.Consumers.Test;
 using Fsel.Course.Lms.Application.Queues.Publishers;
 using Fsel.Course.Lms.Application.Queues.Publishers.ExportFiles;
 using Fsel.Course.Lms.Application.Queues.Publishers.Test;
+using Fsel.Course.Lms.Application.Services.AIConfigService;
 using Fsel.Course.Lms.Application.Services.AiService;
 using Fsel.Course.Lms.Application.Services.AiService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService;
 using Fsel.Course.Lms.Application.Services.AIService.SpeakingAIService.Interface;
-using Fsel.Course.Lms.Application.Services.AIConfigService;
 using Fsel.Course.Lms.Application.Services.ApplicationServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
 using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices.BuildModules;
@@ -63,6 +64,7 @@ builder.Services.AddScoped<ICourseCachingService, CourseCachingService>();
 builder.Services.AddScoped<IUnitModuleCachingService, UnitModuleCachingService>();
 builder.Services.AddScoped<ICourseModuleCachingService, CourseModuleCachingService>();
 builder.Services.AddScoped<ILessonModuleCachingService, LessonModuleCachingService>();
+builder.Services.AddScoped<IAggregateResultQueryService, AggregateResultQueryService>();
 
 builder.Services.AddScoped<IPlacementTestRepository, PlacementTestRepository>();
 builder.Services.AddScoped<ILessonRepository, LessonRepository>();
@@ -233,6 +235,7 @@ builder.Services.AddScoped<TechieActionPublisher>();
 builder.Services.AddScoped<CreateLuckyTicketPublisher>();
 builder.Services.AddScoped<AddFeatureMissionPublisher>();
 builder.Services.AddScoped<SaveUserSurveyAssignmentPublisher>();
+builder.Services.AddScoped<SubmitAiTestLayOutPublisher>();
 
 // Converter
 builder.Services.AddScoped<ExtraPracticeConverter>();
@@ -341,6 +344,7 @@ queues: new Dictionary<string, Type>
     { QueueSettings.LmsQueue.NameQueue.JobStudentAggregate, typeof(JobStudentAggregateConsumer) },
     { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyReportCourseTarget, typeof(NotifyWeeklyReportCourseTargetConsumer) },
     { QueueSettings.LmsQueue.NameQueue.NotifyWeeklyCourseGoalTarget, typeof(NotifyWeeklyCourseGoalTargetConsumer) },
+    { QueueSettings.LmsQueue.NameQueue.SubmitTestAi, typeof(SubmitAiTestLayOutConsumer) },
 });
 
 var app = builder.Build();

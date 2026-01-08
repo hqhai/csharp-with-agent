@@ -286,36 +286,11 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name && (!request.OriginalId.HasValue || (x.OriginalId != request.OriginalId && x.Id != request.OriginalId)));
+            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name);
             if (isExistName)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNameIsExist), nameof(request.Name), request.Name);
                 return methodResult;
-            }
-            switch (request.CourseLevel.GetEnumCourseType())
-            {
-                case EnumCourseType.Academic:
-                    break;
-
-                case EnumCourseType.Ielts:
-                    if (request.VideoTimeCodes.Any(x => x.TimeCodeType != EnumTimeCodeType.Standalone))
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.IeltsAcceptsStandalone),
-                            nameof(request.VideoTimeCodes),
-                            request.VideoTimeCodes.Where(x => x.TimeCodeType != EnumTimeCodeType.Standalone).Select(x => x.DisplayTime));
-                        return methodResult;
-                    }
-                    break;
-
-                case EnumCourseType.EnglishFoundation:
-                    if (request.VideoTimeCodes.Any(x => x.TimeCodeType == EnumTimeCodeType.SkillTest))
-                    {
-                        methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.AdultFoundationNotAcceptsSkillTest),
-                            nameof(request.VideoTimeCodes),
-                            request.VideoTimeCodes.Where(x => x.TimeCodeType != EnumTimeCodeType.Standalone).Select(x => x.DisplayTime));
-                        return methodResult;
-                    }
-                    break;
             }
 
             var method = await AddTimeCodeToVideo(video, request.VideoTimeCodes);
@@ -542,7 +517,7 @@ namespace Fsel.Course.Infrastructure.Common
                 return methodResult;
             }
 
-            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name && x.Id != request.Id && (!video.OriginalId.HasValue || (x.OriginalId != video.OriginalId && x.Id != video.OriginalId)));
+            var isExistName = await _videoRepository.Queryable.AnyAsync(x => x.Name == request.Name && x.Id != request.Id && (x.OriginalId != video.OriginalId && x.Id != video.OriginalId));
             if (isExistName)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.VideoNameIsExist), nameof(request.Name), request.Name);

@@ -7,9 +7,9 @@ namespace Fsel.System.Domain.Models.CommandModels.CourseGoals
     public class CreateCourseGoalCommandModel
     {
         public EnumCourseGoalCategory GoalCategory { get; set; }
-        public EnumCourseLevel CourseLevel { get; set; }
-        public EnumCourseType CourseType { get; set; }
         public Guid? SchoolId { get; set; }
+        public Guid? ProgramId { get; set; }
+        public Guid? LevelId { get; set; }
         public string? SchoolName { get; set; }
         public IList<SchoolClassModel>? Classes { get; set; }
         public IList<CreateCourseGoalConfigCommandModel> CourseGoalConfigs { get; set; } = new List<CreateCourseGoalConfigCommandModel>();

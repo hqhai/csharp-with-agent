@@ -77,7 +77,7 @@ namespace Fsel.Course.Application.Queries.ProgramQuery
                                      UpdatedDate = g.Key.UpdatedDate,
                                      UpdatedFullName = g.Key.UpdatedFullName,
                                      UpdatedUserId = g.Key.UpdatedUserId,
-                                     Levels = g.Select(b => new LevelModel
+                                     Levels = g.OrderBy(x => x.LevelOrder).Select(b => new LevelModel
                                      {
                                          Id = b.Id,
                                          Name = b.Name,

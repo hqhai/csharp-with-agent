@@ -101,11 +101,23 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseCourseModule
             courseResult.CorrectCount = totalCorrectCount;
             courseResult.CorrectTotal = totalCorrectTotal;
             courseResult.Percent = totalPercentModule;
+            if (courseResult.Status == EnumResultStatus.Done)
+            {
+                courseResult.CompletionDate = DateTime.UtcNow;
+            }
 
             courseResult.Status = EnumResultStatus.Done;
             await _courseResultRepository.BulkUpdateList(new List<CourseResult> { courseResult }, bulk =>
             {
-                bulk.ColumnInputExpression = entity => new { entity.CorrectCount, entity.CorrectTotal, entity.Percent, entity.SkillScoresStr, entity.Status };
+                bulk.ColumnInputExpression = entity => new
+                {
+                    entity.CorrectCount,
+                    entity.CorrectTotal,
+                    entity.Percent,
+                    entity.SkillScoresStr,
+                    entity.Status,
+                    entity.CompletionDate
+                };
             });
         }
 

@@ -8,6 +8,13 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using Domain.IRepositories;
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.TestModels;
+    using Fsel.Core.Base.BaseModels;
+    using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Lms.Application.Queues.Publishers.Test;
+    using Fsel.Course.Lms.Application.Services.TestServices;
+    using Fsel.Course.Lms.Application.Services.TestServices.Interface;
+    using Fsel.Shared.Enums;
+    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Services.ApplicationServices.Aggregates;
@@ -27,11 +34,20 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     {
         private readonly ITestResultRepository _testResultRepository;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
+        private readonly ITestAiLayoutService _testAiLayoutService;
+        private readonly SubmitAiTestLayOutPublisher _submitAiTestLayOutPublisher;
         private readonly IServiceProvider _serviceProvider;
 
-        public TestSubmitAnswerCommandHandler(ITestResultRepository testResultRepository, IServiceProvider serviceProvider, ITestGroupResultRepository testGroupResultRepository)
+        public TestSubmitAnswerCommandHandler(ITestResultRepository testResultRepository,
+            IServiceProvider serviceProvider,
+            ITestGroupResultRepository testGroupResultRepository,
+            ITestAiLayoutService testAiLayoutService,
+            SubmitAiTestLayOutPublisher submitAiTestLayOutPublisher
+            )
         {
             _testGroupResultRepository = testGroupResultRepository;
+            _testAiLayoutService = testAiLayoutService;
+            _submitAiTestLayOutPublisher = submitAiTestLayOutPublisher;
             _serviceProvider = serviceProvider;
             _testResultRepository = testResultRepository;
         }
@@ -48,6 +64,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testResult), request.TestResultId);
                 return methodResult;
             }
+
             if (testResult.Status == EnumResultStatus.Done)
             {
                 return new MethodResult<SingleTestStateModel>
@@ -59,7 +76,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 };
             }
 
-            var testGroupResult = await _testGroupResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
+            var testGroupResult = await _testGroupResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == testResult.TestGroupResultId, cancellationToken);
             if (testGroupResult == null)
             {
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(testGroupResult), testResult.TestGroupResultId);
@@ -74,6 +91,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
                 Answers = request.Answers,
                 IsSubmit = request.IsSubmit,
             });
+            await _submitAiTestLayOutPublisher.Publish(new BaseQueueModel { QueueId = request.SectionResultId.ToString() }, cancellationToken);
 
             methodResult.Result = await aggregate.ExpotStateData();
             return methodResult;

@@ -7,6 +7,8 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
     using Domain.Entities.TestConfigs;
     using Domain.Models.EntityModels;
     using Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Domain.Enums;
+    using Fsel.Shared.Enums;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -53,10 +55,19 @@ namespace Fsel.Course.Lms.Application.Queries.PlacementTestQuery
                     if (testAnswer != null)
                     {
                         questionModel.Answer = new AnswerModel { Answer = testAnswer.Answer, CorrectCount = testAnswer.CorrectCount, IsCorrect = testAnswer.IsCorrect, };
+
+                        questionModel.Status = testAnswer.Status == EnumAnswerStatus.Done ? EnumResultStatus.Done : EnumResultStatus.Process;
+                    }
+
+                    if (testSectionResult?.Status == EnumResultStatus.Done)
+                    {
+                        questionModel.Status = EnumResultStatus.Done;
                     }
 
                     return questionModel;
                 }).ToList();
+
+                sectionStateModel.Status = testSectionResult.Status;
             }
 
             return new MethodResult<SectionStateModel>(sectionStateModel);

@@ -6,7 +6,6 @@ namespace Fsel.Course.Infrastructure.Common.UnitHelper
     using System.Collections.Generic;
     using System.Linq;
     using Fsel.Common.Enums;
-    using Fsel.Common.Helpers;
     using Fsel.Course.Domain.Entities;
     using Fsel.Course.Domain.Entities.V1i1;
     using Fsel.Course.Domain.Enums;

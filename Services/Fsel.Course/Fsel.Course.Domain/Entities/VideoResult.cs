@@ -54,6 +54,10 @@ namespace Fsel.Course.Domain.Entities
             }
         }
 
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
+
         public Guid? CurrentVideoTimeCodeId { get; set; }
         public Guid? LessonModuleId { get; set; }
         public LessonModule? LessonModule { get; set; }

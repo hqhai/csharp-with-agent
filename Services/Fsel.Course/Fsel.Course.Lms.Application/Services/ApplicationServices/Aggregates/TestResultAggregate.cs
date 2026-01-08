@@ -39,14 +39,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 {
                     SingleTestResult.Status = EnumResultStatus.Done;
                     await CommitTest();
+                    await CommitTestGroup();
                 }
                 else
                 {
                     await Commit();
                 }
             }
-
-            await StartTest();
         }
 
         public async Task Submit(Guid id)
@@ -136,14 +135,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var inprogressTestResult = TestResultComposites.FirstOrDefault(t => t.TestResult.Status == EnumResultStatus.Process);
             inprogressTestResult?.Start();
 
-            if (TestResult.Status == EnumResultStatus.Done)
-            {
-                await CommitTest();
-            }
-            else
-            {
-                await Commit();
-            }
+            await Commit();
         }
 
         public async Task InitAggregateTest()
@@ -297,14 +289,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             var repositoryTestResult = ServiceProvider.GetRequiredService<IRepository<TestResult>>();
             if (repositoryTestResult.DbContext.ChangeTracker.HasChanges())
             {
-                await repositoryTestResult.UnitOfWork.SaveEntitiesAsync();
+                await repositoryTestResult.UnitOfWork.SaveChangesAsync();
             }
+        }
 
+        private async Task CommitTestGroup()
+        {
             var repositoryTestGroupResult = ServiceProvider.GetRequiredService<IRepository<TestGroupResult>>();
-            if (repositoryTestGroupResult.DbContext.ChangeTracker.HasChanges())
-            {
-                await repositoryTestGroupResult.UnitOfWork.SaveEntitiesAsync();
-            }
+            repositoryTestGroupResult.Update(SingleTestResult);
+            await repositoryTestGroupResult.UnitOfWork.SaveEntitiesAsync();
         }
     }
 }

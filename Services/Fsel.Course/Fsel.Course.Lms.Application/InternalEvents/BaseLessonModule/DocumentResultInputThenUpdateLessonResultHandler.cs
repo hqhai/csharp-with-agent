@@ -65,7 +65,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseLessonModule
             {
                 return;
             }
-
+            if (!documentResult.CompletionDate.HasValue)
+            {
+                documentResult.CompletionDate = DateTime.UtcNow;
+            }
             documentResult.PercentModule = percentModule;
             await _documentResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken);
         }

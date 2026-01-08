@@ -192,7 +192,8 @@ namespace Fsel.Course.Lms.Application.Commands.AiCmd.V1i2
                         c.ProcessDate,
                         c.CompletionDate,
                         c.Status,
-                        c.ClassForumResultId
+                        c.ClassForumResultId,
+                        c.PronunciationAlFeedback
                     };
                 });
 

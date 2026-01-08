@@ -40,7 +40,7 @@ namespace Fsel.Course.Application.Queries.VideoQuery
                 methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(video), request.Id);
                 return methodResult;
             }
-            var originalId = video.OriginalId ?? video.Id;
+            var originalId = video.OriginalId;
             var query = _videoRepository.Queryable.Where(x => x.OriginalId == originalId || x.Id == originalId);
 
             int totalItem = await query.CountAsync(cancellationToken: cancellationToken).ConfigureAwait(false);

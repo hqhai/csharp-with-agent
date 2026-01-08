@@ -11,6 +11,7 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
     using Fsel.Course.Lms.Application.Services.ApplicationServices.CacheServices;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServices.UnitItemServices;
     using Fsel.Shared.Constants;
+    using Microsoft.AspNetCore.Cors.Infrastructure;
     using Microsoft.EntityFrameworkCore;
 
     public interface IUnitResultUpdater
@@ -58,6 +59,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             if (!unitModules.Any())
             {
                 unitResult.Percent = ValueSettings.PercentMaxValue;
+                if (unitResult.Status == EnumResultStatus.Done)
+                {
+                    unitResult.CompletionDate = DateTime.UtcNow;
+                }
                 unitResult.Status = EnumResultStatus.Done;
 
                 await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult }, bulk =>
@@ -65,7 +70,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                     bulk.ColumnInputExpression = entity => new
                     {
                         entity.Percent,
-                        entity.Status
+                        entity.Status,
+                        entity.CompletionDate
                     };
                 });
 
@@ -150,6 +156,10 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
             unitResult.CorrectCount = totalCorrectCount;
             unitResult.CorrectTotal = totalCorrectTotal;
             unitResult.Percent = totalPercentModule;
+            if (unitResult.Status == EnumResultStatus.Done)
+            {
+                unitResult.CompletionDate = DateTime.UtcNow;
+            }
             unitResult.Status = EnumResultStatus.Done;
 
             await _unitResultRepository.BulkUpdateList(new List<UnitResult> { unitResult }, bulk =>
@@ -160,7 +170,8 @@ namespace Fsel.Course.Lms.Application.InternalEvents.BaseUnitModule
                     entity.CorrectTotal,
                     entity.Percent,
                     entity.SkillScoresStr,
-                    entity.Status
+                    entity.Status,
+                    entity.CompletionDate
                 };
             });
 

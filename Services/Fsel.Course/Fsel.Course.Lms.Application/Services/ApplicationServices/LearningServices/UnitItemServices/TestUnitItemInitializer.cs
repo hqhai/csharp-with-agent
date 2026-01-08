@@ -54,6 +54,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                             continue;
                         }
                         item.Status = EnumResultStatus.New;
+                        item.NewDate = DateTime.UtcNow;
                     }
 
                     testGroupResult.Status = EnumResultStatus.New;
@@ -80,6 +81,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 {
                     StudentId = unitResult.StudentId,
                     Status = EnumResultStatus.New,
+                    NewDate = DateTime.UtcNow,
                     TestId = test.Id,
                     TestGroupResultId = testGroupResult.Id,
                 };

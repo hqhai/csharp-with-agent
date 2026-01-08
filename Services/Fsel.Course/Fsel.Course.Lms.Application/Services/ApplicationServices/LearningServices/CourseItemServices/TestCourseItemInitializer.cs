@@ -77,6 +77,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
                 {
                     StudentId = courseResult.StudentId,
                     Status = EnumResultStatus.New,
+                    NewDate = DateTime.UtcNow,
                     TestId = test.Id,
                     TestGroupResultId = testGroupResult.Id,
                 };

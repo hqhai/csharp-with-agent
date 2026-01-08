@@ -62,6 +62,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.LearningServi
             {
                 StudentId = courseResult.StudentId,
                 Status = EnumResultStatus.New,
+                NewDate = DateTime.UtcNow,
                 CourseId = courseResult.CourseId,
                 CourseModuleId = courseModule.Id,
                 CourseResultId = courseResult.Id,

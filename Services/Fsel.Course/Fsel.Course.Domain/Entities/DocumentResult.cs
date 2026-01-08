@@ -27,6 +27,10 @@ namespace Fsel.Course.Domain.Entities
         /// </summary>
         public EnumResultStatus Status { get; set; }
 
+        public DateTime? NewDate { get; set; }
+        public DateTime? ProcessDate { get; set; }
+        public DateTime? CompletionDate { get; set; }
+
         [Required(ErrorMessage = nameof(EnumSystemErrorCode.Required))]
         public Guid StudentId { get; set; }
 

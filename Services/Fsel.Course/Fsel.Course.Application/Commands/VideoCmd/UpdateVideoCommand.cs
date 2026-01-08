@@ -4,14 +4,14 @@ using AutoMapper;
 using Fsel.Common.ActionResults;
 using Fsel.Common.Enums;
 using Fsel.Common.Enums.ErrorCodes;
-using Fsel.Common.Helpers;
+using Fsel.Core.Base.Interfaces;
 using Fsel.Course.Domain.Entities;
 using Fsel.Course.Domain.Enums.ErrorCodes;
 using Fsel.Course.Domain.IRepositories;
 using Fsel.Course.Domain.Models.CommandModels.Videos;
 using Fsel.Course.Domain.Models.EntityModels;
 using Fsel.Course.Infrastructure.Common;
-using Fsel.Shared.Enums;
+using Fsel.Course.Infrastructure.Common.VideoHelpers;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +31,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
         private readonly ILevelRepository _levelRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IVideoSubFilePathRepository _videoSubFilePathRepository;
-        private readonly IMediator _mediator;
+        private readonly IVersionEntityUpdater<Video> _versionEntityUpdater;
+        private readonly QuestionConverter _questionConverter;
 
         public UpdateVideoCommandHandler(IVideoRepository videoRepository
             , IMapper mapper
@@ -40,7 +41,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             , ILevelRepository levelRepository
             , IVideoResultRepository videoResultRepository
             , IVideoSubFilePathRepository videoSubFilePathRepository
-            , IMediator mediator)
+            , IVersionEntityUpdater<Video> versionEntityUpdater
+            , QuestionConverter questionConverter)
         {
             _videoRepository = videoRepository;
             _mapper = mapper;
@@ -49,7 +51,8 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             _levelRepository = levelRepository;
             _videoResultRepository = videoResultRepository;
             _videoSubFilePathRepository = videoSubFilePathRepository;
-            _mediator = mediator;
+            _versionEntityUpdater = versionEntityUpdater;
+            _questionConverter = questionConverter;
         }
 
         public async Task<MethodResult<VideoModel>> Handle(UpdateVideoCommand request, CancellationToken cancellationToken)
@@ -58,48 +61,6 @@ namespace Fsel.Course.Application.Commands.VideoCmd
             MethodResult<VideoModel> methodResult = new MethodResult<VideoModel>();
 
             #region Validation
-
-            #region Validate New
-
-            Category? program = null;
-            if (request.ProgramId.HasValue)
-            {
-                program = await _categoryRepository.Queryable.Where(x => x.Id == request.ProgramId && x.Type == EnumTypeCategory.Program).FirstOrDefaultAsync(cancellationToken);
-                if (program == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.ProgramId), request.ProgramId);
-                    return methodResult;
-                }
-            }
-            Level? level = null;
-            if (request.LevelId.HasValue)
-            {
-                level = await _levelRepository.GetByIdAsync(request.LevelId.Value);
-                if (level == null)
-                {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(request.LevelId), request.LevelId);
-                    return methodResult;
-                }
-            }
-            if (level != null && program != null && level.ProgramId != request.ProgramId)
-            {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.InValidFormat), nameof(request.ProgramId), request.ProgramId);
-                return methodResult;
-            }
-
-            #endregion Validate New
-
-            #region Tạm thời không validate isTeacher
-
-            //var isTeacher = await _userService.GetTeacherByIdAsync(request.TeacherId);
-            //var isCheck = isTeacher?.Content?.Result;
-            //if (isCheck == null)
-            //{
-            //    methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.TeacherIdDoesNotExitst), nameof(request.TeacherId));
-            //    return methodResult;
-            //}
-
-            #endregion Tạm thời không validate isTeacher
 
             var video = await _videoRepository.GetIncludeByIdAsync(request.Id);
             if (video == null)
@@ -112,12 +73,54 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                 methodResult.AddErrorBadRequest(nameof(EnumVideoErrorCode.NotEdited), nameof(video.VersionStatus), video.VersionStatus);
                 return methodResult;
             }
+            var factory = VideoFactory.Create(request, _mapper, _questionConverter);
+            var newVersionVideo = factory.Build(originalId: video.OriginalId);
+            if (await newVersionVideo.ValidateDuplicateVideo(_videoRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(newVersionVideo.ErrorMessages);
+                return methodResult;
+            }
+
+            if (!await newVersionVideo.ValidateLevel(_levelRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(newVersionVideo.ErrorMessages);
+                return methodResult;
+            }
+            if (!await newVersionVideo.ValidateProgram(_categoryRepository).ConfigureAwait(false))
+            {
+                methodResult.AddErrorBadRequest(newVersionVideo.ErrorMessages);
+                return methodResult;
+            }
+            if (!newVersionVideo.ValidateVideoPercentConfigs())
+            {
+                methodResult.AddErrorBadRequest(newVersionVideo.ErrorMessages);
+                return methodResult;
+            }
+            if (!newVersionVideo.IsValid())
+            {
+                methodResult.AddErrorBadRequest(newVersionVideo.ErrorMessages);
+                return methodResult;
+            }
+            var methodQuestion = factory.ValidateQuestions(request);
+            if (!methodQuestion.IsOK)
+            {
+                methodResult.AddErrorBadRequest(methodQuestion.ErrorMessages);
+                return methodResult;
+            }
+
+            #endregion Validation
+
             if (await _videoResultRepository.Queryable.AnyAsync(x => x.VideoId == request.Id, cancellationToken))
             {
-                video.VersionStatus = EnumVersionStatus.OldVersion;
-                var model = _mapper.Map<CreateVideoCommandModel>((UpdateVideoCommandModel)request);
-                model.OriginalId = video.OriginalId ?? video.Id;
-                await _mediator.Send(model.Serialize().Deserialize<CreateVideoCommand>(), cancellationToken).ConfigureAwait(false);
+                await _versionEntityUpdater.UpdateEntity(video, newVersionVideo,
+                      async (_, entity) => true,
+                      async (oldEntity, newEntity) =>
+                      {
+                          await Task.Yield();
+                      }
+                  );
+                methodResult.StatusCode = StatusCodes.Status200OK;
+                methodResult.Result = _mapper.Map<VideoModel>(newVersionVideo);
             }
             else
             {
@@ -140,70 +143,16 @@ namespace Fsel.Course.Application.Commands.VideoCmd
                     methodResult.AddErrorBadRequest(method.ErrorMessages);
                     return methodResult;
                 }
+                await _videoRepository.ExecuteTransactionAsync(async () =>
+                {
+                    video = _videoRepository.Update(video);
+                    await _videoRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                    methodResult.StatusCode = StatusCodes.Status200OK;
+                    methodResult.Result = _mapper.Map<VideoModel>(video);
+                    return methodResult;
+                });
             }
-
-            #endregion Validation
-
-            #region Validate ConfigVideos
-
-            // Nếu cấu hình chấm điểm theo component
-            if (request.VideoPercentConfigs == null || !request.VideoPercentConfigs.Any())
-            {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumSystemErrorCode.Required),
-                    nameof(request.VideoPercentConfigs),
-                    "ConfigVideos is required");
-                return methodResult;
-            }
-
-            // Không cho phép trùng Type
-            var duplicatedTypes = request.VideoPercentConfigs
-                .GroupBy(x => x.Type)
-                .Where(g => g.Count() > 1)
-                .Select(g => g.Key)
-                .ToList();
-
-            if (duplicatedTypes.Any())
-            {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumSystemErrorCode.DataAlreadyExist),
-                    nameof(request.VideoPercentConfigs),
-                    $"Duplicate time code type(s): {string.Join(", ", duplicatedTypes)}");
-                return methodResult;
-            }
-
-            // Percent phải >= 0
-            if (request.VideoPercentConfigs.Any(x => x.Percent < 0))
-            {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumSystemErrorCode.InValidFormat),
-                    nameof(request.VideoPercentConfigs),
-                    "Percent must be greater than or equal to 0");
-                return methodResult;
-            }
-
-            // Tổng Percent phải = 100
-            var totalPercent = request.VideoPercentConfigs.Sum(x => x.Percent);
-            if (Math.Abs(totalPercent - 100.0) > 0.0001) // cho phép sai số nhỏ
-            {
-                methodResult.AddErrorBadRequest(
-                    nameof(EnumSystemErrorCode.InValidFormat),
-                    nameof(request.VideoPercentConfigs),
-                    $"Total percent must equal 100. Current total: {totalPercent}");
-                return methodResult;
-            }
-
-            #endregion Validate ConfigVideos
-
-            await _videoRepository.ExecuteTransactionAsync(async () =>
-            {
-                video = _videoRepository.Update(video);
-                await _videoRepository.UnitOfWork.SaveEntitiesAsync(cancellationToken).ConfigureAwait(false);
-
-                methodResult.StatusCode = StatusCodes.Status200OK;
-                methodResult.Result = _mapper.Map<VideoModel>(video);
-                return methodResult;
-            });
 
             return methodResult;
         }

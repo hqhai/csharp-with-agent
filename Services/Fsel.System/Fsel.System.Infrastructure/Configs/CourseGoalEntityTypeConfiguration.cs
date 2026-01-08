@@ -15,16 +15,6 @@ namespace Fsel.System.Infrastructure.Configs
         {
             ArgumentNullException.ThrowIfNull(builder);
 
-            builder.Property(e => e.CourseType)
-                    .HasMaxLength(100)
-                    .HasConversion(v => v.ToString(),
-                    v => v.EnumParse<EnumCourseType>());
-
-            builder.Property(e => e.CourseLevel)
-                   .HasMaxLength(100)
-                   .HasConversion(v => v.ToString(),
-                   v => v.EnumParse<EnumCourseLevel>());
-
             builder.Property(e => e.GoalCategory)
                   .HasMaxLength(100)
                   .HasConversion(v => v.ToString(),

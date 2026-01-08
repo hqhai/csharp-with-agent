@@ -56,5 +56,6 @@ namespace Fsel.Course.Domain.Entities.SkillScoresConfigs
 
         public Guid? SkillId { get; set; }
         public string? SkillName { get; set; }
+        public string? SkillFilePath { get; set; }
     }
 }
