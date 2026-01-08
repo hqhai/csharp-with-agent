@@ -13,7 +13,6 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Curriculums;
     using Fsel.Course.Domain.Models.EntityModels;
-    using Fsel.Course.Lms.Application.Commands.CourseCmd;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
@@ -83,7 +82,7 @@ namespace Fsel.Course.Lms.Application.Commands.CurriculumCmd
 
             await _curriculumRepository.ExecuteTransactionAsync(async () =>
             {
-                var cloneCourseResult = await _mediator.Send(new CloneCourseCommand() { CourseId = request.CourseId });
+                var cloneCourseResult = await _mediator.Send(new CloneCourseCommand() { Id = request.CourseId });
                 if (!cloneCourseResult.IsOK)
                 {
                     methodResult.AddError(cloneCourseResult.ErrorMessages);

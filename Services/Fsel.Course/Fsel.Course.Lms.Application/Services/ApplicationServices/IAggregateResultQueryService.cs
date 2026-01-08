@@ -47,6 +47,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 ComponentName = courseResult.Course?.GetType().Name,
                 LearningTemplateId = courseResult.Course?.Id ?? Guid.Empty,
                 LearningResultId = courseResultId,
+                StudentId = studentId,
                 Children = courseResult.Course?.CourseModules.Where(x => x.CourseConfigType == EnumCourseConfigType.Unit).Select(cm => new UnitComponent
                 {
                     LearningOriginalTemplateId = cm.OriginalId,
@@ -126,7 +127,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 var lesson = lessonsHasResult.FirstOrDefault(ur => ur.OriginalId == child.LearningOriginalTemplateId);
                 if (lesson != null && child is LessonComponent lessonComponent)
                 {
-                    var result = lessonResults.FirstOrDefault(ur => ur.UnitId == lesson.Id);
+                    var result = lessonResults.FirstOrDefault(ur => ur.LessonId == lesson.Id);
                     lessonComponent.ComponentName = lesson.Name;
                     lessonComponent.LearningTemplateId = lesson.Id;
                     lessonComponent.LearningResultId = result?.Id;

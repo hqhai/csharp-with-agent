@@ -45,5 +45,27 @@ namespace Fsel.Course.Lms.Api.Controllers
             return queryResult.GetActionResult();
         }
 
+        [HttpGet("get-program-match-student/{studentId:guid}")]
+        public async Task<IActionResult> GetProgramsMatchingStudent(Guid studentId)
+        {
+            var getProgramQuery = new GetProgramsMatchUserQuery
+            {
+                StudentId = studentId
+            };
+            var queryResult = await _mediator.Send(getProgramQuery).ConfigureAwait(false);
+            return queryResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get category tress
+        /// </summary>
+        [HttpGet("get-category-trees")]
+        [ProducesResponseType(typeof(MethodResult<IList<CategoryTreeDtoModel>>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCategoryTrees()
+        {
+            var methodResult = await _mediator.Send(new GetCategoryTreesQuery()).ConfigureAwait(false);
+            return methodResult.GetActionResult();
+        }
     }
 }

@@ -21,7 +21,7 @@ namespace Fsel.Course.Domain.Models.CommandModels.Courses.V1i1
 
         public EnumCourseStatus Status { get; set; }
 
-        public IList<UpdateCourseModuleModel>? Modules { get; set; }
+        public IList<UpdateCourseModuleModel>? CourseModules { get; set; }
 
         public IList<CreateCourseTeacherCommandModel>? CourseTeachers { get; set; }
     }

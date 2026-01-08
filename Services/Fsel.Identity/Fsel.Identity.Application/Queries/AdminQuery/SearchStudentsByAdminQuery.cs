@@ -223,6 +223,9 @@ namespace Fsel.Identity.Application.Queries.AdminQuery
             user.TotalLesson = dataStudent?.TotalLesson == 0 ? null : dataStudent?.TotalLesson;
             user.TotalLessonDone = user.TotalLesson == null ? null : dataStudent?.TotalLessonDone;
 
+            user.Program = dataStudent?.Program;
+            user.Level = dataStudent?.Level;
+
             if (user.StudentId.HasValue)
             {
                 var studentCompetitionEvent = studentCompetitionEvents?.FirstOrDefault(p => p.StudentId == user.StudentId);
