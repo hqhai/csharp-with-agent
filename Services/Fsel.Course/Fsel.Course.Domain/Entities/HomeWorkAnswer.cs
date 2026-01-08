@@ -7,6 +7,7 @@ namespace Fsel.Course.Domain.Entities
 
     public class HomeWorkAnswer : BaseAnswer
     {
+        public bool IsFirstSubmit { get; set; }
         public HomeWorkQuestion? HomeWorkQuestion { get; set; }
 
         public HomeWorkResult? HomeWorkResult { get; set; }

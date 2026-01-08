@@ -4,6 +4,7 @@ namespace Fsel.Course.Domain.Entities
 {
     public class HomeWorkExtraPracticeAnswer : BaseAnswer
     {
+        public bool IsFirstSubmit { get; set; }
         public Question? Question { get; set; }
         public HomeWorkExtraPracticeResult? HomeWorkExtraPracticeResult { get; set; }
         public Guid QuestionId { get; set; }

@@ -832,22 +832,22 @@ namespace Fsel.Course.Infrastructure.Common
                     result = matchingTypeQuestion;
                     break;
 
-                case EnumQuestionType.GapFillWordBankScoreByGap:
-                    var gapFillQuestion = config.Deserialize<GapFillQuestion>();
-                    if (gapFillQuestion != null && !isResultDone)
-                    {
-                        gapFillQuestion.Contents = GenerateRandomLoop(gapFillQuestion.Contents, shuffleConfigs);
-                        if (shuffleConfigs == null)
-                        {
-                            questionShuffleStr = gapFillQuestion.Contents?.Select((x, index) => new SubQuestionConfig
-                            {
-                                Id = $"{x.Id}",
-                                Index = index
-                            }).Serialize() ?? string.Empty;
-                        }
-                    }
-                    result = gapFillQuestion;
-                    break;
+                //case EnumQuestionType.GapFillWordBankScoreByGap:
+                //    var gapFillQuestion = config.Deserialize<GapFillQuestion>();
+                //    if (gapFillQuestion != null && !isResultDone)
+                //    {
+                //        gapFillQuestion.Contents = GenerateRandomLoop(gapFillQuestion.Contents, shuffleConfigs);
+                //        if (shuffleConfigs == null)
+                //        {
+                //            questionShuffleStr = gapFillQuestion.Contents?.Select((x, index) => new SubQuestionConfig
+                //            {
+                //                Id = $"{x.Id}",
+                //                Index = index
+                //            }).Serialize() ?? string.Empty;
+                //        }
+                //    }
+                //    result = gapFillQuestion;
+                //    break;
 
                 case EnumQuestionType.DragAndDropListSentenceOrder:
                     var dragAndDropList = config.Deserialize<DragAndDropListSentenceOrderQuestion>();

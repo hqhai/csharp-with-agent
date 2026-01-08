@@ -2,7 +2,11 @@
 
 namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Threading;
+    using System.Threading.Tasks;
     using Fsel.Common.ActionResults;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
@@ -40,7 +44,8 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
         private readonly IHomeWorkQuestionRepository _homeWorkQuestionRepository;
         private readonly IHomeWorkRetryRepository _homeWorkRetryRepository;
 
-        public CreateHomeWorkExtraPracticeAnswerCommandHandler(IHomeWorkExtraPracticeResultRepository homeWorkExtraPracticeResultRepository,
+        public CreateHomeWorkExtraPracticeAnswerCommandHandler(
+            IHomeWorkExtraPracticeResultRepository homeWorkExtraPracticeResultRepository,
             QuestionConverter questionConverter,
             IHomeWorkExtraPracticeAnswerRepository homeWorkExtraPracticeAnswerRepository,
             IHomeWorkRepository homeWorkRepository,
@@ -70,15 +75,17 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<HomeWorkExtraDtoModel>();
 
+            // 1. Lấy kết quả ExtraPractice
             var moduleResult = await GetHomeWorkExtraPracticeResultAsync(request.HomeWorkExtraPracticeResultId);
             if (!moduleResult.IsOK)
             {
                 methodResult.AddErrorBadRequest(moduleResult.ErrorMessages);
                 return methodResult;
             }
-            var homeWorkExamPracticeResult = moduleResult.Result!;
+            var homeWorkExtraPracticeResult = moduleResult.Result!;
 
-            var moduleResultRetry = await GetHomeWorkRetryAsync(homeWorkExamPracticeResult.HomeWorkRetryId);
+            // 2. Lấy HomeWorkRetry để lấy config
+            var moduleResultRetry = await GetHomeWorkRetryAsync(homeWorkExtraPracticeResult.HomeWorkRetryId);
             if (!moduleResultRetry.IsOK)
             {
                 methodResult.AddErrorBadRequest(moduleResultRetry.ErrorMessages);
@@ -86,47 +93,68 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             }
             var homeWorkRetry = moduleResultRetry.Result!;
 
+            // 3. Nếu có Answers thì validate + lưu
             if (request.Answers != null && request.Answers.Any())
             {
-                var method = await ValidateQuestionsAsync(request, homeWorkExamPracticeResult.HomeWorkId);
-                if (!method.IsOK)
+                var validateQuestionsResult = await ValidateQuestionsAsync(request, homeWorkExtraPracticeResult.HomeWorkId);
+                if (!validateQuestionsResult.IsOK)
                 {
-                    methodResult.AddErrorBadRequest(method.ErrorMessages);
+                    methodResult.AddErrorBadRequest(validateQuestionsResult.ErrorMessages);
                     return methodResult;
                 }
-                var questions = method.Result!;
+                var questions = validateQuestionsResult.Result!;
 
-                var methodSave = await SaveAnswerAsync(homeWorkExamPracticeResult, questions, request, cancellationToken);
-                if (!methodSave.IsOK)
+                var saveAnswersResult = await SaveAnswerAsync(homeWorkExtraPracticeResult, questions, request, cancellationToken);
+                if (!saveAnswersResult.IsOK)
                 {
-                    methodResult.AddErrorBadRequest(methodSave.ErrorMessages);
+                    methodResult.AddErrorBadRequest(saveAnswersResult.ErrorMessages);
                     return methodResult;
                 }
             }
 
-            var methodHomeWork = await UpdateHomeWorkExtraPracticeResultAsync(homeWorkExamPracticeResult, request.IsSubmit, cancellationToken);
-            if (!methodHomeWork.IsOK)
+            // 4. Update kết quả ExtraPractice (status, scores, HighestStreak)
+            var updateResult = await UpdateHomeWorkExtraPracticeResultAsync(homeWorkExtraPracticeResult, request.IsSubmit, cancellationToken);
+            if (!updateResult.IsOK)
             {
-                methodResult.AddErrorBadRequest(methodHomeWork.ErrorMessages);
+                methodResult.AddErrorBadRequest(updateResult.ErrorMessages);
                 return methodResult;
             }
 
-            methodResult = await _mediator.Send(new GetHomeWorkExtraQuery { Id = homeWorkExamPracticeResult.HomeWorkId, IsShowSubStatus = request.IsSubmit, HomeWorkConfigId = homeWorkRetry.HomeWorkConfigId }, cancellationToken);
+            // 5. Get DTO trả về
+            methodResult = await _mediator.Send(
+                new GetHomeWorkExtraQuery
+                {
+                    Id = homeWorkExtraPracticeResult.HomeWorkId,
+                    IsShowSubStatus = request.IsSubmit,
+                    HomeWorkConfigId = homeWorkRetry.HomeWorkConfigId
+                },
+                cancellationToken);
+
             return methodResult;
         }
+
+        #region Load Result & Retry
 
         private async Task<MethodResult<HomeWorkExtraPracticeResult>> GetHomeWorkExtraPracticeResultAsync(Guid homeWorkExtraPracticeResultId)
         {
             var methodResult = new MethodResult<HomeWorkExtraPracticeResult>();
             var homeWorkExtraPracticeResult = await _homeWorkExtraPracticeResultRepository.GetByIdAsync(homeWorkExtraPracticeResultId);
+
             if (homeWorkExtraPracticeResult == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkExtraPracticeResult), homeWorkExtraPracticeResultId);
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumSystemErrorCode.DataNotExist),
+                    nameof(homeWorkExtraPracticeResult),
+                    homeWorkExtraPracticeResultId);
                 return methodResult;
             }
+
             if (homeWorkExtraPracticeResult.Status == EnumResultStatus.Done)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumResultErrorCode.ResultStatusDone), nameof(homeWorkExtraPracticeResult.Status), homeWorkExtraPracticeResult.Status);
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumResultErrorCode.ResultStatusDone),
+                    nameof(homeWorkExtraPracticeResult.Status),
+                    homeWorkExtraPracticeResult.Status);
                 return methodResult;
             }
 
@@ -138,9 +166,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
         {
             var methodResult = new MethodResult<HomeWorkRetry>();
             var homeWorkRetry = await _homeWorkRetryRepository.GetByIdAsync(homeWorkRetryId);
+
             if (homeWorkRetry == null)
             {
-                methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(homeWorkRetry), homeWorkRetryId);
+                methodResult.AddErrorBadRequest(
+                    nameof(EnumSystemErrorCode.DataNotExist),
+                    nameof(homeWorkRetry),
+                    homeWorkRetryId);
                 return methodResult;
             }
 
@@ -148,7 +180,13 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             return methodResult;
         }
 
-        public async Task<MethodResult<List<Question>>> ValidateQuestionsAsync(CreateHomeWorkExtraPracticeAnswerCommand request, Guid homeworkId)
+        #endregion Load Result & Retry
+
+        #region Validate Questions
+
+        public async Task<MethodResult<List<Question>>> ValidateQuestionsAsync(
+            CreateHomeWorkExtraPracticeAnswerCommand request,
+            Guid homeworkId)
         {
             ArgumentNullException.ThrowIfNull(request);
             var result = new MethodResult<List<Question>>();
@@ -160,18 +198,25 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
 
             var questionIds = request.Answers.Select(a => a.QuestionId).ToList();
 
-            var duplicatedIds = questionIds.GroupBy(id => id).Where(g => g.Count() > 1).Select(g => g.Key).ToList();
+            // Trùng câu trong request
+            var duplicatedIds = questionIds
+                .GroupBy(id => id)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToList();
+
             if (duplicatedIds.Any())
             {
                 result.AddErrorBadRequest(nameof(EnumQuestionErrorCode.QuestionsDuplicate), nameof(request.Answers));
                 return result;
             }
 
+            // Câu hỏi phải thuộc về homework
             var validQuestionIds = await _homeWorkQuestionRepository.Queryable
-                                                                    .AsNoTracking()
-                                                                    .Where(x => x.HomeWorkId == homeworkId)
-                                                                    .Select(x => x.QuestionId)
-                                                                    .ToListAsync();
+                .AsNoTracking()
+                .Where(x => x.HomeWorkId == homeworkId)
+                .Select(x => x.QuestionId)
+                .ToListAsync();
 
             var validSet = new HashSet<Guid>(validQuestionIds);
             var notBelongIds = questionIds
@@ -196,64 +241,118 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             return result;
         }
 
-        private async Task<IList<HomeWorkExtraPracticeAnswer>> GetAnswersAsync(IList<Guid> questionIds, Guid homeWorkExtraPracticeResultId)
+        #endregion Validate Questions
+
+        #region Save Answers
+
+        private async Task<IList<HomeWorkExtraPracticeAnswer>> GetAnswersAsync(
+            IList<Guid> questionIds,
+            Guid homeWorkExtraPracticeResultId)
         {
-            return await _homeWorkExtraPracticeAnswerRepository.Queryable.WhereBulkContains(questionIds, x => x.QuestionId)
-                                                               .Where(x => x.HomeWorkExtraPracticeResultId == homeWorkExtraPracticeResultId)
-                                                               .ToListAsync();
+            return await _homeWorkExtraPracticeAnswerRepository.Queryable
+                .WhereBulkContains(questionIds, x => x.QuestionId)
+                .Where(x => x.HomeWorkExtraPracticeResultId == homeWorkExtraPracticeResultId)
+                .ToListAsync();
         }
 
-        private async Task<MethodResult<bool>> SaveAnswerAsync(HomeWorkExtraPracticeResult homeWorkExtraPracticeResult, IList<Question>? questions, CreateHomeWorkExtraPracticeAnswerCommand request, CancellationToken cancellationToken)
+        private async Task<MethodResult<bool>> SaveAnswerAsync(
+            HomeWorkExtraPracticeResult homeWorkExtraPracticeResult,
+            IList<Question>? questions,
+            CreateHomeWorkExtraPracticeAnswerCommand request,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(request.Answers);
             ArgumentNullException.ThrowIfNull(questions);
+
             var methodResult = new MethodResult<bool>();
+
+            var isFirstSubmit = homeWorkExtraPracticeResult.SubmissionCount == EnumSubmissionCount.FirstSubmit;
             var isTryAgain = homeWorkExtraPracticeResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
 
             var answers = await GetAnswersAsync(questions.Select(x => x.Id).ToList(), homeWorkExtraPracticeResult.Id);
 
             var createHomeWorkAnswers = new List<HomeWorkExtraPracticeAnswer>();
             var updateHomeWorkAnswers = new List<HomeWorkExtraPracticeAnswer>();
+
             foreach (var item in request.Answers)
             {
                 var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);
                 if (question == null)
                 {
-                    methodResult.AddErrorBadRequest(nameof(EnumSystemErrorCode.DataNotExist), nameof(question), item.QuestionId);
+                    methodResult.AddErrorBadRequest(
+                        nameof(EnumSystemErrorCode.DataNotExist),
+                        nameof(question),
+                        item.QuestionId);
                     return methodResult;
                 }
-                var homeWorkExtraPracticeAnswer = answers.FirstOrDefault(x => x.QuestionId == item.QuestionId) ?? new HomeWorkExtraPracticeAnswer { QuestionId = question.Id, HomeWorkExtraPracticeResultId = homeWorkExtraPracticeResult.Id };
-                if (homeWorkExtraPracticeAnswer.Id == Guid.Empty)
+
+                var answer = answers.FirstOrDefault(x => x.QuestionId == item.QuestionId)
+                    ?? new HomeWorkExtraPracticeAnswer
+                    {
+                        QuestionId = question.Id,
+                        HomeWorkExtraPracticeResultId = homeWorkExtraPracticeResult.Id
+                    };
+
+                var isNewAnswer = answer.Id == Guid.Empty;
+
+                if (isNewAnswer)
                 {
-                    createHomeWorkAnswers.Add(homeWorkExtraPracticeAnswer);
+                    createHomeWorkAnswers.Add(answer);
                 }
-                else if (homeWorkExtraPracticeAnswer.Status != EnumAnswerStatus.Done)
+                else if (answer.Status != EnumAnswerStatus.Done)
                 {
-                    updateHomeWorkAnswers.Add(homeWorkExtraPracticeAnswer);
+                    updateHomeWorkAnswers.Add(answer);
                 }
 
-                var questionResult = _questionConverter.HandleQuestionAnswer(question, item.Answer, request.IsSubmit, homeWorkExtraPracticeAnswer.Answer, isTryAgain, request.IsSubmit);
+                var questionResult = _questionConverter.HandleQuestionAnswer(
+                    question,
+                    item.Answer,
+                    request.IsSubmit,
+                    answer.Answer,
+                    isTryAgain,
+                    request.IsSubmit);
+
                 if (!questionResult.IsOK)
                 {
                     methodResult.AddErrorBadRequest(questionResult.ErrorMessages);
                     return methodResult;
                 }
+
                 var (questionItem, answerConfig, correctCount, isAnswered) = questionResult.Result;
 
-                homeWorkExtraPracticeAnswer.Status = EnumAnswerStatus.Process;
-                homeWorkExtraPracticeAnswer.Answer = answerConfig;
-                homeWorkExtraPracticeAnswer.CorrectCount = correctCount;
-                homeWorkExtraPracticeAnswer.IsCorrect = isAnswered ? correctCount == question.CorrectTotal : null;
+                BuildHomeWorkExtraPracticeAnswer(
+                    answer,
+                    answerConfig,
+                    isAnswered,
+                    correctCount,
+                    questionItem.CorrectTotal,
+                    isFirstSubmit);
 
-                if (!homeWorkExtraPracticeAnswer.IsValid())
+                if (!answer.IsValid())
                 {
-                    methodResult.AddErrorBadRequest(homeWorkExtraPracticeAnswer.ErrorMessages);
+                    methodResult.AddErrorBadRequest(answer.ErrorMessages);
                     return methodResult;
                 }
             }
+
             await SaveAnswersAsync(createHomeWorkAnswers, updateHomeWorkAnswers);
             methodResult.Result = true;
             return methodResult;
+        }
+
+        private static void BuildHomeWorkExtraPracticeAnswer(
+            HomeWorkExtraPracticeAnswer answer,
+            object? answerConfig,
+            bool isAnswered,
+            short correctCount,
+            int correctTotal,
+            bool isFirstSubmit)
+        {
+            answer.Status = EnumAnswerStatus.Process;
+            answer.Answer = answerConfig;
+            answer.CorrectCount = correctCount;
+            answer.IsCorrect = isAnswered ? correctCount == correctTotal : null;
+            answer.IsFirstSubmit = isFirstSubmit;
         }
 
         private async Task SaveAnswersAsync(List<HomeWorkExtraPracticeAnswer> creates, List<HomeWorkExtraPracticeAnswer> updates)
@@ -264,7 +363,12 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 {
                     await _homeWorkExtraPracticeAnswerRepository.BulkMergeAsync(creates, bulk =>
                     {
-                        bulk.ColumnPrimaryKeyExpression = e => new { e.QuestionId, e.HomeWorkExtraPracticeResultId, e.IsDeleted };
+                        bulk.ColumnPrimaryKeyExpression = e => new
+                        {
+                            e.QuestionId,
+                            e.HomeWorkExtraPracticeResultId,
+                            e.IsDeleted
+                        };
                     });
                 }
 
@@ -272,7 +376,11 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 {
                     await _homeWorkExtraPracticeAnswerRepository.BulkUpdateList(updates, bulk =>
                     {
-                        bulk.IgnoreOnUpdateExpression = e => new { e.QuestionId, e.HomeWorkExtraPracticeResultId };
+                        bulk.IgnoreOnUpdateExpression = e => new
+                        {
+                            e.QuestionId,
+                            e.HomeWorkExtraPracticeResultId
+                        };
                     });
                 }
             }
@@ -282,22 +390,58 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             }
         }
 
-        private async Task<MethodResult<bool>> UpdateHomeWorkExtraPracticeResultAsync(HomeWorkExtraPracticeResult homeWorkResult, bool isSubmit, CancellationToken cancellationToken)
+        #endregion Save Answers
+
+        #region Update Result & Statistics
+
+        private sealed class HomeWorkExtraPracticeStatistics
+        {
+            public Guid? SkillId { get; init; }
+            public string? SkillName { get; init; }
+            public string? SkillFilePath { get; init; }
+            public EnumCourseSkill CourseSkill { get; init; }
+            public EnumCourseLevel CourseLevel { get; init; }
+            public int CorrectQuestion { get; init; }
+            public int CorrectCount { get; init; }
+            public int CorrectTotal { get; init; }
+            public int TotalQuestion { get; init; }
+            public int TotalAnswer { get; init; }
+        }
+
+        private async Task<HomeWorkExtraPracticeStatistics?> GetHomeWorkExtraPracticeStatisticsAsync(
+            Guid homeWorkExtraPracticeResultId,
+            CancellationToken cancellationToken)
+        {
+            return await _homeWorkExtraPracticeResultRepository.ReadQueryable
+                .Where(x => x.Id == homeWorkExtraPracticeResultId)
+                .Select(x => new HomeWorkExtraPracticeStatistics
+                {
+                    SkillId = x.HomeWork != null ? x.HomeWork.SkillId : null,
+                    SkillName = x.HomeWork != null && x.HomeWork.Skill != null ? x.HomeWork.Skill.Name : string.Empty,
+                    SkillFilePath = x.HomeWork != null && x.HomeWork.Skill != null ? x.HomeWork.Skill.FilePath : string.Empty,
+                    CourseSkill = x.HomeWork!.CourseSkill,
+                    CourseLevel = x.HomeWork.CourseLevel,
+                    CorrectQuestion = x.HomeWorkExtraPracticeAnswers.Count(a => a.IsCorrect == true),
+                    CorrectCount = x.HomeWorkExtraPracticeAnswers.Sum(a => a.CorrectCount),
+                    CorrectTotal = x.HomeWork.HomeWorkQuestions
+                        .Select(hq => hq.Question)
+                        .Sum(q => q!.CorrectTotal),
+                    TotalQuestion = x.HomeWork.HomeWorkQuestions.Count,
+                    TotalAnswer = x.HomeWorkExtraPracticeAnswers.Count
+                })
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        private async Task<MethodResult<bool>> UpdateHomeWorkExtraPracticeResultAsync(
+            HomeWorkExtraPracticeResult homeWorkResult,
+            bool isSubmit,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(homeWorkResult);
             var methodResult = new MethodResult<bool>();
 
-            var homeWorkQuestionCount = await _homeWorkExtraPracticeResultRepository.Queryable.Where(x => x.Id == homeWorkResult.Id).Select(x => new
-            {
-                CourseSkill = x.HomeWork!.CourseSkill,
-                CourseLevel = x.HomeWork.CourseLevel,
-                CorrectCount = x.HomeWorkExtraPracticeAnswers.Sum(x => x.CorrectCount),
-                CorrectTotal = x.HomeWork.HomeWorkQuestions.Select(x => x.Question).Sum(x => x!.CorrectTotal),
-                TotalQuestion = x.HomeWork.HomeWorkQuestions.Count,
-                TotalAnswer = x.HomeWorkExtraPracticeAnswers.Count,
-            }).FirstOrDefaultAsync(cancellationToken);
-
-            if (homeWorkQuestionCount == null)
+            var statistics = await GetHomeWorkExtraPracticeStatisticsAsync(homeWorkResult.Id, cancellationToken);
+            if (statistics == null)
             {
                 return methodResult;
             }
@@ -306,37 +450,54 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             {
                 homeWorkResult.Status = EnumResultStatus.Process;
             }
+
             if (isSubmit)
             {
-                var isHomeWorkDone = homeWorkQuestionCount.CorrectCount == homeWorkQuestionCount.CorrectTotal || homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
-                if (homeWorkQuestionCount.TotalAnswer > homeWorkQuestionCount.TotalQuestion)
+                var isHomeWorkDone =
+                    statistics.CorrectCount == statistics.CorrectTotal ||
+                    homeWorkResult.SubmissionCount == EnumSubmissionCount.SecondSubmit;
+
+                if (statistics.TotalAnswer > statistics.TotalQuestion)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.DuplicateAnswers));
                     return methodResult;
                 }
-                if (homeWorkQuestionCount.TotalAnswer < homeWorkQuestionCount.TotalQuestion)
+
+                if (statistics.TotalAnswer < statistics.TotalQuestion)
                 {
                     methodResult.AddErrorBadRequest(nameof(EnumAnswerErrorCode.NotAnsweredEnough));
                     return methodResult;
                 }
+
+                // Chốt trạng thái các câu trả lời
                 await UpdateAnswersAsync(homeWorkResult, isHomeWorkDone);
-                SetHomeWorkExtraPracticeResult(homeWorkResult, homeWorkQuestionCount, isHomeWorkDone);
+
+                // Tính HighestStreak cho ExtraPractice (chỉ tính FirstSubmit)
+                homeWorkResult.HighestStreak = await CalculateHighestCorrectStreakAsync(homeWorkResult.Id, cancellationToken);
+
+                // Cập nhật thống kê vào result
+                SetHomeWorkExtraPracticeResult(homeWorkResult, statistics, isHomeWorkDone);
             }
 
-            await _homeWorkExtraPracticeResultRepository.BulkUpdateList(new List<HomeWorkExtraPracticeResult> { homeWorkResult }, bulk =>
-            {
-                bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.HomeWorkId };
-            });
-            await _homeWorkExtraPracticeResultRepository.UnitOfWork.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await _homeWorkExtraPracticeResultRepository.BulkUpdateList(
+                new List<HomeWorkExtraPracticeResult> { homeWorkResult },
+                bulk =>
+                {
+                    bulk.IgnoreOnUpdateExpression = c => new { c.StudentId, c.HomeWorkId };
+                });
 
             methodResult.Result = true;
             return methodResult;
         }
 
-        private static void SetHomeWorkExtraPracticeResult(HomeWorkExtraPracticeResult homeWorkResult, dynamic homeWorkQuestionCount, bool isHomeWorkDone)
+        private static void SetHomeWorkExtraPracticeResult(
+            HomeWorkExtraPracticeResult homeWorkResult,
+            HomeWorkExtraPracticeStatistics statistics,
+            bool isHomeWorkDone)
         {
-            homeWorkResult.CorrectCount = homeWorkQuestionCount.CorrectCount;
-            homeWorkResult.CorrectTotal = homeWorkQuestionCount.CorrectTotal;
+            homeWorkResult.CorrectCount = statistics.CorrectCount;
+            homeWorkResult.CorrectTotal = statistics.CorrectTotal;
+
             if (isHomeWorkDone)
             {
                 homeWorkResult.Status = EnumResultStatus.Done;
@@ -345,31 +506,43 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
             {
                 homeWorkResult.SubmissionCount = EnumSubmissionCount.SecondSubmit;
             }
+
             homeWorkResult.SkillScores = new List<SkillScores>
             {
                 new SkillScores
                 {
-                    Skill = homeWorkQuestionCount.CourseSkill,
-                    CorrectCount = homeWorkQuestionCount.CorrectCount,
-                    TotalCount = homeWorkQuestionCount.CorrectTotal,
-                    CountQuestion = homeWorkQuestionCount.TotalAnswer,
-                    TotalQuestion = homeWorkQuestionCount.TotalQuestion,
+                    Skill = statistics.CourseSkill,
+                    CorrectCount = statistics.CorrectCount,
+                    TotalCount = statistics.CorrectTotal,
+                    CountQuestion = statistics.TotalAnswer,
+                    TotalQuestion = statistics.TotalQuestion,
+                    SkillFilePath = statistics.SkillFilePath,
+                    SkillName = statistics.SkillName,
+                    SkillId = statistics.SkillId,
+                    CorrectQuestion = statistics.CorrectQuestion,
                 }
             };
         }
 
+        #endregion Update Result & Statistics
+
+        #region Finalize Answers & HighestStreak
+
         public async Task UpdateAnswersAsync(HomeWorkExtraPracticeResult? homeWorkResult, bool isDone = false)
         {
             ArgumentNullException.ThrowIfNull(homeWorkResult);
-            var answerQuestions = await (from baseQ in _homeWorkExtraPracticeAnswerRepository.Queryable
-                                         join q in _questionRepository.Queryable on baseQ.QuestionId equals q.Id
-                                         where baseQ.HomeWorkExtraPracticeResultId == homeWorkResult.Id
-                                         && baseQ.Status == EnumAnswerStatus.Process
-                                         select new
-                                         {
-                                             HomeWorkExtraPracticeAnswer = baseQ,
-                                             CorrectTotal = q.CorrectTotal
-                                         }).ToListAsync();
+
+            var answerQuestions = await (
+                from baseQ in _homeWorkExtraPracticeAnswerRepository.Queryable
+                join q in _questionRepository.Queryable on baseQ.QuestionId equals q.Id
+                where baseQ.HomeWorkExtraPracticeResultId == homeWorkResult.Id
+                      && baseQ.Status == EnumAnswerStatus.Process
+                select new
+                {
+                    HomeWorkExtraPracticeAnswer = baseQ,
+                    CorrectTotal = q.CorrectTotal
+                }).ToListAsync();
+
             var toUpdate = new List<HomeWorkExtraPracticeAnswer>();
 
             foreach (var x in answerQuestions)
@@ -381,15 +554,67 @@ namespace Fsel.Course.Lms.Application.Commands.HomeWorkExtraCmd
                 if (answer.Status != newStatus || answer.IsCorrect.HasValue)
                 {
                     answer.Status = newStatus;
-                    answer.IsCorrect = answer.IsCorrect.HasValue ? (answer.CorrectCount == x.CorrectTotal) : null;
+                    answer.IsCorrect = answer.IsCorrect.HasValue
+                        ? (answer.CorrectCount == x.CorrectTotal)
+                        : (bool?)null;
                 }
+
                 toUpdate.Add(answer);
             }
 
-            await _homeWorkExtraPracticeAnswerRepository.BulkUpdateList(toUpdate, bulk =>
+            if (toUpdate.Any())
             {
-                bulk.IgnoreOnUpdateExpression = e => new { e.HomeWorkExtraPracticeResultId, e.QuestionId };
-            });
+                await _homeWorkExtraPracticeAnswerRepository.BulkUpdateList(toUpdate, bulk =>
+                {
+                    bulk.ColumnInputExpression = entity => new
+                    {
+                        entity.Status,
+                        entity.IsCorrect
+                    };
+                });
+            }
         }
+
+        private async Task<int> CalculateHighestCorrectStreakAsync(
+            Guid homeWorkExtraPracticeResultId,
+            CancellationToken cancellationToken)
+        {
+            // HighestStreak: chuỗi dài nhất các câu đúng (IsCorrect == true) liên tiếp,
+            // chỉ tính các answer FirstSubmit và đã Done.
+            var answers = await _homeWorkExtraPracticeAnswerRepository.ReadQueryable
+                .Where(x => x.HomeWorkExtraPracticeResultId == homeWorkExtraPracticeResultId)
+                .Where(x => x.Status == EnumAnswerStatus.Done && x.IsFirstSubmit)
+                .OrderBy(x => x.CreatedDate)
+                .Select(x => x.IsCorrect)
+                .ToListAsync(cancellationToken);
+
+            if (!answers.Any())
+            {
+                return 0;
+            }
+
+            var currentStreak = 0;
+            var maxStreak = 0;
+
+            foreach (var isCorrect in answers)
+            {
+                if (isCorrect == true)
+                {
+                    currentStreak++;
+                    if (currentStreak > maxStreak)
+                    {
+                        maxStreak = currentStreak;
+                    }
+                }
+                else
+                {
+                    currentStreak = 0;
+                }
+            }
+
+            return maxStreak;
+        }
+
+        #endregion Finalize Answers & HighestStreak
     }
 }
