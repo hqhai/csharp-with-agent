@@ -98,7 +98,8 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                                 StudentId = p,
                                 CurriculumId = c.Curriculum.Id,
                                 StartDate = c.Curriculum.StartDate,
-                                EndDate = c.Curriculum.EndDate
+                                EndDate = c.Curriculum.EndDate,
+                                CourseCloneId = c.Curriculum.CourseCloneId
                             };
 
                             var courseResult = courseResultEntities
