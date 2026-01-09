@@ -7,8 +7,10 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     using Fsel.Common.ActionResults;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.TestConfigs;
+    using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.CommandModels.Tests;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Infrastructure.Repositories;
     using Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
@@ -30,11 +32,13 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
     {
         private IRepository<TestGroupResult> _testGroupResult;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ITestSectionResultRepository _testSectionResultRepository;
 
-        public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult, IServiceProvider serviceProvider)
+        public SubmitAnswerCommandHandler(IRepository<TestGroupResult> testGroupResult, ITestSectionResultRepository testSectionResultRepository, IServiceProvider serviceProvider)
         {
             _testGroupResult = testGroupResult;
             _serviceProvider = serviceProvider;
+            _testSectionResultRepository = testSectionResultRepository;
         }
 
         public async Task<MethodResult<PtStateModel>> Handle(SubmitAnswerCommand request, CancellationToken cancellationToken)
@@ -65,6 +69,20 @@ namespace Fsel.Course.Lms.Application.Commands.PlacementTestCmd
                         Status = flowTestResult.Status,
                     }
                 };
+            }
+
+            var testSectionResult = await _testSectionResultRepository.Queryable
+                .Where(x => x.Id == request.SectionResultId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (testSectionResult == null || testSectionResult.Status == Domain.Enums.EnumResultStatus.Done)
+            {
+                var result = new MethodResult<PtStateModel>
+                {
+                    StatusCode = 400,
+                };
+                result.AddErrorBadRequest("Section result not found or already completed.");
+                return result;
             }
 
             var aggregate = new FlowTestResultAggregate(flowTestResult, _serviceProvider);
