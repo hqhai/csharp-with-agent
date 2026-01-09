@@ -53,7 +53,8 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             var query = await (from baseQuery in _curriculumStudentRepository.Queryable
                                join cu in _curriculumRepository.Queryable on baseQuery.CurriculumId equals cu.Id
                                join c in _courseRepository.Queryable on cu.CourseId equals c.Id
-                               join cc in _courseRepository.Queryable on cu.CourseCloneId equals cc.Id
+                               join cc in _courseRepository.Queryable.Include(p => p.Level).Include(p => p.Program).ThenInclude(p => p.CategoryParent)
+                               on cu.CourseCloneId equals cc.Id
                                where baseQuery.StudentId == request.StudentId
                                select new
                                {
@@ -84,7 +85,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                 EndDate = p.Curriculum.EndDate,
                 CourseLevel = p.Course.CourseLevel,
                 CourseType = p.Course.CourseType,
-                Subject = "Tiếng Anh"
+                Subject = p.CourseClone.Program?.CategoryParent?.Name,
+                Level = p.CourseClone.Level?.Name,
+                Program = p.CourseClone.Program?.Name,
             }).OrderByDescending(x => x.CreatedDate).ToList();
 
             curriculums.ForEach(p =>

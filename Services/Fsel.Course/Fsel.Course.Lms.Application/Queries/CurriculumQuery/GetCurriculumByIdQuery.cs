@@ -37,7 +37,8 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
 
             var curriculum = await (from baseQuery in _curriculumRepository.Queryable
                                     join c in _courseRepository.Queryable on baseQuery.CourseId equals c.Id
-                                    join cc in _courseRepository.Queryable on baseQuery.CourseCloneId equals cc.Id
+                                    join cc in _courseRepository.Queryable.Include(p => p.Level).Include(p => p.Program).ThenInclude(p => p.CategoryParent)
+                                    on baseQuery.CourseCloneId equals cc.Id
                                     where baseQuery.Id == request.Id
                                     select new
                                     {
@@ -55,7 +56,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             curriculumModel.CourseName = curriculum.Course.Name;
             curriculumModel.CourseType = curriculum.Course.CourseType;
             curriculumModel.CourseLevel = curriculum.Course.CourseLevel;
-            curriculumModel.Subject = "Tiếng Anh";
+            curriculumModel.Subject = curriculum.CourseClone.Program?.CategoryParent?.Name;
+            curriculumModel.Level = curriculum.CourseClone.Level?.Name;
+            curriculumModel.Program = curriculum.CourseClone.Program?.Name;
 
             methodResult.Result = curriculumModel;
             return methodResult;

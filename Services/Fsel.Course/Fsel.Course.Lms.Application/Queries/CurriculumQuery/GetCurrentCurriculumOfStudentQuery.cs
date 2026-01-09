@@ -64,7 +64,8 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
             var curriculum = await (from baseQuery in _curriculumRepository.Queryable
                                     join cs in _curriculumStudentRepository.Queryable on baseQuery.Id equals cs.CurriculumId
                                     join c in _courseRepository.Queryable on baseQuery.CourseId equals c.Id
-                                    join cc in _courseRepository.Queryable on baseQuery.CourseCloneId equals cc.Id
+                                    join cc in _courseRepository.Queryable.Include(p => p.Level).Include(p => p.Program).ThenInclude(p => p.CategoryParent)
+                                    on baseQuery.CourseCloneId equals cc.Id
                                     where cc.Id == student.CourseId
                                     select new
                                     {
@@ -94,7 +95,9 @@ namespace Fsel.Course.Lms.Application.Queries.CurriculumQuery
                 EndDate = curriculum.Curriculum.EndDate,
                 CourseLevel = curriculum.Course.CourseLevel,
                 CourseType = curriculum.Course.CourseType,
-                Subject = "Tiếng Anh",
+                Subject = curriculum.CourseClone.Program?.CategoryParent?.Name,
+                Level = curriculum.CourseClone.Level?.Name,
+                Program = curriculum.CourseClone.Program?.Name,
                 IsDone = courseResult != null && courseResult.Status == EnumResultStatus.Done
             };
 
