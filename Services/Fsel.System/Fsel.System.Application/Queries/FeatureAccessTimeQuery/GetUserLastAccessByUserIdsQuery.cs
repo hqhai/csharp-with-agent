@@ -35,12 +35,13 @@ namespace Fsel.System.Application.Queries.FeatureAccessTimeQuery
                                                     .GroupBy(p => p.CreatedUserId)
                                                     .Select(g => new
                                                     {
-                                                        UserId = g.Key,
+                                                        CreatedUserId = g.Key,
+                                                        AccessTime = g.Sum(x => x.AccessTime),
                                                         LastFeatureAccessTime = g.OrderByDescending(x => x.LastVisited).FirstOrDefault(),
                                                     })
                                                     .ToListAsync(cancellationToken);
 
-            methodResult.Result = _mapper.Map<IList<FeatureAccessTimeModel>>(featureAccessTimes.Select(x => x.LastFeatureAccessTime));
+            methodResult.Result = _mapper.Map<IList<FeatureAccessTimeModel>>(featureAccessTimes);
             methodResult.StatusCode = StatusCodes.Status200OK;
             return methodResult;
         }
