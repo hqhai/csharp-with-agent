@@ -75,6 +75,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
 
         public Guid StudentId { get; set; }
 
+        public DateTime? UpdatedDate { get; set; }
+
         public List<LearningComponent> Children { get; set; } = new List<LearningComponent>();
 
         public IEnumerable<T> GetAllItemByType<T>()
@@ -132,6 +134,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     lessonComponent.LearningTemplateId = lesson.Id;
                     lessonComponent.LearningResultId = result?.Id;
                     lessonComponent.Status = result?.Status;
+                    lessonComponent.UpdatedDate = result?.CompletionDate ?? result?.UpdatedDate;
                 }
             }
         }
@@ -190,6 +193,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                     unitComponent.LearningTemplateId = unit.Id;
                     unitComponent.LearningResultId = result?.Id;
                     unitComponent.Status = result?.Status;
+                    unitComponent.UpdatedDate = result?.CompletionDate ?? result?.UpdatedDate;
                     unitComponent.Children = unit.UnitModules.Where(um => um.UnitConfigType == EnumUnitConfigType.Lesson).Select(um => new LessonComponent
                     {
                         LearningOriginalTemplateId = um.OriginalId,
