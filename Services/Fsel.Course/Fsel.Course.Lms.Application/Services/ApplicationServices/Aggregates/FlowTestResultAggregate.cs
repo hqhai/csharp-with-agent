@@ -102,7 +102,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 Status = FlowTestResult.Status,
                 StudentId = FlowTestResult.StudentId,
                 Level = FlowTestResult.LevelId?.ToString(),
-                TestStates = TestResultComposites.Select(c => c.ExportState()).ToList()
+                TestStates = TestResultComposites.Select(c => c.ExportState()).OrderBy(x => x.UpdatedDate).ToList()
             };
 
             foreach (var testResult in ptResult.TestStates)
