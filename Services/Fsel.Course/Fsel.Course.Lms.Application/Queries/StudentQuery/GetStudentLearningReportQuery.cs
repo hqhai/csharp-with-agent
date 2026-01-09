@@ -136,6 +136,8 @@ namespace Fsel.Course.Lms.Application.Queries.StudentQuery
 
             //var courseResults = await _courseResultRepository.ReadQueryable.Include(p => p.Course).ThenInclude(p => p.Program).ThenInclude(p => p.CategoryParent).Where(p => p.StudentId == student.Id).ToListAsync(cancellationToken);
 
+            subjects = subjects.DistinctBy(p => p.Id).ToList();
+
             methodResult.Result = new StudentCourseProgressModel
             {
                 StudentId = student.Id,
