@@ -50,6 +50,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                             PhoneNumber = u.PhoneNumber,
                             StudentId = s.Id,
                             SchoolClassId = s.SchoolClassId,
+                            CourseId = s.CourseId,
                         };
 
             if (!string.IsNullOrEmpty(request.Keyword))

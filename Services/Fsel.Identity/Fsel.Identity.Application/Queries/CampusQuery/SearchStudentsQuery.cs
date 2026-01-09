@@ -80,7 +80,8 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                             School = s.School,
                             Birthday = u.Birthday,
                             DefaultPassword = u.DefaultPassword,
-                            StudentCode = u.Code
+                            StudentCode = u.Code,
+                            CourseId = s.CourseId,
                         };
 
             if (!string.IsNullOrEmpty(request.Keyword))
@@ -156,6 +157,7 @@ namespace Fsel.Identity.Application.Queries.CampusQuery
                 lists.ForEach(p =>
                 {
                     p.LearningProgresses = learningProgress?.Where(x => x.StudentId == p.StudentId).ToList();
+                    p.LearningProgresses.ForEach(x => { x.IsLearning = x.CourseCloneId == p.CourseId; });
                 });
             }
 
