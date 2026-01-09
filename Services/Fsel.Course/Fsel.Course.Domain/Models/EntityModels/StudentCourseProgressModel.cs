@@ -13,5 +13,9 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public long? TotalActiveDuration { get; set; }
         public Guid StudentId { get; set; }
         public Guid? CourseId { get; set; }
+        public string? SubjectName { get; set; }
+        public string? ProgramName { get; set; }
+        public string? LevelName { get; set; }
+        public IList<CategoryModel>? CategoryModels { get; set; }
     }
 }
