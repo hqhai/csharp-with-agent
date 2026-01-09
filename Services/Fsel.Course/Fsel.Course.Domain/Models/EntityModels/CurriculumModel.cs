@@ -11,7 +11,6 @@ namespace Fsel.Course.Domain.Models.EntityModels
     {
         public string? CurriculumName { get; set; }
         public string? CourseName { get; set; }
-        public string? Subject { get; set; }
         public Guid CourseId { get; set; }
         public Guid CourseCloneId { get; set; }
         public DateTime StartDate { get; set; }
@@ -23,6 +22,7 @@ namespace Fsel.Course.Domain.Models.EntityModels
         public Guid? ProgramId { get; set; }
         public string? Program { get; set; }
         public Guid? SubjectId { get; set; }
+        public string? Subject { get; set; }
         public Guid LevelId { get; set; }
         public string? Level { get; set; }
 
