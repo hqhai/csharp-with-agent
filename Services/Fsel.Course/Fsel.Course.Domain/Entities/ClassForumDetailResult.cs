@@ -118,7 +118,7 @@ namespace Fsel.Course.Domain.Entities
                     }
                 }
 
-                return count + MaxPronunciationScore;
+                return PronunciationScore == 0 ? count + PronunciationScore : count + MaxPronunciationScore;
             }
         }
 
