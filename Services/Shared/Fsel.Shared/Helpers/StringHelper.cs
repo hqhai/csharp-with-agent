@@ -185,6 +185,18 @@ namespace Fsel.Shared.Helpers
                 urls.Add(url);
             }
 
+            if (isAudio)
+            {
+                string audioTagPattern = @"<audio[^>]*\ssrc=""([^""]+)""[^>]*>";
+
+                var audioTagMatches = Regex.Matches(inputHtml, audioTagPattern, RegexOptions.Singleline | RegexOptions.IgnoreCase);
+
+                foreach (Match match in audioTagMatches)
+                {
+                    urls.Add(match.Groups[1].Value);
+                }
+            }
+
             return urls;
         }
 
