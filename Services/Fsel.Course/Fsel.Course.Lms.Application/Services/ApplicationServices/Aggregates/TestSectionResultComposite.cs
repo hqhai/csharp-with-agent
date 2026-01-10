@@ -191,6 +191,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
+                    TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
 
                     if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
                     {
