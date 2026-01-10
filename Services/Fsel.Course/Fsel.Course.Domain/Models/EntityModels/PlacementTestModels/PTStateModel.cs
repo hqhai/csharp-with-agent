@@ -43,6 +43,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     {
         public string? Name { get; set; }
 
+        public EnumScoringFormulaType ScoringFormulaType { get; set; }
+        public double? Score { get; set; }
+
         [JsonProperty("ModuleId")] public Guid? StepFlowId { get; set; }
 
         public Guid? TestId { get; set; }
@@ -61,7 +64,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
             }
 
             Name = test.Name;
-
+            ScoringFormulaType = test.ScoringFormulaType;
             foreach (var sectionResult in Children)
             {
                 if (sectionResult is not SectionStateModel sectionStateModel)
@@ -91,6 +94,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
     public class SectionStateModel : BaseTestStateModel
     {
         public string? Name { get; set; }
+        public string? FilePath { get; set; }
         public Guid? SectionId { get; set; }
         public EnumTestLayoutType? TestLayoutType { get; set; }
         public TestSectionConfig? Config { get; set; }
@@ -117,8 +121,9 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
                 return;
             }
 
-            Order = section?.DisplayOrder;
+            Order = section.DisplayOrder;
             Name = section.Name ?? section.Skill?.Name;
+            FilePath = section.Skill?.FilePath;
             Config = section.Config;
             foreach (var sectionResult in Children)
             {
@@ -151,6 +156,7 @@ namespace Fsel.Course.Domain.Models.EntityModels.PlacementTestModels
         public Guid? TestSectionId { get; set; }
         public Guid? QuestionId { get; set; }
         public Guid? TestAnswerId { get; set; }
+        public int DisplayOrder { get; set; }
         public QuestionModel? Question { get; set; }
         public AnswerModel? Answer { get; set; }
     }

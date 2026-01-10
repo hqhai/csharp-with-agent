@@ -9,12 +9,8 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     using Domain.Models.CommandModels.Tests;
     using Domain.Models.EntityModels.TestModels;
     using Fsel.Core.Base.BaseModels;
-    using Fsel.Course.Domain.Entities;
     using Fsel.Course.Lms.Application.Queues.Publishers.Test;
-    using Fsel.Course.Lms.Application.Services.TestServices;
     using Fsel.Course.Lms.Application.Services.TestServices.Interface;
-    using Fsel.Shared.Enums;
-    using Fsel.Shared.Models.ShareModels;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
     using Services.ApplicationServices.Aggregates;
@@ -34,19 +30,15 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
     {
         private readonly ITestResultRepository _testResultRepository;
         private readonly ITestGroupResultRepository _testGroupResultRepository;
-        private readonly ITestAiLayoutService _testAiLayoutService;
         private readonly SubmitAiTestLayOutPublisher _submitAiTestLayOutPublisher;
         private readonly IServiceProvider _serviceProvider;
 
         public TestSubmitAnswerCommandHandler(ITestResultRepository testResultRepository,
             IServiceProvider serviceProvider,
             ITestGroupResultRepository testGroupResultRepository,
-            ITestAiLayoutService testAiLayoutService,
-            SubmitAiTestLayOutPublisher submitAiTestLayOutPublisher
-            )
+            SubmitAiTestLayOutPublisher submitAiTestLayOutPublisher)
         {
             _testGroupResultRepository = testGroupResultRepository;
-            _testAiLayoutService = testAiLayoutService;
             _submitAiTestLayOutPublisher = submitAiTestLayOutPublisher;
             _serviceProvider = serviceProvider;
             _testResultRepository = testResultRepository;
@@ -57,7 +49,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<SingleTestStateModel>();
 
-            var testResult = await _testResultRepository.ReadQueryable.FirstOrDefaultAsync(x => x.Id == request.TestResultId, cancellationToken);
+            var testResult = await _testResultRepository.Queryable.FirstOrDefaultAsync(x => x.Id == request.TestResultId, cancellationToken);
 
             if (testResult == null)
             {

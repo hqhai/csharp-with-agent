@@ -514,8 +514,9 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices
                 var partResults = await _testSectionResultRepository.ReadQueryable.Where(x => x.TestSectionId.HasValue && partIds.Contains(x.TestSectionId.Value))
                                                                            .Where(x => x.TestResultId == request.TestResultId)
                                                                            .ToListAsync();
-
-                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId == request.SectionResultId).ToListAsync();
+                var partResultIds = partResults.Select(x => x.Id).ToList();
+                var testAnswers = await _testAnswerRepository.Queryable.Where(x => x.TestSectionResultId.HasValue && partResultIds.Contains(x.TestSectionResultId.Value))
+                                                             .ToListAsync();
                 foreach (var item in request.Answers)
                 {
                     var question = questions.FirstOrDefault(x => x.Id == item.QuestionId);

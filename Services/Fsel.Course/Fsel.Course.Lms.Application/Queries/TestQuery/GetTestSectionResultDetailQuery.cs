@@ -143,10 +143,11 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
 
                 var query = sections
                     .Where(x => x.TestSectionQuestions != null && x.TestSectionQuestions.Any())
+                    .OrderBy(x => x.CreatedDate)
                     .SelectMany(x => x.TestSectionQuestions);
 
                 var questionPairs = query
-                    .Select(q => new { SectionId = q.TestSectionId, q.QuestionId })
+                    .Select(q => new { SectionId = q.TestSectionId, q.QuestionId, UpdatedDate = q.UpdatedDate ?? q.CreatedDate })
                     .ToList();
 
                 var questionIdsBySectionId = questionPairs
@@ -154,7 +155,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                     .GroupBy(x => x.SectionId)
                     .ToDictionary(
                         g => g.Key,
-                        g => g.Select(x => x.QuestionId).Distinct().ToList());
+                        g => g.OrderBy(x => x.UpdatedDate).Select(x => x.QuestionId).Distinct().ToList());
 
                 return new CachedSectionTreeModel
                 {

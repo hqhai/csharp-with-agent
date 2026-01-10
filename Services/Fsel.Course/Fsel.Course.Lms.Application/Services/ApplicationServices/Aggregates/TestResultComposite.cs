@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 PercentResult = TestResult.Percent,
                 Status = TestResult.Status,
                 Children = childStates,
+                Score = TestResult.Score,
                 UpdatedDate = TestResult?.UpdatedDate ?? TestResult?.CreatedDate
             };
             return stateModel;
@@ -93,6 +94,8 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
                     return skillScores;
                 }).ToList();
+
+                TestResult.HighestStreak = Children.Cast<TestSectionResultComposite>().Max(x => x.TestSectionResult.HighestStreak);
 
                 if (context.ScoringFormulaType.HasValue)
                 {

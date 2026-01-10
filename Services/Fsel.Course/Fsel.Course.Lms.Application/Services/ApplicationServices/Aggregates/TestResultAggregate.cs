@@ -235,6 +235,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TestResult.TestAnswers = hierarchicalTestResult.TestAnswers;
             }
             testResultComposite.GenerateChildren();
+            await testResultComposite.LoadTestHierarchicalData();
         }
 
         public async Task UpdateTestResultDetailInfo(TestStateModel? testStateModel)
@@ -263,6 +264,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     var sectionStateModel = new SectionStateModel()
                     {
                         Name = skill.TestSection?.Skill?.Name,
+                        FilePath = skill.TestSection?.Skill?.FilePath,
+                        HighestStreak = skill.HighestStreak,
+                        PercentResult = skill.Percent,
+                        CurrentSectionTimeCodeId = skill.CurrentSectionTimeCodeId,
+                        SkillScores = skill.SkillScores,
                         SectionResultId = skill.Id,
                         CorrectCount = skill.CorrectCount,
                         TotalCount = skill.CorrectTotal,

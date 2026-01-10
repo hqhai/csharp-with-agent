@@ -767,36 +767,57 @@ namespace Fsel.Course.Infrastructure.Common
         public async Task<int> GetHighestStreak(VideoResult videoResult)
         {
             ArgumentNullException.ThrowIfNull(videoResult);
-            var questionIds = await (from baseQ in _videoTimeCodeRepository.Queryable
-                                     join te in _timeCodeExerciseRepository.Queryable on baseQ.Id equals te.VideoTimeCodeId
-                                     join e in _exerciseRepository.Queryable on te.ExerciseId equals e.Id
-                                     join eq in _exerciseQuestionRepository.Queryable on e.Id equals eq.ExerciseId
-                                     join q in _questionRepository.Queryable on eq.QuestionId equals q.Id
-                                     where baseQ.VideoId == videoResult.VideoId && baseQ.TimeCodeType == EnumTimeCodeType.Standalone
-                                      && !q.Ungraded && q.QuestionType != EnumQuestionType.ExercisePreparation
-                                     select q.Id).ToListAsync();
 
-            var answerQuery = from baseQ in _questionRepository.Queryable.WhereBulkContains(questionIds, x => x.Id)
-                              join vtca in _videoTimeCodeAnswerRepository.Queryable.Where(x => x.CreatedDate >= videoResult.CreatedDate && x.VideoResultId == videoResult.Id) on baseQ.Id equals vtca.QuestionId
-                              where vtca.VideoResultId == videoResult.Id
-                              orderby baseQ.CreatedDate
-                              select vtca.IsCorrect == true && vtca.IsFirstSubmit;
-            var highestStreaks = await answerQuery.ToListAsync();
-            if (highestStreaks == null)
-            {
-                return default;
-            }
-            return highestStreaks.GetHighestStreak();
+            var correctnessTimeline = await (
+                from vtc in _videoTimeCodeRepository.ReadQueryable
+                join te in _timeCodeExerciseRepository.ReadQueryable
+                    on vtc.Id equals te.VideoTimeCodeId
+                join eq in _exerciseQuestionRepository.ReadQueryable
+                    on te.ExerciseId equals eq.ExerciseId
+                join q in _questionRepository.ReadQueryable
+                    on eq.QuestionId equals q.Id
+
+                join a in _videoTimeCodeAnswerRepository.ReadQueryable on q.Id equals a.QuestionId into answerGroup
+                from a in answerGroup.DefaultIfEmpty()
+
+                where vtc.VideoId == videoResult.VideoId
+                && a.VideoResultId == videoResult.Id
+                && !q.Ungraded
+                && q.QuestionType != EnumQuestionType.ExercisePreparation
+                && a.CreatedDate >= videoResult.CreatedDate
+                orderby q.CreatedDate
+                select a != null && a.IsCorrect == true && a.IsFirstSubmit
+            ).ToListAsync();
+
+            return correctnessTimeline.GetHighestStreak();
         }
 
         public async Task<int> GetHighestStreak(VideoTimeCodeResult videoTimeCodeResult)
         {
-            var answers = await _videoTimeCodeAnswerRepository.Queryable.Where(x => x.VideoTimeCodeResultId == videoTimeCodeResult.Id)
-                                                .Where(x => x.CreatedDate >= videoTimeCodeResult.CreatedDate)
-                                                .Where(q => q.Question != null && !q.Question.Ungraded && q.Question.QuestionType != EnumQuestionType.ExercisePreparation)
-                                                .OrderBy(x => x.Question!.CreatedDate)
-                                                .Select(x => x.IsCorrect == true && x.IsFirstSubmit).ToListAsync();
-            return answers.GetHighestStreak();
+            ArgumentNullException.ThrowIfNull(videoTimeCodeResult);
+
+            var correctnessTimeline = await (
+                from vtc in _videoTimeCodeRepository.ReadQueryable
+                join te in _timeCodeExerciseRepository.ReadQueryable
+                    on vtc.Id equals te.VideoTimeCodeId
+                join eq in _exerciseQuestionRepository.ReadQueryable
+                    on te.ExerciseId equals eq.ExerciseId
+                join q in _questionRepository.ReadQueryable
+                    on eq.QuestionId equals q.Id
+
+                join a in _videoTimeCodeAnswerRepository.ReadQueryable on q.Id equals a.QuestionId into answerGroup
+                from a in answerGroup.DefaultIfEmpty()
+
+                where vtc.Id == videoTimeCodeResult.VideoTimeCodeId
+                && a.VideoTimeCodeResultId == videoTimeCodeResult.Id
+                && !q.Ungraded
+                && q.QuestionType != EnumQuestionType.ExercisePreparation
+                && a.CreatedDate >= videoTimeCodeResult.CreatedDate
+                orderby q.CreatedDate
+                select a != null && a.IsCorrect == true && a.IsFirstSubmit
+            ).ToListAsync();
+
+            return correctnessTimeline.GetHighestStreak();
         }
 
         private static bool GetUngraded(VideoTimeCode? videoTimeCode)
