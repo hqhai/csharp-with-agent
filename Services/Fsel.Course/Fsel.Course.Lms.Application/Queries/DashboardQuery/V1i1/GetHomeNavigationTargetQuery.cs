@@ -34,13 +34,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
         private readonly ILessonResultRepository _lessonResultRepository;
         private readonly ILessonRepository _lessonRepository;
         private readonly ICourseRepository _courseRepository;
-        private readonly IUnitRepository _unitRepository;
-        private readonly IMockTestResultRepository _mockTestResultRepository;
         private readonly IMapper _mapper;
         private readonly IVideoTimeCodeRepository _videoTimeCodeRepository;
         private readonly IVideoResultRepository _videoResultRepository;
         private readonly IUnitResultRepository _unitResultRepository;
-        private readonly IFinalTestResultRepository _finalTestResultRepository;
         private readonly ICourseResultRepository _courseResultRepository;
         private readonly IVideoTimeCodeResultRepository _videoTimeCodeResultRepository;
         private readonly ICourseService _courseService;
@@ -89,13 +86,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             _lessonResultRepository = lessonResultRepository;
             _lessonRepository = lessonRepository;
             _courseRepository = courseRepository;
-            _unitRepository = unitRepository;
-            _mockTestResultRepository = mockTestResultRepository;
             _mapper = mapper;
             _videoTimeCodeRepository = videoTimeCodeRepository;
             _videoResultRepository = videoResultRepository;
             _unitResultRepository = unitResultRepository;
-            _finalTestResultRepository = finalTestResultRepository;
             _courseResultRepository = courseResultRepository;
             _videoTimeCodeResultRepository = videoTimeCodeResultRepository;
             _courseService = courseService;
@@ -126,7 +120,11 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             public Guid? LessonResultId { get; set; }
             public Guid? ObjectId { get; set; }
             public Guid? VideoId { get; set; }
+            public Guid? ModuleId { get; set; }
+            public EnumTestType? TestType { get; set; }
             public EnumResultStatus? ResultStatus { get; set; }
+            public string? Thumbnail { get; set; }
+            public string? Description { get; set; }
             public string? Type { get; set; }
         }
 
@@ -294,7 +292,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             }
 
             // Module là Test độc lập
-            return await BuildCourseTestNavigationTargetAsync(course, currentModuleNav, cancellationToken);
+            return await BuildCourseTestNavigationTargetAsync(course, courseResult, currentModuleNav, cancellationToken);
         }
 
         private async Task<NavigationTargetContext?> BuildUnitNavigationTargetAsync(
@@ -328,8 +326,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 UnitId = currentModuleNav.UnitId,
                 UnitResultId = currentModuleNav.ResultId,
                 LessonId = null,
+                ModuleId = selectedUnitModule.Id,
                 LessonResultId = null,
                 ObjectId = selectedUnitModule.TestId,
+                TestType = selectedUnitModule.TestType,
                 VideoId = null,
                 Type = EnumUnitConfigType.Test.ToString(),
                 ResultStatus = selectedUnitModule.Status
@@ -359,12 +359,15 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             var navigationTarget = new NavigationTargetContext
             {
                 CourseId = course.Id,
+                Description = selectedLessonModule.Description,
+                Thumbnail = selectedLessonModule.Thumbnail,
                 UnitId = currentModuleNav.UnitId,
                 UnitResultId = currentModuleNav.ResultId,       // ResultId ở CourseModule = UnitResultId
                 LessonId = selectedUnitModule.LessonId,
                 LessonResultId = selectedUnitModule.ResultId,
-                ResultStatus = selectedLessonModule.Status,
-                Type = selectedLessonModule.ConfigType.ToString()
+                ResultStatus = selectedUnitModule.Status,
+                ModuleId = selectedLessonModule.Id,
+                Type = nameof(Lesson)
             };
 
             // ObjectId + VideoId tùy theo loại LessonModule
@@ -399,6 +402,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
 
         private async Task<NavigationTargetContext?> BuildCourseTestNavigationTargetAsync(
             Course course,
+            CourseResult courseResult,
             CourseModuleBuildModel currentModuleNav,
             CancellationToken cancellationToken)
         {
@@ -409,16 +413,20 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             {
                 return null;
             }
+            var testGroupResult = await _testGroupResultRepository.ReadQueryable
+                .Include(x => x.TestResults)
+                .Where(x => x.CourseModuleId == currentModuleNav.Id)
+                .FirstOrDefaultAsync(x => x.CourseResultId == courseResult.Id, cancellationToken);
+
+            var testResult = testGroupResult?.TestResults.FirstOrDefault();
 
             return new NavigationTargetContext
             {
                 CourseId = course.Id,
-                UnitId = null,
-                UnitResultId = null,
-                LessonId = null,
-                LessonResultId = null,
+                UnitId = test.Id,
+                UnitResultId = testResult?.Id,
+                TestType = testGroupResult?.TestType,
                 ObjectId = test.Id,
-                VideoId = null,
                 Type = EnumCourseConfigType.Test.ToString(),
                 ResultStatus = currentModuleNav.Status
             };
@@ -429,8 +437,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             LessonModuleBuildModel selectedLessonModule,
             CancellationToken cancellationToken)
         {
-            if (!selectedLessonModule.CurrentVideoTimeCodeId.HasValue ||
-                selectedLessonModule.Status == EnumResultStatus.Done)
+            if (!selectedLessonModule.CurrentVideoTimeCodeId.HasValue || selectedLessonModule.Status == EnumResultStatus.Done)
             {
                 return;
             }
@@ -501,7 +508,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                     vm.UnitId = lessonResult.UnitId;
                 }
             }
-
+            vm.Thumbnail = navigationTarget.Thumbnail;
+            vm.Description = navigationTarget.Description;
+            vm.ModuleId = navigationTarget.ModuleId;
+            vm.TestType = navigationTarget.TestType;
             vm.CourseId = navigationTarget.CourseId;
             vm.UnitId = navigationTarget.UnitId ?? vm.UnitId;
             vm.UnitResultId = navigationTarget.UnitResultId;
@@ -692,6 +702,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                     Guid? resultId = null;
                     Guid? lessonId = null;
                     Guid? testId = null;
+                    EnumTestType? type = null;
 
                     if (um.UnitConfigType == EnumUnitConfigType.Lesson)
                     {
@@ -706,6 +717,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                         status = tr?.Status;
                         resultId = tr?.Id;
                         testId = testResult?.TestId ?? testEntity?.Id;
+                        type = tr?.TestType;
                     }
 
                     return new UnitModuleBuildModel
@@ -716,6 +728,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                         LessonId = lessonId,
                         TestId = testId,
                         Status = status,
+                        TestType = type,
                         ResultId = resultId,
                         ConfigType = um.UnitConfigType,
                         DisplayNumber = um.DisplayNumber,
@@ -937,6 +950,8 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                     return new LessonModuleBuildModel
                     {
                         Id = lm.Id,
+                        Description = lm.Description,
+                        Thumbnail = lm.Thumbnail,
                         OpenOrder = lm.OpenOrder,
                         DisplayOrder = lm.DisplayOrder,
                         DisplayNumber = lm.DisplayNumber,

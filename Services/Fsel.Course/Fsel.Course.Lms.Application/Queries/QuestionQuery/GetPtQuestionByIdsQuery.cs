@@ -95,6 +95,7 @@ namespace Fsel.Course.Lms.Application.Queries.QuestionQuery
             var listQuestionShuffle = new List<QuestionShuffle>();
             var questionShuffles = await _questionShuffleRepository.Queryable
                 .Where(x => questions.Select(y => y!.Id).Contains(x.QuestionId) && x.StudentId == request.StudentId)
+                .OrderBy(x => x.CreatedDate)
                 .ToListAsync();
             foreach (var question in questions)
             {

@@ -2,12 +2,14 @@
 
 namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 {
+    using System.Collections.Generic;
     using Domain.Models.EntityModels;
     using Fsel.Core.Base.Interfaces;
     using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Entities.TestConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.Models.EntityModels.PlacementTestModels;
+    using Fsel.Course.Infrastructure.Common;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Helpers;
     using Microsoft.EntityFrameworkCore;
@@ -30,6 +32,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TotalCount = TestSectionResult.SkillScores?.Sum(x => x.TotalCount) ?? default,
                 WorkingTime = TestSectionResult.WorkingTime,
                 Children = new List<BaseTestStateModel>(),
+                CurrentSectionTimeCodeId = TestSectionResult.CurrentSectionTimeCodeId,
+                HighestStreak = TestSectionResult.HighestStreak,
+                CorrectTotal = TestSectionResult.CorrectTotal,
+                PercentResult = TestSectionResult.Percent,
+                SkillScores = TestSectionResult.SkillScores,
+                FilePath = TestSection?.Skill?.FilePath,
                 UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
             };
             if (Children.Count > 0)
@@ -54,6 +62,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 TotalCount = TestSectionResult.SkillScores?.Sum(x => x.TotalCount) ?? default,
                 WorkingTime = TestSectionResult.WorkingTime,
                 Children = new List<BaseTestStateModel>(),
+                FilePath = TestSection?.Skill?.FilePath,
+                CorrectTotal = TestSectionResult.CorrectTotal,
+                CurrentSectionTimeCodeId = TestSectionResult.CurrentSectionTimeCodeId,
+                HighestStreak = TestSectionResult.HighestStreak,
+                PercentResult = TestSectionResult.Percent,
+                SkillScores = TestSectionResult.SkillScores,
                 UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
             };
             if (Children.Count > 0)
@@ -67,7 +81,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             {
                 sectionState.Children = TestSectionResult.TestSection.TestSectionQuestions.Select(BaseTestStateModel (x) =>
                 {
-                    var questionModel = new QuestionStateModel { QuestionId = x.QuestionId };
+                    var questionModel = new QuestionStateModel { QuestionId = x.QuestionId, DisplayOrder = TestSectionResult.TestSection.DisplayOrder };
                     var testAnswer = TestSectionResult?.TestAnswers.FirstOrDefault(t => t.QuestionId == x.QuestionId);
                     questionModel.TestAnswerId = testAnswer?.Id;
                     if (testAnswer != null)
@@ -177,8 +191,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
 
-                    TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
-
                     if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
                     {
                         TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((TestSectionResult.Percent * TestSection.Percent.Value), 2);
@@ -226,8 +238,40 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
                 }
             }
-
+            var answers = GetPlainQuestionStates().Select(x => x.Answer != null && x.Answer.IsCorrect == true).ToList();
+            TestSectionResult.HighestStreak = answers.GetHighestStreak();
             TestSectionResult.Status = EnumResultStatus.Done;
+        }
+
+        public override IEnumerable<QuestionStateModel> GetPlainQuestionStates()
+        {
+            if (TestSection?.TestSectionQuestions.Any() == true)
+            {
+                var answerChildren = Children.Where(x => x is TestAnswerLeaf).Select(x => (QuestionStateModel)x.ExportState()).ToList();
+                var notAnswerQuestions = new List<QuestionStateModel>();
+                foreach (var sectionQuestion in TestSection.TestSectionQuestions)
+                {
+                    var answer = answerChildren.FirstOrDefault(a => a.QuestionId == sectionQuestion.QuestionId);
+                    if (answer != null)
+                    {
+                        answer.UpdatedDate = sectionQuestion.UpdatedDate ?? sectionQuestion.CreatedDate;
+                    }
+                    else
+                    {
+                        notAnswerQuestions.Add(new QuestionStateModel
+                        {
+                            QuestionId = sectionQuestion.QuestionId,
+                            UpdatedDate = sectionQuestion.UpdatedDate ?? sectionQuestion.CreatedDate
+                        });
+                    }
+                }
+
+                return answerChildren.Concat(notAnswerQuestions).OrderBy(x => x.UpdatedDate).ToList();
+            }
+            else
+            {
+                return base.GetPlainQuestionStates();
+            }
         }
 
         public override async Task SubmitTest(SubmitContext context)
@@ -271,7 +315,6 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     firstSkillScore.SkillFilePath = TestSection?.Skill?.FilePath;
                     TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                 }
-
                 TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
 
                 if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
@@ -298,12 +341,15 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 }
                 TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
             }
+
+            var answers = GetPlainQuestionStates().Select(x => x.Answer != null && x.Answer.IsCorrect == true).ToList();
+            TestSectionResult.HighestStreak = answers.GetHighestStreak();
             TestSectionResult.Status = EnumResultStatus.Done;
         }
 
         public override async Task LoadTestHierarchicalData()
         {
-            if (TestSection?.TestSections != null && Children != null && Children.Any())
+            if (TestSection?.TestSections != null && TestSection.TestSections.Any() && Children != null && Children.Any())
             {
                 foreach (var child in Children)
                 {
@@ -317,6 +363,11 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         }
                     }
                 }
+
+                Children = Children.Where(x => x is TestSectionResultComposite)
+                    .Cast<TestSectionResultComposite>()
+                    .OrderBy(x => x.TestSection?.DisplayOrder)
+                    .Select(x => x as ResultComponent).ToList();
             }
         }
     }

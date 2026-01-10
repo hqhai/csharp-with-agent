@@ -23,12 +23,19 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         public abstract Task SubmitTest(SubmitContext context);
 
         public IServiceProvider ServiceProvider { get; set; }
+
+        public virtual IEnumerable<T> GetComponentByType<T>() where T : ResultComponent
+        {
+            if (this is T t)
+            {
+                yield return t;
+            }
+        }
     }
 
     public class SubmitContext
     {
         public Guid Id { get; set; }
         public EnumScoringFormulaType? ScoringFormulaType { get; set; }
-
     }
 }
