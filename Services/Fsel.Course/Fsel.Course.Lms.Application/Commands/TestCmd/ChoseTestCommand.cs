@@ -73,6 +73,7 @@ namespace Fsel.Course.Lms.Application.Commands.TestCmd
 
             var testResult = await _testResultRepository.Queryable.Include(x => x.TestGroupResult)
                                                         .Include(x => x.SectionResults)
+                                                        .Include(x => x.Test)
                                                         .FirstOrDefaultAsync(x => x.Id == request.TestResultId, cancellationToken);
 
             if (testResult == null)

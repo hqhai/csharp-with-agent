@@ -56,6 +56,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             MethodResult<LeaderBoardSearchModel> methodResult = new MethodResult<LeaderBoardSearchModel>();
 
             #region Cmt code lỏ của Hải Đây Lè
+
             ////List CourseLevel hiện có
             //EnumCourseLevel[] enumValues = (EnumCourseLevel[])Enum.GetValues(typeof(EnumCourseLevel));
 
@@ -111,8 +112,9 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery
             //                            .Take(LEADERBOARD_TOP)
             //                        )
             //                        .OrderBy(x => x.CourseLevel)
-            //                        .ToList(); 
-            #endregion
+            //                        .ToList();
+
+            #endregion Cmt code lỏ của Hải Đây Lè
 
             // Lấy dữ liệu
 

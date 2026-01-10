@@ -9,6 +9,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Core.Base;
     using Fsel.Course.Domain.Entities;
+    using Fsel.Course.Domain.Entities.SkillScoresConfigs;
     using Fsel.Course.Domain.Enums;
     using Fsel.Course.Domain.IRepositories;
     using Fsel.Course.Domain.Models.EntityModels;
@@ -59,13 +60,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             ILessonResultRepository lessonResultRepository,
             ILessonRepository lessonRepository,
             ICourseRepository courseRepository,
-            IUnitRepository unitRepository,
-            IMockTestResultRepository mockTestResultRepository,
             IMapper mapper,
             IVideoTimeCodeRepository videoTimeCodeRepository,
             IVideoResultRepository videoResultRepository,
             IUnitResultRepository unitResultRepository,
-            IFinalTestResultRepository finalTestResultRepository,
             ICourseResultRepository courseResultRepository,
             IVideoTimeCodeResultRepository videoTimeCodeResultRepository,
             ICourseService courseService,
@@ -123,6 +121,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             public Guid? ModuleId { get; set; }
             public EnumTestType? TestType { get; set; }
             public EnumResultStatus? ResultStatus { get; set; }
+            public IList<SkillScores>? SkillScores { get; set; }
             public string? Thumbnail { get; set; }
             public string? Description { get; set; }
             public string? Type { get; set; }
@@ -164,7 +163,19 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 return methodResult;
             }
             var course = courseMethod.Result!;
-
+            if (courseResult.Status != EnumResultStatus.Process)
+            {
+                methodResult.Result = new HomeNavigationTargetModel
+                {
+                    Name = course.Name,
+                    CourseId = courseResult.CourseId,
+                    ObjectId = courseResult.CourseId,
+                    Type = nameof(Course),
+                    Status = MapOverviewStatus(courseResult.Status),
+                    SkillScores = courseResult.SkillScores,
+                };
+                return methodResult;
+            }
             // 4. Build NavigationTarget (điểm điều hướng cuối cùng)
             var navigationTarget = await BuildNavigationTargetAsync(course, courseResult, cancellationToken);
             if (navigationTarget == null || !navigationTarget.ObjectId.HasValue)
@@ -288,6 +299,19 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
             // Level 5 - Module type
             if (currentModuleNav.ConfigType == EnumCourseConfigType.Unit)
             {
+                if (currentModuleNav.Status == EnumResultStatus.New)
+                {
+                    return new NavigationTargetContext
+                    {
+                        CourseId = course.Id,
+                        UnitId = currentModuleNav.UnitId,
+                        UnitResultId = currentModuleNav.ResultId,
+                        ModuleId = currentModuleNav.Id,
+                        Type = EnumCourseConfigType.Unit.ToString(),
+                        ResultStatus = currentModuleNav.Status
+                    };
+                }
+
                 return await BuildUnitNavigationTargetAsync(course, courseResult, currentModuleNav, cancellationToken);
             }
 
@@ -332,7 +356,7 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 TestType = selectedUnitModule.TestType,
                 VideoId = null,
                 Type = EnumUnitConfigType.Test.ToString(),
-                ResultStatus = selectedUnitModule.Status
+                ResultStatus = selectedUnitModule.Status,
             };
         }
 
@@ -367,29 +391,10 @@ namespace Fsel.Course.Lms.Application.Queries.DashboardQuery.V1i1
                 LessonResultId = selectedUnitModule.ResultId,
                 ResultStatus = selectedUnitModule.Status,
                 ModuleId = selectedLessonModule.Id,
-                Type = nameof(Lesson)
+                Type = nameof(Lesson),
+                VideoId = selectedLessonModule.VideoId,
+                ObjectId = selectedUnitModule.LessonId
             };
-
-            // ObjectId + VideoId tùy theo loại LessonModule
-            switch (selectedLessonModule.ConfigType)
-            {
-                case EnumLessonConfigType.HomeWork:
-                    navigationTarget.ObjectId = selectedLessonModule.HomeWorkId;
-                    break;
-
-                case EnumLessonConfigType.ClassForum:
-                    navigationTarget.ObjectId = selectedLessonModule.ClassForumId;
-                    break;
-
-                case EnumLessonConfigType.Document:
-                    navigationTarget.ObjectId = selectedLessonModule.DocumentId;
-                    break;
-
-                case EnumLessonConfigType.Video:
-                    navigationTarget.ObjectId = selectedLessonModule.VideoId;
-                    navigationTarget.VideoId = selectedLessonModule.VideoId;
-                    break;
-            }
 
             // Nếu là Video => apply thêm logic TimeCode
             if (selectedLessonModule.ConfigType == EnumLessonConfigType.Video)

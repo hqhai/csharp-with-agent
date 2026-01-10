@@ -264,6 +264,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     var sectionStateModel = new SectionStateModel()
                     {
                         Name = skill.TestSection?.Skill?.Name,
+                        TestLayoutType = skill.TestSection?.LayoutType,
                         FilePath = skill.TestSection?.Skill?.FilePath,
                         HighestStreak = skill.HighestStreak,
                         PercentResult = skill.Percent,

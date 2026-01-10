@@ -27,6 +27,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
             {
                 SectionId = TestSectionResult.TestSectionId,
                 SectionResultId = TestSectionResult.Id,
+                TestLayoutType = TestSection?.LayoutType,
                 Status = TestSectionResult.Status,
                 CorrectCount = TestSectionResult.CorrectCount,
                 TotalCount = TestSectionResult.SkillScores?.Sum(x => x.TotalCount) ?? default,
