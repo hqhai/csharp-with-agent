@@ -15,5 +15,7 @@ namespace Fsel.Shared.Constants
             public const int OneHour = 3600;
             public const int ThreeHour = 10800;
         }
+
+        public const string GetCoinOfStudent = "GetCoinOfStudent_";
     }
 }

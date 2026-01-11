@@ -28,7 +28,7 @@ namespace Fsel.Interaction.Application.Queues.Publishers
                 return;
             }
 
-            var key = $"GetCoinOfStudent_{_authContext.CurrentUserId}".ToLower(CultureInfo.InvariantCulture);
+            var key = $"{CacheSettings.GetCoinOfStudent}{_authContext.CurrentUserId}".ToLower(CultureInfo.InvariantCulture);
             await _cacheService.RemoveAsync(key);
 
             await _queueProvider.Publish(QueueSettings.InteractionQueue.NameQueue.CreateTokenHistory, new TokenHistoryQueuesModel { TokenHistories = request }, cancellationToken);

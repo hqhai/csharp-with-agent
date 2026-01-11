@@ -11,6 +11,8 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
     using Fsel.Core.Base.Managers;
     using Fsel.Identity.Domain.Entities;
     using Fsel.Identity.Domain.IRepositories;
+    using Fsel.Identity.Domain.Models.EntityModels;
+    using Fsel.Shared.Constants;
     using MediatR;
     using Microsoft.EntityFrameworkCore;
 
@@ -23,9 +25,9 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
         private readonly UserManager<User> _userManager;
         private readonly IStudentRepository _studentRepository;
         private readonly AuthContext _authContext;
-        private readonly ICacheService<Student> _cacheService;
+        private readonly ICacheService<StudentModel> _cacheService;
 
-        public GetCoinOfStudentQueryHandler(UserManager<User> userManager, IStudentRepository studentRepository, AuthContext authContext, ICacheService<Student> cacheService)
+        public GetCoinOfStudentQueryHandler(UserManager<User> userManager, IStudentRepository studentRepository, AuthContext authContext, ICacheService<StudentModel> cacheService)
         {
             _userManager = userManager;
             _studentRepository = studentRepository;
@@ -38,7 +40,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
             ArgumentNullException.ThrowIfNull(request);
             var methodResult = new MethodResult<long>();
 
-            var key = $"GetCoinOfStudent_{_authContext.CurrentUserId}".ToLower(CultureInfo.InvariantCulture);
+            var key = $"{CacheSettings.GetCoinOfStudent}{_authContext.CurrentUserId}".ToLower(CultureInfo.InvariantCulture);
             var studentCache = await _cacheService.GetAsync(key);
             if (studentCache != null)
             {
@@ -59,7 +61,7 @@ namespace Fsel.Identity.Application.Queries.StudentQuery
 
             var numberOfToken = student.NumberOfToken;
 
-            await _cacheService.SetAsync(key, student, TimeSpan.FromMinutes(10));
+            await _cacheService.SetAsync(key, new StudentModel() { NumberOfToken = numberOfToken }, TimeSpan.FromMinutes(10));
 
             methodResult.Result = numberOfToken;
             return methodResult;

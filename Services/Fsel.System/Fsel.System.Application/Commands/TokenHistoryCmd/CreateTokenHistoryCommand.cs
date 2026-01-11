@@ -6,6 +6,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     using Fsel.Common.ActionResults;
     using Fsel.Common.Caching;
     using Fsel.Common.Enums.ErrorCodes;
+    using Fsel.Shared.Constants;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
     using Fsel.System.Application.Services.UserServices;
@@ -68,7 +69,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
             }
             var userId = student.UserId;
 
-            var key = $"GetCoinOfStudent_{userId}".ToLower(CultureInfo.InvariantCulture);
+            var key = $"{CacheSettings.GetCoinOfStudent}{userId}".ToLower(CultureInfo.InvariantCulture);
             await _cacheService.RemoveAsync(key);
 
             var listEventCode = request.TokenHistorys.Where(x => !string.IsNullOrEmpty(x.EventCode)).Select(x => x.EventCode!).ToList();
