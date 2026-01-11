@@ -4,6 +4,7 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
 {
     using AutoMapper;
     using Fsel.Common.ActionResults;
+    using Fsel.Common.Caching;
     using Fsel.Common.Enums.ErrorCodes;
     using Fsel.Shared.Enums;
     using Fsel.Shared.Enums.ErrorCodes;
@@ -15,11 +16,11 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
     using Fsel.System.Domain.Models.EntityModels;
     using Fsel.System.Domain.Models.EntityModels.Configs;
     using global::System;
+    using global::System.Globalization;
     using global::System.Threading.Tasks;
     using MediatR;
     using Microsoft.AspNetCore.Http;
     using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Logging;
 
     public class CreateTokenHistoryCommand : CreateTokenHistoryCommandModel, IRequest<MethodResult<IList<TokenHistoryModel>>>
     {
@@ -31,13 +32,15 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
         private readonly ITokenHistoryRepository _tokenHistoryRepository;
         private readonly IUserService _userService;
         private readonly ITokenConfigRepository _tokenConfigRepository;
+        private readonly ICacheService<StudentModel> _cacheService;
 
-        public CreateTokenHistoryCommandHandler(IMapper mapper, ITokenHistoryRepository tokenHistoryRepository, IUserService userService, ITokenConfigRepository tokenConfigRepository)
+        public CreateTokenHistoryCommandHandler(IMapper mapper, ITokenHistoryRepository tokenHistoryRepository, IUserService userService, ITokenConfigRepository tokenConfigRepository, ICacheService<StudentModel> cacheService)
         {
             _mapper = mapper;
             _tokenHistoryRepository = tokenHistoryRepository;
             _userService = userService;
             _tokenConfigRepository = tokenConfigRepository;
+            _cacheService = cacheService;
         }
 
         public async Task<MethodResult<IList<TokenHistoryModel>>> Handle(CreateTokenHistoryCommand request, CancellationToken cancellationToken)
@@ -64,6 +67,10 @@ namespace Fsel.System.Application.Commands.TokenHistoryCmd
                 return methodResult;
             }
             var userId = student.UserId;
+
+            var key = $"GetCoinOfStudent_{userId}".ToLower(CultureInfo.InvariantCulture);
+            await _cacheService.RemoveAsync(key);
+
             var listEventCode = request.TokenHistorys.Where(x => !string.IsNullOrEmpty(x.EventCode)).Select(x => x.EventCode!).ToList();
             if (listEventCode.Any())
             {

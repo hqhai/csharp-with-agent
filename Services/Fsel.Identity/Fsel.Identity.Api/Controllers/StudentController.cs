@@ -372,11 +372,23 @@ namespace Fsel.Identity.Api.Controllers
         [HttpPut("update-status/{studentId}")]
         [ProducesResponseType(typeof(MethodResult<StudentModel>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> UpdateStatusStudentCampus([FromRoute] Guid studentId,[FromBody] UpdateStatusStudentCampusCommand command)
+        public async Task<IActionResult> UpdateStatusStudentCampus([FromRoute] Guid studentId, [FromBody] UpdateStatusStudentCampusCommand command)
         {
             ArgumentNullException.ThrowIfNull(command);
             command.StudentId = studentId;
             var commandResult = await _mediator.Send(command).ConfigureAwait(false);
+            return commandResult.GetActionResult();
+        }
+
+        /// <summary>
+        /// get coin of student
+        /// </summary>
+        [HttpGet("get-coin")]
+        [ProducesResponseType(typeof(MethodResult<long>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(VoidMethodResult), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> GetCoin()
+        {
+            var commandResult = await _mediator.Send(new GetCoinOfStudentQuery()).ConfigureAwait(false);
             return commandResult.GetActionResult();
         }
     }
