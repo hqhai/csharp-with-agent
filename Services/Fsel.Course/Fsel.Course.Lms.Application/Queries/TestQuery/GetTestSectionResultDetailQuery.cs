@@ -242,6 +242,7 @@ namespace Fsel.Course.Lms.Application.Queries.TestQuery
                 TestLayoutType = node.LayoutType,
                 TotalCount = nodeResult?.CorrectTotal ?? 0,
                 WorkingTime = nodeResult?.WorkingTime ?? 0,
+                ScoreModule = nodeResult?.ScoreModule ?? 0,
                 SectionId = node.Id,
                 CurrentSectionTimeCodeId = nodeResult?.CurrentSectionTimeCodeId,
             };

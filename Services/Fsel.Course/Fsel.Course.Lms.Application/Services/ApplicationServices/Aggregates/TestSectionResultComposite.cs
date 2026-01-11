@@ -38,6 +38,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 CorrectTotal = TestSectionResult.CorrectTotal,
                 PercentResult = TestSectionResult.Percent,
                 SkillScores = TestSectionResult.SkillScores,
+                ScoreModule = TestSectionResult.ScoreModule,
                 FilePath = TestSection?.Skill?.FilePath,
                 UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
             };
@@ -68,6 +69,7 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                 CurrentSectionTimeCodeId = TestSectionResult.CurrentSectionTimeCodeId,
                 HighestStreak = TestSectionResult.HighestStreak,
                 PercentResult = TestSectionResult.Percent,
+                ScoreModule = TestSectionResult.ScoreModule,
                 SkillScores = TestSectionResult.SkillScores,
                 UpdatedDate = TestSectionResult?.UpdatedDate ?? TestSectionResult?.CreatedDate
             };
@@ -178,8 +180,12 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
 
             if (Children.Count > 0)
             {
+                var scoringFormulaConfigs = (TestSection?.ScoringFormulaConfigs ?? new List<ScoringFormulaConfig>()).ToList();
+
                 if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == EnumAnswerStatus.Done))
                 {
+                    TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+                    var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
                     if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                     {
                         var firstSkillScore = TestSectionResult.SkillScores.First();
@@ -188,18 +194,24 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         firstSkillScore.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
                         firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
                         firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
-
+                        firstSkillScore.Scores = scores;
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
-                    TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
 
                     if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
                     {
                         TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((TestSectionResult.Percent * TestSection.Percent.Value), 2);
                     }
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
+                    {
+                        TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                    }
                 }
                 else if (Children.All(c => c is TestSectionResultComposite))
                 {
+                    TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(t => t.CorrectCount);
+                    var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
+
                     if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                     {
                         var firstSkillScore = TestSectionResult.SkillScores.First();
@@ -210,19 +222,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
                         firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
                         firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                        firstSkillScore.Scores = scores;
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
-
-                    TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
 
                     if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
                     {
                         var totelChildPercentModule = TestSectionResult.SectionResults.Sum(x => x.PercentModule);
                         TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((totelChildPercentModule * TestSection.Percent.Value), 2);
                     }
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
+                    {
+                        TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                    }
                 }
                 else
                 {
+                    TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(t => t.CorrectCount);
+                    var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
+
                     // get layout and process
                     if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                     {
@@ -234,10 +252,18 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                         firstSkillScore.CorrectQuestion = skillScores.Sum(x => x.CorrectQuestion ?? 0);
                         firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
                         firstSkillScore.SkillName = TestSectionResult.TestSection?.Skill?.Name;
+                        firstSkillScore.Scores = GetBandScore(firstSkillScore.CorrectCount, scoringFormulaConfigs);
                         TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                     }
-
-                    TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
+                    {
+                        var totelChildPercentModule = TestSectionResult.SectionResults.Sum(x => x.PercentModule);
+                        TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((totelChildPercentModule * TestSection.Percent.Value), 2);
+                    }
+                    if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
+                    {
+                        TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                    }
                 }
             }
             var answers = GetPlainQuestionStates().Select(x => x.Answer != null && x.Answer.IsCorrect == true).ToList();
@@ -280,8 +306,13 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
         {
             await base.SubmitTest(context);
 
+            var scoringFormulaConfigs = (TestSection?.ScoringFormulaConfigs ?? new List<ScoringFormulaConfig>()).ToList();
+
             if (Children.All(c => c is TestAnswerLeaf ta && ta.TestAnswer.Status == EnumAnswerStatus.Done))
             {
+                TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
+                var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
+
                 if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                 {
                     var firstSkillScore = TestSectionResult.SkillScores.First();
@@ -291,19 +322,25 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
                     firstSkillScore.SkillName = TestSection?.Skill?.Name;
                     firstSkillScore.SkillFilePath = TestSection?.Skill?.FilePath;
+                    firstSkillScore.Scores = scores;
 
                     TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                 }
-
-                TestSectionResult.CorrectCount = TestSectionResult.TestAnswers.Sum(t => t.CorrectCount);
 
                 if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
                 {
                     TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((TestSectionResult.Percent * TestSection.Percent.Value), 2);
                 }
+                if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
+                {
+                    TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                }
             }
             else if (Children.All(c => c is TestSectionResultComposite))
             {
+                TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(t => t.CorrectCount);
+                var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
+
                 if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                 {
                     var firstSkillScore = TestSectionResult.SkillScores.First();
@@ -315,18 +352,24 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
                     firstSkillScore.SkillName = TestSection?.Skill?.Name;
                     firstSkillScore.SkillFilePath = TestSection?.Skill?.FilePath;
+                    firstSkillScore.Scores = scores;
                     TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                 }
-                TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
 
                 if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
                 {
-                    var totelChildPercentModule = TestSectionResult.SectionResults.Sum(x => x.PercentModule);
-                    TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((totelChildPercentModule * TestSection.Percent.Value), 2);
+                    TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((TestSectionResult.Percent * TestSection.Percent.Value), 2);
+                }
+                if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
+                {
+                    TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
                 }
             }
             else
             {
+                TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(t => t.CorrectCount);
+                var scores = GetBandScore(TestSectionResult.CorrectCount, scoringFormulaConfigs);
+
                 // get layout and process
                 if (TestSectionResult.SkillScores != null && TestSectionResult.SkillScores.Any())
                 {
@@ -339,14 +382,42 @@ namespace Fsel.Course.Lms.Application.Services.ApplicationServices.Aggregates
                     firstSkillScore.SkillId = TestSectionResult.TestSection?.SkillId;
                     firstSkillScore.SkillName = TestSection?.Skill?.Name;
                     firstSkillScore.SkillFilePath = TestSection?.Skill?.FilePath;
+                    firstSkillScore.Scores = scores;
                     TestSectionResult.SkillScores = new List<SkillScores> { firstSkillScore };
                 }
-                TestSectionResult.CorrectCount = TestSectionResult.SectionResults.Sum(x => x.CorrectCount);
+                if (context.ScoringFormulaType == EnumScoringFormulaType.Percent && TestSection != null && TestSection.Percent.HasValue)
+                {
+                    TestSectionResult.PercentModule = NumberHelper.ConvertDoublePercent((TestSectionResult.Percent * TestSection.Percent.Value), 2);
+                }
+                if (context.ScoringFormulaType == EnumScoringFormulaType.BandScore && TestSection != null && TestSection.Percent.HasValue)
+                {
+                    TestSectionResult.ScoreModule = NumberHelper.ConvertDoublePercent(scores * TestSection.Percent.Value, 2);
+                }
             }
 
             var answers = GetPlainQuestionStates().Select(x => x.Answer != null && x.Answer.IsCorrect == true).ToList();
             TestSectionResult.HighestStreak = answers.GetHighestStreak();
             TestSectionResult.Status = EnumResultStatus.Done;
+        }
+
+        public static double GetBandScore(double correctAnswers, IReadOnlyCollection<ScoringFormulaConfig> configs)
+        {
+            if (configs == null || configs.Count == 0)
+            {
+                return default;
+            }
+
+            // Không clamp cứng – chỉ đảm bảo không âm
+            if (correctAnswers < 0)
+            {
+                correctAnswers = 0;
+            }
+
+            var rule = configs
+                .OrderByDescending(x => x.From)
+                .FirstOrDefault(x => correctAnswers >= x.From);
+
+            return rule?.Equal ?? default;
         }
 
         public override async Task LoadTestHierarchicalData()
